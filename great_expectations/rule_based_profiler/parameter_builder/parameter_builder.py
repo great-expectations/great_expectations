@@ -232,11 +232,6 @@ class ParameterBuilder(ABC, Builder):
             )
 
     @property
-    @abstractmethod
-    def fully_qualified_parameter_name(self) -> str:
-        pass
-
-    @property
     def name(self) -> str:
         return self._name
 
@@ -255,6 +250,10 @@ class ParameterBuilder(ABC, Builder):
     @property
     def json_serialize(self) -> Union[str, bool]:
         return self._json_serialize
+
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"{PARAMETER_KEY}{self.name}"
 
     @abstractmethod
     def _build_parameters(
@@ -342,7 +341,7 @@ class ParameterBuilder(ABC, Builder):
         )
         if not batch_ids:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
+                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of Batch identifiers."
             )
 
         """

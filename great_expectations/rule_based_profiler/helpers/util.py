@@ -19,12 +19,18 @@ from great_expectations.core.batch import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
     VARIABLES_PREFIX,
     Domain,
+    NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
+    SemanticDomainTypes,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
+)
+from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -361,23 +367,39 @@ def get_resolved_metrics_by_key(
     return resolved_metrics_by_key
 
 
-def build_simple_domains_from_column_names(
+def build_domains_from_column_names(
+    rule_name: str,
     column_names: List[str],
-    domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN,
+    domain_type: MetricDomainTypes,
+    table_column_name_to_inferred_semantic_domain_type_map: Optional[
+        Dict[str, SemanticDomainTypes]
+    ] = None,
 ) -> List[Domain]:
     """
     This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
 
+    :param rule_name: name of Rule object, for which "Domain" objects are obtained.
     :param column_names: list of column names to serve as values for "column" keys in "domain_kwargs" dictionary
     :param domain_type: type of Domain objects (same "domain_type" must be applicable to all Domain objects returned)
+    :param table_column_name_to_inferred_semantic_domain_type_map: map from column name to inferred semantic type
     :return: list of resulting Domain objects
     """
     column_name: str
     domains: List[Domain] = [
         Domain(
+            rule_name=rule_name,
             domain_type=domain_type,
             domain_kwargs={
                 "column": column_name,
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    column_name: table_column_name_to_inferred_semantic_domain_type_map[
+                        column_name
+                    ],
+                }
+                if table_column_name_to_inferred_semantic_domain_type_map
+                else None,
             },
         )
         for column_name in column_names
@@ -407,29 +429,71 @@ def convert_variables_to_dict(
     return variables_as_dict
 
 
+def integer_semantic_domain_type(domain: Domain) -> bool:
+    """
+    This method examines "INFERRED_SEMANTIC_TYPE_KEY" attribute of "Domain" argument to check whether or not underlying
+    "SemanticDomainTypes" enum value is an "integer".  Because explicitly designated "SemanticDomainTypes.INTEGER" type
+    is unavaiable, "SemanticDomainTypes.LOGIC" and "SemanticDomainTypes.IDENTIFIER" are intepreted as "integer" values.
+
+    This method can be used "NumericMetricRangeMultiBatchParameterBuilder._get_round_decimals_using_heuristics()".
+
+    Note: Inability to assess underlying "SemanticDomainTypes" details of "Domain" object produces "False" return value.
+
+    Args:
+        domain: "Domain" object to inspect for underlying "SemanticDomainTypes" details
+
+    Returns:
+        Boolean value indicating whether or not specified "Domain" is inferred to denote "integer" values
+
+    """
+
+    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
+        INFERRED_SEMANTIC_TYPE_KEY
+    )
+
+    semantic_domain_type: SemanticDomainTypes
+    return inferred_semantic_domain_type and all(
+        [
+            semantic_domain_type
+            in [
+                SemanticDomainTypes.LOGIC,
+                SemanticDomainTypes.IDENTIFIER,
+            ]
+            for semantic_domain_type in (inferred_semantic_domain_type.values())
+        ]
+    )
+
+
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-) -> Tuple[Number, Number]:
+    quantile_statistic_interpolation_method: str,
+) -> NumericRangeEstimationResult:
     lower_quantile = np.quantile(
         metric_values,
         q=(false_positive_rate / 2),
         axis=0,
+        interpolation=quantile_statistic_interpolation_method,
     )
     upper_quantile = np.quantile(
         metric_values,
         q=1.0 - (false_positive_rate / 2),
         axis=0,
+        interpolation=quantile_statistic_interpolation_method,
     )
-    return lower_quantile, upper_quantile
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
+        value_range=np.array([lower_quantile, upper_quantile]),
+    )
 
 
 def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
+    quantile_statistic_interpolation_method: str,
     n_resamples: int,
     random_seed: Optional[int] = None,
-) -> Tuple[Number, Number]:
+) -> NumericRangeEstimationResult:
     """
     ML Flow Experiment: parameter_builders_bootstrap/bootstrap_quantiles
     ML Flow Experiment ID: 4129654509298109
@@ -487,8 +551,16 @@ def compute_bootstrap_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2
 
-    sample_lower_quantile: np.ndarray = np.quantile(metric_values, q=lower_quantile_pct)
-    sample_upper_quantile: np.ndarray = np.quantile(metric_values, q=upper_quantile_pct)
+    sample_lower_quantile: np.ndarray = np.quantile(
+        metric_values,
+        q=lower_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
+    sample_upper_quantile: np.ndarray = np.quantile(
+        metric_values,
+        q=upper_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
 
     bootstraps: np.ndarray
     if random_seed:
@@ -507,6 +579,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps,
         q=lower_quantile_pct,
         axis=1,
+        interpolation=quantile_statistic_interpolation_method,
     )
     bootstrap_lower_quantile_point_estimate: float = np.mean(bootstrap_lower_quantiles)
     bootstrap_lower_quantile_standard_error: float = np.std(bootstrap_lower_quantiles)
@@ -532,6 +605,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps,
         q=upper_quantile_pct,
         axis=1,
+        interpolation=quantile_statistic_interpolation_method,
     )
     bootstrap_upper_quantile_point_estimate: np.ndarray = np.mean(
         bootstrap_upper_quantiles
@@ -557,9 +631,14 @@ def compute_bootstrap_quantiles_point_estimate(
             bootstrap_upper_quantile_point_estimate - bootstrap_upper_quantile_bias
         )
 
-    return (
-        lower_quantile_bias_corrected_point_estimate,
-        upper_quantile_bias_corrected_point_estimate,
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(
+            a=bootstraps.flatten(), bins=NUM_HISTOGRAM_BINS
+        )[0],
+        value_range=[
+            lower_quantile_bias_corrected_point_estimate,
+            upper_quantile_bias_corrected_point_estimate,
+        ],
     )
 
 
