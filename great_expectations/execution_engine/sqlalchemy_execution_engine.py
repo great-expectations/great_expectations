@@ -93,8 +93,8 @@ except ImportError:
 
 
 try:
-    import psycopg2
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
+    import psycopg2  # noqa: F401
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 

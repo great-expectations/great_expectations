@@ -10,7 +10,7 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import substitute_none_for_missing
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: F401
 except ImportError:
     pass
 

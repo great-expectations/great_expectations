@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Callable, Dict, List, Optional, cast
+from typing import Dict, List, Optional, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
