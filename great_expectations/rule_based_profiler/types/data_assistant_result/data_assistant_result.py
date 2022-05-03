@@ -276,10 +276,15 @@ class DataAssistantResult(SerializableDictDot):
         column_name_title: str = "Column Name"
         column_name_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
+        detail_title_font_size: int = 14
+        detail_title_font_weight: str = "bold"
+
         line_chart_height: int = 150
         detail_line_chart_height: int = 75
 
         point_size: int = 50
+
+        unselected_color: alt.value = alt.value("lightgray")
 
         selected_opacity: float = 1.0
         unselected_opacity: float = 0.4
@@ -326,7 +331,7 @@ class DataAssistantResult(SerializableDictDot):
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
-                    alt.value("lightgray"),
+                    unselected_color,
                 ),
                 opacity=alt.condition(
                     selection,
@@ -351,7 +356,7 @@ class DataAssistantResult(SerializableDictDot):
                 color=alt.condition(
                     selection,
                     alt.value(Colors.GREEN.value),
-                    alt.value("lightgray"),
+                    unselected_color,
                 ),
                 opacity=alt.condition(
                     selection,
@@ -380,7 +385,7 @@ class DataAssistantResult(SerializableDictDot):
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
-                    alt.value("lightgray"),
+                    unselected_color,
                 ),
                 opacity=alt.condition(
                     selection,
@@ -406,7 +411,7 @@ class DataAssistantResult(SerializableDictDot):
                 color=alt.condition(
                     selection,
                     alt.value(Colors.GREEN.value),
-                    alt.value("lightgray"),
+                    unselected_color,
                 ),
                 opacity=alt.condition(
                     selection,
@@ -447,7 +452,7 @@ class DataAssistantResult(SerializableDictDot):
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
-                    alt.value("lightgray"),
+                    unselected_color,
                 ),
                 tooltip=tooltip,
             )
@@ -468,7 +473,7 @@ class DataAssistantResult(SerializableDictDot):
                 color=alt.condition(
                     empty_selection,
                     alt.value(Colors.GREEN.value),
-                    alt.value("lightgray"),
+                    unselected_color,
                 ),
                 tooltip=tooltip,
             )
@@ -495,7 +500,7 @@ class DataAssistantResult(SerializableDictDot):
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
-                    alt.value("lightgray"),
+                    unselected_color,
                 ),
                 opacity=alt.condition(
                     selection,
@@ -523,7 +528,7 @@ class DataAssistantResult(SerializableDictDot):
                 color=alt.condition(
                     selection,
                     alt.value(Colors.GREEN.value),
-                    alt.value("lightgray"),
+                    unselected_color,
                 ),
                 opacity=alt.condition(
                     selection,
@@ -555,7 +560,7 @@ class DataAssistantResult(SerializableDictDot):
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
-                    alt.value("lightgray"),
+                    unselected_color,
                 ),
                 tooltip=tooltip,
             )
@@ -578,22 +583,12 @@ class DataAssistantResult(SerializableDictDot):
                 color=alt.condition(
                     empty_selection,
                     alt.value(Colors.GREEN.value),
-                    alt.value("lightgray"),
+                    unselected_color,
                 ),
                 tooltip=tooltip,
             )
             .properties(height=detail_line_chart_height)
             .transform_filter(empty_selection)
-        )
-
-        y_axis_title = alt.TitleParams(
-            metric_title,
-            color=Colors.PURPLE.value,
-            orient="left",
-            angle=270,
-            fontSize=14,
-            dx=70,
-            dy=-5,
         )
 
         detail_title_column_names: pd.DataFrame = pd.DataFrame(
@@ -611,7 +606,11 @@ class DataAssistantResult(SerializableDictDot):
 
         detail_title = (
             alt.Chart(detail_title_column_names)
-            .mark_text(color=Colors.PURPLE.value, fontSize=14, fontWeight="bold")
+            .mark_text(
+                color=Colors.PURPLE.value,
+                fontSize=detail_title_font_size,
+                fontWeight=detail_title_font_weight,
+            )
             .encode(text=detail_title_text)
             .transform_filter(selection)
             .properties(height=10)
@@ -632,10 +631,25 @@ class DataAssistantResult(SerializableDictDot):
 
         detail_empty_selection_title = (
             alt.Chart(detail_empty_selection_title_column_names)
-            .mark_text(color=Colors.PURPLE.value, fontSize=14, fontWeight="bold")
+            .mark_text(
+                color=Colors.PURPLE.value,
+                fontSize=detail_title_font_size,
+                fontWeight=detail_title_font_weight,
+            )
             .encode(text=detail_empty_selection_title_text)
             .transform_filter(empty_selection)
             .properties(height=10)
+        )
+
+        # special title for combined y-axis across two charts
+        y_axis_title = alt.TitleParams(
+            metric_title,
+            color=Colors.PURPLE.value,
+            orient="left",
+            angle=270,
+            fontSize=14,
+            dx=70,
+            dy=-5,
         )
 
         return (
