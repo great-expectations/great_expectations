@@ -70,6 +70,7 @@ class SqlAlchemyDataSampler(DataSampler):
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
         elif dialect == "mssql":
+            # TODO: AJB 20220429 WARNING THIS mssql dialect METHOD IS NOT COVERED BY TESTS
             query: Selectable = (
                 sa.select("*")
                 .select_from(
@@ -79,7 +80,9 @@ class SqlAlchemyDataSampler(DataSampler):
                 .limit(batch_spec["sampling_kwargs"]["n"])
             )
             return str(
-                query.compile(execution_engine, compile_kwargs={"literal_binds": True})
+                query.compile(
+                    execution_engine.engine, compile_kwargs={"literal_binds": True}
+                )
             )
         else:
             return (
