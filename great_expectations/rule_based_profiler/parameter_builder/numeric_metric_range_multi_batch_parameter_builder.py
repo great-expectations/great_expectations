@@ -1,7 +1,7 @@
 import itertools
 import warnings
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import numpy as np
 
