@@ -1,3 +1,4 @@
+import warnings
 from typing import Optional, Union
 
 from great_expectations.core.id_dict import BatchSpec
@@ -70,20 +71,28 @@ class SqlAlchemyDataSampler(DataSampler):
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
         elif dialect == "mssql":
-            # TODO: AJB 20220429 WARNING THIS mssql dialect METHOD IS NOT COVERED BY TESTS
-            query: Selectable = (
+            warnings.warn(
+                "limit sampling in mssql is not yet supported. Providing all data."
+            )
+            return (
                 sa.select("*")
-                .select_from(
-                    sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                )
+                .select_from(sa.table(table_name, schema=batch_spec.get("schema_name")))
                 .where(where_clause)
-                .limit(batch_spec["sampling_kwargs"]["n"])
             )
-            return str(
-                query.compile(
-                    execution_engine.engine, compile_kwargs={"literal_binds": True}
-                )
-            )
+            # TODO: AJB 20220429 WARNING THIS mssql dialect METHOD IS NOT COVERED BY TESTS
+            # query: Selectable = (
+            #     sa.select("*")
+            #     .select_from(
+            #         sa.table(table_name, schema=batch_spec.get("schema_name", None))
+            #     )
+            #     .where(where_clause)
+            #     .limit(batch_spec["sampling_kwargs"]["n"])
+            # )
+            # return str(
+            #     query.compile(
+            #         execution_engine.engine, compile_kwargs={"literal_binds": True}
+            #     )
+            # )
         else:
             return (
                 sa.select("*")
