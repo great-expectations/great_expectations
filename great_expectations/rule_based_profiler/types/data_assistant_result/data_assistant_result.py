@@ -272,6 +272,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         legend_title: str = "Select Column:"
+        column_name: str = legend_title
         column_name_title: str = "Column Name"
         column_name_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
@@ -285,7 +286,7 @@ class DataAssistantResult(SerializableDictDot):
 
         tooltip: List[alt.Tooltip] = [
             alt.Tooltip(
-                field=legend_title, type=column_name_type, title=column_name_title
+                field=column_name, type=column_name_type, title=column_name_title
             ),
             alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
             alt.Tooltip(
@@ -294,15 +295,15 @@ class DataAssistantResult(SerializableDictDot):
         ]
 
         df: pd.DataFrame = pd.DataFrame(
-            columns=[legend_title, "batch", batch_id, metric_name]
+            columns=[column_name, "batch", batch_id, metric_name]
         )
         for column, column_df in column_dfs:
-            column_df[legend_title] = column
+            column_df[column_name] = column
             df = pd.concat([df, column_df], axis=0)
 
-        selector = alt.selection_multi(
-            empty="all",
-            fields=[legend_title],
+        selection = alt.selection_multi(
+            empty="none",
+            fields=[column_name],
             bind="legend",
             on="click",
             clear="click",
@@ -319,16 +320,16 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 y=alt.Y(metric_name, type=metric_type, title=None),
                 color=alt.condition(
-                    selector,
+                    selection,
                     alt.Color(
-                        legend_title,
+                        column_name,
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
                     alt.value("lightgray"),
                 ),
                 opacity=alt.condition(
-                    selector,
+                    selection,
                     alt.value(selected_opacity),
                     alt.value(unselected_opacity),
                 ),
@@ -348,12 +349,12 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 y=alt.Y(metric_name, type=metric_type, title=None),
                 color=alt.condition(
-                    selector,
+                    selection,
                     alt.value(Colors.GREEN.value),
                     alt.value("lightgray"),
                 ),
                 opacity=alt.condition(
-                    selector,
+                    selection,
                     alt.value(selected_opacity),
                     alt.value(unselected_opacity),
                 ),
@@ -373,23 +374,23 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 y=alt.Y(metric_name, type=metric_type, title=None),
                 color=alt.condition(
-                    selector,
+                    selection,
                     alt.Color(
-                        legend_title,
+                        column_name,
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
                     alt.value("lightgray"),
                 ),
                 opacity=alt.condition(
-                    selector,
+                    selection,
                     alt.value(selected_opacity),
                     alt.value(unselected_opacity),
                 ),
                 tooltip=tooltip,
             )
             .properties(height=line_chart_height)
-            .transform_filter(selector)
+            .transform_filter(selection)
         )
 
         highlight_points: alt.Chart = (
@@ -403,19 +404,76 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 y=alt.Y(metric_name, type=metric_type, title=None),
                 color=alt.condition(
-                    selector,
+                    selection,
                     alt.value(Colors.GREEN.value),
                     alt.value("lightgray"),
                 ),
                 opacity=alt.condition(
-                    selector,
+                    selection,
                     alt.value(selected_opacity),
                     alt.value(unselected_opacity),
                 ),
                 tooltip=tooltip,
             )
             .properties(height=line_chart_height)
-            .transform_filter(selector)
+            .transform_filter(selection)
+        )
+
+        empty_selection = alt.selection_single(
+            empty="all",
+            fields=[column_name],
+            bind="legend",
+            on="click",
+            clear="click",
+        )
+
+        # only display the column in the first row of the dataframe if nothing is selected
+        empty_selection_df = df[df[column_name] == df[column_name].iloc[0]]
+
+        empty_selection_line: alt.Chart = (
+            alt.Chart(empty_selection_df, title=title)
+            .mark_line(strokeWidth=2.5)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    axis=alt.Axis(ticks=False, title=None, labels=False),
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=None),
+                color=alt.condition(
+                    empty_selection,
+                    alt.Color(
+                        column_name,
+                        type=AltairDataTypes.NOMINAL.value,
+                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
+                    ),
+                    alt.value("lightgray"),
+                ),
+                tooltip=tooltip,
+            )
+            .properties(height=line_chart_height)
+            .transform_filter(empty_selection)
+        )
+
+        empty_selection_points: alt.Chart = (
+            alt.Chart(empty_selection_df, title=title)
+            .mark_point(size=40)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    axis=alt.Axis(ticks=False, title=None, labels=False),
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=None),
+                color=alt.condition(
+                    empty_selection,
+                    alt.value(Colors.GREEN.value),
+                    alt.value("lightgray"),
+                ),
+                tooltip=tooltip,
+            )
+            .properties(height=line_chart_height)
+            .transform_filter(empty_selection)
         )
 
         detail_line: alt.Chart = (
@@ -434,23 +492,23 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 y=alt.Y(metric_name, type=metric_type, title=None),
                 color=alt.condition(
-                    selector,
+                    selection,
                     alt.Color(
-                        legend_title,
+                        column_name,
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
                     alt.value("lightgray"),
                 ),
                 opacity=alt.condition(
-                    selector,
+                    selection,
                     alt.value(selected_opacity),
                     alt.value(unselected_opacity),
                 ),
                 tooltip=tooltip,
             )
             .properties(height=detail_line_chart_height)
-            .transform_filter(selector)
+            .transform_filter(selection)
         )
 
         detail_points: alt.Chart = (
@@ -469,19 +527,75 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 y=alt.Y(metric_name, type=metric_type, title=None),
                 color=alt.condition(
-                    selector,
+                    selection,
                     alt.value(Colors.GREEN.value),
                     alt.value("lightgray"),
                 ),
                 opacity=alt.condition(
-                    selector,
+                    selection,
                     alt.value(selected_opacity),
                     alt.value(unselected_opacity),
                 ),
                 tooltip=tooltip,
             )
             .properties(height=detail_line_chart_height)
-            .transform_filter(selector)
+            .transform_filter(selection)
+        )
+
+        detail_empty_selection_line: alt.Chart = (
+            alt.Chart(
+                empty_selection_df,
+                title=alt.TitleParams(
+                    "Column Selection Detail", color=Colors.PURPLE.value, fontSize=14
+                ),
+            )
+            .mark_line()
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=None),
+                color=alt.condition(
+                    empty_selection,
+                    alt.Color(
+                        column_name,
+                        type=AltairDataTypes.NOMINAL.value,
+                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
+                    ),
+                    alt.value("lightgray"),
+                ),
+                tooltip=tooltip,
+            )
+            .properties(height=detail_line_chart_height)
+            .transform_filter(empty_selection)
+        )
+
+        detail_empty_selection_points: alt.Chart = (
+            alt.Chart(
+                empty_selection_df,
+                title=alt.TitleParams(
+                    "Column Selection Detail", color=Colors.PURPLE.value, fontSize=14
+                ),
+            )
+            .mark_point(size=point_size)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=None),
+                color=alt.condition(
+                    empty_selection,
+                    alt.value(Colors.GREEN.value),
+                    alt.value("lightgray"),
+                ),
+                tooltip=tooltip,
+            )
+            .properties(height=detail_line_chart_height)
+            .transform_filter(empty_selection)
         )
 
         y_axis_title = alt.TitleParams(
@@ -497,12 +611,21 @@ class DataAssistantResult(SerializableDictDot):
         return (
             alt.VConcatChart(
                 vconcat=[
-                    line + points + highlight_line + highlight_points,
-                    detail_line + detail_points,
+                    line
+                    + points
+                    + highlight_line
+                    + highlight_points
+                    + empty_selection_line
+                    + empty_selection_points,
+                    detail_line
+                    + detail_points
+                    + detail_empty_selection_line
+                    + detail_empty_selection_points,
                 ],
             )
             .properties(title=y_axis_title)
-            .add_selection(selector)
+            .add_selection(selection)
+            .add_selection(empty_selection)
         )
 
     @staticmethod
