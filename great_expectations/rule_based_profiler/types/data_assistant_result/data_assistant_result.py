@@ -1,7 +1,7 @@
 import copy
 from abc import abstractmethod
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Union
 
 import altair as alt
 import pandas as pd
@@ -91,12 +91,13 @@ class DataAssistantResult(SerializableDictDot):
             chart.configure(**altair_theme).display()
 
     @staticmethod
-    def get_table_line_chart(
+    def get_line_chart(
         df: pd.DataFrame,
         metric_name: str,
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
+        subtitle: Optional[str] = None,
     ) -> alt.Chart:
         """
         Args:
@@ -111,7 +112,10 @@ class DataAssistantResult(SerializableDictDot):
         """
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
-        title: str = f"{metric_title} per {domain_title}"
+
+        title: Union[str, alt.TitleParams] = f"{metric_title} per {domain_title}"
+        if subtitle:
+            title = alt.TitleParams(title, subtitle=[subtitle])
 
         batch_id: str = "batch_id"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
@@ -152,12 +156,13 @@ class DataAssistantResult(SerializableDictDot):
         return line + points
 
     @staticmethod
-    def get_expect_table_values_to_be_between_chart(
+    def get_expect_values_to_be_between_chart(
         df: pd.DataFrame,
         metric_name: str,
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
+        subtitle: Optional[str],
     ) -> alt.Chart:
         """
         Args:
@@ -231,167 +236,13 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        line: alt.Chart = DataAssistantResult.get_table_line_chart(
+        line: alt.Chart = DataAssistantResult.get_line_chart(
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
             domain_name=domain_name,
             domain_type=domain_type,
-        )
-
-        anomaly_coded_line: alt.Chart = (
-            DataAssistantResult._determine_anomaly_coded_line(
-                line, tooltip, metric_name
-            )
-        )
-
-        return band + lower_limit + upper_limit + anomaly_coded_line
-
-    @staticmethod
-    def get_column_line_chart(
-        df: pd.DataFrame,
-        column_name: str,
-        metric_name: str,
-        metric_type: alt.StandardType,
-        domain_name: str,
-        domain_type: alt.StandardType,
-        include_title: bool,
-    ) -> alt.Chart:
-        metric_title: str = metric_name.replace("_", " ").title()
-        domain_title: str = domain_name.title()
-
-        title: str = ""
-        if include_title:
-            title = f"{metric_title} per {domain_title}"
-
-        batch_id: str = "batch_id"
-        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-
-        tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type),
-            alt.Tooltip(field=metric_name, type=metric_type, format=","),
-        ]
-
-        column_label: str = column_name
-        chart_height: int = 150
-
-        line: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_line()
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(metric_name, type=metric_type, title=column_label),
-                tooltip=tooltip,
-            )
-            .properties(height=chart_height)
-        )
-
-        points: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_point()
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(metric_name, type=metric_type, title=column_label),
-                tooltip=tooltip,
-            )
-            .properties(height=chart_height)
-        )
-
-        return line + points
-
-    @staticmethod
-    def get_expect_column_values_to_be_between_chart(
-        df: pd.DataFrame,
-        column_name: str,
-        metric_name: str,
-        metric_type: alt.StandardType,
-        domain_name: str,
-        domain_type: alt.StandardType,
-        include_title: bool,
-    ) -> alt.Chart:
-        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
-
-        metric_title: str = metric_name.replace("_", " ").title()
-        domain_title: str = domain_name.title()
-
-        batch_id: str = "batch_id"
-        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-        min_value: str = "min_value"
-        min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        max_value: str = "max_value"
-        max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-
-        tooltip: list[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type),
-            alt.Tooltip(field=metric_name, type=metric_type, format=","),
-            alt.Tooltip(field=min_value, type=min_value_type, format=","),
-            alt.Tooltip(field=max_value, type=max_value_type, format=","),
-        ]
-
-        column_label: str = column_name
-        chart_height: int = 150
-
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(color=line_color)
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(min_value, type=metric_type, title=column_label),
-                tooltip=tooltip,
-            )
-            .properties(height=chart_height)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(color=line_color)
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(max_value, type=metric_type, title=column_label),
-                tooltip=tooltip,
-            )
-            .properties(height=chart_height)
-        )
-
-        band: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_area()
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(min_value, type=metric_type, title=column_label),
-                y2=alt.Y2(max_value, title=column_label),
-            )
-            .properties(height=chart_height)
-        )
-
-        line: alt.Chart = DataAssistantResult.get_column_line_chart(
-            df=df,
-            column_name=column_name,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
-            include_title=include_title,
+            subtitle=subtitle,
         )
 
         anomaly_coded_line: alt.Chart = (
@@ -440,5 +291,8 @@ class DataAssistantResult(SerializableDictDot):
         Args:
             prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
             theme: Altair top-level chart configuration dictionary
+
+        Returns:
+            PlotResult wrapper object around Altair charts.
         """
         pass
