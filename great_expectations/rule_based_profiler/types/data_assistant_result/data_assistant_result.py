@@ -301,7 +301,7 @@ class DataAssistantResult(SerializableDictDot):
             column_df[column_name] = column
             df = pd.concat([df, column_df], axis=0)
 
-        selection = alt.selection_multi(
+        selection = alt.selection_single(
             empty="none",
             fields=[column_name],
             bind="legend",
@@ -479,9 +479,6 @@ class DataAssistantResult(SerializableDictDot):
         detail_line: alt.Chart = (
             alt.Chart(
                 df,
-                title=alt.TitleParams(
-                    "Column Selection Detail", color=Colors.PURPLE.value, fontSize=14
-                ),
             )
             .mark_line()
             .encode(
@@ -514,9 +511,6 @@ class DataAssistantResult(SerializableDictDot):
         detail_points: alt.Chart = (
             alt.Chart(
                 df,
-                title=alt.TitleParams(
-                    "Column Selection Detail", color=Colors.PURPLE.value, fontSize=14
-                ),
             )
             .mark_point(size=point_size)
             .encode(
@@ -545,9 +539,6 @@ class DataAssistantResult(SerializableDictDot):
         detail_empty_selection_line: alt.Chart = (
             alt.Chart(
                 empty_selection_df,
-                title=alt.TitleParams(
-                    "Column Selection Detail", color=Colors.PURPLE.value, fontSize=14
-                ),
             )
             .mark_line()
             .encode(
@@ -575,9 +566,6 @@ class DataAssistantResult(SerializableDictDot):
         detail_empty_selection_points: alt.Chart = (
             alt.Chart(
                 empty_selection_df,
-                title=alt.TitleParams(
-                    "Column Selection Detail", color=Colors.PURPLE.value, fontSize=14
-                ),
             )
             .mark_point(size=point_size)
             .encode(
@@ -608,6 +596,27 @@ class DataAssistantResult(SerializableDictDot):
             dy=-5,
         )
 
+        detail_title_column_names: pd.DataFrame = pd.DataFrame(
+            {column_name: pd.unique(df[column_name])}
+        )
+
+        detail_title_column_titles: str = "column_title"
+        detail_title_column_names[
+            detail_title_column_titles
+        ] = detail_title_column_names[column_name].apply(
+            lambda x: f"Column ({x}) Selection Detail"
+        )
+
+        detail_title = (
+            alt.Chart(detail_title_column_names)
+            .mark_text(color=Colors.PURPLE.value, fontSize=14)
+            .encode(
+                text=alt.condition(selection, detail_title_column_titles, alt.value(""))
+            )
+            .transform_filter(selection)
+            .properties(height=50)
+        )
+
         return (
             alt.VConcatChart(
                 vconcat=[
@@ -617,15 +626,16 @@ class DataAssistantResult(SerializableDictDot):
                     + highlight_points
                     + empty_selection_line
                     + empty_selection_points,
+                    detail_title,
                     detail_line
                     + detail_points
                     + detail_empty_selection_line
                     + detail_empty_selection_points,
                 ],
+                padding=0,
             )
             .properties(title=y_axis_title)
-            .add_selection(selection)
-            .add_selection(empty_selection)
+            .add_selection(selection, empty_selection)
         )
 
     @staticmethod
