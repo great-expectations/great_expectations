@@ -118,6 +118,12 @@ stages:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
 
+    - job: unused_import_checker
+      steps:
+        # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
+      - bash: flake8 --select F401 great_expectations tests
+        name: UnusedImportChecker
+
   - stage: import_ge
     dependsOn: [lint]
     pool:
