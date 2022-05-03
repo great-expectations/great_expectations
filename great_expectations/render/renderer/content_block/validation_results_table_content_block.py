@@ -4,6 +4,9 @@ import warnings
 from copy import deepcopy
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (  # noqa: F401
+    ExpectColumnKlDivergenceToBeLessThan,
+)
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
