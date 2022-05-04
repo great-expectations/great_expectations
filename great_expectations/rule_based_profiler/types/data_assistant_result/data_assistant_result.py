@@ -86,13 +86,18 @@ class DataAssistantResult(SerializableDictDot):
 
         display(
             HTML(
-                """
+                f"""
                 <style>
-                form.vega-bindings {
+                span.vega-bind-name {{
+                    color: {Colors.PURPLE.value};
+                    font: Veranda;
+                    font-weight: bold;
+                }}
+                form.vega-bindings {{
                   position: absolute;
                   left: 70px;
                   top: 28px;
-                }
+                }}
                 </style>
                 """
             )
@@ -324,8 +329,10 @@ class DataAssistantResult(SerializableDictDot):
             df = pd.concat([df, column_df], axis=0)
 
         columns: List[str] = [" "] + pd.unique(df[column_name]).tolist()
-        input_dropdown = alt.binding_select(options=columns, name="Select Column: ")
-        selection = alt.selection_single(
+        input_dropdown: alt.binding_select = alt.binding_select(
+            options=columns, name="Select Column: "
+        )
+        selection: alt.selection_single = alt.selection_single(
             empty="none",
             bind=input_dropdown,
             fields=[column_name],
