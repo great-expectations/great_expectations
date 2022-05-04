@@ -18,7 +18,7 @@ class PlotUtil:
 
     @property
     def title(self) -> str:
-        return self._name.replace("_", " ").title()
+        return self.name.replace("_", " ").title()
 
     def generate_tooltip(self, format: str = "") -> alt.Tooltip:
         return alt.Tooltip(
