@@ -5,12 +5,13 @@ import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generator, List, Optional, Set, Union, cast
+from typing import Any, Generator, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import (
     CheckpointStore,
     ProfilerStore,
@@ -50,7 +51,7 @@ except ImportError:
     SQLAlchemyError = None
 
 logger = logging.getLogger(__name__)
-
+yaml_handler: YAMLHandler = YAMLHandler()
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -775,6 +776,44 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     finally:
         connection.close()
         engine.dispose()
+
+
+def get_awsathena_connection_url() -> str:
+    """Get awsathena connection url from environment variables.
+
+    Returns:
+        String of the awsathena connection url.
+    """
+    ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
+    if not ATHENA_DB_NAME:
+        raise ValueError(
+            "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"
+        )
+    ATHENA_STAGING_S3 = os.getenv("ATHENA_STAGING_S3")
+    if not ATHENA_STAGING_S3:
+        raise ValueError(
+            "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
+        )
+
+    return f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
+
+
+def get_connection_string_and_dialect() -> Tuple[str, str]:
+
+    with open("./connection_string.yml") as f:
+        db_config: dict = yaml_handler.load(f)
+
+    dialect: str = db_config["dialect"]
+    if dialect == "snowflake":
+        connection_string: str = get_snowflake_connection_url()
+    elif dialect == "bigquery":
+        connection_string: str = get_bigquery_connection_url()
+    elif dialect == "awsathena":
+        connection_string: str = get_awsathena_connection_url()
+    else:
+        connection_string: str = db_config["connection_string"]
+
+    return dialect, connection_string
 
 
 def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
