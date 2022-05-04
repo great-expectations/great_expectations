@@ -58,6 +58,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-redshift.txt"]
         | req_set_dict["requirements-dev-snowflake.txt"]
         | req_set_dict["requirements-dev-teradata.txt"]
+        | req_set_dict["requirements-dev-trino.txt"]
     ) == req_set_dict["requirements-dev-sqlalchemy.txt"]
 
     assert (
@@ -89,4 +90,5 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-redshift.txt"]
         | req_set_dict["requirements-dev-snowflake.txt"]
         | req_set_dict["requirements-dev-teradata.txt"]
+        | req_set_dict["requirements-dev-trino.txt"]
     ) <= {"numpy>=1.21.0", "scipy>=1.7.0"}
