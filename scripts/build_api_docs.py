@@ -1,3 +1,14 @@
+"""A script for generating API documents through introspection of class objects and docstring parsing.
+
+    Usage:
+    1. Run the script.
+        1a. The files will be generated automatically.
+    2. A series of print statements at the end of the script execution will alert you to documentation that needs to be
+     updated with cross-linking (or have cross-linking removed).  Manually update these files as needed.
+    3. Among the print statements will be a snippet for sidebar.js -- past this snippet into the `items` list for the
+     API documentation category under Reference, replacing the existing content of this list.
+        3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
+"""
 import re
 import pydoc
 import inspect
@@ -22,6 +33,8 @@ API_CROSS_LINK_SUFFIX = "__api_links.mdx"
 
 
 class BlockValueIndentationError(Exception):
+    """An error that is raised when a multiline entry in an `Args:` block is not properly indented.
+    """
     def __init__(self, block_header, block_contents, line):
         message = (f"The line `{line}` in the `{block_header}` block:\n"
                    f"```\n"
@@ -32,6 +45,8 @@ class BlockValueIndentationError(Exception):
 
 
 class BlockFormatError(Exception):
+    """An error that is raised when the first line of an `Args:` block does not start with a key: value pair.
+    """
     def __init__(self, block_header, block_contents, line):
         message = f"The line `{line}` in the `{block_header}` block:" \
                   f"```" \
@@ -164,16 +179,8 @@ def get_args_dictionary(docstring: str) -> dict:
 
     Returns:
         A dictionary of parameter: description pairs according to the provided docstring.
-
-    Raises:
-        ArgValueIndentationError: An error occurred due to improper indentation of a multiline description.
-        ArgBlockFormatError: An error occurred due to an improperly formatted key: value in the first line of the
-            `Args:` block in the docstring.
     """
-    try:
-        return _get_dictionary_from_block_in_docstring(docstring, ARGS_TAG)
-    except Exception:
-        raise Exception()
+    return _get_dictionary_from_block_in_docstring(docstring, ARGS_TAG)
 
 
 def get_raises_dictionary(docstring: str) -> dict:
@@ -188,22 +195,14 @@ def get_raises_dictionary(docstring: str) -> dict:
 
     Returns:
         A dictionary of error: description pairs according to the provided docstring.
-
-    Raises:
-        ArgValueIndentationError: An error occurred due to improper indentation of a multiline description.
-        ArgBlockFormatError: An error occurred due to an improperly formatted key: value in the first line of the
-            `Raises:` block in the docstring.
     """
-    try:
-        return _get_dictionary_from_block_in_docstring(docstring, RAISES_TAG)
-    except Exception:
-        raise Exception
+    return _get_dictionary_from_block_in_docstring(docstring, RAISES_TAG)
 
 
 def get_block_contents(block_heading_text: str, docstring: str) -> str:
     """Gets the content of a block of information in a docstring.
 
-    The block is conscidered to be everything after the `block_headning_text` up to the first blank line or the
+    The block is considered to be everything after the `block_heading_text` up to the first blank line or the
         end of the docstring.
 
     Args:
@@ -357,7 +356,7 @@ def parse_method_signature(signature: inspect.Signature, param_dict: Dict[str, s
     """Combines Signature with the contents of a param_dict to create rows for a parameter table.
 
     Args:
-        signature: the output from running inspect.signature on a method
+        signature: the output from running `inspect.signature` on a method
         param_dict: dictionary of parameter: parameter description key: values for the inspected method.
 
     Returns:
@@ -670,7 +669,7 @@ def remove_existing_api_reference_files(directory_path: Path) -> List[Path]:
     """Remove any files in the file tree for `directory_path` that end in the value of API_CROSS_LINK_SUFFIX.
 
     Args:
-        directory_path: the root directory of the file tree to traverse and remove existing api cross link files from.
+        directory_path: the root directory of the file tree to traverse and remove existing api cross-link files from.
 
     Returns:
         A list of paths to files that have been removed because they end in the API_CROSS_LINK_SUFFIX.
@@ -771,58 +770,6 @@ def gather_classes_to_document(import_path: str) -> typeGenerator[Tuple[str, obj
             yield class_name, imported_class
 
 
-def build_sidebars_entry():
-    module_docs_dir = "../docs/api_docs/modules"
-    class_docs_dir = "../docs/api_docs/classes"
-    method_docs_dir = "../docs/api_docs/methods"
-
-    module_files = [Path(_) for _ in glob.glob(f"{module_docs_dir}/**/*.md", recursive=True)]
-    class_files = [Path(_) for _ in glob.glob(f"{class_docs_dir}/**/*.md", recursive=True)]
-    method_files = [Path(_) for _ in glob.glob(f"{method_docs_dir}/**/*.md", recursive=True)]
-
-    module_docs = []
-    for path in module_files:
-        path = str(path).replace('../docs/', '').replace('.md', '')
-        module_docs.append(f"{{ type: 'doc', id: '{path}' }}")
-
-    class_docs = []
-    for path in class_files:
-        path = str(path).replace('../docs/', '').replace('.md', '')
-        class_docs.append(f"{{ type: 'doc', id: '{path}' }}")
-
-    method_docs = []
-    for path in method_files:
-        path = str(path).replace('../docs/', '').replace('.md', '')
-        method_docs.append(f"{{ type: 'doc', id: '{path}' }}")
-
-    combined_categories = []
-    module_items = ",\n".join(module_docs)
-    combined_categories.append(f"{{"
-                               f"\ntype: 'category',"
-                               f"\nlabel: 'Modules',"
-                               f"\nitems: [{module_items}]"
-                               f"\n}}")
-    class_items = ",\n".join(class_docs)
-    combined_categories.append(f"{{"
-                               f"\ntype: 'category',"
-                               f"\nlabel: 'Classes',"
-                               f"\nitems: [{class_items}]"
-                               f"\n}}")
-    method_items = ",\n".join(method_docs)
-    combined_categories.append(f"{{"
-                               f"\ntype: 'category',"
-                               f"\nlabel: 'Methods',"
-                               f"\nitems: [{method_items}]"
-                               f"\n}}")
-    combined_items = ",\n".join(combined_categories)
-    print(f"{{"
-          f"\ntype: 'category',"
-          f"\nlabel: 'API documentation',"
-          f"\nitems: [{combined_items}]"
-          f"\n}}",
-          )
-
-
 if __name__ == '__main__':
     def main_func() -> None:
         """Generate all the API docs according to the contents of class and method docstrings.
@@ -856,8 +803,8 @@ if __name__ == '__main__':
                     all_snippet_paths.update(snippet_path_update)
                     sidebar_entry.append(sidebar_update)
 
-        # Print the report for documentation to update with cross links, and the content to paste into the sidebar.
-        print("\n\nThe following is the sidebar content for the generated API docs.  Simply paste this scetion into"
+        # Print the report for documentation to update with cross-links, and the content to paste into the sidebar.
+        print("\n\nThe following is the sidebar content for the generated API docs.  Simply paste this section into"
               "\n`sidebars.js` and run the auto-format fix indentations context on the file.\n")
         print(",\n".join(sidebar_entry))
         print("\n\nThe following are the importable snippet files that were generated for cross-linking.  Please verify"
