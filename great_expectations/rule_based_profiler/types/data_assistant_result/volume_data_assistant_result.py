@@ -48,17 +48,13 @@ class VolumeDataAssistantResult(DataAssistantResult):
             ExpectationConfiguration
         ] = self.expectation_suite.expectations
 
-        table_domain_display_charts: List[alt.Chart]
-        table_domain_return_charts: List[alt.chart]
-        (
-            table_domain_display_charts,
-            table_domain_return_charts,
-        ) = self._plot_table_domain_charts(
+        table_domain_charts: List[alt.Chart]
+        (table_domain_charts,) = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
             prescriptive=prescriptive,
         )
-        display_charts.extend(table_domain_display_charts)
-        return_charts.extend(table_domain_return_charts)
+        display_charts.extend([table_domain_charts])
+        return_charts.extend([table_domain_charts])
 
         column_domain_display_charts: List[alt.Chart]
         column_domain_return_charts: List[alt.Chart]
@@ -71,8 +67,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             exclude_column_names=exclude_column_names,
             prescriptive=prescriptive,
         )
-        display_charts.extend(column_domain_display_charts)
-        return_charts.extend(column_domain_return_charts)
+        display_charts.extend([column_domain_display_charts])
+        return_charts.extend([column_domain_return_charts])
 
         self.display(charts=display_charts, theme=theme)
 
@@ -107,7 +103,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             )
             charts.append(table_domain_chart)
 
-        return charts, charts
+        return charts
 
     def _plot_column_domain_charts(
         self,
@@ -115,7 +111,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
         prescriptive: bool,
-    ) -> List[alt.Chart]:
+    ) -> Tuple[alt.VConcatChart, List[alt.Chart]]:
         def _filter(e: ExpectationConfiguration) -> bool:
             if e.expectation_type != "expect_column_unique_value_count_to_be_between":
                 return False
@@ -137,28 +133,26 @@ class VolumeDataAssistantResult(DataAssistantResult):
             Domain, Dict[str, ParameterNode]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
 
-        return_charts: List[alt.Chart] = []
+        display_chart: alt.VConcatChart = (
+            self._create_display_chart_for_column_domain_expectation(
+                expectation_configurations=column_based_expectation_configurations,
+                attributed_metrics=attributed_metrics_by_column_domain,
+                prescriptive=prescriptive,
+            )
+        )
 
-        expectation_configuration: ExpectationConfiguration
+        return_charts: List[alt.Chart] = []
         for expectation_configuration in column_based_expectation_configurations:
-            column_domain_chart: alt.Chart = (
+            return_chart: alt.Chart = (
                 self._create_return_chart_for_column_domain_expectation(
                     expectation_configuration=expectation_configuration,
                     attributed_metrics=attributed_metrics_by_column_domain,
                     prescriptive=prescriptive,
                 )
             )
-            return_charts.append(column_domain_chart)
+            return_charts.extend([return_chart])
 
-        display_charts: List[
-            alt.Chart
-        ] = self._create_display_chart_for_column_domain_expectation(
-            expectation_configurations=column_based_expectation_configurations,
-            attributed_metrics=attributed_metrics_by_column_domain,
-            prescriptive=prescriptive,
-        )
-
-        return display_charts, return_charts
+        return display_chart, return_charts
 
     def _create_chart_for_table_domain_expectation(
         self,
@@ -270,7 +264,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             domain_name=domain_name,
             domain_type=domain_type,
             prescriptive=prescriptive,
-            subtitle=None,
         )
 
     def _create_return_chart_for_column_domain_expectation(
@@ -334,7 +327,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
         domain_name: str,
         domain_type: alt.StandardType,
         prescriptive: bool,
-        subtitle: Optional[str],
     ) -> Tuple[alt.Chart, List[alt.Chart]]:
         plot_impl: Callable[
             [
@@ -351,22 +343,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             display_impl = (
                 self.get_interactive_detail_expect_column_values_to_be_between_chart
             )
-            return_impl = self.get_expect_values_to_be_between_chart
         else:
             display_impl = self.get_interactive_detail_multi_line_chart
-            return_impl = self.get_line_chart
-
-        return_charts: List[alt.Chart] = []
-        for df in column_dfs:
-            return_chart: alt.Chart = return_impl(
-                df=df,
-                metric_name=metric_name,
-                metric_type=metric_type,
-                domain_name=domain_name,
-                domain_type=domain_type,
-                subtitle=subtitle,
-            )
-            return_charts.extend([return_chart])
 
         display_chart: alt.Chart = display_impl(
             column_dfs=column_dfs,
@@ -376,7 +354,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             domain_type=domain_type,
         )
 
-        return display_chart, return_charts
+        return display_chart
 
     @staticmethod
     def _create_df_for_charting(
