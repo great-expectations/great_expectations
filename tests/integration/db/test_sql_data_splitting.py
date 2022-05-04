@@ -20,7 +20,9 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
 from tests.test_utils import (
     LoadedTable,
     clean_up_tables_with_prefix,
+    get_awsathena_db_name,
     get_connection_string_and_dialect,
+    load_and_concatenate_csvs,
     load_data_into_test_database,
 )
 
@@ -54,21 +56,38 @@ def _load_data(
     )
 
 
+def _is_dialect_athena(dialect: str) -> bool:
+    """Is the dialect awsathena?"""
+    return dialect == "awsathena"
+
+
 if __name__ == "test_script_module":
 
     dialect, connection_string = get_connection_string_and_dialect()
     print(f"Testing dialect: {dialect}")
 
-    print("Preemptively cleaning old tables")
-    clean_up_tables_with_prefix(
-        connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
-    )
+    if _is_dialect_athena(dialect):
+        test_df: pd.DataFrame = load_and_concatenate_csvs(
+            csv_paths=[
+                f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
+            ],
+            convert_column_names_to_datetime=["pickup_datetime", "dropoff_datetime"],
+            load_full_dataset=True,
+        )
+        athena_db_name: str = get_awsathena_db_name()
+        table_name: str = f"{athena_db_name}.taxitable"
+    else:
 
-    loaded_table: LoadedTable = _load_data(
-        connection_string=connection_string, dialect=dialect
-    )
-    test_df: pd.DataFrame = loaded_table.inserted_dataframe
-    table_name: str = loaded_table.table_name
+        print("Preemptively cleaning old tables")
+        clean_up_tables_with_prefix(
+            connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
+        )
+
+        loaded_table: LoadedTable = _load_data(
+            connection_string=connection_string, dialect=dialect
+        )
+        test_df: pd.DataFrame = loaded_table.inserted_dataframe
+        table_name: str = loaded_table.table_name
 
     taxi_test_data: TaxiTestData = TaxiTestData(
         test_df, test_column_name="pickup_datetime"

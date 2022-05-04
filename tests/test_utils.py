@@ -778,17 +778,27 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
         engine.dispose()
 
 
+def get_awsathena_db_name() -> str:
+    """Get awsathena database name from environment variables.
+
+    Returns:
+        String of the awsathena database name.
+    """
+    athena_db_name: str = os.getenv("ATHENA_DB_NAME")
+    if not athena_db_name:
+        raise ValueError(
+            "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"
+        )
+    return athena_db_name
+
+
 def get_awsathena_connection_url() -> str:
     """Get awsathena connection url from environment variables.
 
     Returns:
         String of the awsathena connection url.
     """
-    ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
-    if not ATHENA_DB_NAME:
-        raise ValueError(
-            "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"
-        )
+    ATHENA_DB_NAME: str = get_awsathena_db_name()
     ATHENA_STAGING_S3 = os.getenv("ATHENA_STAGING_S3")
     if not ATHENA_STAGING_S3:
         raise ValueError(
