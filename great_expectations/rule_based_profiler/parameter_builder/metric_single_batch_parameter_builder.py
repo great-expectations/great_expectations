@@ -27,7 +27,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     def __init__(
         self,
         name: str,
-        metric_name: str,
+        metric_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = False,
@@ -117,9 +117,9 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         return Attributes(
             {
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-                ][0],
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: None
+                if parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] is None
+                else parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0],
                 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
                     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
                 ],

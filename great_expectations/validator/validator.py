@@ -811,10 +811,18 @@ class Validator:
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
         # updates graph with aborted metrics
-        self.resolve_validation_graph(
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ] = self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
         )
+
+        if aborted_metrics_info:
+            logger.warning(
+                f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
+            )
 
         return resolved_metrics
 

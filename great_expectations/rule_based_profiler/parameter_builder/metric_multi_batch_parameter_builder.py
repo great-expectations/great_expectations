@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional, Union
 
+import numpy as np
+
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -28,7 +30,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        metric_name: str,
+        metric_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = False,
@@ -77,6 +79,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     @property
     def metric_name(self) -> str:
         return self._metric_name
+
+    @metric_name.setter
+    def metric_name(self, value: str) -> None:
+        self._metric_name = value
 
     @property
     def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
@@ -140,6 +146,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
             if (
                 reduce_scalar_metric
+                and isinstance(
+                    metric_computation_result.attributed_resolved_metrics[
+                        0
+                    ].metric_values,
+                    np.ndarray,
+                )
                 and metric_computation_result.attributed_resolved_metrics[
                     0
                 ].metric_values.shape[1]
