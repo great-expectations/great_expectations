@@ -46,7 +46,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
         self._column_partition_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="MetricSingleBatchParameterBuilder",
-            name="column_partition_metric_parameter_builder",
+            name="column_partition_metric_single_batch_parameter_builder",
             metric_name="column.partition",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs={
@@ -137,11 +137,11 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
 
         is_categorical: bool = not bucketize_data
 
-        fully_qualified_column_partition_metric_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
+        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
         # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=fully_qualified_column_partition_metric_parameter_builder_name,
+            parameter_reference=fully_qualified_column_partition_metric_single_batch_parameter_builder_name,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
@@ -150,7 +150,10 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        is_categorical = is_categorical or not np.all(np.diff(bins) > 0.0)
+        if bins is None:
+            is_categorical = True
+        else:
+            is_categorical = is_categorical or not np.all(np.diff(bins) > 0.0)
 
         fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
         # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.

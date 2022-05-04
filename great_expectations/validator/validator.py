@@ -810,8 +810,13 @@ class Validator:
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
+        # TODO: <Alex>Please keep the return value ("aborted_metrics_info"), even though it is not actively used.</Alex>
         # updates graph with aborted metrics
-        self.resolve_validation_graph(
+        # noinspection PyUnusedLocal
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ] = self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
         )

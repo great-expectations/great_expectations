@@ -1,5 +1,6 @@
 import copy
 import itertools
+import logging
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from dataclasses import asdict, dataclass, make_dataclass
@@ -37,6 +38,9 @@ from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 # TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
 MetricValue = Union[Any, List[Any], pd.DataFrame, pd.Series, np.ndarray]
 MetricValues = Union[MetricValue, pd.DataFrame, pd.Series, np.ndarray]
@@ -62,6 +66,9 @@ class AttributedResolvedMetrics(SerializableDictDot):
     def get_metric_values_from_attributed_metric_values(
         attributed_metric_values: Dict[str, MetricValue]
     ) -> MetricValues:
+        if attributed_metric_values is None:
+            return None
+
         values: MetricValues = list(attributed_metric_values.values())[0]
         if values is not None and isinstance(values, (pd.DataFrame, pd.Series)):
             return list(attributed_metric_values.values())
@@ -469,9 +476,10 @@ specified (empty "metric_name" value detected)."""
 
         for metric_configuration in metrics_to_resolve:
             if metric_configuration.id not in resolved_metrics:
-                raise ge_exceptions.ProfilerExecutionError(
+                logger.warning(
                     f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
                 )
+                continue
 
             resolved_metrics_sorted[metric_configuration.id] = resolved_metrics[
                 metric_configuration.id
@@ -496,11 +504,14 @@ specified (empty "metric_name" value detected)."""
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
-            resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
-            attributed_resolved_metrics.add_resolved_metric(
-                batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
-                value=resolved_metric_value,
-            )
+            if metric_configuration.id in resolved_metrics_sorted:
+                resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
+                attributed_resolved_metrics.add_resolved_metric(
+                    batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
+                    value=resolved_metric_value,
+                )
+            else:
+                continue
 
         # Step-8: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
 
@@ -735,6 +746,7 @@ def resolve_evaluation_dependencies(
     evaluation_parameter_builders: List[
         "ParameterBuilder"  # noqa: F821
     ] = parameter_builder.evaluation_parameter_builders
+
     if not evaluation_parameter_builders:
         return
 
