@@ -821,7 +821,7 @@ class Validator:
 
         if aborted_metrics_info:
             logger.warning(
-                f'Exceptions "{str(aborted_metrics_info)}" occurred while resolving metrics.'
+                f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
             )
 
         return resolved_metrics
