@@ -1,5 +1,6 @@
 from typing import Optional, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
@@ -53,22 +54,46 @@ class SqlAlchemyDataSampler(DataSampler):
         # so the business logic for building the query needs to be different.
         dialect: str = execution_engine.engine.dialect.name.lower()
         if dialect == "oracle":
-            # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS UNTESTED
+            # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
             # limit doesn't compile properly for oracle so we will append rownum to query string later
-            raw_query = (
+            raw_query: Selectable = (
                 sa.select("*")
                 .select_from(
                     sa.table(table_name, schema=batch_spec.get("schema_name", None))
                 )
                 .where(where_clause)
             )
-            query = str(
+            query: str = str(
                 raw_query.compile(
                     execution_engine, compile_kwargs={"literal_binds": True}
                 )
             )
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
+        elif dialect == "mssql":
+            # TODO: AJB 20220429 WARNING THIS mssql dialect METHOD IS NOT COVERED BY TESTS
+            selectable_query: Selectable = (
+                sa.select("*")
+                .select_from(
+                    sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                )
+                .where(where_clause)
+                .limit(batch_spec["sampling_kwargs"]["n"])
+            )
+            string_of_query: str = str(
+                selectable_query.compile(
+                    execution_engine.engine, compile_kwargs={"literal_binds": True}
+                )
+            )
+            # TODO: AJB 20220504 REMOVE THIS HACK!
+            # This hack is here because the limit parameter is not substituted during query.compile()
+            n: Union[str, int] = batch_spec["sampling_kwargs"]["n"]
+            if not isinstance(n, (str, int)):
+                raise ge_exceptions.InvalidConfigError(
+                    "Please specify your sampling kwargs 'n' parameter as a string or int."
+                )
+            string_of_query = string_of_query.replace("?", str(n))
+            return string_of_query
         else:
             return (
                 sa.select("*")
@@ -100,7 +125,7 @@ class SqlAlchemyDataSampler(DataSampler):
             Sqlalchemy selectable.
         """
 
-        # TODO: AJB 20220429 WARNING THIS METHOD IS UNTESTED
+        # TODO: AJB 20220429 WARNING THIS METHOD IS NOT COVERED BY TESTS
 
         table_name: str = batch_spec["table_name"]
 
