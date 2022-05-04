@@ -1161,6 +1161,8 @@ def build_sa_validator_with_data(
                     )
             elif type_ in ["DATETIME", "TIMESTAMP", "DATE"]:
                 df[col] = pd.to_datetime(df[col])
+            elif type_ in ["VARCHAR", "STRING"]:
+                df[col] = df[col].apply(str)
 
     if table_name is None:
         table_name = generate_test_table_name()
@@ -1818,6 +1820,45 @@ def generate_expectation_tests(
                 print(f"c -> {c}\ne -> {e}")
                 print(f"d['data'] -> {d.get('data')}")
                 print(f"d['schemas'] -> {d.get('schemas')}")
+                print("DataFrame from data without any casting/conversion ->")
+                print(pd.DataFrame(d.get("data")))
+                print()
+
+                if "data_alt" in d and d["data_alt"] is not None:
+                    print("There is alternate data to try!!")
+                    try:
+                        if isinstance(d["data_alt"], list):
+                            sqlite_db_path = generate_sqlite_db_path()
+                            for dataset in d["data_alt"]:
+                                datasets.append(
+                                    get_test_validator_with_data(
+                                        c,
+                                        dataset["data_alt"],
+                                        dataset.get("schemas"),
+                                        table_name=dataset.get("dataset_name"),
+                                        sqlite_db_path=sqlite_db_path,
+                                    )
+                                )
+                            validator_with_data = datasets[0]
+                        else:
+                            validator_with_data = get_test_validator_with_data(
+                                c, d["data_alt"], d["schemas"]
+                            )
+                    except Exception as e2:
+                        print("\n[[ STILL Problem calling get_test_validator_with_data ]]")
+                        print(f"expectation_type -> {expectation_type}")
+                        print(f"c -> {c}\ne2 -> {e2}")
+                        print(f"d['data_alt'] -> {d.get('data_alt')}")
+                        print("DataFrame from data_alt without any casting/conversion ->")
+                        print(pd.DataFrame(d.get("data_alt")))
+                        print()
+                        continue
+                    else:
+                        print("\n[[ The alternate data worked!! ]]\n")
+                else:
+                    continue
+
+            except Exception as e:
                 continue
 
             for test in d["tests"]:
