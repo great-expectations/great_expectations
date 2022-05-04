@@ -26,6 +26,7 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_uti
     BatchIdPlotUtil,
     DomainPlotUtil,
     MetricPlotUtil,
+    PlotUtil,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
@@ -184,15 +185,15 @@ class DataAssistantResult(SerializableDictDot):
 
         tooltip: List[alt.Tooltip] = [
             batch_id_plot_util.generate_tooltip(),
-            metric_plot_util.generate_tooltip(),
+            metric_plot_util.generate_tooltip(format=","),
         ]
 
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
             .mark_line()
             .encode(
-                x=domain_plot_util.plot_on_target_axis(axis=alt.X),
-                y=metric_plot_util.plot_on_target_axis(axis=alt.Y),
+                x=domain_plot_util.plot_on_axis(),
+                y=metric_plot_util.plot_on_axis(),
                 tooltip=tooltip,
             )
         )
@@ -201,8 +202,8 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df, title=title)
             .mark_point()
             .encode(
-                x=domain_plot_util.plot_on_target_axis(axis=alt.X),
-                y=metric_plot_util.plot_on_target_axis(axis=alt.Y),
+                x=domain_plot_util.plot_on_axis(),
+                y=metric_plot_util.plot_on_axis(),
                 tooltip=tooltip,
             )
         )
@@ -235,11 +236,20 @@ class DataAssistantResult(SerializableDictDot):
         batch_id_plot_util: BatchIdPlotUtil = BatchIdPlotUtil(
             "batch_id", AltairDataTypes.NOMINAL.value
         )
+        min_value_plot_util: PlotUtil = PlotUtil(
+            "min_value", AltairDataTypes.QUANTITATIVE.value
+        )
+        max_value_plot_util: PlotUtil = PlotUtil(
+            "max_value", AltairDataTypes.QUANTITATIVE.value
+        )
+
         return DataAssistantResult._get_expect_values_to_be_between_chart(
             df=df,
             metric_plot_util=metric_plot_util,
             domain_plot_util=domain_plot_util,
             batch_id_plot_util=batch_id_plot_util,
+            min_value_plot_util=min_value_plot_util,
+            max_value_plot_util=max_value_plot_util,
             subtitle=subtitle,
         )
 
@@ -249,6 +259,8 @@ class DataAssistantResult(SerializableDictDot):
         metric_plot_util: MetricPlotUtil,
         domain_plot_util: DomainPlotUtil,
         batch_id_plot_util: BatchIdPlotUtil,
+        min_value_plot_util: PlotUtil,
+        max_value_plot_util: PlotUtil,
         subtitle: Optional[str],
     ) -> alt.Chart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
@@ -259,30 +271,19 @@ class DataAssistantResult(SerializableDictDot):
             subtitle=subtitle,
         )
 
-        min_value: str = "min_value"
-        min_value_title: str = min_value.replace("_", " ").title()
-        min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        max_value: str = "max_value"
-        max_value_title: str = max_value.replace("_", " ").title()
-        max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-
         tooltip: List[alt.Tooltip] = [
             batch_id_plot_util.generate_tooltip(),
-            metric_plot_util.generate_tooltip(),
-            alt.Tooltip(
-                field=min_value, type=min_value_type, title=min_value_title, format=","
-            ),
-            alt.Tooltip(
-                field=max_value, type=max_value_type, title=max_value_title, format=","
-            ),
+            metric_plot_util.generate_tooltip(format=","),
+            min_value_plot_util.generate_tooltip(format=","),
+            max_value_plot_util.generate_tooltip(format=","),
         ]
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
             .mark_line(color=line_color)
             .encode(
-                x=domain_plot_util.plot_on_target_axis(axis=alt.X),
-                y=metric_plot_util.plot_on_target_axis(axis=alt.Y, shorthand=min_value),
+                x=domain_plot_util.plot_on_axis(),
+                y=metric_plot_util.plot_on_axis(shorthand=min_value_plot_util.name),
                 tooltip=tooltip,
             )
             .properties(title=title)
@@ -292,8 +293,8 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_line(color=line_color)
             .encode(
-                x=domain_plot_util.plot_on_target_axis(axis=alt.X),
-                y=metric_plot_util.plot_on_target_axis(axis=alt.Y, shorthand=max_value),
+                x=domain_plot_util.plot_on_axis(),
+                y=metric_plot_util.plot_on_axis(shorthand=max_value_plot_util.name),
                 tooltip=tooltip,
             )
             .properties(title=title)
@@ -303,9 +304,9 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_area()
             .encode(
-                x=domain_plot_util.plot_on_target_axis(axis=alt.X),
-                y=metric_plot_util.plot_on_target_axis(axis=alt.Y, shorthand=min_value),
-                y2=alt.Y2(max_value, title=metric_plot_util.title),
+                x=domain_plot_util.plot_on_axis(),
+                y=metric_plot_util.plot_on_axis(shorthand=min_value_plot_util.name),
+                y2=alt.Y2(max_value_plot_util.name, title=metric_plot_util.title),
             )
             .properties(title=title)
         )
@@ -319,7 +320,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         # encode point color based on anomalies
-        metric_name: str = metric_plot_util.metric_name
+        metric_name: str = metric_plot_util.name
         predicate: alt.expr.core.BinaryExpression = (
             (alt.datum.min_value > alt.datum[metric_name])
             & (alt.datum.max_value > alt.datum[metric_name])
