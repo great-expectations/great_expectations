@@ -169,10 +169,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             ".", "_"
         )
         domain_name: str = "batch"
-        metric_type: alt.StandardType = alt.StandardType(
-            AltairDataTypes.QUANTITATIVE.value
-        )
-        domain_type: alt.StandardType = alt.StandardType(AltairDataTypes.ORDINAL.value)
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+        domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
 
         df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
             metric_name=metric_name,
@@ -243,7 +241,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         )
 
         domain_name: str = "batch"
-        domain_type: alt.StandardType = alt.StandardType(AltairDataTypes.ORDINAL.value)
+        domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
 
         attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
             attributed_metrics.values()
@@ -253,9 +251,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
-        metric_type: alt.StandardType = alt.StandardType(
-            AltairDataTypes.QUANTITATIVE.value
-        )
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
         return self._chart_column_values(
             column_dfs=column_dfs,
@@ -273,8 +269,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
         prescriptive: bool,
     ) -> alt.Chart:
         domain_name: str = "batch"
-        metric_type: str = alt.StandardType(AltairDataTypes.QUANTITATIVE.value)
-        domain_type: str = alt.StandardType(AltairDataTypes.ORDINAL.value)
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+        domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
 
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
