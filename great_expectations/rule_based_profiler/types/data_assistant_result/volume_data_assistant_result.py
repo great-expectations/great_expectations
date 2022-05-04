@@ -240,20 +240,33 @@ class VolumeDataAssistantResult(DataAssistantResult):
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         prescriptive: bool,
     ) -> alt.Chart:
-        domain_name: str = "batch"
-        domain_type: str = AltairDataTypes.ORDINAL.value
-
         column_dfs: List[
             pd.DataFrame
         ] = VolumeDataAssistantResult._create_column_dfs_for_charting(
-            domain_name=domain_name,
             attributed_metrics=attributed_metrics,
             expectation_configurations=expectation_configurations,
             prescriptive=prescriptive,
         )
 
+        domain_name: str = "batch"
+        domain_type: alt.StandardType = alt.StandardType(AltairDataTypes.ORDINAL.value)
+
+        attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
+            attributed_metrics.values()
+        )[0]
+
+        # Altair does not accept periods.
+        metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
+            ".", "_"
+        )
+        metric_type: alt.StandardType = alt.StandardType(
+            AltairDataTypes.QUANTITATIVE.value
+        )
+
         return self._chart_column_values(
             column_dfs=column_dfs,
+            metric_name=metric_name,
+            metric_type=metric_type,
             domain_name=domain_name,
             domain_type=domain_type,
             prescriptive=prescriptive,
@@ -267,8 +280,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
         prescriptive: bool,
     ) -> alt.Chart:
         domain_name: str = "batch"
-        metric_type: str = AltairDataTypes.QUANTITATIVE.value
-        domain_type: str = AltairDataTypes.ORDINAL.value
+        metric_type: str = alt.StandardType(AltairDataTypes.QUANTITATIVE.value)
+        domain_type: str = alt.StandardType(AltairDataTypes.ORDINAL.value)
 
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
@@ -315,7 +328,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
     def _chart_column_values(
         self,
-        column_dfs: pd.DataFrame,
+        column_dfs: List[pd.DataFrame],
         metric_name: str,
         metric_type: alt.StandardType,
         domain_name: str,
@@ -405,12 +418,44 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
     @staticmethod
     def _create_column_dfs_for_charting(
-        domain_name: str,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         expectation_configurations: List[ExpectationConfiguration],
         prescriptive: bool,
-    ) -> pd.DataFrame:
-        for expectation_configuration in expectation_configurations:
-            metric_values = attributed_metrics[expectation_configuration]
+    ) -> List[pd.DataFrame]:
+        domain_name: str = "batch"
+        domain: Domain
+        domains_by_column_name: Dict[str, Domain] = {
+            domain.domain_kwargs["column"]: domain
+            for domain in list(attributed_metrics.keys())
+        }
 
-        return None
+        column_dfs: List[Tuple[str, pd.DataFrame]] = []
+        for expectation_configuration in expectation_configurations:
+            metric_configuration: dict = expectation_configuration.meta[
+                "profiler_details"
+            ]["metric_configuration"]
+            domain_kwargs: dict = metric_configuration["domain_kwargs"]
+
+            domain = domains_by_column_name[domain_kwargs["column"]]
+
+            attributed_values_by_metric_name: Dict[
+                str, ParameterNode
+            ] = attributed_metrics[domain]
+
+            # Altair does not accept periods.
+            metric_name = list(attributed_values_by_metric_name.keys())[0].replace(
+                ".", "_"
+            )
+
+            df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
+                metric_name,
+                domain_name,
+                attributed_values_by_metric_name,
+                expectation_configuration,
+                prescriptive,
+            )
+
+            column_name: str = expectation_configuration.kwargs["column"]
+            column_dfs.append((column_name, df))
+
+        return column_dfs
