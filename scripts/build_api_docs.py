@@ -9,14 +9,16 @@
      API documentation category under Reference, replacing the existing content of this list.
         3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
 """
-import re
-import pydoc
-import inspect
-import importlib
-import shutil
 import glob
+import importlib
+import inspect
+import pydoc
+import re
+import shutil
 from pathlib import Path
-from typing import Set, Generator as typeGenerator, Tuple, List, Dict, Any
+from typing import Any, Dict
+from typing import Generator as typeGenerator
+from typing import List, Set, Tuple
 
 WHITELISTED_TAG = "# Public API"
 DOCUMENTATION_TAG = "# Documentation"
