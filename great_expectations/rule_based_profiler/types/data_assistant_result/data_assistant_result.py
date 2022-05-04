@@ -1,10 +1,11 @@
 import copy
 from abc import abstractmethod
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import altair as alt
 import pandas as pd
+from IPython.display import HTML, display
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import convert_to_json_serializable, nested_update
@@ -82,6 +83,20 @@ class DataAssistantResult(SerializableDictDot):
         altair_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
         if theme is not None:
             nested_update(altair_theme, theme)
+
+        display(
+            HTML(
+                """
+                <style>
+                form.vega-bindings {
+                  position: absolute;
+                  left: 70px;
+                  top: 28px;
+                }
+                </style>
+                """
+            )
+        )
 
         chart: alt.Chart
         for chart in charts:
@@ -265,14 +280,16 @@ class DataAssistantResult(SerializableDictDot):
         """
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
-        title: str = f"{metric_title} per {domain_title}"
+        title: alt.TitleParams = alt.TitleParams(
+            f"{metric_title} per {domain_title}",
+            dy=-30,
+        )
 
         batch_id: str = "batch_id"
         batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
-        legend_title: str = "Select Column:"
-        column_name: str = legend_title
+        column_name: str = "column_name"
         column_name_title: str = "Column Name"
         column_name_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
@@ -306,15 +323,16 @@ class DataAssistantResult(SerializableDictDot):
             column_df[column_name] = column
             df = pd.concat([df, column_df], axis=0)
 
+        columns: List[str] = [" "] + pd.unique(df[column_name]).tolist()
+        input_dropdown = alt.binding_select(options=columns, name="Select Column: ")
         selection = alt.selection_single(
             empty="none",
-            bind="legend",
+            bind=input_dropdown,
             fields=[column_name],
-            on="mouseover",
         )
 
         line: alt.Chart = (
-            alt.Chart(df, title=title)
+            alt.Chart(df)
             .mark_line()
             .encode(
                 x=alt.X(
@@ -329,6 +347,7 @@ class DataAssistantResult(SerializableDictDot):
                         column_name,
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
+                        legend=None,
                     ),
                     unselected_color,
                 ),
@@ -339,11 +358,11 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 tooltip=tooltip,
             )
-            .properties(height=line_chart_height)
+            .properties(height=line_chart_height, title=title)
         )
 
         points: alt.Chart = (
-            alt.Chart(df, title=title)
+            alt.Chart(df)
             .mark_point(size=point_size)
             .encode(
                 x=alt.X(
@@ -364,11 +383,11 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 tooltip=tooltip,
             )
-            .properties(height=line_chart_height)
+            .properties(height=line_chart_height, title=title)
         )
 
         highlight_line: alt.Chart = (
-            alt.Chart(df, title=title)
+            alt.Chart(df)
             .mark_line(strokeWidth=2.5)
             .encode(
                 x=alt.X(
@@ -383,6 +402,7 @@ class DataAssistantResult(SerializableDictDot):
                         column_name,
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
+                        legend=None,
                     ),
                     unselected_color,
                 ),
@@ -393,12 +413,12 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 tooltip=tooltip,
             )
-            .properties(height=line_chart_height)
+            .properties(height=line_chart_height, title=title)
             .transform_filter(selection)
         )
 
         highlight_points: alt.Chart = (
-            alt.Chart(df, title=title)
+            alt.Chart(df)
             .mark_point(size=40)
             .encode(
                 x=alt.X(
@@ -419,7 +439,7 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 tooltip=tooltip,
             )
-            .properties(height=line_chart_height)
+            .properties(height=line_chart_height, title=title)
             .transform_filter(selection)
         )
 
@@ -508,137 +528,6 @@ class DataAssistantResult(SerializableDictDot):
             .properties(height=10)
         )
 
-        empty_selection = alt.selection_single(
-            empty="all",
-            bind="legend",
-            fields=[column_name],
-            on="mouseover",
-        )
-
-        # only display the column in the first row of the dataframe if nothing is selected
-        empty_selection_df = df[df[column_name] == df[column_name].iloc[0]]
-
-        empty_selection_line: alt.Chart = (
-            alt.Chart(empty_selection_df, title=title)
-            .mark_line(strokeWidth=2.5)
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                ),
-                y=alt.Y(metric_name, type=metric_type, title=None),
-                color=alt.condition(
-                    empty_selection,
-                    alt.Color(
-                        column_name,
-                        type=AltairDataTypes.NOMINAL.value,
-                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                    ),
-                    unselected_color,
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=line_chart_height)
-            .transform_filter(empty_selection)
-        )
-
-        empty_selection_points: alt.Chart = (
-            alt.Chart(empty_selection_df, title=title)
-            .mark_point(size=40)
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                ),
-                y=alt.Y(metric_name, type=metric_type, title=None),
-                color=alt.condition(
-                    empty_selection,
-                    alt.value(Colors.GREEN.value),
-                    unselected_color,
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=line_chart_height)
-            .transform_filter(empty_selection)
-        )
-
-        detail_empty_selection_line: alt.Chart = (
-            alt.Chart(
-                empty_selection_df,
-            )
-            .mark_line()
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(metric_name, type=metric_type, title=None),
-                color=alt.condition(
-                    empty_selection,
-                    alt.Color(
-                        column_name,
-                        type=AltairDataTypes.NOMINAL.value,
-                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                    ),
-                    unselected_color,
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=detail_line_chart_height)
-            .transform_filter(empty_selection)
-        )
-
-        detail_empty_selection_points: alt.Chart = (
-            alt.Chart(
-                empty_selection_df,
-            )
-            .mark_point(size=point_size)
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(metric_name, type=metric_type, title=None),
-                color=alt.condition(
-                    empty_selection,
-                    alt.value(Colors.GREEN.value),
-                    unselected_color,
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=detail_line_chart_height)
-            .transform_filter(empty_selection)
-        )
-
-        detail_empty_selection_title_column_names: pd.DataFrame = pd.DataFrame(
-            {column_name: pd.unique(empty_selection_df[column_name])}
-        )
-        detail_empty_selection_title_column_titles: str = detail_title_column_titles
-        detail_empty_selection_title_column_names[
-            detail_empty_selection_title_column_titles
-        ] = detail_empty_selection_title_column_names[column_name].apply(
-            lambda x: f"Column ({x}) Selection Detail"
-        )
-        detail_empty_selection_title_text: alt.condition = alt.condition(
-            empty_selection, detail_empty_selection_title_column_titles, alt.value("")
-        )
-
-        detail_empty_selection_title = (
-            alt.Chart(detail_empty_selection_title_column_names)
-            .mark_text(
-                color=Colors.PURPLE.value,
-                fontSize=detail_title_font_size,
-                fontWeight=detail_title_font_weight,
-            )
-            .encode(text=detail_empty_selection_title_text)
-            .transform_filter(empty_selection)
-            .properties(height=10)
-        )
-
         # special title for combined y-axis across two charts
         y_axis_title = alt.TitleParams(
             metric_title,
@@ -653,22 +542,13 @@ class DataAssistantResult(SerializableDictDot):
         return (
             alt.VConcatChart(
                 vconcat=[
-                    line
-                    + points
-                    + highlight_line
-                    + highlight_points
-                    + empty_selection_line
-                    + empty_selection_points,
-                    detail_title + detail_empty_selection_title,
-                    detail_line
-                    + detail_points
-                    + detail_empty_selection_line
-                    + detail_empty_selection_points,
+                    line + points + highlight_line + highlight_points,
+                    detail_title,
+                    detail_line + detail_points,
                 ],
-                padding=0,
             )
             .properties(title=y_axis_title)
-            .add_selection(selection, empty_selection)
+            .add_selection(selection)
         )
 
     @staticmethod
@@ -709,8 +589,7 @@ class DataAssistantResult(SerializableDictDot):
             alt.Tooltip(field=max_value, type=max_value_type, format=","),
         ]
 
-        legend_title: str = "Select Column:"
-        column_name: str = legend_title
+        column_name: str = "column_name"
 
         df: pd.DataFrame = pd.DataFrame(
             columns=[column_name, "batch", batch_id, metric_name]
@@ -777,6 +656,13 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
+        anomaly_coded_multi_lines.vconcat[2] = alt.layer(
+            anomaly_coded_multi_lines.vconcat[2].layer[0],
+            anomaly_coded_multi_lines.vconcat[2].layer[1],
+            anomaly_coded_multi_lines.vconcat[2].layer[2],
+            anomaly_coded_multi_lines.vconcat[2].layer[3],
+        )
+
         return anomaly_coded_multi_lines
 
     @staticmethod
@@ -796,12 +682,6 @@ class DataAssistantResult(SerializableDictDot):
             if_true=alt.value(Colors.PINK.value),
         )
 
-        # encode overall view
-        # lines.vconcat[0].layer[1] = (
-        #     lines.vconcat[0]
-        #     .layer[1]
-        #     .encode(color=point_color_condition, tooltip=tooltip)
-        # )
         lines.vconcat[0].layer[3] = (
             lines.vconcat[0]
             .layer[3]

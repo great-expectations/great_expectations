@@ -4,7 +4,7 @@ from typing import List
 from great_expectations.types import ColorPalettes, Colors
 
 # Size
-chart_width: int = 700
+chart_width: int = 800
 chart_height: int = 250
 
 # View
