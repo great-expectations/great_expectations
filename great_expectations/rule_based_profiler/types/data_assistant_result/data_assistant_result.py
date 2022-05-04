@@ -48,15 +48,16 @@ class DataAssistantResult(SerializableDictDot):
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         return {
             "profiler_config": self.profiler_config.to_json_dict(),
-            "metrics_by_domain": {
-                domain.id: {
+            "metrics_by_domain": [
+                {
+                    "domain_id": domain.id,
                     "domain": domain.to_json_dict(),
                     "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(
                         data=parameter_values_for_fully_qualified_parameter_names
                     ),
                 }
                 for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-            },
+            ],
             "expectation_suite": self.expectation_suite.to_json_dict(),
             "execution_time": convert_to_json_serializable(data=self.execution_time),
         }
