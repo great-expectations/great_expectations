@@ -19,11 +19,13 @@ from great_expectations.rule_based_profiler.types.altair import (
     AltairDataTypes,
     AltairThemes,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result.plot_helper import (
-    PlotHelper,
-)
 from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
     PlotResult,
+)
+from great_expectations.rule_based_profiler.types.data_assistant_result.plot_util import (
+    BatchIdPlotUtil,
+    DomainPlotUtil,
+    MetricPlotUtil,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
@@ -133,42 +135,44 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair line chart
         """
-        plot_helper: PlotHelper = PlotHelper(
-            metric_name=metric_name,
-            metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
-            batch_id="batch_id",
-            batch_id_type=AltairDataTypes.NOMINAL.value,
+        metric_plot_util: MetricPlotUtil = MetricPlotUtil(metric_name, metric_type)
+        domain_plot_util: DomainPlotUtil = DomainPlotUtil(domain_name, domain_type)
+        batch_id_plot_util: BatchIdPlotUtil = BatchIdPlotUtil(
+            "batch_id", AltairDataTypes.NOMINAL.value
         )
-
         return DataAssistantResult._get_line_chart(
-            df=df, plot_helper=plot_helper, subtitle=subtitle
+            df=df,
+            metric_plot_util=metric_plot_util,
+            domain_plot_util=domain_plot_util,
+            batch_id_plot_util=batch_id_plot_util,
+            subtitle=subtitle,
         )
 
     @staticmethod
     def _get_line_chart(
         df: pd.DataFrame,
-        plot_helper: PlotHelper,
+        metric_plot_util: MetricPlotUtil,
+        domain_plot_util: DomainPlotUtil,
+        batch_id_plot_util: BatchIdPlotUtil,
         subtitle: Optional[str],
     ) -> alt.Chart:
-        title: alt.TitleParams = plot_helper.determine_plot_title(subtitle=subtitle)
+        title: alt.TitleParams = DataAssistantResult._determine_plot_title(
+            metric_title=metric_plot_util.title,
+            domain_title=domain_plot_util.title,
+            subtitle=subtitle,
+        )
 
         tooltip: List[alt.Tooltip] = [
-            plot_helper.get_batch_id_tooltip(),
-            plot_helper.get_metric_tooltip(),
+            batch_id_plot_util.generate_tooltip(),
+            metric_plot_util.generate_tooltip(),
         ]
 
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
             .mark_line()
             .encode(
-                x=plot_helper.plot_domain_on_target_axis(axis=alt.X),
-                y=alt.Y(
-                    plot_helper.metric_name,
-                    type=plot_helper.metric_type,
-                    title=plot_helper.metric_title,
-                ),
+                x=domain_plot_util.plot_on_target_axis(axis=alt.X),
+                y=metric_plot_util.plot_on_target_axis(axis=alt.Y),
                 tooltip=tooltip,
             )
         )
@@ -177,8 +181,8 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df, title=title)
             .mark_point()
             .encode(
-                x=plot_helper.plot_domain_on_target_axis(axis=alt.X),
-                y=plot_helper.plot_metric_on_target_axis(axis=alt.Y),
+                x=domain_plot_util.plot_on_target_axis(axis=alt.X),
+                y=metric_plot_util.plot_on_target_axis(axis=alt.Y),
                 tooltip=tooltip,
             )
         )
@@ -206,28 +210,34 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
-        plot_helper: PlotHelper = PlotHelper(
-            metric_name=metric_name,
-            metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
-            batch_id="batch_id",
-            batch_id_type=AltairDataTypes.NOMINAL.value,
+        metric_plot_util: MetricPlotUtil = MetricPlotUtil(metric_name, metric_type)
+        domain_plot_util: DomainPlotUtil = DomainPlotUtil(domain_name, domain_type)
+        batch_id_plot_util: BatchIdPlotUtil = BatchIdPlotUtil(
+            "batch_id", AltairDataTypes.NOMINAL.value
         )
-
         return DataAssistantResult._get_expect_values_to_be_between_chart(
-            df=df, plot_helper=plot_helper, subtitle=subtitle
+            df=df,
+            metric_plot_util=metric_plot_util,
+            domain_plot_util=domain_plot_util,
+            batch_id_plot_util=batch_id_plot_util,
+            subtitle=subtitle,
         )
 
     @staticmethod
     def _get_expect_values_to_be_between_chart(
         df: pd.DataFrame,
-        plot_helper: PlotHelper,
+        metric_plot_util: MetricPlotUtil,
+        domain_plot_util: DomainPlotUtil,
+        batch_id_plot_util: BatchIdPlotUtil,
         subtitle: Optional[str],
     ) -> alt.Chart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
-        title: alt.TitleParams = plot_helper.determine_plot_title(subtitle=subtitle)
+        title: alt.TitleParams = DataAssistantResult._determine_plot_title(
+            metric_title=metric_plot_util.title,
+            domain_title=domain_plot_util.title,
+            subtitle=subtitle,
+        )
 
         min_value: str = "min_value"
         min_value_title: str = min_value.replace("_", " ").title()
@@ -237,8 +247,8 @@ class DataAssistantResult(SerializableDictDot):
         max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
         tooltip: List[alt.Tooltip] = [
-            plot_helper.get_batch_id_tooltip(),
-            plot_helper.get_metric_tooltip(),
+            batch_id_plot_util.generate_tooltip(),
+            metric_plot_util.generate_tooltip(),
             alt.Tooltip(
                 field=min_value, type=min_value_type, title=min_value_title, format=","
             ),
@@ -251,10 +261,8 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_line(color=line_color)
             .encode(
-                x=plot_helper.plot_domain_on_target_axis(axis=alt.X),
-                y=plot_helper.plot_metric_on_target_axis(
-                    axis=alt.Y, shorthand=min_value
-                ),
+                x=domain_plot_util.plot_on_target_axis(axis=alt.X),
+                y=metric_plot_util.plot_on_target_axis(axis=alt.Y, shorthand=min_value),
                 tooltip=tooltip,
             )
             .properties(title=title)
@@ -264,10 +272,8 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_line(color=line_color)
             .encode(
-                x=plot_helper.plot_domain_on_target_axis(axis=alt.X),
-                y=plot_helper.plot_metric_on_target_axis(
-                    axis=alt.Y, shorthand=max_value
-                ),
+                x=domain_plot_util.plot_on_target_axis(axis=alt.X),
+                y=metric_plot_util.plot_on_target_axis(axis=alt.Y, shorthand=max_value),
                 tooltip=tooltip,
             )
             .properties(title=title)
@@ -277,28 +283,29 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_area()
             .encode(
-                x=plot_helper.plot_domain_on_target_axis(axis=alt.X),
-                y=plot_helper.plot_metric_on_target_axis(
-                    axis=alt.Y, shorthand=min_value
-                ),
-                y2=alt.Y2(max_value, title=plot_helper.metric_title),
+                x=domain_plot_util.plot_on_target_axis(axis=alt.X),
+                y=metric_plot_util.plot_on_target_axis(axis=alt.Y, shorthand=min_value),
+                y2=alt.Y2(max_value, title=metric_plot_util.title),
             )
             .properties(title=title)
         )
 
         line: alt.Chart = DataAssistantResult._get_line_chart(
             df=df,
-            plot_helper=plot_helper,
+            metric_plot_util=metric_plot_util,
+            domain_plot_util=domain_plot_util,
+            batch_id_plot_util=batch_id_plot_util,
             subtitle=None,
         )
 
         # encode point color based on anomalies
+        metric_name: str = metric_plot_util.metric_name
         predicate: alt.expr.core.BinaryExpression = (
-            (alt.datum.min_value > alt.datum[plot_helper.metric_name])
-            & (alt.datum.max_value > alt.datum[plot_helper.metric_name])
+            (alt.datum.min_value > alt.datum[metric_name])
+            & (alt.datum.max_value > alt.datum[metric_name])
         ) | (
-            (alt.datum.min_value < alt.datum[plot_helper.metric_name])
-            & (alt.datum.max_value < alt.datum[plot_helper.metric_name])
+            (alt.datum.min_value < alt.datum[metric_name])
+            & (alt.datum.max_value < alt.datum[metric_name])
         )
         point_color_condition: alt.condition = alt.condition(
             predicate=predicate,
@@ -820,6 +827,20 @@ class DataAssistantResult(SerializableDictDot):
         interactive_detail_multi_line_chart.vconcat[2].layer = detail_chart_layers
 
         return interactive_detail_multi_line_chart
+
+    @staticmethod
+    def _determine_plot_title(
+        metric_title: str, domain_title: str, subtitle: Optional[str]
+    ) -> alt.TitleParams:
+        contents: str = f"{metric_title} per {domain_title}"
+
+        title: alt.TitleParams
+        if subtitle:
+            title = alt.TitleParams(contents, subtitle=[subtitle])
+        else:
+            title = alt.TitleParams(contents)
+
+        return title
 
     @abstractmethod
     def plot(
