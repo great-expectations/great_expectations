@@ -109,14 +109,6 @@ if __name__ == "test_script_module":
         context: DataContext = ge.get_context()
 
         datasource_name: str = "test_datasource"
-        context.add_datasource(
-            name=datasource_name,
-            class_name="Datasource",
-            execution_engine={
-                "class_name": "SqlAlchemyExecutionEngine",
-                "connection_string": connection_string,
-            },
-        )
 
         # 2. Set splitter in data connector config
         data_connector_name: str = "test_data_connector"
@@ -134,6 +126,16 @@ if __name__ == "test_script_module":
                     }
                 },
             )
+        )
+
+        context.add_datasource(
+            name=datasource_name,
+            class_name="Datasource",
+            execution_engine={
+                "class_name": "SqlAlchemyExecutionEngine",
+                "connection_string": connection_string,
+            },
+            data_connector=data_connector,
         )
 
         # 3. Check if resulting batches are as expected

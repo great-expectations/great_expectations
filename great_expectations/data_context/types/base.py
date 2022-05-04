@@ -155,6 +155,10 @@ class AssetConfig(DictDot):
         schema_name=None,
         batch_spec_passthrough=None,
         batch_identifiers=None,
+        splitter_method=None,
+        splitter_kwargs=None,
+        sampling_method=None,
+        sampling_kwargs=None,
         **kwargs,
     ) -> None:
         if name is not None:
@@ -175,6 +179,15 @@ class AssetConfig(DictDot):
             self.batch_spec_passthrough = batch_spec_passthrough
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
+        if splitter_method is not None:
+            self.splitter_method = splitter_method
+        if splitter_kwargs is not None:
+            self.splitter_kwargs = splitter_kwargs
+        if sampling_method is not None:
+            self.sampling_method = sampling_method
+        if sampling_kwargs is not None:
+            self.sampling_kwargs = sampling_kwargs
+
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -222,6 +235,12 @@ class AssetConfigSchema(Schema):
     batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
+
+    # splitters and samplers
+    splitter_method = fields.String(required=False, allow_none=True)
+    splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sampling_method = fields.String(required=False, allow_none=True)
+    sampling_kwargs = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
@@ -353,6 +372,7 @@ class DataConnectorConfig(DictDot):
         prefix=None,
         # Both S3/Azure
         delimiter=None,
+        # do we need to include samplers and splitters?
         **kwargs,
     ) -> None:
         self._class_name = class_name
@@ -919,6 +939,8 @@ class DatasourceConfigSchema(Schema):
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
     limit = fields.Integer(required=False, allow_none=True)
+
+    # splitters and samplers?
 
     # noinspection PyUnusedLocal
     @validates_schema

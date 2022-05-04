@@ -605,6 +605,7 @@ cloud_bigquery_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
+    # so we know for sure that it works
     IntegrationTestFixture(
         name="split_data_on_datetime_bigquery",
         user_flow_script="tests/integration/db/test_sql_data_splitting.py",
