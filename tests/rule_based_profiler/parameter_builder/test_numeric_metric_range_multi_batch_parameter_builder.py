@@ -11,6 +11,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.rule_based_profiler.helpers.util import NP_EPSILON
 from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
+    ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
     Domain,
@@ -34,14 +35,16 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "data_asset_name": "my_reports",
     }
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="row_count_range",
-        metric_name="table.row_count",
-        estimator="bootstrap",
-        false_positive_rate=1.0e-2,
-        round_decimals=0,
-        json_serialize=False,
-        data_context=data_context,
+    numeric_metric_range_parameter_builder: ParameterBuilder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="row_count_range",
+            metric_name="table.row_count",
+            estimator="bootstrap",
+            false_positive_rate=1.0e-2,
+            round_decimals=0,
+            json_serialize=False,
+            data_context=data_context,
+        )
     )
 
     variables: Optional[ParameterContainer] = None
@@ -83,7 +86,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    actual_value_parameter_node: ParameterNode = (
+    parameter_node: ParameterNode = (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
@@ -91,14 +94,14 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         )
     )
 
-    actual_value: np.ndarray = actual_value_parameter_node.pop("value")
-    actual_value_parameter_node["value"] = None
+    actual_value: np.ndarray = parameter_node.pop("value")
+    parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = actual_value_parameter_node.details.pop(
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
         "estimation_histogram"
     )
 
-    assert actual_value_parameter_node == expected_value_dict
+    assert parameter_node == expected_value_dict
 
     expected_value: np.ndarray = np.array([7510, 8806])
 
@@ -159,15 +162,17 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     expected_value_dict: dict
     actual_value_dict: dict
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="column_min_range",
-        metric_name="column.min",
-        metric_domain_kwargs=metric_domain_kwargs,
-        estimator="oneshot",
-        false_positive_rate=1.0e-2,
-        round_decimals=1,
-        json_serialize=False,
-        data_context=data_context,
+    numeric_metric_range_parameter_builder: ParameterBuilder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="column_min_range",
+            metric_name="column.min",
+            metric_domain_kwargs=metric_domain_kwargs,
+            estimator="oneshot",
+            false_positive_rate=1.0e-2,
+            round_decimals=1,
+            json_serialize=False,
+            data_context=data_context,
+        )
     )
 
     variables: Optional[ParameterContainer] = None
@@ -209,7 +214,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    actual_value_parameter_node: ParameterNode = (
+    parameter_node: ParameterNode = (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
@@ -217,14 +222,14 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         )
     )
 
-    actual_values_01: np.ndarray = actual_value_parameter_node.pop("value")
-    actual_value_parameter_node["value"] = None
+    actual_values_01: np.ndarray = parameter_node.pop("value")
+    parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = actual_value_parameter_node.details.pop(
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
         "estimation_histogram"
     )
 
-    assert actual_value_parameter_node == expected_value_dict
+    assert parameter_node == expected_value_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -277,7 +282,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         batch_request=batch_request,
     )
 
-    actual_value_parameter_node: ParameterNode = (
+    parameter_node: ParameterNode = (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
@@ -285,14 +290,14 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         )
     )
 
-    actual_values_05 = actual_value_parameter_node.pop("value")
-    actual_value_parameter_node["value"] = None
+    actual_values_05 = parameter_node.pop("value")
+    parameter_node["value"] = None
 
-    actual_estimation_histogram: np.ndarray = actual_value_parameter_node.details.pop(
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
         "estimation_histogram"
     )
 
-    assert actual_value_parameter_node == expected_value_dict
+    assert parameter_node == expected_value_dict
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
@@ -343,13 +348,15 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         "data_asset_name": "my_reports",
     }
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="row_count_range",
-        metric_name="table.row_count",
-        estimator="bootstrap",
-        false_positive_rate=1.0,
-        round_decimals=0,
-        data_context=data_context,
+    numeric_metric_range_parameter_builder: ParameterBuilder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="row_count_range",
+            metric_name="table.row_count",
+            estimator="bootstrap",
+            false_positive_rate=1.0,
+            round_decimals=0,
+            data_context=data_context,
+        )
     )
 
     variables: Optional[ParameterContainer] = None
@@ -393,13 +400,15 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         "data_asset_name": "my_reports",
     }
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="row_count_range",
-        metric_name="table.row_count",
-        estimator="bootstrap",
-        false_positive_rate=-0.05,
-        round_decimals=0,
-        data_context=data_context,
+    numeric_metric_range_parameter_builder: ParameterBuilder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="row_count_range",
+            metric_name="table.row_count",
+            estimator="bootstrap",
+            false_positive_rate=-0.05,
+            round_decimals=0,
+            data_context=data_context,
+        )
     )
 
     variables: Optional[ParameterContainer] = None
@@ -443,13 +452,15 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         "data_asset_name": "my_reports",
     }
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="row_count_range",
-        metric_name="table.row_count",
-        estimator="bootstrap",
-        false_positive_rate=0.0,
-        round_decimals=0,
-        data_context=data_context,
+    numeric_metric_range_parameter_builder: ParameterBuilder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="row_count_range",
+            metric_name="table.row_count",
+            estimator="bootstrap",
+            false_positive_rate=0.0,
+            round_decimals=0,
+            data_context=data_context,
+        )
     )
 
     variables: Optional[ParameterContainer] = None
@@ -500,13 +511,15 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     # what if user tries a false positive rate smaller than NP_EPSILON (by an order of magnitude in this case)?
     smaller_than_np_epsilon_false_positive_rate: float = NP_EPSILON / 10
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="row_count_range",
-        metric_name="table.row_count",
-        estimator="bootstrap",
-        false_positive_rate=smaller_than_np_epsilon_false_positive_rate,
-        round_decimals=0,
-        data_context=data_context,
+    numeric_metric_range_parameter_builder: ParameterBuilder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="row_count_range",
+            metric_name="table.row_count",
+            estimator="bootstrap",
+            false_positive_rate=smaller_than_np_epsilon_false_positive_rate,
+            round_decimals=0,
+            data_context=data_context,
+        )
     )
 
     variables: Optional[ParameterContainer] = None
