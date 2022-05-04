@@ -26,9 +26,16 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
+from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
+    PlotResult,
+)
+from great_expectations.rule_based_profiler.types.data_assistant_result.volume_data_assistant_result import (
+    VolumeDataAssistantResult,
+)
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
 from tests.render.test_util import load_notebook_from_path
+from tests.test_utils import find_strings_in_nested_obj
 
 
 @pytest.fixture
@@ -2552,6 +2559,44 @@ def quentin_expected_expectation_suite(
     return _expectation_suite
 
 
+@pytest.fixture
+def volume_data_assistant_result(
+    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
+        data_context=context,
+        expectation_suite=None,
+        expectation_suite_name="my_suite",
+        component_name=None,
+    )
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=expectation_suite,
+        component_name="volume_data_assistant",
+    )
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
+        validator=validator,
+    )
+
+    data_assistant_result: DataAssistantResult = data_assistant.run(
+        expectation_suite=expectation_suite
+    )
+    return data_assistant_result
+
+
 def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     context: DataContext,
     new_cell: str,
@@ -3228,3 +3273,80 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
         new_cell=new_cell,
         implicit=True,
     )
+
+
+def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    plot_result: PlotResult = volume_data_assistant_result.plot()
+
+    table_domain_chart: dict = plot_result.charts[0].to_dict()
+    assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
+
+
+def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    plot_result: PlotResult = volume_data_assistant_result.plot()
+
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
+    assert len(column_domain_charts) == 18  # One for each column present
+
+    columns: List[str] = [
+        "VendorID",
+        "pickup_datetime",
+        "dropoff_datetime",
+        "passenger_count",
+        "trip_distance",
+        "RatecodeID",
+        "store_and_fwd_flag",
+        "PULocationID",
+        "DOLocationID",
+        "payment_type",
+        "fare_amount",
+        "extra",
+        "mta_tax",
+        "tip_amount",
+        "tolls_amount",
+        "improvement_surcharge",
+        "total_amount",
+        "congestion_surcharge",
+    ]
+    assert find_strings_in_nested_obj(column_domain_charts, columns)
+
+
+def test_volume_data_assistant_plot_include_column_names_filters_output(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    include_column_names: List[str] = ["VendorID", "pickup_datetime"]
+    plot_result: PlotResult = volume_data_assistant_result.plot(
+        include_column_names=include_column_names
+    )
+
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
+    assert len(column_domain_charts) == 2  # Normally 18 without filtering
+    assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
+
+
+def test_volume_data_assistant_plot_exclude_column_names_filters_output(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    exclude_column_names: List[str] = ["VendorID", "pickup_datetime"]
+    plot_result: PlotResult = volume_data_assistant_result.plot(
+        exclude_column_names=exclude_column_names
+    )
+
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
+    assert len(column_domain_charts) == 16  # Normally 18 without filtering
+    assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
+
+
+def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_error(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    with pytest.raises(ValueError) as e:
+        volume_data_assistant_result.plot(
+            include_column_names=["VendorID"], exclude_column_names=["pickup_datetime"]
+        )
+
+    assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
