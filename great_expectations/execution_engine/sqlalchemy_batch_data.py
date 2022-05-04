@@ -133,8 +133,10 @@ class SqlAlchemyBatchData(BatchData):
             if engine.dialect.name.lower() == "mssql":
                 generated_table_name = f"#{generated_table_name}"
             if selectable is not None:
-                if engine.dialect.name.lower() in ["oracle", "mssql"]:
-                    # oracle, mssql query was already passed as a string
+                if engine.dialect.name.lower() in ["oracle", "mssql"] and isinstance(
+                    selectable, str
+                ):
+                    # oracle, mssql query could already be passed as a string
                     query = selectable
                 else:
                     # compile selectable to sql statement
