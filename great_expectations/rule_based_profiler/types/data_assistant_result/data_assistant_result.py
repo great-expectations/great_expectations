@@ -256,11 +256,24 @@ class DataAssistantResult(SerializableDictDot):
             domain_type=domain_type,
         )
 
-        anomaly_coded_line: alt.Chart = (
-            DataAssistantResult._determine_anomaly_coded_line(
-                line, tooltip, metric_name
-            )
+        # encode point color based on anomalies
+        predicate: alt.expr.core.BinaryExpression = (
+            (alt.datum.min_value > alt.datum[metric_name])
+            & (alt.datum.max_value > alt.datum[metric_name])
+        ) | (
+            (alt.datum.min_value < alt.datum[metric_name])
+            & (alt.datum.max_value < alt.datum[metric_name])
         )
+        point_color_condition: alt.condition = alt.condition(
+            predicate=predicate,
+            if_false=alt.value(Colors.GREEN.value),
+            if_true=alt.value(Colors.PINK.value),
+        )
+
+        anomaly_coded_points = line.layer[1].encode(
+            color=point_color_condition, tooltip=tooltip
+        )
+        anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
 
         return band + lower_limit + upper_limit + anomaly_coded_line
 
@@ -588,64 +601,42 @@ class DataAssistantResult(SerializableDictDot):
         min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         max_value: str = "max_value"
         max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+        strict_min: str = "strict_min"
+        strict_min_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+        strict_max: str = "strict_max"
+        strict_max_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         tooltip: List[alt.Tooltip] = [
             alt.Tooltip(field=batch_id, type=batch_id_type),
             alt.Tooltip(field=metric_name, type=metric_type, format=","),
             alt.Tooltip(field=min_value, type=min_value_type, format=","),
             alt.Tooltip(field=max_value, type=max_value_type, format=","),
+            alt.Tooltip(field=strict_min, type=strict_min_type),
+            alt.Tooltip(field=strict_max, type=strict_max_type),
         ]
 
         column_name: str = "column_name"
+        batch: str = "batch"
 
         df: pd.DataFrame = pd.DataFrame(
-            columns=[column_name, "batch", batch_id, metric_name]
+            columns=[
+                column_name,
+                batch,
+                batch_id,
+                metric_name,
+                min_value,
+                max_value,
+                strict_min,
+                strict_max,
+            ]
         )
         for column, column_df in column_dfs:
             column_df[column_name] = column
             df = pd.concat([df, column_df], axis=0)
 
-        lower_limits: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(color=line_color)
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(min_value, type=metric_type, title=metric_title),
-                tooltip=tooltip,
-            )
-        )
+        df = df.drop(columns=["column"])
 
-        upper_limits: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(color=line_color)
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(max_value, type=metric_type, title=metric_title),
-                tooltip=tooltip,
-            )
-        )
-
-        bands: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_area()
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(min_value, title=metric_title, type=metric_type),
-                y2=alt.Y2(max_value, title=metric_title),
-            )
-        )
+        detail_line_chart_height: int = 75
 
         interactive_detail_multi_line_chart: alt.VConcatChart = (
             DataAssistantResult.get_interactive_detail_multi_line_chart(
@@ -657,25 +648,68 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        anomaly_coded_multi_lines: alt.VConcatChart = (
-            DataAssistantResult._determine_anomaly_coded_multi_lines(
-                interactive_detail_multi_line_chart, tooltip, metric_name
+        # use existing selection
+        selection_name: str = list(
+            interactive_detail_multi_line_chart.vconcat[2].layer[0].selection.keys()
+        )[0]
+        selection_def: alt.SelectionDef = (
+            interactive_detail_multi_line_chart.vconcat[2]
+            .layer[0]
+            .selection[selection_name]
+        )
+        selection: alt.selection = alt.selection(
+            name=selection_name, **selection_def.to_dict()
+        )
+
+        lower_limit: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_line(color=line_color)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(min_value, type=metric_type, title=metric_title),
+                tooltip=tooltip,
             )
+            .properties(height=detail_line_chart_height)
+            .transform_filter(selection)
         )
 
-        anomaly_coded_multi_lines.vconcat[2] = alt.layer(
-            anomaly_coded_multi_lines.vconcat[2].layer[0],
-            anomaly_coded_multi_lines.vconcat[2].layer[1],
-            anomaly_coded_multi_lines.vconcat[2].layer[2],
-            anomaly_coded_multi_lines.vconcat[2].layer[3],
+        upper_limit: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_line(color=line_color)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(max_value, type=metric_type, title=metric_title),
+                tooltip=tooltip,
+            )
+            .properties(height=detail_line_chart_height)
+            .transform_filter(selection)
         )
 
-        return anomaly_coded_multi_lines
+        band: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_area()
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(min_value, title=metric_title, type=metric_type),
+                y2=alt.Y2(max_value, title=metric_title),
+            )
+            .properties(height=detail_line_chart_height)
+            .transform_filter(selection)
+        )
 
-    @staticmethod
-    def _determine_anomaly_coded_multi_lines(
-        lines: alt.VConcatChart, tooltip: List[alt.Tooltip], metric_name: str
-    ) -> alt.VConcatChart:
+        # encode point color based on anomalies
         predicate: alt.expr.core.BinaryExpression = (
             (alt.datum.min_value > alt.datum[metric_name])
             & (alt.datum.max_value > alt.datum[metric_name])
@@ -689,53 +723,30 @@ class DataAssistantResult(SerializableDictDot):
             if_true=alt.value(Colors.PINK.value),
         )
 
-        lines.vconcat[0].layer[3] = (
-            lines.vconcat[0]
+        interactive_detail_multi_line_chart.vconcat[0].layer[3] = (
+            interactive_detail_multi_line_chart.vconcat[0]
             .layer[3]
             .encode(color=point_color_condition, tooltip=tooltip)
         )
-        lines.vconcat[0].layer[5] = (
-            lines.vconcat[0]
-            .layer[5]
-            .encode(color=point_color_condition, tooltip=tooltip)
-        )
 
-        # encode detail view
-        lines.vconcat[2].layer[1] = (
-            lines.vconcat[2]
+        interactive_detail_multi_line_chart.vconcat[2].layer[1] = (
+            interactive_detail_multi_line_chart.vconcat[2]
             .layer[1]
             .encode(color=point_color_condition, tooltip=tooltip)
         )
-        lines.vconcat[2].layer[3] = (
-            lines.vconcat[2]
-            .layer[3]
-            .encode(color=point_color_condition, tooltip=tooltip)
-        )
 
-        return lines
+        # add expectation kwargs
+        detail_chart: alt.LayerChart = interactive_detail_multi_line_chart.vconcat[2]
+        detail_chart_layers: list[alt.Chart] = [
+            detail_chart.layer[0],
+            detail_chart.layer[1],
+            band,
+            lower_limit,
+            upper_limit,
+        ]
+        interactive_detail_multi_line_chart.vconcat[2].layer = detail_chart_layers
 
-    @staticmethod
-    def _determine_anomaly_coded_line(
-        line: alt.Chart, tooltip: List[alt.Tooltip], metric_name: str
-    ) -> alt.Chart:
-        predicate: alt.expr.core.BinaryExpression = (
-            (alt.datum.min_value > alt.datum[metric_name])
-            & (alt.datum.max_value > alt.datum[metric_name])
-        ) | (
-            (alt.datum.min_value < alt.datum[metric_name])
-            & (alt.datum.max_value < alt.datum[metric_name])
-        )
-        point_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
-        )
-
-        anomaly_coded_points = line.layer[1].encode(
-            color=point_color_condition, tooltip=tooltip
-        )
-        anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
-        return anomaly_coded_line
+        return interactive_detail_multi_line_chart
 
     @abstractmethod
     def plot(
