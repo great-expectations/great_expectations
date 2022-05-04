@@ -2,11 +2,8 @@ import logging
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.data_context.types.base import assetConfigSchema
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset.asset import Asset
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
@@ -41,7 +38,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         """
         Base class for DataConnectors that connect to filesystem-like data by taking in
         configured `assets` as a dictionary. This class supports the configuration of default_regex and
@@ -76,7 +73,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     def assets(self) -> Dict[str, Union[dict, Asset]]:
         return self._assets
 
-    def _build_assets_from_config(self, config: Dict[str, dict]):
+    def _build_assets_from_config(self, config: Dict[str, dict]) -> None:
         for name, asset_config in config.items():
             if asset_config is None:
                 asset_config = {}
@@ -96,7 +93,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         """
         return list(self.assets.keys())
 
-    def _refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self) -> None:
 
         # Map data_references to batch_definitions
         self._data_references_cache = {}

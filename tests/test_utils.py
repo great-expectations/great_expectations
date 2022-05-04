@@ -5,7 +5,7 @@ import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, List, Optional, Union, cast
+from typing import Any, Generator, List, Optional, Set, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -553,6 +553,7 @@ def load_data_into_test_database(
     load_full_dataset: bool = False,
     convert_colnames_to_datetime: Optional[List[str]] = None,
     random_table_suffix: bool = False,
+    to_sql_method: Optional[str] = None,
 ) -> LoadedTable:
     """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
 
@@ -567,6 +568,7 @@ def load_data_into_test_database(
         convert_colnames_to_datetime: List of column names to convert to datetime before writing to db.
         random_table_suffix: If true, add 8 random characters to the table suffix and remove other tables with the
             same prefix.
+        to_sql_method: Method to pass to method param of pd.to_sql()
 
     Returns:
         LoadedTable which for convenience, contains the pandas dataframe that was used to load the data.
@@ -608,7 +610,11 @@ def load_data_into_test_database(
             connection.execute(f"DROP TABLE IF EXISTS {table_name}")
             print(f"Creating table {table_name} and adding data from {csv_paths}")
             all_dfs_concatenated.to_sql(
-                name=table_name, con=engine, index=False, if_exists="append"
+                name=table_name,
+                con=engine,
+                index=False,
+                if_exists="append",
+                method=to_sql_method,
             )
             return return_value
         except SQLAlchemyError as e:
@@ -769,3 +775,43 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     finally:
         connection.close()
         engine.dispose()
+
+
+def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
+    """Recursively traverse a nested structure to find all strings in an input string.
+
+    Args:
+        obj (Any): The object to traverse (generally a dict to start with)
+        target_strings (List[str]): The collection of strings to find.
+
+    Returns:
+        True if ALL target strings are found. Otherwise, will return False.
+    """
+
+    strings: Set[str] = set(target_strings)
+
+    def _find_string(data: Any) -> bool:
+        if isinstance(data, list):
+            for val in data:
+                if _find_string(val):
+                    return True
+        elif isinstance(data, dict):
+            for key, val in data.items():
+                if _find_string(key) or _find_string(val):
+                    return True
+        elif isinstance(data, str):
+            string_to_remove: Optional[str] = None
+            for string in strings:
+                if string in data:
+                    string_to_remove = string
+                    break
+            if string_to_remove:
+                strings.remove(string_to_remove)
+                if not strings:
+                    return True
+        return False
+
+    success: bool = _find_string(obj)
+    if not success:
+        logger.info(f"Could not find the following target strings: {strings}")
+    return success

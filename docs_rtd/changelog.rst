@@ -4,6 +4,27 @@
 Changelog
 #########
 
+0.15.3
+-----------------
+* [FEATURE] Enable self-initializing capabilities for `ExpectColumnProportionOfUniqueValuesToBeBetween` (#4929)
+* [FEATURE] Enable support for plotting both Table and Column charts in `VolumeDataAssistant` (#4930)
+* [FEATURE] BigQuery Temp Table Support (#4925)
+* [FEATURE] Registry for DataAssistant classes with ability to execute from DataContext by registered name (#4966)
+* [FEATURE] Enable self-intializing capabilities for `ExpectColumnValuesToMatchRegex`/`ExpectColumnValuesToNotMatchRegex` (#4958)
+* [FEATURE] Provide "estimation histogram" ParameterBuilder output details . (#4975)
+* [FEATURE] Enable self-initializing `ExpectColumnValuesToMatchStrftimeFormat` (#4977)
+* [BUGFIX] check contrib requirements (#4922)
+* [BUGFIX] Use `monkeypatch` to set a consistent bootstrap seed in tests (#4960)
+* [BUGFIX] Make all Builder Configuration classes of Rule-Based Profiler Configuration Serializable (#4972)
+* [BUGFIX] extras_require (#4968)
+* [BUGFIX] Fix broken packaging test and update `dgtest-overrides` (#4976)
+* [MAINTENANCE] Add timeout to `great_expectations` pipeline stages to prevent false positive build failures (#4957)
+* [MAINTENANCE] Defining Common Test Fixtures for DataAssistant Testing (#4959)
+* [MAINTENANCE] Temporarily pin `cryptography` package (#4963)
+* [MAINTENANCE] Type annotate relevant functions with `-> None` (per PEP 484) (#4969)
+* [MAINTENANCE] Handle edge cases where `false_positive_rate` is not in range [0, 1] or very close to bounds (#4946)
+* [MAINTENANCE] fix a typo  (#4974)
+
 0.15.2
 -----------------
 * [FEATURE] Split data assets using sql datetime columns (#4871)

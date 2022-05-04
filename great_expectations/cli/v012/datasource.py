@@ -5,7 +5,6 @@ import os
 import platform
 import sys
 import textwrap
-import uuid
 
 import click
 
@@ -78,7 +77,7 @@ class SupportedDatabases(enum.Enum):
 
 
 @click.group()
-def datasource():
+def datasource() -> None:
     """Datasource operations"""
     pass
 
@@ -90,7 +89,7 @@ def datasource():
     default=None,
     help="The project's great_expectations directory.",
 )
-def datasource_new(directory):
+def datasource_new(directory) -> None:
     """Add a new datasource to the data context."""
     context = toolkit.load_data_context_with_error_handling(directory)
     datasource_name, data_source_type = add_datasource(context)
@@ -121,7 +120,7 @@ def datasource_new(directory):
     help="The project's great_expectations directory.",
 )
 @click.argument("datasource")
-def delete_datasource(directory, datasource):
+def delete_datasource(directory, datasource) -> None:
     """Delete the datasource specified as an argument"""
     context = toolkit.load_data_context_with_error_handling(directory)
     try:
@@ -146,7 +145,7 @@ def delete_datasource(directory, datasource):
     default=None,
     help="The project's great_expectations directory.",
 )
-def datasource_list(directory):
+def datasource_list(directory) -> None:
     """List known datasources."""
     context = toolkit.load_data_context_with_error_handling(directory)
     datasources = context.list_datasources()
@@ -235,7 +234,7 @@ def datasource_profile(
     view,
     additional_batch_kwargs,
     assume_yes,
-):
+) -> None:
     """
     Profile a datasource (Experimental)
 

@@ -92,7 +92,7 @@ rules:
         column: $domain.domain_kwargs.column
         strftime_format: $parameter.my_date_format.value
         meta:
-          details: $parameter.my_date_format.details
+          profiler_details: $parameter.my_date_format.details
           notes:
             format: markdown
             content:
@@ -121,7 +121,7 @@ rules:
         column: $domain.domain_kwargs.column
         regex: $parameter.my_regex.value
         meta:
-          details: $parameter.my_regex.details
+          profiler_details: $parameter.my_regex.details
           notes:
             format: markdown
             content:

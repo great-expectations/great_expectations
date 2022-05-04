@@ -5,6 +5,8 @@ from .domain import (  # isort:skip
     SemanticDomainTypes,
     InferredSemanticDomainType,
 )
+from .semantic_type_filter import SemanticTypeFilter  # isort:skip
+from .numeric_range_estimation_result import NumericRangeEstimationResult  # isort:skip
 from .parameter_container import (  # isort:skip
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER,

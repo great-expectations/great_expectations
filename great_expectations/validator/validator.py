@@ -55,13 +55,13 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 )
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
+    ReconciliationDirectives,
+    ReconciliationStrategy,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
-    ReconciliationDirectives,
-    ReconciliationStrategy,
 )
 from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.types import ClassConfig
@@ -148,7 +148,7 @@ class Validator:
         ] = None,  # Cannot type DataContext due to circular import
         batches: Optional[List[Batch]] = None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Validator is the key object used to create Expectations, validate Expectations,
         and get Metrics for Expectations.
@@ -736,7 +736,7 @@ class Validator:
         self,
         parameter_builder: ParameterBuilder,
         metric_value_kwargs: Optional[dict] = None,
-    ):
+    ) -> None:
         if metric_value_kwargs is None:
             metric_value_kwargs = {}
 
@@ -811,10 +811,18 @@ class Validator:
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
         # updates graph with aborted metrics
-        self.resolve_validation_graph(
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ] = self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
         )
+
+        if aborted_metrics_info:
+            logger.warning(
+                f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
+            )
 
         return resolved_metrics
 
@@ -1146,7 +1154,7 @@ class Validator:
         metric_configuration: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
+    ) -> None:
         """Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
         until all metrics have been added."""
 
@@ -2012,7 +2020,7 @@ set as active.
         else:
             return default_value
 
-    def set_evaluation_parameter(self, parameter_name, parameter_value):
+    def set_evaluation_parameter(self, parameter_name, parameter_value) -> None:
         """
         Provide a value to be stored in the data_asset evaluation_parameters object and used to evaluate
         parameterized expectations.
@@ -2186,7 +2194,7 @@ set as active.
         self,
         expectation_suite: ExpectationSuite = None,
         expectation_suite_name: str = None,
-    ):
+    ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -2282,7 +2290,9 @@ set as active.
 class BridgeValidator:
     """This is currently helping bridge APIs"""
 
-    def __init__(self, batch, expectation_suite, expectation_engine=None, **kwargs):
+    def __init__(
+        self, batch, expectation_suite, expectation_engine=None, **kwargs
+    ) -> None:
         """Builds an expectation_engine object using an expectation suite and a batch, with the expectation engine being
         determined either by the user or by the type of batch data (pandas dataframe, SqlAlchemy table, etc.)
 
