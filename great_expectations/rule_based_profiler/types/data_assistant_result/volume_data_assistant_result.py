@@ -26,6 +26,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
     ) -> PlotResult:
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
+        Display Charts are condensed and interactive while Return Charts are separated into an individual chart for
+        each metric-domain/expectation-domain combination.
 
         Altair theme configuration reference:
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
@@ -35,6 +37,9 @@ class VolumeDataAssistantResult(DataAssistantResult):
             theme: Altair top-level chart configuration dictionary
             include_column_names: A list of columns to chart
             exclude_column_names: A list of columns not to chart
+
+        Returns:
+            A PlotResult object consisting of an individual chart for each metric-domain/expectation-domain
         """
         if include_column_names is not None and exclude_column_names is not None:
             raise ValueError(
