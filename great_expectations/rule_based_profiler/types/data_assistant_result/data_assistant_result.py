@@ -1,6 +1,6 @@
 import copy
 from abc import abstractmethod
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
 import altair as alt
@@ -33,19 +33,38 @@ class DataAssistantResult(SerializableDictDot):
     """
 
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
-    metrics_by_domain: Optional[Dict[Domain, Dict[str, Any]]] = None
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     # Obtain "expectation_configurations" using "expectation_configurations = expectation_suite.expectations".
     # Obtain "meta/details" using "meta = expectation_suite.meta".
     expectation_suite: Optional[ExpectationSuite] = None
     execution_time: Optional[float] = None  # Execution time (in seconds).
 
     def to_dict(self) -> dict:
-        """Returns: this DataAssistantResult as a dictionary"""
-        return asdict(self)
+        """
+        Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
+        """
+        domain: Domain
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        return {
+            "profiler_config": self.profiler_config.to_json_dict(),
+            "metrics_by_domain": {
+                domain.id: {
+                    "domain": domain.to_json_dict(),
+                    "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(
+                        data=parameter_values_for_fully_qualified_parameter_names
+                    ),
+                }
+                for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
+            },
+            "expectation_suite": self.expectation_suite.to_json_dict(),
+            "execution_time": convert_to_json_serializable(data=self.execution_time),
+        }
 
     def to_json_dict(self) -> dict:
-        """Returns: this DataAssistantResult as a json dictionary"""
-        return convert_to_json_serializable(data=self.to_dict())
+        """
+        Returns: This DataAssistantResult as JSON-serializable dictionary.
+        """
+        return self.to_dict()
 
     def get_attributed_metrics_by_domain(
         self,
