@@ -5,7 +5,6 @@ import sqlalchemy as sa
 
 import great_expectations as ge
 from great_expectations import DataContext
-from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -13,10 +12,10 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
-    TaxiSplittingTestCase,
-    TaxiSplittingTestCases,
-    TaxiTestData,
+from tests.integration.fixtures.split_and_sample_data.sampler_test_cases_and_fixtures import (
+    SamplerTaxiTestData,
+    TaxiSamplingTestCase,
+    TaxiSamplingTestCases,
 )
 from tests.test_utils import (
     LoadedTable,
@@ -91,18 +90,18 @@ if __name__ == "test_script_module":
     test_df: pd.DataFrame = loaded_table.inserted_dataframe
     table_name: str = loaded_table.table_name
 
-    taxi_test_data: TaxiTestData = TaxiTestData(
+    taxi_test_data: SamplerTaxiTestData = SamplerTaxiTestData(
         test_df, test_column_name="pickup_datetime"
     )
-    taxi_splitting_test_cases: TaxiSplittingTestCases = TaxiSplittingTestCases(
+    taxi_splitting_test_cases: TaxiSamplingTestCases = TaxiSamplingTestCases(
         taxi_test_data
     )
 
-    test_cases: List[TaxiSplittingTestCase] = taxi_splitting_test_cases.test_cases()
+    test_cases: List[TaxiSamplingTestCase] = taxi_splitting_test_cases.test_cases()
 
     for test_case in test_cases:
 
-        print("Testing splitter method:", test_case.splitter_method_name)
+        print("Testing sampler method:", test_case.sampling_method_name)
 
         # 1. Setup
 
@@ -118,7 +117,7 @@ if __name__ == "test_script_module":
             },
         )
 
-        # 2. Set splitter in data connector config
+        # 2. Set sampler in data connector config
         data_connector_name: str = "test_data_connector"
         data_asset_name: str = table_name  # Read from generated table name
         column_name: str = taxi_splitting_test_cases.test_column_name
@@ -129,8 +128,8 @@ if __name__ == "test_script_module":
                 execution_engine=context.datasources[datasource_name].execution_engine,
                 assets={
                     data_asset_name: {
-                        "splitter_method": test_case.splitter_method_name,
-                        "splitter_kwargs": test_case.splitter_kwargs,
+                        "sampling_method": test_case.sampling_method_name,
+                        "sampling_kwargs": test_case.sampling_kwargs,
                     }
                 },
             )
@@ -149,26 +148,10 @@ if __name__ == "test_script_module":
 
         assert len(batch_definition_list) == test_case.num_expected_batch_definitions
 
-        expected_batch_definition_list: List[BatchDefinition] = [
-            BatchDefinition(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                batch_identifiers=IDDict({column_name: pickup_datetime}),
-            )
-            for pickup_datetime in test_case.expected_pickup_datetimes
-        ]
-
-        assert set(batch_definition_list) == set(
-            expected_batch_definition_list
-        ), f"BatchDefinition lists don't match\n\nbatch_definition_list:\n{batch_definition_list}\n\nexpected_batch_definition_list:\n{expected_batch_definition_list}"
-
         # 4. Check that loaded data is as expected
 
-        # Use expected_batch_definition_list since it is sorted, and we already
-        # asserted that it contains the same items as batch_definition_list
         batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(
-            expected_batch_definition_list[0]
+            batch_definition_list[0]
         )
 
         batch_data: SqlAlchemyBatchData = context.datasources[
@@ -179,6 +162,8 @@ if __name__ == "test_script_module":
             sa.select([sa.func.count()]).select_from(batch_data.selectable)
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
+
+        # TODO: AJB 20220502 Test the actual rows that are returned e.g. for random sampling.
 
     print("Clean up tables used in this test")
     clean_up_tables_with_prefix(
