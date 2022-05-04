@@ -343,7 +343,8 @@ def get_sqlalchemy_column_metadata(
             )
 
         return columns
-    except AttributeError:
+    except AttributeError as e:
+        logger.debug(f"Error while introspecting columns: {str(e)}")
         return None
 
 
@@ -468,6 +469,11 @@ def column_reflection_fallback(
             for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
         ]
     elif dialect.name.lower() == "trino":
+        try:
+            table_name = selectable.name
+        except AttributeError:
+            table_name = selectable
+
         tables_table: sa.Table = sa.Table(
             "tables",
             sa.MetaData(),
@@ -520,7 +526,7 @@ def column_reflection_fallback(
                     right=columns_table_query, onclause=conditions, isouter=False
                 )
             )
-            .where(tables_table_query.c.table_name == selectable.name)
+            .where(tables_table_query.c.table_name == table_name)
             .order_by(
                 tables_table_query.c.schema_name.asc(),
                 tables_table_query.c.table_name.asc(),
