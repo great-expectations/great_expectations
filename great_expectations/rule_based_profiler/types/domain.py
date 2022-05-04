@@ -151,6 +151,7 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
             "domain_kwargs": self["domain_kwargs"].to_json_dict(),
             "details": details,
         }
+        json_dict = convert_to_json_serializable(data=json_dict)
 
         return filter_properties_dict(properties=json_dict, clean_falsy=True)
 
