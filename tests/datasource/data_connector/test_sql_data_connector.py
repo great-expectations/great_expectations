@@ -573,7 +573,9 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
 #  'table_that_should_be_partitioned_by_random_hash__H']
 
 
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_sampling_method__limit(
+    sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
@@ -585,7 +587,7 @@ def test_sampling_method__limit(
                 "batch_identifiers": {},
                 "splitter_method": "_split_on_whole_table",
                 "splitter_kwargs": {},
-                "sampling_method": "_sample_using_limit",
+                "sampling_method": f"{sampler_method_name_prefix}sample_using_limit",
                 "sampling_kwargs": {"n": 20},
             }
         )
@@ -601,7 +603,9 @@ def test_sampling_method__limit(
     ).success
 
 
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_sampling_method__random(
+    sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
@@ -614,7 +618,7 @@ def test_sampling_method__random(
                 "batch_identifiers": {},
                 "splitter_method": "_split_on_whole_table",
                 "splitter_kwargs": {},
-                "sampling_method": "_sample_using_random",
+                "sampling_method": f"{sampler_method_name_prefix}sample_using_random",
                 "sampling_kwargs": {"p": 1.0},
             }
         )
@@ -625,7 +629,9 @@ def test_sampling_method__random(
     pass
 
 
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_sampling_method__mod(
+    sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
@@ -637,7 +643,7 @@ def test_sampling_method__mod(
                 "batch_identifiers": {},
                 "splitter_method": "_split_on_whole_table",
                 "splitter_kwargs": {},
-                "sampling_method": "_sample_using_mod",
+                "sampling_method": f"{sampler_method_name_prefix}sample_using_mod",
                 "sampling_kwargs": {
                     "column_name": "id",
                     "mod": 10,
@@ -651,7 +657,9 @@ def test_sampling_method__mod(
     assert len(validator.head(fetch_all=True)) == 12
 
 
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_sampling_method__a_list(
+    sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
@@ -663,7 +671,7 @@ def test_sampling_method__a_list(
                 "batch_identifiers": {},
                 "splitter_method": "_split_on_whole_table",
                 "splitter_kwargs": {},
-                "sampling_method": "_sample_using_a_list",
+                "sampling_method": f"{sampler_method_name_prefix}sample_using_a_list",
                 "sampling_kwargs": {
                     "column_name": "id",
                     "value_list": [10, 20, 30, 40],

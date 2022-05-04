@@ -25,7 +25,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
     MetricMultiBatchParameterBuilder
 ):
     """
-    Compute mean unexpected count ratio (as a fraction) of a specified map-style metric across all specified batches.
+    Compute mean unexpected count ratio (as a fraction) of specified map-style metric across every Batch of data given.
     """
 
     exclude_field_names: Set[
