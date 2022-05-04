@@ -15,7 +15,6 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from pandas import DataFrame as pandas_DataFrame
 
 from great_expectations.core import (
     ExpectationConfigurationSchema,
@@ -1570,8 +1569,8 @@ def build_test_backends_list(
 
     if include_spark:
         try:
-            import pyspark
-            from pyspark.sql import SparkSession
+            import pyspark  # noqa: F401
+            from pyspark.sql import SparkSession  # noqa: F401
         except ImportError:
             if raise_exceptions_for_backends is True:
                 raise ValueError(

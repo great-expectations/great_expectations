@@ -1,7 +1,7 @@
 import datetime
 import json
 import os
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -157,7 +157,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         if len(self.upgrade_checklist["manual"]["validation_operators"]) == 0:
             self.upgrade_log["skipped_validation_operators_upgrade"] = True
 
-    def manual_steps_required(self):
+    def manual_steps_required(self) -> bool:
         return any(
             [
                 len(manual_upgrade_item.keys()) > 0
@@ -165,7 +165,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
             ]
         )
 
-    def get_upgrade_overview(self):
+    def get_upgrade_overview(self) -> Tuple[str, bool]:
         manual_steps_required = self.manual_steps_required()
 
         increment_version = self.upgrade_log["update_version"]
@@ -216,7 +216,7 @@ Your project needs to be upgraded in order to be compatible with Great Expectati
 
         return upgrade_overview, confirmation_required
 
-    def _upgrade_overview_common_content(self, manual_steps_required: bool):
+    def _upgrade_overview_common_content(self, manual_steps_required: bool) -> str:
         stores_upgrade_checklist = list(
             self.upgrade_checklist["automatic"]["stores"].keys()
         )

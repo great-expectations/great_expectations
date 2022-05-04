@@ -13,6 +13,9 @@ from great_expectations._version import get_versions  # isort:skip
 __version__ = get_versions()["version"]  # isort:skip
 
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
+    SqlAlchemyDataSampler,
+)
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
@@ -90,8 +93,8 @@ except ImportError:
 
 
 try:
-    import psycopg2
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
+    import psycopg2  # noqa: F401
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 
@@ -374,6 +377,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
         self._data_splitter = SqlAlchemyDataSplitter()
+        self._data_sampler = SqlAlchemyDataSampler()
 
     @property
     def credentials(self) -> Optional[dict]:
@@ -836,7 +840,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
-    ) -> dict:
+    ) -> Dict[Tuple[str, str, str], Any]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
@@ -949,45 +953,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.engine.dispose()
 
-    ### Sampling methods ###
-
-    # _sample_using_limit
-    # _sample_using_random
-    # _sample_using_mod
-    # _sample_using_a_list
-    # _sample_using_md5
-
-    def _sample_using_mod(
-        self,
-        column_name: str,
-        mod: int,
-        value: int,
-    ) -> bool:
-        """Take the mod of named column, and only keep rows that match the given value"""
-        return sa.column(column_name) % mod == value
-
-    def _sample_using_a_list(
-        self,
-        column_name: str,
-        value_list: list,
-    ) -> bool:
-        """Match the values in the named column against value_list, and only keep the matches"""
-        return sa.column(column_name).in_(value_list)
-
-    def _sample_using_md5(
-        self,
-        column_name: str,
-        hash_digits: int = 1,
-        hash_value: str = "f",
-    ) -> bool:
-        """Hash the values in the named column, and split on that"""
-        return (
-            sa.func.right(
-                sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits
-            )
-            == hash_value
-        )
-
     def _get_splitter_method(self, splitter_method_name: str) -> Callable:
         """Get the appropriate splitter method from the method name.
 
@@ -1049,59 +1014,31 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         table_name: str = batch_spec["table_name"]
         if "sampling_method" in batch_spec:
-            if batch_spec["sampling_method"] == "_sample_using_limit":
-                # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
-                # so the business logic for building the query needs to be different.
-                if self.engine.dialect.name.lower() == "oracle":
-                    # limit doesn't compile properly for oracle so we will append rownum to query string later
-                    raw_query = (
-                        sa.select("*")
-                        .select_from(
-                            sa.table(
-                                table_name, schema=batch_spec.get("schema_name", None)
-                            )
-                        )
-                        .where(split_clause)
-                    )
-                    query = str(
-                        raw_query.compile(
-                            self.engine, compile_kwargs={"literal_binds": True}
-                        )
-                    )
-                    query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
-                    return query
-                else:
-                    return (
-                        sa.select("*")
-                        .select_from(
-                            sa.table(
-                                table_name, schema=batch_spec.get("schema_name", None)
-                            )
-                        )
-                        .where(split_clause)
-                        .limit(batch_spec["sampling_kwargs"]["n"])
-                    )
-            elif batch_spec["sampling_method"] == "_sample_using_random":
-                num_rows: int = self.engine.execute(
-                    sa.select([sa.func.count()])
-                    .select_from(
-                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                    )
-                    .where(split_clause)
-                ).scalar()
-                p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
-                sample_size: int = round(p * num_rows)
-                return (
-                    sa.select("*")
-                    .select_from(
-                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                    )
-                    .where(split_clause)
-                    .order_by(sa.func.random())
-                    .limit(sample_size)
+            if batch_spec["sampling_method"] in [
+                "_sample_using_limit",
+                "sample_using_limit",
+            ]:
+                return self._data_sampler.sample_using_limit(
+                    execution_engine=self,
+                    batch_spec=batch_spec,
+                    where_clause=split_clause,
+                )
+            elif batch_spec["sampling_method"] in [
+                "_sample_using_random",
+                "sample_using_random",
+            ]:
+                sampler_fn = self._data_sampler.get_sampler_method(
+                    batch_spec["sampling_method"]
+                )
+                return sampler_fn(
+                    execution_engine=self,
+                    batch_spec=batch_spec,
+                    where_clause=split_clause,
                 )
             else:
-                sampler_fn = getattr(self, batch_spec["sampling_method"])
+                sampler_fn = self._data_sampler.get_sampler_method(
+                    batch_spec["sampling_method"]
+                )
                 return (
                     sa.select("*")
                     .select_from(
