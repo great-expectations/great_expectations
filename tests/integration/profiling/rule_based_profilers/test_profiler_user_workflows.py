@@ -275,7 +275,7 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"]
     )
 
-    assert mock_emit.call_count == 43
+    assert mock_emit.call_count == 54
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
@@ -297,11 +297,11 @@ def test_alice_profiler_user_workflow_single_batch(
                         },
                         "anonymized_parameter_builders": [
                             {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "parent_class": "MetricSingleBatchParameterBuilder",
                                 "anonymized_name": "2b4df3c7cf39207db3e08477e1ea8f79",
                             },
                             {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "parent_class": "MetricSingleBatchParameterBuilder",
                                 "anonymized_name": "bea5e4c3943006d008899cdb1ebc3fb4",
                             },
                         ],
@@ -321,12 +321,12 @@ def test_alice_profiler_user_workflow_single_batch(
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
                                 "anonymized_expectation_type": "49e0013b377d4c7d9604d73fd672aa63",
-                                "anonymized_condition": "a2e517a17f9590295b4210da954796cf",
+                                "anonymized_condition": "5191ecaeb23644e402e68b1c641b1342",
                             },
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
                                 "anonymized_expectation_type": "5a4993ff394c8cf957dbe7964798f5a5",
-                                "anonymized_condition": "567ccfc06fecff803aa8533476b84936",
+                                "anonymized_condition": "a7f49ffeced7b75c9e0d958e9d010ddd",
                             },
                         ],
                     },
@@ -337,15 +337,15 @@ def test_alice_profiler_user_workflow_single_batch(
                         },
                         "anonymized_parameter_builders": [
                             {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "parent_class": "MetricSingleBatchParameterBuilder",
                                 "anonymized_name": "fa3ce9b81f1acc2f2730005e05737ea7",
                             },
                             {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "parent_class": "MetricSingleBatchParameterBuilder",
                                 "anonymized_name": "0bb947e516b26696a66787dc936570b7",
                             },
                             {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "parent_class": "MetricSingleBatchParameterBuilder",
                                 "anonymized_name": "66093b34c0c2e4ff275edf1752bcd27e",
                             },
                             {
@@ -2199,14 +2199,14 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time(TIMESTAMP)
-def test_quentin_expect_column_median_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+def test_quentin_expect_column_sum_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ) -> None:
     validator: Validator = quentin_validator
 
-    test_cases: Tuple[Tuple[str, float, float], ...] = (
-        ("passenger_count", 1.0, 6.0),
-        ("total_amount", 10.0, 30.0),
+    test_cases: Tuple[Tuple[str, int, int], ...] = (
+        ("passenger_count", 0, 20000),
+        ("congestion_surcharge", 0, 25000),
     )
 
     column_name: str
@@ -2214,7 +2214,7 @@ def test_quentin_expect_column_median_to_be_between_auto_yes_default_profiler_co
     max_value_expected: float
     for column_name, min_value_expected, max_value_expected in test_cases:
         # Use all batches, loaded by Validator, for estimating Expectation argument values.
-        result = validator.expect_column_median_to_be_between(
+        result = validator.expect_column_sum_to_be_between(
             column=column_name,
             result_format="SUMMARY",
             include_config=True,
