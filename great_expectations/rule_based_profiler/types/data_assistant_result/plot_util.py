@@ -28,7 +28,6 @@ class PlotUtil:
 
         Returns:
             An instance of alt.Tooltip containing relevant information from the PlotUtil class.
-
         """
         return alt.Tooltip(
             field=self.name,
@@ -45,7 +44,6 @@ class PlotUtil:
 
         Returns:
             Either an alt.X or alt.Y instance based on desired axis.
-
         """
         raise NotImplementedError
 
