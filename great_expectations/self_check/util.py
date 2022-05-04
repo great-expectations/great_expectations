@@ -912,7 +912,10 @@ def get_test_validator_with_data(
         if not create_engine:
             return None
 
-        return build_sa_validator_with_data(
+        if table_name is None:
+            table_name = generate_test_table_name().lower()
+
+        result = build_sa_validator_with_data(
             df=df,
             sa_engine_name=execution_engine,
             schemas=schemas,
@@ -920,6 +923,7 @@ def get_test_validator_with_data(
             table_name=table_name,
             sqlite_db_path=sqlite_db_path,
         )
+        return result
 
     elif execution_engine == "spark":
         import pyspark.sql.types as sparktypes
