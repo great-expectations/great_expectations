@@ -71,7 +71,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             exclude_column_names=exclude_column_names,
             prescriptive=prescriptive,
         )
-        display_charts.append(column_domain_display_charts)
+        display_charts.extend(column_domain_display_charts)
         return_charts.extend(column_domain_return_charts)
 
         self.display(charts=display_charts, theme=theme)
@@ -137,12 +137,12 @@ class VolumeDataAssistantResult(DataAssistantResult):
             Domain, Dict[str, ParameterNode]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
 
-        display_chart: alt.VConcatChart = (
-            self._create_display_chart_for_column_domain_expectation(
-                expectation_configurations=column_based_expectation_configurations,
-                attributed_metrics=attributed_metrics_by_column_domain,
-                prescriptive=prescriptive,
-            )
+        display_chart: List[
+            alt.VConcatChart
+        ] = self._create_display_chart_for_column_domain_expectation(
+            expectation_configurations=column_based_expectation_configurations,
+            attributed_metrics=attributed_metrics_by_column_domain,
+            prescriptive=prescriptive,
         )
 
         return_charts: List[alt.Chart] = []
@@ -327,7 +327,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         domain_name: str,
         domain_type: alt.StandardType,
         prescriptive: bool,
-    ) -> Tuple[alt.Chart, List[alt.Chart]]:
+    ) -> Tuple[alt.VConcatChart]:
         plot_impl: Callable[
             [
                 pd.DataFrame,
@@ -354,7 +354,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             domain_type=domain_type,
         )
 
-        return display_chart
+        return [display_chart]
 
     @staticmethod
     def _create_df_for_charting(
