@@ -710,13 +710,39 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         # encode point color based on anomalies
-        predicate: alt.expr.core.BinaryExpression = (
-            (alt.datum.min_value > alt.datum[metric_name])
-            & (alt.datum.max_value > alt.datum[metric_name])
-        ) | (
-            (alt.datum.min_value < alt.datum[metric_name])
-            & (alt.datum.max_value < alt.datum[metric_name])
-        )
+        predicate: alt.expr.core.BinaryExpression
+        if strict_min and strict_max:
+            predicate = (
+                (alt.datum.min_value > alt.datum[metric_name])
+                & (alt.datum.max_value > alt.datum[metric_name])
+            ) | (
+                (alt.datum.min_value < alt.datum[metric_name])
+                & (alt.datum.max_value < alt.datum[metric_name])
+            )
+        elif strict_min:
+            predicate = (
+                (alt.datum.min_value > alt.datum[metric_name])
+                & (alt.datum.max_value >= alt.datum[metric_name])
+            ) | (
+                (alt.datum.min_value < alt.datum[metric_name])
+                & (alt.datum.max_value <= alt.datum[metric_name])
+            )
+        elif strict_max:
+            predicate = (
+                (alt.datum.min_value >= alt.datum[metric_name])
+                & (alt.datum.max_value > alt.datum[metric_name])
+            ) | (
+                (alt.datum.min_value <= alt.datum[metric_name])
+                & (alt.datum.max_value < alt.datum[metric_name])
+            )
+        else:
+            predicate: alt.expr.core.BinaryExpression = (
+                (alt.datum.min_value >= alt.datum[metric_name])
+                & (alt.datum.max_value >= alt.datum[metric_name])
+            ) | (
+                (alt.datum.min_value <= alt.datum[metric_name])
+                & (alt.datum.max_value <= alt.datum[metric_name])
+            )
         point_color_condition: alt.condition = alt.condition(
             predicate=predicate,
             if_false=alt.value(Colors.GREEN.value),
@@ -738,11 +764,11 @@ class DataAssistantResult(SerializableDictDot):
         # add expectation kwargs
         detail_chart: alt.LayerChart = interactive_detail_multi_line_chart.vconcat[2]
         detail_chart_layers: list[alt.Chart] = [
-            detail_chart.layer[0],
-            detail_chart.layer[1],
             band,
             lower_limit,
             upper_limit,
+            detail_chart.layer[0].encode(tooltip=tooltip),
+            detail_chart.layer[1].encode(tooltip=tooltip),
         ]
         interactive_detail_multi_line_chart.vconcat[2].layer = detail_chart_layers
 
