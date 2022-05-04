@@ -1,7 +1,7 @@
 import copy
 from abc import abstractmethod
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import altair as alt
 import pandas as pd
@@ -191,6 +191,7 @@ class DataAssistantResult(SerializableDictDot):
             metric_type: The altair data type for the metric being plotted
             domain_name: The name of the domain as it exists in the pandas dataframe
             domain_type: The altair data type for the domain being plotted
+            subtitle: The subtitle to add for a domain such as "Column: column_name"
 
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
@@ -199,6 +200,10 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
+
+        title: Union[str, alt.TitleParams] = f"{metric_title} per {domain_title}"
+        if subtitle:
+            title = alt.TitleParams(title, subtitle=[subtitle])
 
         batch_id: str = "batch_id"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
@@ -226,6 +231,7 @@ class DataAssistantResult(SerializableDictDot):
                 y=alt.Y(min_value, type=metric_type, title=metric_title),
                 tooltip=tooltip,
             )
+            .properties(title=title)
         )
 
         upper_limit: alt.Chart = (
@@ -240,6 +246,7 @@ class DataAssistantResult(SerializableDictDot):
                 y=alt.Y(max_value, type=metric_type, title=metric_title),
                 tooltip=tooltip,
             )
+            .properties(title=title)
         )
 
         band: alt.Chart = (
@@ -254,6 +261,7 @@ class DataAssistantResult(SerializableDictDot):
                 y=alt.Y(min_value, title=metric_title, type=metric_type),
                 y2=alt.Y2(max_value, title=metric_title),
             )
+            .properties(title=title)
         )
 
         line: alt.Chart = DataAssistantResult.get_line_chart(

@@ -86,7 +86,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in table_based_expectations:
             table_domain_chart: alt.Chart = (
-                self._create_chart_for_table_domain_expectation(
+                self._create_return_chart_for_table_domain_expectation(
                     expectation_configuration=expectation_configuration,
                     attributed_metrics=attributed_metrics_by_table_domain,
                     prescriptive=prescriptive,
@@ -129,7 +129,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in column_based_expectations:
             column_domain_chart: alt.Chart = (
-                self._create_chart_for_column_domain_expectation(
+                self._create_return_chart_for_column_domain_expectation(
                     expectation_configuration=expectation_configuration,
                     attributed_metrics=attributed_metrics_by_column_domain,
                     prescriptive=prescriptive,
@@ -139,7 +139,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         return charts
 
-    def _create_chart_for_table_domain_expectation(
+    def _create_return_chart_for_table_domain_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
@@ -154,8 +154,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
             ".", "_"
         )
         domain_name: str = "batch"
-        metric_type: str = AltairDataTypes.QUANTITATIVE.value
-        domain_type: str = AltairDataTypes.ORDINAL.value
+        metric_type: alt.StandardType = alt.StandardType(
+            AltairDataTypes.QUANTITATIVE.value
+        )
+        domain_type: alt.StandardType = alt.StandardType(AltairDataTypes.ORDINAL.value)
 
         df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
             metric_name=metric_name,
@@ -165,7 +167,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             prescriptive=prescriptive,
         )
 
-        return self._chart_values(
+        return self._return_chart_values(
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
@@ -175,7 +177,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             subtitle=None,
         )
 
-    def _create_chart_for_column_domain_expectation(
+    def _create_return_chart_for_column_domain_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
@@ -218,7 +220,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         column_name: str = expectation_configuration.kwargs["column"]
         subtitle = f"Column: {column_name}"
 
-        return self._chart_values(
+        return self._return_chart_values(
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
@@ -228,7 +230,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             subtitle=subtitle,
         )
 
-    def _chart_values(
+    def _return_chart_values(
         self,
         df: pd.DataFrame,
         metric_name: str,
@@ -250,14 +252,12 @@ class VolumeDataAssistantResult(DataAssistantResult):
             alt.Chart,
         ]
         if prescriptive:
-            plot_impl = (
-                self.get_interactive_detail_expect_column_values_to_be_between_chart
-            )
+            return_impl = self.get_expect_values_to_be_between_chart
         else:
-            plot_impl = self.get_interactive_detail_multi_line_chart
+            return_impl = self.get_line_chart
 
-        chart: alt.Chart = plot_impl(
-            column_dfs=column_dfs,
+        chart: alt.Chart = return_impl(
+            df=df,
             metric_name=metric_name,
             metric_type=metric_type,
             domain_name=domain_name,
