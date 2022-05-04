@@ -203,6 +203,11 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         metric_values = attributed_resolved_metrics.metric_values
 
+        if metric_values is None:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"Result of metric computations for {self.__class__.__name__} is empty."
+            )
+
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
 
