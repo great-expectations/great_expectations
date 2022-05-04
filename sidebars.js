@@ -384,22 +384,17 @@ module.exports = {
         {
           type: 'category',
           label: 'API documentation',
-          items: [{
-            type: 'category',
-            label: 'Modules',
-            items: []
-          },
-          {
-            type: 'category',
-            label: 'Classes',
-            items: [{ type: 'doc', id: 'api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext' }]
-          },
-          {
-            type: 'category',
-            label: 'Methods',
-            items: [{ type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config' },
-              { type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create' }]
-          }]
+          items: [
+            {
+              type: 'category',
+              label: 'Class DataContext',
+              items: [
+                { type: 'doc', label: 'DataContext (Overview)', id: 'api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext' },
+                { label: '  .create(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create' },
+                { label: '  .test_yaml_config(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config' }
+              ]
+            }
+          ]
         },
         'glossary',
         {

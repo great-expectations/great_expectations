@@ -3472,12 +3472,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         test_yaml_config is mainly intended for use within notebooks and tests.
 
-        --Public API Whitelisted--
+        # Public API
 
-        --Relevant Documentation--
-        /docs/terms/data_context
-        /docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
-        --Relevant Documentation--
+        # Documentation
+            /docs/terms/data_context
+            /docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
         Args:
             yaml_config: A string containing the yaml config to be tested

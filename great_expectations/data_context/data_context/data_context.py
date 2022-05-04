@@ -72,11 +72,10 @@ class DataContext(BaseDataContext):
 
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
 
-    --Public API Whitelisted--
+    # Public API
 
-    --Relevant Documentation--
-    /docs/terms/data_context
-    --Relevant Documentation--
+    # Documentation
+        /docs/terms/data_context
     """
 
     @classmethod
@@ -92,17 +91,16 @@ class DataContext(BaseDataContext):
         `create` will not create a new "great_expectations" directory in the provided folder, provided one does not
         already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
 
-        --Public API Whitelisted--
+        # Public API
 
-        --Relevant Documentation--
-        /docs/terms/data_context
-        --Relevant Documentation--
+        # Documentation
+            /docs/terms/data_context
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
             usage_statistics_enabled: boolean directive specifying whether or not to gather usage statistics
-            runtime_environment: a dictionary of config variables that
-            override both those set in config_variables.yml and the environment
+            runtime_environment: a dictionary of config variables that override both those set in
+                config_variables.yml and the environment
 
         Returns:
             DataContext
