@@ -138,11 +138,14 @@ class DataAssistantResult(SerializableDictDot):
             title = alt.TitleParams(title, subtitle=[subtitle])
 
         batch_id: str = "batch_id"
+        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type),
-            alt.Tooltip(field=metric_name, type=metric_type, format=","),
+            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
+            alt.Tooltip(
+                field=metric_name, type=metric_type, title=metric_title, format=","
+            ),
         ]
 
         line: alt.Chart = (
@@ -206,17 +209,26 @@ class DataAssistantResult(SerializableDictDot):
             title = alt.TitleParams(title, subtitle=[subtitle])
 
         batch_id: str = "batch_id"
+        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
+        min_value_title: str = min_value.replace("_", " ").title()
         min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         max_value: str = "max_value"
+        max_value_title: str = max_value.replace("_", " ").title()
         max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
         tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type),
-            alt.Tooltip(field=metric_name, type=metric_type, format=","),
-            alt.Tooltip(field=min_value, type=min_value_type, format=","),
-            alt.Tooltip(field=max_value, type=max_value_type, format=","),
+            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
+            alt.Tooltip(
+                field=metric_name, type=metric_type, title=metric_title, format=","
+            ),
+            alt.Tooltip(
+                field=min_value, type=min_value_type, title=min_value_title, format=","
+            ),
+            alt.Tooltip(
+                field=max_value, type=max_value_type, title=max_value_title, format=","
+            ),
         ]
 
         lower_limit: alt.Chart = (
@@ -612,23 +624,34 @@ class DataAssistantResult(SerializableDictDot):
         domain_title: str = domain_name.title()
 
         batch_id: str = "batch_id"
+        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
+        min_value_title: str = min_value.replace("_", " ").title()
         min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         max_value: str = "max_value"
+        max_value_title: str = max_value.replace("_", " ").title()
         max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         strict_min: str = "strict_min"
+        strict_min_title: str = strict_min.replace("_", " ").title()
         strict_min_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         strict_max: str = "strict_max"
+        strict_max_title: str = strict_max.replace("_", " ").title()
         strict_max_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type),
-            alt.Tooltip(field=metric_name, type=metric_type, format=","),
-            alt.Tooltip(field=min_value, type=min_value_type, format=","),
-            alt.Tooltip(field=max_value, type=max_value_type, format=","),
-            alt.Tooltip(field=strict_min, type=strict_min_type),
-            alt.Tooltip(field=strict_max, type=strict_max_type),
+            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
+            alt.Tooltip(
+                field=metric_name, type=metric_type, title=metric_title, format=","
+            ),
+            alt.Tooltip(
+                field=min_value, type=min_value_type, title=min_value_title, format=","
+            ),
+            alt.Tooltip(
+                field=max_value, type=max_value_type, title=max_value_title, format=","
+            ),
+            alt.Tooltip(field=strict_min, type=strict_min_type, title=strict_min_title),
+            alt.Tooltip(field=strict_max, type=strict_max_type, title=strict_max_title),
         ]
 
         column_name: str = "column_name"
