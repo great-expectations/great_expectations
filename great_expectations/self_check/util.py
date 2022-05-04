@@ -307,7 +307,6 @@ except (ImportError, KeyError):
 
 import tempfile
 
-
 SQL_DIALECT_NAMES = (
     "sqlite",
     "postgresql",
@@ -633,11 +632,7 @@ def get_dataset(
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         engine = _create_trino_engine(db_hostname)
         sql_dtypes = {}
-        if (
-            schemas
-            and "trino" in schemas
-            and isinstance(engine.dialect, trinoDialect)
-        ):
+        if schemas and "trino" in schemas and isinstance(engine.dialect, trinoDialect):
             schema = schemas["trino"]
             sql_dtypes = {col: TRINO_TYPES[dtype] for (col, dtype) in schema.items()}
             for col in schema:
@@ -1848,11 +1843,15 @@ def generate_expectation_tests(
                                 c, d["data_alt"], d["schemas"]
                             )
                     except Exception as e2:
-                        print("\n[[ STILL Problem calling get_test_validator_with_data ]]")
+                        print(
+                            "\n[[ STILL Problem calling get_test_validator_with_data ]]"
+                        )
                         print(f"expectation_type -> {expectation_type}")
                         print(f"c -> {c}\ne2 -> {e2}")
                         print(f"d['data_alt'] -> {d.get('data_alt')}")
-                        print("DataFrame from data_alt without any casting/conversion ->")
+                        print(
+                            "DataFrame from data_alt without any casting/conversion ->"
+                        )
                         print(pd.DataFrame(d.get("data_alt")))
                         print()
                         continue
@@ -2324,10 +2323,13 @@ def _bigquery_dataset() -> str:
     return dataset
 
 
-def _create_trino_engine(hostname: str = "localhost", schema_name: str = "schema") -> Engine:
+def _create_trino_engine(
+    hostname: str = "localhost", schema_name: str = "schema"
+) -> Engine:
     engine = create_engine(f"trino://test@{hostname}:8088/memory/{schema_name}")
     from sqlalchemy import text
     from trino.exceptions import TrinoUserError
+
     with engine.begin() as conn:
         try:
             res = conn.execute(text(f"create schema {schema_name}"))
