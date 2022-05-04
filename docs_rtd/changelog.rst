@@ -4,6 +4,27 @@
 Changelog
 #########
 
+0.15.4
+-----------------
+* [FEATURE] Enable self-initializing `ExpectColumnMeanToBeBetween` (#4986)
+* [FEATURE] Enable self-initializing `ExpectColumnMedianToBeBetween` (#4987)
+* [FEATURE] Enable self-initializing `ExpectColumnSumToBeBetween` (#4988)
+* [FEATURE] New MetricSingleBatchParameterBuilder for specifically single-Batch Rule-Based Profiler scenarios (#5003)
+* [FEATURE] Enable Pandas DataFrame and Series as MetricValues Output of Metric ParameterBuilder Classes (#5008)
+* [FEATURE] Notebook for `VolumeDataAssistant` Example (#5010)
+* [FEATURE] Histogram/Partition Single-Batch ParameterBuilder (#5011)
+* [FEATURE] Update `DataAssistantResult.plot()` return value to emit `PlotResult` wrapper dataclass (#4962)
+* [BUGFIX] RBP Profiling Dataset ProgressBar Fix (#4999)
+* [DOCS] Update slack notification guide to not use validation operators. (#4978)
+* [MAINTENANCE] Update `autoupdate` GitHub action (#5001)
+* [MAINTENANCE] Move `DataAssistant` registry capabilities into `DataAssistantRegistry` to enable user aliasing (#4991)
+* [MAINTENANCE] Fix continuous partition example (#4939) (thanks @andyjessen)
+* [MAINTENANCE] Preliminary refactors for data samplers. (#4996)
+* [MAINTENANCE] Clean up unused imports and enforce through `flake8` in CI/CD (#5005)
+* [MAINTENANCE] ParameterBuilder tests should maximally utilize polymorphism (#5007)
+* [MAINTENANCE] Clean up type hints in CLI (#5006)
+* [MAINTENANCE] Making ParameterBuilder metric computations robust to failures through logging and exception handling (#5009)
+
 0.15.3
 -----------------
 * [FEATURE] Enable self-initializing capabilities for `ExpectColumnProportionOfUniqueValuesToBeBetween` (#4929)
