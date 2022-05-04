@@ -3289,7 +3289,7 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_ch
 ) -> None:
     plot_result: PlotResult = volume_data_assistant_result.plot()
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1]]
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
     assert len(column_domain_charts) == 18  # One for each column present
 
     columns: List[str] = [
@@ -3323,7 +3323,7 @@ def test_volume_data_assistant_plot_include_column_names_filters_output(
         include_column_names=include_column_names
     )
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1]]
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
     assert len(column_domain_charts) == 2  # Normally 18 without filtering
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
@@ -3336,7 +3336,7 @@ def test_volume_data_assistant_plot_exclude_column_names_filters_output(
         exclude_column_names=exclude_column_names
     )
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1]]
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
     assert len(column_domain_charts) == 16  # Normally 18 without filtering
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
