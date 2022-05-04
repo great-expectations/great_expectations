@@ -95,5 +95,7 @@ class BatchIdPlotUtil(PlotUtil):
             title=self.title,
         )
 
-    def plot_on_target_axis(self) -> Union[alt.X, alt.Y]:
+    def plot_on_target_axis(
+        self, axis: Union[alt.X, alt.Y], shorthand: Optional[str] = None
+    ) -> Union[alt.X, alt.Y]:
         raise NotImplementedError
