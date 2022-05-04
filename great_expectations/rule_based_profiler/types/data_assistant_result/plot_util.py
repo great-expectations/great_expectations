@@ -15,7 +15,9 @@ class PlotUtil(ABC):
         pass
 
     @abstractmethod
-    def plot_on_target_axis(self) -> Union[alt.X, alt.Y]:
+    def plot_on_target_axis(
+        self, axis: Union[alt.X, alt.Y], shorthand: Optional[str] = None
+    ) -> Union[alt.X, alt.Y]:
         pass
 
 
@@ -94,4 +96,4 @@ class BatchIdPlotUtil(PlotUtil):
         )
 
     def plot_on_target_axis(self) -> Union[alt.X, alt.Y]:
-        raise NotImplementedError()
+        raise NotImplementedError
