@@ -53,15 +53,14 @@ class VolumeDataAssistantResult(DataAssistantResult):
             ExpectationConfiguration
         ] = self.expectation_suite.expectations
 
-        table_domain_charts: List[alt.Chart]
-        (table_domain_charts,) = self._plot_table_domain_charts(
+        table_domain_chart: List[alt.Chart] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
             prescriptive=prescriptive,
         )
-        display_charts.extend([table_domain_charts])
-        return_charts.extend([table_domain_charts])
+        display_charts.extend(table_domain_chart)
+        return_charts.extend(table_domain_chart)
 
-        column_domain_display_charts: List[alt.Chart]
+        column_domain_display_chart: alt.VConcatChart
         column_domain_return_charts: List[alt.Chart]
         (
             column_domain_display_charts,
@@ -72,8 +71,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             exclude_column_names=exclude_column_names,
             prescriptive=prescriptive,
         )
-        display_charts.extend([column_domain_display_charts])
-        return_charts.extend([column_domain_return_charts])
+        display_charts.append(column_domain_display_charts)
+        return_charts.extend(column_domain_return_charts)
 
         self.display(charts=display_charts, theme=theme)
 
