@@ -2,7 +2,7 @@ import enum
 import logging
 import os
 import sys
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import click
 
@@ -45,7 +45,7 @@ class SupportedDatabaseBackends(enum.Enum):
 
 @click.group()
 @click.pass_context
-def datasource(ctx):
+def datasource(ctx: click.Context) -> None:
     """Datasource operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
@@ -74,7 +74,7 @@ def datasource(ctx):
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def datasource_new(ctx, name, jupyter):
+def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     """Add a new Datasource to the data context."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -98,7 +98,7 @@ def datasource_new(ctx, name, jupyter):
 @datasource.command(name="delete")
 @click.argument("datasource")
 @click.pass_context
-def delete_datasource(ctx, datasource):
+def delete_datasource(ctx: click.Context, datasource: str) -> None:
     """Delete the datasource specified as an argument"""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -136,7 +136,7 @@ def delete_datasource(ctx, datasource):
 
 @datasource.command(name="list")
 @click.pass_context
-def datasource_list(ctx):
+def datasource_list(ctx: click.Context) -> None:
     """List known Datasources."""
     context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -166,7 +166,7 @@ def datasource_list(ctx):
         return
 
 
-def _build_datasource_intro_string(datasources):
+def _build_datasource_intro_string(datasources: List[dict]) -> str:
     datasource_count = len(datasources)
     if datasource_count == 0:
         return "No Datasources found"
@@ -244,7 +244,7 @@ class BaseDatasourceNewYamlHelper:
         datasource_type: DatasourceTypes,
         usage_stats_payload: dict,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         self.datasource_type: DatasourceTypes = datasource_type
         self.datasource_name: Optional[str] = datasource_name
         self.usage_stats_payload: dict = usage_stats_payload
@@ -264,7 +264,9 @@ class BaseDatasourceNewYamlHelper:
         renderer.render_to_disk(notebook_path)
         return notebook_path
 
-    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+    def get_notebook_renderer(
+        self, context: DataContext
+    ) -> DatasourceNewNotebookRenderer:
         """Get a renderer specifically constructed for the datasource type."""
         raise NotImplementedError
 
@@ -298,13 +300,15 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
         class_name: str,
         context_root_dir: str,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(datasource_type, usage_stats_payload, datasource_name)
         self.class_name: str = class_name
         self.base_path: str = ""
         self.context_root_dir: str = context_root_dir
 
-    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+    def get_notebook_renderer(
+        self, context: DataContext
+    ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
             context,
             datasource_type=self.datasource_type,
@@ -351,7 +355,7 @@ class PandasYamlHelper(FilesYamlHelper):
         self,
         context_root_dir: str,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.PANDAS,
             usage_stats_payload={
@@ -372,7 +376,7 @@ class SparkYamlHelper(FilesYamlHelper):
         self,
         context_root_dir: str,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.SPARK,
             usage_stats_payload={
@@ -404,7 +408,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         password: str = "YOUR_PASSWORD",
         database: str = "YOUR_DATABASE",
         schema_name: str = "YOUR_SCHEMA",
-    ):
+    ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.SQL,
             usage_stats_payload=usage_stats_payload,
@@ -460,7 +464,9 @@ data_connectors:
     database: {database}
     schema_name: {schema_name}"""
 
-    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+    def get_notebook_renderer(
+        self, context: DataContext
+    ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
             context,
             datasource_type=self.datasource_type,
@@ -471,7 +477,7 @@ data_connectors:
 
 
 class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         # We are insisting on pymysql driver when adding a MySQL datasource
         # through the CLI to avoid over-complication of this flow. If user wants
         # to use another driver, they must use a sqlalchemy connection string.
@@ -495,7 +501,7 @@ class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
 
 
 class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -523,7 +529,7 @@ class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
 
 
 class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         # We are insisting on psycopg2 driver when adding a Redshift datasource
         # through the CLI to avoid over-complication of this flow. If user wants
         # to use another driver, they must use a sqlalchemy connection string.
@@ -575,7 +581,7 @@ class SnowflakeAuthMethod(enum.IntEnum):
 
 
 class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -644,7 +650,7 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
 
 
 class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -678,7 +684,7 @@ connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
 
 
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={

@@ -48,7 +48,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         """
         ConfiguredAssetDataConnector for connecting to S3.
 

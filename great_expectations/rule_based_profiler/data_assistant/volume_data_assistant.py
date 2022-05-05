@@ -27,11 +27,13 @@ class VolumeDataAssistant(DataAssistant):
         - Others in the future.
     """
 
+    __alias__: str = "volume"
+
     def __init__(
         self,
         name: str,
         validator: Validator,
-    ):
+    ) -> None:
         super().__init__(
             name=name,
             validator=validator,

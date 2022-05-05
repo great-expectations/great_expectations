@@ -8,7 +8,7 @@ from great_expectations.core.usage_statistics.util import send_usage_message
 
 @click.group()
 @click.pass_context
-def store(ctx):
+def store(ctx: click.Context) -> None:
     """Store operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
@@ -30,7 +30,7 @@ def store(ctx):
 
 @store.command(name="list")
 @click.pass_context
-def store_list(ctx):
+def store_list(ctx: click.Context):
     """List active Stores."""
     context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end

@@ -12,7 +12,7 @@ class MicrosoftTeamsRenderer(Renderer):
 
     MICROSOFT_TEAMS_SCHEMA_URL = "http://adaptivecards.io/schemas/adaptive-card.json"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def render(

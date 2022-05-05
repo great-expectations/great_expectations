@@ -50,7 +50,6 @@ def test_requirements_files():
     assert (
         req_set_dict["requirements-dev-lite.txt"]
         | req_set_dict["requirements-dev-athena.txt"]
-        | req_set_dict["requirements-dev-azure.txt"]
         | req_set_dict["requirements-dev-bigquery.txt"]
         | req_set_dict["requirements-dev-dremio.txt"]
         | req_set_dict["requirements-dev-mssql.txt"]
