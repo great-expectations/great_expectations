@@ -331,6 +331,7 @@ stages:
               # In order to ensure coverage, we run them during each CI/CD cycle.
               pytest \
                 tests/core/test_urn.py \
+                tests/core/usage_statistics/test_package_dependencies.py \
                 tests/data_asset/test_data_asset_util.py \
                 tests/data_context/test_data_context_store_configs.py \
                 tests/data_context/test_templates.py \
