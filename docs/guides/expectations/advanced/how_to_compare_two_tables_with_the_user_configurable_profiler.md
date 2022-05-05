@@ -16,7 +16,7 @@ In this guide, you will utilize a User-Configurable <TechnicalTag tag="profiler"
 
 ## Steps
 
-### 1. Create a new Great Expectations project
+### 1. Set-Up
 
 - Create a new directory, called `taxi_profiling_tutorial`
 - Within this directory, create another directory called `data`

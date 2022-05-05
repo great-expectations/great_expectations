@@ -7,15 +7,11 @@ from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
 
-# This utility is not for general use. It is only to support testing.
-from tests.test_utils import load_data_into_test_database
-
-# </snippet>
-
-
-# <snippet>
 context = ge.get_context()
 # </snippet>
+
+# This utility is not for general use. It is only to support testing.
+from tests.test_utils import load_data_into_test_database
 
 # The following load & config blocks up until the batch requests are only to support testing.
 MY_CONNECTION_STRING = "mysql+pymysql://root:root@localhost/test_ci"
