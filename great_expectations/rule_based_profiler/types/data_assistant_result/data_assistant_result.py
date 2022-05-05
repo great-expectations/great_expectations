@@ -547,7 +547,7 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(
                 df,
             )
-            .mark_line()
+            .mark_line(opacity=selected_opacity)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -555,19 +555,10 @@ class DataAssistantResult(SerializableDictDot):
                     title=domain_title,
                 ),
                 y=alt.Y(metric_name, type=metric_type, title=None),
-                color=alt.condition(
-                    selection,
-                    alt.Color(
-                        column_name,
-                        type=AltairDataTypes.NOMINAL.value,
-                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                    ),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
+                color=alt.Color(
+                    column_name,
+                    type=AltairDataTypes.NOMINAL.value,
+                    scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                 ),
                 tooltip=tooltip,
             )
@@ -579,7 +570,9 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(
                 df,
             )
-            .mark_point(size=point_size)
+            .mark_point(
+                size=point_size, color=Colors.GREEN.value, opacity=selected_opacity
+            )
             .encode(
                 x=alt.X(
                     domain_name,
@@ -587,16 +580,6 @@ class DataAssistantResult(SerializableDictDot):
                     title=domain_title,
                 ),
                 y=alt.Y(metric_name, type=metric_type, title=None),
-                color=alt.condition(
-                    selection,
-                    alt.value(Colors.GREEN.value),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
-                ),
                 tooltip=tooltip,
             )
             .properties(height=detail_line_chart_height)
