@@ -2,7 +2,6 @@ import logging
 
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.data_context.data_context import DataContext
 
 logger = logging.getLogger(__name__)

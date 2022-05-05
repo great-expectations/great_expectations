@@ -2,10 +2,7 @@ from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )
-from great_expectations.render.types import (
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-)
+from great_expectations.render.types import RenderedTableContent
 
 
 class ProfilingColumnPropertiesTableContentBlockRenderer(ContentBlockRenderer):

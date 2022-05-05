@@ -10,7 +10,7 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     validate_input_parameters,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
-    build_simple_domains_from_column_names,
+    build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
@@ -166,11 +166,13 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """Return domains matching the selected limit_mode.
 
         Args:
+            rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
 
         Returns:
@@ -250,7 +252,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         allowed_column_names_passthrough: List[str] = [
             column_name
             for column_name in effective_column_names
-            if self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
+            if self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
                 column_name
             ]
             in allowed_semantic_types_passthrough
@@ -276,10 +278,15 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         )
         candidate_column_names.extend(allowed_column_names_passthrough)
 
-        return build_simple_domains_from_column_names(
+        column_name: str
+        domains: List[Domain] = build_domains_from_column_names(
+            rule_name=rule_name,
             column_names=candidate_column_names,
             domain_type=self.domain_type,
+            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,
         )
+
+        return domains
 
     def _generate_metric_configurations_to_check_cardinality(
         self,
