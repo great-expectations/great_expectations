@@ -418,7 +418,7 @@ class DataAssistantResult(SerializableDictDot):
         ]
 
         df: pd.DataFrame = pd.DataFrame(
-            columns=[column_name, "batch", batch_id, metric_name]
+            columns=[column_name, domain_name, batch_id, metric_name]
         )
         for column, column_df in column_dfs:
             column_df[column_name] = column
