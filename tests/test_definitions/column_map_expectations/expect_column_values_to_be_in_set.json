@@ -181,6 +181,9 @@
         },
         "bigquery": {
           "empty_column": "STRING"
+        },
+        "trino": {
+          "empty_column": "VARCHAR"
         }
       },
       "tests": [{
@@ -215,6 +218,9 @@
       },
       "mssql": {
         "dates": "DATETIME"
+      },
+      "trino": {
+        "dates": "TIMESTAMP"
       }
     },
     "tests" : [
