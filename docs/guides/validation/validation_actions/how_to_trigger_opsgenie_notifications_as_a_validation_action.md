@@ -10,6 +10,7 @@ This guide will help you set up Opsgenie alert notifications when running Great 
 
   - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
   - You already have an Opsgenie account
+  - You have created a <TechnicalTag tag="checkpoint" text="Checkpoint" /> that will be configured with the notification Action.
 
 </Prerequisites>
 
@@ -37,24 +38,21 @@ Using the API Key you copied from Step 1, update your Great Expectations configu
 opsgenie_api_key: YOUR-API-KEY
 ```
 
-### 3. Add `send_opsgenie_alert_on_validation_result` operator to `great_expectations.yml`
+### 3. Add `send_opsgenie_alert_on_validation_result` operator to your Checkpoint configuration
 
-Next, update your Great Expectations configuration file to add a new operator to the <TechnicalTag tag="action" text="Actions" /> list in great_expectations.yml
+Next, update your Checkpoint configuration file to add a new operator to the <TechnicalTag tag="action" text="Actions" /> list in great_expectations.yml
 
  ```yaml
- validation_operators:
-   action_list_operator:
-     class_name: ActionListValidationOperator
-     action_list:
-     - name: send_opsgenie_alert_on_validation_result
-       action:
-         class_name: OpsgenieAlertAction
-         notify_on: all
-         api_key: ${opsgenie_api_key}
-         priority: P3
-         renderer:
-           module_name: great_expectations.render.renderer.opsgenie_renderer
-           class_name: OpsgenieRenderer
+action_list:
+ - name: send_opsgenie_alert_on_validation_result
+   action:
+     class_name: OpsgenieAlertAction
+     notify_on: all
+     api_key: ${opsgenie_api_key}
+     priority: P3
+     renderer:
+       module_name: great_expectations.render.renderer.opsgenie_renderer
+       class_name: OpsgenieRenderer
  ```
 
  - Set notify_on to one of, "all", "failure", or "success"
@@ -63,9 +61,10 @@ Next, update your Great Expectations configuration file to add a new operator to
 
 ### 4. Validate a Batch of data to test your alerts
 
-Run your `action_list_operator`, to <TechnicalTag tag="validate" text="Validate" /> a <TechnicalTag tag="batch" text="Batch" /> of data and receive an Opsgenie alert on the success or failure of the Validation.
+Run your Checkpoint to <TechnicalTag tag="validate" text="Validate" /> a <TechnicalTag tag="batch" text="Batch" /> of data and receive an Opsgenie alert on the success or failure of the Validation.
 
-```
-context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="opsgenie_test")
-```
+:::note Reminder
+Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md) has instructions for this step.
+:::
+
 
