@@ -534,6 +534,9 @@ def test__generate_expectation_tests__with_test_backends2():
     ]
 
 
+@pytest.mark.skip(
+    reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
+)
 @pytest.mark.skipif(
     sqlalchemy is None,
     reason="sqlalchemy is not installed",
