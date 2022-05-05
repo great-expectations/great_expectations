@@ -4,6 +4,35 @@
 Changelog
 #########
 
+0.15.4
+-----------------
+* [FEATURE] Enable self-initializing `ExpectColumnMeanToBeBetween` (#4986)
+* [FEATURE] Enable self-initializing `ExpectColumnMedianToBeBetween` (#4987)
+* [FEATURE] Enable self-initializing `ExpectColumnSumToBeBetween` (#4988)
+* [FEATURE] New MetricSingleBatchParameterBuilder for specifically single-Batch Rule-Based Profiler scenarios (#5003)
+* [FEATURE] Enable Pandas DataFrame and Series as MetricValues Output of Metric ParameterBuilder Classes (#5008)
+* [FEATURE] Notebook for `VolumeDataAssistant` Example (#5010)
+* [FEATURE] Histogram/Partition Single-Batch ParameterBuilder (#5011)
+* [FEATURE] Update `DataAssistantResult.plot()` return value to emit `PlotResult` wrapper dataclass (#4962)
+* [FEATURE] Limit samplers work with supported sqlalchemy backends (#5014)
+* [FEATURE] trino support (#5021)
+* [BUGFIX] RBP Profiling Dataset ProgressBar Fix (#4999)
+* [BUGFIX] Fix DataAssistantResult serialization issue (#5020)
+* [DOCS] Update slack notification guide to not use validation operators. (#4978)
+* [MAINTENANCE] Update `autoupdate` GitHub action (#5001)
+* [MAINTENANCE] Move `DataAssistant` registry capabilities into `DataAssistantRegistry` to enable user aliasing (#4991)
+* [MAINTENANCE] Fix continuous partition example (#4939) (thanks @andyjessen)
+* [MAINTENANCE] Preliminary refactors for data samplers. (#4996)
+* [MAINTENANCE] Clean up unused imports and enforce through `flake8` in CI/CD (#5005)
+* [MAINTENANCE] ParameterBuilder tests should maximally utilize polymorphism (#5007)
+* [MAINTENANCE] Clean up type hints in CLI (#5006)
+* [MAINTENANCE] Making ParameterBuilder metric computations robust to failures through logging and exception handling (#5009)
+* [MAINTENANCE] Condense column-level `vconcat` plots into one interactive plot (#5002)
+* [MAINTENANCE] Update version of `black` in pre-commit config (#5019)
+* [MAINTENANCE] Improve tooltips and formatting for distinct column values chart in VolumeDataAssistantResult (#5017)
+* [MAINTENANCE] Enhance configuring serialization for DotDict type classes (#5023)
+* [MAINTENANCE] Pyarrow upper bound (#5028)
+
 0.15.3
 -----------------
 * [FEATURE] Enable self-initializing capabilities for `ExpectColumnProportionOfUniqueValuesToBeBetween` (#4929)
