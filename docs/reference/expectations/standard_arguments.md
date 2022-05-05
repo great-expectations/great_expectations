@@ -155,17 +155,10 @@ my_df.expect_column_values_to_be_between(
 }
 ```
 
-## Dataset defaults
+## Checkpoints and `result_format`
 
-This default behavior for `result_format`, `include_config`, `catch_exceptions` can be overridden at the Dataset level:
+While `result_format`, `include_config`, and `catch_expectations` are all standard arguments for Expectations, the `result_format` argument is also a valid parameter when included in calls to the `run(...)` command of a Checkpoint.
 
-```python
-my_dataset.set_default_expectation_argument("result_format", "SUMMARY")
-```
-
-In validation mode, they can be overridden using flags:
-
-```bash
-great_expectations validation csv my_dataset.csv my_expectations.json \ 
---result_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
-```
+:::note Reminder:
+For more detailed information on how to define `result_format` values, please see [our reference guide on `result_format`](./result_format.md).
+:::
