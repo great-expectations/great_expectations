@@ -184,7 +184,7 @@ def build_test_backends_list(metafunc):
     return [
         (backend_name_class_name_map.get(backend_name) or backend_name)
         for backend_name in test_backend_names
-        if backend_name != "trino"                                              # <--------- maybe remove that
+        if backend_name != "trino"  # <--------- maybe remove that
     ]
 
 
