@@ -53,7 +53,7 @@ except ImportError:
 
 @click.group(short_help="Checkpoint operations")
 @click.pass_context
-def checkpoint(ctx) -> None:
+def checkpoint(ctx: click.Context) -> None:
     """
     Checkpoint operations
 
@@ -93,7 +93,7 @@ def checkpoint(ctx) -> None:
     default=True,
 )
 @click.pass_context
-def checkpoint_new(ctx, name, jupyter) -> None:
+def checkpoint_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     """Create a new Checkpoint for easy deployments.
 
     NAME is the name of the Checkpoint to create.
@@ -101,7 +101,7 @@ def checkpoint_new(ctx, name, jupyter) -> None:
     _checkpoint_new(ctx=ctx, checkpoint_name=name, jupyter=jupyter)
 
 
-def _checkpoint_new(ctx, checkpoint_name, jupyter):
+def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> None:
 
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -162,7 +162,7 @@ def _verify_checkpoint_does_not_exist(
         )
 
 
-def _get_notebook_path(context, notebook_name):
+def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
     return os.path.abspath(
         os.path.join(
             context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
@@ -172,7 +172,7 @@ def _get_notebook_path(context, notebook_name):
 
 @checkpoint.command(name="list")
 @click.pass_context
-def checkpoint_list(ctx) -> None:
+def checkpoint_list(ctx: click.Context) -> None:
     """List configured checkpoints."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -205,7 +205,7 @@ def checkpoint_list(ctx) -> None:
 @checkpoint.command(name="delete")
 @click.argument("checkpoint")
 @click.pass_context
-def checkpoint_delete(ctx, checkpoint):
+def checkpoint_delete(ctx: click.Context, checkpoint: str) -> None:
     """Delete a Checkpoint."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -237,7 +237,7 @@ def checkpoint_delete(ctx, checkpoint):
 @checkpoint.command(name="run")
 @click.argument("checkpoint")
 @click.pass_context
-def checkpoint_run(ctx, checkpoint):
+def checkpoint_run(ctx: click.Context, checkpoint: str) -> None:
     """Run a Checkpoint."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -308,7 +308,7 @@ def print_validation_operator_results_details(
 @checkpoint.command(name="script")
 @click.argument("checkpoint")
 @click.pass_context
-def checkpoint_script(ctx, checkpoint) -> None:
+def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
     """
     Create a python script to run a Checkpoint.
 

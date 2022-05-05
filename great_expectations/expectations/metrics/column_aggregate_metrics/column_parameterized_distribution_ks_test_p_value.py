@@ -13,7 +13,7 @@ from great_expectations.expectations.metrics.util import (
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import stddev_samp
+    from pyspark.sql.functions import stddev_samp  # noqa: F401
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(

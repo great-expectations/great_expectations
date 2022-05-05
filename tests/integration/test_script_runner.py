@@ -319,7 +319,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_data/postgres_connection_string.yml",
+                "tests/integration/fixtures/split_and_sample_data/postgres_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -333,7 +333,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_data/mssql_connection_string.yml",
+                "tests/integration/fixtures/split_and_sample_data/mssql_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -347,7 +347,49 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_data/mysql_connection_string.yml",
+                "tests/integration/fixtures/split_and_sample_data/mysql_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.MYSQL,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_postgres",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/postgres_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_mssql",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/mssql_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.MSSQL,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_mysql",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/mysql_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -436,7 +478,21 @@ cloud_snowflake_tests = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_data/snowflake_connection_string.yml",
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -557,7 +613,21 @@ cloud_bigquery_tests = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_data/bigquery_connection_string.yml",
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
                 "connection_string.yml",
             ),
         ),

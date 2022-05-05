@@ -2,7 +2,7 @@ import enum
 import logging
 import os
 import sys
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import click
 
@@ -45,7 +45,7 @@ class SupportedDatabaseBackends(enum.Enum):
 
 @click.group()
 @click.pass_context
-def datasource(ctx) -> None:
+def datasource(ctx: click.Context) -> None:
     """Datasource operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
@@ -74,7 +74,7 @@ def datasource(ctx) -> None:
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def datasource_new(ctx, name, jupyter):
+def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     """Add a new Datasource to the data context."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -98,7 +98,7 @@ def datasource_new(ctx, name, jupyter):
 @datasource.command(name="delete")
 @click.argument("datasource")
 @click.pass_context
-def delete_datasource(ctx, datasource) -> None:
+def delete_datasource(ctx: click.Context, datasource: str) -> None:
     """Delete the datasource specified as an argument"""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -136,7 +136,7 @@ def delete_datasource(ctx, datasource) -> None:
 
 @datasource.command(name="list")
 @click.pass_context
-def datasource_list(ctx):
+def datasource_list(ctx: click.Context) -> None:
     """List known Datasources."""
     context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -166,7 +166,7 @@ def datasource_list(ctx):
         return
 
 
-def _build_datasource_intro_string(datasources):
+def _build_datasource_intro_string(datasources: List[dict]) -> str:
     datasource_count = len(datasources)
     if datasource_count == 0:
         return "No Datasources found"
@@ -264,7 +264,9 @@ class BaseDatasourceNewYamlHelper:
         renderer.render_to_disk(notebook_path)
         return notebook_path
 
-    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+    def get_notebook_renderer(
+        self, context: DataContext
+    ) -> DatasourceNewNotebookRenderer:
         """Get a renderer specifically constructed for the datasource type."""
         raise NotImplementedError
 
@@ -304,7 +306,9 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
         self.base_path: str = ""
         self.context_root_dir: str = context_root_dir
 
-    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+    def get_notebook_renderer(
+        self, context: DataContext
+    ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
             context,
             datasource_type=self.datasource_type,
@@ -460,7 +464,9 @@ data_connectors:
     database: {database}
     schema_name: {schema_name}"""
 
-    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+    def get_notebook_renderer(
+        self, context: DataContext
+    ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
             context,
             datasource_type=self.datasource_type,

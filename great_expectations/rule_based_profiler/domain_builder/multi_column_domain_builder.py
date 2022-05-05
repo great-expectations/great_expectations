@@ -1,9 +1,14 @@
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    ParameterContainer,
+    SemanticDomainTypes,
+)
 
 
 class MultiColumnDomainBuilder(ColumnDomainBuilder):
@@ -39,11 +44,13 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """Return domains matching the specified tolerance limits.
 
         Args:
+            rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
 
         Returns:
@@ -64,11 +71,23 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
                 message=f'Error: "column_list" in {self.__class__.__name__} must not be empty.'
             )
 
+        column_name: str
+        semantic_types_by_column_name: Dict[str, SemanticDomainTypes] = {
+            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
+                column_name
+            ]
+            for column_name in effective_column_names
+        }
+
         domains: List[Domain] = [
             Domain(
+                rule_name=rule_name,
                 domain_type=self.domain_type,
                 domain_kwargs={
                     "column_list": effective_column_names,
+                },
+                details={
+                    INFERRED_SEMANTIC_TYPE_KEY: semantic_types_by_column_name,
                 },
             ),
         ]

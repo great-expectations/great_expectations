@@ -245,16 +245,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 if "rule_based_profiler" in progress_bars:
                     disable = not progress_bars["rule_based_profiler"]
 
-        # noinspection PyProtectedMember,SpellCheckingInspection
-        progress_bar: tqdm = tqdm(
-            desc="Profiling Dataset",
-            disable=disable,
-        )
-        progress_bar.update(0)
-        progress_bar.refresh()
-        sys.stdout.write("\n")
-        sys.stdout.flush()
-
         effective_variables: Optional[
             ParameterContainer
         ] = self.reconcile_profiler_variables(
@@ -278,6 +268,17 @@ class BaseRuleBasedProfiler(ConfigPeer):
             "rules": effective_rules_configs,
         }
 
+        # noinspection PyProtectedMember,SpellCheckingInspection
+        progress_bar: tqdm = tqdm(
+            total=len(effective_rules),
+            desc="Profiling Dataset",
+            disable=disable,
+        )
+        progress_bar.update(0)
+        progress_bar.refresh()
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+
         rule_state: RuleState
         rule: Rule
         domains_count: int = 0
@@ -290,6 +291,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 reconciliation_directives=reconciliation_directives,
             )
             self.rule_states.append(rule_state)
+            progress_bar.update(1)
+            progress_bar.refresh()
+
+        progress_bar.close()
 
             domains_count += len(rule_state.domains)
             progress_bar.update(domains_count)

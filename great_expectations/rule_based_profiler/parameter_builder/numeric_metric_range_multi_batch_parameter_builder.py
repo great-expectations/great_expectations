@@ -1,7 +1,7 @@
 import itertools
 import warnings
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import numpy as np
 
@@ -12,6 +12,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     compute_bootstrap_quantiles_point_estimate,
     compute_quantiles,
     get_parameter_value_and_validate_return_type,
+    integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     AttributedResolvedMetrics,
@@ -35,8 +36,6 @@ from great_expectations.util import is_numeric
 
 MAX_DECIMALS: int = 9
 
-DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
-
 
 class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
@@ -58,21 +57,30 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         "bootstrap",
     }
 
+    DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
+
     RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
         "lower_bound",
         "upper_bound",
     }
 
+    RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
+        "auto",
+        "nearest",
+        "linear",
+    }
+
     def __init__(
         self,
         name: str,
-        metric_name: str,
+        metric_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = True,
         replace_nan_with_zero: Union[str, bool] = True,
         reduce_scalar_metric: Union[str, bool] = True,
         false_positive_rate: Union[str, float] = 5.0e-2,
+        quantile_statistic_interpolation_method: str = "auto",
         estimator: str = "bootstrap",
         num_bootstrap_samples: Optional[Union[str, int]] = None,
         bootstrap_random_seed: Optional[Union[str, int]] = None,
@@ -100,6 +108,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
             identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
+            quantile_statistic_interpolation_method: Applicable only for the "bootstrap" sampling method --
+            supplies value of (interpolation) "method" to "np.quantile()" statistic, used for confidence intervals.
             estimator: choice of the estimation algorithm: "oneshot" (one observation) or "bootstrap" (default)
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
             9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
@@ -128,6 +138,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         )
 
         self._false_positive_rate = false_positive_rate
+
+        self._quantile_statistic_interpolation_method = (
+            quantile_statistic_interpolation_method
+        )
 
         self._estimator = estimator
 
@@ -165,6 +179,10 @@ detected.
     @property
     def false_positive_rate(self) -> Union[str, float]:
         return self._false_positive_rate
+
+    @property
+    def quantile_statistic_interpolation_method(self) -> str:
+        return self._quantile_statistic_interpolation_method
 
     @property
     def estimator(self) -> str:
@@ -285,12 +303,52 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
 """
             )
 
+        round_decimals: int
+
+        # Obtain quantile_statistic_interpolation_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        quantile_statistic_interpolation_method: str = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.quantile_statistic_interpolation_method,
+                expected_return_type=str,
+                variables=variables,
+                parameters=parameters,
+            )
+        )
+        if (
+            quantile_statistic_interpolation_method
+            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "quantile_statistic_interpolation_method" for {self.__class__.__name__} can \
+be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS} \
+("{quantile_statistic_interpolation_method}" was detected).
+"""
+            )
+
+        if integer_semantic_domain_type(domain=domain):
+            round_decimals = 0
+        else:
+            round_decimals = self._get_round_decimals_using_heuristics(
+                metric_values=metric_values,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
+
+        if quantile_statistic_interpolation_method == "auto":
+            if round_decimals == 0:
+                quantile_statistic_interpolation_method = "nearest"
+            else:
+                quantile_statistic_interpolation_method = "linear"
+
         estimator_func: Callable
         estimator_kwargs: dict
         if estimator == "bootstrap":
             estimator_func = self._get_bootstrap_estimate
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
+                "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
                 "num_bootstrap_samples": self.num_bootstrap_samples,
                 "bootstrap_random_seed": self.bootstrap_random_seed,
             }
@@ -298,12 +356,14 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
             estimator_func = self._get_deterministic_estimate
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
+                "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
             }
 
         numeric_range_estimation_result: NumericRangeEstimationResult = (
             self._estimate_metric_value_range(
                 metric_values=metric_values,
                 estimator_func=estimator_func,
+                round_decimals=round_decimals,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
@@ -330,6 +390,7 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
         self,
         metric_values: np.ndarray,
         estimator_func: Callable,
+        round_decimals: int,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -350,13 +411,6 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
         )
         lower_bound: Optional[float] = truncate_values.get("lower_bound")
         upper_bound: Optional[float] = truncate_values.get("upper_bound")
-
-        round_decimals: int = self._get_round_decimals_using_heuristics(
-            metric_values=metric_values,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
 
         min_value: Number
         max_value: Number
@@ -548,8 +602,6 @@ positive integer, or must be omitted (or set to None).
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
     ) -> NumericRangeEstimationResult:
-        false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
-
         # Obtain num_bootstrap_samples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         num_bootstrap_samples: Optional[
             int
@@ -563,7 +615,9 @@ positive integer, or must be omitted (or set to None).
 
         n_resamples: int
         if num_bootstrap_samples is None:
-            n_resamples = DEFAULT_BOOTSTRAP_NUM_RESAMPLES
+            n_resamples = (
+                NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_BOOTSTRAP_NUM_RESAMPLES
+            )
         else:
             n_resamples = num_bootstrap_samples
 
@@ -576,11 +630,17 @@ positive integer, or must be omitted (or set to None).
             parameters=parameters,
         )
 
+        false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
+        quantile_statistic_interpolation_method: str = kwargs.get(
+            "quantile_statistic_interpolation_method"
+        )
+
         return compute_bootstrap_quantiles_point_estimate(
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
             n_resamples=n_resamples,
             random_seed=random_seed,
+            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
         )
 
     @staticmethod
@@ -589,8 +649,12 @@ positive integer, or must be omitted (or set to None).
         **kwargs,
     ) -> NumericRangeEstimationResult:
         false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
+        quantile_statistic_interpolation_method: str = kwargs.get(
+            "quantile_statistic_interpolation_method"
+        )
 
         return compute_quantiles(
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
+            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
         )

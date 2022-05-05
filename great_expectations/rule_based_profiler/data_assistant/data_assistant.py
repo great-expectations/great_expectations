@@ -48,7 +48,12 @@ class MetaDataAssistant(ABCMeta):
         if not newclass.is_abstract():
             # Only particular "DataAssistant" implementations must be registered.
             newclass.data_assistant_type = camel_to_snake(name=clsname)
-            register_data_assistant(data_assistant=newclass)
+
+            from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+                DataAssistantDispatcher,
+            )
+
+            DataAssistantDispatcher.register_data_assistant(data_assistant=newclass)
 
         return newclass
 
@@ -78,6 +83,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         expectation_suite_meta: Dict[str, Any] = expectation_suite.meta
         profiler_config: RuleBasedProfilerConfig = result.profiler_config
     """
+
+    __alias__: Optional[str] = None
 
     def __init__(
         self,

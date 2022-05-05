@@ -19,6 +19,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
+    ParameterBuilder,
     RegexPatternStringParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
@@ -134,7 +135,7 @@ def test_regex_pattern_string_parameter_builder_alice(
         r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
     ]
 
-    regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
+    regex_pattern_string_parameter: ParameterBuilder = (
         RegexPatternStringParameterBuilder(
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
@@ -144,7 +145,9 @@ def test_regex_pattern_string_parameter_builder_alice(
     )
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -221,7 +224,9 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     assert regex_parameter.threshold == 0.9
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -282,17 +287,17 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
     }
     threshold: float = 0.9
 
-    regex_parameter: RegexPatternStringParameterBuilder = (
-        RegexPatternStringParameterBuilder(
-            name="my_regex_pattern_string_parameter_builder",
-            metric_domain_kwargs=metric_domain_kwargs,
-            candidate_regexes=candidate_regexes,
-            threshold=threshold,
-            data_context=data_context,
-        )
+    regex_parameter: ParameterBuilder = RegexPatternStringParameterBuilder(
+        name="my_regex_pattern_string_parameter_builder",
+        metric_domain_kwargs=metric_domain_kwargs,
+        candidate_regexes=candidate_regexes,
+        threshold=threshold,
+        data_context=data_context,
     )
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -354,7 +359,7 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
     metric_domain_kwargs: dict = {"column": "c"}
     candidate_regexes: List[str] = [r"^\d{1}$"]
 
-    regex_pattern_string_parameter_builder: RegexPatternStringParameterBuilder = (
+    regex_pattern_string_parameter_builder: ParameterBuilder = (
         RegexPatternStringParameterBuilder(
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
@@ -364,7 +369,9 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
     )
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -380,7 +387,7 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
 
     assert (
         e.value.message
-        == "column_values.nonnull.count was not found in the resolved Metrics for ParameterBuilder."
+        == "Result of metric computations for RegexPatternStringParameterBuilder is empty."
     )
 
 
@@ -399,7 +406,7 @@ def test_regex_single_candidate(
     metric_domain_kwargs: dict = {"column": "b"}
     candidate_regexes: List[str] = [r"^\d{1}$"]
 
-    regex_pattern_string_parameter_builder: RegexPatternStringParameterBuilder = (
+    regex_pattern_string_parameter_builder: ParameterBuilder = (
         RegexPatternStringParameterBuilder(
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
@@ -409,7 +416,9 @@ def test_regex_single_candidate(
     )
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -464,7 +473,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
     metric_domain_kwargs: dict = {"column": "b"}
     candidate_regexes: List[str] = [r"^\d{1}$", r"^\d{3}$"]
 
-    regex_pattern_string_parameter_builder: RegexPatternStringParameterBuilder = (
+    regex_pattern_string_parameter_builder: ParameterBuilder = (
         RegexPatternStringParameterBuilder(
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
@@ -474,7 +483,9 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
     )
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
