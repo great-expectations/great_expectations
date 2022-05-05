@@ -5,7 +5,7 @@ import altair as alt
 
 
 @dataclass(frozen=True)
-class PlotUtil:
+class PlotComponent:
     name: str
     alt_type: alt.StandardType
 
@@ -20,7 +20,7 @@ class PlotUtil:
             format (str): Desired format within tooltip
 
         Returns:
-            An instance of alt.Tooltip containing relevant information from the PlotUtil class.
+            An instance of alt.Tooltip containing relevant information from the PlotComponent class.
         """
         return alt.Tooltip(
             field=self.name,
@@ -42,10 +42,10 @@ class PlotUtil:
 
 
 @dataclass(frozen=True)
-class MetricPlotUtil(PlotUtil):
+class MetricPlotComponent(PlotComponent):
     def plot_on_axis(self, shorthand: Optional[str] = None) -> alt.Y:
         """
-        Plots metric on Y axis - see parenet `PlotUtil` for more details.
+        Plots metric on Y axis - see parenet `PlotComponent` for more details.
         """
         if shorthand is None:
             shorthand = self.name
@@ -57,14 +57,14 @@ class MetricPlotUtil(PlotUtil):
 
 
 @dataclass(frozen=True)
-class DomainPlotUtil(PlotUtil):
+class DomainPlotComponent(PlotComponent):
     @property
     def title(self) -> str:
         return self.name.title()
 
     def plot_on_axis(self, shorthand: Optional[str] = None) -> alt.X:
         """
-        Plots domain on X axis - see parenet `PlotUtil` for more details.
+        Plots domain on X axis - see parenet `PlotComponent` for more details.
         """
         if shorthand is None:
             shorthand = self.name
@@ -76,7 +76,7 @@ class DomainPlotUtil(PlotUtil):
 
 
 @dataclass(frozen=True)
-class BatchIdPlotUtil(PlotUtil):
+class BatchPlotComponent(PlotComponent):
     @property
     def title(self) -> str:
         return self.name.replace("_", " ").title().replace("Id", "ID")
