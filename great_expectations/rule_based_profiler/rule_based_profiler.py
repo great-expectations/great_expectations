@@ -281,7 +281,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         rule_state: RuleState
         rule: Rule
-        domains_count: int = 0
         for rule in effective_rules:
             rule_state = rule.run(
                 variables=effective_variables,
@@ -292,12 +291,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
             self.rule_states.append(rule_state)
             progress_bar.update(1)
-            progress_bar.refresh()
-
-        progress_bar.close()
-
-            domains_count += len(rule_state.domains)
-            progress_bar.update(domains_count)
             progress_bar.refresh()
 
         progress_bar.close()
