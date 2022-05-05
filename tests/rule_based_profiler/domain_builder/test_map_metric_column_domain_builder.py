@@ -48,11 +48,11 @@ def test_column_values_unique_single_batch(alice_columnar_table_single_batch_con
     column_name: str
     alice_expected_column_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in alice_compliant_column_names
     ]
@@ -118,11 +118,11 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted(
     column_name: str
     bobby_expected_column_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -189,11 +189,11 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
     column_name: str
     bobby_expected_column_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -260,11 +260,11 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_une
     column_name: str
     bobby_expected_column_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -330,11 +330,11 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted_tight_max_unex
     column_name: str
     bobby_expected_column_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -401,11 +401,11 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
     column_name: str
     bobby_expected_column_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]

@@ -145,9 +145,9 @@ def test_regex_pattern_string_parameter_builder_alice(
     )
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -224,9 +224,9 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     assert regex_parameter.threshold == 0.9
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -295,9 +295,9 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         data_context=data_context,
     )
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -369,9 +369,9 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
     )
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -416,9 +416,9 @@ def test_regex_single_candidate(
     )
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -483,9 +483,9 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
     )
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {

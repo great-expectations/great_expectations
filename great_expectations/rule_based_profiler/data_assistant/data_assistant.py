@@ -52,6 +52,7 @@ class MetaDataAssistant(ABCMeta):
                 DataAssistantDispatcher,
             )
 
+            # noinspection PyTypeChecker
             DataAssistantDispatcher.register_data_assistant(data_assistant=newclass)
 
         return newclass
