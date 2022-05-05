@@ -133,9 +133,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
         For each Self-Initializing "Expectation" as specified by "DataAssistant.expectation_kwargs_by_expectation_type"
         interface property, retrieve its "RuleBasedProfiler" configuration, construct "Rule" object based on it, while
         incorporating metrics "ParameterBuilder" objects for "MetricDomainTypes", emitted by "DomainBuilder"
-        of comprised "Rule", specified by "DataAssistant.metrics_parameter_builders_by_domain_type" interface property.
+        of comprised "Rule", specified by "DataAssistant.metrics_parameter_builders_by_domain" interface property.
         Append this "Rule" object to overall DataAssistant "RuleBasedProfiler" object; incorporate "variables" as well.
         """
+        expectation_type: str
         expectation_kwargs: Dict[str, Any]
         for (
             expectation_type,
@@ -150,8 +151,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 domain_builder = rule.domain_builder
                 parameter_builders = rule.parameter_builders or []
                 parameter_builders.extend(
-                    self.metrics_parameter_builders_by_domain_type[
-                        domain_builder.domain_type
+                    self.metrics_parameter_builders_by_domain[
+                        Domain(
+                            domain_builder.domain_type,
+                        )
                     ]
                 )
                 expectation_configuration_builders = (
@@ -243,9 +246,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
     @property
     @abstractmethod
-    def metrics_parameter_builders_by_domain_type(
+    def metrics_parameter_builders_by_domain(
         self,
-    ) -> Dict[MetricDomainTypes, List[ParameterBuilder]]:
+    ) -> Dict[Domain, List[ParameterBuilder]]:
         """
         DataAssistant subclasses implement this method to return "ParameterBuilder" objects for "MetricDomainTypes", for
         every "Domain" type, for which generating metrics of interest is desired.  These metrics will be computed in
@@ -294,9 +297,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
     def get_metrics_by_domain(self) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
         Obtain subset of all parameter values for fully-qualified parameter names by domain, available from entire
-        "RuleBasedProfiler" state, where "Domain" types are among keys included in provisions as proscribed by return
-        value of "DataAssistant.metrics_parameter_builders_by_domain_type" interface property and actual fully-qualified
-        parameter names match interface properties of "ParameterBuilder" objects, corresponding to these "domain" types.
+        "RuleBasedProfiler" state, where "Domain" objects are among keys included in provisions as proscribed by return
+        value of "DataAssistant.metrics_parameter_builders_by_domain" interface property and fully-qualified parameter
+        names match interface properties of "ParameterBuilder" objects, corresponding to these "Domain" objects.
 
         Returns:
             Dictionaries of values for fully-qualified parameter names by Domain for metrics, from "RuleBasedpRofiler"
@@ -306,8 +309,12 @@ class DataAssistant(metaclass=MetaDataAssistant):
             Domain, Dict[str, ParameterNode]
         ] = dict(
             filter(
-                lambda element: element[0].domain_type
-                in list(self.metrics_parameter_builders_by_domain_type.keys()),
+                lambda element: any(
+                    element[0].is_superset(other=domain_cursor)
+                    for domain_cursor in list(
+                        self.metrics_parameter_builders_by_domain.keys()
+                    )
+                ),
                 self.profiler.get_parameter_values_for_fully_qualified_parameter_names_by_domain().items(),
             )
         )
