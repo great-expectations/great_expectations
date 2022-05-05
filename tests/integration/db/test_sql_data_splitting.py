@@ -1,7 +1,14 @@
-from typing import List, Tuple
+import logging
+from typing import List, Optional, Tuple
 
 import pandas as pd
 import sqlalchemy as sa
+
+from great_expectations.datasource import BaseDatasource, Datasource, LegacyDatasource
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+logger = logging.getLogger(__name__)
+
 
 import great_expectations as ge
 from great_expectations import DataContext
@@ -105,29 +112,23 @@ if __name__ == "test_script_module":
         print("Testing splitter method:", test_case.splitter_method_name)
 
         # 1. Setup
-
+        # 2. Set splitter in data connector config
         context: DataContext = ge.get_context()
 
         datasource_name: str = "test_datasource"
-
-        # 2. Set splitter in data connector config
         data_connector_name: str = "test_data_connector"
         data_asset_name: str = table_name  # Read from generated table name
         column_name: str = taxi_splitting_test_cases.test_column_name
-        data_connector: ConfiguredAssetSqlDataConnector = (
-            ConfiguredAssetSqlDataConnector(
-                name=data_connector_name,
-                datasource_name=datasource_name,
-                execution_engine=context.datasources[datasource_name].execution_engine,
-                assets={
-                    data_asset_name: {
-                        "splitter_method": test_case.splitter_method_name,
-                        "splitter_kwargs": test_case.splitter_kwargs,
-                    }
-                },
-            )
-        )
 
+        data_connector_config: dict = {
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "assets": {
+                data_asset_name: {
+                    "splitter_method": test_case.splitter_method_name,
+                    "splitter_kwargs": test_case.splitter_kwargs,
+                }
+            },
+        }
         context.add_datasource(
             name=datasource_name,
             class_name="Datasource",
@@ -135,7 +136,13 @@ if __name__ == "test_script_module":
                 "class_name": "SqlAlchemyExecutionEngine",
                 "connection_string": connection_string,
             },
-            data_connector=data_connector,
+            data_connectors={data_connector_name: data_connector_config},
+        )
+        test_datasource: Optional[
+            LegacyDatasource, BaseDatasource
+        ] = context.get_datasource(datasource_name="test_datasource")
+        data_connector: ConfiguredAssetSqlDataConnector = (
+            test_datasource.data_connectors["test_data_connector"]
         )
 
         # 3. Check if resulting batches are as expected
