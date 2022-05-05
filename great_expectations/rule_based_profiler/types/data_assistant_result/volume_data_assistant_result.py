@@ -216,7 +216,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             alt.Chart,
         ]
         if prescriptive:
-            return_impl = self.get_expect_values_to_be_between_chart
+            return_impl = self.get_expect_domain_values_to_be_between_chart
         else:
             return_impl = self.get_line_chart
 

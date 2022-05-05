@@ -215,7 +215,7 @@ class DataAssistantResult(SerializableDictDot):
         return line + points
 
     @staticmethod
-    def get_expect_values_to_be_between_chart(
+    def get_expect_domain_values_to_be_between_chart(
         df: pd.DataFrame,
         metric_name: str,
         metric_type: alt.StandardType,
@@ -251,7 +251,7 @@ class DataAssistantResult(SerializableDictDot):
             "max_value", AltairDataTypes.QUANTITATIVE.value
         )
 
-        return DataAssistantResult._get_expect_values_to_be_between_chart(
+        return DataAssistantResult._get_expect_domain_values_to_be_between_chart(
             df=df,
             metric_component=metric_component,
             domain_component=domain_component,
@@ -262,7 +262,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
     @staticmethod
-    def _get_expect_values_to_be_between_chart(
+    def _get_expect_domain_values_to_be_between_chart(
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         domain_component: DomainPlotComponent,
