@@ -244,3 +244,31 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
     )
 
     assert parameter_node == expected_parameter_value
+
+
+def test_partition_parameter_builder_alice_continuous_check_serialized_keys(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    parameter_builder: ParameterBuilder = PartitionParameterBuilder(
+        name="my_name",
+        bucketize_data=True,
+        data_context=data_context,
+    )
+
+    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.
+    assert set(parameter_builder.to_json_dict().keys()) == {
+        "class_name",
+        "module_name",
+        "name",
+        "bucketize_data",
+        "metric_name",
+        "metric_domain_kwargs",
+        "metric_value_kwargs",
+        "enforce_numeric_metric",
+        "replace_nan_with_zero",
+        "reduce_scalar_metric",
+        "evaluation_parameter_builder_configs",
+        "json_serialize",
+    }
