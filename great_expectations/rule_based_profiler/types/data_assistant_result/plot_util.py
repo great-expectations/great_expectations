@@ -1,20 +1,13 @@
+from dataclasses import dataclass
 from typing import Optional, Union
 
 import altair as alt
 
 
+@dataclass(frozen=True)
 class PlotUtil:
-    def __init__(self, name: str, alt_type: alt.StandardType) -> None:
-        self._name = name
-        self._alt_type = alt_type
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def alt_type(self) -> alt.StandardType:
-        return self._alt_type
+    name: str
+    alt_type: alt.StandardType
 
     @property
     def title(self) -> str:
@@ -48,6 +41,7 @@ class PlotUtil:
         raise NotImplementedError
 
 
+@dataclass(frozen=True)
 class MetricPlotUtil(PlotUtil):
     def plot_on_axis(self, shorthand: Optional[str] = None) -> alt.Y:
         """
@@ -62,6 +56,7 @@ class MetricPlotUtil(PlotUtil):
         )
 
 
+@dataclass(frozen=True)
 class DomainPlotUtil(PlotUtil):
     @property
     def title(self) -> str:
@@ -80,6 +75,7 @@ class DomainPlotUtil(PlotUtil):
         )
 
 
+@dataclass(frozen=True)
 class BatchIdPlotUtil(PlotUtil):
     @property
     def title(self) -> str:
