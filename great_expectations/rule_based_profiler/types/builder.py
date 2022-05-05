@@ -27,7 +27,7 @@ class Builder(SerializableDictDot):
     def __init__(
         self,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Args:
             data_context: BaseDataContext associated with this Builder

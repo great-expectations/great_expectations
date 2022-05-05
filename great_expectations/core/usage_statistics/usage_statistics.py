@@ -53,7 +53,7 @@ class UsageStatisticsHandler:
         data_context: "DataContext",  # noqa: F821
         data_context_id: str,
         usage_statistics_url: str,
-    ):
+    ) -> None:
         self._url = usage_statistics_url
 
         self._data_context_id = data_context_id

@@ -457,7 +457,7 @@ class AzureUrl:
         "wasbs://{container}@{account_name}.blob.core.windows.net/{path}"
     )
 
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         search = re.search(
             AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url
         )
@@ -511,7 +511,7 @@ class GCSUrl:
 
     OBJECT_URL_TEMPLATE: str = "gs://{bucket_or_name}/{path}"
 
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         search = re.search(GCSUrl.URL_REGEX_PATTERN, url)
         assert (
             search is not None
@@ -556,7 +556,7 @@ class S3Url:
     's3://bucket/hello/world#foo?bar=2'
     """
 
-    def __init__(self, url):
+    def __init__(self, url) -> None:
         self._parsed = urlparse(url, allow_fragments=False)
 
     @property

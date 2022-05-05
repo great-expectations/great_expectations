@@ -48,6 +48,7 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -55,7 +56,12 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    ParameterNode,
+    SemanticDomainTypes,
+)
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -2400,7 +2406,7 @@ def profiler_config_with_placeholder_args(
                         "my_arg": "$parameter.my_parameter.value[0]",
                         "my_other_arg": "$parameter.my_parameter.value[1]",
                         "meta": {
-                            "details": {
+                            "profiler_details": {
                                 "my_parameter_estimator": "$parameter.my_parameter.details",
                                 "note": "Important remarks about estimation algorithm.",
                             },
@@ -2678,23 +2684,21 @@ def alice_columnar_table_single_batch(empty_data_context):
                     expectation_type="expect_column_values_to_match_strftime_format",
                     kwargs={
                         "column": column_data["column_name"],
-                        "strftime_format": {
-                            "value": event_ts_column_data[
-                                "observed_strftime_format"
-                            ],  # Pin to event_ts column
-                            "details": {
-                                "success_ratio": 1.0,
-                                "candidate_strings": expected_candidate_strings_dict,
-                            },
-                        },
+                        "strftime_format": event_ts_column_data[
+                            "observed_strftime_format"
+                        ],  # Pin to event_ts column
                     },
                     meta={
+                        "profiler_details": {
+                            "success_ratio": 1.0,
+                            "candidate_strings": expected_candidate_strings_dict,
+                        },
                         "notes": {
                             "format": "markdown",
                             "content": [
                                 "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                             ],
-                        }
+                        },
                     },
                 ),
             ]
@@ -2757,8 +2761,8 @@ def alice_columnar_table_single_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_single_batch_parameter_builder",
+                        "class_name": "MetricSingleBatchParameterBuilder",
                         "name": "my_min_user_id",
                         "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
@@ -2770,8 +2774,8 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "json_serialize": True,
                     },
                     {
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_single_batch_parameter_builder",
+                        "class_name": "MetricSingleBatchParameterBuilder",
                         "name": "my_max_user_id",
                         "metric_name": "column.max",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
@@ -2818,9 +2822,9 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "column": "$domain.domain_kwargs.column",
                         "meta": {},
                         "expectation_type": "expect_column_values_to_be_less_than",
-                        "condition": "$parameter.my_max_user_id.value[-1] < $variables.very_large_user_id",
+                        "condition": "$parameter.my_max_user_id.value < $variables.very_large_user_id",
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "value": "$parameter.my_max_user_id.value[-1]",
+                        "value": "$parameter.my_max_user_id.value",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "validation_parameter_builder_configs": None,
                     },
@@ -2828,9 +2832,9 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "column": "$domain.domain_kwargs.column",
                         "meta": {},
                         "expectation_type": "expect_column_values_to_be_greater_than",
-                        "condition": "$parameter.my_min_user_id.value[-1] > 0 & $parameter.my_min_user_id.value[-1] > $variables.very_small_user_id",
+                        "condition": "$parameter.my_min_user_id.value > 0 & $parameter.my_min_user_id.value > $variables.very_small_user_id",
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "value": "$parameter.my_min_user_id.value[-1]",
+                        "value": "$parameter.my_min_user_id.value",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "validation_parameter_builder_configs": None,
                     },
@@ -2852,8 +2856,8 @@ def alice_columnar_table_single_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_single_batch_parameter_builder",
+                        "class_name": "MetricSingleBatchParameterBuilder",
                         "name": "my_max_ts",
                         "metric_name": "column.max",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
@@ -2865,8 +2869,8 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "json_serialize": True,
                     },
                     {
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_single_batch_parameter_builder",
+                        "class_name": "MetricSingleBatchParameterBuilder",
                         "name": "my_max_event_ts",
                         "metric_name": "column.max",
                         "metric_domain_kwargs": {"column": "event_ts"},
@@ -3020,7 +3024,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                             }
                         },
                         "expectation_type": "expect_column_max_to_be_between",
-                        "max_value": "$parameter.my_max_event_ts.value[-1]",
+                        "max_value": "$parameter.my_max_event_ts.value",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "min_value": "$variables.min_timestamp",
@@ -3030,17 +3034,18 @@ def alice_columnar_table_single_batch(empty_data_context):
                     {
                         "column": "$domain.domain_kwargs.column",
                         "meta": {
+                            "profiler_details": "$parameter.my_date_format.details",
                             "notes": {
                                 "format": "markdown",
                                 "content": [
                                     "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                                 ],
-                            }
+                            },
                         },
                         "expectation_type": "expect_column_values_to_match_strftime_format",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "strftime_format": "$parameter.my_date_format",
+                        "strftime_format": "$parameter.my_date_format.value",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "validation_parameter_builder_configs": None,
                     },
@@ -3236,7 +3241,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     ] = [
         ExpectationConfiguration(
             **{
-                "kwargs": {"min_value": 7510, "max_value": 8995},
+                "kwargs": {"min_value": 7500, "max_value": 9000},
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3924,7 +3929,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "expectation_type": "expect_column_values_to_match_strftime_format",
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "success_ratio": 1.0,
                         "candidate_strings": {
                             "%Y-%m-%d %H:%M:%S": 1.0,
@@ -3948,7 +3953,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "expectation_type": "expect_column_values_to_match_strftime_format",
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "success_ratio": 1.0,
                         "candidate_strings": {
                             "%Y-%m-%d %H:%M:%S": 1.0,
@@ -3977,7 +3982,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "strftime_format": "%Y-%m-%d %H:%M:%S",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "success_ratio": 1.0,
                         "candidate_strings": {
                             "%Y-%m-%d %H:%M:%S": 1.0,
@@ -4001,7 +4006,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "strftime_format": "%Y-%m-%d %H:%M:%S",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "success_ratio": 1.0,
                         "candidate_strings": {
                             "%Y-%m-%d %H:%M:%S": 1.0,
@@ -4030,7 +4035,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "regex": r"^\d{1}$",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
                         "success_ratio": 1.0,
                     },
@@ -4051,7 +4056,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "regex": r"^\d{1}$",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
                         "success_ratio": 1.0,
                     },
@@ -4072,7 +4077,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "regex": r"^\d{1}$",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
                         "success_ratio": 1.0,
                     },
@@ -4093,7 +4098,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "regex": r"^\d{1}$",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
                         "success_ratio": 1.0,
                     },
@@ -4196,6 +4201,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "num_bootstrap_samples": None,
                         "bootstrap_random_seed": None,
                         "false_positive_rate": "$variables.false_positive_rate",
+                        "quantile_statistic_interpolation_method": "auto",
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
                         "evaluation_parameter_builder_configs": None,
@@ -4246,6 +4252,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "num_bootstrap_samples": None,
                         "bootstrap_random_seed": None,
                         "false_positive_rate": "$variables.false_positive_rate",
+                        "quantile_statistic_interpolation_method": "auto",
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
                         "round_decimals": 2,
                         "evaluation_parameter_builder_configs": None,
@@ -4265,6 +4272,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "num_bootstrap_samples": None,
                         "bootstrap_random_seed": None,
                         "false_positive_rate": "$variables.false_positive_rate",
+                        "quantile_statistic_interpolation_method": "auto",
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
                         "round_decimals": 2,
                         "evaluation_parameter_builder_configs": None,
@@ -4329,7 +4337,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     {
                         "column": "$domain.domain_kwargs.column",
                         "meta": {
-                            "details": "$parameter.my_date_format.details",
+                            "profiler_details": "$parameter.my_date_format.details",
                             "notes": {
                                 "format": "markdown",
                                 "content": [
@@ -4377,7 +4385,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     {
                         "column": "$domain.domain_kwargs.column",
                         "meta": {
-                            "details": "$parameter.my_regex.details",
+                            "profiler_details": "$parameter.my_regex.details",
                             "notes": {
                                 "format": "markdown",
                                 "content": [
@@ -4447,214 +4455,306 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     expected_fixture_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
         Domain, List[str]
     ] = {
-        Domain(domain_type="table",): [
-            "$variables",
-            "$parameter.row_count_range",
-        ],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "VendorID"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "row_count_range_rule",
+                "domain_type": MetricDomainTypes.TABLE,
+            }
+        ): ["$variables", "$parameter.row_count_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "passenger_count"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "VendorID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "VendorID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "trip_distance"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "passenger_count"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "passenger_count": SemanticDomainTypes.NUMERIC,
+                    }
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "RatecodeID"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "trip_distance"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "trip_distance": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "PULocationID"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "RatecodeID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "RatecodeID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "DOLocationID"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "PULocationID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "PULocationID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "payment_type"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "DOLocationID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "DOLocationID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "fare_amount"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "payment_type"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "payment_type": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "extra"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "fare_amount"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "fare_amount": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "mta_tax"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "extra"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "extra": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "tip_amount"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "mta_tax"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "mta_tax": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "tolls_amount"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "tip_amount"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "tip_amount": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "improvement_surcharge"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "tolls_amount"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "tolls_amount": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "total_amount"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "improvement_surcharge"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "improvement_surcharge": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "congestion_surcharge"},
-            details={"inferred_semantic_domain_type": "numeric"},
-        ): [
-            "$variables",
-            "$parameter.min_range",
-            "$parameter.max_range",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "total_amount"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "total_amount": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "pickup_datetime"},
-            details=None,
-        ): [
-            "$variables",
-            "$parameter.my_date_format",
-        ],
+            **{
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "congestion_surcharge"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "congestion_surcharge": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.min_range", "$parameter.max_range"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "dropoff_datetime"},
-            details=None,
-        ): [
-            "$variables",
-            "$parameter.my_date_format",
-        ],
+            **{
+                "rule_name": "my_rule_for_timestamps",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "pickup_datetime"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "pickup_datetime": SemanticDomainTypes.TEXT,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.my_date_format"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "VendorID"},
-            details=None,
-        ): [
-            "$variables",
-            "$parameter.my_pickup_location_id_value_set",
-        ],
+            **{
+                "rule_name": "my_rule_for_timestamps",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "dropoff_datetime"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "dropoff_datetime": SemanticDomainTypes.TEXT,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.my_date_format"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "RatecodeID"},
-            details=None,
-        ): [
-            "$variables",
-            "$parameter.my_regex",
-        ],
+            **{
+                "rule_name": "rule_for_regex",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "VendorID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "VendorID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.my_regex"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "PULocationID"},
-            details=None,
-        ): [
-            "$variables",
-            "$parameter.my_regex",
-        ],
+            **{
+                "rule_name": "rule_for_regex",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "RatecodeID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "RatecodeID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.my_regex"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "DOLocationID"},
-            details=None,
-        ): [
-            "$variables",
-            "$parameter.my_regex",
-        ],
+            **{
+                "rule_name": "rule_for_regex",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "PULocationID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "PULocationID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.my_regex"],
         Domain(
-            domain_type="column",
-            domain_kwargs={"column": "passenger_count"},
-            details=None,
-        ): [
-            "$variables",
-            "$parameter.my_pickup_location_id_value_set",
-        ],
+            **{
+                "rule_name": "rule_for_regex",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "DOLocationID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "DOLocationID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.my_regex"],
+        Domain(
+            **{
+                "rule_name": "my_rule_for_very_few_cardinality",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "VendorID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "VendorID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.my_pickup_location_id_value_set"],
+        Domain(
+            **{
+                "rule_name": "my_rule_for_very_few_cardinality",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "passenger_count"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "passenger_count": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): ["$variables", "$parameter.my_pickup_location_id_value_set"],
     }
 
     expected_parameter_values_for_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
         Domain, Dict[str, ParameterNode]
     ] = {
-        Domain(**{"domain_type": "table"}): {
+        Domain(
+            **{
+                "rule_name": "row_count_range_rule",
+                "domain_type": MetricDomainTypes.TABLE,
+            }
+        ): {
             "$variables": {
                 "estimator": "oneshot",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
             "$parameter.row_count_range": {
-                "value": [7510, 8995],
+                "value": [7500, 9000],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "table.row_count",
@@ -4668,9 +4768,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "VendorID"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "VendorID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -4705,9 +4810,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "passenger_count"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "passenger_count": SemanticDomainTypes.NUMERIC,
+                    }
+                },
             }
         ): {
             "$variables": {
@@ -4742,9 +4852,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "trip_distance"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "trip_distance": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -4779,9 +4894,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "RatecodeID"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "RatecodeID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -4816,9 +4936,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "PULocationID"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "PULocationID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -4853,9 +4978,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "DOLocationID"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "DOLocationID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -4890,9 +5020,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "payment_type"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "payment_type": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -4927,9 +5062,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "fare_amount"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "fare_amount": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -4964,9 +5104,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "extra"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "extra": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -5001,9 +5146,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "mta_tax"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "mta_tax": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -5038,9 +5188,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "tip_amount"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "tip_amount": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -5075,9 +5230,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "tolls_amount"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "tolls_amount": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -5112,9 +5272,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "improvement_surcharge"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "improvement_surcharge": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -5149,9 +5314,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "total_amount"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "total_amount": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -5186,9 +5356,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         Domain(
             **{
-                "domain_type": "column",
+                "rule_name": "column_ranges_rule",
+                "domain_type": MetricDomainTypes.COLUMN,
                 "domain_kwargs": {"column": "congestion_surcharge"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "congestion_surcharge": SemanticDomainTypes.NUMERIC,
+                    },
+                },
             }
         ): {
             "$variables": {
@@ -5222,7 +5397,16 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             },
         },
         Domain(
-            **{"domain_type": "column", "domain_kwargs": {"column": "pickup_datetime"}}
+            **{
+                "rule_name": "my_rule_for_timestamps",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "pickup_datetime"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "pickup_datetime": SemanticDomainTypes.TEXT,
+                    },
+                },
+            }
         ): {
             "$variables": {
                 "estimator": "oneshot",
@@ -5238,7 +5422,16 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             },
         },
         Domain(
-            **{"domain_type": "column", "domain_kwargs": {"column": "dropoff_datetime"}}
+            **{
+                "rule_name": "my_rule_for_timestamps",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "dropoff_datetime"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "dropoff_datetime": SemanticDomainTypes.TEXT,
+                    },
+                },
+            }
         ): {
             "$variables": {
                 "estimator": "oneshot",
@@ -5253,7 +5446,118 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
         },
-        Domain(**{"domain_type": "column", "domain_kwargs": {"column": "VendorID"}}): {
+        Domain(
+            **{
+                "rule_name": "rule_for_regex",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "VendorID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "VendorID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_regex": {
+                "value": "^\\d{1}$",
+                "details": {
+                    "success_ratio": 1.0,
+                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                },
+            },
+        },
+        Domain(
+            **{
+                "rule_name": "rule_for_regex",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "RatecodeID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "RatecodeID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_regex": {
+                "value": "^\\d{1}$",
+                "details": {
+                    "success_ratio": 1.0,
+                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                },
+            },
+        },
+        Domain(
+            **{
+                "rule_name": "rule_for_regex",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "PULocationID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "PULocationID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_regex": {
+                "value": "^\\d{1}$",
+                "details": {
+                    "success_ratio": 1.0,
+                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                },
+            },
+        },
+        Domain(
+            **{
+                "rule_name": "rule_for_regex",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "DOLocationID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "DOLocationID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_regex": {
+                "value": "^\\d{1}$",
+                "details": {
+                    "success_ratio": 1.0,
+                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                },
+            },
+        },
+        Domain(
+            **{
+                "rule_name": "my_rule_for_very_few_cardinality",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "VendorID"},
+                "details": {
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "VendorID": SemanticDomainTypes.NUMERIC,
+                    },
+                },
+            }
+        ): {
             "$variables": {
                 "estimator": "oneshot",
                 "false_positive_rate": 0.01,
@@ -5273,55 +5577,16 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             },
         },
         Domain(
-            **{"domain_type": "column", "domain_kwargs": {"column": "RatecodeID"}}
-        ): {
-            "$variables": {
-                "estimator": "oneshot",
-                "false_positive_rate": 0.01,
-                "mostly": 1.0,
-            },
-            "$parameter.my_regex": {
-                "value": "^\\d{1}$",
+            **{
+                "rule_name": "my_rule_for_very_few_cardinality",
+                "domain_type": MetricDomainTypes.COLUMN,
+                "domain_kwargs": {"column": "passenger_count"},
                 "details": {
-                    "success_ratio": 1.0,
-                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                    INFERRED_SEMANTIC_TYPE_KEY: {
+                        "passenger_count": SemanticDomainTypes.NUMERIC,
+                    },
                 },
-            },
-        },
-        Domain(
-            **{"domain_type": "column", "domain_kwargs": {"column": "PULocationID"}}
-        ): {
-            "$variables": {
-                "estimator": "oneshot",
-                "false_positive_rate": 0.01,
-                "mostly": 1.0,
-            },
-            "$parameter.my_regex": {
-                "value": "^\\d{1}$",
-                "details": {
-                    "success_ratio": 1.0,
-                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
-                },
-            },
-        },
-        Domain(
-            **{"domain_type": "column", "domain_kwargs": {"column": "DOLocationID"}}
-        ): {
-            "$variables": {
-                "estimator": "oneshot",
-                "false_positive_rate": 0.01,
-                "mostly": 1.0,
-            },
-            "$parameter.my_regex": {
-                "value": "^\\d{1}$",
-                "details": {
-                    "success_ratio": 1.0,
-                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
-                },
-            },
-        },
-        Domain(
-            **{"domain_type": "column", "domain_kwargs": {"column": "passenger_count"}}
+            }
         ): {
             "$variables": {
                 "estimator": "oneshot",

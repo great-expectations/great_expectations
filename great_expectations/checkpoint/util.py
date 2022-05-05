@@ -457,7 +457,7 @@ def get_validations_with_batch_request_as_dict(
     return validations
 
 
-def validate_validation_dict(validation_dict: dict):
+def validate_validation_dict(validation_dict: dict) -> None:
     if validation_dict.get("batch_request") is None:
         raise ge_exceptions.CheckpointError("validation batch_request cannot be None")
     if not validation_dict.get("expectation_suite_name"):
