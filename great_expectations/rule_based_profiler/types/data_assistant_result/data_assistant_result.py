@@ -323,7 +323,11 @@ class DataAssistantResult(SerializableDictDot):
         )
         anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
 
-        return band + lower_limit + upper_limit + anomaly_coded_line
+        anomaly_coded_points = line.layer[1].encode(
+            color=point_color_condition, tooltip=tooltip
+        )
+        anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
+        return anomaly_coded_line
 
     @staticmethod
     def get_interactive_detail_multi_line_chart(

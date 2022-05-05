@@ -1752,7 +1752,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 6,
+                "variable_count": 5,
             },
             "event": "profiler.run",
             "success": True,

@@ -9,6 +9,7 @@ from great_expectations.core.metric import Metric
 logger = logging.getLogger(__name__)
 
 _registered_expectations = {}
+_registered_data_assistants = {}
 _registered_metrics = {}
 _registered_renderers = {}
 
@@ -92,6 +93,48 @@ def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F82
 
     logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
+
+
+def register_data_assistant(
+    data_assistant: Type["DataAssistant"],  # noqa: F821
+) -> None:
+    """
+    This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
+
+    Args:
+        data_assistant: "DataAssistant" class to be registered
+    """
+    data_assistant_type = data_assistant.data_assistant_type
+    if data_assistant_type in _registered_data_assistants:
+        if _registered_data_assistants[data_assistant_type] == data_assistant:
+            logger.info(
+                f'Multiple declarations of DataAssistant "{data_assistant_type}" found.'
+            )
+            return
+        else:
+            logger.warning(
+                f'Overwriting the declaration of DataAssistant "{data_assistant_type}" took place.'
+            )
+
+    logger.debug(
+        f'Registering the declaration of DataAssistant "{data_assistant_type}" took place.'
+    )
+    _registered_data_assistants[data_assistant_type] = data_assistant
+
+
+def get_data_assistant_impl(
+    data_assistant_type: str,
+) -> Optional[Type["DataAssistant"]]:  # noqa: F821
+    """
+    This method obtains (previously registered) "DataAssistant" class from DataAssistant Registry
+
+    Args:
+        data_assistant_type: String representing "snake case" version of "DataAssistant" class type
+
+    Returns:
+        Class inheriting "DataAssistant" if found; otherwise, None
+    """
+    return _registered_data_assistants.get(data_assistant_type)
 
 
 def _add_response_key(res, key, value):

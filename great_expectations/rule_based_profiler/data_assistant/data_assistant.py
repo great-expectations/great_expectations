@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.expectations.registry import register_data_assistant
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
