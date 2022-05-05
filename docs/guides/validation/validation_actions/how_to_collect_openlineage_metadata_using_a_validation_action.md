@@ -24,10 +24,10 @@ This guide will explain how to use an <TechnicalTag tag="action" text="Action" /
 ## Steps
 
 
-### 1. Ensure that the `openlineage-common` package has been installed in your Python environment.
+### 1. Ensure that the `openlineage-integration-common` package has been installed in your Python environment.
 
  ```bash
- % pip3 install openlineage-common
+ % pip3 install openlineage-integration-common
  ```
 
 ### 2. Update the `action_list` key in your Validation Operator config.
