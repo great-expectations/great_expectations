@@ -65,6 +65,15 @@
           "b": "BIT",
           "s": "FLOAT",
           "s1": "BIGINT"
+        },
+        "trino": {
+          "x": "INTEGER",
+          "y": "DOUBLE",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BOOLEAN",
+          "s": "DOUBLE",
+          "s1": "BIGINT"
         }
       },
       "tests": [
@@ -135,7 +144,7 @@
           {
             "success":false
           },
-          "only_for": ["postgresql", "mysql", "mssql"]
+          "only_for": ["postgresql", "mysql", "mssql", "trino"]
         },
         {
           "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
@@ -247,7 +256,7 @@
           "exact_match_out": false,
           "in":{"column":"z","type_":"VARCHAR"},
           "out":{"success":true},
-          "only_for": ["sqlite", "mssql"]
+          "only_for": ["sqlite", "mssql", "trino"]
         },
         {
           "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
