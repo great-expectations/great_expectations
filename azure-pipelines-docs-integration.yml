@@ -28,6 +28,10 @@ resources:
       MSSQL_PID: Developer
     ports:
       - 1433:1433
+  - container: trino
+    image: trinodb/trino:379
+    ports:
+      - 8088:8080
 
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
@@ -85,6 +89,7 @@ stages:
         postgres: postgres
         mysql: mysql
         mssql: mssql
+        trino: trino
 
       steps:
         - task: UsePythonVersion@0
@@ -137,7 +142,7 @@ stages:
 
         - script: |
             pip install pytest pytest-azurepipelines
-            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --aws tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
