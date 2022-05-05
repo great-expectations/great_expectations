@@ -149,6 +149,11 @@ def pytest_addoption(parser):
         help="If set, execute tests against AWS resources like S3, RedShift and Athena",
     )
     parser.addoption(
+        "--trino",
+        action="store_true",
+        help="If set, execute tests against trino",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests for usage_statistics",
@@ -172,9 +177,14 @@ def build_test_backends_list(metafunc):
         "spark": "SparkDFDataset",
     }
     backend_name: str
+    """
+    In order to get the support for the "trino" SQLAlchemy dialect as well as receive the benefits of other latest
+    capabilities, users are encouraged to upgrade their Great Expectations installation to the latest version.
+    """
     return [
         (backend_name_class_name_map.get(backend_name) or backend_name)
         for backend_name in test_backend_names
+        if backend_name != "trino"  # <--------- maybe remove that
     ]
 
 
@@ -198,6 +208,7 @@ def build_test_backends_list_cfe(metafunc):
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
     include_aws: bool = metafunc.config.getoption("--aws")
+    include_trino: bool = metafunc.config.getoption("--trino")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -207,6 +218,7 @@ def build_test_backends_list_cfe(metafunc):
         include_mssql=include_mssql,
         include_bigquery=include_bigquery,
         include_aws=include_aws,
+        include_trino=include_trino,
     )
     return test_backend_names
 
@@ -246,7 +258,10 @@ def no_usage_stats(monkeypatch):
 @pytest.fixture(scope="module")
 def sa(test_backends):
     if not any(
-        [dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]]
+        [
+            dbms in test_backends
+            for dbms in ["postgresql", "sqlite", "mysql", "mssql", "bigquery", "trino"]
+        ]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
