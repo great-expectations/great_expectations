@@ -259,6 +259,10 @@ local_tests = [
         name="expect_table_columns_to_be_unique",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py",
     ),
+    IntegrationTestFixture(
+        name="cross_table_comparisons_from_query",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparisons_from_query.py",
+    ),
 ]
 
 
