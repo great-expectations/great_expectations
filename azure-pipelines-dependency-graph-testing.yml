@@ -504,10 +504,11 @@ stages:
 
           - script: |
               printf 'Waiting for Trino database to accept connections'
-              until trino --execute "SHOW CATALOGS"; do
-                printf '.'
-                sleep 1;
-              done;
+              sleep 30
+#             until trino --execute "SHOW CATALOGS"; do
+#               printf '.'
+#               sleep 1;
+#             done;
             displayName: Wait for database to initialise
 
           - script: |
