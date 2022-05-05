@@ -2,7 +2,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
-    build_simple_domains_from_column_names,
+    build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
@@ -124,11 +124,13 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """Return domains matching the specified tolerance limits.
 
         Args:
+            rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
 
         Returns:
@@ -217,10 +219,15 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
         )
 
-        return build_simple_domains_from_column_names(
+        column_name: str
+        domains: List[Domain] = build_domains_from_column_names(
+            rule_name=rule_name,
             column_names=candidate_column_names,
             domain_type=self.domain_type,
+            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,
         )
+
+        return domains
 
     @staticmethod
     def _generate_metric_configurations(

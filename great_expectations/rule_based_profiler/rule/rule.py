@@ -106,6 +106,7 @@ class Rule(SerializableDictDot):
             []
             if self.domain_builder is None
             else self.domain_builder.get_domains(
+                rule_name=self.name,
                 variables=variables,
                 batch_list=batch_list,
                 batch_request=batch_request,

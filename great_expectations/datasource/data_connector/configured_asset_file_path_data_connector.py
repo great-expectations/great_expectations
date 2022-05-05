@@ -2,11 +2,8 @@ import logging
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.data_context.types.base import assetConfigSchema
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset.asset import Asset
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,

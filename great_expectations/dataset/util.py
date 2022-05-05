@@ -11,7 +11,7 @@ from scipy import stats
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy
+    import sqlalchemy  # noqa: F401
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.sql.elements import WithinGroup
 except ImportError:
