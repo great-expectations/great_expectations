@@ -3372,4 +3372,6 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
         prescriptive=True, theme=theme
     )
 
+    json_test = plot_result.charts[0].to_json()
+
     assert plot_result.charts == ""
