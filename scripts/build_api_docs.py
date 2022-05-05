@@ -5,7 +5,7 @@
         1a. The files will be generated automatically.
     2. A series of print statements at the end of the script execution will alert you to documentation that needs to be
      updated with cross-linking (or have cross-linking removed).  Manually update these files as needed.
-    3. Among the print statements will be a snippet for sidebar.js -- past this snippet into the `items` list for the
+    3. Among the print statements will be a snippet for sidebar.js -- paste this snippet into the `items` list for the
      API documentation category under Reference, replacing the existing content of this list.
         3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
 """
@@ -140,9 +140,9 @@ def _get_dictionary_from_block_in_docstring(
 ) -> Dict[str, str]:
     """Builds a dictionary of key: description pairs from a block of text in a docstring.
 
-    Note: The description portion of the key: description pair will have all non-alphanumerics escaped in case
-    there is content (such as a regex example) that could be mistaken as special formatting by Docusaurus' markdown
-    rendering.
+    Note: The description portion of the key: description pair will have all non-alphanumerics that are used in Markdown
+    formatting escaped in case there is content (such as a regex example) that could be mistaken as special formatting
+    by Docusaurus' Markdown rendering.
 
     Args:
         docstring: the docstring to parse key: description pairs out of.
@@ -184,9 +184,9 @@ def _get_dictionary_from_block_in_docstring(
 def get_args_dictionary(docstring: str) -> dict:
     """Builds a dictionary of parameter: description pairs from a docstring's `Args:` block.
 
-    Note: The description portion of the parameter: description pair will have all non-alphanumerics escaped in case
-    there is content (such as a regex example) that could be mistaken as special formatting by Docusaurus' markdown
-    rendering.
+    Note: The description portion of the key: description pair will have all non-alphanumerics that are used in Markdown
+    formatting escaped in case there is content (such as a regex example) that could be mistaken as special formatting
+    by Docusaurus' Markdown rendering.
 
     Args:
         docstring: the docstring to parse parameters out of.
@@ -200,9 +200,9 @@ def get_args_dictionary(docstring: str) -> dict:
 def get_raises_dictionary(docstring: str) -> dict:
     """Builds a dictionary of error: description pairs from a docstring's `Raises:` block.
 
-    Note: The description portion of the error: description pair will have all non-alphanumerics escaped in case
-    there is content (such as a regex example) that could be mistaken as special formatting by Docusaurus' markdown
-    rendering.
+    Note: The description portion of the key: description pair will have all non-alphanumerics that are used in Markdown
+    formatting escaped in case there is content (such as a regex example) that could be mistaken as special formatting
+    by Docusaurus' Markdown rendering.
 
     Args:
         docstring: the docstring to parse possible raised errors out of.
