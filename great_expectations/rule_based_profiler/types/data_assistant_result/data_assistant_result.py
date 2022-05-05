@@ -107,24 +107,25 @@ class DataAssistantResult(SerializableDictDot):
         if theme is not None:
             nested_update(altair_theme, theme)
 
-        display(
-            HTML(
-                f"""
-                <style>
-                span.vega-bind-name {{
-                    color: {Colors.PURPLE.value};
-                    font: Veranda;
-                    font-weight: bold;
-                }}
-                form.vega-bindings {{
-                  position: absolute;
-                  left: 70px;
-                  top: 28px;
-                }}
-                </style>
-                """
-            )
-        )
+        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+        dropdown_title_color: str = altair_theme["legend"]["titleColor"]
+        dropdown_title_font: str = altair_theme["font"]
+        dropdown_css: str = f"""
+            <style>
+            span.vega-bind-name {{
+                color: {dropdown_title_color};
+                font-family: "{dropdown_title_font}";
+                font-weight: bold;
+            }}
+            form.vega-bindings {{
+              position: relative;
+              left: 70px;
+              top: -350px;
+            }}
+            </style>
+        """
+
+        display(HTML(dropdown_css))
 
         chart: alt.Chart
         for chart in charts:
