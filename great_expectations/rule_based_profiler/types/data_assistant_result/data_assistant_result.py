@@ -110,8 +110,11 @@ class DataAssistantResult(SerializableDictDot):
         Args:
             charts: A list of Altair chart objects to apply a theme to
             theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
+
+        Returns:
+            A list of Altair charts with the theme applied
         """
-        theme = DataAssistantResult._get_theme(theme=theme)
+        theme: Dict[str, Any] = DataAssistantResult._get_theme(theme=theme)
         return [chart.configure(**theme) for chart in charts]
 
     @staticmethod
