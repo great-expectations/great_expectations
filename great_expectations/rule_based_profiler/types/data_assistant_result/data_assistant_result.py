@@ -89,6 +89,36 @@ class DataAssistantResult(SerializableDictDot):
         return metrics_attributed_values_by_domain
 
     @staticmethod
+    def _get_theme(theme: Dict[str, Any]) -> Dict[str, Any]:
+        altair_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
+        if theme is not None:
+            nested_update(altair_theme, theme)
+        return altair_theme
+
+    @staticmethod
+    def apply_theme(
+        charts: List[alt.Chart],
+        theme: Dict[str, Any],
+    ) -> List[alt.Chart]:
+        """
+        Apply the Great Expectations default theme and any user-provided theme overrides to each chart
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            charts: A list of Altair chart objects to apply a theme to
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
+        """
+        altair_theme: Dict[str, Any] = DataAssistantResult._get_theme(theme=theme)
+
+        chart: alt.Chart
+        for chart in charts:
+            chart.configure(**altair_theme)
+
+        return charts
+
+    @staticmethod
     def display(
         charts: List[alt.Chart],
         theme: Optional[Dict[str, Any]],
@@ -100,12 +130,14 @@ class DataAssistantResult(SerializableDictDot):
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            charts: A list of altair chart objects to display
+            charts: A list of Altair chart objects to display
             theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
         """
-        altair_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
-        if theme is not None:
-            nested_update(altair_theme, theme)
+        altair_theme: Dict[str, Any]
+        if theme:
+            altair_theme = DataAssistantResult._get_theme(theme=theme)
+        else:
+            altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
 
         # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
         dropdown_title_color: str = altair_theme["legend"]["titleColor"]
@@ -124,12 +156,14 @@ class DataAssistantResult(SerializableDictDot):
             }}
             </style>
         """
-
         display(HTML(dropdown_css))
 
+        themed_charts: List[alt.chart] = DataAssistantResult.apply_theme(
+            charts=charts, theme=theme
+        )
         chart: alt.Chart
-        for chart in charts:
-            chart.configure(**altair_theme).display()
+        for chart in themed_charts:
+            chart.display()
 
     @staticmethod
     def get_line_chart(

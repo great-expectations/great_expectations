@@ -3350,3 +3350,26 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
         )
 
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
+
+
+def test_volume_data_assistant_plot_custom_theme_overrides(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    theme: Dict[str, Any] = {
+        "font": "Comic Sans MS",
+        "title": {
+            "color": "#FFA500",
+            "fontSize": 48,
+        },
+        "point": {"size": 1000},
+        "axisY": {
+            "labelColor": "red",
+            "labelAngle": 180,
+        },
+        "axisX": {"titleColor": "brown"},
+    }
+    plot_result: PlotResult = volume_data_assistant_result.plot(
+        prescriptive=True, theme=theme
+    )
+
+    assert plot_result.charts == ""
