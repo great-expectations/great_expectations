@@ -1,170 +1,132 @@
 ---
-title: How to create a new Expectation Suite using Rule Based Profilers
+title: How to compare two tables with the UserConfigurableProfiler
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-In this guide, you will utilize a User-Configurable <TechnicalTag tag="profiler" text="Profiler" /> to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> that can be used to gauge whether two tables are identical.
+In this guide, you will utilize a <TechnicalTag tag="profiler" text="UserConfigurableProfiler" /> to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> that can be used to gauge whether two tables are identical. This workflow can be used, for example, to validate migrated data.
 
 <Prerequisites>
 
 - Have a basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations).
-- Have read the overview of <TechnicalTag tag="profiler" text="Profilers" /> and the section on [User-Configurable Profilers](../../../terms/profiler.md#userconfigurableprofiler) in particular.
+- Have read the overview of <TechnicalTag tag="profiler" text="Profilers" /> and the section on [UserConfigurableProfilers](../../../terms/profiler.md#userconfigurableprofiler) in particular.
 
 </Prerequisites>
 
 
 ## Steps
 
-### 1. Set-Up
+### 1. Decide your use-case
 
-- Create a new directory, called `taxi_profiling_tutorial`
-- Within this directory, create another directory called `data`
-- Navigate to the top level of `taxi_profiling_tutorial` in a terminal and run `great_expectations init`
+This workflow can be applied to batches created from full tables, or to batches created from queries against tables. These two approaches will have slightly different workflows detailed below.
 
-### 2. Download the data
+<Tabs
+  groupId="tables"
+  defaultValue='full-table'
+  values={[
+  {label: 'Full Table', value:'full-table'},
+  {label: 'Query', value:'query'},
+  ]}>
 
-- Download [this directory](https://github.com/great-expectations/great_expectations/tree/develop/tests/test_sets/taxi_yellow_tripdata_samples) of yellow taxi trip `csv` files from the Great Expectations GitHub repo. You can use a tool like [DownGit](https://downgit.github.io/) to do so
-- Move the unzipped directory of `csv` files into the `data` directory that you created in Step 1
+<TabItem value="full-table">
 
-### 3. Set up your Datasource
+### 2. Set-Up
+<br/>
 
-- Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas.md). For the purpose of this tutorial, we will work from a `yaml` to set up your <TechnicalTag tag="datasource" text="Datasource" /> config. When you open up your notebook to create and test and save your Datasource config, replace the config docstring with the following docstring:
+In this workflow, we will be making use of the `UserConfigurableProfiler` to profile against a <TechnicalTag tag="batch_request" text="BatchRequest" /> representing our source data, and validate the resulting suite against a `BatchRequest` representing our second set of data.
 
+To begin, we'll need to set up our imports and instantiate our <TechnicalTag tag="data_context" text="Data Context" />:
+
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L2-L10
+```
+
+:::note
+Depending on your use-case, workflow, and directory structures, you may need to update you context root directory as follows:
 ```python
-example_yaml = f"""
-name: taxi_pandas
-class_name: Datasource
-execution_engine:
-  class_name: PandasExecutionEngine
-data_connectors:
-  monthly:
-    base_directory: ../<YOUR BASE DIR>/
-    glob_directive: '*.csv'
-    class_name: ConfiguredAssetFilesystemDataConnector
-    assets:
-      my_reports:
-        base_directory: ./
-        group_names:
-          - name
-          - year
-          - month
-        class_name: Asset
-        pattern: (.+)_(\d.*)-(\d.*)\.csv
-"""
+context = ge.data_context.DataContext( 
+    context_root_dir='/my/context/root/directory/great_expectations'
+)
 ```
-
-- Test your YAML config to make sure it works - you should see some of the taxi `csv` filenames listed
-- Save your Datasource config
-
-### 4. Configure the Profiler
-
-- Now, we'll create a new script in the same top-level `taxi_profiling_tutorial` directory called `profiler_script.py`. If you prefer, you could open up a Jupyter Notebook and run this there instead.
-- At the top of this file, we will create a new YAML docstring assigned to a variable called `profiler_config`. This will look similar to the YAML docstring we used above when creating our Datasource. Over the next several steps, we will slowly add lines to this docstring by typing or pasting in the lines below:
-
-```python 
-profiler_config = """
-
-"""
-```
-
-First, we'll add some relevant top level keys (`name` and `config_version`) to label our Profiler and associate it with a specific version of the feature.
-
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L10-L12
-```
-
-:::info Config Versioning
-
-Note that at the time of writing this document, `1.0` is the only supported config version.
-
 :::
 
-Then, we'll add in a `Variables` key and some variables that we'll use. Next, we'll add a top level `rules` key, and then the name of your `rule`:
+### 3. Create Batch Requests
+<br/>
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L13-L15
+In order to profile our first table and validate our second table, we need to set up our Batch Requests pointing to each set of data.
+
+In this guide, we will use a MySQL <TechnicalTag tag="datasource" text= "Datasource" /> as our source data -- the data we trust to be correct.
+
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L81-L85
 ```
 
-After that, we'll add our Domain Builder. In this case, we'll use a `TableDomainBuilder`, which will indicate that any expectations we build for this Domain will be at the Table level. Each Rule in our Profiler config can only use one Domain Builder.
+From this data, we will create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and use that suite to validate our second table, pulled from a PostgreSQL Datasource.
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L19-L20
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L88-L92
 ```
 
-Next, we'll use a `NumericMetricRangeMultiBatchParameterBuilder` to get an estimate to use for the `min_value` and `max_value` of our `expect_table_row_count_to_be_between` Expectation. This Parameter Builder will take in a <TechnicalTag tag="batch_request" text="Batch Request" /> consisting of the five Batches prior to our current Batch, and use the row counts of each of those months to get a probable range of row counts that you could use in your `ExpectationConfiguration`.
+### 4. Profile Source Data
+<br/>
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L21-L35
+We can now use the `mysql_batch_request` defined above to build a <TechnicalTag tag="validator" text="Validator" />:
+
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L95
 ```
 
-A Rule can have multiple `ParameterBuilders` if needed, but in our case, we'll only use the one for now.
+Instantiate our `UserConfigurableProfiler`:
 
-Finally, you would use an `ExpectationConfigurationBuilder` to actually build your `expect_table_row_count_to_be_between` Expectation, where the Domain is the Domain returned by your `TableDomainBuilder` (your entire table), and the `min_value` and `max_value` are Parameters returned by your `NumericMetricRangeMultiBatchParameterBuilder`.
-
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L36-L44
-```
-You can see here that we use a special `$` syntax to reference `variables` and `parameters` that have been previously defined in our config. You can see a more thorough description of this syntax in the  docstring for [`ParameterContainer` here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/types/parameter_container.py).
-
-- When we put it all together, here is what our config with our single `row_count_rule` looks like:
-
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L10-L44
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L98-L101
 ```
 
-### 5. Run the Profiler
+And use that profiler to build and save an Expectation Suite:
 
-Now let's use our config to Profile our data and create a simple Expectation Suite!
-
-First we'll do some basic set-up - set up a <TechnicalTag tag="data_context" text="Data Context" /> and parse our YAML
-
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L102-L106
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L104-L108
 ```
 
-Next, we'll instantiate our Profiler, passing in our config and our Data Context
+<details>
+<summary><code>excluded_expectations</code>?</summary>
+Above, we excluded <code>expect_column_quantile_values_to_be_between</code>, as it isn't fully supported by some SQL dialects.
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L107-L114
+This is one example of the ways in which we can customize the Suite built by our Profiler.
+
+For more on these configurations, see our [guide on the optional parameters available with the `UserConfigurableProfiler`](../../../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md#optional-parameters).
+</details>
+
+### 5. Checkpoint Set-Up
+<br/>
+
+Before we can validate our second table, we need to define a <TechnicalTag tag="checkpoint" text="Checkpoint" />. 
+
+We will pass both the `pg_batch_request` and Expectation Suite defined above to this checkpoint.
+
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L111-L121
 ```
 
-Finally, we'll run `profile()` and save it to a variable. 
+### 6. Validation
+<br/>
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L115
+Finally, we can use our Checkpoint to validate that our two tables are identical:
+
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L124-L126
 ```
 
-Then, we can print our Expectation Suite so we can see how it looks!
+If we now inspect the results of this Checkpoint (`results["success"]`), we can see that our Validation was successful!
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L120-L138
-```
+By default, the Checkpoint above also updates your Data Docs, allowing you to further inspect the results of this workflow.
 
-### 6. Add a Rule for Columns
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've just compared two tables across Datasources! &#127881;
+</b></p>
+</div>
 
-Let's add one more rule to our Rule-Based Profiler config. This Rule will use the `DomainBuilder` to populate a list of all of the numeric columns in one Batch of taxi data (in this case, the most recent Batch). It will then use our `NumericMetricRangeMultiBatchParameterBuilder` looking at the five Batches prior to our most recent Batch to get probable ranges for the min and max values for each of those columns. Finally, it will use those ranges to add two `ExpectationConfigurations` for each of those columns: `expect_column_min_to_be_between` and `expect_column_max_to_be_between`. This rule will go directly below our previous rule.
+</TabItem>
 
-As before, we will first add the name of our rule, and then specify the `DomainBuilder`.
+<TabItem value="query">
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L45-L56
-```
+</TabItem>
 
-In this case, our `DomainBuilder` configuration is a bit more complex. First, we are using a `SimpleSemanticTypeColumnDomainBuilder`. This will take a table, and return a list of all columns that match the `semantic_type` specified - `numeric` in our case.
+</Tabs>
 
-Then, we need to specify a Batch Request that returns exactly one Batch of data (this is our `data_connector_query` with `index` equal to `-1`). This tells us which Batch to use to get the columns from which we will select our numeric columns. Though we might hope that all our Batches of data have the same columns, in actuality, there might be differences between the Batches, and so we explicitly specify the Batch we want to use here.
 
-After this, we specify our `ParameterBuilders`. This is very similar to the specification in our previous rule, except we will be specifying two `NumericMetricRangeMultiBatchParameterBuilders` to get a probable range for the `min_value` and `max_value` of each of our numeric columns. Thus one `ParameterBuilder` will take the `column.min` `metric_name`, and the other will take the `column.max` `metric_name`.
-
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L57-L81
-```
-
-Finally, we'll put together our `Domains` and `Parameters` in our `ExpectationConfigurationBuilders`:
-
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L82-L100
-```
-
-Putting together our entire config, with both of our Rules, we get:
-
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L9-L100
-```
-
-And if we re-instantiate our `Profiler` with our config which now has two rules, and then we re-run the `Profiler`, we'll have an updated Expectation Suite with a table row count Expectation for our table, and column min and column max Expectations for each of our numeric columns!
-
-🚀Congratulations! You have successfully Profiled multi-batch data using a Rule-Based Profiler. Now you can try adding some new Rules, or running your Profiler on some other data (remember to change the `BatchRequest` in your config)!🚀
-
-## Additional Notes
-
-To view the full script used in this page, see it on GitHub:
-
-- [multi_batch_rule_based_profiler_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py)
