@@ -287,7 +287,7 @@ def test_semantic_domain_comparisons_inclusion():
             "cardinality": "low",
             INFERRED_SEMANTIC_TYPE_KEY: {},
         },
-        rule_name="",
+        rule_name=None,
     )
     assert domain_a.is_superset(other=domain_b)
 
@@ -298,7 +298,6 @@ def test_semantic_domain_comparisons_inclusion():
             "estimator": "categorical",
             "cardinality": "low",
         },
-        rule_name="",
     )
     assert domain_a.is_superset(other=domain_b)
 
@@ -306,7 +305,7 @@ def test_semantic_domain_comparisons_inclusion():
         domain_type="column",
         domain_kwargs=None,
         details={},
-        rule_name="",
+        rule_name=None,
     )
     assert domain_a.is_superset(other=domain_b)
 
