@@ -51,10 +51,10 @@ class Domain(SerializableDotDict):
     # Adding an explicit constructor to highlight the specific properties that will be used.
     def __init__(
         self,
-        rule_name: str,
         domain_type: Union[str, MetricDomainTypes],
         domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
         details: Optional[Dict[str, Any]] = None,
+        rule_name: Optional[str] = None,
     ) -> None:
         if isinstance(domain_type, str):
             try:
@@ -114,10 +114,10 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
                     )
 
         super().__init__(
-            rule_name=rule_name,
             domain_type=domain_type,
             domain_kwargs=domain_kwargs_dot_dict,
             details=details,
+            rule_name=rule_name,
         )
 
     def __repr__(self):
@@ -194,10 +194,10 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
             details[key] = convert_to_json_serializable(data=value)
 
         json_dict: dict = {
-            "rule_name": self["rule_name"],
             "domain_type": self["domain_type"].value,
             "domain_kwargs": self["domain_kwargs"].to_json_dict(),
             "details": details,
+            "rule_name": self["rule_name"],
         }
         json_dict = convert_to_json_serializable(data=json_dict)
 
