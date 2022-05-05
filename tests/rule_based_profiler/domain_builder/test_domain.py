@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pytest
 
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -8,6 +10,30 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     SemanticDomainTypes,
 )
+
+
+def test_semantic_domain_consistency():
+    domain: Domain
+
+    with pytest.raises(ValueError) as excinfo:
+        # noinspection PyUnusedLocal
+        domain = Domain(
+            rule_name="my_rule",
+            domain_type="column",
+            domain_kwargs={"column": "passenger_count"},
+            details={
+                "estimator": "categorical",
+                "cardinality": "low",
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "num_passengers": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        )
+
+    assert (
+        """Cannot instantiate Domain (domain_type "MetricDomainTypes.COLUMN" of type "<enum 'MetricDomainTypes'>" -- key "num_passengers", detected in "inferred_semantic_domain_type" dictionary, does not exist as value of appropriate key in "domain_kwargs" dictionary."""
+        in str(excinfo.value)
+    )
 
 
 def test_semantic_domain_serialization():
@@ -90,7 +116,7 @@ def test_semantic_domain_serialization():
     }
 
 
-def test_semantic_domain_comparisons():
+def test_semantic_domain_equivalence():
     domain_a: Domain
     domain_b: Domain
     domain_c: Domain
@@ -206,6 +232,156 @@ def test_semantic_domain_comparisons():
     )
 
 
+def test_semantic_domain_comparisons_inclusion():
+    domain_a: Optional[Domain]
+    domain_b: Optional[Domain]
+
+    domain_a = Domain(
+        rule_name="my_rule",
+        domain_type="column",
+        domain_kwargs={"column": "passenger_count"},
+        details={
+            "estimator": "categorical",
+            "cardinality": "low",
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC,
+            },
+        },
+    )
+    domain_b = None
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="my_rule",
+        domain_type="column",
+        domain_kwargs={"column": "passenger_count"},
+        details={
+            "estimator": "categorical",
+            "cardinality": "low",
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC,
+            },
+        },
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="",
+        domain_type="column",
+        domain_kwargs={"column": "passenger_count"},
+        details={
+            "estimator": "categorical",
+            "cardinality": "low",
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC,
+            },
+        },
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="",
+        domain_type="column",
+        domain_kwargs=None,
+        details={
+            "estimator": "categorical",
+            "cardinality": "low",
+            INFERRED_SEMANTIC_TYPE_KEY: {},
+        },
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="",
+        domain_type="column",
+        domain_kwargs=None,
+        details={
+            "estimator": "categorical",
+            "cardinality": "low",
+        },
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="",
+        domain_type="column",
+        domain_kwargs=None,
+        details={},
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="",
+        domain_type="column",
+        domain_kwargs=None,
+        details=None,
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="",
+        domain_type="column",
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="my_other_rule",
+        domain_type="column",
+    )
+    assert not domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="my_other_rule",
+        domain_type="table",
+    )
+    assert not domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="",
+        domain_type="table",
+    )
+    assert not domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="my_rule",
+        domain_type="table",
+    )
+    assert not domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="my_rule",
+        domain_type="column",
+        domain_kwargs={"column": "passenger_count"},
+        details={
+            "estimator": "categorical",
+            "cardinality": "medium",
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC,
+            },
+        },
+    )
+    assert not domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="my_rule",
+        domain_type="column",
+        domain_kwargs={"column": "fair_amount"},
+    )
+    assert not domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        rule_name="my_rule",
+        domain_type="column",
+        domain_kwargs={"column": "fair_amount"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "fair_amount": SemanticDomainTypes.CURRENCY,
+            },
+        },
+    )
+    assert not domain_a.is_superset(other=domain_b)
+
+
 def test_integer_semantic_domain_type():
     domain: Domain
 
@@ -217,7 +393,7 @@ def test_integer_semantic_domain_type():
         },
         details={
             INFERRED_SEMANTIC_TYPE_KEY: {
-                "VendorID": SemanticDomainTypes.NUMERIC,
+                "passenger_count": SemanticDomainTypes.NUMERIC,
             },
         },
     )
@@ -324,6 +500,7 @@ def test_integer_semantic_domain_type():
         domain_type="column",
         domain_kwargs={
             "column_list": [
+                "RatecodeID",
                 "VendorID",
                 "fare_amount",
                 "is_night_time",
