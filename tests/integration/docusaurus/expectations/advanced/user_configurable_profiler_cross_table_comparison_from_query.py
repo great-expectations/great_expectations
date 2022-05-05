@@ -30,8 +30,6 @@ load_data_into_test_database(
     connection_string=PG_CONNECTION_STRING,
 )
 
-context = ge.get_context()
-
 pg_datasource_config = {
     "name": "my_postgresql_datasource",
     "class_name": "Datasource",
