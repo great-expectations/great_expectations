@@ -3356,18 +3356,26 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
 def test_volume_data_assistant_plot_custom_theme_overrides(
     volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
+    font: str = "Comic Sans MS"
+    title_color: str = "#FFA500"
+    title_font_size: str = 48
+    point_size: int = 1000
+    y_axis_label_color: str = "red"
+    y_axis_label_angle: int = 180
+    x_axis_title_color: str = "brown"
+
     theme: Dict[str, Any] = {
-        "font": "Comic Sans MS",
+        "font": font,
         "title": {
-            "color": "#FFA500",
-            "fontSize": 48,
+            "color": title_color,
+            "fontSize": title_font_size,
         },
-        "point": {"size": 1000},
+        "point": {"size": point_size},
         "axisY": {
-            "labelColor": "red",
-            "labelAngle": 180,
+            "labelColor": y_axis_label_color,
+            "labelAngle": y_axis_label_angle,
         },
-        "axisX": {"titleColor": "brown"},
+        "axisX": {"titleColor": x_axis_title_color},
     }
     plot_result: PlotResult = volume_data_assistant_result.plot(
         prescriptive=True, theme=theme
@@ -3375,7 +3383,41 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
 
     # ensure a config has been added to each chart
     assert all(
-        [not isinstance(chart.config, alt.Undefined) for chart in plot_result.charts]
+        [
+            not isinstance(chart.config, alt.utils.schemapi.UndefinedType)
+            for chart in plot_result.charts
+        ]
     )
 
-    assert plot_result.charts == ""
+    # ensure the theme elements were updated for each chart
+    assert all([chart.config.font == font for chart in plot_result.charts])
+    assert all(
+        [chart.config.title["color"] == title_color for chart in plot_result.charts]
+    )
+    assert all(
+        [
+            chart.config.title["fontSize"] == title_font_size
+            for chart in plot_result.charts
+        ]
+    )
+    assert all(
+        [chart.config.point["size"] == point_size for chart in plot_result.charts]
+    )
+    assert all(
+        [
+            chart.config.axisY["labelColor"] == y_axis_label_color
+            for chart in plot_result.charts
+        ]
+    )
+    assert all(
+        [
+            chart.config.axisY["labelAngle"] == y_axis_label_angle
+            for chart in plot_result.charts
+        ]
+    )
+    assert all(
+        [
+            chart.config.axisX["titleColor"] == x_axis_title_color
+            for chart in plot_result.charts
+        ]
+    )
