@@ -1,6 +1,6 @@
 import copy
 from abc import abstractmethod
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import altair as alt
@@ -34,19 +34,39 @@ class DataAssistantResult(SerializableDictDot):
     """
 
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
-    metrics_by_domain: Optional[Dict[Domain, Dict[str, Any]]] = None
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     # Obtain "expectation_configurations" using "expectation_configurations = expectation_suite.expectations".
     # Obtain "meta/details" using "meta = expectation_suite.meta".
     expectation_suite: Optional[ExpectationSuite] = None
     execution_time: Optional[float] = None  # Execution time (in seconds).
 
     def to_dict(self) -> dict:
-        """Returns: this DataAssistantResult as a dictionary"""
-        return asdict(self)
+        """
+        Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
+        """
+        domain: Domain
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        return {
+            "profiler_config": self.profiler_config.to_json_dict(),
+            "metrics_by_domain": [
+                {
+                    "domain_id": domain.id,
+                    "domain": domain.to_json_dict(),
+                    "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(
+                        data=parameter_values_for_fully_qualified_parameter_names
+                    ),
+                }
+                for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
+            ],
+            "expectation_suite": self.expectation_suite.to_json_dict(),
+            "execution_time": convert_to_json_serializable(data=self.execution_time),
+        }
 
     def to_json_dict(self) -> dict:
-        """Returns: this DataAssistantResult as a json dictionary"""
-        return convert_to_json_serializable(data=self.to_dict())
+        """
+        Returns: This DataAssistantResult as JSON-serializable dictionary.
+        """
+        return self.to_dict()
 
     def get_attributed_metrics_by_domain(
         self,
@@ -138,11 +158,14 @@ class DataAssistantResult(SerializableDictDot):
             title = alt.TitleParams(title, subtitle=[subtitle])
 
         batch_id: str = "batch_id"
+        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type),
-            alt.Tooltip(field=metric_name, type=metric_type, format=","),
+            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
+            alt.Tooltip(
+                field=metric_name, type=metric_type, title=metric_title, format=","
+            ),
         ]
 
         line: alt.Chart = (
@@ -206,17 +229,26 @@ class DataAssistantResult(SerializableDictDot):
             title = alt.TitleParams(title, subtitle=[subtitle])
 
         batch_id: str = "batch_id"
+        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
+        min_value_title: str = min_value.replace("_", " ").title()
         min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         max_value: str = "max_value"
+        max_value_title: str = max_value.replace("_", " ").title()
         max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
         tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type),
-            alt.Tooltip(field=metric_name, type=metric_type, format=","),
-            alt.Tooltip(field=min_value, type=min_value_type, format=","),
-            alt.Tooltip(field=max_value, type=max_value_type, format=","),
+            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
+            alt.Tooltip(
+                field=metric_name, type=metric_type, title=metric_title, format=","
+            ),
+            alt.Tooltip(
+                field=min_value, type=min_value_type, title=min_value_title, format=","
+            ),
+            alt.Tooltip(
+                field=max_value, type=max_value_type, title=max_value_title, format=","
+            ),
         ]
 
         lower_limit: alt.Chart = (
@@ -612,23 +644,34 @@ class DataAssistantResult(SerializableDictDot):
         domain_title: str = domain_name.title()
 
         batch_id: str = "batch_id"
+        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
+        min_value_title: str = min_value.replace("_", " ").title()
         min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         max_value: str = "max_value"
+        max_value_title: str = max_value.replace("_", " ").title()
         max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         strict_min: str = "strict_min"
+        strict_min_title: str = strict_min.replace("_", " ").title()
         strict_min_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         strict_max: str = "strict_max"
+        strict_max_title: str = strict_max.replace("_", " ").title()
         strict_max_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type),
-            alt.Tooltip(field=metric_name, type=metric_type, format=","),
-            alt.Tooltip(field=min_value, type=min_value_type, format=","),
-            alt.Tooltip(field=max_value, type=max_value_type, format=","),
-            alt.Tooltip(field=strict_min, type=strict_min_type),
-            alt.Tooltip(field=strict_max, type=strict_max_type),
+            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
+            alt.Tooltip(
+                field=metric_name, type=metric_type, title=metric_title, format=","
+            ),
+            alt.Tooltip(
+                field=min_value, type=min_value_type, title=min_value_title, format=","
+            ),
+            alt.Tooltip(
+                field=max_value, type=max_value_type, title=max_value_title, format=","
+            ),
+            alt.Tooltip(field=strict_min, type=strict_min_type, title=strict_min_title),
+            alt.Tooltip(field=strict_max, type=strict_max_type, title=strict_max_title),
         ]
 
         column_name: str = "column_name"

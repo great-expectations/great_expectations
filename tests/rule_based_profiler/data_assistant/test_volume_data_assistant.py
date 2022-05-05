@@ -2565,6 +2565,12 @@ def volume_data_assistant_result(
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
     expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
         data_context=context,
         expectation_suite=None,
@@ -2572,29 +2578,9 @@ def volume_data_assistant_result(
         component_name=None,
     )
 
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=expectation_suite,
-        component_name="volume_data_assistant",
+    return context.assistants.volume.run(
+        batch_request=batch_request, expectation_suite=expectation_suite
     )
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        validator=validator,
-    )
-
-    data_assistant_result: DataAssistantResult = data_assistant.run(
-        expectation_suite=expectation_suite
-    )
-    return data_assistant_result
 
 
 def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
@@ -2701,6 +2687,20 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         nbconvert.preprocessors.ExecutePreprocessor(timeout=60, kernel_name="python3")
     )
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
+
+
+def test_volume_data_assistant_result_serialization(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    volume_data_assistant_result_as_dict: dict = volume_data_assistant_result.to_dict()
+    assert (
+        volume_data_assistant_result_as_dict is not None
+        and len(volume_data_assistant_result_as_dict) == 4
+    )
+    assert (
+        volume_data_assistant_result.to_json_dict()
+        == volume_data_assistant_result_as_dict
+    )
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -3289,7 +3289,7 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_ch
 ) -> None:
     plot_result: PlotResult = volume_data_assistant_result.plot()
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1]]
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
     assert len(column_domain_charts) == 18  # One for each column present
 
     columns: List[str] = [
@@ -3323,7 +3323,7 @@ def test_volume_data_assistant_plot_include_column_names_filters_output(
         include_column_names=include_column_names
     )
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1]]
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
     assert len(column_domain_charts) == 2  # Normally 18 without filtering
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
@@ -3336,7 +3336,7 @@ def test_volume_data_assistant_plot_exclude_column_names_filters_output(
         exclude_column_names=exclude_column_names
     )
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1]]
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
     assert len(column_domain_charts) == 16  # Normally 18 without filtering
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
