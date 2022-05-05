@@ -1,6 +1,7 @@
 import os
 from typing import Any, Callable, Dict, List
 
+import altair as alt
 import nbconvert
 import nbformat
 import pytest
@@ -3372,6 +3373,9 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
         prescriptive=True, theme=theme
     )
 
-    json_test = plot_result.charts[0].to_json()
+    # ensure a config has been added to each chart
+    assert all(
+        [not isinstance(chart.config, alt.Undefined) for chart in plot_result.charts]
+    )
 
     assert plot_result.charts == ""

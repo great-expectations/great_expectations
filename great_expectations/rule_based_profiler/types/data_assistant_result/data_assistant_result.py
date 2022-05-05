@@ -89,9 +89,12 @@ class DataAssistantResult(SerializableDictDot):
         return metrics_attributed_values_by_domain
 
     @staticmethod
-    def _get_theme(theme: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         default_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
-        return nested_update(default_theme, theme)
+        if theme:
+            return nested_update(default_theme, theme)
+        else:
+            return default_theme
 
     @staticmethod
     def apply_theme(
@@ -108,8 +111,7 @@ class DataAssistantResult(SerializableDictDot):
             charts: A list of Altair chart objects to apply a theme to
             theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
         """
-        if theme is None:
-            theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
+        theme = DataAssistantResult._get_theme(theme=theme)
         return [chart.configure(**theme) for chart in charts]
 
     @staticmethod
