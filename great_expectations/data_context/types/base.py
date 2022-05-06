@@ -124,7 +124,7 @@ class BaseYamlConfig(SerializableDictDot):
 
     def to_json_dict(self) -> dict:
         """
-        :returns a JSON-serialiable dict containing the project configuration
+        :returns a JSON-serializable dict containing the project configuration
         """
         commented_map: CommentedMap = self.commented_map
         return convert_to_json_serializable(data=commented_map)
@@ -145,16 +145,18 @@ class BaseYamlConfig(SerializableDictDot):
 class AssetConfig(DictDot):
     def __init__(
         self,
-        name=None,
-        class_name=None,
-        module_name=None,
-        bucket=None,
-        prefix=None,
-        delimiter=None,
-        max_keys=None,
-        schema_name=None,
-        batch_spec_passthrough=None,
-        batch_identifiers=None,
+        name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        bucket: Optional[str] = None,
+        prefix: Optional[str] = None,
+        delimiter: Optional[str] = None,
+        max_keys: Optional[int] = None,
+        schema_name: Optional[str] = None,
+        batch_spec_passthrough: Optional[Dict[str, Any]] = None,
+        batch_identifiers: Optional[List[str]] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> None:
         if name is not None:
@@ -175,6 +177,10 @@ class AssetConfig(DictDot):
             self.batch_spec_passthrough = batch_spec_passthrough
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
+        if splitter_method is not None:
+            self.splitter_method = splitter_method
+        if splitter_kwargs is not None:
+            self.splitter_kwargs = splitter_kwargs
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -222,6 +228,9 @@ class AssetConfigSchema(Schema):
     batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
+
+    splitter_method = fields.String(required=False, allow_none=True)
+    splitter_kwargs = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
@@ -404,6 +413,7 @@ class DataConnectorConfig(DictDot):
         if delimiter is not None:
             self.delimiter = delimiter
 
+        # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
             setattr(self, k, v)
 
