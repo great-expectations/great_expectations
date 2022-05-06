@@ -133,9 +133,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
 
     variables: Optional[ParameterContainer] = None
@@ -246,9 +246,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
 
     variables: Optional[ParameterContainer] = None
@@ -344,9 +344,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
 
     variables: Optional[ParameterContainer] = None
@@ -445,9 +445,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
 
     metric_domain_kwargs: dict = {"column": "pickup_datetime"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
 
     variables: Optional[ParameterContainer] = None
@@ -558,9 +558,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
 
     metric_domain_kwargs: dict = {"column": "pickup_datetime"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
 
     variables: Optional[ParameterContainer] = None
@@ -656,9 +656,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
 
     metric_domain_kwargs: dict = {"column": "pickup_datetime"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
 
     variables: Optional[ParameterContainer] = None

@@ -669,8 +669,8 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     domain = Domain(
-        rule_name="row_count_range_rule",
         domain_type=MetricDomainTypes.TABLE,
+        rule_name="row_count_range_rule",
     )
 
     profiled_fully_qualified_parameter_names_for_domain_id: List[
@@ -708,7 +708,6 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     domain = Domain(
-        rule_name="column_ranges_rule",
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
         details={
@@ -716,6 +715,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                 "VendorID": SemanticDomainTypes.NUMERIC,
             },
         },
+        rule_name="column_ranges_rule",
     )
 
     profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
