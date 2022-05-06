@@ -2,9 +2,17 @@ import json
 import logging
 import os
 import random
+from typing import Optional, Union
 
 import pytest
 from ruamel.yaml import YAML
+
+from great_expectations.datasource import (
+    BaseDatasource,
+    Datasource,
+    LegacyDatasource,
+    SimpleSqlalchemyDatasource,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +114,7 @@ def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector(sa):
         __file__,
         os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
     )
-    # This is a basic integration test demonstrating an Datasource containing a SQL data_connector
+    # This is a basic integration test demonstrating a Datasource containing a SQL data_connector
     # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
     config = yaml.load(
         f"""
@@ -182,10 +190,77 @@ data_connectors:
     }
 
 
+def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config(
+    sa, empty_data_context
+):
+    # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
+    # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
+    # round-trip to the configuration.
+    context: DataContext = empty_data_context
+    db_file: Union[bytes, str] = file_relative_path(
+        __file__,
+        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+    config: str = f"""
+    name: my_datasource
+    class_name: Datasource
+
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+
+    data_connectors:
+        my_sqlite_db:
+            class_name: ConfiguredAssetSqlDataConnector
+
+            assets:
+                table_partitioned_by_date_column__A:
+                    splitter_method: _split_on_converted_datetime
+                    splitter_kwargs:
+                        column_name: date
+                        date_format_string: "%Y-%W"
+    """
+    context.add_datasource(**yaml.load(config))
+    datasource: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
+        datasource_name="my_datasource"
+    )
+    report: dict = datasource.self_check()
+    report["execution_engine"].pop("connection_string")
+    assert report == {
+        "execution_engine": {
+            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
+            "class_name": "SqlAlchemyExecutionEngine",
+        },
+        "data_connectors": {
+            "count": 1,
+            "my_sqlite_db": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "data_asset_count": 1,
+                "example_data_asset_names": ["table_partitioned_by_date_column__A"],
+                "data_assets": {
+                    "table_partitioned_by_date_column__A": {
+                        "batch_definition_count": 5,
+                        "example_data_references": [
+                            {"date": "2020-00"},
+                            {"date": "2020-01"},
+                            {"date": "2020-02"},
+                        ],
+                    }
+                },
+                "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
+            },
+        },
+    }
+
+
 def test_basic_instantiation_with_InferredAssetSqlDataConnector(sa):
+    # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
+    # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
+    # round-trip to the configuration.
     random.seed(0)
 
-    db_file = file_relative_path(
+    db_file: Union[bytes, str] = file_relative_path(
         __file__,
         os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
     )
@@ -220,6 +295,74 @@ data_connectors:
     assert report == {
         "execution_engine": {
             "connection_string": connection_string_to_test,
+            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
+            "class_name": "SqlAlchemyExecutionEngine",
+        },
+        "data_connectors": {
+            "count": 1,
+            "my_sqlite_db": {
+                "class_name": "InferredAssetSqlDataConnector",
+                "data_asset_count": 21,
+                "example_data_asset_names": [
+                    "prefix__table_containing_id_spacers_for_D__xiffus",
+                    "prefix__table_full__I__xiffus",
+                    "prefix__table_partitioned_by_date_column__A__xiffus",
+                ],
+                "data_assets": {
+                    "prefix__table_containing_id_spacers_for_D__xiffus": {
+                        "batch_definition_count": 1,
+                        "example_data_references": [{}],
+                    },
+                    "prefix__table_full__I__xiffus": {
+                        "batch_definition_count": 1,
+                        "example_data_references": [{}],
+                    },
+                    "prefix__table_partitioned_by_date_column__A__xiffus": {
+                        "batch_definition_count": 1,
+                        "example_data_references": [{}],
+                    },
+                },
+                "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
+            },
+        },
+    }
+
+
+def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config(
+    sa, empty_data_context
+):
+    # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
+    # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
+    # round-trip to the configuration.
+    context: DataContext = empty_data_context
+    db_file: Union[bytes, str] = file_relative_path(
+        __file__,
+        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+    config: str = f"""
+    name: my_datasource
+    class_name: Datasource
+
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+
+    data_connectors:
+        my_sqlite_db:
+            class_name: InferredAssetSqlDataConnector
+            name: whole_table
+            data_asset_name_prefix: prefix__
+            data_asset_name_suffix: __xiffus
+        """
+    context.add_datasource(**yaml.load(config))
+    datasource: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
+        datasource_name="my_datasource"
+    )
+    report: dict = datasource.self_check()
+    report["execution_engine"].pop("connection_string")
+    assert report == {
+        "execution_engine": {
             "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
             "class_name": "SqlAlchemyExecutionEngine",
         },
