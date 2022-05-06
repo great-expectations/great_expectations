@@ -45,7 +45,7 @@ class PlotComponent:
 class MetricPlotComponent(PlotComponent):
     def plot_on_axis(self, shorthand: Optional[str] = None) -> alt.Y:
         """
-        Plots metric on Y axis - see parenet `PlotComponent` for more details.
+        Plots metric on Y axis - see parent `PlotComponent` for more details.
         """
         if shorthand is None:
             shorthand = self.name
@@ -64,7 +64,7 @@ class DomainPlotComponent(PlotComponent):
 
     def plot_on_axis(self, shorthand: Optional[str] = None) -> alt.X:
         """
-        Plots domain on X axis - see parenet `PlotComponent` for more details.
+        Plots domain on X axis - see parent `PlotComponent` for more details.
         """
         if shorthand is None:
             shorthand = self.name
