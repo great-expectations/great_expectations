@@ -972,7 +972,7 @@ def test_run_profiler_with_dynamic_args(
     rules = {"baz": "qux"}
 
     # noinspection PyUnusedLocal
-    reule_based_profiler_result: RuleBasedProfilerResult = (
+    rule_based_profiler_result: RuleBasedProfilerResult = (
         RuleBasedProfiler.run_profiler(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
