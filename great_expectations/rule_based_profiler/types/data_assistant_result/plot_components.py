@@ -82,6 +82,9 @@ class ExpectationKwargPlotComponent(PlotComponent):
     metric_plot_component: MetricPlotComponent
 
     def plot_on_axis(self) -> alt.Y:
+        """
+        Plots domain on Y axis - see parent `PlotComponent` for more details.
+        """
         return alt.Y(
             self.name,
             type=self.metric_plot_component.alt_type,
