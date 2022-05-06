@@ -92,6 +92,35 @@ class DataAssistantResult(SerializableDictDot):
         return metrics_attributed_values_by_domain
 
     @staticmethod
+    def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        default_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
+        if theme:
+            return nested_update(default_theme, theme)
+        else:
+            return default_theme
+
+    @staticmethod
+    def apply_theme(
+        charts: List[alt.Chart],
+        theme: Optional[Dict[str, Any]],
+    ) -> List[alt.Chart]:
+        """
+        Apply the Great Expectations default theme and any user-provided theme overrides to each chart
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            charts: A list of Altair chart objects to apply a theme to
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
+
+        Returns:
+            A list of Altair charts with the theme applied
+        """
+        theme: Dict[str, Any] = DataAssistantResult._get_theme(theme=theme)
+        return [chart.configure(**theme) for chart in charts]
+
+    @staticmethod
     def display(
         charts: List[alt.Chart],
         theme: Optional[Dict[str, Any]],
@@ -103,35 +132,41 @@ class DataAssistantResult(SerializableDictDot):
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            charts: A list of altair chart objects to display
-            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
+            charts: A list of Altair chart objects to display
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the default theme
         """
-        altair_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
-        if theme is not None:
-            nested_update(altair_theme, theme)
+        altair_theme: Dict[str, Any]
+        if theme:
+            altair_theme = DataAssistantResult._get_theme(theme=theme)
+        else:
+            altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
 
-        display(
-            HTML(
-                f"""
-                <style>
-                span.vega-bind-name {{
-                    color: {Colors.PURPLE.value};
-                    font: Veranda;
-                    font-weight: bold;
-                }}
-                form.vega-bindings {{
-                  position: absolute;
-                  left: 70px;
-                  top: 28px;
-                }}
-                </style>
-                """
-            )
+        themed_charts: List[alt.chart] = DataAssistantResult.apply_theme(
+            charts=charts, theme=altair_theme
         )
 
+        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+        dropdown_title_color: str = altair_theme["legend"]["titleColor"]
+        dropdown_title_font: str = altair_theme["font"]
+        dropdown_css: str = f"""
+            <style>
+            span.vega-bind-name {{
+                color: {dropdown_title_color};
+                font-family: "{dropdown_title_font}";
+                font-weight: bold;
+            }}
+            form.vega-bindings {{
+              position: relative;
+              left: 70px;
+              top: -350px;
+            }}
+            </style>
+        """
+        display(HTML(dropdown_css))
+
         chart: alt.Chart
-        for chart in charts:
-            chart.configure(**altair_theme).display()
+        for chart in themed_charts:
+            chart.display()
 
     @staticmethod
     def get_line_chart(
@@ -386,7 +421,7 @@ class DataAssistantResult(SerializableDictDot):
         ]
 
         df: pd.DataFrame = pd.DataFrame(
-            columns=[column_name, "batch", batch_id, metric_name]
+            columns=[column_name, domain_name, batch_id, metric_name]
         )
         for column, column_df in column_dfs:
             column_df[column_name] = column
@@ -518,7 +553,7 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(
                 df,
             )
-            .mark_line()
+            .mark_line(opacity=selected_opacity)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -526,19 +561,10 @@ class DataAssistantResult(SerializableDictDot):
                     title=domain_title,
                 ),
                 y=alt.Y(metric_name, type=metric_type, title=None),
-                color=alt.condition(
-                    selection,
-                    alt.Color(
-                        column_name,
-                        type=AltairDataTypes.NOMINAL.value,
-                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                    ),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
+                color=alt.Color(
+                    column_name,
+                    type=AltairDataTypes.NOMINAL.value,
+                    scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                 ),
                 tooltip=tooltip,
             )
@@ -550,7 +576,9 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(
                 df,
             )
-            .mark_point(size=point_size)
+            .mark_point(
+                size=point_size, color=Colors.GREEN.value, opacity=selected_opacity
+            )
             .encode(
                 x=alt.X(
                     domain_name,
@@ -558,16 +586,6 @@ class DataAssistantResult(SerializableDictDot):
                     title=domain_title,
                 ),
                 y=alt.Y(metric_name, type=metric_type, title=None),
-                color=alt.condition(
-                    selection,
-                    alt.value(Colors.GREEN.value),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
-                ),
                 tooltip=tooltip,
             )
             .properties(height=detail_line_chart_height)
