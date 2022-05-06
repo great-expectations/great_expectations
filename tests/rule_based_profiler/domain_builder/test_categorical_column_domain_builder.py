@@ -66,11 +66,11 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
     column_name: str
     alice_all_column_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in alice_all_column_names
     ]
@@ -108,11 +108,11 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
     column_name: str
     alice_all_column_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in alice_all_column_names
     ]
@@ -202,11 +202,11 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
     column_name: str
     alice_all_column_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in alice_all_column_names
     ]
@@ -251,11 +251,11 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
     column_name: str
     alice_all_column_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in alice_all_column_names
     ]
@@ -292,7 +292,6 @@ def test_multi_batch_very_few_cardinality(
 
     expected_domains: List[Domain] = [
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "VendorID",
@@ -302,9 +301,9 @@ def test_multi_batch_very_few_cardinality(
                     "VendorID": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="my_rule",
         ),
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "passenger_count",
@@ -314,9 +313,9 @@ def test_multi_batch_very_few_cardinality(
                     "passenger_count": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="my_rule",
         ),
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "RatecodeID",
@@ -326,9 +325,9 @@ def test_multi_batch_very_few_cardinality(
                     "RatecodeID": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="my_rule",
         ),
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "store_and_fwd_flag",
@@ -338,9 +337,9 @@ def test_multi_batch_very_few_cardinality(
                     "store_and_fwd_flag": SemanticDomainTypes.TEXT,
                 },
             },
+            rule_name="my_rule",
         ),
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "payment_type",
@@ -350,9 +349,9 @@ def test_multi_batch_very_few_cardinality(
                     "payment_type": SemanticDomainTypes.NUMERIC,
                 }
             },
+            rule_name="my_rule",
         ),
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "mta_tax",
@@ -362,9 +361,9 @@ def test_multi_batch_very_few_cardinality(
                     "mta_tax": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="my_rule",
         ),
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "improvement_surcharge",
@@ -374,9 +373,9 @@ def test_multi_batch_very_few_cardinality(
                     "improvement_surcharge": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="my_rule",
         ),
         Domain(
-            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "congestion_surcharge",
@@ -386,6 +385,7 @@ def test_multi_batch_very_few_cardinality(
                     "congestion_surcharge": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="my_rule",
         ),
     ]
 

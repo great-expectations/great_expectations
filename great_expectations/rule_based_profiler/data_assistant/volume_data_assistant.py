@@ -9,6 +9,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    Domain,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
@@ -26,6 +27,8 @@ class VolumeDataAssistant(DataAssistant):
         - "expect_column_unique_value_count_to_be_between";
         - Others in the future.
     """
+
+    __alias__: str = "volume"
 
     def __init__(
         self,
@@ -51,9 +54,9 @@ class VolumeDataAssistant(DataAssistant):
         }
 
     @property
-    def metrics_parameter_builders_by_domain_type(
+    def metrics_parameter_builders_by_domain(
         self,
-    ) -> Dict[MetricDomainTypes, List[ParameterBuilder]]:
+    ) -> Dict[Domain, List[ParameterBuilder]]:
         table_row_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
             name="table_row_count",
             metric_name="table.row_count",
@@ -79,10 +82,10 @@ class VolumeDataAssistant(DataAssistant):
             data_context=None,
         )
         return {
-            MetricDomainTypes.TABLE: [
+            Domain(domain_type=MetricDomainTypes.TABLE,): [
                 table_row_count_metric_multi_batch_parameter_builder,
             ],
-            MetricDomainTypes.COLUMN: [
+            Domain(domain_type=MetricDomainTypes.COLUMN,): [
                 column_distinct_values_metric_multi_batch_parameter_builder,
             ],
         }
@@ -101,6 +104,7 @@ class VolumeDataAssistant(DataAssistant):
         return VolumeDataAssistantResult(
             profiler_config=data_assistant_result.profiler_config,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
-            expectation_suite=data_assistant_result.expectation_suite,
+            expectation_configurations=data_assistant_result.expectation_configurations,
+            citation=data_assistant_result.citation,
             execution_time=data_assistant_result.execution_time,
         )

@@ -13,7 +13,7 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from tests.integration.fixtures.split_data.splitter_test_cases_and_fixtures import (
+from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
     TaxiSplittingTestCase,
     TaxiSplittingTestCases,
     TaxiTestData,
