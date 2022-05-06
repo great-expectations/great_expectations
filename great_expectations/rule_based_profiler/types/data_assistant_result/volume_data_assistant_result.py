@@ -76,6 +76,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         self.display(charts=display_charts, theme=theme)
 
+        return_charts = self.apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
 
     def _plot_table_domain_charts(
