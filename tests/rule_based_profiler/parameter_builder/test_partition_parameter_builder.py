@@ -62,9 +62,9 @@ def test_partition_parameter_builder_alice_continuous(
 
     metric_domain_kwargs: dict = {"column": "user_id"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -129,9 +129,9 @@ def test_partition_parameter_builder_alice_categorical(
 
     metric_domain_kwargs: dict = {"column": "event_type"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -195,9 +195,9 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
 
     metric_domain_kwargs: dict = {"column": "event_ts"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)

@@ -50,7 +50,10 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
         )
     )
 
-    domain: Domain = Domain(rule_name="my_rule", domain_type=MetricDomainTypes.COLUMN)
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        rule_name="my_rule",
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -93,9 +96,9 @@ def test_simple_date_format_parameter_builder_alice(
     assert date_format_string_parameter._threshold == 1.0
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -225,9 +228,9 @@ def test_simple_date_format_parameter_builder_bobby(
     assert date_format_string_parameter._threshold == 0.9
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
