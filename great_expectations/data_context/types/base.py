@@ -940,7 +940,7 @@ class DatasourceConfigSchema(Schema):
     )
     limit = fields.Integer(required=False, allow_none=True)
 
-    # noinspection PyUnusedLocagreat_expectations/execution_engine/split_and_sample/sqlalchemy_data_splitter.py
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "generators" in data:

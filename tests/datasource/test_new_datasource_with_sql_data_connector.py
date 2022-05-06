@@ -107,7 +107,19 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     return context
 
 
-def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector(sa):
+# TODO
+def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector_sampling(sa):
+    pass
+
+
+# TODO
+def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_sampling(
+    sa, empty_data_context
+):
+    pass
+
+
+def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector_splitting(sa):
     random.seed(0)
 
     db_file = file_relative_path(
@@ -190,7 +202,7 @@ data_connectors:
     }
 
 
-def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config(
+def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_splitting(
     sa, empty_data_context
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
@@ -254,7 +266,7 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
     }
 
 
-def test_basic_instantiation_with_InferredAssetSqlDataConnector(sa):
+def test_basic_instantiation_with_InferredAssetSqlDataConnector_splitting(sa):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
     # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
@@ -281,6 +293,10 @@ data_connectors:
         name: whole_table
         data_asset_name_prefix: prefix__
         data_asset_name_suffix: __xiffus
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%W"
     """,
     )
 
@@ -294,7 +310,7 @@ data_connectors:
     connection_string_to_test = f"""sqlite:///{db_file}"""
     assert report == {
         "execution_engine": {
-            "connection_string": connection_string_to_test,
+            "connection_string": "sqlite:////Users/work/Development/great_expectations/tests/datasource/../test_sets/test_cases_for_sql_data_connector.db",
             "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
             "class_name": "SqlAlchemyExecutionEngine",
         },
@@ -302,7 +318,7 @@ data_connectors:
             "count": 1,
             "my_sqlite_db": {
                 "class_name": "InferredAssetSqlDataConnector",
-                "data_asset_count": 21,
+                "data_asset_count": 6,
                 "example_data_asset_names": [
                     "prefix__table_containing_id_spacers_for_D__xiffus",
                     "prefix__table_full__I__xiffus",
@@ -310,16 +326,28 @@ data_connectors:
                 ],
                 "data_assets": {
                     "prefix__table_containing_id_spacers_for_D__xiffus": {
-                        "batch_definition_count": 1,
-                        "example_data_references": [{}],
+                        "batch_definition_count": 5,
+                        "example_data_references": [
+                            {"date": "2020-00"},
+                            {"date": "2020-01"},
+                            {"date": "2020-02"},
+                        ],
                     },
                     "prefix__table_full__I__xiffus": {
-                        "batch_definition_count": 1,
-                        "example_data_references": [{}],
+                        "batch_definition_count": 5,
+                        "example_data_references": [
+                            {"date": "2020-00"},
+                            {"date": "2020-01"},
+                            {"date": "2020-02"},
+                        ],
                     },
                     "prefix__table_partitioned_by_date_column__A__xiffus": {
-                        "batch_definition_count": 1,
-                        "example_data_references": [{}],
+                        "batch_definition_count": 5,
+                        "example_data_references": [
+                            {"date": "2020-00"},
+                            {"date": "2020-01"},
+                            {"date": "2020-02"},
+                        ],
                     },
                 },
                 "unmatched_data_reference_count": 0,
@@ -329,7 +357,7 @@ data_connectors:
     }
 
 
-def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config(
+def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_splitting(
     sa, empty_data_context
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
@@ -354,6 +382,10 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config(
             name: whole_table
             data_asset_name_prefix: prefix__
             data_asset_name_suffix: __xiffus
+            splitter_method: _split_on_converted_datetime
+            splitter_kwargs:
+                column_name: date
+                date_format_string: "%Y-%W"
         """
     context.add_datasource(**yaml.load(config))
     datasource: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
@@ -363,6 +395,7 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config(
     report["execution_engine"].pop("connection_string")
     assert report == {
         "execution_engine": {
+            "connection_string": "sqlite:////Users/work/Development/great_expectations/tests/datasource/../test_sets/test_cases_for_sql_data_connector.db",
             "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
             "class_name": "SqlAlchemyExecutionEngine",
         },
@@ -370,7 +403,7 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config(
             "count": 1,
             "my_sqlite_db": {
                 "class_name": "InferredAssetSqlDataConnector",
-                "data_asset_count": 21,
+                "data_asset_count": 6,
                 "example_data_asset_names": [
                     "prefix__table_containing_id_spacers_for_D__xiffus",
                     "prefix__table_full__I__xiffus",
@@ -378,16 +411,28 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config(
                 ],
                 "data_assets": {
                     "prefix__table_containing_id_spacers_for_D__xiffus": {
-                        "batch_definition_count": 1,
-                        "example_data_references": [{}],
+                        "batch_definition_count": 5,
+                        "example_data_references": [
+                            {"date": "2020-00"},
+                            {"date": "2020-01"},
+                            {"date": "2020-02"},
+                        ],
                     },
                     "prefix__table_full__I__xiffus": {
-                        "batch_definition_count": 1,
-                        "example_data_references": [{}],
+                        "batch_definition_count": 5,
+                        "example_data_references": [
+                            {"date": "2020-00"},
+                            {"date": "2020-01"},
+                            {"date": "2020-02"},
+                        ],
                     },
                     "prefix__table_partitioned_by_date_column__A__xiffus": {
-                        "batch_definition_count": 1,
-                        "example_data_references": [{}],
+                        "batch_definition_count": 5,
+                        "example_data_references": [
+                            {"date": "2020-00"},
+                            {"date": "2020-01"},
+                            {"date": "2020-02"},
+                        ],
                     },
                 },
                 "unmatched_data_reference_count": 0,
@@ -395,6 +440,18 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config(
             },
         },
     }
+
+
+# TODO
+def test_basic_instantiation_with_InferredAssetSqlDataConnector_sampling(sa):
+    pass
+
+
+# TODO
+def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_sampling(
+    sa, empty_data_context
+):
+    pass
 
 
 def test_SimpleSqlalchemyDatasource(empty_data_context):
