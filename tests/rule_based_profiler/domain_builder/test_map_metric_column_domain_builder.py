@@ -53,6 +53,7 @@ def test_column_values_unique_single_batch(alice_columnar_table_single_batch_con
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in alice_compliant_column_names
     ]
@@ -123,6 +124,7 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted(
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -194,6 +196,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -265,6 +268,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_une
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -335,6 +339,7 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted_tight_max_unex
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -406,6 +411,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
