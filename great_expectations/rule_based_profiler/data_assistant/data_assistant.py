@@ -293,6 +293,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         pass
 
+    # noinspection PyShadowingNames
     def get_metrics_by_domain(self) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
         Obtain subset of all parameter values for fully-qualified parameter names by domain, available from entire
@@ -303,6 +304,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         Returns:
             Dictionaries of values for fully-qualified parameter names by Domain for metrics, from "RuleBasedpRofiler"
         """
+        domain_key: Domain
+
         # noinspection PyTypeChecker
         parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
             Domain, Dict[str, ParameterNode]
@@ -319,6 +322,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         )
 
         domain: Domain
+
         parameter_builders: List[ParameterBuilder]
         parameter_builder: ParameterBuilder
         fully_qualified_metrics_parameter_names_by_domain: Dict[Domain, List[str]] = {
@@ -329,18 +333,21 @@ class DataAssistant(metaclass=MetaDataAssistant):
             for domain, parameter_builders in self.metrics_parameter_builders_by_domain.items()
         }
 
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        fully_qualified_metrics_parameter_names: List[str]
+
         # noinspection PyTypeChecker
         parameter_values_for_fully_qualified_parameter_names_by_domain = {
             domain: dict(
                 filter(
                     lambda element: element[0]
-                    in fully_qualified_metrics_parameter_names_by_domain[domain_cursor],
+                    in fully_qualified_metrics_parameter_names_by_domain[domain_key],
                     parameter_values_for_fully_qualified_parameter_names.items(),
                 )
             )
-            for domain_cursor, fully_qualified_metrics_parameter_names in fully_qualified_metrics_parameter_names_by_domain.items()
+            for domain_key, fully_qualified_metrics_parameter_names in fully_qualified_metrics_parameter_names_by_domain.items()
             for domain, parameter_values_for_fully_qualified_parameter_names in parameter_values_for_fully_qualified_parameter_names_by_domain.items()
-            if domain.is_superset(domain_cursor)
+            if domain.is_superset(domain_key)
         }
 
         return parameter_values_for_fully_qualified_parameter_names_by_domain
