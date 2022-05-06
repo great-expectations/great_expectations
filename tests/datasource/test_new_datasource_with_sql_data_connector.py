@@ -294,11 +294,10 @@ data_connectors:
         runtime_environment={"name": "my_sql_datasource"},
     )
     report = my_data_source.self_check()
+    report["execution_engine"].pop("connection_string")
 
-    connection_string_to_test = f"""sqlite:///{db_file}"""
     assert report == {
         "execution_engine": {
-            "connection_string": "sqlite:////Users/work/Development/great_expectations/tests/datasource/../test_sets/test_cases_for_sql_data_connector.db",
             "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
             "class_name": "SqlAlchemyExecutionEngine",
         },
@@ -383,7 +382,6 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
     report["execution_engine"].pop("connection_string")
     assert report == {
         "execution_engine": {
-            "connection_string": "sqlite:////Users/work/Development/great_expectations/tests/datasource/../test_sets/test_cases_for_sql_data_connector.db",
             "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
             "class_name": "SqlAlchemyExecutionEngine",
         },
