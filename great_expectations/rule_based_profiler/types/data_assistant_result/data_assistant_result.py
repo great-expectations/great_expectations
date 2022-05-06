@@ -24,6 +24,7 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_com
     DomainPlotComponent,
     MetricPlotComponent,
     PlotComponent,
+    determine_plot_title,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
     PlotResult,
@@ -157,20 +158,19 @@ class DataAssistantResult(SerializableDictDot):
             An altair line chart
         """
         metric_component: MetricPlotComponent = MetricPlotComponent(
-            metric_name, metric_type
+            name=metric_name, alt_type=metric_type
         )
         domain_component: DomainPlotComponent = DomainPlotComponent(
-            domain_name, domain_type
+            name=domain_name, alt_type=domain_type, subtitle=subtitle
         )
         batch_id_component: BatchPlotComponent = BatchPlotComponent(
-            "batch_id", AltairDataTypes.NOMINAL.value
+            name="batch_id", alt_type=AltairDataTypes.NOMINAL.value
         )
         return DataAssistantResult._get_line_chart(
             df=df,
             metric_component=metric_component,
             domain_component=domain_component,
             batch_id_component=batch_id_component,
-            subtitle=subtitle,
         )
 
     @staticmethod
@@ -179,12 +179,10 @@ class DataAssistantResult(SerializableDictDot):
         metric_component: MetricPlotComponent,
         domain_component: DomainPlotComponent,
         batch_id_component: BatchPlotComponent,
-        subtitle: Optional[str],
     ) -> alt.Chart:
-        title: alt.TitleParams = DataAssistantResult._determine_plot_title(
-            metric_title=metric_component.title,
-            domain_title=domain_component.title,
-            subtitle=subtitle,
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_component=metric_component,
+            domain_plot_component=domain_component,
         )
 
         tooltip: List[alt.Tooltip] = [
@@ -230,25 +228,24 @@ class DataAssistantResult(SerializableDictDot):
             metric_type: The altair data type for the metric being plotted
             domain_name: The name of the domain as it exists in the pandas dataframe
             domain_type: The altair data type for the domain being plotted
-            subtitle: The subtitle to add for a domain such as "Column: column_name"
 
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
         metric_component: MetricPlotComponent = MetricPlotComponent(
-            metric_name, metric_type
+            name=metric_name, alt_type=metric_type
         )
         domain_component: DomainPlotComponent = DomainPlotComponent(
-            domain_name, domain_type
+            name=domain_name, alt_type=domain_type, subtitle=subtitle
         )
         batch_id_component: BatchPlotComponent = BatchPlotComponent(
-            "batch_id", AltairDataTypes.NOMINAL.value
+            name="batch_id", alt_type=AltairDataTypes.NOMINAL.value
         )
         min_value_component: PlotComponent = PlotComponent(
-            "min_value", AltairDataTypes.QUANTITATIVE.value
+            name="min_value", alt_type=AltairDataTypes.QUANTITATIVE.value
         )
         max_value_component: PlotComponent = PlotComponent(
-            "max_value", AltairDataTypes.QUANTITATIVE.value
+            name="max_value", alt_type=AltairDataTypes.QUANTITATIVE.value
         )
 
         return DataAssistantResult._get_expect_domain_values_to_be_between_chart(
@@ -258,7 +255,6 @@ class DataAssistantResult(SerializableDictDot):
             batch_id_component=batch_id_component,
             min_value_component=min_value_component,
             max_value_component=max_value_component,
-            subtitle=subtitle,
         )
 
     @staticmethod
@@ -269,14 +265,12 @@ class DataAssistantResult(SerializableDictDot):
         batch_id_component: BatchPlotComponent,
         min_value_component: PlotComponent,
         max_value_component: PlotComponent,
-        subtitle: Optional[str],
     ) -> alt.Chart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
-        title: alt.TitleParams = DataAssistantResult._determine_plot_title(
-            metric_title=metric_component.title,
-            domain_title=domain_component.title,
-            subtitle=subtitle,
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_component=metric_component,
+            domain_plot_component=domain_component,
         )
 
         tooltip: List[alt.Tooltip] = [
@@ -324,7 +318,6 @@ class DataAssistantResult(SerializableDictDot):
             metric_component=metric_component,
             domain_component=domain_component,
             batch_id_component=batch_id_component,
-            subtitle=None,
         )
 
         # encode point color based on anomalies
@@ -856,20 +849,6 @@ class DataAssistantResult(SerializableDictDot):
         interactive_detail_multi_line_chart.vconcat[2].layer = detail_chart_layers
 
         return interactive_detail_multi_line_chart
-
-    @staticmethod
-    def _determine_plot_title(
-        metric_title: str, domain_title: str, subtitle: Optional[str]
-    ) -> alt.TitleParams:
-        contents: str = f"{metric_title} per {domain_title}"
-
-        title: alt.TitleParams
-        if subtitle:
-            title = alt.TitleParams(contents, subtitle=[subtitle])
-        else:
-            title = alt.TitleParams(contents)
-
-        return title
 
     @abstractmethod
     def plot(

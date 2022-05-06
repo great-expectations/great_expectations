@@ -58,6 +58,8 @@ class MetricPlotComponent(PlotComponent):
 
 @dataclass(frozen=True)
 class DomainPlotComponent(PlotComponent):
+    subtitle: Optional[str] = None
+
     @property
     def title(self) -> str:
         return self.name.title()
@@ -80,3 +82,31 @@ class BatchPlotComponent(PlotComponent):
     @property
     def title(self) -> str:
         return self.name.replace("_", " ").title().replace("Id", "ID")
+
+
+def determine_plot_title(
+    metric_plot_component: MetricPlotComponent,
+    domain_plot_component: DomainPlotComponent,
+) -> alt.TitleParams:
+    """Determines the appropriate title for a chart based on input componentsself.
+
+    Conditionally renders a subtitle if relevant (specifically with column domain)
+
+    Args:
+        metric_plot_component: Plot utility corresponding to a given metric.
+        domain_plot_component: Plot utility corresponding to a given domain.
+
+    Returns:
+        An Altair TitleParam object
+
+    """
+    contents: str = f"{metric_plot_component.title} per {domain_plot_component.title}"
+    subtitle: Optional[str] = domain_plot_component.subtitle
+
+    title: alt.TitleParams
+    if subtitle:
+        title = alt.TitleParams(contents, subtitle=[subtitle])
+    else:
+        title = alt.TitleParams(contents)
+
+    return title
