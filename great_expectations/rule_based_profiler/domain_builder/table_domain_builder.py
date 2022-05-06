@@ -34,8 +34,8 @@ class TableDomainBuilder(DomainBuilder):
     ) -> List[Domain]:
         domains: List[Domain] = [
             Domain(
-                rule_name=rule_name,
                 domain_type=self.domain_type,
+                rule_name=rule_name,
             ),
         ]
 
