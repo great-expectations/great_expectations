@@ -7,6 +7,7 @@ module.exports = {
   tagline: 'Always know what to expect from your data.',
   url: 'https://docs.greatexpectations.io', // Url to your site with no trailing slash
   baseUrl: '/',
+  onDuplicateRoutes: 'warn',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'https://greatexpectations.io/favicon-32x32.png',
@@ -14,8 +15,7 @@ module.exports = {
   projectName: 'great_expectations',
   plugins: [
     // ["plugin-image-zoom"],
-    require.resolve('@cmfcmf/docusaurus-search-local'),
-    '@docusaurus-terminology/parser'
+    require.resolve('@cmfcmf/docusaurus-search-local')
   ],
 
   themeConfig: {
@@ -24,12 +24,6 @@ module.exports = {
     },
     colorMode: {
       disableSwitch: true
-    },
-    gtag: {
-      // You can also use your "G-" Measurement ID here.
-      trackingID: 'UA-138955219-1',
-      // Optional fields.
-      anonymizeIP: true // Should IPs be anonymized?
     },
     zoomSelector: '.markdown :not(em) > img',
     announcementBar: {
@@ -45,7 +39,8 @@ module.exports = {
       logo: {
         alt: 'Great Expectations',
         src: 'img/great-expectations-logo-full-size.png',
-        href: 'https://greatexpectations.io'
+        href: 'https://greatexpectations.io',
+        height: 64
       },
       items: [
         {
@@ -142,26 +137,27 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
+          lastVersion: 'current',
+          versions: {
+            // Example configuration:
+            // <WILL> may have to be fixed
+            current: {
+              label: 'Current'
+            }
+          },
           sidebarPath: require.resolve('./sidebars.js'),
           remarkPlugins: [remarkCodeImport],
           editUrl:
                         'https://github.com/great-expectations/great_expectations/tree/develop/'
         },
+        gtag: {
+          // You can also use your "G-" Measurement ID here.
+          trackingID: 'UA-138955219-1',
+          // Optional fields.
+          anonymizeIP: true // Should IPs be anonymized?
+        },
         theme: {
           customCss: require.resolve('./src/css/custom.css')
-        },
-        lastVersion: 'current',
-        versions: {
-          // Example configuration:
-          // <WILL> may have to be fixed
-          current: {
-            label: 'docs',
-            path: 'docs'
-          },
-          '0.13.9': {
-            label: '0.13.9-docs',
-            path: '0.13.9'
-          }
         }
       }
     ]
