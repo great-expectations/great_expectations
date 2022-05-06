@@ -158,7 +158,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 batch identifier matches the date_part value in the column_name column.
         """
         self._validate_date_parts(date_parts)
-        # split on date parts
         date_parts: List[DatePart] = self._convert_date_parts(date_parts)
 
         column_batch_identifiers: dict = batch_identifiers[column_name]

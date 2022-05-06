@@ -52,7 +52,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self._assets: dict = {}
         if assets:
             for asset_name, config in assets.items():
-                # here is where we add the assets, but we aren't adding hte correct ones
                 self.add_data_asset(asset_name, config)
 
         if execution_engine:

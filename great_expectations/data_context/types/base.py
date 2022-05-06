@@ -372,7 +372,6 @@ class DataConnectorConfig(DictDot):
         prefix=None,
         # Both S3/Azure
         delimiter=None,
-        # do we need to include samplers and splitters?
         **kwargs,
     ) -> None:
         self._class_name = class_name
@@ -424,6 +423,7 @@ class DataConnectorConfig(DictDot):
         if delimiter is not None:
             self.delimiter = delimiter
 
+        # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -940,9 +940,7 @@ class DatasourceConfigSchema(Schema):
     )
     limit = fields.Integer(required=False, allow_none=True)
 
-    # splitters and samplers?
-
-    # noinspection PyUnusedLocal
+    # noinspection PyUnusedLocagreat_expectations/execution_engine/split_and_sample/sqlalchemy_data_splitter.py
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "generators" in data:

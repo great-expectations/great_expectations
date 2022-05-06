@@ -112,7 +112,6 @@ if __name__ == "test_script_module":
         print("Testing splitter method:", test_case.splitter_method_name)
 
         # 1. Setup
-        # 2. Set splitter in data connector config
         context: DataContext = ge.get_context()
 
         datasource_name: str = "test_datasource"
@@ -120,6 +119,7 @@ if __name__ == "test_script_module":
         data_asset_name: str = table_name  # Read from generated table name
         column_name: str = taxi_splitting_test_cases.test_column_name
 
+        # 2. Set splitter in data connector config
         data_connector_config: dict = {
             "class_name": "ConfiguredAssetSqlDataConnector",
             "assets": {
@@ -129,6 +129,7 @@ if __name__ == "test_script_module":
                 }
             },
         }
+
         context.add_datasource(
             name=datasource_name,
             class_name="Datasource",
@@ -138,14 +139,14 @@ if __name__ == "test_script_module":
             },
             data_connectors={data_connector_name: data_connector_config},
         )
-        test_datasource: [
-            LegacyDatasource,
-            BaseDatasource,
-            None,
-        ] = context.get_datasource(datasource_name="test_datasource")
-        data_connector: ConfiguredAssetSqlDataConnector = (
-            test_datasource.data_connectors["test_data_connector"]
+
+        datasource: BaseDatasource = context.get_datasource(
+            datasource_name="test_datasource"
         )
+
+        data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
+            "test_data_connector"
+        ]
 
         # 3. Check if resulting batches are as expected
         # using data_connector.get_batch_definition_list_from_batch_request()
