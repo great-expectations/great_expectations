@@ -138,8 +138,10 @@ if __name__ == "test_script_module":
             },
             data_connectors={data_connector_name: data_connector_config},
         )
-        test_datasource: Optional[
-            LegacyDatasource, BaseDatasource
+        test_datasource: [
+            LegacyDatasource,
+            BaseDatasource,
+            None,
         ] = context.get_datasource(datasource_name="test_datasource")
         data_connector: ConfiguredAssetSqlDataConnector = (
             test_datasource.data_connectors["test_data_connector"]
