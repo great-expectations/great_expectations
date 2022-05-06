@@ -124,7 +124,7 @@ class BaseYamlConfig(SerializableDictDot):
 
     def to_json_dict(self) -> dict:
         """
-        :returns a JSON-serialiable dict containing the project configuration
+        :returns a JSON-serializable dict containing the project configuration
         """
         commented_map: CommentedMap = self.commented_map
         return convert_to_json_serializable(data=commented_map)
