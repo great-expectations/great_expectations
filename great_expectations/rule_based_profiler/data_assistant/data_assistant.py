@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -310,8 +309,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         ] = dict(
             filter(
                 lambda element: any(
-                    element[0].is_superset(other=domain_cursor)
-                    for domain_cursor in list(
+                    element[0].is_superset(other=domain_key)
+                    for domain_key in list(
                         self.metrics_parameter_builders_by_domain.keys()
                     )
                 ),
@@ -319,36 +318,29 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
         )
 
-        fully_qualified_metrics_parameter_names_by_domain_type: Dict[
-            MetricDomainTypes : List[str]
-        ] = {}
-
-        domain_type: MetricDomainTypes
+        domain: Domain
         parameter_builders: List[ParameterBuilder]
         parameter_builder: ParameterBuilder
-        for (
-            domain_type,
-            parameter_builders,
-        ) in self.metrics_parameter_builders_by_domain_type.items():
-            fully_qualified_metrics_parameter_names_by_domain_type[domain_type] = [
+        fully_qualified_metrics_parameter_names_by_domain: Dict[Domain, List[str]] = {
+            domain: [
                 parameter_builder.fully_qualified_parameter_name
                 for parameter_builder in parameter_builders
             ]
+            for domain, parameter_builders in self.metrics_parameter_builders_by_domain.items()
+        }
 
-        domain: Domain
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         # noinspection PyTypeChecker
         parameter_values_for_fully_qualified_parameter_names_by_domain = {
             domain: dict(
                 filter(
                     lambda element: element[0]
-                    in fully_qualified_metrics_parameter_names_by_domain_type[
-                        domain.domain_type
-                    ],
+                    in fully_qualified_metrics_parameter_names_by_domain[domain_cursor],
                     parameter_values_for_fully_qualified_parameter_names.items(),
                 )
             )
+            for domain_cursor, fully_qualified_metrics_parameter_names in fully_qualified_metrics_parameter_names_by_domain.items()
             for domain, parameter_values_for_fully_qualified_parameter_names in parameter_values_for_fully_qualified_parameter_names_by_domain.items()
+            if domain.is_superset(domain_cursor)
         }
 
         return parameter_values_for_fully_qualified_parameter_names_by_domain
