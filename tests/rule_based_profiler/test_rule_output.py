@@ -42,22 +42,22 @@ def test_rule_output_get_fully_qualified_parameter_names_by_domain(
 ):
     expected_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = {
         Domain(
-            rule_name="my_rule",
             domain_type="column",
             domain_kwargs={
                 "column": "Age",
             },
             details={},
+            rule_name="my_rule",
         ): [
             "$mean",
         ],
         Domain(
-            rule_name="my_rule",
             domain_type="column",
             domain_kwargs={
                 "column": "Date",
             },
             details={},
+            rule_name="my_rule",
         ): [
             "$parameter.weekly_taxi_fairs.mean_values",
             "$parameter.tolerances.mostly",
@@ -114,7 +114,9 @@ def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_by
             rule_name="my_rule", domain_type="column", domain_kwargs={"column": "Age"}
         ): {"$mean": 5.0},
         Domain(
-            rule_name="my_rule", domain_type="column", domain_kwargs={"column": "Date"}
+            domain_type="column",
+            domain_kwargs={"column": "Date"},
+            rule_name="my_rule",
         ): {
             "$parameter.weekly_taxi_fairs.mean_values": {
                 "value": [
