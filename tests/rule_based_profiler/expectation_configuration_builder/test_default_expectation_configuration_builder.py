@@ -45,9 +45,9 @@ def test_meta_not_dict_exception(
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -109,9 +109,9 @@ def test_condition_not_string_exception(
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -172,9 +172,9 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -228,9 +228,9 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -297,9 +297,9 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -362,9 +362,9 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -430,9 +430,9 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -499,9 +499,9 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -568,9 +568,9 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -637,9 +637,9 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -706,9 +706,9 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -775,9 +775,9 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -844,9 +844,9 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -913,9 +913,9 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -982,9 +982,9 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
@@ -1051,9 +1051,9 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
