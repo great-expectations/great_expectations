@@ -119,7 +119,7 @@ if __name__ == "test_script_module":
         data_asset_name: str = table_name  # Read from generated table name
         column_name: str = taxi_splitting_test_cases.test_column_name
 
-        # 2. Set splitter in data connector config
+        # 2. Set splitter in DataConnector config
         data_connector_config: dict = {
             "class_name": "ConfiguredAssetSqlDataConnector",
             "assets": {
