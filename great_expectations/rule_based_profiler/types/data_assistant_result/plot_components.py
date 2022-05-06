@@ -29,11 +29,8 @@ class PlotComponent:
             format=format,
         )
 
-    def plot_on_axis(self, shorthand: Optional[str] = None) -> Union[alt.X, alt.Y]:
+    def plot_on_axis(self) -> Union[alt.X, alt.Y]:
         """Wrapper around alt.X/alt.Y plotting utility.
-
-        Args:
-            shorthand (Optional[str]): If provided, used as shorthand for field, aggregate, and type.
 
         Returns:
             Either an alt.X or alt.Y instance based on desired axis.
@@ -43,14 +40,12 @@ class PlotComponent:
 
 @dataclass(frozen=True)
 class MetricPlotComponent(PlotComponent):
-    def plot_on_axis(self, shorthand: Optional[str] = None) -> alt.Y:
+    def plot_on_axis(self) -> alt.Y:
         """
         Plots metric on Y axis - see parent `PlotComponent` for more details.
         """
-        if shorthand is None:
-            shorthand = self.name
         return alt.Y(
-            shorthand,
+            self.name,
             type=self.alt_type,
             title=self.title,
         )
@@ -64,14 +59,12 @@ class DomainPlotComponent(PlotComponent):
     def title(self) -> str:
         return self.name.title()
 
-    def plot_on_axis(self, shorthand: Optional[str] = None) -> alt.X:
+    def plot_on_axis(self) -> alt.X:
         """
         Plots domain on X axis - see parent `PlotComponent` for more details.
         """
-        if shorthand is None:
-            shorthand = self.name
         return alt.X(
-            shorthand,
+            self.name,
             type=self.alt_type,
             title=self.title,
         )
@@ -82,6 +75,18 @@ class BatchPlotComponent(PlotComponent):
     @property
     def title(self) -> str:
         return self.name.replace("_", " ").title().replace("Id", "ID")
+
+
+@dataclass(frozen=True)
+class ExpectationKwargPlotComponent(PlotComponent):
+    metric_plot_component: MetricPlotComponent
+
+    def plot_on_axis(self) -> alt.Y:
+        return alt.Y(
+            self.name,
+            type=self.metric_plot_component.alt_type,
+            title=self.metric_plot_component.title,
+        )
 
 
 def determine_plot_title(

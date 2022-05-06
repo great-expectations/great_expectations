@@ -22,6 +22,7 @@ from great_expectations.rule_based_profiler.types.altair import (
 from great_expectations.rule_based_profiler.types.data_assistant_result.plot_components import (
     BatchPlotComponent,
     DomainPlotComponent,
+    ExpectationKwargPlotComponent,
     MetricPlotComponent,
     PlotComponent,
     determine_plot_title,
@@ -198,14 +199,14 @@ class DataAssistantResult(SerializableDictDot):
         domain_component: DomainPlotComponent = DomainPlotComponent(
             name=domain_name, alt_type=domain_type, subtitle=subtitle
         )
-        batch_id_component: BatchPlotComponent = BatchPlotComponent(
+        batch_component: BatchPlotComponent = BatchPlotComponent(
             name="batch_id", alt_type=AltairDataTypes.NOMINAL.value
         )
         return DataAssistantResult._get_line_chart(
             df=df,
             metric_component=metric_component,
             domain_component=domain_component,
-            batch_id_component=batch_id_component,
+            batch_component=batch_component,
         )
 
     @staticmethod
@@ -213,7 +214,7 @@ class DataAssistantResult(SerializableDictDot):
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         domain_component: DomainPlotComponent,
-        batch_id_component: BatchPlotComponent,
+        batch_component: BatchPlotComponent,
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             metric_plot_component=metric_component,
@@ -221,7 +222,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         tooltip: List[alt.Tooltip] = [
-            batch_id_component.generate_tooltip(),
+            batch_component.generate_tooltip(),
             metric_component.generate_tooltip(format=","),
         ]
 
@@ -273,21 +274,29 @@ class DataAssistantResult(SerializableDictDot):
         domain_component: DomainPlotComponent = DomainPlotComponent(
             name=domain_name, alt_type=domain_type, subtitle=subtitle
         )
-        batch_id_component: BatchPlotComponent = BatchPlotComponent(
+        batch_component: BatchPlotComponent = BatchPlotComponent(
             name="batch_id", alt_type=AltairDataTypes.NOMINAL.value
         )
-        min_value_component: PlotComponent = PlotComponent(
-            name="min_value", alt_type=AltairDataTypes.QUANTITATIVE.value
+        min_value_component: ExpectationKwargPlotComponent = (
+            ExpectationKwargPlotComponent(
+                name="min_value",
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                metric_plot_component=metric_component,
+            )
         )
-        max_value_component: PlotComponent = PlotComponent(
-            name="max_value", alt_type=AltairDataTypes.QUANTITATIVE.value
+        max_value_component: ExpectationKwargPlotComponent = (
+            ExpectationKwargPlotComponent(
+                name="max_value",
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                metric_plot_component=metric_component,
+            )
         )
 
         return DataAssistantResult._get_expect_domain_values_to_be_between_chart(
             df=df,
             metric_component=metric_component,
             domain_component=domain_component,
-            batch_id_component=batch_id_component,
+            batch_component=batch_component,
             min_value_component=min_value_component,
             max_value_component=max_value_component,
         )
@@ -297,7 +306,7 @@ class DataAssistantResult(SerializableDictDot):
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         domain_component: DomainPlotComponent,
-        batch_id_component: BatchPlotComponent,
+        batch_component: BatchPlotComponent,
         min_value_component: PlotComponent,
         max_value_component: PlotComponent,
     ) -> alt.Chart:
@@ -309,7 +318,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         tooltip: List[alt.Tooltip] = [
-            batch_id_component.generate_tooltip(),
+            batch_component.generate_tooltip(),
             metric_component.generate_tooltip(format=","),
             min_value_component.generate_tooltip(format=","),
             max_value_component.generate_tooltip(format=","),
@@ -320,7 +329,7 @@ class DataAssistantResult(SerializableDictDot):
             .mark_line(color=line_color)
             .encode(
                 x=domain_component.plot_on_axis(),
-                y=metric_component.plot_on_axis(shorthand=min_value_component.name),
+                y=min_value_component.plot_on_axis(),
                 tooltip=tooltip,
             )
             .properties(title=title)
@@ -331,7 +340,7 @@ class DataAssistantResult(SerializableDictDot):
             .mark_line(color=line_color)
             .encode(
                 x=domain_component.plot_on_axis(),
-                y=metric_component.plot_on_axis(shorthand=max_value_component.name),
+                y=max_value_component.plot_on_axis(),
                 tooltip=tooltip,
             )
             .properties(title=title)
@@ -342,7 +351,7 @@ class DataAssistantResult(SerializableDictDot):
             .mark_area()
             .encode(
                 x=domain_component.plot_on_axis(),
-                y=metric_component.plot_on_axis(shorthand=min_value_component.name),
+                y=min_value_component.plot_on_axis(),
                 y2=alt.Y2(max_value_component.name, title=metric_component.title),
             )
             .properties(title=title)
@@ -352,7 +361,7 @@ class DataAssistantResult(SerializableDictDot):
             df=df,
             metric_component=metric_component,
             domain_component=domain_component,
-            batch_id_component=batch_id_component,
+            batch_component=batch_component,
         )
 
         # encode point color based on anomalies
