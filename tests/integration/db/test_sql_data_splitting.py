@@ -1,14 +1,7 @@
-import logging
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import pandas as pd
 import sqlalchemy as sa
-
-from great_expectations.datasource import BaseDatasource, Datasource, LegacyDatasource
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
-logger = logging.getLogger(__name__)
-
 
 import great_expectations as ge
 from great_expectations import DataContext
@@ -16,6 +9,7 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.datasource import BaseDatasource, Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,

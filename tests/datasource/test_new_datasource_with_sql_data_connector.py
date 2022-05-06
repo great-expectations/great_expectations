@@ -107,18 +107,6 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     return context
 
 
-# TODO
-def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector_sampling(sa):
-    pass
-
-
-# TODO
-def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_sampling(
-    sa, empty_data_context
-):
-    pass
-
-
 def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector_splitting(sa):
     random.seed(0)
 
@@ -440,18 +428,6 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
             },
         },
     }
-
-
-# TODO
-def test_basic_instantiation_with_InferredAssetSqlDataConnector_sampling(sa):
-    pass
-
-
-# TODO
-def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_sampling(
-    sa, empty_data_context
-):
-    pass
 
 
 def test_SimpleSqlalchemyDatasource(empty_data_context):

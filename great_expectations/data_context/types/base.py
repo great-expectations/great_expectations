@@ -157,8 +157,6 @@ class AssetConfig(DictDot):
         batch_identifiers=None,
         splitter_method=None,
         splitter_kwargs=None,
-        sampling_method=None,
-        sampling_kwargs=None,
         **kwargs,
     ) -> None:
         if name is not None:
@@ -183,11 +181,6 @@ class AssetConfig(DictDot):
             self.splitter_method = splitter_method
         if splitter_kwargs is not None:
             self.splitter_kwargs = splitter_kwargs
-        if sampling_method is not None:
-            self.sampling_method = sampling_method
-        if sampling_kwargs is not None:
-            self.sampling_kwargs = sampling_kwargs
-
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -236,11 +229,8 @@ class AssetConfigSchema(Schema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
 
-    # splitters and samplers
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
-    sampling_method = fields.String(required=False, allow_none=True)
-    sampling_kwargs = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
