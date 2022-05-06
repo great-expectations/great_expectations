@@ -2,8 +2,8 @@ from abc import ABCMeta, abstractmethod
 from inspect import isabstract
 from typing import Any, Dict, List, Optional, Union
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequestBase
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -93,8 +93,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
         corresponding to indended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
-        "RuleBasedProfilerResult" object, containing metrics by "Domain", list of "ExpectationConfiguration" objects,
-        and overall "ExpectationSuite" object, immediately available for validating underlying data "Batch" objects.
+        "RuleBasedProfilerResult" object, containing "fully_qualified_parameter_names_by_domain",
+        "parameter_values_for_fully_qualified_parameter_names_by_domain", "expectation_configurations", and "citation",
+        immediately available for composing "ExpectationSuite" and validating underlying data "Batch" objects.
 
         Args:
             name: the name of this DataAssistant object
@@ -174,22 +175,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             reconciliation_strategy=DEFAULT_RECONCILATION_DIRECTIVES.variables,
         )
 
-    def run(
-        self,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-        save_updated_expectation_suite: bool = False,
-    ) -> DataAssistantResult:
+    def run(self) -> DataAssistantResult:
         """
         Run the DataAssistant as it is currently configured.
-
-        Args:
-            expectation_suite: An existing "ExpectationSuite" to update
-            expectation_suite_name: A name for returned "ExpectationSuite"
-            include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
-            as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
-            save_updated_expectation_suite: Flag, constrolling whether or not updated "ExpectationSuite" must be saved
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
@@ -205,10 +193,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
             rules=self.rules,
             batch_list=list(self._validator.batches.values()),
             batch_request=None,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-            save_updated_expectation_suite=save_updated_expectation_suite,
         )
         return self._build_data_assistant_result(
             data_assistant_result=data_assistant_result
@@ -366,10 +350,6 @@ def run_profiler_on_data(
     rules: Optional[Dict[str, Dict[str, Any]]] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-    expectation_suite: Optional[ExpectationSuite] = None,
-    expectation_suite_name: Optional[str] = None,
-    include_citation: bool = True,
-    save_updated_expectation_suite: bool = False,
 ) -> None:
     """
     This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
@@ -382,11 +362,6 @@ def run_profiler_on_data(
         rules: name/(configuration-dictionary) (overrides)
         batch_list: Explicit list of Batch objects to supply data at runtime
         batch_request: Explicit batch_request used to supply data at runtime
-        expectation_suite: An existing "ExpectationSuite" to update
-        expectation_suite_name: A name for returned "ExpectationSuite"
-        include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
-        as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
-        save_updated_expectation_suite: Flag, constrolling whether or not updated "ExpectationSuite" must be saved
     """
     if rules is None:
         rules = []
@@ -395,7 +370,7 @@ def run_profiler_on_data(
     rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
         rule.name: rule.to_json_dict() for rule in rules
     }
-    profiler.run(
+    rule_based_profiler_result: RuleBasedProfilerResult = profiler.run(
         variables=variables,
         rules=rules_configs,
         batch_list=batch_list,
@@ -406,9 +381,7 @@ def run_profiler_on_data(
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
-    result.expectation_suite = profiler.get_expectation_suite(
-        expectation_suite=expectation_suite,
-        expectation_suite_name=expectation_suite_name,
-        include_citation=include_citation,
-        save_updated_expectation_suite=save_updated_expectation_suite,
+    result.expectation_configurations = (
+        rule_based_profiler_result.expectation_configurations
     )
+    result.citation = rule_based_profiler_result.citation
