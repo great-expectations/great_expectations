@@ -3383,41 +3383,29 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
 
     # ensure a config has been added to each chart
     assert all(
-        [
-            not isinstance(chart.config, alt.utils.schemapi.UndefinedType)
-            for chart in plot_result.charts
-        ]
+        not isinstance(chart.config, alt.utils.schemapi.UndefinedType)
+        for chart in plot_result.charts
     )
 
     # ensure the theme elements were updated for each chart
-    assert all([chart.config.font == font for chart in plot_result.charts])
+    assert all(chart.config.font == font for chart in plot_result.charts)
     assert all(
-        [chart.config.title["color"] == title_color for chart in plot_result.charts]
+        chart.config.title["color"] == title_color for chart in plot_result.charts
     )
     assert all(
-        [
-            chart.config.title["fontSize"] == title_font_size
-            for chart in plot_result.charts
-        ]
+        chart.config.title["fontSize"] == title_font_size
+        for chart in plot_result.charts
+    )
+    assert all(chart.config.point["size"] == point_size for chart in plot_result.charts)
+    assert all(
+        chart.config.axisY["labelColor"] == y_axis_label_color
+        for chart in plot_result.charts
     )
     assert all(
-        [chart.config.point["size"] == point_size for chart in plot_result.charts]
+        chart.config.axisY["labelAngle"] == y_axis_label_angle
+        for chart in plot_result.charts
     )
     assert all(
-        [
-            chart.config.axisY["labelColor"] == y_axis_label_color
-            for chart in plot_result.charts
-        ]
-    )
-    assert all(
-        [
-            chart.config.axisY["labelAngle"] == y_axis_label_angle
-            for chart in plot_result.charts
-        ]
-    )
-    assert all(
-        [
-            chart.config.axisX["titleColor"] == x_axis_title_color
-            for chart in plot_result.charts
-        ]
+        chart.config.axisX["titleColor"] == x_axis_title_color
+        for chart in plot_result.charts
     )
