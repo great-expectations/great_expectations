@@ -1,0 +1,670 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "my_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "max_value": 10000,
+        "min_value": 10000
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            36.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {},
+            "metric_dependencies": null,
+            "metric_name": "table.row_count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "vendor_id",
+        "max_value": 3,
+        "min_value": 2,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            219654.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            140310.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "vendor_id"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "pickup_datetime",
+        "max_value": 9983,
+        "min_value": 9945,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            20083.0,
+            0.0,
+            10054.0,
+            19674.0,
+            9941.0,
+            9988.0,
+            40094.0,
+            80255.0,
+            109609.0,
+            60266.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "pickup_datetime"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "dropoff_datetime",
+        "max_value": 9985,
+        "min_value": 9958,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            10004.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            49924.0,
+            39829.0,
+            119869.0,
+            80187.0,
+            60151.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "dropoff_datetime"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "passenger_count",
+        "max_value": 8,
+        "min_value": 7,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            9991.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            310014.0,
+            0.0,
+            0.0,
+            0.0,
+            39959.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "passenger_count"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "trip_distance",
+        "max_value": 1430,
+        "min_value": 1159,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            39915.0,
+            129582.0,
+            100205.0,
+            40046.0,
+            19963.0,
+            10195.0,
+            10058.0,
+            0.0,
+            0.0,
+            10000.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "trip_distance"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "rate_code_id",
+        "max_value": 6,
+        "min_value": 5,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            200262.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            149572.0,
+            0.0,
+            0.0,
+            0.0,
+            10130.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "rate_code_id"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "store_and_fwd_flag",
+        "max_value": 2,
+        "min_value": 2,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            36.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "store_and_fwd_flag"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "pickup_location_id",
+        "max_value": 211,
+        "min_value": 118,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            40080.0,
+            59702.0,
+            90179.0,
+            70336.0,
+            9944.0,
+            0.0,
+            0.0,
+            19839.0,
+            20103.0,
+            49781.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "pickup_location_id"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "dropoff_location_id",
+        "max_value": 236,
+        "min_value": 190,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            10028.0,
+            20193.0,
+            69678.0,
+            119741.0,
+            30142.0,
+            9856.0,
+            10110.0,
+            30093.0,
+            20138.0,
+            39985.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "dropoff_location_id"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "payment_type",
+        "max_value": 4,
+        "min_value": 4,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            36.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "payment_type"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "fare_amount",
+        "max_value": 813,
+        "min_value": 153,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            260145.0,
+            10065.0,
+            9936.0,
+            49978.0,
+            19937.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            9903.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "fare_amount"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "extra",
+        "max_value": 15,
+        "min_value": 5,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            29972.0,
+            70096.0,
+            19975.0,
+            9926.0,
+            0.0,
+            100221.0,
+            59927.0,
+            30068.0,
+            19761.0,
+            20018.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "extra"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "mta_tax",
+        "max_value": 4,
+        "min_value": 3,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            299835.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            60129.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "mta_tax"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "tip_amount",
+        "max_value": 608,
+        "min_value": 469,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            19681.0,
+            0.0,
+            20078.0,
+            19655.0,
+            40368.0,
+            20090.0,
+            60174.0,
+            60152.0,
+            40231.0,
+            79535.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "tip_amount"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "tolls_amount",
+        "max_value": 31,
+        "min_value": 18,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            10010.0,
+            19895.0,
+            39926.0,
+            60644.0,
+            29815.0,
+            49825.0,
+            90064.0,
+            19962.0,
+            19849.0,
+            19974.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "tolls_amount"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "improvement_surcharge",
+        "max_value": 3,
+        "min_value": 3,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            36.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "improvement_surcharge"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "total_amount",
+        "max_value": 1440,
+        "min_value": 898,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            110122.0,
+            159572.0,
+            60278.0,
+            0.0,
+            20100.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            9892.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "total_amount"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "congestion_surcharge",
+        "max_value": 4,
+        "min_value": 0,
+        "strict_max": false,
+        "strict_min": false
+      },
+      "meta": {
+        "profiler_details": {
+          "estimation_histogram": [
+            120111.0,
+            0.0,
+            9997.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            210069.0,
+            0.0,
+            19787.0
+          ],
+          "metric_configuration": {
+            "domain_kwargs": {
+              "column": "congestion_surcharge"
+            },
+            "metric_dependencies": null,
+            "metric_name": "column.distinct_values.count",
+            "metric_value_kwargs": null
+          },
+          "num_batches": 36
+        }
+      }
+    }
+  ],
+  "ge_cloud_id": null,
+  "meta": {
+    "great_expectations_version": "0.15.4+13.g58f2637f4.dirty"
+  }
+}
