@@ -43,8 +43,8 @@ from tests.test_utils import find_strings_in_nested_obj
 def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
         Domain(
-            rule_name="default_expect_table_row_count_to_be_between_rule",
             domain_type=MetricDomainTypes.TABLE,
+            rule_name="default_expect_table_row_count_to_be_between_rule",
         ): {
             "$parameter.table_row_count": {
                 "value": [
@@ -135,7 +135,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "vendor_id",
@@ -145,6 +144,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "vendor_id": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -235,7 +235,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "pickup_datetime",
@@ -245,6 +244,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "pickup_datetime": SemanticDomainTypes.TEXT,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -335,7 +335,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "dropoff_datetime",
@@ -345,6 +344,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "dropoff_datetime": SemanticDomainTypes.TEXT,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -435,7 +435,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "passenger_count",
@@ -445,6 +444,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "passenger_count": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -535,7 +535,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "trip_distance",
@@ -545,6 +544,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "trip_distance": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -635,7 +635,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "rate_code_id",
@@ -645,6 +644,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "rate_code_id": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -735,7 +735,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "store_and_fwd_flag",
@@ -745,6 +744,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "store_and_fwd_flag": SemanticDomainTypes.TEXT,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -835,7 +835,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "pickup_location_id",
@@ -845,6 +844,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "pickup_location_id": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -935,7 +935,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "dropoff_location_id",
@@ -945,6 +944,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "dropoff_location_id": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1035,7 +1035,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "payment_type",
@@ -1045,6 +1044,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "payment_type": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1135,7 +1135,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "fare_amount",
@@ -1145,6 +1144,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "fare_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1235,7 +1235,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "extra",
@@ -1245,6 +1244,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "extra": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1335,7 +1335,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "mta_tax",
@@ -1345,6 +1344,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "mta_tax": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1435,7 +1435,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "tip_amount",
@@ -1445,6 +1444,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "tip_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1535,7 +1535,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "tolls_amount",
@@ -1545,6 +1544,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "tolls_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1635,7 +1635,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "improvement_surcharge",
@@ -1645,6 +1644,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "improvement_surcharge": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1735,7 +1735,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "total_amount",
@@ -1745,6 +1744,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "total_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1835,7 +1835,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "congestion_surcharge",
@@ -1845,6 +1844,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "congestion_surcharge": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
