@@ -65,6 +65,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -141,6 +142,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -223,9 +225,9 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -300,9 +302,9 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
 
     metric_domain_kwargs: dict = {"column": "store_and_fwd_flag"}
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {

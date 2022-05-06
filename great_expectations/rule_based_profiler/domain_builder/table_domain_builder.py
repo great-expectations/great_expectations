@@ -36,6 +36,7 @@ class TableDomainBuilder(DomainBuilder):
             Domain(
                 rule_name=rule_name,
                 domain_type=self.domain_type,
+                rule_name=rule_name,
             ),
         ]
 

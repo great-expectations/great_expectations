@@ -101,6 +101,7 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
                 details={
                     INFERRED_SEMANTIC_TYPE_KEY: semantic_types_by_column_name,
                 },
+                rule_name=rule_name,
             ),
         ]
 

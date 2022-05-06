@@ -79,6 +79,7 @@ def table_Users_domain():
         domain_type=MetricDomainTypes.TABLE,
         domain_kwargs=None,
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -92,6 +93,7 @@ def column_Age_domain():
             "column": "Age",
         },
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -105,6 +107,7 @@ def column_Date_domain():
             "column": "Date",
         },
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -118,6 +121,7 @@ def column_Description_domain():
             "column": "Description",
         },
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -132,6 +136,7 @@ def column_pair_Age_Date_domain():
             "column_B": "Date",
         },
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -149,6 +154,7 @@ def multi_column_Age_Date_Description_domain():
             ],
         },
         details=None,
+        rule_name="my_rule",
     )
 
 

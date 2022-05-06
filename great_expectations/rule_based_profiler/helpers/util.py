@@ -401,6 +401,7 @@ def build_domains_from_column_names(
                 if table_column_name_to_inferred_semantic_domain_type_map
                 else None,
             },
+            rule_name=rule_name,
         )
         for column_name in column_names
     ]
