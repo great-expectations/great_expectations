@@ -1191,6 +1191,13 @@ anonymized_usage_statistics_record_schema = {
 
 
 def write_schema_to_file(target_dir: str) -> None:
+    """Utility to write schema to disk.
+
+    The file name will always be "usage_statistics_record_schema.json" but the target directory can be specified.
+
+    Args:
+        target_dir (str): The dir you wish to write the schema to.
+    """
     import json
     import os
 
