@@ -21,6 +21,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.registry import get_expectation_impl
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
@@ -238,41 +239,20 @@ def test_alice_profiler_user_workflow_single_batch(
         "data_connector_name": "alice_columnar_table_single_batch_data_connector",
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
-    profiler.run(batch_request=alice_single_batch_data_batch_request)
-    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
-        expectation_suite_name=alice_columnar_table_single_batch[
-            "expected_expectation_suite_name"
-        ],
-        include_citation=True,
+    result: RuleBasedProfilerResult = profiler.run(
+        batch_request=alice_single_batch_data_batch_request
     )
 
     expectation_configuration: ExpectationConfiguration
-    for expectation_configuration in expectation_suite.expectations:
+    for expectation_configuration in result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
             expectation_configuration.meta["profiler_details"].pop(
                 "estimation_histogram", None
             )
 
     assert (
-        expectation_suite.expectations
+        result.expectation_configurations
         == alice_columnar_table_single_batch["expected_expectation_suite"].expectations
-    )
-
-    """
-    Deleting some "parameter_builders" from both actual and expected configurations, because nested dictionaries are
-    extremely difficult to match, due to complex structure, containing dictionaries, lists of dictionaries, lists of
-    primitive types, and other iterables, presented in random sort order at various levels of configuration hierarchy.
-    """
-    expectation_suite.meta["citations"][0]["profiler_config"]["rules"][
-        "my_rule_for_timestamps"
-    ].pop("parameter_builders")
-    alice_columnar_table_single_batch["expected_expectation_suite"].meta["citations"][
-        0
-    ]["profiler_config"]["rules"]["my_rule_for_timestamps"].pop("parameter_builders")
-
-    assert (
-        expectation_suite
-        == alice_columnar_table_single_batch["expected_expectation_suite"]
     )
 
     assert mock_emit.call_count == 54
@@ -612,46 +592,22 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         "data_asset_name": "my_reports",
     }
 
-    profiler.run(batch_request=batch_request)
+    result: RuleBasedProfilerResult = profiler.run(batch_request=batch_request)
 
     domain: Domain
-
-    profiled_expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
-        expectation_suite_name=bobby_columnar_table_multi_batch[
-            "test_configuration_oneshot_estimator"
-        ]["expectation_suite_name"],
-        include_citation=True,
-    )
 
     fixture_expectation_suite: ExpectationSuite = bobby_columnar_table_multi_batch[
         "test_configuration_oneshot_estimator"
     ]["expected_expectation_suite"]
 
     expectation_configuration: ExpectationConfiguration
-    for expectation_configuration in profiled_expectation_suite.expectations:
+    for expectation_configuration in result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
             expectation_configuration.meta["profiler_details"].pop(
                 "estimation_histogram", None
             )
 
-    assert (
-        profiled_expectation_suite.expectations
-        == fixture_expectation_suite.expectations
-    )
-
-    """
-    Deleting some "parameter_builders" from both actual and expected configurations, because nested dictionaries are
-    extremely difficult to match, due to complex structure, containing dictionaries, lists of dictionaries, lists of
-    primitive types, and other iterables, presented in random sort order at various levels of configuration hierarchy.
-    """
-    profiled_expectation_suite.meta["citations"][0]["profiler_config"]["rules"][
-        "my_rule_for_timestamps"
-    ].pop("parameter_builders")
-    fixture_expectation_suite.meta["citations"][0]["profiler_config"]["rules"][
-        "my_rule_for_timestamps"
-    ].pop("parameter_builders")
-
-    assert profiled_expectation_suite == fixture_expectation_suite
+    assert result.expectation_configurations == fixture_expectation_suite.expectations
 
     profiled_fully_qualified_parameter_names_by_domain: Dict[
         Domain, List[str]
@@ -669,8 +625,8 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     domain = Domain(
-        rule_name="row_count_range_rule",
         domain_type=MetricDomainTypes.TABLE,
+        rule_name="row_count_range_rule",
     )
 
     profiled_fully_qualified_parameter_names_for_domain_id: List[
@@ -708,7 +664,6 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     domain = Domain(
-        rule_name="column_ranges_rule",
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
         details={
@@ -716,6 +671,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                 "VendorID": SemanticDomainTypes.NUMERIC,
             },
         },
+        rule_name="column_ranges_rule",
     )
 
     profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
@@ -1503,17 +1459,10 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         "data_asset_name": "my_reports",
     }
 
-    profiler.run(batch_request=batch_request)
+    result: RuleBasedProfilerResult = profiler.run(batch_request=batch_request)
 
-    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
-        expectation_suite_name=bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_estimator"
-        ][
-            "expectation_suite_name"
-        ],
-    )
     expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = (
-        expectation_suite.to_json_dict()["expectations"][0]["kwargs"]
+        result.expectation_configurations[0].to_json_dict()["kwargs"]
     )
     min_value: int = (
         expect_table_row_count_to_be_between_expectation_configuration_kwargs[
@@ -1655,14 +1604,9 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         "data_asset_name": "my_reports",
     }
 
-    profiler.run(batch_request=batch_request)
+    result: RuleBasedProfilerResult = profiler.run(batch_request=batch_request)
 
-    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
-        expectation_suite_name=quentin_columnar_table_multi_batch["test_configuration"][
-            "expectation_suite_name"
-        ],
-    )
-
+    expectation_configuration: ExpectationConfiguration
     expectation_configuration_dict: dict
     column_name: str
     expectation_kwargs: dict
@@ -1672,8 +1616,9 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         expectation_configuration_dict["kwargs"][
             "column"
         ]: expectation_configuration_dict["kwargs"]
-        for expectation_configuration_dict in expectation_suite.to_json_dict()[
-            "expectations"
+        for expectation_configuration_dict in [
+            expectation_configuration.to_json_dict()
+            for expectation_configuration in result.expectation_configurations
         ]
     }
     expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column: Dict[
@@ -2248,3 +2193,56 @@ def test_quentin_expect_column_sum_to_be_between_auto_yes_default_profiler_confi
 
         max_value_actual: int = result.expectation_config["kwargs"]["max_value"]
         assert max_value_expected >= max_value_actual
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time(TIMESTAMP)
+def test_quentin_expect_column_stdev_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_validator: Validator,
+):
+    validator: Validator = quentin_validator
+
+    test_cases: Tuple[Tuple[str, float, float], ...] = (
+        ("fare_amount", 10.0, 565.0),
+        ("passenger_count", 1.0, 2.0),
+    )
+
+    for column_name, min_value_expected, max_value_expected in test_cases:
+        # Use all batches, loaded by Validator, for estimating Expectation argument values.
+        result = validator.expect_column_stdev_to_be_between(
+            column=column_name,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
+        assert result.success
+
+        key: str
+        value: Any
+        expectation_config_kwargs: dict = {
+            key: value
+            for key, value in result.expectation_config["kwargs"].items()
+            if key
+            not in [
+                "min_value",
+                "max_value",
+            ]
+        }
+        assert expectation_config_kwargs == {
+            "column": column_name,
+            "strict_min": False,
+            "strict_max": False,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+        }
+
+        min_value_actual: int = result.expectation_config["kwargs"]["min_value"]
+        assert min_value_expected - 1 <= min_value_actual <= min_value_expected + 1
+
+        max_value_actual: int = result.expectation_config["kwargs"]["max_value"]
+        assert max_value_expected - 1 <= max_value_actual <= max_value_expected + 1
