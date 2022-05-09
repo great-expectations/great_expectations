@@ -55,6 +55,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     RECOGNIZED_SAMPLING_METHOD_NAMES: set = {
         "oneshot",
         "bootstrap",
+        "kde",
     }
 
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
