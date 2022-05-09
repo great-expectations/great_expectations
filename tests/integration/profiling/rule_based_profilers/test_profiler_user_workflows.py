@@ -829,6 +829,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 @freeze_time(TIMESTAMP)
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     bobby_validator: Validator,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
     validator: Validator = bobby_validator
 
@@ -846,8 +847,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.success
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
-        "min_value": -22.5,
-        "max_value": 250.0,
+        "min_value": -50.5,
+        "max_value": 2121.9,
         "strict_min": False,
         "strict_max": False,
         "mostly": 1.0,
@@ -870,7 +871,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": 0.0,
-        "max_value": 250.0,
+        "max_value": 2121.9,
         "strict_min": False,
         "strict_max": False,
         "mostly": 1.0,
@@ -894,7 +895,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": 0.0,
-        "max_value": 250.0,
+        "max_value": 2121.9,
         "strict_min": False,
         "strict_max": False,
         "mostly": 8.75e-1,
@@ -2008,8 +2009,8 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
     rtol: float = 2.0e1 * RTOL
     atol: float = 2.0e1 * ATOL
 
-    min_value_actual: int = result.expectation_config["kwargs"]["min_value"]
-    min_value_expected: int = 155
+    min_value_actual: float = result.expectation_config["kwargs"]["min_value"]
+    min_value_expected: float = 155.0
 
     np.testing.assert_allclose(
         actual=float(min_value_actual),
@@ -2019,8 +2020,8 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
         err_msg=f"Actual value of {min_value_actual} differs from expected value of {min_value_expected} by more than {atol + rtol * abs(min_value_expected)} tolerance.",
     )
 
-    max_value_actual: int = result.expectation_config["kwargs"]["max_value"]
-    max_value_expected: int = 3004
+    max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
+    max_value_expected: float = 56314.8
     np.testing.assert_allclose(
         actual=float(max_value_actual),
         desired=float(max_value_expected),
