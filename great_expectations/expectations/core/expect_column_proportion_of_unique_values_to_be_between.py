@@ -123,6 +123,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         estimator=f"{VARIABLES_KEY}estimator",
         num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
         bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
+        include_bootstrap_samples_histogram_in_details=f"{VARIABLES_KEY}include_bootstrap_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
@@ -146,6 +147,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                     "estimator": "bootstrap",
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": 0.0,
                         "upper_bound": 1.0,

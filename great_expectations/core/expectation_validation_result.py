@@ -180,6 +180,10 @@ class ExpectationValidationResult(SerializableDictDot):
         myself = expectationValidationResultSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
+        if "expectation_config" in myself:
+            myself["expectation_config"] = convert_to_json_serializable(
+                myself["expectation_config"]
+            )
         if "result" in myself:
             myself["result"] = convert_to_json_serializable(myself["result"])
         if "meta" in myself:
