@@ -7,6 +7,7 @@ from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import scipy.stats as stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -484,6 +485,46 @@ def compute_quantiles(
     return NumericRangeEstimationResult(
         estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
         value_range=np.array([lower_quantile, upper_quantile]),
+    )
+
+
+def compute_kde_quantiles_point_estimate(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    quantile_statistic_interpolation_method: str,
+    random_seed: Optional[int] = None,
+) -> NumericRangeEstimationResult:
+    """
+    An internal implementation of the "kernel density estimation" estimator method, returning a point estimate for a
+    population parameter of interest (lower and upper quantiles in this case).
+    """
+    lower_quantile_pct: float = false_positive_rate / 2.0
+    upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
+
+    metric_values_density_estimate = stats.gaussian_kde(metric_values)
+    metric_values_gaussian_sample = metric_values_density_estimate.resample(
+        len(metric_values)
+    )
+
+    lower_quantile_point_estimate = np.quantile(
+        metric_values_gaussian_sample,
+        q=lower_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
+    upper_quantile_point_estimate = np.quantile(
+        metric_values_gaussian_sample,
+        q=upper_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
+
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(
+            a=metric_values_gaussian_sample, bins=NUM_HISTOGRAM_BINS
+        )[0],
+        value_range=[
+            lower_quantile_point_estimate,
+            upper_quantile_point_estimate,
+        ],
     )
 
 

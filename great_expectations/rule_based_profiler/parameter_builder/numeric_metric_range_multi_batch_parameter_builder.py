@@ -10,6 +10,7 @@ from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     compute_bootstrap_quantiles_point_estimate,
+    compute_kde_quantiles_point_estimate,
     compute_quantiles,
     get_parameter_value_and_validate_return_type,
     integer_semantic_domain_type,
@@ -111,7 +112,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
             quantile_statistic_interpolation_method: Applicable only for the "bootstrap" sampling method --
             supplies value of (interpolation) "method" to "np.quantile()" statistic, used for confidence intervals.
-            estimator: choice of the estimation algorithm: "oneshot" (one observation) or "bootstrap" (default)
+            estimator: choice of the estimation algorithm: "oneshot" (one observation), "bootstrap" (default),
+                       or "kde" (kernel density estimation).
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
             9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
@@ -351,6 +353,13 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                 "false_positive_rate": false_positive_rate,
                 "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
                 "num_bootstrap_samples": self.num_bootstrap_samples,
+                "bootstrap_random_seed": self.bootstrap_random_seed,
+            }
+        elif estimator == "kde":
+            estimator_func = self._get_kde_estimate
+            estimator_kwargs = {
+                "false_positive_rate": false_positive_rate,
+                "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
                 "bootstrap_random_seed": self.bootstrap_random_seed,
             }
         else:
@@ -640,6 +649,35 @@ positive integer, or must be omitted (or set to None).
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
             n_resamples=n_resamples,
+            random_seed=random_seed,
+            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        )
+
+    @staticmethod
+    def _get_kde_estimate(
+        metric_values: np.ndarray,
+        domain: Domain,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        **kwargs,
+    ) -> NumericRangeEstimationResult:
+        # Obtain random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=kwargs.get("bootstrap_random_seed"),
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
+        quantile_statistic_interpolation_method: str = kwargs.get(
+            "quantile_statistic_interpolation_method"
+        )
+
+        return compute_kde_quantiles_point_estimate(
+            metric_values=metric_values,
+            false_positive_rate=false_positive_rate,
             random_seed=random_seed,
             quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
         )
