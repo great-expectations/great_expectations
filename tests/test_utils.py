@@ -50,6 +50,17 @@ except ImportError:
     Select = None
     SQLAlchemyError = None
 
+try:
+    import pyathena
+    from pyathena import Connection
+    from pyathena.pandas.util import to_sql
+except ImportError:
+    logger.debug("Unable to use pyathena; install optional pyathena dependency.")
+    pyathena = None
+    to_sql = None
+    Connection = None
+
+
 logger = logging.getLogger(__name__)
 yaml_handler: YAMLHandler = YAMLHandler()
 
@@ -604,6 +615,13 @@ def load_data_into_test_database(
             dataframe=all_dfs_concatenated, table_name=table_name
         )
         return return_value
+    elif engine.dialect.name.lower() == "awsathena":
+        load_dataframe_into_test_athena_database_as_table(
+            df=all_dfs_concatenated,
+            table_name=table_name,
+            connection=engine,
+        )
+        return return_value
     else:
         try:
             connection = engine.connect()
@@ -653,6 +671,40 @@ def load_data_into_test_bigquery_database_with_bigquery_client(
         dataframe, table_id
     )  # Make an API request.
     job.result()  # Wait for the job to complete
+
+
+def load_dataframe_into_test_athena_database_as_table(
+    df: pd.DataFrame,
+    table_name: str,
+    connection: Connection,
+    data_location_bucket: Optional[str] = None,
+    data_location: Optional[str] = None,
+) -> None:
+    """
+
+    Args:
+        df: dataframe containing data.
+        table_name: name of table to write.
+        connection: connection to database.
+        data_location_bucket: name of bucket where data is located.
+        data_location: path to data from bucket without leading / e.g.
+            "data/stuff/" in path "s3://my-bucket/data/stuff/"
+
+    Returns:
+        None
+    """
+    if not data_location_bucket:
+        data_location_bucket = os.getenv("ATHENA_DATA_BUCKET")
+    if not data_location:
+        data_location = "data/ten_trips_from_each_month/"
+    location: str = f"s3://{data_location_bucket}/{data_location}"
+    to_sql(
+        df=df,
+        name=table_name,
+        conn=connection,
+        location=location,
+        if_exists="replace",
+    )
 
 
 def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:

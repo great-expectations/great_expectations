@@ -31,7 +31,10 @@ TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
 
 
 def _load_data(
-    connection_string: str, dialect: str, table_name: str = TAXI_DATA_TABLE_NAME
+    connection_string: str,
+    dialect: str,
+    table_name: str = TAXI_DATA_TABLE_NAME,
+    random_table_suffix: bool = True,
 ) -> LoadedTable:
 
     dialects_supporting_multiple_values_in_single_insert_clause: List[str] = [
@@ -52,7 +55,7 @@ def _load_data(
         connection_string=connection_string,
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
         load_full_dataset=True,
-        random_table_suffix=True,
+        random_table_suffix=random_table_suffix,
         to_sql_method=to_sql_method,
     )
 
@@ -68,17 +71,13 @@ if __name__ == "test_script_module":
     print(f"Testing dialect: {dialect}")
 
     if _is_dialect_athena(dialect):
-        test_df: pd.DataFrame = load_and_concatenate_csvs(
-            csv_paths=[
-                f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
-            ],
-            convert_column_names_to_datetime=["pickup_datetime", "dropoff_datetime"],
-            load_full_dataset=True,
-        )
         athena_db_name: str = get_awsathena_db_name()
         table_name: str = f"{athena_db_name}.ten_trips_from_each_month"
-    else:
+        loaded_table: LoadedTable = _load_data(
+            connection_string=connection_string, dialect=dialect, table_name=table_name
+        )
 
+    else:
         print("Preemptively cleaning old tables")
         clean_up_tables_with_prefix(
             connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
@@ -87,8 +86,9 @@ if __name__ == "test_script_module":
         loaded_table: LoadedTable = _load_data(
             connection_string=connection_string, dialect=dialect
         )
-        test_df: pd.DataFrame = loaded_table.inserted_dataframe
-        table_name: str = loaded_table.table_name
+
+    test_df: pd.DataFrame = loaded_table.inserted_dataframe
+    table_name: str = loaded_table.table_name
 
     taxi_test_data: TaxiTestData = TaxiTestData(
         test_df, test_column_name="pickup_datetime"
