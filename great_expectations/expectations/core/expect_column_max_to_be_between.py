@@ -156,7 +156,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                         "lower_bound": None,
                         "upper_bound": None,
                     },
-                    "round_decimals": 0,
+                    "round_decimals": 1,
                 },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
