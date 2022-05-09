@@ -49,6 +49,7 @@ from great_expectations.expectations.registry import (
     list_registered_expectation_implementations,
 )
 from great_expectations.marshmallow__shade import ValidationError
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -418,7 +419,7 @@ class Validator:
             *(), **expectation_kwargs
         )
         if profiler is not None:
-            profiler.run(
+            profiler_result: RuleBasedProfilerResult = profiler.run(
                 variables=None,
                 rules=None,
                 batch_list=list(self.batches.values()),
@@ -428,13 +429,7 @@ class Validator:
             )
             expectation_configurations: List[
                 ExpectationConfiguration
-            ] = profiler.get_expectation_suite(
-                expectation_suite=None,
-                expectation_suite_name=None,
-                include_citation=True,
-                save_updated_expectation_suite=False,
-            ).expectations
-
+            ] = profiler_result.expectation_configurations
             configuration = expectation_configurations[0]
 
             # Reconcile explicitly provided "ExpectationConfiguration" success_kwargs as overrides to generated values.

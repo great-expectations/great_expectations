@@ -126,7 +126,7 @@ class TaxiSplittingTestCases:
                 splitter_method_name="split_on_date_parts",
                 splitter_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
-                    "date_parts": [DatePart.MONTH],
+                    "date_parts": [DatePart.MONTH.name],
                 },
                 num_expected_batch_definitions=12,
                 num_expected_rows_in_first_batch_definition=30,
@@ -137,7 +137,7 @@ class TaxiSplittingTestCases:
                 splitter_method_name="split_on_date_parts",
                 splitter_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
-                    "date_parts": [DatePart.YEAR, "mOnTh"],
+                    "date_parts": [DatePart.YEAR.name, "mOnTh"],
                 },
                 num_expected_batch_definitions=36,
                 num_expected_rows_in_first_batch_definition=10,

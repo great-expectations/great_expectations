@@ -3,12 +3,12 @@ from typing import List
 import pytest
 from ruamel import yaml
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
     DomainBuilder,
@@ -184,9 +184,11 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
         data_context=context,
     )
     my_rbp.add_rule(rule=simple_rule)
-    my_rbp.run(batch_request=batch_request)
-    res: ExpectationSuite = my_rbp.get_expectation_suite()
-    assert len(res.expectations) == 4
+    result: RuleBasedProfilerResult = my_rbp.run(batch_request=batch_request)
+    expectation_configurations: List[
+        ExpectationConfiguration
+    ] = result.expectation_configurations
+    assert len(expectation_configurations) == 4
 
 
 def test_profiler_parameter_builder_added(data_context_with_taxi_data):
@@ -237,9 +239,11 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
         data_context=context,
     )
     my_rbp.add_rule(rule=simple_rule)
-    my_rbp.run(batch_request=batch_request)
-    res: ExpectationSuite = my_rbp.get_expectation_suite()
-    assert len(res.expectations) == 4
+    result: RuleBasedProfilerResult = my_rbp.run(batch_request=batch_request)
+    expectation_configurations: List[
+        ExpectationConfiguration
+    ] = result.expectation_configurations
+    assert len(expectation_configurations) == 4
 
 
 def test_profiler_save_and_load(data_context_with_taxi_data):
@@ -344,62 +348,3 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
             },
         },
     }
-
-
-def test_profiler_run_with_expectation_suite_arg(
-    data_context_with_taxi_data: DataContext, basic_expectation_suite: ExpectationSuite
-):
-    context: DataContext = data_context_with_taxi_data
-    batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_multibatch_datasource_other_possibility",
-        data_connector_name="default_inferred_data_connector_name",
-        data_asset_name="yellow_tripdata_sample_2018",
-        data_connector_query={"index": -1},
-    )
-    domain_builder: DomainBuilder = ColumnDomainBuilder(
-        include_column_name_suffixes=["_amount"],
-        data_context=context,
-    )
-    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
-        expectation_type="expect_column_values_to_not_be_null",
-        column="$domain.domain_kwargs.column",
-    )
-    simple_rule: Rule = Rule(
-        name="rule_with_no_variables_no_parameters",
-        variables=None,
-        domain_builder=domain_builder,
-        expectation_configuration_builders=[default_expectation_configuration_builder],
-    )
-    my_rbp: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_simple_rbp", data_context=context, config_version=1.0
-    )
-    my_rbp.add_rule(rule=simple_rule)
-
-    existing_expectations: List[ExpectationConfiguration] = [
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist",
-            kwargs={"column": "infinities"},
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_unique",
-            kwargs={"column": "naturals"},
-        ),
-    ]
-
-    assert len(basic_expectation_suite.expectations) == 4
-    assert basic_expectation_suite.expectations == existing_expectations
-
-    my_rbp.run(batch_request=batch_request)
-    res: ExpectationSuite = my_rbp.get_expectation_suite(
-        expectation_suite=basic_expectation_suite
-    )
-
-    assert id(res) == id(basic_expectation_suite)
-    assert len(res.expectations) == 8
-    assert basic_expectation_suite.expectations[:4] == existing_expectations
