@@ -9,7 +9,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.types import (
-    INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     ParameterContainer,
     SemanticDomainTypes,

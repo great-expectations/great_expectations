@@ -135,6 +135,7 @@ class GEDependencies:
         "s3fs",
         "snapshottest",
         # "sqlalchemy",  # Not excluded from tracking
+        "trino",
     ]
 
     GE_DEV_DEPENDENCIES: List[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(

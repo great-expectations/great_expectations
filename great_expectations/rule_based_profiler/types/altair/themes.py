@@ -7,6 +7,9 @@ from great_expectations.types import ColorPalettes, Colors
 chart_width: int = 800
 chart_height: int = 250
 
+# View
+chart_border_opacity: float = 0
+
 # Font
 font: str = "Verdana"
 
@@ -18,7 +21,12 @@ font: str = "Verdana"
 title_align: str = "center"
 title_font_size: int = 15
 title_color: str = Colors.GREEN.value
-title_dy: int = -15
+title_dy: int = -10
+subtitle_color: str = Colors.PURPLE.value
+subtitle_font: str = font
+subtitle_font_size: int = 12
+subtitle_font_weight: str = "bold"
+subtitle_padding: int = 5
 
 # Both Axes
 axis_title_color: str = Colors.PURPLE.value
@@ -38,14 +46,18 @@ x_axis_grid: bool = True
 
 # Y-Axis Only
 
+# Legend
+legend_title_color: str = Colors.PURPLE.value
+legend_title_font_size: str = 12
+
 #
 # Color Palettes
 #
 
-category_color_scheme: List[str] = ColorPalettes.CATEGORY.value
-diverging_color_scheme: List[str] = ColorPalettes.DIVERGING.value
-heatmap_color_scheme: List[str] = ColorPalettes.HEATMAP.value
-ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
+category_color_scheme: List[str] = ColorPalettes.CATEGORY_5.value
+diverging_color_scheme: List[str] = ColorPalettes.DIVERGING_7.value
+heatmap_color_scheme: List[str] = ColorPalettes.HEATMAP_6.value
+ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL_7.value
 
 #
 # Chart Types
@@ -53,10 +65,10 @@ ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
 
 # Area
 fill_opacity: float = 0.5
-fill_color: str = ColorPalettes.HEATMAP.value[5]
+fill_color: str = ColorPalettes.HEATMAP_6.value[5]
 
 # Line Chart
-line_color: str = Colors.BLUE_1.value
+line_color: str = Colors.BLUE_2.value
 line_stroke_width: int = 3
 line_opacity: float = 0.9
 # Known vega-lite bug: https://github.com/vega/vega-lite/issues/5732
@@ -74,13 +86,22 @@ point_tooltip_content: str = "data"
 class AltairThemes(Enum):
     # https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
     DEFAULT_THEME = {
-        "view": {"width": chart_width, "height": chart_height},
+        "view": {
+            "width": chart_width,
+            "height": chart_height,
+            "strokeOpacity": chart_border_opacity,
+        },
         "font": font,
         "title": {
             "align": title_align,
             "color": title_color,
             "fontSize": title_font_size,
             "dy": title_dy,
+            "subtitleFont": subtitle_font,
+            "subtitleFontSize": subtitle_font_size,
+            "subtitleColor": subtitle_color,
+            "subtitleFontWeight": subtitle_font_weight,
+            "subtitlePadding": subtitle_padding,
         },
         "axis": {
             "titleFontSize": axis_title_font_size,
@@ -93,6 +114,10 @@ class AltairThemes(Enum):
             "labelAngle": x_axis_label_angle,
             "labelFlush": x_axis_label_flush,
             "grid": x_axis_grid,
+        },
+        "legend": {
+            "titleColor": legend_title_color,
+            "titleFontSize": legend_title_font_size,
         },
         "range": {
             "category": category_color_scheme,

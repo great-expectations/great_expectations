@@ -1,7 +1,7 @@
 import itertools
 import warnings
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import numpy as np
 
@@ -73,7 +73,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     def __init__(
         self,
         name: str,
-        metric_name: str,
+        metric_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = True,
