@@ -1,7 +1,7 @@
 import copy
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import altair as alt
 import pandas as pd
@@ -18,6 +18,14 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.types.altair import (
     AltairDataTypes,
     AltairThemes,
+)
+from great_expectations.rule_based_profiler.types.data_assistant_result.plot_components import (
+    BatchPlotComponent,
+    DomainPlotComponent,
+    ExpectationKwargPlotComponent,
+    MetricPlotComponent,
+    PlotComponent,
+    determine_plot_title,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
     PlotResult,
@@ -188,34 +196,45 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair line chart
         """
-        metric_title: str = metric_name.replace("_", " ").title()
-        domain_title: str = domain_name.title()
+        metric_component: MetricPlotComponent = MetricPlotComponent(
+            name=metric_name, alt_type=metric_type
+        )
+        domain_component: DomainPlotComponent = DomainPlotComponent(
+            name=domain_name, alt_type=domain_type, subtitle=subtitle
+        )
+        batch_component: BatchPlotComponent = BatchPlotComponent(
+            name="batch_id", alt_type=AltairDataTypes.NOMINAL.value
+        )
+        return DataAssistantResult._get_line_chart(
+            df=df,
+            metric_component=metric_component,
+            domain_component=domain_component,
+            batch_component=batch_component,
+        )
 
-        title: Union[str, alt.TitleParams] = f"{metric_title} per {domain_title}"
-        if subtitle:
-            title = alt.TitleParams(title, subtitle=[subtitle])
-
-        batch_id: str = "batch_id"
-        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
-        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+    @staticmethod
+    def _get_line_chart(
+        df: pd.DataFrame,
+        metric_component: MetricPlotComponent,
+        domain_component: DomainPlotComponent,
+        batch_component: BatchPlotComponent,
+    ) -> alt.Chart:
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_component=metric_component,
+            domain_plot_component=domain_component,
+        )
 
         tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
-            alt.Tooltip(
-                field=metric_name, type=metric_type, title=metric_title, format=","
-            ),
+            batch_component.generate_tooltip(),
+            metric_component.generate_tooltip(format=","),
         ]
 
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
             .mark_line()
             .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(metric_name, type=metric_type, title=metric_title),
+                x=domain_component.plot_on_axis(),
+                y=metric_component.plot_on_axis(),
                 tooltip=tooltip,
             )
         )
@@ -224,12 +243,8 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df, title=title)
             .mark_point()
             .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(metric_name, type=metric_type, title=metric_title),
+                x=domain_component.plot_on_axis(),
+                y=metric_component.plot_on_axis(),
                 tooltip=tooltip,
             )
         )
@@ -237,7 +252,7 @@ class DataAssistantResult(SerializableDictDot):
         return line + points
 
     @staticmethod
-    def get_expect_values_to_be_between_chart(
+    def get_expect_domain_values_to_be_between_chart(
         df: pd.DataFrame,
         metric_name: str,
         metric_type: alt.StandardType,
@@ -252,53 +267,72 @@ class DataAssistantResult(SerializableDictDot):
             metric_type: The altair data type for the metric being plotted
             domain_name: The name of the domain as it exists in the pandas dataframe
             domain_type: The altair data type for the domain being plotted
-            subtitle: The subtitle to add for a domain such as "Column: column_name"
 
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
+        metric_component: MetricPlotComponent = MetricPlotComponent(
+            name=metric_name, alt_type=metric_type
+        )
+        domain_component: DomainPlotComponent = DomainPlotComponent(
+            name=domain_name, alt_type=domain_type, subtitle=subtitle
+        )
+        batch_component: BatchPlotComponent = BatchPlotComponent(
+            name="batch_id", alt_type=AltairDataTypes.NOMINAL.value
+        )
+        min_value_component: ExpectationKwargPlotComponent = (
+            ExpectationKwargPlotComponent(
+                name="min_value",
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                metric_plot_component=metric_component,
+            )
+        )
+        max_value_component: ExpectationKwargPlotComponent = (
+            ExpectationKwargPlotComponent(
+                name="max_value",
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                metric_plot_component=metric_component,
+            )
+        )
+
+        return DataAssistantResult._get_expect_domain_values_to_be_between_chart(
+            df=df,
+            metric_component=metric_component,
+            domain_component=domain_component,
+            batch_component=batch_component,
+            min_value_component=min_value_component,
+            max_value_component=max_value_component,
+        )
+
+    @staticmethod
+    def _get_expect_domain_values_to_be_between_chart(
+        df: pd.DataFrame,
+        metric_component: MetricPlotComponent,
+        domain_component: DomainPlotComponent,
+        batch_component: BatchPlotComponent,
+        min_value_component: PlotComponent,
+        max_value_component: PlotComponent,
+    ) -> alt.Chart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
-        metric_title: str = metric_name.replace("_", " ").title()
-        domain_title: str = domain_name.title()
-
-        title: Union[str, alt.TitleParams] = f"{metric_title} per {domain_title}"
-        if subtitle:
-            title = alt.TitleParams(title, subtitle=[subtitle])
-
-        batch_id: str = "batch_id"
-        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
-        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-        min_value: str = "min_value"
-        min_value_title: str = min_value.replace("_", " ").title()
-        min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        max_value: str = "max_value"
-        max_value_title: str = max_value.replace("_", " ").title()
-        max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_component=metric_component,
+            domain_plot_component=domain_component,
+        )
 
         tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
-            alt.Tooltip(
-                field=metric_name, type=metric_type, title=metric_title, format=","
-            ),
-            alt.Tooltip(
-                field=min_value, type=min_value_type, title=min_value_title, format=","
-            ),
-            alt.Tooltip(
-                field=max_value, type=max_value_type, title=max_value_title, format=","
-            ),
+            batch_component.generate_tooltip(),
+            metric_component.generate_tooltip(format=","),
+            min_value_component.generate_tooltip(format=","),
+            max_value_component.generate_tooltip(format=","),
         ]
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
             .mark_line(color=line_color)
             .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(min_value, type=metric_type, title=metric_title),
+                x=domain_component.plot_on_axis(),
+                y=min_value_component.plot_on_axis(),
                 tooltip=tooltip,
             )
             .properties(title=title)
@@ -308,12 +342,8 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_line(color=line_color)
             .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(max_value, type=metric_type, title=metric_title),
+                x=domain_component.plot_on_axis(),
+                y=max_value_component.plot_on_axis(),
                 tooltip=tooltip,
             )
             .properties(title=title)
@@ -323,26 +353,22 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_area()
             .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    title=domain_title,
-                ),
-                y=alt.Y(min_value, title=metric_title, type=metric_type),
-                y2=alt.Y2(max_value, title=metric_title),
+                x=domain_component.plot_on_axis(),
+                y=min_value_component.plot_on_axis(),
+                y2=alt.Y2(max_value_component.name, title=metric_component.title),
             )
             .properties(title=title)
         )
 
-        line: alt.Chart = DataAssistantResult.get_line_chart(
+        line: alt.Chart = DataAssistantResult._get_line_chart(
             df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
+            metric_component=metric_component,
+            domain_component=domain_component,
+            batch_component=batch_component,
         )
 
         # encode point color based on anomalies
+        metric_name: str = metric_component.name
         predicate: alt.expr.core.BinaryExpression = (
             (alt.datum.min_value > alt.datum[metric_name])
             & (alt.datum.max_value > alt.datum[metric_name])
