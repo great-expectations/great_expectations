@@ -38,8 +38,6 @@ class DataAssistantRunner:
         batch_request: Union[BatchRequestBase, dict],
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-        save_updated_expectation_suite: bool = False,
     ) -> DataAssistantResult:
         data_assistant_name: str = self._data_assistant_cls.data_assistant_type
         validator: Validator = get_validator_with_expectation_suite(
@@ -53,10 +51,5 @@ class DataAssistantRunner:
             name=data_assistant_name,
             validator=validator,
         )
-        data_assistant_result: DataAssistantResult = data_assistant.run(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-            save_updated_expectation_suite=save_updated_expectation_suite,
-        )
+        data_assistant_result: DataAssistantResult = data_assistant.run()
         return data_assistant_result

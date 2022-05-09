@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -25,6 +25,14 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
     """
     Compute histogram/partition using specified metric (depending on bucketizaiton directive) for one Batch od data.
     """
+
+    exclude_field_names: Set[
+        str
+    ] = MetricSingleBatchParameterBuilder.exclude_field_names | {
+        "column_partition_metric_single_batch_parameter_builder_config",
+        "column_value_counts_metric_single_batch_parameter_builder_config",
+        "column_values_nonnull_count_metric_single_batch_parameter_builder_config",
+    }
 
     def __init__(
         self,

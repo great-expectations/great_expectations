@@ -1,6 +1,7 @@
 import os
 from typing import Any, Callable, Dict, List
 
+import altair as alt
 import nbconvert
 import nbformat
 import pytest
@@ -15,7 +16,6 @@ from great_expectations.rule_based_profiler.data_assistant import (
     VolumeDataAssistant,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
-    get_or_create_expectation_suite,
     get_validator_with_expectation_suite,
 )
 from great_expectations.rule_based_profiler.types import (
@@ -42,8 +42,8 @@ from tests.test_utils import find_strings_in_nested_obj
 def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
         Domain(
-            rule_name="default_expect_table_row_count_to_be_between_rule",
             domain_type=MetricDomainTypes.TABLE,
+            rule_name="default_expect_table_row_count_to_be_between_rule",
         ): {
             "$parameter.table_row_count": {
                 "value": [
@@ -134,7 +134,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "vendor_id",
@@ -144,6 +143,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "vendor_id": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -234,7 +234,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "pickup_datetime",
@@ -244,6 +243,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "pickup_datetime": SemanticDomainTypes.TEXT,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -334,7 +334,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "dropoff_datetime",
@@ -344,6 +343,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "dropoff_datetime": SemanticDomainTypes.TEXT,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -434,7 +434,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "passenger_count",
@@ -444,6 +443,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "passenger_count": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -534,7 +534,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "trip_distance",
@@ -544,6 +543,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "trip_distance": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -634,7 +634,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "rate_code_id",
@@ -644,6 +643,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "rate_code_id": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -734,7 +734,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "store_and_fwd_flag",
@@ -744,6 +743,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "store_and_fwd_flag": SemanticDomainTypes.TEXT,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -834,7 +834,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "pickup_location_id",
@@ -844,6 +843,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "pickup_location_id": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -934,7 +934,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "dropoff_location_id",
@@ -944,6 +943,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "dropoff_location_id": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1034,7 +1034,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "payment_type",
@@ -1044,6 +1043,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "payment_type": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1134,7 +1134,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "fare_amount",
@@ -1144,6 +1143,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "fare_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1234,7 +1234,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "extra",
@@ -1244,6 +1243,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "extra": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1334,7 +1334,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "mta_tax",
@@ -1344,6 +1343,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "mta_tax": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1434,7 +1434,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "tip_amount",
@@ -1444,6 +1443,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "tip_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1534,7 +1534,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "tolls_amount",
@@ -1544,6 +1543,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "tolls_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1634,7 +1634,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "improvement_surcharge",
@@ -1644,6 +1643,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "improvement_surcharge": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1734,7 +1734,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "total_amount",
@@ -1744,6 +1743,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "total_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1834,7 +1834,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "congestion_surcharge",
@@ -1844,6 +1843,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "congestion_surcharge": SemanticDomainTypes.NUMERIC,
                 },
             },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -2543,7 +2543,7 @@ def quentin_expected_expectation_suite(
         expected_expectation_suite_meta: Dict[str, Any] = {
             "citations": [
                 {
-                    "citation_date": "2019-09-26T13:42:41.000000Z",
+                    "citation_date": "2019-09-26T13:42:41+00:00",
                     "profiler_config": quentin_expected_rule_based_profiler_configuration(
                         name=name
                     ).to_json_dict(),
@@ -2571,16 +2571,7 @@ def volume_data_assistant_result(
         "data_asset_name": "my_reports",
     }
 
-    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name="my_suite",
-        component_name=None,
-    )
-
-    return context.assistants.volume.run(
-        batch_request=batch_request, expectation_suite=expectation_suite
-    )
+    return context.assistants.volume.run(batch_request=batch_request)
 
 
 def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
@@ -2649,18 +2640,11 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         validator=validator,
     )
 
-    expectation_suite_name: str = "test_suite"
-    data_assistant_result: DataAssistantResult = data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
-    )
+    data_assistant_result: DataAssistantResult = data_assistant.run()
     """
 
     implicit_invocation_code: str = """
-    expectation_suite_name: str = "test_suite"
-    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request,
-        expectation_suite_name=expectation_suite_name,
-    )
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(batch_request=batch_request)
     """
 
     notebook_code: str
@@ -2739,27 +2723,21 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
         validator=validator,
     )
 
-    data_assistant_result: DataAssistantResult = data_assistant.run(
-        expectation_suite_name=expected_expectation_suite.expectation_suite_name,
-    )
+    data_assistant_result: DataAssistantResult = data_assistant.run()
 
     assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
 
     expectation_configuration: ExpectationConfiguration
-    for (
-        expectation_configuration
-    ) in data_assistant_result.expectation_suite.expectations:
+    for expectation_configuration in data_assistant_result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
             expectation_configuration.meta["profiler_details"].pop(
                 "estimation_histogram", None
             )
 
     assert (
-        data_assistant_result.expectation_suite.expectations
+        data_assistant_result.expectation_configurations
         == expected_expectation_suite.expectations
     )
-
-    data_assistant_result.expectation_suite.meta.pop("great_expectations_version", None)
 
     assert deep_filter_properties_iterable(
         properties=data_assistant_result.profiler_config.to_json_dict(),
@@ -2771,15 +2749,12 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
         delete_fields={"bootstrap_random_seed"},
     )
 
-    data_assistant_result.expectation_suite.meta["citations"][0].pop(
-        "profiler_config", None
-    )
+    data_assistant_result.citation.pop("profiler_config", None)
     expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
 
-    assert data_assistant_result.expectation_suite == expected_expectation_suite
-
     assert (
-        data_assistant_result.expectation_suite.meta == expected_expectation_suite.meta
+        data_assistant_result.citation
+        == expected_expectation_suite.meta["citations"][0]
     )
 
 
@@ -2813,20 +2788,16 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
     assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
 
     expectation_configuration: ExpectationConfiguration
-    for (
-        expectation_configuration
-    ) in data_assistant_result.expectation_suite.expectations:
+    for expectation_configuration in data_assistant_result.expectation_configurations:
         if "profiler_details" in expectation_configuration.meta:
             expectation_configuration.meta["profiler_details"].pop(
                 "estimation_histogram", None
             )
 
     assert (
-        data_assistant_result.expectation_suite.expectations
+        data_assistant_result.expectation_configurations
         == expected_expectation_suite.expectations
     )
-
-    data_assistant_result.expectation_suite.meta.pop("great_expectations_version", None)
 
     assert deep_filter_properties_iterable(
         properties=data_assistant_result.profiler_config.to_json_dict(),
@@ -2838,15 +2809,12 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
         delete_fields={"bootstrap_random_seed"},
     )
 
-    data_assistant_result.expectation_suite.meta["citations"][0].pop(
-        "profiler_config", None
-    )
+    data_assistant_result.citation.pop("profiler_config", None)
     expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
 
-    assert data_assistant_result.expectation_suite == expected_expectation_suite
-
     assert (
-        data_assistant_result.expectation_suite.meta == expected_expectation_suite.meta
+        data_assistant_result.citation
+        == expected_expectation_suite.meta["citations"][0]
     )
 
 
@@ -2897,276 +2865,6 @@ def test_execution_time_within_proper_bounds_using_implicit_invocation(
 
     # Execution time (in seconds) must have non-trivial value.
     assert data_assistant_result.execution_time > 0.0
-
-
-def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_no_using_explicit_instantiation(
-    quentin_columnar_table_multi_batch_data_context,
-):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name="my_suite",
-        component_name=None,
-    )
-    assert len(expectation_suite.expectations) == 0
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=expectation_suite,
-        component_name="volume_data_assistant",
-    )
-    assert len(validator.batches) == 36
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        validator=validator,
-    )
-    data_assistant_result: DataAssistantResult = data_assistant.run()
-
-    expectation_suite.add_expectation_configurations(
-        expectation_configurations=data_assistant_result.expectation_suite.expectations,
-        send_usage_event=False,
-        match_type="domain",
-        overwrite_existing=True,
-    )
-    assert len(expectation_suite.expectations) == 19
-
-
-def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_no_using_implicit_invocation(
-    quentin_columnar_table_multi_batch_data_context,
-):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name="my_suite",
-        component_name=None,
-    )
-    assert len(expectation_suite.expectations) == 0
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request,
-    )
-
-    expectation_suite.add_expectation_configurations(
-        expectation_configurations=data_assistant_result.expectation_suite.expectations,
-        send_usage_event=False,
-        match_type="domain",
-        overwrite_existing=True,
-    )
-    assert len(expectation_suite.expectations) == 19
-
-
-def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_yes_use_suite_name_using_explicit_instantiation(
-    quentin_columnar_table_multi_batch_data_context,
-):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    expectation_suite_name: str = "my_suite"
-
-    expectation_suite: ExpectationSuite
-
-    expectation_suite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        component_name=None,
-    )
-    assert len(expectation_suite.expectations) == 0
-
-    context.save_expectation_suite(expectation_suite=expectation_suite)
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=expectation_suite_name,
-        expectation_suite=expectation_suite,
-        component_name="volume_data_assistant",
-    )
-    assert len(validator.batches) == 36
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        validator=validator,
-    )
-
-    data_assistant_result: DataAssistantResult
-
-    data_assistant_result = data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
-        save_updated_expectation_suite=False,
-    )
-    expectation_suite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        component_name=None,
-    )
-    assert len(data_assistant_result.expectation_suite.expectations) == 19
-    assert len(expectation_suite.expectations) == 0
-
-    data_assistant_result = data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
-        save_updated_expectation_suite=True,
-    )
-    expectation_suite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        component_name=None,
-    )
-    assert len(data_assistant_result.expectation_suite.expectations) == 19
-    assert len(expectation_suite.expectations) == 19
-
-
-def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_yes_use_suite_name_using_implicit_invocation(
-    quentin_columnar_table_multi_batch_data_context,
-):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    expectation_suite_name: str = "my_suite"
-
-    expectation_suite: ExpectationSuite
-
-    expectation_suite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        component_name=None,
-    )
-    assert len(expectation_suite.expectations) == 0
-
-    context.save_expectation_suite(expectation_suite=expectation_suite)
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    data_assistant_result: DataAssistantResult
-
-    # Both, registered "volume_data_assistant" data_assistant_type and alias name are supported for invocation.
-
-    # Using registered "volume_data_assistant" data_assistant_type for invocation.
-    data_assistant_result = context.assistants.volume_data_assistant.run(
-        batch_request=batch_request,
-        expectation_suite_name=expectation_suite_name,
-        save_updated_expectation_suite=False,
-    )
-
-    expectation_suite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        component_name=None,
-    )
-    assert len(data_assistant_result.expectation_suite.expectations) == 19
-    assert len(expectation_suite.expectations) == 0
-
-    # Using alias name "volume" for invocation.
-    data_assistant_result = context.assistants.volume.run(
-        batch_request=batch_request,
-        expectation_suite_name=expectation_suite_name,
-        save_updated_expectation_suite=True,
-    )
-
-    expectation_suite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        component_name=None,
-    )
-    assert len(data_assistant_result.expectation_suite.expectations) == 19
-    assert len(expectation_suite.expectations) == 19
-
-
-def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_yes_use_suite_using_explicit_instantiation(
-    quentin_columnar_table_multi_batch_data_context,
-):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name="my_suite",
-        component_name=None,
-    )
-    assert len(expectation_suite.expectations) == 0
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=expectation_suite,
-        component_name="volume_data_assistant",
-    )
-    assert len(validator.batches) == 36
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        validator=validator,
-    )
-    # noinspection PyUnusedLocal
-    data_assistant_result: DataAssistantResult = data_assistant.run(
-        expectation_suite=expectation_suite
-    )
-    assert len(expectation_suite.expectations) == 19
-
-
-def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_yes_use_suite_using_implicit_invocation(
-    quentin_columnar_table_multi_batch_data_context,
-):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name="my_suite",
-        component_name=None,
-    )
-    assert len(expectation_suite.expectations) == 0
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    # noinspection PyUnusedLocal
-    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request, expectation_suite=expectation_suite
-    )
-    assert len(expectation_suite.expectations) == 19
 
 
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
@@ -3350,3 +3048,61 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
         )
 
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
+
+
+def test_volume_data_assistant_plot_custom_theme_overrides(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    font: str = "Comic Sans MS"
+    title_color: str = "#FFA500"
+    title_font_size: str = 48
+    point_size: int = 1000
+    y_axis_label_color: str = "red"
+    y_axis_label_angle: int = 180
+    x_axis_title_color: str = "brown"
+
+    theme: Dict[str, Any] = {
+        "font": font,
+        "title": {
+            "color": title_color,
+            "fontSize": title_font_size,
+        },
+        "point": {"size": point_size},
+        "axisY": {
+            "labelColor": y_axis_label_color,
+            "labelAngle": y_axis_label_angle,
+        },
+        "axisX": {"titleColor": x_axis_title_color},
+    }
+    plot_result: PlotResult = volume_data_assistant_result.plot(
+        prescriptive=True, theme=theme
+    )
+
+    # ensure a config has been added to each chart
+    assert all(
+        not isinstance(chart.config, alt.utils.schemapi.UndefinedType)
+        for chart in plot_result.charts
+    )
+
+    # ensure the theme elements were updated for each chart
+    assert all(chart.config.font == font for chart in plot_result.charts)
+    assert all(
+        chart.config.title["color"] == title_color for chart in plot_result.charts
+    )
+    assert all(
+        chart.config.title["fontSize"] == title_font_size
+        for chart in plot_result.charts
+    )
+    assert all(chart.config.point["size"] == point_size for chart in plot_result.charts)
+    assert all(
+        chart.config.axisY["labelColor"] == y_axis_label_color
+        for chart in plot_result.charts
+    )
+    assert all(
+        chart.config.axisY["labelAngle"] == y_axis_label_angle
+        for chart in plot_result.charts
+    )
+    assert all(
+        chart.config.axisX["titleColor"] == x_axis_title_color
+        for chart in plot_result.charts
+    )

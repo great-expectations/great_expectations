@@ -100,3 +100,4 @@ class ExpectationTestDataCases(SerializableDictDot):
     tests: List[ExpectationTestCase]
     schemas: Dict[Backend, Dict[str, str]] = field(default_factory=dict)
     test_backends: Optional[List[TestBackend]] = None
+    data_alt: Optional[TestData] = None

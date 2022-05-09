@@ -95,12 +95,12 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
 
         domains: List[Domain] = [
             Domain(
-                rule_name=rule_name,
                 domain_type=self.domain_type,
                 domain_kwargs=domain_kwargs,
                 details={
                     INFERRED_SEMANTIC_TYPE_KEY: semantic_types_by_column_name,
                 },
+                rule_name=rule_name,
             ),
         ]
 

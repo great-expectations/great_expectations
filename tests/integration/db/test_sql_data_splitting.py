@@ -8,6 +8,7 @@ from great_expectations import DataContext
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.datasource import BaseDatasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -103,10 +104,24 @@ if __name__ == "test_script_module":
         print("Testing splitter method:", test_case.splitter_method_name)
 
         # 1. Setup
-
         context: DataContext = ge.get_context()
 
         datasource_name: str = "test_datasource"
+        data_connector_name: str = "test_data_connector"
+        data_asset_name: str = table_name  # Read from generated table name
+        column_name: str = taxi_splitting_test_cases.test_column_name
+
+        # 2. Set splitter in DataConnector config
+        data_connector_config: dict = {
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "assets": {
+                data_asset_name: {
+                    "splitter_method": test_case.splitter_method_name,
+                    "splitter_kwargs": test_case.splitter_kwargs,
+                }
+            },
+        }
+
         context.add_datasource(
             name=datasource_name,
             class_name="Datasource",
@@ -114,25 +129,16 @@ if __name__ == "test_script_module":
                 "class_name": "SqlAlchemyExecutionEngine",
                 "connection_string": connection_string,
             },
+            data_connectors={data_connector_name: data_connector_config},
         )
 
-        # 2. Set splitter in data connector config
-        data_connector_name: str = "test_data_connector"
-        data_asset_name: str = table_name  # Read from generated table name
-        column_name: str = taxi_splitting_test_cases.test_column_name
-        data_connector: ConfiguredAssetSqlDataConnector = (
-            ConfiguredAssetSqlDataConnector(
-                name=data_connector_name,
-                datasource_name=datasource_name,
-                execution_engine=context.datasources[datasource_name].execution_engine,
-                assets={
-                    data_asset_name: {
-                        "splitter_method": test_case.splitter_method_name,
-                        "splitter_kwargs": test_case.splitter_kwargs,
-                    }
-                },
-            )
+        datasource: BaseDatasource = context.get_datasource(
+            datasource_name="test_datasource"
         )
+
+        data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
+            "test_data_connector"
+        ]
 
         # 3. Check if resulting batches are as expected
         # using data_connector.get_batch_definition_list_from_batch_request()
