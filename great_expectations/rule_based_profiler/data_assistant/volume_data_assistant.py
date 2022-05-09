@@ -104,6 +104,7 @@ class VolumeDataAssistant(DataAssistant):
         return VolumeDataAssistantResult(
             profiler_config=data_assistant_result.profiler_config,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
-            expectation_suite=data_assistant_result.expectation_suite,
+            expectation_configurations=data_assistant_result.expectation_configurations,
+            citation=data_assistant_result.citation,
             execution_time=data_assistant_result.execution_time,
         )

@@ -7,7 +7,7 @@ import altair as alt
 import pandas as pd
 from IPython.display import HTML, display
 
-from great_expectations.core import ExpectationSuite
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
@@ -37,15 +37,14 @@ from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 class DataAssistantResult(SerializableDictDot):
     """
     DataAssistantResult is a "dataclass" object, designed to hold results of executing "DataAssistant.run()" method.
-    Available properties ("metrics_by_domain", "expectation_suite", and configuration object ("RuleBasedProfilerConfig")
-    of effective Rule-Based Profiler, which embodies given "DataAssistant".
+    Available properties are: "metrics_by_domain", "expectation_configurations", and configuration object
+    ("RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
     """
 
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
-    # Obtain "expectation_configurations" using "expectation_configurations = expectation_suite.expectations".
-    # Obtain "meta/details" using "meta = expectation_suite.meta".
-    expectation_suite: Optional[ExpectationSuite] = None
+    expectation_configurations: Optional[List[ExpectationConfiguration]] = None
+    citation: Optional[dict] = None
     execution_time: Optional[float] = None  # Execution time (in seconds).
 
     def to_dict(self) -> dict:
@@ -54,6 +53,7 @@ class DataAssistantResult(SerializableDictDot):
         """
         domain: Domain
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        expectation_configuration: ExpectationConfiguration
         return {
             "profiler_config": self.profiler_config.to_json_dict(),
             "metrics_by_domain": [
@@ -66,7 +66,10 @@ class DataAssistantResult(SerializableDictDot):
                 }
                 for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
             ],
-            "expectation_suite": self.expectation_suite.to_json_dict(),
+            "expectation_configurations": [
+                expectation_configuration.to_json_dict()
+                for expectation_configuration in self.expectation_configurations
+            ],
             "execution_time": convert_to_json_serializable(data=self.execution_time),
         }
 

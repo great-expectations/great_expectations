@@ -51,7 +51,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         expectation_configurations: List[
             ExpectationConfiguration
-        ] = self.expectation_suite.expectations
+        ] = self.expectation_configurations
 
         table_domain_chart: List[alt.Chart] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
