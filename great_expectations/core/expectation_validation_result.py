@@ -146,13 +146,32 @@ class ExpectationValidationResult(SerializableDictDot):
             return True
 
     def __repr__(self):
+        """
+        # TODO: <Alex>5/9/2022</Alex>
+        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
+        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
+        """
+        json_dict: dict = self.to_json_dict()
         if in_jupyter_notebook():
-            json_dict = self.to_json_dict()
-            json_dict.pop("expectation_config")
-            return json.dumps(json_dict, indent=2)
-        return json.dumps(self.to_json_dict(), indent=2)
+            json_dict: dict = self.to_json_dict()
+            if (
+                "expectation_config" in json_dict
+                and "kwargs" in json_dict["expectation_config"]
+                and "auto" in json_dict["expectation_config"]["kwargs"]
+            ):
+                json_dict["expectation_config"].pop("meta", None)
+                json_dict["expectation_config"]["kwargs"].pop("auto")
+            else:
+                json_dict.pop("expectation_config", None)
+
+        return json.dumps(json_dict, indent=2)
 
     def __str__(self):
+        """
+        # TODO: <Alex>5/9/2022</Alex>
+        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
+        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
+        """
         return json.dumps(self.to_json_dict(), indent=2)
 
     @staticmethod
