@@ -35,7 +35,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         skip_inapplicable_tables: bool = True,
         introspection_directives: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         """
         InferredAssetDataConnector for connecting to data on a SQL database
 
@@ -100,7 +100,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
     def assets(self) -> Dict[str, Asset]:
         return self._introspected_assets_cache
 
-    def _refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self) -> None:
         self._refresh_introspected_assets_cache(
             self._data_asset_name_prefix,
             self._data_asset_name_suffix,
@@ -128,7 +128,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         excluded_tables: List = None,
         included_tables: List = None,
         skip_inapplicable_tables: bool = True,
-    ):
+    ) -> None:
         introspected_table_metadata = self._introspect_db(
             **self._introspection_directives
         )

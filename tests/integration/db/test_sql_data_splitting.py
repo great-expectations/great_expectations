@@ -9,11 +9,12 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.datasource import BaseDatasource, Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from tests.integration.fixtures.split_data.splitter_test_cases_and_fixtures import (
+from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
     TaxiSplittingTestCase,
     TaxiSplittingTestCases,
     TaxiTestData,
@@ -49,20 +50,29 @@ TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
 
 
 def _load_data(
-    connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME
+    connection_string: str, dialect: str, table_name: str = TAXI_DATA_TABLE_NAME
 ) -> LoadedTable:
+
+    dialects_supporting_multiple_values_in_single_insert_clause: List[str] = [
+        "redshift"
+    ]
+    to_sql_method: str = (
+        "multi"
+        if dialect in dialects_supporting_multiple_values_in_single_insert_clause
+        else None
+    )
 
     # Load the first 10 rows of each month of taxi data
     return load_data_into_test_database(
         table_name=table_name,
         csv_paths=[
-            f"./data/yellow_tripdata_sample_{year}-{month}.csv"
-            for year in ["2018", "2019", "2020"]
-            for month in [f"{mo:02d}" for mo in range(1, 12 + 1)]
+            f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
         ],
         connection_string=connection_string,
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
+        load_full_dataset=True,
         random_table_suffix=True,
+        to_sql_method=to_sql_method,
     )
 
 
@@ -76,7 +86,9 @@ if __name__ == "test_script_module":
         connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
     )
 
-    loaded_table: LoadedTable = _load_data(connection_string=connection_string)
+    loaded_table: LoadedTable = _load_data(
+        connection_string=connection_string, dialect=dialect
+    )
     test_df: pd.DataFrame = loaded_table.inserted_dataframe
     table_name: str = loaded_table.table_name
 
@@ -94,10 +106,24 @@ if __name__ == "test_script_module":
         print("Testing splitter method:", test_case.splitter_method_name)
 
         # 1. Setup
-
         context: DataContext = ge.get_context()
 
         datasource_name: str = "test_datasource"
+        data_connector_name: str = "test_data_connector"
+        data_asset_name: str = table_name  # Read from generated table name
+        column_name: str = taxi_splitting_test_cases.test_column_name
+
+        # 2. Set splitter in DataConnector config
+        data_connector_config: dict = {
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "assets": {
+                data_asset_name: {
+                    "splitter_method": test_case.splitter_method_name,
+                    "splitter_kwargs": test_case.splitter_kwargs,
+                }
+            },
+        }
+
         context.add_datasource(
             name=datasource_name,
             class_name="Datasource",
@@ -105,25 +131,16 @@ if __name__ == "test_script_module":
                 "class_name": "SqlAlchemyExecutionEngine",
                 "connection_string": connection_string,
             },
+            data_connectors={data_connector_name: data_connector_config},
         )
 
-        # 2. Set splitter in data connector config
-        data_connector_name: str = "test_data_connector"
-        data_asset_name: str = table_name  # Read from generated table name
-        column_name: str = taxi_splitting_test_cases.test_column_name
-        data_connector: ConfiguredAssetSqlDataConnector = (
-            ConfiguredAssetSqlDataConnector(
-                name=data_connector_name,
-                datasource_name=datasource_name,
-                execution_engine=context.datasources[datasource_name].execution_engine,
-                assets={
-                    data_asset_name: {
-                        "splitter_method": test_case.splitter_method_name,
-                        "splitter_kwargs": test_case.splitter_kwargs,
-                    }
-                },
-            )
+        datasource: BaseDatasource = context.get_datasource(
+            datasource_name="test_datasource"
         )
+
+        data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
+            "test_data_connector"
+        ]
 
         # 3. Check if resulting batches are as expected
         # using data_connector.get_batch_definition_list_from_batch_request()

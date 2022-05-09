@@ -1,6 +1,7 @@
 import os
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 
+import altair as alt
 import nbconvert
 import nbformat
 import pytest
@@ -8,190 +9,42 @@ from freezegun import freeze_time
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
-from great_expectations.rule_based_profiler.types import Domain
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_validator_with_expectation_suite,
+)
+from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
+)
+from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
+    PlotResult,
+)
+from great_expectations.rule_based_profiler.types.data_assistant_result.volume_data_assistant_result import (
+    VolumeDataAssistantResult,
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
 from tests.render.test_util import load_notebook_from_path
-from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
-from tests.test_utils import (
-    get_or_create_expectation_suite,
-    get_validator_with_expectation_suite,
-    set_bootstrap_random_seed_variable,
-)
+from tests.test_utils import find_strings_in_nested_obj
 
 
-def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
-    context: DataContext, new_cell: str
-):
-    """
-    To set this test up we:
-    - create a suite
-    - write code (as a string) for creating a VolumeDataAssistantResult
-    - add a new cell to the notebook that was passed to this method
-    - write both cells to ipynb file
-
-    We then:
-    - load the notebook back from disk
-    - execute the notebook (Note: this will raise various errors like
-      CellExecutionError if any cell in the notebook fails)
-    """
-
-    root_dir: str = context.root_directory
-    expectation_suite_name: str = "test_suite"
-    context.create_expectation_suite(expectation_suite_name)
-    notebook_path: str = os.path.join(root_dir, f"run_volume_data_assistant.ipynb")
-    notebook_code: str = """
-    from typing import Optional, Union
-
-    import uuid
-
-    import great_expectations as ge
-    from great_expectations.data_context import BaseDataContext
-    from great_expectations.core.batch import BatchRequestBase, materialize_batch_request
-    from great_expectations.core import ExpectationSuite
-    from great_expectations.validator.validator import Validator
-    from great_expectations.rule_based_profiler.data_assistant import (
-        DataAssistant,
-        VolumeDataAssistant,
-    )
-    from great_expectations.rule_based_profiler.types.data_assistant_result import DataAssistantResult
-    import great_expectations.exceptions as ge_exceptions
-    """
-    notebook_code += """
-    def get_validator_with_expectation_suite(
-        batch_request: Union[BatchRequestBase, dict],
-        data_context: BaseDataContext,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        component_name: Optional[str] = None,
-    ) -> Validator:
-        expectation_suite: ExpectationSuite
-
-        generate_temp_expectation_suite_name: bool
-        create_expectation_suite: bool
-
-        if expectation_suite is not None and expectation_suite_name is not None:
-            if expectation_suite.expectation_suite_name != expectation_suite_name:
-                raise ValueError(
-                    'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
-                )
-            generate_temp_expectation_suite_name = False
-            create_expectation_suite = False
-        elif expectation_suite is None and expectation_suite_name is not None:
-            generate_temp_expectation_suite_name = False
-            create_expectation_suite = True
-        elif expectation_suite is not None and expectation_suite_name is None:
-            generate_temp_expectation_suite_name = False
-            create_expectation_suite = False
-        else:
-            generate_temp_expectation_suite_name = True
-            create_expectation_suite = True
-
-        if generate_temp_expectation_suite_name:
-            if not component_name:
-                component_name = "test"
-
-            expectation_suite_name = f"tmp.{component_name}.suite_{str(uuid.uuid4())[:8]}"
-
-        if create_expectation_suite:
-            try:
-                # noinspection PyUnusedLocal
-                expectation_suite = data_context.get_expectation_suite(
-                    expectation_suite_name=expectation_suite_name
-                )
-            except ge_exceptions.DataContextError:
-                expectation_suite = data_context.create_expectation_suite(
-                    expectation_suite_name=expectation_suite_name
-                )
-                print(f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".')
-
-        batch_request = materialize_batch_request(batch_request=batch_request)
-        validator: Validator = data_context.get_validator(
-            batch_request=batch_request,
-            expectation_suite_name=expectation_suite_name,
-        )
-
-        return validator
-    """
-    notebook_code += """
-    context = ge.get_context()
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="volume_data_assistant",
-    )
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        validator=validator,
-    )
-
-    expectation_suite_name: str = "test_suite"
-    data_assistant_result: DataAssistantResult = data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
-    )
-    """
-
-    nb = nbformat.v4.new_notebook()
-    nb["cells"] = []
-    nb["cells"].append(nbformat.v4.new_code_cell(notebook_code))
-    nb["cells"].append(nbformat.v4.new_code_cell(new_cell))
-
-    # Write notebook to path and load it as NotebookNode
-    with open(notebook_path, "w") as f:
-        nbformat.write(nb, f)
-
-    nb: nbformat.notebooknode.NotebookNode = load_notebook_from_path(
-        notebook_path=notebook_path
-    )
-
-    # Run notebook
-    ep: nbconvert.preprocessors.ExecutePreprocessor = (
-        nbconvert.preprocessors.ExecutePreprocessor(timeout=60, kernel_name="python3")
-    )
-    ep.preprocess(nb, {"metadata": {"path": root_dir}})
-
-
-@freeze_time("09/26/2019 13:42:41")
-def test_get_metrics_and_expectations(
-    quentin_columnar_table_multi_batch_data_context,
-):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="volume_data_assistant",
-    )
-    assert len(validator.batches) == 36
-
+@pytest.fixture
+def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
-        Domain(domain_type="table",): {
+        Domain(
+            domain_type=MetricDomainTypes.TABLE,
+            rule_name="default_expect_table_row_count_to_be_between_rule",
+        ): {
             "$parameter.table_row_count": {
                 "value": [
                     10000,
@@ -280,7 +133,18 @@ def test_get_metrics_and_expectations(
                 },
             },
         },
-        Domain(domain_type="column", domain_kwargs={"column": "vendor_id",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "vendor_id",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "vendor_id": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     3,
@@ -369,7 +233,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "pickup_datetime",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "pickup_datetime",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "pickup_datetime": SemanticDomainTypes.TEXT,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     9973,
@@ -458,7 +333,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "dropoff_datetime",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "dropoff_datetime",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "dropoff_datetime": SemanticDomainTypes.TEXT,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     9972,
@@ -547,7 +433,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "passenger_count",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "passenger_count",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "passenger_count": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     6,
@@ -636,7 +533,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "trip_distance",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "trip_distance",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "trip_distance": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     1184,
@@ -725,7 +633,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "rate_code_id",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "rate_code_id",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "rate_code_id": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     7,
@@ -814,7 +733,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "store_and_fwd_flag",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "store_and_fwd_flag",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "store_and_fwd_flag": SemanticDomainTypes.TEXT,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     2,
@@ -903,7 +833,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "pickup_location_id",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "pickup_location_id",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "pickup_location_id": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     151,
@@ -993,10 +934,16 @@ def test_get_metrics_and_expectations(
             }
         },
         Domain(
-            domain_type="column",
+            domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "dropoff_location_id",
             },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "dropoff_location_id": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1086,7 +1033,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "payment_type",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "payment_type",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "payment_type": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     4,
@@ -1175,7 +1133,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "fare_amount",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "fare_amount",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "fare_amount": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     187,
@@ -1264,7 +1233,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "extra",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "extra",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "extra": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     8,
@@ -1353,7 +1333,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "mta_tax",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "mta_tax",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "mta_tax": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     4,
@@ -1442,7 +1433,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "tip_amount",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "tip_amount",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "tip_amount": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     535,
@@ -1531,7 +1533,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "tolls_amount",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "tolls_amount",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "tolls_amount": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     22,
@@ -1621,10 +1634,16 @@ def test_get_metrics_and_expectations(
             }
         },
         Domain(
-            domain_type="column",
+            domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "improvement_surcharge",
             },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "improvement_surcharge": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1714,7 +1733,18 @@ def test_get_metrics_and_expectations(
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "total_amount",}): {
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "total_amount",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "total_amount": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     942,
@@ -1804,10 +1834,16 @@ def test_get_metrics_and_expectations(
             }
         },
         Domain(
-            domain_type="column",
+            domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "congestion_surcharge",
             },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "congestion_surcharge": SemanticDomainTypes.NUMERIC,
+                },
+            },
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
@@ -1898,789 +1934,891 @@ def test_get_metrics_and_expectations(
             }
         },
     }
+    return expected_metrics_by_domain
 
-    expected_expect_table_row_count_to_be_between_expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
-        **{
-            "expectation_type": "expect_table_row_count_to_be_between",
-            "kwargs": {
-                "min_value": 10000,
-                "max_value": 10000,
-            },
-            "meta": {
-                "profiler_details": {
-                    "metric_configuration": {
-                        "metric_name": "table.row_count",
-                        "domain_kwargs": {},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
+
+@pytest.fixture
+def quentin_expected_rule_based_profiler_configuration() -> Callable:
+    def _profiler_config(name: str) -> RuleBasedProfilerConfig:
+        expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+            config_version=1.0,
+            name=name,
+            variables={"bootstrap_random_seed": None},
+            rules={
+                "default_expect_table_row_count_to_be_between_rule": {
+                    "variables": {
+                        "false_positive_rate": 0.05,
+                        "quantile_statistic_interpolation_method": "auto",
+                        "estimator": "bootstrap",
+                        "num_bootstrap_samples": 9999,
+                        "truncate_values": {"lower_bound": 0},
+                        "round_decimals": 0,
                     },
-                    "num_batches": 36,
+                    "domain_builder": {
+                        "class_name": "TableDomainBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                    },
+                    "parameter_builders": [
+                        {
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "replace_nan_with_zero": True,
+                            "name": "table_row_count",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                            "enforce_numeric_metric": True,
+                            "class_name": "MetricMultiBatchParameterBuilder",
+                            "json_serialize": True,
+                            "reduce_scalar_metric": True,
+                            "metric_name": "table.row_count",
+                        }
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "max_value": "$parameter.row_count_range_estimator.value[1]",
+                            "validation_parameter_builder_configs": [
+                                {
+                                    "replace_nan_with_zero": True,
+                                    "name": "row_count_range_estimator",
+                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                                    "truncate_values": "$variables.truncate_values",
+                                    "enforce_numeric_metric": True,
+                                    "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                                    "json_serialize": True,
+                                    "estimator": "$variables.estimator",
+                                    "reduce_scalar_metric": True,
+                                    "metric_name": "table.row_count",
+                                    "false_positive_rate": "$variables.false_positive_rate",
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                                    "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                                    "round_decimals": "$variables.round_decimals",
+                                }
+                            ],
+                            "expectation_type": "expect_table_row_count_to_be_between",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                            "meta": {
+                                "profiler_details": "$parameter.row_count_range_estimator.details"
+                            },
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "min_value": "$parameter.row_count_range_estimator.value[0]",
+                        }
+                    ],
+                },
+                "default_expect_column_unique_values_to_be_between_rule": {
+                    "variables": {
+                        "mostly": 1.0,
+                        "strict_min": False,
+                        "strict_max": False,
+                        "false_positive_rate": 0.05,
+                        "quantile_statistic_interpolation_method": "auto",
+                        "estimator": "bootstrap",
+                        "num_bootstrap_samples": 9999,
+                        "truncate_values": {"lower_bound": 0},
+                        "round_decimals": 0,
+                    },
+                    "domain_builder": {
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                        "class_name": "ColumnDomainBuilder",
+                    },
+                    "parameter_builders": [
+                        {
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "replace_nan_with_zero": True,
+                            "name": "column_distinct_values.count",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                            "enforce_numeric_metric": True,
+                            "class_name": "MetricMultiBatchParameterBuilder",
+                            "json_serialize": True,
+                            "reduce_scalar_metric": True,
+                            "metric_name": "column.distinct_values.count",
+                        }
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "max_value": "$parameter.column_unique_values_range_estimator.value[1]",
+                            "validation_parameter_builder_configs": [
+                                {
+                                    "metric_domain_kwargs": "$domain.domain_kwargs",
+                                    "replace_nan_with_zero": True,
+                                    "name": "column_unique_values_range_estimator",
+                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                                    "truncate_values": "$variables.truncate_values",
+                                    "enforce_numeric_metric": True,
+                                    "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                                    "json_serialize": True,
+                                    "estimator": "$variables.estimator",
+                                    "reduce_scalar_metric": True,
+                                    "metric_name": "column.distinct_values.count",
+                                    "false_positive_rate": "$variables.false_positive_rate",
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                                    "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                                    "round_decimals": "$variables.round_decimals",
+                                }
+                            ],
+                            "expectation_type": "expect_column_unique_value_count_to_be_between",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                            "meta": {
+                                "profiler_details": "$parameter.column_unique_values_range_estimator.details"
+                            },
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "strict_max": "$variables.strict_max",
+                            "min_value": "$parameter.column_unique_values_range_estimator.value[0]",
+                            "strict_min": "$variables.strict_min",
+                            "column": "$domain.domain_kwargs.column",
+                        }
+                    ],
                 },
             },
-        },
-    )
+        )
+        return expected_rule_based_profiler_config
 
-    expected_expect_column_unique_value_count_to_be_between_expectation_configuration_list: List[
-        ExpectationConfiguration
-    ] = [
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "vendor_id"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 3,
-                    "strict_min": False,
-                    "column": "vendor_id",
-                    "min_value": 2,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "pickup_datetime"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 9983,
-                    "strict_min": False,
-                    "column": "pickup_datetime",
-                    "min_value": 9944,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "dropoff_datetime"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 9985,
-                    "strict_min": False,
-                    "column": "dropoff_datetime",
-                    "min_value": 9957,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "passenger_count"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 8,
-                    "strict_min": False,
-                    "column": "passenger_count",
-                    "min_value": 7,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "trip_distance"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 1439,
-                    "strict_min": False,
-                    "column": "trip_distance",
-                    "min_value": 1157,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "rate_code_id"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 6,
-                    "strict_min": False,
-                    "column": "rate_code_id",
-                    "min_value": 5,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "store_and_fwd_flag"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 2,
-                    "strict_min": False,
-                    "column": "store_and_fwd_flag",
-                    "min_value": 2,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "pickup_location_id"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 212,
-                    "strict_min": False,
-                    "column": "pickup_location_id",
-                    "min_value": 118,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "dropoff_location_id"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 236,
-                    "strict_min": False,
-                    "column": "dropoff_location_id",
-                    "min_value": 190,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "payment_type"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 4,
-                    "strict_min": False,
-                    "column": "payment_type",
-                    "min_value": 4,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "fare_amount"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 899,
-                    "strict_min": False,
-                    "column": "fare_amount",
-                    "min_value": 152,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "extra"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 15,
-                    "strict_min": False,
-                    "column": "extra",
-                    "min_value": 5,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "mta_tax"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 4,
-                    "strict_min": False,
-                    "column": "mta_tax",
-                    "min_value": 3,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "tip_amount"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 608,
-                    "strict_min": False,
-                    "column": "tip_amount",
-                    "min_value": 469,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "tolls_amount"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 31,
-                    "strict_min": False,
-                    "column": "tolls_amount",
-                    "min_value": 18,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "improvement_surcharge"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 3,
-                    "strict_min": False,
-                    "column": "improvement_surcharge",
-                    "min_value": 3,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "total_amount"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 1562,
-                    "strict_min": False,
-                    "column": "total_amount",
-                    "min_value": 896,
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.distinct_values.count",
-                            "domain_kwargs": {"column": "congestion_surcharge"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 36,
-                    }
-                },
-                "expectation_type": "expect_column_unique_value_count_to_be_between",
-                "kwargs": {
-                    "strict_max": False,
-                    "max_value": 4,
-                    "strict_min": False,
-                    "column": "congestion_surcharge",
-                    "min_value": 0,
-                },
-            }
-        ),
-    ]
+    return _profiler_config
 
-    expected_expectation_configurations: List[ExpectationConfiguration] = (
-        [
-            expected_expect_table_row_count_to_be_between_expectation_configuration,
-        ]
-        + expected_expect_column_unique_value_count_to_be_between_expectation_configuration_list
-    )
 
-    expectation_suite_name: str = "my_suite"
-
-    expected_expectation_suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name,
-    )
-
-    expectation_configuration: ExpectationConfiguration
-    for expectation_configuration in expected_expectation_configurations:
-        expected_expectation_suite._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
+@pytest.fixture
+def quentin_expected_expectation_suite(
+    quentin_expected_rule_based_profiler_configuration,
+) -> Callable:
+    def _expectation_suite(name: str) -> ExpectationSuite:
+        expected_expect_table_row_count_to_be_between_expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_table_row_count_to_be_between",
+                "kwargs": {
+                    "min_value": 10000,
+                    "max_value": 10000,
+                },
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "table.row_count",
+                            "domain_kwargs": {},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
+                        },
+                        "num_batches": 36,
+                    },
+                },
+            },
         )
 
-    expected_expectation_suite_meta: Dict[str, Any] = {
-        "citations": [
-            {
-                "citation_date": "2019-09-26T13:42:41.000000Z",
-                "profiler_config": {
-                    "name": "test_volume_data_assistant",
-                    "config_version": 1.0,
-                    "variables": {"bootstrap_random_seed": RANDOM_SEED},
-                    "rules": {
-                        "default_expect_table_row_count_to_be_between_rule": {
-                            "domain_builder": {
-                                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
-                                "class_name": "TableDomainBuilder",
+        expected_expect_column_unique_value_count_to_be_between_expectation_configuration_list: List[
+            ExpectationConfiguration
+        ] = [
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "vendor_id"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
                             },
-                            "parameter_builders": [
-                                {
-                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                                    "metric_name": "table.row_count",
-                                    "json_serialize": True,
-                                    "class_name": "MetricMultiBatchParameterBuilder",
-                                    "name": "table_row_count",
-                                    "enforce_numeric_metric": True,
-                                    "metric_domain_kwargs": "$domain.domain_kwargs",
-                                    "evaluation_parameter_builder_configs": None,
-                                    "reduce_scalar_metric": True,
-                                    "replace_nan_with_zero": True,
-                                    "metric_value_kwargs": None,
-                                }
-                            ],
-                            "expectation_configuration_builders": [
-                                {
-                                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                                    "max_value": "$parameter.row_count_range_estimator.value[1]",
-                                    "class_name": "DefaultExpectationConfigurationBuilder",
-                                    "meta": {
-                                        "profiler_details": "$parameter.row_count_range_estimator.details"
-                                    },
-                                    "condition": None,
-                                    "validation_parameter_builder_configs": [
-                                        {
-                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                                            "json_serialize": True,
-                                            "metric_name": "table.row_count",
-                                            "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                            "false_positive_rate": "$variables.false_positive_rate",
-                                            "name": "row_count_range_estimator",
-                                            "enforce_numeric_metric": True,
-                                            "truncate_values": "$variables.truncate_values",
-                                            "round_decimals": "$variables.round_decimals",
-                                            "metric_domain_kwargs": None,
-                                            "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                                            "evaluation_parameter_builder_configs": None,
-                                            "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                                            "reduce_scalar_metric": True,
-                                            "metric_value_kwargs": None,
-                                            "estimator": "$variables.estimator",
-                                            "replace_nan_with_zero": True,
-                                        }
-                                    ],
-                                    "min_value": "$parameter.row_count_range_estimator.value[0]",
-                                    "expectation_type": "expect_table_row_count_to_be_between",
-                                }
-                            ],
-                            "variables": {
-                                "false_positive_rate": 0.05,
-                                "estimator": "bootstrap",
-                                "num_bootstrap_samples": 9999,
-                                "bootstrap_random_seed": RANDOM_SEED,
-                                "truncate_values": {
-                                    "lower_bound": 0,
-                                    "upper_bound": None,
-                                },
-                                "round_decimals": 0,
-                            },
-                        },
-                        "default_expect_column_unique_values_to_be_between_rule": {
-                            "domain_builder": {
-                                "exclude_column_name_suffixes": None,
-                                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
-                                "semantic_type_filter_class_name": None,
-                                "class_name": "ColumnDomainBuilder",
-                                "include_semantic_types": None,
-                                "include_column_name_suffixes": None,
-                                "exclude_column_names": None,
-                                "exclude_semantic_types": None,
-                                "include_column_names": None,
-                                "semantic_type_filter_module_name": None,
-                            },
-                            "parameter_builders": [
-                                {
-                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                                    "metric_name": "column.distinct_values.count",
-                                    "json_serialize": True,
-                                    "class_name": "MetricMultiBatchParameterBuilder",
-                                    "name": "column_distinct_values.count",
-                                    "enforce_numeric_metric": True,
-                                    "metric_domain_kwargs": "$domain.domain_kwargs",
-                                    "evaluation_parameter_builder_configs": None,
-                                    "reduce_scalar_metric": True,
-                                    "replace_nan_with_zero": True,
-                                    "metric_value_kwargs": None,
-                                }
-                            ],
-                            "expectation_configuration_builders": [
-                                {
-                                    "column": "$domain.domain_kwargs.column",
-                                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                                    "max_value": "$parameter.column_unique_values_range_estimator.value[1]",
-                                    "class_name": "DefaultExpectationConfigurationBuilder",
-                                    "strict_max": "$variables.strict_max",
-                                    "meta": {
-                                        "profiler_details": "$parameter.column_unique_values_range_estimator.details"
-                                    },
-                                    "condition": None,
-                                    "validation_parameter_builder_configs": [
-                                        {
-                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                                            "json_serialize": True,
-                                            "metric_name": "column.distinct_values.count",
-                                            "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                            "false_positive_rate": "$variables.false_positive_rate",
-                                            "name": "column_unique_values_range_estimator",
-                                            "enforce_numeric_metric": True,
-                                            "truncate_values": "$variables.truncate_values",
-                                            "round_decimals": "$variables.round_decimals",
-                                            "metric_domain_kwargs": "$domain.domain_kwargs",
-                                            "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                                            "evaluation_parameter_builder_configs": None,
-                                            "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                                            "reduce_scalar_metric": True,
-                                            "metric_value_kwargs": None,
-                                            "estimator": "$variables.estimator",
-                                            "replace_nan_with_zero": True,
-                                        }
-                                    ],
-                                    "strict_min": "$variables.strict_min",
-                                    "min_value": "$parameter.column_unique_values_range_estimator.value[0]",
-                                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                                }
-                            ],
-                            "variables": {
-                                "mostly": 1.0,
-                                "strict_min": False,
-                                "strict_max": False,
-                                "false_positive_rate": 0.05,
-                                "estimator": "bootstrap",
-                                "num_bootstrap_samples": 9999,
-                                "bootstrap_random_seed": RANDOM_SEED,
-                                "truncate_values": {
-                                    "lower_bound": 0,
-                                    "upper_bound": None,
-                                },
-                                "round_decimals": 0,
-                            },
-                        },
+                            "num_batches": 36,
+                        }
                     },
-                },
-                "comment": "Suite created by Rule-Based Profiler with the configuration included.",
-            }
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 3,
+                        "strict_min": False,
+                        "column": "vendor_id",
+                        "min_value": 2,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "pickup_datetime"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 9983,
+                        "strict_min": False,
+                        "column": "pickup_datetime",
+                        "min_value": 9945,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "dropoff_datetime"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 9985,
+                        "strict_min": False,
+                        "column": "dropoff_datetime",
+                        "min_value": 9958,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "passenger_count"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 8,
+                        "strict_min": False,
+                        "column": "passenger_count",
+                        "min_value": 7,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "trip_distance"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 1430,
+                        "strict_min": False,
+                        "column": "trip_distance",
+                        "min_value": 1159,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "rate_code_id"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 6,
+                        "strict_min": False,
+                        "column": "rate_code_id",
+                        "min_value": 5,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "store_and_fwd_flag"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 2,
+                        "strict_min": False,
+                        "column": "store_and_fwd_flag",
+                        "min_value": 2,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "pickup_location_id"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 211,
+                        "strict_min": False,
+                        "column": "pickup_location_id",
+                        "min_value": 118,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "dropoff_location_id"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 236,
+                        "strict_min": False,
+                        "column": "dropoff_location_id",
+                        "min_value": 190,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "payment_type"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 4,
+                        "strict_min": False,
+                        "column": "payment_type",
+                        "min_value": 4,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "fare_amount"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 813,
+                        "strict_min": False,
+                        "column": "fare_amount",
+                        "min_value": 153,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "extra"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 15,
+                        "strict_min": False,
+                        "column": "extra",
+                        "min_value": 5,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "mta_tax"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 4,
+                        "strict_min": False,
+                        "column": "mta_tax",
+                        "min_value": 3,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "tip_amount"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 608,
+                        "strict_min": False,
+                        "column": "tip_amount",
+                        "min_value": 469,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "tolls_amount"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 31,
+                        "strict_min": False,
+                        "column": "tolls_amount",
+                        "min_value": 18,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "improvement_surcharge"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 3,
+                        "strict_min": False,
+                        "column": "improvement_surcharge",
+                        "min_value": 3,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "total_amount"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 1440,
+                        "strict_min": False,
+                        "column": "total_amount",
+                        "min_value": 898,
+                    },
+                }
+            ),
+            ExpectationConfiguration(
+                **{
+                    "meta": {
+                        "profiler_details": {
+                            "metric_configuration": {
+                                "metric_name": "column.distinct_values.count",
+                                "domain_kwargs": {"column": "congestion_surcharge"},
+                                "metric_value_kwargs": None,
+                                "metric_dependencies": None,
+                            },
+                            "num_batches": 36,
+                        }
+                    },
+                    "expectation_type": "expect_column_unique_value_count_to_be_between",
+                    "kwargs": {
+                        "strict_max": False,
+                        "max_value": 4,
+                        "strict_min": False,
+                        "column": "congestion_surcharge",
+                        "min_value": 0,
+                    },
+                }
+            ),
         ]
+
+        expected_expectation_configurations: List[ExpectationConfiguration] = (
+            [
+                expected_expect_table_row_count_to_be_between_expectation_configuration,
+            ]
+            + expected_expect_column_unique_value_count_to_be_between_expectation_configuration_list
+        )
+
+        expectation_suite_name: str = "my_suite"
+
+        expected_expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite_name=expectation_suite_name,
+        )
+
+        expectation_configuration: ExpectationConfiguration
+        for expectation_configuration in expected_expectation_configurations:
+            expected_expectation_suite._add_expectation(
+                expectation_configuration=expectation_configuration,
+                send_usage_event=False,
+            )
+
+        expected_expectation_suite_meta: Dict[str, Any] = {
+            "citations": [
+                {
+                    "citation_date": "2019-09-26T13:42:41+00:00",
+                    "profiler_config": quentin_expected_rule_based_profiler_configuration(
+                        name=name
+                    ).to_json_dict(),
+                    "comment": "Suite created by Rule-Based Profiler with the configuration included.",
+                }
+            ]
+        }
+
+        expected_expectation_suite.meta = expected_expectation_suite_meta
+
+        return expected_expectation_suite
+
+    return _expectation_suite
+
+
+@pytest.fixture
+def volume_data_assistant_result(
+    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
     }
 
-    expected_expectation_suite.meta = expected_expectation_suite_meta
+    return context.assistants.volume.run(batch_request=batch_request)
 
-    expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        config_version=1.0,
-        name="test_volume_data_assistant",
-        variables={"bootstrap_random_seed": RANDOM_SEED},
-        rules={
-            "default_expect_table_row_count_to_be_between_rule": {
-                "variables": {
-                    "false_positive_rate": 0.05,
-                    "estimator": "bootstrap",
-                    "num_bootstrap_samples": 9999,
-                    "truncate_values": {"lower_bound": 0},
-                    "round_decimals": 0,
-                },
-                "domain_builder": {
-                    "class_name": "TableDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
-                },
-                "parameter_builders": [
-                    {
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "replace_nan_with_zero": True,
-                        "name": "table_row_count",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                        "enforce_numeric_metric": True,
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "json_serialize": True,
-                        "reduce_scalar_metric": True,
-                        "metric_name": "table.row_count",
-                    }
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "max_value": "$parameter.row_count_range_estimator.value[1]",
-                        "validation_parameter_builder_configs": [
-                            {
-                                "replace_nan_with_zero": True,
-                                "name": "row_count_range_estimator",
-                                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                                "truncate_values": "$variables.truncate_values",
-                                "enforce_numeric_metric": True,
-                                "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                                "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                "json_serialize": True,
-                                "estimator": "$variables.estimator",
-                                "reduce_scalar_metric": True,
-                                "metric_name": "table.row_count",
-                                "false_positive_rate": "$variables.false_positive_rate",
-                                "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                                "round_decimals": "$variables.round_decimals",
-                            }
-                        ],
-                        "expectation_type": "expect_table_row_count_to_be_between",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "meta": {
-                            "profiler_details": "$parameter.row_count_range_estimator.details"
-                        },
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "min_value": "$parameter.row_count_range_estimator.value[0]",
-                    }
-                ],
-            },
-            "default_expect_column_unique_values_to_be_between_rule": {
-                "variables": {
-                    "mostly": 1.0,
-                    "strict_min": False,
-                    "strict_max": False,
-                    "false_positive_rate": 0.05,
-                    "estimator": "bootstrap",
-                    "num_bootstrap_samples": 9999,
-                    "truncate_values": {"lower_bound": 0},
-                    "round_decimals": 0,
-                },
-                "domain_builder": {
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
-                    "class_name": "ColumnDomainBuilder",
-                },
-                "parameter_builders": [
-                    {
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "replace_nan_with_zero": True,
-                        "name": "column_distinct_values.count",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                        "enforce_numeric_metric": True,
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "json_serialize": True,
-                        "reduce_scalar_metric": True,
-                        "metric_name": "column.distinct_values.count",
-                    }
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "max_value": "$parameter.column_unique_values_range_estimator.value[1]",
-                        "validation_parameter_builder_configs": [
-                            {
-                                "metric_domain_kwargs": "$domain.domain_kwargs",
-                                "replace_nan_with_zero": True,
-                                "name": "column_unique_values_range_estimator",
-                                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                                "truncate_values": "$variables.truncate_values",
-                                "enforce_numeric_metric": True,
-                                "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                                "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                "json_serialize": True,
-                                "estimator": "$variables.estimator",
-                                "reduce_scalar_metric": True,
-                                "metric_name": "column.distinct_values.count",
-                                "false_positive_rate": "$variables.false_positive_rate",
-                                "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                                "round_decimals": "$variables.round_decimals",
-                            }
-                        ],
-                        "expectation_type": "expect_column_unique_value_count_to_be_between",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "meta": {
-                            "profiler_details": "$parameter.column_unique_values_range_estimator.details"
-                        },
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "strict_max": "$variables.strict_max",
-                        "min_value": "$parameter.column_unique_values_range_estimator.value[0]",
-                        "strict_min": "$variables.strict_min",
-                        "column": "$domain.domain_kwargs.column",
-                    }
-                ],
-            },
-        },
+
+def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+    context: DataContext,
+    new_cell: str,
+    implicit: bool,
+):
+    """
+    To set this test up we:
+    - create a suite
+    - write code (as a string) for creating a VolumeDataAssistantResult
+    - add a new cell to the notebook that was passed to this method
+    - write both cells to ipynb file
+
+    We then:
+    - load the notebook back from disk
+    - execute the notebook (Note: this will raise various errors like
+      CellExecutionError if any cell in the notebook fails)
+    """
+    root_dir: str = context.root_directory
+
+    expectation_suite_name: str = "test_suite"
+    context.create_expectation_suite(
+        expectation_suite_name=expectation_suite_name, overwrite_existing=True
     )
 
-    # Utilize a consistent seed to deal with probabilistic nature of this feature.
+    notebook_path: str = os.path.join(root_dir, f"run_volume_data_assistant.ipynb")
+
+    notebook_code_initialization: str = """
+    from typing import Optional, Union
+
+    import uuid
+
+    import great_expectations as ge
+    from great_expectations.data_context import BaseDataContext
+    from great_expectations.validator.validator import Validator
+    from great_expectations.rule_based_profiler.data_assistant import (
+        DataAssistant,
+        VolumeDataAssistant,
+    )
+    from great_expectations.rule_based_profiler.types.data_assistant_result import DataAssistantResult
+    from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
+    import great_expectations.exceptions as ge_exceptions
+
+    context = ge.get_context()
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    """
+
+    explicit_instantiation_code: str = """
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="volume_data_assistant",
+    )
+
     data_assistant: DataAssistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
         validator=validator,
     )
-    set_bootstrap_random_seed_variable(profiler=data_assistant.profiler)
-    data_assistant_result: DataAssistantResult = data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
+
+    data_assistant_result: DataAssistantResult = data_assistant.run()
+    """
+
+    implicit_invocation_code: str = """
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(batch_request=batch_request)
+    """
+
+    notebook_code: str
+    if implicit:
+        notebook_code = notebook_code_initialization + implicit_invocation_code
+    else:
+        notebook_code = notebook_code_initialization + explicit_instantiation_code
+
+    nb = nbformat.v4.new_notebook()
+    nb["cells"] = []
+    nb["cells"].append(nbformat.v4.new_code_cell(notebook_code))
+    nb["cells"].append(nbformat.v4.new_code_cell(new_cell))
+
+    # Write notebook to path and load it as NotebookNode
+    with open(notebook_path, "w") as f:
+        nbformat.write(nb, f)
+
+    nb: nbformat.notebooknode.NotebookNode = load_notebook_from_path(
+        notebook_path=notebook_path
     )
 
-    assert data_assistant_result.metrics_by_domain == expected_metrics_by_domain
+    # Run notebook
+    ep: nbconvert.preprocessors.ExecutePreprocessor = (
+        nbconvert.preprocessors.ExecutePreprocessor(timeout=60, kernel_name="python3")
+    )
+    ep.preprocess(nb, {"metadata": {"path": root_dir}})
+
+
+def test_volume_data_assistant_result_serialization(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    volume_data_assistant_result_as_dict: dict = volume_data_assistant_result.to_dict()
     assert (
-        data_assistant_result.expectation_suite.expectations
-        == expected_expectation_configurations
+        volume_data_assistant_result_as_dict is not None
+        and len(volume_data_assistant_result_as_dict) == 4
+    )
+    assert (
+        volume_data_assistant_result.to_json_dict()
+        == volume_data_assistant_result_as_dict
     )
 
-    data_assistant_result.expectation_suite.meta.pop("great_expectations_version", None)
 
-    assert data_assistant_result.expectation_suite == expected_expectation_suite
+@freeze_time("09/26/2019 13:42:41")
+def test_get_metrics_and_expectations_using_explicit_instantiation(
+    quentin_columnar_table_multi_batch_data_context,
+    quentin_expected_metrics_by_domain,
+    quentin_expected_expectation_suite,
+    quentin_expected_rule_based_profiler_configuration,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="volume_data_assistant",
+    )
+    assert len(validator.batches) == 36
+
+    data_assistant_name: str = "test_volume_data_assistant"
+
+    expected_expectation_suite: ExpectationSuite = quentin_expected_expectation_suite(
+        name=data_assistant_name
+    )
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name=data_assistant_name,
+        validator=validator,
+    )
+
+    data_assistant_result: DataAssistantResult = data_assistant.run()
+
+    assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
+
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in data_assistant_result.expectation_configurations:
+        if "profiler_details" in expectation_configuration.meta:
+            expectation_configuration.meta["profiler_details"].pop(
+                "estimation_histogram", None
+            )
 
     assert (
-        data_assistant_result.expectation_suite.meta == expected_expectation_suite_meta
+        data_assistant_result.expectation_configurations
+        == expected_expectation_suite.expectations
     )
 
     assert deep_filter_properties_iterable(
-        properties=data_assistant_result.profiler_config.to_json_dict()
+        properties=data_assistant_result.profiler_config.to_json_dict(),
+        delete_fields={"bootstrap_random_seed"},
     ) == deep_filter_properties_iterable(
-        properties=expected_rule_based_profiler_config.to_json_dict()
+        properties=quentin_expected_rule_based_profiler_configuration(
+            name=data_assistant_name
+        ).to_json_dict(),
+        delete_fields={"bootstrap_random_seed"},
+    )
+
+    data_assistant_result.citation.pop("profiler_config", None)
+    expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
+
+    assert (
+        data_assistant_result.citation
+        == expected_expectation_suite.meta["citations"][0]
     )
 
 
-def test_execution_time_within_proper_bounds(
+@freeze_time("09/26/2019 13:42:41")
+def test_get_metrics_and_expectations_using_implicit_invocation(
+    quentin_columnar_table_multi_batch_data_context,
+    quentin_expected_metrics_by_domain,
+    quentin_expected_expectation_suite,
+    quentin_expected_rule_based_profiler_configuration,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    registered_data_assistant_name: str = "volume_data_assistant"
+
+    expected_expectation_suite: ExpectationSuite = quentin_expected_expectation_suite(
+        name=registered_data_assistant_name
+    )
+
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
+        expectation_suite_name=expected_expectation_suite.expectation_suite_name,
+    )
+
+    assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
+
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in data_assistant_result.expectation_configurations:
+        if "profiler_details" in expectation_configuration.meta:
+            expectation_configuration.meta["profiler_details"].pop(
+                "estimation_histogram", None
+            )
+
+    assert (
+        data_assistant_result.expectation_configurations
+        == expected_expectation_suite.expectations
+    )
+
+    assert deep_filter_properties_iterable(
+        properties=data_assistant_result.profiler_config.to_json_dict(),
+        delete_fields={"bootstrap_random_seed"},
+    ) == deep_filter_properties_iterable(
+        properties=quentin_expected_rule_based_profiler_configuration(
+            name=registered_data_assistant_name
+        ).to_json_dict(),
+        delete_fields={"bootstrap_random_seed"},
+    )
+
+    data_assistant_result.citation.pop("profiler_config", None)
+    expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
+
+    assert (
+        data_assistant_result.citation
+        == expected_expectation_suite.meta["citations"][0]
+    )
+
+
+def test_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_columnar_table_multi_batch_data_context,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
@@ -2710,18 +2848,10 @@ def test_execution_time_within_proper_bounds(
     assert data_assistant_result.execution_time > 0.0
 
 
-def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_no(
+def test_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_columnar_table_multi_batch_data_context,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name="my_suite",
-        component_name=None,
-    )
-    assert len(expectation_suite.expectations) == 0
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -2729,145 +2859,33 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_n
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_expectation_suite(
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=expectation_suite,
-        component_name="volume_data_assistant",
-    )
-    assert len(validator.batches) == 36
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        validator=validator,
-    )
-    data_assistant_result: DataAssistantResult = data_assistant.run()
-
-    expectation_suite.add_expectation_configurations(
-        expectation_configurations=data_assistant_result.expectation_suite.expectations,
-        send_usage_event=False,
-        match_type="domain",
-        overwrite_existing=True,
-    )
-    assert len(expectation_suite.expectations) == 19
-
-
-def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_yes_use_suite_name(
-    quentin_columnar_table_multi_batch_data_context,
-):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    expectation_suite_name: str = "my_suite"
-
-    expectation_suite: ExpectationSuite
-
-    expectation_suite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        component_name=None,
-    )
-    assert len(expectation_suite.expectations) == 0
-
-    context.save_expectation_suite(expectation_suite=expectation_suite)
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=expectation_suite_name,
-        expectation_suite=expectation_suite,
-        component_name="volume_data_assistant",
-    )
-    assert len(validator.batches) == 36
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        validator=validator,
     )
 
-    data_assistant_result: DataAssistantResult
-
-    data_assistant_result = data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
-        save_updated_expectation_suite=False,
-    )
-    expectation_suite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        component_name=None,
-    )
-    assert len(data_assistant_result.expectation_suite.expectations) == 19
-    assert len(expectation_suite.expectations) == 0
-
-    data_assistant_result = data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
-        save_updated_expectation_suite=True,
-    )
-    expectation_suite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        component_name=None,
-    )
-    assert len(data_assistant_result.expectation_suite.expectations) == 19
-    assert len(expectation_suite.expectations) == 19
-
-
-def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_yes_use_suite(
-    quentin_columnar_table_multi_batch_data_context,
-):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
-        data_context=context,
-        expectation_suite=None,
-        expectation_suite_name="my_suite",
-        component_name=None,
-    )
-    assert len(expectation_suite.expectations) == 0
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=expectation_suite,
-        component_name="volume_data_assistant",
-    )
-    assert len(validator.batches) == 36
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        validator=validator,
-    )
-    # noinspection PyUnusedLocal
-    data_assistant_result: DataAssistantResult = data_assistant.run(
-        expectation_suite=expectation_suite
-    )
-    assert len(expectation_suite.expectations) == 19
+    # Execution time (in seconds) must have non-trivial value.
+    assert data_assistant_result.execution_time > 0.0
 
 
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
     new_cell: str = "data_assistant_result.plot(this_is_not_a_real_parameter=True)"
+
     with pytest.raises(nbconvert.preprocessors.CellExecutionError):
         run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
-            context=context, new_cell=new_cell
+            context=context,
+            new_cell=new_cell,
+            implicit=False,
+        )
+
+    with pytest.raises(nbconvert.preprocessors.CellExecutionError):
+        run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+            context=context,
+            new_cell=new_cell,
+            implicit=True,
         )
 
 
@@ -2875,9 +2893,19 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
     new_cell: str = "data_assistant_result.plot()"
+
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
-        context=context, new_cell=new_cell
+        context=context,
+        new_cell=new_cell,
+        implicit=False,
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=True,
     )
 
 
@@ -2885,9 +2913,19 @@ def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
     new_cell: str = "data_assistant_result.plot(prescriptive=True)"
+
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
-        context=context, new_cell=new_cell
+        context=context,
+        new_cell=new_cell,
+        implicit=False,
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=True,
     )
 
 
@@ -2897,9 +2935,19 @@ def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     theme = {"font": "Comic Sans MS"}
+
     new_cell: str = f"data_assistant_result.plot(theme={theme})"
+
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
-        context=context, new_cell=new_cell
+        context=context,
+        new_cell=new_cell,
+        implicit=False,
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=True,
     )
 
 
@@ -2909,7 +2957,152 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     theme = {"font": "Comic Sans MS"}
+
     new_cell: str = f"data_assistant_result.plot(prescriptive=True, theme={theme})"
+
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
-        context=context, new_cell=new_cell
+        context=context,
+        new_cell=new_cell,
+        implicit=False,
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=True,
+    )
+
+
+def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    plot_result: PlotResult = volume_data_assistant_result.plot()
+
+    table_domain_chart: dict = plot_result.charts[0].to_dict()
+    assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
+
+
+def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    plot_result: PlotResult = volume_data_assistant_result.plot()
+
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
+    assert len(column_domain_charts) == 18  # One for each column present
+
+    columns: List[str] = [
+        "VendorID",
+        "pickup_datetime",
+        "dropoff_datetime",
+        "passenger_count",
+        "trip_distance",
+        "RatecodeID",
+        "store_and_fwd_flag",
+        "PULocationID",
+        "DOLocationID",
+        "payment_type",
+        "fare_amount",
+        "extra",
+        "mta_tax",
+        "tip_amount",
+        "tolls_amount",
+        "improvement_surcharge",
+        "total_amount",
+        "congestion_surcharge",
+    ]
+    assert find_strings_in_nested_obj(column_domain_charts, columns)
+
+
+def test_volume_data_assistant_plot_include_column_names_filters_output(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    include_column_names: List[str] = ["VendorID", "pickup_datetime"]
+    plot_result: PlotResult = volume_data_assistant_result.plot(
+        include_column_names=include_column_names
+    )
+
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
+    assert len(column_domain_charts) == 2  # Normally 18 without filtering
+    assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
+
+
+def test_volume_data_assistant_plot_exclude_column_names_filters_output(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    exclude_column_names: List[str] = ["VendorID", "pickup_datetime"]
+    plot_result: PlotResult = volume_data_assistant_result.plot(
+        exclude_column_names=exclude_column_names
+    )
+
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
+    assert len(column_domain_charts) == 16  # Normally 18 without filtering
+    assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
+
+
+def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_error(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    with pytest.raises(ValueError) as e:
+        volume_data_assistant_result.plot(
+            include_column_names=["VendorID"], exclude_column_names=["pickup_datetime"]
+        )
+
+    assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
+
+
+def test_volume_data_assistant_plot_custom_theme_overrides(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    font: str = "Comic Sans MS"
+    title_color: str = "#FFA500"
+    title_font_size: str = 48
+    point_size: int = 1000
+    y_axis_label_color: str = "red"
+    y_axis_label_angle: int = 180
+    x_axis_title_color: str = "brown"
+
+    theme: Dict[str, Any] = {
+        "font": font,
+        "title": {
+            "color": title_color,
+            "fontSize": title_font_size,
+        },
+        "point": {"size": point_size},
+        "axisY": {
+            "labelColor": y_axis_label_color,
+            "labelAngle": y_axis_label_angle,
+        },
+        "axisX": {"titleColor": x_axis_title_color},
+    }
+    plot_result: PlotResult = volume_data_assistant_result.plot(
+        prescriptive=True, theme=theme
+    )
+
+    # ensure a config has been added to each chart
+    assert all(
+        not isinstance(chart.config, alt.utils.schemapi.UndefinedType)
+        for chart in plot_result.charts
+    )
+
+    # ensure the theme elements were updated for each chart
+    assert all(chart.config.font == font for chart in plot_result.charts)
+    assert all(
+        chart.config.title["color"] == title_color for chart in plot_result.charts
+    )
+    assert all(
+        chart.config.title["fontSize"] == title_font_size
+        for chart in plot_result.charts
+    )
+    assert all(chart.config.point["size"] == point_size for chart in plot_result.charts)
+    assert all(
+        chart.config.axisY["labelColor"] == y_axis_label_color
+        for chart in plot_result.charts
+    )
+    assert all(
+        chart.config.axisY["labelAngle"] == y_axis_label_angle
+        for chart in plot_result.charts
+    )
+    assert all(
+        chart.config.axisX["titleColor"] == x_axis_title_color
+        for chart in plot_result.charts
     )

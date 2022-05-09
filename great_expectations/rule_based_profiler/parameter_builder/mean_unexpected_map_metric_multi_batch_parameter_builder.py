@@ -14,18 +14,18 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
-    Attributes,
     Domain,
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.types.attributes import Attributes
 
 
 class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
     MetricMultiBatchParameterBuilder
 ):
     """
-    Compute mean unexpected count ratio (as a fraction) of a specified map-style metric across all specified batches.
+    Compute mean unexpected count ratio (as a fraction) of specified map-style metric across every Batch of data given.
     """
 
     exclude_field_names: Set[
@@ -50,7 +50,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         ] = None,
         json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Args:
             name: the name of this parameter -- this is user-specified parameter name (from configuration);

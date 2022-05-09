@@ -1,11 +1,13 @@
 import copy
 import itertools
+import logging
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from dataclasses import asdict, dataclass, make_dataclass
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
+import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
@@ -26,7 +28,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
-    Attributes,
     Builder,
     Domain,
     ParameterContainer,
@@ -34,11 +35,15 @@ from great_expectations.rule_based_profiler.types import (
     get_fully_qualified_parameter_names,
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.types.attributes import Attributes
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 # TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
-MetricValue = Union[Any, List[Any], np.ndarray]
-MetricValues = Union[MetricValue, np.ndarray]
+MetricValue = Union[Any, List[Any], pd.DataFrame, pd.Series, np.ndarray]
+MetricValues = Union[MetricValue, pd.DataFrame, pd.Series, np.ndarray]
 MetricComputationDetails = Dict[str, Any]
 MetricComputationResult = make_dataclass(
     "MetricComputationResult", ["attributed_resolved_metrics", "details"]
@@ -54,14 +59,21 @@ class AttributedResolvedMetrics(SerializableDictDot):
     with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
     """
 
-    @staticmethod
-    def get_metric_values_from_attributed_metric_values(
-        attributed_metric_values: Optional[Dict[str, MetricValue]] = None,
-    ) -> MetricValues:
-        return np.array(list(attributed_metric_values.values()))
-
     metric_attributes: Optional[Attributes] = None
     metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
+
+    @staticmethod
+    def get_metric_values_from_attributed_metric_values(
+        attributed_metric_values: Dict[str, MetricValue]
+    ) -> MetricValues:
+        if attributed_metric_values is None:
+            return None
+
+        values: MetricValues = list(attributed_metric_values.values())[0]
+        if values is not None and isinstance(values, (pd.DataFrame, pd.Series)):
+            return list(attributed_metric_values.values())
+
+        return np.array(list(attributed_metric_values.values()))
 
     def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
         if self.metric_values_by_batch_id is None:
@@ -82,7 +94,11 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     @property
     def metric_values(self) -> MetricValues:
-        return np.array(list(self.attributed_metric_values.values()))
+        return (
+            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
+                attributed_metric_values=self.attributed_metric_values
+            )
+        )
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -91,7 +107,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-class ParameterBuilder(Builder, ABC):
+class ParameterBuilder(ABC, Builder):
     """
     A ParameterBuilder implementation provides support for building Expectation Configuration Parameters suitable for
     use in other ParameterBuilders or in ConfigurationBuilders as part of profiling.
@@ -121,7 +137,7 @@ class ParameterBuilder(Builder, ABC):
         ] = None,
         json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
 
@@ -232,11 +248,6 @@ class ParameterBuilder(Builder, ABC):
             )
 
     @property
-    @abstractmethod
-    def fully_qualified_parameter_name(self) -> str:
-        pass
-
-    @property
     def name(self) -> str:
         return self._name
 
@@ -255,6 +266,10 @@ class ParameterBuilder(Builder, ABC):
     @property
     def json_serialize(self) -> Union[str, bool]:
         return self._json_serialize
+
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"{PARAMETER_KEY}{self.name}"
 
     @abstractmethod
     def _build_parameters(
@@ -335,6 +350,12 @@ class ParameterBuilder(Builder, ABC):
         significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
+        if not metric_name:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""Utilizing "{self.__class__.__name__}.get_metrics()" requires valid "metric_name" to be \
+specified (empty "metric_name" value detected)."""
+            )
+
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
             variables=variables,
@@ -342,7 +363,7 @@ class ParameterBuilder(Builder, ABC):
         )
         if not batch_ids:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
+                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of Batch identifiers."
             )
 
         """
@@ -455,9 +476,10 @@ class ParameterBuilder(Builder, ABC):
 
         for metric_configuration in metrics_to_resolve:
             if metric_configuration.id not in resolved_metrics:
-                raise ge_exceptions.ProfilerExecutionError(
+                logger.warning(
                     f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
                 )
+                continue
 
             resolved_metrics_sorted[metric_configuration.id] = resolved_metrics[
                 metric_configuration.id
@@ -482,11 +504,14 @@ class ParameterBuilder(Builder, ABC):
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
-            resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
-            attributed_resolved_metrics.add_resolved_metric(
-                batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
-                value=resolved_metric_value,
-            )
+            if metric_configuration.id in resolved_metrics_sorted:
+                resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
+                attributed_resolved_metrics.add_resolved_metric(
+                    batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
+                    value=resolved_metric_value,
+                )
+            else:
+                continue
 
         # Step-8: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
 
@@ -495,7 +520,10 @@ class ParameterBuilder(Builder, ABC):
             metric_attributes_id,
             attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
-            if attributed_resolved_metrics.metric_values.ndim == 1:
+            if (
+                isinstance(attributed_resolved_metrics.metric_values, np.ndarray)
+                and attributed_resolved_metrics.metric_values.ndim == 1
+            ):
                 attributed_resolved_metrics.metric_values_by_batch_id = {
                     batch_id: [resolved_metric_value]
                     for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
@@ -572,6 +600,9 @@ class ParameterBuilder(Builder, ABC):
             variables=variables,
             parameters=parameters,
         )
+
+        if not (enforce_numeric_metric or replace_nan_with_zero):
+            return attributed_resolved_metrics
 
         metric_values: MetricValues = attributed_resolved_metrics.metric_values
 
@@ -715,6 +746,7 @@ def resolve_evaluation_dependencies(
     evaluation_parameter_builders: List[
         "ParameterBuilder"  # noqa: F821
     ] = parameter_builder.evaluation_parameter_builders
+
     if not evaluation_parameter_builders:
         return
 

@@ -46,7 +46,7 @@ class JsonSchemaProfiler(Profiler):
         JsonSchemaTypes.BOOLEAN.value: ProfilerTypeMapping.BOOLEAN_TYPE_NAMES,
     }
 
-    def __init__(self, configuration: dict = None):
+    def __init__(self, configuration: dict = None) -> None:
         super().__init__(configuration)
 
     def validate(self, schema: dict) -> bool:

@@ -33,7 +33,7 @@ class StoreBackend(metaclass=ABCMeta):
         suppress_store_backend_id=False,
         manually_initialize_store_backend_id: str = "",
         store_name="no_store_name",
-    ):
+    ) -> None:
         """
         Initialize a StoreBackend
         Args:
@@ -140,14 +140,14 @@ class StoreBackend(metaclass=ABCMeta):
         self._validate_key(key)
         return self._has_key(key)
 
-    def get_url_for_key(self, key, protocol=None):
+    def get_url_for_key(self, key, protocol=None) -> None:
         raise StoreError(
             "Store backend of type {:s} does not have an implementation of get_url_for_key".format(
                 type(self).__name__
             )
         )
 
-    def _validate_key(self, key):
+    def _validate_key(self, key) -> None:
         if isinstance(key, tuple):
             for key_element in key:
                 if not isinstance(key_element, str):
@@ -167,30 +167,30 @@ class StoreBackend(metaclass=ABCMeta):
                 )
             )
 
-    def _validate_value(self, value):
+    def _validate_value(self, value) -> None:
         pass
 
     @abstractmethod
-    def _get(self, key):
+    def _get(self, key) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def _set(self, key, value, **kwargs):
+    def _set(self, key, value, **kwargs) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def _move(self, source_key, dest_key, **kwargs):
+    def _move(self, source_key, dest_key, **kwargs) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def list_keys(self, prefix=()):
+    def list_keys(self, prefix=()) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def remove_key(self, key):
+    def remove_key(self, key) -> None:
         raise NotImplementedError
 
-    def _has_key(self, key):
+    def _has_key(self, key) -> None:
         raise NotImplementedError
 
     def is_ignored_key(self, key):
@@ -216,7 +216,7 @@ class InMemoryStoreBackend(StoreBackend):
         suppress_store_backend_id=False,
         manually_initialize_store_backend_id: str = "",
         store_name=None,
-    ):
+    ) -> None:
         super().__init__(
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
@@ -247,10 +247,10 @@ class InMemoryStoreBackend(StoreBackend):
         except KeyError as e:
             raise InvalidKeyError(f"{str(e)}")
 
-    def _set(self, key, value, **kwargs):
+    def _set(self, key, value, **kwargs) -> None:
         self._store[key] = value
 
-    def _move(self, source_key, dest_key, **kwargs):
+    def _move(self, source_key, dest_key, **kwargs) -> None:
         self._store[dest_key] = self._store[source_key]
         self._store.pop(source_key)
 
@@ -260,7 +260,7 @@ class InMemoryStoreBackend(StoreBackend):
     def _has_key(self, key):
         return key in self._store
 
-    def remove_key(self, key):
+    def remove_key(self, key) -> None:
         del self._store[key]
 
     @property

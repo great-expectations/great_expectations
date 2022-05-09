@@ -1189,8 +1189,27 @@ anonymized_usage_statistics_record_schema = {
     ],
 }
 
-if __name__ == "__main__":
-    import json
 
-    with open("usage_statistics_record_schema.json", "w") as outfile:
+def write_schema_to_file(target_dir: str) -> None:
+    """Utility to write schema to disk.
+
+    The file name will always be "usage_statistics_record_schema.json" but the target directory can be specified.
+
+    Args:
+        target_dir (str): The dir you wish to write the schema to.
+    """
+    import json
+    import os
+
+    file: str = "usage_statistics_record_schema.json"
+    out: str = os.path.join(target_dir, file)
+
+    with open(out, "w") as outfile:
         json.dump(anonymized_usage_statistics_record_schema, outfile, indent=2)
+
+
+if __name__ == "__main__":
+    import sys
+
+    target_dir = sys.argv[1] if len(sys.argv) >= 2 else "."
+    write_schema_to_file(target_dir)

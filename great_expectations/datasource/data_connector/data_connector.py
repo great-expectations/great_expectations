@@ -45,7 +45,7 @@ class DataConnector:
         datasource_name: str,
         execution_engine: ExecutionEngine,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         """
         Base class for DataConnectors
 
@@ -91,7 +91,7 @@ class DataConnector:
         return self._data_context_root_directory
 
     @data_context_root_directory.setter
-    def data_context_root_directory(self, data_context_root_directory: str):
+    def data_context_root_directory(self, data_context_root_directory: str) -> None:
         self._data_context_root_directory = data_context_root_directory
 
     def get_batch_data_and_metadata(
@@ -145,7 +145,7 @@ class DataConnector:
 
     def _refresh_data_references_cache(
         self,
-    ):
+    ) -> None:
         raise NotImplementedError
 
     def _get_data_reference_list(
@@ -404,7 +404,7 @@ class DataConnector:
             "n_rows": n_rows,
         }
 
-    def _validate_batch_request(self, batch_request: BatchRequestBase):
+    def _validate_batch_request(self, batch_request: BatchRequestBase) -> None:
         """
         Validate batch_request by checking:
             1. if configured datasource_name matches batch_request's datasource_name

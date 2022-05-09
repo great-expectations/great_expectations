@@ -144,7 +144,7 @@ class Profiler(metaclass=abc.ABCMeta):
       kind of object. You should raise an appropriate Exception if the object is not valid.
     """
 
-    def __init__(self, configuration: dict = None):
+    def __init__(self, configuration: dict = None) -> None:
         self.configuration = configuration
 
     def validate(self, item_to_validate: Any) -> None:
@@ -259,5 +259,5 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite, validation_results
 
     @classmethod
-    def _profile(cls, dataset, configuration=None):
+    def _profile(cls, dataset, configuration=None) -> None:
         raise NotImplementedError
