@@ -32,11 +32,13 @@ class DatePart(enum.Enum):
     def __hash__(self: DatePart):
         return hash(self.value)
 
-    # the to_yaml() allows for the yaml-encodable representation of ENUM, using internal methods of ruamel.
-    # pattern was found in the following stackoverflow thread.
-    # https://stackoverflow.com/questions/48017317/can-ruamel-yaml-encode-an-enum
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
+        """
+        Method allows for yaml-encodable representation of ENUM, using internal methods of ruamel.
+        pattern was found in the following stackoverflow thread:
+        https://stackoverflow.com/questions/48017317/can-ruamel-yaml-encode-an-enum
+        """
         return representer.represent_str(data=node.value)
 
 
