@@ -230,10 +230,6 @@ class AssetConfigSchema(Schema):
     )
 
     splitter_method = fields.String(required=False, allow_none=True)
-    # see if there is a way to take in string or ENUM (datetime)
-    # and if it is a ENUM, then we do the conversion.
-    # when we dump it into a YAML, then we use teh value.. or just use the string.
-    # TODO : look into
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
