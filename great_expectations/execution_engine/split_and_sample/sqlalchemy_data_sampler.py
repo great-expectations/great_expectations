@@ -92,6 +92,11 @@ class SqlAlchemyDataSampler(DataSampler):
                 raise ge_exceptions.InvalidConfigError(
                     "Please specify your sampling kwargs 'n' parameter as a string or int."
                 )
+            if isinstance(n, str) and not n.isdigit():
+                raise ge_exceptions.InvalidConfigError(
+                    "If specifying your sampling kwargs 'n' parameter as a string please ensure it is "
+                    "parseable as an integer."
+                )
             string_of_query = string_of_query.replace("?", str(n))
             return string_of_query
         else:

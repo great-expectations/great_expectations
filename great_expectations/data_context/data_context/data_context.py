@@ -439,7 +439,7 @@ class DataContext(BaseDataContext):
         """Save the current project to disk."""
         if self.ge_cloud_mode:
             logger.debug(
-                "ge_cloud_mode detected - skipping DataContect._save_project_config"
+                "ge_cloud_mode detected - skipping DataContext._save_project_config"
             )
             return
         logger.debug("Starting DataContext._save_project_config")

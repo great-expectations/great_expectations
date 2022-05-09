@@ -1973,11 +1973,11 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     ],
                     "expectation_configuration_builders": [
                         {
-                            "max_value": "$parameter.row_count_range_estimator.value[1]",
+                            "max_value": "$parameter.table_row_count_range_estimator.value[1]",
                             "validation_parameter_builder_configs": [
                                 {
                                     "replace_nan_with_zero": True,
-                                    "name": "row_count_range_estimator",
+                                    "name": "table_row_count_range_estimator",
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                                     "truncate_values": "$variables.truncate_values",
                                     "enforce_numeric_metric": True,
@@ -1996,10 +1996,10 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "expectation_type": "expect_table_row_count_to_be_between",
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                             "meta": {
-                                "profiler_details": "$parameter.row_count_range_estimator.details"
+                                "profiler_details": "$parameter.table_row_count_range_estimator.details"
                             },
                             "class_name": "DefaultExpectationConfigurationBuilder",
-                            "min_value": "$parameter.row_count_range_estimator.value[0]",
+                            "min_value": "$parameter.table_row_count_range_estimator.value[0]",
                         }
                     ],
                 },

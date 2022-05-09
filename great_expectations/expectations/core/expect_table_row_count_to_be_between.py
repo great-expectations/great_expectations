@@ -87,10 +87,10 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "profiler_config",
     )
 
-    row_count_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    table_row_count_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
-        name="row_count_range_estimator",
+        name="table_row_count_range_estimator",
         metric_name="table.row_count",
         metric_domain_kwargs=None,
         metric_value_kwargs=None,
@@ -108,7 +108,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        row_count_range_estimator_parameter_builder_config,
+        table_row_count_range_estimator_parameter_builder_config,
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
@@ -138,10 +138,10 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "min_value": f"{PARAMETER_KEY}{row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-                        "max_value": f"{PARAMETER_KEY}{row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+                        "min_value": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+                        "max_value": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     }
                 ],
