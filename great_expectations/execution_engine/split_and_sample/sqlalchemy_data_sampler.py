@@ -72,6 +72,8 @@ class SqlAlchemyDataSampler(DataSampler):
             return query
         elif dialect == "mssql":
             # TODO: AJB 20220429 WARNING THIS mssql dialect METHOD IS NOT COVERED BY TESTS
+            # Note that this code path exists because the limit parameter is not getting rendered
+            # successfully in the resulting mssql query.
             selectable_query: Selectable = (
                 sa.select("*")
                 .select_from(
@@ -85,18 +87,9 @@ class SqlAlchemyDataSampler(DataSampler):
                     execution_engine.engine, compile_kwargs={"literal_binds": True}
                 )
             )
-            # TODO: AJB 20220504 REMOVE THIS HACK!
-            # This hack is here because the limit parameter is not substituted during query.compile()
             n: Union[str, int] = batch_spec["sampling_kwargs"]["n"]
-            if not isinstance(n, (str, int)):
-                raise ge_exceptions.InvalidConfigError(
-                    "Please specify your sampling kwargs 'n' parameter as a string or int."
-                )
-            if isinstance(n, str) and not n.isdigit():
-                raise ge_exceptions.InvalidConfigError(
-                    "If specifying your sampling kwargs 'n' parameter as a string please ensure it is "
-                    "parseable as an integer."
-                )
+            self._validate_mssql_limit_param(n)
+            # This string replacement is here because the limit parameter is not substituted during query.compile()
             string_of_query = string_of_query.replace("?", str(n))
             return string_of_query
         else:
@@ -107,6 +100,25 @@ class SqlAlchemyDataSampler(DataSampler):
                 )
                 .where(where_clause)
                 .limit(batch_spec["sampling_kwargs"]["n"])
+            )
+
+    def _validate_mssql_limit_param(self, n: Union[str, int]) -> None:
+        """Validate that the mssql limit param is passed as an int or a string representation of an int.
+
+        Args:
+            n: mssql limit parameter.
+
+        Returns:
+            None
+        """
+        if not isinstance(n, (str, int)):
+            raise ge_exceptions.InvalidConfigError(
+                "Please specify your sampling kwargs 'n' parameter as a string or int."
+            )
+        if isinstance(n, str) and not n.isdigit():
+            raise ge_exceptions.InvalidConfigError(
+                "If specifying your sampling kwargs 'n' parameter as a string please ensure it is "
+                "parseable as an integer."
             )
 
     def sample_using_random(
