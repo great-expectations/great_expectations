@@ -19,6 +19,7 @@ from great_expectations.rule_based_profiler.types import (
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
+from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
@@ -575,6 +576,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
             metric_name="column.min",
             metric_domain_kwargs=metric_domain_kwargs,
             estimator="kde",
+            bootstrap_random_seed=RANDOM_SEED,
             false_positive_rate=1.0e-2,
             round_decimals=1,
             json_serialize=False,
@@ -674,6 +676,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
             metric_name="column.min",
             metric_domain_kwargs=metric_domain_kwargs,
             estimator="kde",
+            bootstrap_random_seed=RANDOM_SEED,
             false_positive_rate=5.0e-2,
             round_decimals=1,
             json_serialize=False,
