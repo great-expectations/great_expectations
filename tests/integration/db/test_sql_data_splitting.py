@@ -76,7 +76,7 @@ if __name__ == "test_script_module":
             load_full_dataset=True,
         )
         athena_db_name: str = get_awsathena_db_name()
-        table_name: str = f"{athena_db_name}.taxitable"
+        table_name: str = f"{athena_db_name}.ten_trips_from_each_month"
     else:
 
         print("Preemptively cleaning old tables")
@@ -184,7 +184,8 @@ if __name__ == "test_script_module":
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
 
-    print("Clean up tables used in this test")
-    clean_up_tables_with_prefix(
-        connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
-    )
+    if not _is_dialect_athena(dialect):
+        print("Clean up tables used in this test")
+        clean_up_tables_with_prefix(
+            connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
+        )
