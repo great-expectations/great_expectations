@@ -630,7 +630,7 @@ positive integer, or must be omitted (or set to None).
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
     ) -> NumericRangeEstimationResult:
-        # Obtain num_bootstrap_samples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain n_resamples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         n_resamples: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=kwargs.get("n_resamples"),
@@ -674,7 +674,7 @@ positive integer, or must be omitted (or set to None).
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
     ) -> NumericRangeEstimationResult:
-        # Obtain num_bootstrap_samples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain n_resamples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         n_resamples: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=kwargs.get("n_resamples"),
