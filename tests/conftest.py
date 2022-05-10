@@ -4213,8 +4213,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "enforce_numeric_metric": True,
                         "reduce_scalar_metric": True,
                         "estimator": "$variables.estimator",
-                        "num_bootstrap_samples": None,
-                        "bootstrap_random_seed": None,
+                        "n_resamples": None,
+                        "random_seed": None,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
                         "truncate_values": {"lower_bound": 0},
@@ -4264,8 +4264,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "replace_nan_with_zero": True,
                         "reduce_scalar_metric": True,
                         "estimator": "$variables.estimator",
-                        "num_bootstrap_samples": None,
-                        "bootstrap_random_seed": None,
+                        "n_resamples": None,
+                        "random_seed": None,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
@@ -4284,8 +4284,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "replace_nan_with_zero": True,
                         "reduce_scalar_metric": True,
                         "estimator": "$variables.estimator",
-                        "num_bootstrap_samples": None,
-                        "bootstrap_random_seed": None,
+                        "n_resamples": None,
+                        "random_seed": None,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
@@ -6262,5 +6262,5 @@ def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builde
         RANDOM_SEED,
     )
     logger.info(
-        "Set the bootstrap_random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
+        "Set the random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
     )

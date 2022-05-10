@@ -19,7 +19,6 @@ from great_expectations.rule_based_profiler.types import (
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(

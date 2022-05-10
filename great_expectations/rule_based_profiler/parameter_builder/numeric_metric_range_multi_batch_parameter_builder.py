@@ -677,7 +677,7 @@ positive integer, or must be omitted (or set to None).
         # Obtain num_bootstrap_samples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         n_resamples: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=kwargs.get("num_bootstrap_samples"),
+            parameter_reference=kwargs.get("n_resamples"),
             expected_return_type=None,
             variables=variables,
             parameters=parameters,

@@ -6,7 +6,7 @@ config_version: 1.0
 
 variables:
   num_bootstrap_samples: 9999
-  bootstrap_random_seed: 43792
+  random_seed: 43792
   false_positive_rate: 5.0e-2
   quantile_statistic_interpolation_method: auto
 
@@ -21,7 +21,7 @@ rules:
         false_positive_rate: $variables.false_positive_rate
         quantile_statistic_interpolation_method: $variables.quantile_statistic_interpolation_method
         num_bootstrap_samples: $variables.num_bootstrap_samples
-        bootstrap_random_seed: $variables.bootstrap_random_seed
+        random_seed: $variables.random_seed
         truncate_values:
           lower_bound: 0
         round_decimals: 0
