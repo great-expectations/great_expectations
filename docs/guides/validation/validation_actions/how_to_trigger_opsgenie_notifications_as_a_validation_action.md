@@ -40,7 +40,7 @@ opsgenie_api_key: YOUR-API-KEY
 
 ### 3. Add `send_opsgenie_alert_on_validation_result` operator to your Checkpoint configuration
 
-Next, update your Checkpoint configuration file to add a new operator to the <TechnicalTag tag="action" text="Actions" /> list in great_expectations.yml
+Next, update your Checkpoint configuration file to add a new action to the <TechnicalTag tag="action" text="Actions" /> list in great_expectations.yml
 
  ```yaml
 action_list:
