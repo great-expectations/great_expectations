@@ -606,13 +606,22 @@ def load_data_into_test_database(
         )
         return return_value
     elif engine.dialect.name.lower() == "awsathena":
-        with engine.connect() as connection:
+        try:
+            connection = engine.connect()
             load_dataframe_into_test_athena_database_as_table(
                 df=all_dfs_concatenated,
                 table_name=table_name,
                 connection=connection,
             )
-        return return_value
+            return return_value
+        except SQLAlchemyError as e:
+            logger.error(
+                """Docs integration tests encountered an error while loading test-data into test-database."""
+            )
+            raise
+        finally:
+            connection.close()
+            engine.dispose()
     else:
         try:
             connection = engine.connect()
