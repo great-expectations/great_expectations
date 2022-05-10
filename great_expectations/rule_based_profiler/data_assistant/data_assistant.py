@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from inspect import isabstract
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -102,6 +102,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             validator: Validator object, containing loaded Batch objects as well as Expectation and Metric operations
         """
         self._name = name
+
         self._validator = validator
 
         self._profiler = RuleBasedProfiler(
@@ -111,6 +112,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
             data_context=self._validator.data_context,
         )
         self._build_profiler()
+
+        self._batches = self._validator.batches
 
     def _build_profiler(self) -> None:
         """
@@ -183,7 +186,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
             DataAssistantResult: The result object for the DataAssistant
         """
         data_assistant_result: DataAssistantResult = DataAssistantResult(
-            execution_time=0.0
+            batch_id_to_batch_identifier_display_name_map=self.batch_id_to_batch_identifier_display_name_map(),
+            execution_time=0.0,
         )
         run_profiler_on_data(
             data_assistant=self,
@@ -191,7 +195,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             profiler=self.profiler,
             variables=self.variables,
             rules=self.rules,
-            batch_list=list(self._validator.batches.values()),
+            batch_list=list(self._batches.values()),
             batch_request=None,
         )
         return self._build_data_assistant_result(
@@ -335,6 +339,16 @@ class DataAssistant(metaclass=MetaDataAssistant):
         }
 
         return parameter_values_for_fully_qualified_parameter_names_by_domain
+
+    def batch_id_to_batch_identifier_display_name_map(
+        self,
+    ) -> Dict[str, Set[Tuple[str, Any]]]:
+        batch_id: str
+        batch: Batch
+        return {
+            batch_id: set(batch.batch_definition.batch_identifiers.items())
+            for batch_id, batch in self._batches.items()
+        }
 
 
 @measure_execution_time(
