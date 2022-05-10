@@ -1327,6 +1327,33 @@ def is_nan(value: Any) -> bool:
         return True
 
 
+def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
+    """
+    This method checks whether or not candidate object is subset of target object.
+    """
+    if isinstance(candidate, dict):
+        key: Any  # must be "hashable"
+        value: Any
+        return all(
+            key in target
+            and is_candidate_subset_of_target(candidate=val, target=target[key])
+            for key, val in candidate.items()
+        )
+
+    if isinstance(candidate, (list, set, tuple)):
+        subitem: Any
+        superitem: Any
+        return all(
+            any(
+                is_candidate_subset_of_target(subitem, superitem)
+                for superitem in target
+            )
+            for subitem in candidate
+        )
+
+    return candidate == target
+
+
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
         # noinspection PyUnusedLocal

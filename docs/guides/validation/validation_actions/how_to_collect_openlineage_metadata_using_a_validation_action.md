@@ -32,21 +32,18 @@ This guide will explain how to use an <TechnicalTag tag="action" text="Action" /
 
 ### 2. Update the `action_list` key in your Validation Operator config.
 
- Add the ``OpenLineageValidationAction`` action to the ``action_list`` key of the ``ActionListValidationOperator`` config in your ``great_expectations.yml``.
+ Add the ``OpenLineageValidationAction`` action to the ``action_list`` key your Checkpoint configuration.
 
  ```yaml
- validation_operators:
-   action_list_operator:
-     class_name: ActionListValidationOperator
-     action_list:
-     - name: openlineage
-       action:
-         class_name: OpenLineageValidationAction
-         module_name: openlineage.common.provider.great_expectations
-         openlineage_host: ${OPENLINEAGE_URL}
-         openlineage_apiKey: ${OPENLINEAGE_API_KEY}
-         job_name: ge_validation # This is user-definable
-         openlineage_namespace: ge_namespace # This is user-definable
+action_list:
+ - name: openlineage
+   action:
+     class_name: OpenLineageValidationAction
+     module_name: openlineage.common.provider.great_expectations
+     openlineage_host: ${OPENLINEAGE_URL}
+     openlineage_apiKey: ${OPENLINEAGE_API_KEY}
+     job_name: ge_validation # This is user-definable
+     openlineage_namespace: ge_namespace # This is user-definable
  ```
 
  The `openlineage_host` and `openlineage_apiKey` values can be set via the environment, as shown above, or can be implemented as variables in `uncommitted/config_variables.yml`. The `openlineage_apiKey` value is optional, and is not required by all OpenLineage backends.
@@ -55,27 +52,15 @@ This guide will explain how to use an <TechnicalTag tag="action" text="Action" /
 
 ### 3.  Test your Action by Validating a Batch of data.
 
-Trigger your `action_list_operator` to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and emit lineage events to the OpenLineage backend. This can be done in code:
-
- ```python
- context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="openlineage_test")
- ```
-
- Alteratively, this can be done with a Checkpoint. First, make sure that the `validation_operator_name` is set in your checkpoint's XML file:
-
- ```diff
- module_name: great_expectations.checkpoint
- class_name: LegacyCheckpoint
- +validation_operator_name: action_list_operator
- batches:
-   - batch_kwargs:
- ```
-
- Then, run the Checkpoint:
+Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and emit lineage events to the OpenLineage backend.  This can be done from the command line:
 
  ```bash
  % great_expectations checkpoint run <checkpoint_name>
  ```
+
+:::note Reminder
+Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md) has more detailed instructions for this step, including instructions on how to run a checkpoint from a Python script instead of from the <TechnicalTag tag="cli" text="CLI" />.
+:::
 
 ## Additional resources
 
