@@ -50,14 +50,6 @@ except ImportError:
     Select = None
     SQLAlchemyError = None
 
-try:
-    from pyathena import Connection
-    from pyathena.pandas.util import to_sql
-except ImportError:
-    logger.debug("Unable to use pyathena; install optional pyathena dependency.")
-    to_sql = None
-    Connection = None
-
 
 logger = logging.getLogger(__name__)
 yaml_handler: YAMLHandler = YAMLHandler()
@@ -674,7 +666,7 @@ def load_data_into_test_bigquery_database_with_bigquery_client(
 def load_dataframe_into_test_athena_database_as_table(
     df: pd.DataFrame,
     table_name: str,
-    connection: Connection,
+    connection,
     data_location_bucket: Optional[str] = None,
     data_location: Optional[str] = None,
 ) -> None:
@@ -691,6 +683,9 @@ def load_dataframe_into_test_athena_database_as_table(
     Returns:
         None
     """
+
+    from pyathena.pandas.util import to_sql
+
     if not data_location_bucket:
         data_location_bucket = os.getenv("ATHENA_DATA_BUCKET")
     if not data_location:
