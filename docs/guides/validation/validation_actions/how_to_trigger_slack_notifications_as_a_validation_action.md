@@ -66,7 +66,7 @@ Open the `.yml` configuration file in `great_expectations/checkpoints` that corr
 Add the `send_slack_notification_on_validation_result` Action to the `action_list` section of the configuration. Make sure the following section exists in the Checkpoint configuration.
 
 <Tabs
-  groupId="webhook-or-app"
+  groupId="webhook-or-app2"
   defaultValue='webhook'
   values={[
   {label: 'For Webhook', value:'webhook'},
@@ -135,10 +135,9 @@ Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_d
 ![slack_notification_example](../../../images/slack_notification_example.png)
 
 
-Additional notes
---------------------
+## Additional notes
 
-- If your `great_expectations.yml` contains multiple configurations for <TechnicalTag tag="data_docs" text="Data Docs" /> sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the `notify_with` variable in your `great_expectations.yml`.
+- If your `great_expectations.yml` contains multiple configurations for <TechnicalTag tag="data_docs" text="Data Docs" /> sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the `notify_with` variable in your Checkpoint configuration.
 - The following example will configure the Slack message to include links Data Docs at `local_site` and `s3_site`.
 
 ```yaml
@@ -160,7 +159,10 @@ Additional notes
         site_index_builder:
           class_name: DefaultSiteIndexBuilder
           show_cta_footer: true
+```
 
+```yaml
+    # Example action_list in Checkpoint configuration   
     action_list:
         - name: send_slack_notification_on_validation_result # name can be set to any value
               action:
@@ -180,7 +182,6 @@ Additional notes
 ```
 
 
-Additional resources
---------------------
+## Additional resources
 
 - Instructions on how to set up a Slack app with webhook can be found in the documentation for the [Slack API](https://api.slack.com/messaging/webhooks#)
