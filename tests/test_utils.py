@@ -833,28 +833,28 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
         engine.dispose()
 
 
-def get_awsathena_db_name(env_var: str = "ATHENA_DB_NAME") -> str:
+def get_awsathena_db_name(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
     """Get awsathena database name from environment variables.
 
     Returns:
         String of the awsathena database name.
     """
-    athena_db_name: str = os.getenv(env_var)
+    athena_db_name: str = os.getenv(db_name_env_var)
     if not athena_db_name:
         raise ValueError(
-            f"Environment Variable {env_var} is required to run integration tests against AWS Athena"
+            f"Environment Variable {db_name_env_var} is required to run integration tests against AWS Athena"
         )
     return athena_db_name
 
 
-def get_awsathena_connection_url() -> str:
+def get_awsathena_connection_url(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
     """Get awsathena connection url from environment variables.
 
     Returns:
         String of the awsathena connection url.
     """
-    ATHENA_DB_NAME: str = get_awsathena_db_name()
-    ATHENA_STAGING_S3 = os.getenv("ATHENA_STAGING_S3")
+    ATHENA_DB_NAME: str = get_awsathena_db_name(db_name_env_var)
+    ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
     if not ATHENA_STAGING_S3:
         raise ValueError(
             "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
@@ -863,7 +863,9 @@ def get_awsathena_connection_url() -> str:
     return f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
 
 
-def get_connection_string_and_dialect() -> Tuple[str, str]:
+def get_connection_string_and_dialect(
+    athena_db_name_env_var: str = "ATHENA_DB_NAME",
+) -> Tuple[str, str]:
 
     with open("./connection_string.yml") as f:
         db_config: dict = yaml_handler.load(f)
@@ -874,7 +876,7 @@ def get_connection_string_and_dialect() -> Tuple[str, str]:
     elif dialect == "bigquery":
         connection_string: str = get_bigquery_connection_url()
     elif dialect == "awsathena":
-        connection_string: str = get_awsathena_connection_url()
+        connection_string: str = get_awsathena_connection_url(athena_db_name_env_var)
     else:
         connection_string: str = db_config["connection_string"]
 

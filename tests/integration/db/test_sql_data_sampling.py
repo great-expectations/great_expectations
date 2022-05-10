@@ -65,11 +65,15 @@ def _is_dialect_athena(dialect: str) -> bool:
 
 if __name__ == "test_script_module":
 
-    dialect, connection_string = get_connection_string_and_dialect()
+    dialect, connection_string = get_connection_string_and_dialect(
+        athena_db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
+    )
     print(f"Testing dialect: {dialect}")
 
     if _is_dialect_athena(dialect):
-        athena_db_name: str = get_awsathena_db_name(env_var="ATHENA_TEN_TRIPS_DB_NAME")
+        athena_db_name: str = get_awsathena_db_name(
+            db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
+        )
         table_name: str = f"{athena_db_name}.ten_trips_from_each_month"
         test_df: pd.DataFrame = load_and_concatenate_csvs(
             csv_paths=[
