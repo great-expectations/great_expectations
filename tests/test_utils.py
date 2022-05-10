@@ -606,11 +606,12 @@ def load_data_into_test_database(
         )
         return return_value
     elif engine.dialect.name.lower() == "awsathena":
-        load_dataframe_into_test_athena_database_as_table(
-            df=all_dfs_concatenated,
-            table_name=table_name,
-            connection=engine,
-        )
+        with engine.connect() as connection:
+            load_dataframe_into_test_athena_database_as_table(
+                df=all_dfs_concatenated,
+                table_name=table_name,
+                connection=connection,
+            )
         return return_value
     else:
         try:
