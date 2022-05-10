@@ -51,12 +51,10 @@ except ImportError:
     SQLAlchemyError = None
 
 try:
-    import pyathena
     from pyathena import Connection
     from pyathena.pandas.util import to_sql
 except ImportError:
     logger.debug("Unable to use pyathena; install optional pyathena dependency.")
-    pyathena = None
     to_sql = None
     Connection = None
 
