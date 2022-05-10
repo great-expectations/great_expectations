@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 from copy import deepcopy
@@ -159,8 +160,13 @@ class ExpectationValidationResult(SerializableDictDot):
                 and "kwargs" in json_dict["expectation_config"]
                 and "auto" in json_dict["expectation_config"]["kwargs"]
             ):
-                json_dict["expectation_config"].pop("meta", None)
+                json_dict["expectation_config"]["meta"] = {
+                    "auto_generated_at": datetime.datetime.now(
+                        datetime.timezone.utc
+                    ).strftime("%Y%m%dT%H%M%S.%fZ"),
+                }
                 json_dict["expectation_config"]["kwargs"].pop("auto")
+                json_dict["expectation_config"]["kwargs"].pop("batch_id", None)
             else:
                 json_dict.pop("expectation_config", None)
 
