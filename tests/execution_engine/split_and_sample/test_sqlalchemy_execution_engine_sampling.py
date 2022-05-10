@@ -1,4 +1,5 @@
 from unittest import mock
+from unittest.mock import PropertyMock
 
 import pytest
 
@@ -63,12 +64,14 @@ def test_sample_using_limit(mock_execution_engine: mock.MagicMock, dialect: str)
         schema_name="test_schema_name",
         sampling_kwargs={"n": 10},
     )
-    mock_execution_engine.engine.dialect.name.return_value = dialect
 
-    data_sampler: SqlAlchemyDataSampler = SqlAlchemyDataSampler()
+    data_sampler: SqlAlchemyDataSampler = SqlAlchemyDataSampler(
+        dialect=GESqlDialect(dialect)
+    )
 
     result = data_sampler.sample_using_limit(
         execution_engine=mock_execution_engine, batch_spec=batch_spec, where_clause=None
     )
 
     print(result)
+    raise NotImplementedError

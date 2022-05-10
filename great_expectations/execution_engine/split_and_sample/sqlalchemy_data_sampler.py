@@ -22,6 +22,19 @@ except ImportError:
 
 
 class SqlAlchemyDataSampler(DataSampler):
+    """Sampling methods for data stores with SQL interfaces.
+
+    Args:
+        dialect: dialect of sql used in sampling.
+    """
+
+    def __init__(self, dialect: GESqlDialect):
+        self._dialect = dialect
+
+    @property
+    def dialect(self) -> GESqlDialect:
+        return self._dialect
+
     def sample_using_limit(
         self,
         execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
@@ -53,9 +66,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
         # so the business logic for building the query needs to be different.
-        dialect: GESqlDialect = GESqlDialect(
-            execution_engine.engine.dialect.name.lower()
-        )
+        dialect: GESqlDialect = self.dialect
         if dialect == GESqlDialect.ORACLE:
             # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
             # limit doesn't compile properly for oracle so we will append rownum to query string later

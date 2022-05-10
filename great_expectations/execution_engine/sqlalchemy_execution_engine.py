@@ -19,6 +19,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 
 del get_versions  # isort:skip
 
@@ -377,7 +378,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
         self._data_splitter = SqlAlchemyDataSplitter()
-        self._data_sampler = SqlAlchemyDataSampler()
+        self._data_sampler = SqlAlchemyDataSampler(
+            dialect=GESqlDialect(self.engine.dialect.name.lower())
+        )
 
     @property
     def credentials(self) -> Optional[dict]:
