@@ -14,7 +14,7 @@ context = ge.get_context()
 from tests.test_utils import load_data_into_test_database
 
 # The following load & config blocks up until the batch requests are only to support testing.
-MY_CONNECTION_STRING = "mysql+pymysql://root:root@localhost/test_ci"
+MY_CONNECTION_STRING = "mysql+pymysql://root@localhost/test_ci"
 
 PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
