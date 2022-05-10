@@ -161,16 +161,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
 
         self._estimator = estimator
 
-        if n_resamples and (
-            estimator
-            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_N_RESAMPLES_SAMPLING_METHOD_NAMES
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""n_resamples was provided, but estimator {estimator} is not one of:
-{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_N_RESAMPLES_SAMPLING_METHOD_NAMES}.
-"""
-            )
-
         self._n_resamples = n_resamples
 
         self._random_seed = random_seed
