@@ -6258,7 +6258,7 @@ def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builde
     """
     monkeypatch.setattr(
         NumericMetricRangeMultiBatchParameterBuilder,
-        "bootstrap_random_seed",
+        "random_seed",
         RANDOM_SEED,
     )
     logger.info(

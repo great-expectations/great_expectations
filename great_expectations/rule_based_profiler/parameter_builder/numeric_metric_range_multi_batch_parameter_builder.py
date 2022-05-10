@@ -59,7 +59,13 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         "kde",
     }
 
+    RECOGNIZED_N_RESAMPLES_SAMPLING_METHOD_NAMES: set = {
+        "bootstrap",
+        "kde",
+    }
+
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
+    DEFAULT_KDE_NUM_RESAMPLES: int = 9999
 
     RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
         "lower_bound",
@@ -84,8 +90,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         false_positive_rate: Union[str, float] = 5.0e-2,
         quantile_statistic_interpolation_method: str = "auto",
         estimator: str = "bootstrap",
-        num_bootstrap_samples: Optional[Union[str, int]] = None,
-        bootstrap_random_seed: Optional[Union[str, int]] = None,
+        n_resamples: Optional[Union[str, int]] = None,
+        random_seed: Optional[Union[str, int]] = None,
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
@@ -98,32 +104,33 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     ) -> None:
         """
         Args:
-            name: the name of this parameter -- this is user-specified parameter name (from configuration);
-            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
-            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            name: the name of this parameter -- this is user-specified parameter name (from configuration); it is not
+                the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
+                and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
             replace_nan_with_zero: if False, then if the computed metric gives NaN, then exception is raised; otherwise,
-            if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
+                if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
-            identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
+                identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
             quantile_statistic_interpolation_method: Applicable only for the "bootstrap" sampling method --
-            supplies value of (interpolation) "method" to "np.quantile()" statistic, used for confidence intervals.
+                supplies value of (interpolation) "method" to "np.quantile()" statistic, used for confidence intervals.
             estimator: choice of the estimation algorithm: "oneshot" (one observation), "bootstrap" (default),
-                       or "kde" (kernel density estimation).
-            num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
-            9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
+                or "kde" (kernel density estimation).
+            n_resamples: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
+                9999 is used (default in
+                "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
-            (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
+                (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
-            rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them on
-            output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
+                rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them
+                on output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
-            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
-            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+                ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+                These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with this ParameterBuilder
         """
@@ -148,9 +155,19 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
 
         self._estimator = estimator
 
-        self._num_bootstrap_samples = num_bootstrap_samples
+        if n_resamples and (
+            estimator
+            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_N_RESAMPLES_SAMPLING_METHOD_NAMES
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""n_resamples was provided, but estimator {estimator} is not one of:
+{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_N_RESAMPLES_SAMPLING_METHOD_NAMES}.
+"""
+            )
 
-        self._bootstrap_random_seed = bootstrap_random_seed
+        self._n_resamples = n_resamples
+
+        self._random_seed = random_seed
 
         self._round_decimals = round_decimals
 
@@ -192,12 +209,12 @@ detected.
         return self._estimator
 
     @property
-    def num_bootstrap_samples(self) -> Optional[Union[str, int]]:
-        return self._num_bootstrap_samples
+    def n_resamples(self) -> Optional[Union[str, int]]:
+        return self._n_resamples
 
     @property
-    def bootstrap_random_seed(self) -> Optional[Union[str, int]]:
-        return self._bootstrap_random_seed
+    def random_seed(self) -> Optional[Union[str, int]]:
+        return self._random_seed
 
     @property
     def truncate_values(
@@ -352,15 +369,16 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
                 "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
-                "num_bootstrap_samples": self.num_bootstrap_samples,
-                "bootstrap_random_seed": self.bootstrap_random_seed,
+                "n_resamples": self.n_resamples,
+                "random_seed": self.random_seed,
             }
         elif estimator == "kde":
             estimator_func = self._get_kde_estimate
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
                 "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
-                "bootstrap_random_seed": self.bootstrap_random_seed,
+                "n_resamples": self.n_resamples,
+                "random_seed": self.random_seed,
             }
         else:
             estimator_func = self._get_deterministic_estimate
@@ -613,28 +631,23 @@ positive integer, or must be omitted (or set to None).
         **kwargs,
     ) -> NumericRangeEstimationResult:
         # Obtain num_bootstrap_samples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        num_bootstrap_samples: Optional[
-            int
-        ] = get_parameter_value_and_validate_return_type(
+        n_resamples: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=kwargs.get("num_bootstrap_samples"),
+            parameter_reference=kwargs.get("n_resamples"),
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
 
-        n_resamples: int
-        if num_bootstrap_samples is None:
+        if n_resamples is None:
             n_resamples = (
                 NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_BOOTSTRAP_NUM_RESAMPLES
             )
-        else:
-            n_resamples = num_bootstrap_samples
 
         # Obtain random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=kwargs.get("bootstrap_random_seed"),
+            parameter_reference=kwargs.get("random_seed"),
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
@@ -648,9 +661,9 @@ positive integer, or must be omitted (or set to None).
         return compute_bootstrap_quantiles_point_estimate(
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
+            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
             n_resamples=n_resamples,
             random_seed=random_seed,
-            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
         )
 
     @staticmethod
@@ -661,10 +674,24 @@ positive integer, or must be omitted (or set to None).
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
     ) -> NumericRangeEstimationResult:
+        # Obtain num_bootstrap_samples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        n_resamples: Optional[int] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=kwargs.get("num_bootstrap_samples"),
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        if n_resamples is None:
+            n_resamples = (
+                NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_KDE_NUM_RESAMPLES
+            )
+
         # Obtain random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=kwargs.get("bootstrap_random_seed"),
+            parameter_reference=kwargs.get("random_seed"),
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
@@ -678,8 +705,9 @@ positive integer, or must be omitted (or set to None).
         return compute_kde_quantiles_point_estimate(
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
-            random_seed=random_seed,
+            n_resamples=n_resamples,
             quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+            random_seed=random_seed,
         )
 
     @staticmethod

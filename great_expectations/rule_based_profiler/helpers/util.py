@@ -492,6 +492,7 @@ def compute_kde_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     quantile_statistic_interpolation_method: str,
+    n_resamples: int,
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
     """
@@ -502,15 +503,14 @@ def compute_kde_quantiles_point_estimate(
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
 
     metric_values_density_estimate = stats.gaussian_kde(metric_values)
-    kde_samples = 9999
     if random_seed:
         metric_values_gaussian_sample = metric_values_density_estimate.resample(
-            kde_samples,
+            n_resamples,
             seed=random_seed,
         )
     else:
         metric_values_gaussian_sample = metric_values_density_estimate.resample(
-            kde_samples,
+            n_resamples,
         )
 
     lower_quantile_point_estimate = np.quantile(
