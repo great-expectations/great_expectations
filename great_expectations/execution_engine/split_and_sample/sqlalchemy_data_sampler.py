@@ -5,7 +5,7 @@ from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 
 try:
     import sqlalchemy as sa
