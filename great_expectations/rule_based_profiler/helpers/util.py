@@ -624,7 +624,11 @@ def _determine_quantile_bias_corrected_point_estimate(
     # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
     #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
     quantile_bias_corrected_point_estimate: Number
-    if bootstrap_quantile_bias / bootstrap_quantile_standard_error <= 0.25:
+
+    if (
+        bootstrap_quantile_standard_error > 0
+        and bootstrap_quantile_bias / bootstrap_quantile_standard_error <= 0.25
+    ):
         quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate
     else:
         quantile_bias_corrected_point_estimate = (
