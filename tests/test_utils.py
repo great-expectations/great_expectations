@@ -833,16 +833,16 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
         engine.dispose()
 
 
-def get_awsathena_db_name() -> str:
+def get_awsathena_db_name(env_var: str = "ATHENA_DB_NAME") -> str:
     """Get awsathena database name from environment variables.
 
     Returns:
         String of the awsathena database name.
     """
-    athena_db_name: str = os.getenv("ATHENA_DB_NAME")
+    athena_db_name: str = os.getenv(env_var)
     if not athena_db_name:
         raise ValueError(
-            "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"
+            f"Environment Variable {env_var} is required to run integration tests against AWS Athena"
         )
     return athena_db_name
 

@@ -68,7 +68,7 @@ if __name__ == "test_script_module":
     print(f"Testing dialect: {dialect}")
 
     if _is_dialect_athena(dialect):
-        athena_db_name: str = get_awsathena_db_name()
+        athena_db_name: str = get_awsathena_db_name(env_var="ATHENA_TEN_TRIPS_DB_NAME")
         table_name: str = f"{athena_db_name}.ten_trips_from_each_month"
         loaded_table: LoadedTable = _load_data(
             connection_string=connection_string, dialect=dialect, table_name=table_name
