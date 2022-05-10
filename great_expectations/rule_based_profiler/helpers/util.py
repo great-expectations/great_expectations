@@ -388,7 +388,6 @@ def build_domains_from_column_names(
     column_name: str
     domains: List[Domain] = [
         Domain(
-            rule_name=rule_name,
             domain_type=domain_type,
             domain_kwargs={
                 "column": column_name,
@@ -402,6 +401,7 @@ def build_domains_from_column_names(
                 if table_column_name_to_inferred_semantic_domain_type_map
                 else None,
             },
+            rule_name=rule_name,
         )
         for column_name in column_names
     ]

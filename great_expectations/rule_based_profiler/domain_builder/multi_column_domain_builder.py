@@ -81,7 +81,6 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
 
         domains: List[Domain] = [
             Domain(
-                rule_name=rule_name,
                 domain_type=self.domain_type,
                 domain_kwargs={
                     "column_list": effective_column_names,
@@ -89,6 +88,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
                 details={
                     INFERRED_SEMANTIC_TYPE_KEY: semantic_types_by_column_name,
                 },
+                rule_name=rule_name,
             ),
         ]
 

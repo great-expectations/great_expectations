@@ -51,7 +51,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         expectation_configurations: List[
             ExpectationConfiguration
-        ] = self.expectation_suite.expectations
+        ] = self.expectation_configurations
 
         table_domain_chart: List[alt.Chart] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
@@ -76,6 +76,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         self.display(charts=display_charts, theme=theme)
 
+        return_charts = self.apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
 
     def _plot_table_domain_charts(
@@ -216,7 +217,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             alt.Chart,
         ]
         if prescriptive:
-            return_impl = self.get_expect_values_to_be_between_chart
+            return_impl = self.get_expect_domain_values_to_be_between_chart
         else:
             return_impl = self.get_line_chart
 
