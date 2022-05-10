@@ -6,6 +6,7 @@ from typing import Optional
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
@@ -164,6 +165,7 @@ class ExpectationValidationResult(SerializableDictDot):
                     "auto_generated_at": datetime.datetime.now(
                         datetime.timezone.utc
                     ).strftime("%Y%m%dT%H%M%S.%fZ"),
+                    "great_expectations_version": ge_version,
                 }
                 json_dict["expectation_config"]["kwargs"].pop("auto")
                 json_dict["expectation_config"]["kwargs"].pop("batch_id", None)
