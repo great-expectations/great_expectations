@@ -61,7 +61,7 @@ class DataAssistantDispatcher:
         data_assistant: Type[DataAssistant],  # noqa: F821
     ) -> None:
         """
-        This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
+        This method registers "DataAssistant" subclass for future instantiation and execution of its "run()" method.
 
         Args:
             data_assistant: "DataAssistant" class to be registered
