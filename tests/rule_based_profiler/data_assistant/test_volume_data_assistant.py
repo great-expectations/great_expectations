@@ -2683,7 +2683,7 @@ def test_volume_data_assistant_result_serialization(
     volume_data_assistant_result_as_dict: dict = volume_data_assistant_result.to_dict()
     assert (
         volume_data_assistant_result_as_dict is not None
-        and len(volume_data_assistant_result_as_dict) == 4
+        and len(volume_data_assistant_result_as_dict) == 5
     )
     assert (
         volume_data_assistant_result.to_json_dict()
