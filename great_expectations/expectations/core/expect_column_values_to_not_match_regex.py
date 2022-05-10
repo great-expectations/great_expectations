@@ -27,7 +27,7 @@ from great_expectations.rule_based_profiler.types.parameter_container import (
 )
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: F401
 except ImportError:
     pass
 

@@ -75,7 +75,7 @@ except ImportError:
         Row = None
 
 try:
-    import psycopg2
+    import psycopg2  # noqa: F401
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
@@ -1394,7 +1394,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if engine_dialect == "bigquery":
             stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "databricks":
-            stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
+            stmt = f"CREATE OR REPLACE TEMPORARY VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "dremio":
             stmt = f"CREATE OR REPLACE VDS {table_name} AS {custom_sql}"
         elif engine_dialect == "snowflake":
