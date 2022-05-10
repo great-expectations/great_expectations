@@ -672,3 +672,120 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
+
+
+def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstrap_marginal_info_at_min_max(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    data_context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    # BatchRequest yielding three batches
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    metric_domain_kwargs: dict = {"column": "fare_amount"}
+
+    numeric_metric_range_parameter_builder: ParameterBuilder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="column_max_range",
+            metric_name="column.max",
+            metric_domain_kwargs=metric_domain_kwargs,
+            estimator="bootstrap",
+            false_positive_rate=5.0e-2,
+            round_decimals=0,
+            json_serialize=False,
+            data_context=data_context,
+        )
+    )
+
+    variables: Optional[ParameterContainer] = None
+
+    domain: Domain = Domain(
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.TABLE,
+    )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
+    assert parameter_container.parameter_nodes is None
+
+    numeric_metric_range_parameter_builder.build_parameters(
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
+        batch_request=batch_request,
+    )
+
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
+        parameter_container.parameter_nodes or {}
+    )
+    assert len(parameter_nodes) == 1
+
+    fully_qualified_parameter_name_for_value: str = "$parameter.column_max_range"
+
+    parameter_node: ParameterNode = (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+            parameters=parameters,
+        )
+    )
+
+    bootstrap_value: np.ndarray = parameter_node.pop("value")
+
+    numeric_metric_range_parameter_builder: ParameterBuilder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="column_max_range",
+            metric_name="column.max",
+            metric_domain_kwargs=metric_domain_kwargs,
+            estimator="kde",
+            false_positive_rate=5.0e-2,
+            round_decimals=0,
+            json_serialize=False,
+            data_context=data_context,
+        )
+    )
+
+    variables: Optional[ParameterContainer] = None
+
+    domain: Domain = Domain(
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.TABLE,
+    )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
+    assert parameter_container.parameter_nodes is None
+
+    numeric_metric_range_parameter_builder.build_parameters(
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
+        batch_request=batch_request,
+    )
+
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
+        parameter_container.parameter_nodes or {}
+    )
+    assert len(parameter_nodes) == 1
+
+    fully_qualified_parameter_name_for_value: str = "$parameter.column_max_range"
+
+    parameter_node: ParameterNode = (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+            parameters=parameters,
+        )
+    )
+
+    kde_value: np.ndarray = parameter_node.pop("value")
+
+    assert kde_value[1] > bootstrap_value[1]
