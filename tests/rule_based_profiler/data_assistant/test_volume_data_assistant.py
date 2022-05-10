@@ -1951,6 +1951,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
+                        "include_bootstrap_samples_histogram_in_details": False,
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
                     },
@@ -1990,6 +1991,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                                    "include_bootstrap_samples_histogram_in_details": "$variables.include_bootstrap_samples_histogram_in_details",
                                     "round_decimals": "$variables.round_decimals",
                                 }
                             ],
@@ -2012,6 +2014,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
+                        "include_bootstrap_samples_histogram_in_details": False,
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
                     },
@@ -2052,6 +2055,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                                    "include_bootstrap_samples_histogram_in_details": "$variables.include_bootstrap_samples_histogram_in_details",
                                     "round_decimals": "$variables.round_decimals",
                                 }
                             ],
