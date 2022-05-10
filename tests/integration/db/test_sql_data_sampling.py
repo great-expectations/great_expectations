@@ -21,7 +21,6 @@ from tests.test_utils import (
     clean_up_tables_with_prefix,
     get_awsathena_db_name,
     get_connection_string_and_dialect,
-    load_and_concatenate_csvs,
     load_data_into_test_database,
 )
 
