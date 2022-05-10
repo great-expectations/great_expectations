@@ -8,14 +8,15 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner
 
 logger = logging.getLogger(__name__)
 
+# _registered_data_assistants has both aliases and full names
+_registered_data_assistants: Dict[str, Type[DataAssistant]] = {}
+
 
 class DataAssistantDispatcher:
     """
     DataAssistantDispatcher intercepts requests for "DataAssistant" classes by their registered names and manages their
     associated "DataAssistantRunner" objects, which process invocations of calls to "DataAssistant" "run()" methods.
     """
-
-    _registered_data_assistants: Dict[str, Type[DataAssistant]] = {}
 
     def __init__(self, data_context: "BaseDataContext") -> None:  # noqa: F821
         """
@@ -29,7 +30,6 @@ class DataAssistantDispatcher:
     def __getattr__(self, name: str) -> DataAssistantRunner:
         # Both, registered data_assistant_type and alias name are supported for invocation.
 
-        # _registered_data_assistants has both aliases and full names
         data_assistant_cls: Optional[
             Type[DataAssistant]
         ] = DataAssistantDispatcher.get_data_assistant_impl(name=name)
@@ -75,15 +75,13 @@ class DataAssistantDispatcher:
 
     @classmethod
     def _register(cls, name: str, data_assistant: Type[DataAssistant]) -> None:
-        registered_data_assistants = cls._registered_data_assistants
-
-        if name in registered_data_assistants:
+        if name in _registered_data_assistants:
             raise ValueError(f'Existing declarations of DataAssistant "{name}" found.')
 
         logger.debug(
             f'Registering the declaration of DataAssistant "{name}" took place.'
         )
-        registered_data_assistants[name] = data_assistant
+        _registered_data_assistants[name] = data_assistant
 
     @classmethod
     def get_data_assistant_impl(
@@ -104,7 +102,7 @@ class DataAssistantDispatcher:
         if name is None:
             return None
         name = name.lower()
-        return cls._registered_data_assistants.get(name)
+        return _registered_data_assistants.get(name)
 
     def __dir__(self):
         """
@@ -112,7 +110,7 @@ class DataAssistantDispatcher:
         """
         data_assistant_dispatcher_attrs: Set[str] = set(super().__dir__())
         data_assistant_registered_names: Set[str] = set(
-            DataAssistantDispatcher._registered_data_assistants.keys()
+            _registered_data_assistants.keys()
         )
         combined_dir_attrs: Set[str] = (
             data_assistant_dispatcher_attrs | data_assistant_registered_names
