@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Type
+from typing import Dict, Optional, Set, Type
 
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
@@ -89,14 +89,14 @@ class DataAssistantDispatcher:
     def get_data_assistant_impl(
         cls,
         name: Optional[str],
-    ) -> Optional[Type[DataAssistant]]:  # noqa: F821
+    ) -> Optional[Type[DataAssistant]]:
         """
         This method obtains (previously registered) "DataAssistant" class from DataAssistant Registry.
 
         Note that it will clean the input string before checking against registered assistants.
 
         Args:
-            data_assistant_type: String representing "snake case" version of "DataAssistant" class type
+            name: String representing "snake case" version of "DataAssistant" class type
 
         Returns:
             Class inheriting "DataAssistant" if found; otherwise, None
@@ -105,3 +105,16 @@ class DataAssistantDispatcher:
             return None
         name = name.lower()
         return cls._registered_data_assistants.get(name)
+
+    def __dir__(self):
+        """
+        This custom magic method is used to enable expectation tab completion on "DataAssistantDispatcher" objects.
+        """
+        data_assistant_dispatcher_attrs: Set[str] = set(super().__dir__())
+        data_assistant_registered_names: Set[str] = set(
+            DataAssistantDispatcher._registered_data_assistants.keys()
+        )
+        combined_dir_attrs: Set[str] = (
+            data_assistant_dispatcher_attrs | data_assistant_registered_names
+        )
+        return list(combined_dir_attrs)
