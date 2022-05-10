@@ -343,6 +343,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
     def batch_id_to_batch_identifier_display_name_map(
         self,
     ) -> Dict[str, Set[Tuple[str, Any]]]:
+        """
+        This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
+        """
         batch_id: str
         batch: Batch
         return {
