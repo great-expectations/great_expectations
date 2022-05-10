@@ -101,6 +101,8 @@ def get_validator(
             batch_list=batch_list,
         )
 
+    # Always disabled for RBP and DataAssistants due to volume of metric calculations
+    validator.show_progress_bars = False
     return validator
 
 
