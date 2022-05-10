@@ -23,6 +23,7 @@ from tests.test_utils import (
     clean_up_tables_with_prefix,
     get_awsathena_db_name,
     get_connection_string_and_dialect,
+    load_and_concatenate_csvs,
     load_data_into_test_database,
 )
 
@@ -72,8 +73,12 @@ if __name__ == "test_script_module":
     if _is_dialect_athena(dialect):
         athena_db_name: str = get_awsathena_db_name()
         table_name: str = f"{athena_db_name}.ten_trips_from_each_month"
-        loaded_table: LoadedTable = _load_data(
-            connection_string=connection_string, dialect=dialect, table_name=table_name
+        test_df: pd.DataFrame = load_and_concatenate_csvs(
+            csv_paths=[
+                f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
+            ],
+            convert_column_names_to_datetime=["pickup_datetime", "dropoff_datetime"],
+            load_full_dataset=True,
         )
 
     else:
@@ -86,8 +91,8 @@ if __name__ == "test_script_module":
             connection_string=connection_string, dialect=dialect
         )
 
-    test_df: pd.DataFrame = loaded_table.inserted_dataframe
-    table_name: str = loaded_table.table_name
+        test_df: pd.DataFrame = loaded_table.inserted_dataframe
+        table_name: str = loaded_table.table_name
 
     taxi_test_data: TaxiTestData = TaxiTestData(
         test_df, test_column_name="pickup_datetime"
