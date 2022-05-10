@@ -121,7 +121,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         estimator=f"{VARIABLES_KEY}estimator",
         n_resamples=f"{VARIABLES_KEY}n_resamples",
         random_seed=f"{VARIABLES_KEY}random_seed",
-        include_bootstrap_samples_histogram_in_details=f"{VARIABLES_KEY}include_bootstrap_samples_histogram_in_details",
+        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
@@ -144,7 +144,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                     "estimator": "bootstrap",
                     "n_resamples": 9999,
                     "random_seed": None,
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": None,
                         "upper_bound": None,

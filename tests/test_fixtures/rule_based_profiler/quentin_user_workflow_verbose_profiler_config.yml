@@ -17,7 +17,7 @@ variables:
 
   false_positive_rate: 5.0e-2
   quantile_statistic_interpolation_method: auto
-  include_bootstrap_samples_histogram_in_details: False
+  include_estimator_samples_histogram_in_details: False
 
 rules:
   column_quantiles_rule:

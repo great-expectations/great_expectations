@@ -93,7 +93,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         estimator: str = "bootstrap",
         n_resamples: Optional[Union[str, int]] = None,
         random_seed: Optional[Union[str, int]] = None,
-        include_bootstrap_samples_histogram_in_details: Union[str, bool] = False,
+        include_estimator_samples_histogram_in_details: Union[str, bool] = False,
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
@@ -127,7 +127,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             random_seed: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 uses "np.random.choice"; otherwise, utilizes "np.random.Generator(np.random.PCG64(bootstrap_random_seed))".
-                include_bootstrap_samples_histogram_in_details: Applicable only for the "bootstrap" sampling method -- if
+                include_estimator_samples_histogram_in_details: Applicable only for the "bootstrap" sampling method -- if
                 True, then add 10-bin histogram of bootstraps to "details"; otherwise, omit this information (default).
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
                 (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
@@ -165,8 +165,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
 
         self._random_seed = random_seed
 
-        self._include_bootstrap_samples_histogram_in_details = (
-            include_bootstrap_samples_histogram_in_details
+        self._include_estimator_samples_histogram_in_details = (
+            include_estimator_samples_histogram_in_details
         )
 
         self._round_decimals = round_decimals
@@ -217,8 +217,8 @@ detected.
         return self._random_seed
 
     @property
-    def include_bootstrap_samples_histogram_in_details(self) -> Union[str, bool]:
-        return self._include_bootstrap_samples_histogram_in_details
+    def include_estimator_samples_histogram_in_details(self) -> Union[str, bool]:
+        return self._include_estimator_samples_histogram_in_details
 
     @property
     def truncate_values(
@@ -408,18 +408,18 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
         )
 
-        # Obtain include_bootstrap_samples_histogram_in_details from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        include_bootstrap_samples_histogram_in_details: bool = (
+        # Obtain include_estimator_samples_histogram_in_details from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        include_estimator_samples_histogram_in_details: bool = (
             get_parameter_value_and_validate_return_type(
                 domain=domain,
-                parameter_reference=self.include_bootstrap_samples_histogram_in_details,
+                parameter_reference=self.include_estimator_samples_histogram_in_details,
                 expected_return_type=bool,
                 variables=variables,
                 parameters=parameters,
             )
         )
 
-        if include_bootstrap_samples_histogram_in_details:
+        if include_estimator_samples_histogram_in_details:
             details[
                 "estimation_histogram"
             ] = numeric_range_estimation_result.estimation_histogram

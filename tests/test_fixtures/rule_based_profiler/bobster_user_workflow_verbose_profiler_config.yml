@@ -9,7 +9,7 @@ variables:
   random_seed: 43792
   false_positive_rate: 5.0e-2
   quantile_statistic_interpolation_method: auto
-  include_bootstrap_samples_histogram_in_details: False
+  include_estimator_samples_histogram_in_details: False
 
 rules:
   row_count_range_rule:
