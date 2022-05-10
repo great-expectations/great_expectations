@@ -1,7 +1,7 @@
 import copy
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import altair as alt
 import pandas as pd
@@ -39,8 +39,12 @@ class DataAssistantResult(SerializableDictDot):
     DataAssistantResult is a "dataclass" object, designed to hold results of executing "DataAssistant.run()" method.
     Available properties are: "metrics_by_domain", "expectation_configurations", and configuration object
     ("RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
+    Use "batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
     """
 
+    batch_id_to_batch_identifier_display_name_map: Optional[
+        Dict[str, Set[Tuple[str, Any]]]
+    ] = None
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
@@ -55,6 +59,9 @@ class DataAssistantResult(SerializableDictDot):
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         expectation_configuration: ExpectationConfiguration
         return {
+            "batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
+                data=self.batch_id_to_batch_identifier_display_name_map
+            ),
             "profiler_config": self.profiler_config.to_json_dict(),
             "metrics_by_domain": [
                 {
