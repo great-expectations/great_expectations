@@ -5,6 +5,7 @@ from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
+from great_expectations.execution_engine.sqlalchemy_execution_engine import GESqlDialect
 
 try:
     import sqlalchemy as sa
@@ -52,8 +53,10 @@ class SqlAlchemyDataSampler(DataSampler):
 
         # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
         # so the business logic for building the query needs to be different.
-        dialect: str = execution_engine.engine.dialect.name.lower()
-        if dialect == "oracle":
+        dialect: GESqlDialect = GESqlDialect(
+            execution_engine.engine.dialect.name.lower()
+        )
+        if dialect == GESqlDialect.ORACLE:
             # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
             # limit doesn't compile properly for oracle so we will append rownum to query string later
             raw_query: Selectable = (
@@ -70,7 +73,7 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
-        elif dialect == "mssql":
+        elif dialect == GESqlDialect.MSSQL:
             # TODO: AJB 20220429 WARNING THIS mssql dialect METHOD IS NOT COVERED BY TESTS
             # Note that this code path exists because the limit parameter is not getting rendered
             # successfully in the resulting mssql query.
