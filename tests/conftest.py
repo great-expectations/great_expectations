@@ -5636,6 +5636,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
 
 @pytest.fixture
 def bobby_columnar_table_multi_batch_deterministic_data_context(
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     tmp_path_factory,
     monkeypatch,
 ) -> DataContext:

@@ -557,27 +557,20 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
+    # BatchRequest yielding three batches
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    metric_domain_kwargs: dict = {"column": "fare_amount"}
-
-    fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
-
-    expected_value_dict: dict
-    actual_value_dict: dict
-
     numeric_metric_range_parameter_builder: ParameterBuilder = (
         NumericMetricRangeMultiBatchParameterBuilder(
-            name="column_min_range",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
+            name="row_count_range",
+            metric_name="table.row_count",
             estimator="kde",
             false_positive_rate=1.0e-2,
-            round_decimals=1,
+            round_decimals=0,
             json_serialize=False,
             data_context=data_context,
         )
@@ -587,8 +580,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     domain: Domain = Domain(
         rule_name="my_rule",
-        domain_type=MetricDomainTypes.COLUMN,
-        domain_kwargs=metric_domain_kwargs,
+        domain_type=MetricDomainTypes.TABLE,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -609,12 +601,13 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict = {
+    fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
+    expected_value_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
-                "domain_kwargs": {"column": "fare_amount"},
-                "metric_name": "column.min",
+                "domain_kwargs": {},
+                "metric_name": "table.row_count",
                 "metric_value_kwargs": None,
                 "metric_dependencies": None,
             },
@@ -630,7 +623,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         )
     )
 
-    actual_values_01: np.ndarray = parameter_node.pop("value")
+    actual_value: np.ndarray = parameter_node.pop("value")
     parameter_node["value"] = None
 
     actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
@@ -639,98 +632,34 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     assert parameter_node == expected_value_dict
 
-    actual_value_01_lower: float = actual_values_01[0]
-    actual_value_01_upper: float = actual_values_01[1]
-    expected_value_01_lower: float = -51.7
-    expected_value_01_upper: float = -21.0
+    expected_value: np.ndarray = np.array([6180, 10277])
 
-    assert actual_value_01_lower == expected_value_01_lower
-    assert actual_value_01_upper == expected_value_01_upper
+    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
+    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+    rtol: float = 1.0e-2
+    atol: float = 0
+
+    # kde results should be stable +/- 1%
+    np.testing.assert_allclose(
+        actual=actual_value,
+        desired=expected_value,
+        rtol=rtol,
+        atol=atol,
+        err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",
+    )
 
     expected_estimation_histogram: np.ndarray = np.array(
         [
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            2.0,
-        ]
-    )
-
-    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
-    ks_result: tuple = stats.ks_2samp(
-        data1=actual_estimation_histogram, data2=expected_estimation_histogram
-    )
-    p_value: float = ks_result[1]
-    assert p_value > 9.5e-1
-
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="column_min_range",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            estimator="kde",
-            false_positive_rate=5.0e-2,
-            round_decimals=1,
-            json_serialize=False,
-            data_context=data_context,
-        )
-    )
-
-    numeric_metric_range_parameter_builder.build_parameters(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
-        recompute_existing_parameter_values=True,
-        batch_request=batch_request,
-    )
-
-    parameter_node: ParameterNode = (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters=parameters,
-        )
-    )
-
-    actual_values_05 = parameter_node.pop("value")
-    parameter_node["value"] = None
-
-    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
-        "estimation_histogram"
-    )
-
-    assert parameter_node == expected_value_dict
-
-    actual_value_05_lower: float = actual_values_05[0]
-    actual_value_05_upper: float = actual_values_05[1]
-    expected_value_05_lower: float = -50.5
-    expected_value_05_upper: float = -21.1
-
-    assert actual_value_05_lower == expected_value_05_lower
-    assert actual_value_05_upper == expected_value_05_upper
-
-    # if false positive rate is higher, our range should be more narrow
-    assert actual_value_01_lower < actual_value_05_lower
-    assert actual_value_01_upper > actual_value_05_upper
-
-    expected_estimation_histogram: np.ndarray = np.array(
-        [
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            2.0,
+            13.0,
+            155.0,
+            719.0,
+            1546.0,
+            2221.0,
+            2570.0,
+            1946.0,
+            683.0,
+            137.0,
+            9.0,
         ]
     )
 

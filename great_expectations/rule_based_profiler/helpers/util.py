@@ -502,14 +502,15 @@ def compute_kde_quantiles_point_estimate(
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
 
     metric_values_density_estimate = stats.gaussian_kde(metric_values)
+    kde_samples = 9999
     if random_seed:
         metric_values_gaussian_sample = metric_values_density_estimate.resample(
-            len(metric_values)
+            kde_samples,
+            seed=random_seed,
         )
     else:
         metric_values_gaussian_sample = metric_values_density_estimate.resample(
-            len(metric_values),
-            seed=random_seed,
+            kde_samples,
         )
 
     lower_quantile_point_estimate = np.quantile(
