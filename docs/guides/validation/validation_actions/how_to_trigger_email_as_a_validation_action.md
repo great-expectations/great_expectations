@@ -35,9 +35,6 @@ Open `great_expectations.yml` and add `send_email_on_validation_result` Action t
 
 ````yaml
 action_list:
-    #--------------------------------
-    # here is what you will be adding
-    #--------------------------------
     - name: send_email_on_validation_result # name can be set to any value
       action:
         class_name: EmailAction
