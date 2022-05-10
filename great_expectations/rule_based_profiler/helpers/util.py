@@ -578,61 +578,19 @@ def compute_bootstrap_quantiles_point_estimate(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
-    bootstrap_lower_quantiles: Union[np.ndarray, Number] = numpy_quantile(
-        a=bootstraps,
-        q=lower_quantile_pct,
-        axis=1,
-        method=quantile_statistic_interpolation_method,
-    )
-    bootstrap_lower_quantile_point_estimate: float = np.mean(bootstrap_lower_quantiles)
-    bootstrap_lower_quantile_standard_error: float = np.std(bootstrap_lower_quantiles)
-    bootstrap_lower_quantile_bias: float = (
-        bootstrap_lower_quantile_point_estimate - sample_lower_quantile
+    lower_quantile_bias_corrected_point_estimate: Number = _determine_quantile_bias_corrected_point_estimate(
+        bootstraps=bootstraps,
+        quantile_pct=lower_quantile_pct,
+        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        sample_quantile=sample_lower_quantile,
     )
 
-    # Bias / Standard Error > 0.25 is a rule of thumb for when to apply bias correction.
-    # See:
-    # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
-    #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
-    lower_quantile_bias_corrected_point_estimate: Number
-    if bootstrap_lower_quantile_bias / bootstrap_lower_quantile_standard_error <= 0.25:
-        lower_quantile_bias_corrected_point_estimate = (
-            bootstrap_lower_quantile_point_estimate
-        )
-    else:
-        lower_quantile_bias_corrected_point_estimate = (
-            bootstrap_lower_quantile_point_estimate - bootstrap_lower_quantile_bias
-        )
-
-    bootstrap_upper_quantiles: Union[np.ndarray, Number] = numpy_quantile(
-        bootstraps,
-        q=upper_quantile_pct,
-        axis=1,
-        method=quantile_statistic_interpolation_method,
+    upper_quantile_bias_corrected_point_estimate: Number = _determine_quantile_bias_corrected_point_estimate(
+        bootstraps=bootstraps,
+        quantile_pct=upper_quantile_pct,
+        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        sample_quantile=sample_upper_quantile,
     )
-    bootstrap_upper_quantile_point_estimate: np.ndarray = np.mean(
-        bootstrap_upper_quantiles
-    )
-    bootstrap_upper_quantile_standard_error: np.ndarray = np.std(
-        bootstrap_upper_quantiles
-    )
-    bootstrap_upper_quantile_bias: float = (
-        bootstrap_upper_quantile_point_estimate - sample_upper_quantile
-    )
-
-    # Bias / Standard Error > 0.25 is a rule of thumb for when to apply bias correction.
-    # See:
-    # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
-    #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
-    upper_quantile_bias_corrected_point_estimate: Number
-    if bootstrap_upper_quantile_bias / bootstrap_upper_quantile_standard_error <= 0.25:
-        upper_quantile_bias_corrected_point_estimate = (
-            bootstrap_upper_quantile_point_estimate
-        )
-    else:
-        upper_quantile_bias_corrected_point_estimate = (
-            bootstrap_upper_quantile_point_estimate - bootstrap_upper_quantile_bias
-        )
 
     return NumericRangeEstimationResult(
         estimation_histogram=np.histogram(
@@ -643,6 +601,36 @@ def compute_bootstrap_quantiles_point_estimate(
             upper_quantile_bias_corrected_point_estimate,
         ],
     )
+
+
+def _determine_quantile_bias_corrected_point_estimate(
+    bootstraps: np.ndarray,
+    quantile_pct: float,
+    quantile_statistic_interpolation_method: str,
+    sample_quantile: np.ndarray,
+) -> Number:
+    bootstrap_quantiles: Union[np.ndarray, Number] = numpy_quantile(
+        bootstraps,
+        q=quantile_pct,
+        axis=1,
+        method=quantile_statistic_interpolation_method,
+    )
+    bootstrap_quantile_point_estimate: np.ndarray = np.mean(bootstrap_quantiles)
+    bootstrap_quantile_standard_error: np.ndarray = np.std(bootstrap_quantiles)
+    bootstrap_quantile_bias: float = bootstrap_quantile_point_estimate - sample_quantile
+
+    # Bias / Standard Error > 0.25 is a rule of thumb for when to apply bias correction.
+    # See:
+    # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
+    #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
+    quantile_bias_corrected_point_estimate: Number
+    if bootstrap_quantile_bias / bootstrap_quantile_standard_error <= 0.25:
+        quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate
+    else:
+        quantile_bias_corrected_point_estimate = (
+            bootstrap_quantile_point_estimate - bootstrap_quantile_bias
+        )
+    return quantile_bias_corrected_point_estimate
 
 
 def get_validator_with_expectation_suite(
