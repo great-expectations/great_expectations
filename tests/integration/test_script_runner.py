@@ -261,7 +261,7 @@ local_tests = [
     ),
     IntegrationTestFixture(
         name="cross_table_comparisons_from_query",
-        user_flow_script="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparisons_from_query.py",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py",
     ),
 ]
 
