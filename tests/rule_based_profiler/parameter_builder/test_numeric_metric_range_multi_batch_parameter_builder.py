@@ -40,6 +40,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
             name="row_count_range",
             metric_name="table.row_count",
             estimator="bootstrap",
+            include_bootstrap_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=0,
             json_serialize=False,
@@ -50,8 +51,8 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -168,6 +169,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             metric_name="column.min",
             metric_domain_kwargs=metric_domain_kwargs,
             estimator="oneshot",
+            include_bootstrap_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=1,
             json_serialize=False,
@@ -178,9 +180,9 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -267,6 +269,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             metric_name="column.min",
             metric_domain_kwargs=metric_domain_kwargs,
             estimator="oneshot",
+            include_bootstrap_samples_histogram_in_details=True,
             false_positive_rate=5.0e-2,
             round_decimals=1,
             json_serialize=False,
@@ -362,8 +365,8 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -414,8 +417,8 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -466,8 +469,8 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -525,8 +528,8 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
-        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
+        rule_name="my_rule",
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {

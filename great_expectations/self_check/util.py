@@ -1690,10 +1690,12 @@ def build_test_backends_list(
             aws_access_key_id: Optional[str] = os.getenv("AWS_ACCESS_KEY_ID")
             aws_secret_access_key: Optional[str] = os.getenv("AWS_SECRET_ACCESS_KEY")
             aws_session_token: Optional[str] = os.getenv("AWS_SESSION_TOKEN")
+            aws_config_file: Optional[str] = os.getenv("AWS_CONFIG_FILE")
             if (
                 not aws_access_key_id
                 and not aws_secret_access_key
                 and not aws_session_token
+                and not aws_config_file
             ):
                 if raise_exceptions_for_backends is True:
                     raise ImportError(
