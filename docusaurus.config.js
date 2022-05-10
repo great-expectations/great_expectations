@@ -130,8 +130,7 @@ module.exports = {
       copyright: `Copyright © ${new Date().getFullYear()} Superconductive.`
     }
   },
-
-  // themes:[ ],
+  // themes:['@docusaurus/theme-classic'],
   presets: [
     [
       '@docusaurus/preset-classic',
