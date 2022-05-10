@@ -20,13 +20,13 @@ PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
 load_data_into_test_database(
     table_name="taxi_data",
-    csv_path="tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
+    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=MY_CONNECTION_STRING,
 )
 
 load_data_into_test_database(
     table_name="taxi_data",
-    csv_path="tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
+    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=PG_CONNECTION_STRING,
 )
 
