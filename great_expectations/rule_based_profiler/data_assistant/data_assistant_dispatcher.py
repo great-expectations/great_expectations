@@ -106,7 +106,7 @@ class DataAssistantDispatcher:
 
     def __dir__(self):
         """
-        This custom magic method is used to enable expectation tab completion on "DataAssistantDispatcher" objects.
+        This custom magic method is used to enable data assistant tab completion on "DataAssistantDispatcher" objects.
         """
         data_assistant_dispatcher_attrs: Set[str] = set(super().__dir__())
         data_assistant_registered_names: Set[str] = set(
