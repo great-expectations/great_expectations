@@ -379,7 +379,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         self._data_splitter = SqlAlchemyDataSplitter()
         self._data_sampler = SqlAlchemyDataSampler(
-            dialect=GESqlDialect(self.engine.dialect.name.lower())
+            dialect=self.engine.dialect,
+            dialect_name=GESqlDialect(self.engine.dialect.name.lower()),
         )
 
     @property

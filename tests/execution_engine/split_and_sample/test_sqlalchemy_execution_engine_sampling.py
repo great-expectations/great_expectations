@@ -1,5 +1,4 @@
 from unittest import mock
-from unittest.mock import PropertyMock
 
 import pytest
 
@@ -62,16 +61,30 @@ def test_sample_using_limit(mock_execution_engine: mock.MagicMock, dialect: str)
     batch_spec: BatchSpec = BatchSpec(
         table_name="test_table",
         schema_name="test_schema_name",
+        sampling_method="sample_using_limit",
         sampling_kwargs={"n": 10},
     )
 
+    # TODO: AJB 20220510 get dialect based on dialect name tested
+    from sqlalchemy.dialects import postgresql
+
     data_sampler: SqlAlchemyDataSampler = SqlAlchemyDataSampler(
-        dialect=GESqlDialect(dialect)
+        # dialect=sqlalchemy_psycopg2,
+        dialect=postgresql.dialect(),
+        dialect_name=GESqlDialect(dialect),
     )
 
     result = data_sampler.sample_using_limit(
         execution_engine=mock_execution_engine, batch_spec=batch_spec, where_clause=None
     )
 
-    print(result)
+    print("result:", result)
+    if not isinstance(result, str):
+        query_str: str = (
+            str(result.compile(compile_kwargs={"literal_binds": True}))
+            .replace("\n", "")
+            .replace(" ", "")
+            .lower()
+        )
+        print("query_str:", query_str)
     raise NotImplementedError

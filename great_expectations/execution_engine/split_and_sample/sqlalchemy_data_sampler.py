@@ -13,12 +13,14 @@ except ImportError:
     sa = None
 
 try:
+    from sqlalchemy.engine import Dialect
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
 except ImportError:
     Selectable = None
     BinaryExpression = None
     BooleanClauseList = None
+    Dialect = None
 
 
 class SqlAlchemyDataSampler(DataSampler):
@@ -26,13 +28,19 @@ class SqlAlchemyDataSampler(DataSampler):
 
     Args:
         dialect: dialect of sql used in sampling.
+        dialect_name: name of the dialect of sql used in sampling.
     """
 
-    def __init__(self, dialect: GESqlDialect):
+    def __init__(self, dialect: Dialect, dialect_name: GESqlDialect):
         self._dialect = dialect
+        self._dialect_name = dialect_name
 
     @property
-    def dialect(self) -> GESqlDialect:
+    def dialect_name(self) -> GESqlDialect:
+        return self._dialect_name
+
+    @property
+    def dialect(self) -> Dialect:
         return self._dialect
 
     def sample_using_limit(
@@ -66,7 +74,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
         # so the business logic for building the query needs to be different.
-        dialect: GESqlDialect = self.dialect
+        dialect: GESqlDialect = self.dialect_name
         if dialect == GESqlDialect.ORACLE:
             # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
             # limit doesn't compile properly for oracle so we will append rownum to query string later
@@ -79,7 +87,7 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             query: str = str(
                 raw_query.compile(
-                    execution_engine, compile_kwargs={"literal_binds": True}
+                    dialect=self.dialect, compile_kwargs={"literal_binds": True}
                 )
             )
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
@@ -98,7 +106,7 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             string_of_query: str = str(
                 selectable_query.compile(
-                    execution_engine.engine, compile_kwargs={"literal_binds": True}
+                    self.dialect, compile_kwargs={"literal_binds": True}
                 )
             )
             n: Union[str, int] = batch_spec["sampling_kwargs"]["n"]
