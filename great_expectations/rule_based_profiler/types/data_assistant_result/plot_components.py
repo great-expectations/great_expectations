@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import altair as alt
 
@@ -14,7 +14,7 @@ class PlotComponent:
         return self.name.replace("_", " ").title()
 
     def generate_tooltip(self, format: str = "") -> alt.Tooltip:
-        """Wrapper arount alt.Tooltip creation.
+        """Wrapper around alt.Tooltip creation.
 
         Args:
             format (str): Desired format within tooltip
@@ -71,10 +71,37 @@ class DomainPlotComponent(PlotComponent):
 
 
 @dataclass(frozen=True)
-class BatchPlotComponent(PlotComponent):
+class BatchPlotComponent:
+    batch_identifiers: List[str]
+    alt_type: alt.StandardType
+
     @property
-    def title(self) -> str:
-        return self.name.replace("_", " ").title().replace("Id", "ID")
+    def titles(self) -> List[str]:
+        return [
+            batch_identifier.replace("_", " ").title().replace("Id", "ID")
+            for batch_identifier in self.batch_identifiers
+        ]
+
+    def generate_tooltip(self, format: str = "") -> List[alt.Tooltip]:
+        """Wrapper around alt.Tooltip creation.
+
+        Args:
+            format (str): Desired format within tooltip
+
+        Returns:
+            A list of instances of alt.Tooltip containing relevant information from the BatchPlotComponent class.
+        """
+        tooltip: List = []
+        for idx, batch_identifier in enumerate(self.batch_identifiers):
+            tooltip.append(
+                alt.Tooltip(
+                    field=batch_identifier,
+                    type=self.alt_type,
+                    title=self.titles[idx],
+                    format=format,
+                )
+            )
+        return tooltip
 
 
 @dataclass(frozen=True)

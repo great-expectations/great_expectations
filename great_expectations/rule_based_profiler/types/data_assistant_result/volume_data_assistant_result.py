@@ -380,35 +380,38 @@ class VolumeDataAssistantResult(DataAssistantResult):
         # make sure batch_identifier keys are sorted the same from batch to batch
         # e.g. prevent batch 1 from having keys "month", "year" and batch 2 from having keys "year", "month"
         batch_identifier_set: Set
-        batch_identifier_str: str
         batch_identifier_set_sorted: Set
         batch_identifier_tuple: Tuple
         batch_identifier_key: str
         batch_identifier_value: str
         batch_identifier_keys: Set[str] = set()
-        batch_identifiers: List[str] = []
+        batch_identifier_record: List
+        batch_identifier_records: List[List] = []
         for batch_identifier_set in batch_identifier_list:
-            batch_identifier_str = ""
             batch_identifier_set_sorted = sorted(
                 batch_identifier_set,
                 key=lambda batch_identifier_tuple: batch_identifier_tuple[0].casefold(),
             )
+            batch_identifier_record = []
             for (
                 batch_identifier_key,
                 batch_identifier_value,
             ) in batch_identifier_set_sorted:
                 batch_identifier_keys.add(batch_identifier_key)
-                batch_identifier_str += (
-                    f"{batch_identifier_key}: {batch_identifier_value}\n"
-                )
+                batch_identifier_record.append(batch_identifier_value)
 
-            batch_identifiers.append(batch_identifier_str)
+            batch_identifier_records.append(batch_identifier_record)
 
-        df["batch_id"] = batch_identifiers
+        batch_identifier_keys_sorted: Set[str] = sorted(batch_identifier_keys)
+        batch_identifiers: pd.DataFrame = pd.DataFrame(
+            batch_identifier_records, columns=batch_identifier_keys_sorted
+        )
 
         idx: int
         batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_identifiers))]
         df[domain_name] = batch_numbers
+
+        df = pd.concat([df, batch_identifiers], axis=1)
 
         if prescriptive:
             for kwarg_name in expectation_configuration.kwargs:

@@ -209,9 +209,14 @@ class DataAssistantResult(SerializableDictDot):
         domain_component: DomainPlotComponent = DomainPlotComponent(
             name=domain_name, alt_type=domain_type, subtitle=subtitle
         )
+
+        batch_identifiers: List[str] = [
+            column for column in df.columns if column not in [metric_name, domain_name]
+        ]
         batch_component: BatchPlotComponent = BatchPlotComponent(
-            name="batch_id", alt_type=AltairDataTypes.NOMINAL.value
+            batch_identifiers=batch_identifiers, alt_type=AltairDataTypes.NOMINAL.value
         )
+
         return DataAssistantResult._get_line_chart(
             df=df,
             metric_component=metric_component,
@@ -231,8 +236,7 @@ class DataAssistantResult(SerializableDictDot):
             domain_plot_component=domain_component,
         )
 
-        tooltip: List[alt.Tooltip] = [
-            batch_component.generate_tooltip(),
+        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
             metric_component.generate_tooltip(format=","),
         ]
 
@@ -284,9 +288,14 @@ class DataAssistantResult(SerializableDictDot):
         domain_component: DomainPlotComponent = DomainPlotComponent(
             name=domain_name, alt_type=domain_type, subtitle=subtitle
         )
+
+        batch_identifiers: List[str] = [
+            column for column in df.columns if column not in [metric_name, domain_name]
+        ]
         batch_component: BatchPlotComponent = BatchPlotComponent(
-            name="batch_id", alt_type=AltairDataTypes.NOMINAL.value
+            batch_identifiers=batch_identifiers, alt_type=AltairDataTypes.NOMINAL.value
         )
+
         min_value_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name="min_value",
@@ -327,8 +336,7 @@ class DataAssistantResult(SerializableDictDot):
             domain_plot_component=domain_component,
         )
 
-        tooltip: List[alt.Tooltip] = [
-            batch_component.generate_tooltip(),
+        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
             metric_component.generate_tooltip(format=","),
             min_value_component.generate_tooltip(format=","),
             max_value_component.generate_tooltip(format=","),
@@ -422,13 +430,25 @@ class DataAssistantResult(SerializableDictDot):
             dy=-30,
         )
 
-        batch_id: str = "batch_id"
-        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
-        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-
         column_name: str = "column_name"
         column_name_title: str = "Column Name"
         column_name_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+
+        metric_component: MetricPlotComponent = MetricPlotComponent(
+            name=metric_name, alt_type=metric_type
+        )
+        domain_component: DomainPlotComponent = DomainPlotComponent(
+            name=domain_name, alt_type=domain_type
+        )
+
+        batch_identifiers: List[str] = [
+            column
+            for column in column_dfs[0].columns
+            if column not in [metric_name, domain_name]
+        ]
+        batch_component: BatchPlotComponent = BatchPlotComponent(
+            batch_identifiers=batch_identifiers, alt_type=AltairDataTypes.NOMINAL.value
+        )
 
         detail_title_font_size: int = 14
         detail_title_font_weight: str = "bold"
@@ -447,14 +467,12 @@ class DataAssistantResult(SerializableDictDot):
             alt.Tooltip(
                 field=column_name, type=column_name_type, title=column_name_title
             ),
-            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
-            alt.Tooltip(
-                field=metric_name, type=metric_type, title=metric_title, format=","
-            ),
+            batch_component.generate_tooltip(),
+            metric_component.generate_tooltip(format=","),
         ]
 
         df: pd.DataFrame = pd.DataFrame(
-            columns=[column_name, domain_name, batch_id, metric_name]
+            columns=[column_name, domain_name, metric_name, batch_identifiers]
         )
         for column, column_df in column_dfs:
             column_df[column_name] = column
