@@ -3,7 +3,7 @@ import inspect
 import logging
 import os
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 
@@ -93,6 +93,13 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
 
     # Metadata
     version: Optional[str] = None
+
+    def to_json_dict(self) -> dict:
+        json_dict = asdict(self)
+        for value in json_dict["expectations"].values():
+            for test in value["tests"]:
+                test.pop("validation_result")
+        return json_dict
 
     def update_package_state(self) -> None:
         """

@@ -6,7 +6,6 @@
 import json
 import logging
 import os
-from dataclasses import asdict
 from typing import List
 
 import pip
@@ -65,7 +64,7 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
             sync_package(package, package_path)
 
             # Serialize to dict to append to payload
-            json_data: dict = asdict(package)
+            json_data: dict = package.to_json_dict()
             payload.append(json_data)
             logger.info(
                 f"Successfully serialized {package.package_name} to dict and appended to manifest list"
