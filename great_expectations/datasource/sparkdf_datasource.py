@@ -1,8 +1,8 @@
+
 import datetime
 import logging
 import uuid
 import warnings
-
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.dataset import SparkDFDataset
@@ -10,246 +10,153 @@ from great_expectations.datasource.datasource import LegacyDatasource
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
-
 logger = logging.getLogger(__name__)
 try:
     from pyspark.sql import DataFrame, SparkSession
 except ImportError:
     DataFrame = None
     SparkSession = None
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
-
+    logger.debug('Unable to load pyspark; install optional spark dependency for support.')
 
 class SparkDFDatasource(LegacyDatasource):
-    'The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local\n        filesystem (the default subdir_reader batch kwargs  generator) and databricks notebooks.\n\n        Accepted Batch Kwargs:\n            - PathBatchKwargs ("path" or "s3" keys)\n            - InMemoryBatchKwargs ("dataset" key)\n            - QueryBatchKwargs ("query" key)\n\n    --ge-feature-maturity-info--\n\n        id: datasource_hdfs_spark\n            title: Datasource - HDFS\n            icon:\n            short_description: HDFS\n            description: Use HDFS as an external datasource in conjunction with Spark.\n            how_to_guide_url:\n            maturity: Experimental\n            maturity_details:\n                api_stability: Stable\n                implementation_completeness: Unknown\n                unit_test_coverage: Minimal (none)\n                integration_infrastructure_test_coverage: Minimal (none)\n                documentation_completeness:  Minimal (none)\n                bug_risk: Unknown\n\n    --ge-feature-maturity-info--\n'
-    recognized_batch_parameters = {
-        "reader_method",
-        "reader_options",
-        "limit",
-        "dataset_options",
-    }
+    'The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local\n        filesystem (the default subdir_reader batch kwargs  generator) and databricks notebooks.\n\n        Accepted Batch Kwargs:\n            - PathBatchKwargs ("path" or "s3" keys)\n            - InMemoryBatchKwargs ("dataset" key)\n            - QueryBatchKwargs ("query" key)\n\n    --ge-feature-maturity-info--\n\n        id: datasource_hdfs_spark\n            title: Datasource - HDFS\n            icon:\n            short_description: HDFS\n            description: Use HDFS as an external datasource in conjunction with Spark.\n            how_to_guide_url:\n            maturity: Experimental\n            maturity_details:\n                api_stability: Stable\n                implementation_completeness: Unknown\n                unit_test_coverage: Minimal (none)\n                integration_infrastructure_test_coverage: Minimal (none)\n                documentation_completeness:  Minimal (none)\n                bug_risk: Unknown\n\n    --ge-feature-maturity-info--\n    '
+    recognized_batch_parameters = {'reader_method', 'reader_options', 'limit', 'dataset_options'}
 
     @classmethod
-    def build_configuration(
-        cls,
-        data_asset_type=None,
-        batch_kwargs_generators=None,
-        spark_config=None,
-        force_reuse_spark_context=False,
-        **kwargs,
-    ):
+    def build_configuration(cls, data_asset_type=None, batch_kwargs_generators=None, spark_config=None, force_reuse_spark_context=False, **kwargs):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         "\n        Build a full configuration object for a datasource, potentially including generators with defaults.\n\n        Args:\n            data_asset_type: A ClassConfig dictionary\n            batch_kwargs_generators: Generator configuration dictionary\n            spark_config: dictionary of key-value pairs to pass to the spark builder\n            **kwargs: Additional kwargs to be part of the datasource constructor's initialization\n\n        Returns:\n            A complete datasource configuration.\n\n        "
-        if data_asset_type is None:
-            data_asset_type = {
-                "class_name": "SparkDFDataset",
-                "module_name": "great_expectations.dataset",
-            }
+        if (data_asset_type is None):
+            data_asset_type = {'class_name': 'SparkDFDataset', 'module_name': 'great_expectations.dataset'}
         else:
             data_asset_type = classConfigSchema.dump(ClassConfig(**data_asset_type))
-        if spark_config is None:
+        if (spark_config is None):
             spark_config = {}
         configuration = kwargs
-        configuration.update(
-            {
-                "data_asset_type": data_asset_type,
-                "spark_config": spark_config,
-                "force_reuse_spark_context": force_reuse_spark_context,
-            }
-        )
+        configuration.update({'data_asset_type': data_asset_type, 'spark_config': spark_config, 'force_reuse_spark_context': force_reuse_spark_context})
         if batch_kwargs_generators:
-            configuration["batch_kwargs_generators"] = batch_kwargs_generators
+            configuration['batch_kwargs_generators'] = batch_kwargs_generators
         return configuration
 
-    def __init__(
-        self,
-        name="default",
-        data_context=None,
-        data_asset_type=None,
-        batch_kwargs_generators=None,
-        spark_config=None,
-        force_reuse_spark_context=False,
-        **kwargs,
-    ) -> None:
+    def __init__(self, name='default', data_context=None, data_asset_type=None, batch_kwargs_generators=None, spark_config=None, force_reuse_spark_context=False, **kwargs) -> None:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        "Build a new SparkDFDatasource instance.\n\n        Args:\n            name: the name of this datasource\n            data_context: the DataContext to which this datasource is connected\n            data_asset_type: ClassConfig describing the data_asset type to be constructed by this datasource\n            batch_kwargs_generators: generator configuration\n            spark_config: dictionary of key-value pairs to be set on the spark session builder\n            **kwargs: Additional\n        "
-        configuration_with_defaults = SparkDFDatasource.build_configuration(
-            data_asset_type,
-            batch_kwargs_generators,
-            spark_config,
-            force_reuse_spark_context,
-            **kwargs,
-        )
-        data_asset_type = configuration_with_defaults.pop("data_asset_type")
-        batch_kwargs_generators = configuration_with_defaults.pop(
-            "batch_kwargs_generators", None
-        )
-        super().__init__(
-            name,
-            data_context=data_context,
-            data_asset_type=data_asset_type,
-            batch_kwargs_generators=batch_kwargs_generators,
-            **configuration_with_defaults,
-        )
-        if spark_config is None:
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        'Build a new SparkDFDatasource instance.\n\n        Args:\n            name: the name of this datasource\n            data_context: the DataContext to which this datasource is connected\n            data_asset_type: ClassConfig describing the data_asset type to be constructed by this datasource\n            batch_kwargs_generators: generator configuration\n            spark_config: dictionary of key-value pairs to be set on the spark session builder\n            **kwargs: Additional\n        '
+        configuration_with_defaults = SparkDFDatasource.build_configuration(data_asset_type, batch_kwargs_generators, spark_config, force_reuse_spark_context, **kwargs)
+        data_asset_type = configuration_with_defaults.pop('data_asset_type')
+        batch_kwargs_generators = configuration_with_defaults.pop('batch_kwargs_generators', None)
+        super().__init__(name, data_context=data_context, data_asset_type=data_asset_type, batch_kwargs_generators=batch_kwargs_generators, **configuration_with_defaults)
+        if (spark_config is None):
             spark_config = {}
-        spark = get_or_create_spark_application(
-            spark_config=spark_config,
-            force_reuse_spark_context=force_reuse_spark_context,
-        )
+        spark = get_or_create_spark_application(spark_config=spark_config, force_reuse_spark_context=force_reuse_spark_context)
         self.spark = spark
         self._build_generators()
 
-    def process_batch_parameters(
-        self, reader_method=None, reader_options=None, limit=None, dataset_options=None
-    ):
+    def process_batch_parameters(self, reader_method=None, reader_options=None, limit=None, dataset_options=None):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        batch_kwargs = super().process_batch_parameters(
-            limit=limit, dataset_options=dataset_options
-        )
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        batch_kwargs = super().process_batch_parameters(limit=limit, dataset_options=dataset_options)
         if reader_options:
-            if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = {}
-            batch_kwargs["reader_options"].update(reader_options)
-        if reader_method is not None:
-            batch_kwargs["reader_method"] = reader_method
+            if (not batch_kwargs.get('reader_options')):
+                batch_kwargs['reader_options'] = {}
+            batch_kwargs['reader_options'].update(reader_options)
+        if (reader_method is not None):
+            batch_kwargs['reader_method'] = reader_method
         return batch_kwargs
 
     def get_batch(self, batch_kwargs, batch_parameters=None):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        "class-private implementation of get_data_asset"
-        if self.spark is None:
-            logger.error("No spark session available")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        'class-private implementation of get_data_asset'
+        if (self.spark is None):
+            logger.error('No spark session available')
             return None
-        reader_options = batch_kwargs.get("reader_options", {})
-        batch_markers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
-        )
-        if ("path" in batch_kwargs) or ("s3" in batch_kwargs):
-            if "s3" in batch_kwargs:
-                warnings.warn(
-                    "Direct GE Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. Please use a path including the s3a:// protocol instead.",
-                    DeprecationWarning,
-                )
-            path = batch_kwargs.get("path")
-            path = batch_kwargs.get("s3", path)
-            reader_method = batch_kwargs.get("reader_method")
+        reader_options = batch_kwargs.get('reader_options', {})
+        batch_markers = BatchMarkers({'ge_load_time': datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ')})
+        if (('path' in batch_kwargs) or ('s3' in batch_kwargs)):
+            if ('s3' in batch_kwargs):
+                warnings.warn('Direct GE Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. Please use a path including the s3a:// protocol instead.', DeprecationWarning)
+            path = batch_kwargs.get('path')
+            path = batch_kwargs.get('s3', path)
+            reader_method = batch_kwargs.get('reader_method')
             reader = self.spark.read
             for option in reader_options.items():
                 reader = reader.option(*option)
             reader_fn = self._get_reader_fn(reader, reader_method, path)
             df = reader_fn(path)
-        elif "query" in batch_kwargs:
-            df = self.spark.sql(batch_kwargs["query"])
-        elif ("dataset" in batch_kwargs) and isinstance(
-            batch_kwargs["dataset"], (DataFrame, SparkDFDataset)
-        ):
-            df = batch_kwargs.get("dataset")
-            batch_kwargs = {
-                k: batch_kwargs[k] for k in batch_kwargs if (k != "dataset")
-            }
+        elif ('query' in batch_kwargs):
+            df = self.spark.sql(batch_kwargs['query'])
+        elif (('dataset' in batch_kwargs) and isinstance(batch_kwargs['dataset'], (DataFrame, SparkDFDataset))):
+            df = batch_kwargs.get('dataset')
+            batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if (k != 'dataset')}
             if isinstance(df, SparkDFDataset):
                 df = df.spark_df
-            batch_kwargs["SparkDFRef"] = True
-            batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
+            batch_kwargs['SparkDFRef'] = True
+            batch_kwargs['ge_batch_id'] = str(uuid.uuid1())
         else:
-            raise BatchKwargsError(
-                "Unrecognized batch_kwargs for spark_source", batch_kwargs
-            )
-        if "limit" in batch_kwargs:
-            df = df.limit(batch_kwargs["limit"])
-        return Batch(
-            datasource_name=self.name,
-            batch_kwargs=batch_kwargs,
-            data=df,
-            batch_parameters=batch_parameters,
-            batch_markers=batch_markers,
-            data_context=self._data_context,
-        )
+            raise BatchKwargsError('Unrecognized batch_kwargs for spark_source', batch_kwargs)
+        if ('limit' in batch_kwargs):
+            df = df.limit(batch_kwargs['limit'])
+        return Batch(datasource_name=self.name, batch_kwargs=batch_kwargs, data=df, batch_parameters=batch_parameters, batch_markers=batch_markers, data_context=self._data_context)
 
     @staticmethod
     def guess_reader_method_from_path(path):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        if path.endswith(".csv") or path.endswith(".tsv"):
-            return {"reader_method": "csv"}
-        elif path.endswith(".parquet"):
-            return {"reader_method": "parquet"}
-        raise BatchKwargsError(
-            f"Unable to determine reader method from path: {path}", {"path": path}
-        )
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        if (path.endswith('.csv') or path.endswith('.tsv')):
+            return {'reader_method': 'csv'}
+        elif path.endswith('.parquet'):
+            return {'reader_method': 'parquet'}
+        raise BatchKwargsError(f'Unable to determine reader method from path: {path}', {'path': path})
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        "Static helper for providing reader_fn\n\n        Args:\n            reader: the base spark reader to use; this should have had reader_options applied already\n            reader_method: the name of the reader_method to use, if specified\n            path (str): the path to use to guess reader_method if it was not specified\n\n        Returns:\n            ReaderMethod to use for the filepath\n\n        "
-        if (reader_method is None) and (path is None):
-            raise BatchKwargsError(
-                "Unable to determine spark reader function without reader_method or path.",
-                {"reader_method": reader_method},
-            )
-        if reader_method is None:
-            reader_method = self.guess_reader_method_from_path(path=path)[
-                "reader_method"
-            ]
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        'Static helper for providing reader_fn\n\n        Args:\n            reader: the base spark reader to use; this should have had reader_options applied already\n            reader_method: the name of the reader_method to use, if specified\n            path (str): the path to use to guess reader_method if it was not specified\n\n        Returns:\n            ReaderMethod to use for the filepath\n\n        '
+        if ((reader_method is None) and (path is None)):
+            raise BatchKwargsError('Unable to determine spark reader function without reader_method or path.', {'reader_method': reader_method})
+        if (reader_method is None):
+            reader_method = self.guess_reader_method_from_path(path=path)['reader_method']
         try:
-            if reader_method.lower() in ["delta", "avro"]:
+            if (reader_method.lower() in ['delta', 'avro']):
                 return reader.format(reader_method.lower()).load
             return getattr(reader, reader_method)
         except AttributeError:
-            raise BatchKwargsError(
-                f"Unable to find reader_method {reader_method} in spark.",
-                {"reader_method": reader_method},
-            )
+            raise BatchKwargsError(f'Unable to find reader_method {reader_method} in spark.', {'reader_method': reader_method})

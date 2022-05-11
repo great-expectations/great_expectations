@@ -1,9 +1,8 @@
+
 import os
 import sys
 from typing import List
-
 import click
-
 from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli import toolkit
@@ -12,11 +11,8 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
-from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
-    CheckpointNewNotebookRenderer,
-)
+from great_expectations.render.renderer.checkpoint_new_notebook_renderer import CheckpointNewNotebookRenderer
 from great_expectations.util import lint_code
-
 try:
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
@@ -25,347 +21,256 @@ try:
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     SQLAlchemyError = RuntimeError
-"\n--ge-feature-maturity-info--\n\n    id: checkpoint_command_line\n    title: LegacyCheckpoint - Command Line\n    icon:\n    short_description: Run a configured Checkpoint from a command line.\n    description: Run a configured Checkpoint from a command line in a Terminal shell.\n    how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html\n    maturity: Experimental\n    maturity_details:\n        api_stability: Unstable (expect changes to batch request)\n        implementation_completeness: Complete\n        unit_test_coverage: Complete\n        integration_infrastructure_test_coverage: N/A\n        documentation_completeness: Complete\n        bug_risk: Low\n\n--ge-feature-maturity-info--\n"
+'\n--ge-feature-maturity-info--\n\n    id: checkpoint_command_line\n    title: LegacyCheckpoint - Command Line\n    icon:\n    short_description: Run a configured Checkpoint from a command line.\n    description: Run a configured Checkpoint from a command line in a Terminal shell.\n    how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html\n    maturity: Experimental\n    maturity_details:\n        api_stability: Unstable (expect changes to batch request)\n        implementation_completeness: Complete\n        unit_test_coverage: Complete\n        integration_infrastructure_test_coverage: N/A\n        documentation_completeness: Complete\n        bug_risk: Low\n\n--ge-feature-maturity-info--\n'
 
-
-@click.group(short_help="Checkpoint operations")
+@click.group(short_help='Checkpoint operations')
 @click.pass_context
 def checkpoint(ctx: click.Context) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "\n    Checkpoint operations\n\n    A Checkpoint is a bundle of one or more batches of data with one or more\n    Expectation Suites.\n\n    A Checkpoint can be as simple as one batch of data paired with one\n    Expectation Suite.\n\n    A Checkpoint can be as complex as many batches of data across different\n    datasources paired with one or more Expectation Suites each.\n    "
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    '\n    Checkpoint operations\n\n    A Checkpoint is a bundle of one or more batches of data with one or more\n    Expectation Suites.\n\n    A Checkpoint can be as simple as one batch of data paired with one\n    Expectation Suite.\n\n    A Checkpoint can be as complex as many batches of data across different\n    datasources paired with one or more Expectation Suites each.\n    '
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
-    cli_event_noun: str = "checkpoint"
-    (
-        begin_event_name,
-        end_event_name,
-    ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
-        noun=cli_event_noun, verb=ctx.invoked_subcommand
-    )
-    send_usage_message(
-        data_context=ctx.obj.data_context, event=begin_event_name, success=True
-    )
+    cli_event_noun: str = 'checkpoint'
+    (begin_event_name, end_event_name) = UsageStatsEvents.get_cli_begin_and_end_event_names(noun=cli_event_noun, verb=ctx.invoked_subcommand)
+    send_usage_message(data_context=ctx.obj.data_context, event=begin_event_name, success=True)
     ctx.obj.usage_event_end = end_event_name
 
-
-@checkpoint.command(name="new")
-@click.argument("name")
-@click.option(
-    "--jupyter/--no-jupyter",
-    is_flag=True,
-    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
-    default=True,
-)
+@checkpoint.command(name='new')
+@click.argument('name')
+@click.option('--jupyter/--no-jupyter', is_flag=True, help='By default launch jupyter notebooks unless you specify the --no-jupyter flag', default=True)
 @click.pass_context
 def checkpoint_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Create a new Checkpoint for easy deployments.\n\n    NAME is the name of the Checkpoint to create.\n    "
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Create a new Checkpoint for easy deployments.\n\n    NAME is the name of the Checkpoint to create.\n    '
     _checkpoint_new(ctx=ctx, checkpoint_name=name, jupyter=jupyter)
-
 
 def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
         _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event_end)
-        notebook_name = f"edit_checkpoint_{checkpoint_name}.ipynb"
+        notebook_name = f'edit_checkpoint_{checkpoint_name}.ipynb'
         notebook_file_path = _get_notebook_path(context, notebook_name)
-        checkpoint_new_notebook_renderer = CheckpointNewNotebookRenderer(
-            context=context, checkpoint_name=checkpoint_name
-        )
-        checkpoint_new_notebook_renderer.render_to_disk(
-            notebook_file_path=notebook_file_path
-        )
-        if not jupyter:
-            cli_message(
-                f"To continue editing this Checkpoint, run <green>jupyter notebook {notebook_file_path}</green>"
-            )
+        checkpoint_new_notebook_renderer = CheckpointNewNotebookRenderer(context=context, checkpoint_name=checkpoint_name)
+        checkpoint_new_notebook_renderer.render_to_disk(notebook_file_path=notebook_file_path)
+        if (not jupyter):
+            cli_message(f'To continue editing this Checkpoint, run <green>jupyter notebook {notebook_file_path}</green>')
         send_usage_message(data_context=context, event=usage_event_end, success=True)
         if jupyter:
-            cli_message(
-                "<green>Because you requested to create a new Checkpoint, we'll open a notebook for you now to edit it!\nIf you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"
-            )
+            cli_message("<green>Because you requested to create a new Checkpoint, we'll open a notebook for you now to edit it!\nIf you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n")
             toolkit.launch_jupyter_notebook(notebook_file_path)
     except Exception as e:
-        toolkit.exit_with_failure_message_and_stats(
-            data_context=context, usage_event=usage_event_end, message=f"<red>{e}</red>"
-        )
+        toolkit.exit_with_failure_message_and_stats(data_context=context, usage_event=usage_event_end, message=f'<red>{e}</red>')
         return
 
-
-def _verify_checkpoint_does_not_exist(
-    context: DataContext, checkpoint_name: str, usage_event: str
-) -> None:
+def _verify_checkpoint_does_not_exist(context: DataContext, checkpoint_name: str, usage_event: str) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     try:
-        if checkpoint_name in context.list_checkpoints():
-            toolkit.exit_with_failure_message_and_stats(
-                data_context=context,
-                usage_event=usage_event,
-                message=f"A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
-            )
+        if (checkpoint_name in context.list_checkpoints()):
+            toolkit.exit_with_failure_message_and_stats(data_context=context, usage_event=usage_event, message=f'A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.')
     except InvalidTopLevelConfigKeyError as e:
-        toolkit.exit_with_failure_message_and_stats(
-            data_context=context, usage_event=usage_event, message=f"<red>{e}</red>"
-        )
-
+        toolkit.exit_with_failure_message_and_stats(data_context=context, usage_event=usage_event, message=f'<red>{e}</red>')
 
 def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    return os.path.abspath(
-        os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
-        )
-    )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    return os.path.abspath(os.path.join(context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name))
 
-
-@checkpoint.command(name="list")
+@checkpoint.command(name='list')
 @click.pass_context
 def checkpoint_list(ctx: click.Context) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "List configured checkpoints."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'List configured checkpoints.'
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     checkpoints: List[str] = context.list_checkpoints()
-    if not checkpoints:
-        cli_message(
-            "No Checkpoints found.\n  - Use the command `great_expectations checkpoint new` to create one."
-        )
+    if (not checkpoints):
+        cli_message('No Checkpoints found.\n  - Use the command `great_expectations checkpoint new` to create one.')
         send_usage_message(data_context=context, event=usage_event_end, success=True)
         sys.exit(0)
     number_found: int = len(checkpoints)
-    plural: str = "s" if (number_found > 1) else ""
-    message: str = f"Found {number_found} Checkpoint{plural}."
-    pretty_list: list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
+    plural: str = ('s' if (number_found > 1) else '')
+    message: str = f'Found {number_found} Checkpoint{plural}.'
+    pretty_list: list = [f' - <cyan>{cp}</cyan>' for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
     send_usage_message(data_context=context, event=usage_event_end, success=True)
 
-
-@checkpoint.command(name="delete")
-@click.argument("checkpoint")
+@checkpoint.command(name='delete')
+@click.argument('checkpoint')
 @click.pass_context
 def checkpoint_delete(ctx: click.Context, checkpoint: str) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Delete a Checkpoint."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Delete a Checkpoint.'
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
-        toolkit.delete_checkpoint(
-            context=context,
-            checkpoint_name=checkpoint,
-            usage_event=usage_event_end,
-            assume_yes=ctx.obj.assume_yes,
-        )
+        toolkit.delete_checkpoint(context=context, checkpoint_name=checkpoint, usage_event=usage_event_end, assume_yes=ctx.obj.assume_yes)
         send_usage_message(data_context=context, event=usage_event_end, success=True)
     except Exception as e:
-        toolkit.exit_with_failure_message_and_stats(
-            data_context=context, usage_event=usage_event_end, message=f"<red>{e}</red>"
-        )
+        toolkit.exit_with_failure_message_and_stats(data_context=context, usage_event=usage_event_end, message=f'<red>{e}</red>')
         return
     cli_message(f'Checkpoint "{checkpoint}" deleted.')
     sys.exit(0)
 
-
-@checkpoint.command(name="run")
-@click.argument("checkpoint")
+@checkpoint.command(name='run')
+@click.argument('checkpoint')
 @click.pass_context
 def checkpoint_run(ctx: click.Context, checkpoint: str) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Run a Checkpoint."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Run a Checkpoint.'
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
-        result: CheckpointResult = toolkit.run_checkpoint(
-            context=context, checkpoint_name=checkpoint, usage_event=usage_event_end
-        )
+        result: CheckpointResult = toolkit.run_checkpoint(context=context, checkpoint_name=checkpoint, usage_event=usage_event_end)
     except Exception as e:
-        toolkit.exit_with_failure_message_and_stats(
-            data_context=context, usage_event=usage_event_end, message=f"<red>{e}</red>"
-        )
+        toolkit.exit_with_failure_message_and_stats(data_context=context, usage_event=usage_event_end, message=f'<red>{e}</red>')
         return
-    if not result["success"]:
-        cli_message(string="Validation failed!")
+    if (not result['success']):
+        cli_message(string='Validation failed!')
         send_usage_message(data_context=context, event=usage_event_end, success=True)
         print_validation_operator_results_details(result=result)
         sys.exit(1)
-    cli_message("Validation succeeded!")
+    cli_message('Validation succeeded!')
     send_usage_message(data_context=context, event=usage_event_end, success=True)
     print_validation_operator_results_details(result=result)
     sys.exit(0)
 
-
 def print_validation_operator_results_details(result: CheckpointResult) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     max_suite_display_width = 40
-    cli_message(
-        f"""
-{'Suite Name'.ljust(max_suite_display_width)}     Status     Expectations met"""
-    )
+    cli_message(f'''
+{'Suite Name'.ljust(max_suite_display_width)}     Status     Expectations met''')
     for (result_id, result_item) in result.run_results.items():
-        vr = result_item["validation_result"]
+        vr = result_item['validation_result']
         stats = vr.statistics
-        passed = stats["successful_expectations"]
-        evaluated = stats["evaluated_expectations"]
-        percentage_slug = (
-            f"{(round(((passed / evaluated) * 100), 2) if (evaluated > 0) else 100)} %"
-        )
-        stats_slug = f"{passed} of {evaluated} ({percentage_slug})"
+        passed = stats['successful_expectations']
+        evaluated = stats['evaluated_expectations']
+        percentage_slug = f'{(round(((passed / evaluated) * 100), 2) if (evaluated > 0) else 100)} %'
+        stats_slug = f'{passed} of {evaluated} ({percentage_slug})'
         if vr.success:
-            status_slug = "<green>✔ Passed</green>"
+            status_slug = '<green>✔ Passed</green>'
         else:
-            status_slug = "<red>✖ Failed</red>"
-        suite_name: str = str(vr.meta["expectation_suite_name"])
-        if len(suite_name) > max_suite_display_width:
+            status_slug = '<red>✖ Failed</red>'
+        suite_name: str = str(vr.meta['expectation_suite_name'])
+        if (len(suite_name) > max_suite_display_width):
             suite_name = suite_name[0:max_suite_display_width]
-            suite_name = f"{suite_name[:(- 1)]}…"
-        status_line: str = f"- {suite_name.ljust(max_suite_display_width)}   {status_slug}   {stats_slug}"
+            suite_name = f'{suite_name[:(- 1)]}…'
+        status_line: str = f'- {suite_name.ljust(max_suite_display_width)}   {status_slug}   {stats_slug}'
         cli_message(status_line)
 
-
-@checkpoint.command(name="script")
-@click.argument("checkpoint")
+@checkpoint.command(name='script')
+@click.argument('checkpoint')
 @click.pass_context
 def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "\n    Create a python script to run a Checkpoint.\n\n    Checkpoints can be run directly without this script using the\n    `great_expectations Checkpoint run` command.\n\n    This script is provided for those who wish to run Checkpoints via python.\n    "
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    '\n    Create a python script to run a Checkpoint.\n\n    Checkpoints can be run directly without this script using the\n    `great_expectations Checkpoint run` command.\n\n    This script is provided for those who wish to run Checkpoints via python.\n    '
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
-    toolkit.validate_checkpoint(
-        context=context, checkpoint_name=checkpoint, usage_event=usage_event_end
-    )
-    script_name: str = f"run_{checkpoint}.py"
-    script_path: str = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, script_name
-    )
+    toolkit.validate_checkpoint(context=context, checkpoint_name=checkpoint, usage_event=usage_event_end)
+    script_name: str = f'run_{checkpoint}.py'
+    script_path: str = os.path.join(context.root_directory, context.GE_UNCOMMITTED_DIR, script_name)
     if os.path.isfile(script_path):
-        toolkit.exit_with_failure_message_and_stats(
-            data_context=context,
-            usage_event=usage_event_end,
-            message=f"""<red>Warning! A script named {script_name} already exists and this command will not overwrite it.</red>
-  - Existing file path: {script_path}""",
-        )
-    _write_checkpoint_script_to_disk(
-        context_directory=context.root_directory,
-        checkpoint_name=checkpoint,
-        script_path=script_path,
-    )
-    cli_message(
-        f"""<green>A python script was created that runs the Checkpoint named: `{checkpoint}`</green>
+        toolkit.exit_with_failure_message_and_stats(data_context=context, usage_event=usage_event_end, message=f'''<red>Warning! A script named {script_name} already exists and this command will not overwrite it.</red>
+  - Existing file path: {script_path}''')
+    _write_checkpoint_script_to_disk(context_directory=context.root_directory, checkpoint_name=checkpoint, script_path=script_path)
+    cli_message(f'''<green>A python script was created that runs the Checkpoint named: `{checkpoint}`</green>
   - The script is located in `great_expectations/uncommitted/run_{checkpoint}.py`
-  - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
-    )
+  - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`''')
     send_usage_message(data_context=context, event=usage_event_end, success=True)
 
-
-def _write_checkpoint_script_to_disk(
-    context_directory: str, checkpoint_name: str, script_path: str
-) -> None:
+def _write_checkpoint_script_to_disk(context_directory: str, checkpoint_name: str, script_path: str) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     script_full_path: str = os.path.abspath(os.path.join(script_path))
     template: str = _load_script_template().format(checkpoint_name, context_directory)
     linted_code: str = lint_code(code=template)
-    with open(script_full_path, "w") as f:
+    with open(script_full_path, 'w') as f:
         f.write(linted_code)
-
 
 def _load_script_template() -> str:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    with open(file_relative_path(__file__, "checkpoint_script_template.py")) as f:
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    with open(file_relative_path(__file__, 'checkpoint_script_template.py')) as f:
         template = f.read()
     return template

@@ -1,8 +1,7 @@
+
 import sys
 from typing import Optional, Tuple
-
 import click
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
@@ -14,139 +13,102 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
-
 @click.group()
 def project() -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Project operations"
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Project operations'
     pass
 
-
-@project.command(name="check-config")
+@project.command(name='check-config')
 @click.pass_context
 def project_check_config(ctx: click.Context) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Check a config for validity and help with migrations."
-    cli_message("Checking your config files for validity...\n")
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Check a config for validity and help with migrations.'
+    cli_message('Checking your config files for validity...\n')
+    directory = toolkit.parse_cli_config_file_location(config_file_location=ctx.obj.config_file_location).get('directory')
     (is_config_ok, error_message, context) = do_config_check(directory)
-    if not (is_config_ok and context):
-        cli_message("Unfortunately, your config appears to be invalid:\n")
-        cli_message(f"<red>{error_message}</red>")
+    if (not (is_config_ok and context)):
+        cli_message('Unfortunately, your config appears to be invalid:\n')
+        cli_message(f'<red>{error_message}</red>')
         sys.exit(1)
-    send_usage_message(
-        data_context=context,
-        event=UsageStatsEvents.CLI_PROJECT_CHECK_CONFIG.value,
-        success=True,
-    )
-    cli_message("<green>Your config file appears valid!</green>")
+    send_usage_message(data_context=context, event=UsageStatsEvents.CLI_PROJECT_CHECK_CONFIG.value, success=True)
+    cli_message('<green>Your config file appears valid!</green>')
 
-
-@project.command(name="upgrade")
+@project.command(name='upgrade')
 @click.pass_context
 def project_upgrade(ctx: click.Context) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Upgrade a project after installing the next Great Expectations major version."
-    cli_message("\nChecking project...")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Upgrade a project after installing the next Great Expectations major version.'
+    cli_message('\nChecking project...')
     cli_message(SECTION_SEPARATOR)
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    if load_data_context_with_error_handling(
-        directory=directory, from_cli_upgrade_command=True
-    ):
+    directory = toolkit.parse_cli_config_file_location(config_file_location=ctx.obj.config_file_location).get('directory')
+    if load_data_context_with_error_handling(directory=directory, from_cli_upgrade_command=True):
         sys.exit(0)
     else:
-        failure_message = "Error: Your project could not be upgraded.\n"
-        cli_message(f"<red>{failure_message}</red>")
+        failure_message = 'Error: Your project could not be upgraded.\n'
+        cli_message(f'<red>{failure_message}</red>')
         sys.exit(1)
-
 
 def do_config_check(target_directory: str) -> Tuple[(bool, str, Optional[DataContext])]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     is_config_ok: bool = True
-    upgrade_message: str = ""
+    upgrade_message: str = ''
     context: Optional[DataContext]
     try:
         context = DataContext(context_root_dir=target_directory)
         ge_config_version: int = context.get_config().config_version
-        if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+        if (int(ge_config_version) < CURRENT_GE_CONFIG_VERSION):
             is_config_ok = False
-            upgrade_message = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
+            upgrade_message = f'''The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
 Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and
 upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
-"""
+'''
             context = None
-        elif int(ge_config_version) > CURRENT_GE_CONFIG_VERSION:
-            raise ge_exceptions.UnsupportedConfigVersionError(
-                f"""Invalid config version ({ge_config_version}).
+        elif (int(ge_config_version) > CURRENT_GE_CONFIG_VERSION):
+            raise ge_exceptions.UnsupportedConfigVersionError(f'''Invalid config version ({ge_config_version}).
     The maximum valid version is {CURRENT_GE_CONFIG_VERSION}.
-"""
-            )
+''')
         else:
-            upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(
-                int(ge_config_version)
-            )
+            upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
             if upgrade_helper_class:
-                upgrade_helper = upgrade_helper_class(
-                    data_context=context, update_version=False
-                )
+                upgrade_helper = upgrade_helper_class(data_context=context, update_version=False)
                 manual_steps_required = upgrade_helper.manual_steps_required()
                 if manual_steps_required:
-                    (
-                        upgrade_overview,
-                        confirmation_required,
-                    ) = upgrade_helper.get_upgrade_overview()
+                    (upgrade_overview, confirmation_required) = upgrade_helper.get_upgrade_overview()
                     upgrade_overview = cli_colorize_string(upgrade_overview)
                     cli_message(string=upgrade_overview)
                     is_config_ok = False
-                    upgrade_message = "The configuration of your great_expectations.yml is outdated.  Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your Great Expectations configuration in order to take advantage of the latest capabilities.\n"
+                    upgrade_message = 'The configuration of your great_expectations.yml is outdated.  Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your Great Expectations configuration in order to take advantage of the latest capabilities.\n'
                     context = None
-    except (
-        ge_exceptions.InvalidConfigurationYamlError,
-        ge_exceptions.InvalidTopLevelConfigKeyError,
-        ge_exceptions.MissingTopLevelConfigKeyError,
-        ge_exceptions.InvalidConfigValueTypeError,
-        ge_exceptions.UnsupportedConfigVersionError,
-        ge_exceptions.DataContextError,
-        ge_exceptions.PluginClassNotFoundError,
-        ge_exceptions.PluginModuleNotFoundError,
-        ge_exceptions.GreatExpectationsError,
-    ) as err:
+    except (ge_exceptions.InvalidConfigurationYamlError, ge_exceptions.InvalidTopLevelConfigKeyError, ge_exceptions.MissingTopLevelConfigKeyError, ge_exceptions.InvalidConfigValueTypeError, ge_exceptions.UnsupportedConfigVersionError, ge_exceptions.DataContextError, ge_exceptions.PluginClassNotFoundError, ge_exceptions.PluginModuleNotFoundError, ge_exceptions.GreatExpectationsError) as err:
         is_config_ok = False
         upgrade_message = err.message
         context = None

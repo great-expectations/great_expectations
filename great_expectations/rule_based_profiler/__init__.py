@@ -1,2 +1,3 @@
-from .rule_based_profiler import BaseRuleBasedProfiler, RuleBasedProfiler
+
 from .rule_based_profiler_result import RuleBasedProfilerResult
+from .rule_based_profiler import BaseRuleBasedProfiler, RuleBasedProfiler

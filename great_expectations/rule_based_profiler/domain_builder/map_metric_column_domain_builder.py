@@ -1,306 +1,140 @@
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
-from great_expectations.rule_based_profiler.helpers.util import (
-    build_domains_from_column_names,
-    get_parameter_value_and_validate_return_type,
-    get_resolved_metrics_by_key,
-)
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    SemanticDomainTypes,
-)
+from great_expectations.rule_based_profiler.helpers.util import build_domains_from_column_names, get_parameter_value_and_validate_return_type, get_resolved_metrics_by_key
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer, SemanticDomainTypes
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-
 class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
-    "\n    This DomainBuilder uses relative tolerance of specified map metric to identify domains.\n"
+    '\n    This DomainBuilder uses relative tolerance of specified map metric to identify domains.\n    '
 
-    def __init__(
-        self,
-        map_metric_name: str,
-        include_column_names: Optional[Union[(str, Optional[List[str]])]] = None,
-        exclude_column_names: Optional[Union[(str, Optional[List[str]])]] = None,
-        include_column_name_suffixes: Optional[
-            Union[(str, Iterable, List[str])]
-        ] = None,
-        exclude_column_name_suffixes: Optional[
-            Union[(str, Iterable, List[str])]
-        ] = None,
-        semantic_type_filter_module_name: Optional[str] = None,
-        semantic_type_filter_class_name: Optional[str] = None,
-        include_semantic_types: Optional[
-            Union[(str, SemanticDomainTypes, List[Union[(str, SemanticDomainTypes)]])]
-        ] = None,
-        exclude_semantic_types: Optional[
-            Union[(str, SemanticDomainTypes, List[Union[(str, SemanticDomainTypes)]])]
-        ] = None,
-        max_unexpected_values: Union[(str, int)] = 0,
-        max_unexpected_ratio: Optional[Union[(str, float)]] = None,
-        min_max_unexpected_values_proportion: Union[(str, float)] = 0.975,
-        data_context: Optional["BaseDataContext"] = None,
-    ) -> None:
+    def __init__(self, map_metric_name: str, include_column_names: Optional[Union[(str, Optional[List[str]])]]=None, exclude_column_names: Optional[Union[(str, Optional[List[str]])]]=None, include_column_name_suffixes: Optional[Union[(str, Iterable, List[str])]]=None, exclude_column_name_suffixes: Optional[Union[(str, Iterable, List[str])]]=None, semantic_type_filter_module_name: Optional[str]=None, semantic_type_filter_class_name: Optional[str]=None, include_semantic_types: Optional[Union[(str, SemanticDomainTypes, List[Union[(str, SemanticDomainTypes)]])]]=None, exclude_semantic_types: Optional[Union[(str, SemanticDomainTypes, List[Union[(str, SemanticDomainTypes)]])]]=None, max_unexpected_values: Union[(str, int)]=0, max_unexpected_ratio: Optional[Union[(str, float)]]=None, min_max_unexpected_values_proportion: Union[(str, float)]=0.975, data_context: Optional['BaseDataContext']=None) -> None:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         '\n        Create column domains using tolerance for inter-Batch proportion of adherence to intra-Batch "unexpected_count"\n        value of specified "map_metric_name" as criterion for emitting Domain for column under consideration.\n\n        Args:\n            map_metric_name: the name of a map metric (must be a supported and registered map metric); the suffix\n            ".unexpected_count" will be appended to "map_metric_name" to be used in MetricConfiguration to get values.\n            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).\n            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.\n            include_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to match.\n            exclude_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to not match.\n            semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces\n            semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces\n            include_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)\n            to be included\n            exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)\n            to be excluded\n            max_unexpected_values: maximum "unexpected_count" value of "map_metric_name" (intra-Batch)\n            max_unexpected_ratio: maximum "unexpected_count" value of "map_metric_name" divided by number of records\n            (intra-Batch); if both "max_unexpected_values" and "max_unexpected_ratio" are specified, then\n            "max_unexpected_ratio" is used (and "max_unexpected_values" is ignored)\n            min_max_unexpected_values_proportion: minimum fraction of Batch objects adhering to "max_unexpected_values"\n            data_context: BaseDataContext associated with this DomainBuilder\n\n        For example (using default values of "max_unexpected_values" and "min_max_unexpected_values_proportion"):\n        Suppose that "map_metric_name" is "column_values.nonnull" and consider the following three Batches of data:\n\n        Batch-0        Batch-1        Batch-2\n        A B C          A B C          A B C\n        1 1 2          1 1 2          1 1 2\n        1 2 3          1 2 3          1 2 3\n        1 1 2            1 2          1 1 2\n        2 2 2          2 2 2          2 2 2\n        3 2 3          3 2 3          3 2 3\n\n        and consider adherence to this map metric for column "A".\n\n        The intra-Batch adherence to "max_unexpected_values" being 0 gives the following result (1 is True, 0 is False):\n\n        Batch-0        Batch-1        Batch-2\n        1              0              1\n\n        That gives the inter-Batch adherence fraction of 2/3 (0.67).  Since 1/3 >= min_max_unexpected_values_proportion\n        evaluates to False, column "A" does not pass the tolerance test, and thus Domain for it will not be emitted.\n\n        However, if "max_unexpected_ratio" is eased to above 0.2, then the tolerances will be met and Domain emitted.\n        Alternatively, if "min_max_unexpected_values_proportion" is lowered to 0.66, Domain will also be emitted.\n        '
-        super().__init__(
-            include_column_names=include_column_names,
-            exclude_column_names=exclude_column_names,
-            include_column_name_suffixes=include_column_name_suffixes,
-            exclude_column_name_suffixes=exclude_column_name_suffixes,
-            semantic_type_filter_module_name=semantic_type_filter_module_name,
-            semantic_type_filter_class_name=semantic_type_filter_class_name,
-            include_semantic_types=include_semantic_types,
-            exclude_semantic_types=exclude_semantic_types,
-            data_context=data_context,
-        )
+        super().__init__(include_column_names=include_column_names, exclude_column_names=exclude_column_names, include_column_name_suffixes=include_column_name_suffixes, exclude_column_name_suffixes=exclude_column_name_suffixes, semantic_type_filter_module_name=semantic_type_filter_module_name, semantic_type_filter_class_name=semantic_type_filter_class_name, include_semantic_types=include_semantic_types, exclude_semantic_types=exclude_semantic_types, data_context=data_context)
         self._map_metric_name = map_metric_name
         self._max_unexpected_values = max_unexpected_values
         self._max_unexpected_ratio = max_unexpected_ratio
-        self._min_max_unexpected_values_proportion = (
-            min_max_unexpected_values_proportion
-        )
+        self._min_max_unexpected_values_proportion = min_max_unexpected_values_proportion
 
     @property
     def map_metric_name(self) -> str:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         return self._map_metric_name
 
     @property
     def max_unexpected_values(self) -> Union[(str, int)]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         return self._max_unexpected_values
 
     @property
     def max_unexpected_ratio(self) -> Optional[Union[(str, float)]]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         return self._max_unexpected_ratio
 
     @property
     def min_max_unexpected_values_proportion(self) -> Optional[Union[(str, float)]]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         return self._min_max_unexpected_values_proportion
 
-    def _get_domains(
-        self, rule_name: str, variables: Optional[ParameterContainer] = None
-    ) -> List[Domain]:
+    def _get_domains(self, rule_name: str, variables: Optional[ParameterContainer]=None) -> List[Domain]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         'Return domains matching the specified tolerance limits.\n\n        Args:\n            rule_name: name of Rule object, for which "Domain" objects are obtained.\n            variables: Optional variables to substitute when evaluating.\n\n        Returns:\n            List of domains that match the desired tolerance limits.\n        '
-        map_metric_name: str = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.map_metric_name,
-            expected_return_type=str,
-            variables=variables,
-            parameters=None,
-        )
-        max_unexpected_values: int = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.max_unexpected_values,
-            expected_return_type=int,
-            variables=variables,
-            parameters=None,
-        )
-        max_unexpected_ratio: Optional[
-            float
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.max_unexpected_ratio,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
-        )
-        min_max_unexpected_values_proportion: float = (
-            get_parameter_value_and_validate_return_type(
-                domain=None,
-                parameter_reference=self.min_max_unexpected_values_proportion,
-                expected_return_type=float,
-                variables=variables,
-                parameters=None,
-            )
-        )
+        map_metric_name: str = get_parameter_value_and_validate_return_type(domain=None, parameter_reference=self.map_metric_name, expected_return_type=str, variables=variables, parameters=None)
+        max_unexpected_values: int = get_parameter_value_and_validate_return_type(domain=None, parameter_reference=self.max_unexpected_values, expected_return_type=int, variables=variables, parameters=None)
+        max_unexpected_ratio: Optional[float] = get_parameter_value_and_validate_return_type(domain=None, parameter_reference=self.max_unexpected_ratio, expected_return_type=None, variables=variables, parameters=None)
+        min_max_unexpected_values_proportion: float = get_parameter_value_and_validate_return_type(domain=None, parameter_reference=self.min_max_unexpected_values_proportion, expected_return_type=float, variables=variables, parameters=None)
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
         num_batch_ids: int = len(batch_ids)
-        validator: "Validator" = self.get_validator(variables=variables)
-        table_column_names: List[str] = self.get_effective_column_names(
-            batch_ids=batch_ids, validator=validator, variables=variables
-        )
-        table_row_counts: Dict[(str, int)] = self.get_table_row_counts(
-            validator=validator, batch_ids=batch_ids, variables=variables
-        )
-        mean_table_row_count_as_float: float = (
-            1.0 * sum(table_row_counts.values())
-        ) / num_batch_ids
-        if max_unexpected_ratio is None:
-            max_unexpected_ratio = max_unexpected_values / mean_table_row_count_as_float
-        metric_configurations_by_column_name: Dict[
-            (str, List[MetricConfiguration])
-        ] = self._generate_metric_configurations(
-            map_metric_name=map_metric_name,
-            batch_ids=batch_ids,
-            column_names=table_column_names,
-        )
-        candidate_column_names: List[
-            str
-        ] = self._get_column_names_satisfying_tolerance_limits(
-            validator=validator,
-            num_batch_ids=num_batch_ids,
-            metric_configurations_by_column_name=metric_configurations_by_column_name,
-            mean_table_row_count_as_float=mean_table_row_count_as_float,
-            max_unexpected_ratio=max_unexpected_ratio,
-            min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
-        )
+        validator: 'Validator' = self.get_validator(variables=variables)
+        table_column_names: List[str] = self.get_effective_column_names(batch_ids=batch_ids, validator=validator, variables=variables)
+        table_row_counts: Dict[(str, int)] = self.get_table_row_counts(validator=validator, batch_ids=batch_ids, variables=variables)
+        mean_table_row_count_as_float: float = ((1.0 * sum(table_row_counts.values())) / num_batch_ids)
+        if (max_unexpected_ratio is None):
+            max_unexpected_ratio = (max_unexpected_values / mean_table_row_count_as_float)
+        metric_configurations_by_column_name: Dict[(str, List[MetricConfiguration])] = self._generate_metric_configurations(map_metric_name=map_metric_name, batch_ids=batch_ids, column_names=table_column_names)
+        candidate_column_names: List[str] = self._get_column_names_satisfying_tolerance_limits(validator=validator, num_batch_ids=num_batch_ids, metric_configurations_by_column_name=metric_configurations_by_column_name, mean_table_row_count_as_float=mean_table_row_count_as_float, max_unexpected_ratio=max_unexpected_ratio, min_max_unexpected_values_proportion=min_max_unexpected_values_proportion)
         column_name: str
-        domains: List[Domain] = build_domains_from_column_names(
-            rule_name=rule_name,
-            column_names=candidate_column_names,
-            domain_type=self.domain_type,
-            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,
-        )
+        domains: List[Domain] = build_domains_from_column_names(rule_name=rule_name, column_names=candidate_column_names, domain_type=self.domain_type, table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map)
         return domains
 
     @staticmethod
-    def _generate_metric_configurations(
-        map_metric_name: str, batch_ids: List[str], column_names: List[str]
-    ) -> Dict[(str, List[MetricConfiguration])]:
+    def _generate_metric_configurations(map_metric_name: str, batch_ids: List[str], column_names: List[str]) -> Dict[(str, List[MetricConfiguration])]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         '\n        Generate metric configurations used to compute "unexpected_count" values for "map_metric_name".\n\n        Args:\n            map_metric_name: the name of a map metric (must be a supported and registered map metric); the suffix\n            ".unexpected_count" will be appended to "map_metric_name" to be used in MetricConfiguration to get values.\n            batch_ids: List of batch_ids used to create metric configurations.\n            column_names: List of column_names used to create metric configurations.\n\n        Returns:\n            Dictionary of the form {\n                column_name: List[MetricConfiguration],\n            }\n        '
         column_name: str
         batch_id: str
-        metric_configurations: Dict[(str, List[MetricConfiguration])] = {
-            column_name: [
-                MetricConfiguration(
-                    metric_name=f"{map_metric_name}.unexpected_count",
-                    metric_domain_kwargs={"column": column_name, "batch_id": batch_id},
-                    metric_value_kwargs=None,
-                    metric_dependencies=None,
-                )
-                for batch_id in batch_ids
-            ]
-            for column_name in column_names
-        }
+        metric_configurations: Dict[(str, List[MetricConfiguration])] = {column_name: [MetricConfiguration(metric_name=f'{map_metric_name}.unexpected_count', metric_domain_kwargs={'column': column_name, 'batch_id': batch_id}, metric_value_kwargs=None, metric_dependencies=None) for batch_id in batch_ids] for column_name in column_names}
         return metric_configurations
 
     @staticmethod
-    def _get_column_names_satisfying_tolerance_limits(
-        validator: "Validator",
-        num_batch_ids: int,
-        metric_configurations_by_column_name: Dict[(str, List[MetricConfiguration])],
-        mean_table_row_count_as_float: float,
-        max_unexpected_ratio: float,
-        min_max_unexpected_values_proportion: float,
-    ) -> List[str]:
+    def _get_column_names_satisfying_tolerance_limits(validator: 'Validator', num_batch_ids: int, metric_configurations_by_column_name: Dict[(str, List[MetricConfiguration])], mean_table_row_count_as_float: float, max_unexpected_ratio: float, min_max_unexpected_values_proportion: float) -> List[str]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         '\n        Compute figures of merit and return column names satisfying tolerance limits.\n\n        Args:\n            validator: Validator used to compute column cardinality.\n            metric_configurations_by_column_name: metric configurations used to compute figures of merit.\n            mean_table_row_count_as_float: average number of records over available Batch objects.\n            max_unexpected_ratio: maximum "unexpected_count" value of "map_metric_name" averaged over numbers of records\n            min_max_unexpected_values_proportion: minimum fraction of Batch objects adhering to "max_unexpected_ratio"\n\n        Returns:\n            List of column names satisfying tolerance limits.\n        '
         column_name: str
         resolved_metrics: Dict[(Tuple[(str, str, str)], Any)]
-        resolved_metrics_by_column_name: Dict[
-            (str, Dict[(Tuple[(str, str, str)], Any)])
-        ] = get_resolved_metrics_by_key(
-            validator=validator,
-            metric_configurations_by_key=metric_configurations_by_column_name,
-        )
+        resolved_metrics_by_column_name: Dict[(str, Dict[(Tuple[(str, str, str)], Any)])] = get_resolved_metrics_by_key(validator=validator, metric_configurations_by_key=metric_configurations_by_column_name)
         metric_value: Any
-        intra_batch_unexpected_ratios_by_column_name: Dict[(str, List[float])] = {
-            column_name: [
-                (metric_value / mean_table_row_count_as_float)
-                for metric_value in resolved_metrics.values()
-            ]
-            for (
-                column_name,
-                resolved_metrics,
-            ) in resolved_metrics_by_column_name.items()
-        }
+        intra_batch_unexpected_ratios_by_column_name: Dict[(str, List[float])] = {column_name: [(metric_value / mean_table_row_count_as_float) for metric_value in resolved_metrics.values()] for (column_name, resolved_metrics) in resolved_metrics_by_column_name.items()}
         metric_value_ratio: float
-        intra_batch_adherence_by_column_name: Dict[(str, List[bool])] = {
-            column_name: [
-                (metric_value_ratio <= max_unexpected_ratio)
-                for metric_value_ratio in intra_batch_unexpected_ratios_by_column_name[
-                    column_name
-                ]
-            ]
-            for column_name in intra_batch_unexpected_ratios_by_column_name.keys()
-        }
-        inter_batch_adherence_by_column_name: Dict[(str, float)] = {
-            column_name: (
-                (1.0 * sum(intra_batch_adherence_by_column_name[column_name]))
-                / num_batch_ids
-            )
-            for column_name in intra_batch_adherence_by_column_name.keys()
-        }
+        intra_batch_adherence_by_column_name: Dict[(str, List[bool])] = {column_name: [(metric_value_ratio <= max_unexpected_ratio) for metric_value_ratio in intra_batch_unexpected_ratios_by_column_name[column_name]] for column_name in intra_batch_unexpected_ratios_by_column_name.keys()}
+        inter_batch_adherence_by_column_name: Dict[(str, float)] = {column_name: ((1.0 * sum(intra_batch_adherence_by_column_name[column_name])) / num_batch_ids) for column_name in intra_batch_adherence_by_column_name.keys()}
         inter_batch_unexpected_values_proportion: float
-        candidate_column_names: List[str] = [
-            column_name
-            for (
-                column_name,
-                inter_batch_unexpected_values_proportion,
-            ) in inter_batch_adherence_by_column_name.items()
-            if (
-                inter_batch_unexpected_values_proportion
-                >= min_max_unexpected_values_proportion
-            )
-        ]
+        candidate_column_names: List[str] = [column_name for (column_name, inter_batch_unexpected_values_proportion) in inter_batch_adherence_by_column_name.items() if (inter_batch_unexpected_values_proportion >= min_max_unexpected_values_proportion)]
         return candidate_column_names

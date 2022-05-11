@@ -1,70 +1,36 @@
+
 import os
 import sys
-
 import click
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.v012 import toolkit
-from great_expectations.cli.v012.cli_messages import (
-    BUILD_DOCS_PROMPT,
-    GREETING,
-    LETS_BEGIN_PROMPT,
-    ONBOARDING_COMPLETE,
-    PROJECT_IS_COMPLETE,
-    RUN_INIT_AGAIN,
-    SECTION_SEPARATOR,
-    SETUP_SUCCESS,
-    SLACK_LATER,
-    SLACK_SETUP_COMPLETE,
-    SLACK_SETUP_INTRO,
-    SLACK_SETUP_PROMPT,
-    SLACK_WEBHOOK_PROMPT,
-)
+from great_expectations.cli.v012.cli_messages import BUILD_DOCS_PROMPT, GREETING, LETS_BEGIN_PROMPT, ONBOARDING_COMPLETE, PROJECT_IS_COMPLETE, RUN_INIT_AGAIN, SECTION_SEPARATOR, SETUP_SUCCESS, SLACK_LATER, SLACK_SETUP_COMPLETE, SLACK_SETUP_INTRO, SLACK_SETUP_PROMPT, SLACK_WEBHOOK_PROMPT
 from great_expectations.cli.v012.datasource import add_datasource as add_datasource_impl
 from great_expectations.cli.v012.docs import build_docs
 from great_expectations.cli.v012.util import cli_message
 from great_expectations.core.usage_statistics.util import send_usage_message
-from great_expectations.exceptions import (
-    DataContextError,
-    DatasourceInitializationError,
-)
+from great_expectations.exceptions import DataContextError, DatasourceInitializationError
 from great_expectations.util import is_sane_slack_webhook
-
 try:
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
-
 @click.command()
-@click.option(
-    "--target-directory",
-    "-d",
-    default="./",
-    help="The root of the project directory where you want to initialize Great Expectations.",
-)
-@click.option(
-    "--view/--no-view",
-    help="By default open in browser unless you specify the --no-view flag.",
-    default=True,
-)
-@click.option(
-    "--usage-stats/--no-usage-stats",
-    help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
-    default=True,
-)
+@click.option('--target-directory', '-d', default='./', help='The root of the project directory where you want to initialize Great Expectations.')
+@click.option('--view/--no-view', help='By default open in browser unless you specify the --no-view flag.', default=True)
+@click.option('--usage-stats/--no-usage-stats', help='By default, usage statistics are enabled unless you specify the --no-usage-stats flag.', default=True)
 def init(target_directory, view, usage_stats) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "\n    Initialize a new Great Expectations project.\n\n    This guided input walks the user through setting up a new project and also\n    onboards a new developer in an existing project.\n\n    It scaffolds directories, sets up notebooks, creates a project file, and\n    appends to a `.gitignore` file.\n    "
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    '\n    Initialize a new Great Expectations project.\n\n    This guided input walks the user through setting up a new project and also\n    onboards a new developer in an existing project.\n\n    It scaffolds directories, sets up notebooks, creates a project file, and\n    appends to a `.gitignore` file.\n    '
     target_directory = os.path.abspath(target_directory)
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
@@ -73,32 +39,23 @@ def init(target_directory, view, usage_stats) -> None:
             if DataContext.is_project_initialized(ge_dir):
                 cli_message(PROJECT_IS_COMPLETE)
         except (DataContextError, DatasourceInitializationError) as e:
-            cli_message(f"<red>{e.message}</red>")
+            cli_message(f'<red>{e.message}</red>')
             sys.exit(1)
         try:
-            context = DataContext.create(
-                target_directory, usage_statistics_enabled=usage_stats
-            )
+            context = DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
             cli_message(ONBOARDING_COMPLETE)
         except DataContextError as e:
-            cli_message(f"<red>{e.message}</red>")
+            cli_message(f'<red>{e.message}</red>')
             exit(5)
     else:
-        if not click.confirm(LETS_BEGIN_PROMPT, default=True):
+        if (not click.confirm(LETS_BEGIN_PROMPT, default=True)):
             cli_message(RUN_INIT_AGAIN)
             exit(0)
         try:
-            context = DataContext.create(
-                target_directory, usage_statistics_enabled=usage_stats
-            )
-            send_usage_message(
-                data_context=context,
-                event="cli.init.create",
-                api_version="v2",
-                success=True,
-            )
+            context = DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
+            send_usage_message(data_context=context, event='cli.init.create', api_version='v2', success=True)
         except DataContextError as e:
-            cli_message(f"<red>{e}</red>")
+            cli_message(f'<red>{e}</red>')
     try:
         context = DataContext(ge_dir)
         if context.list_expectation_suites():
@@ -106,110 +63,71 @@ def init(target_directory, view, usage_stats) -> None:
                 build_docs(context, view=view)
         else:
             datasources = context.list_datasources()
-            if len(datasources) == 0:
+            if (len(datasources) == 0):
                 cli_message(SECTION_SEPARATOR)
-                if not click.confirm(
-                    "Would you like to configure a Datasource?", default=True
-                ):
-                    cli_message("Okay, bye!")
+                if (not click.confirm('Would you like to configure a Datasource?', default=True)):
+                    cli_message('Okay, bye!')
                     sys.exit(1)
-                (datasource_name, data_source_type) = add_datasource_impl(
-                    context, choose_one_data_asset=False
-                )
-                if not datasource_name:
+                (datasource_name, data_source_type) = add_datasource_impl(context, choose_one_data_asset=False)
+                if (not datasource_name):
                     sys.exit(1)
             datasources = context.list_datasources()
-            if len(datasources) == 1:
-                datasource_name = datasources[0]["name"]
+            if (len(datasources) == 1):
+                datasource_name = datasources[0]['name']
                 cli_message(SECTION_SEPARATOR)
-                if not click.confirm(
-                    "Would you like to profile new Expectations for a single data asset within your new Datasource?",
-                    default=True,
-                ):
-                    cli_message(
-                        "Okay, exiting now. To learn more about Profilers, run great_expectations profile --help or visit docs.greatexpectations.io!"
-                    )
+                if (not click.confirm('Would you like to profile new Expectations for a single data asset within your new Datasource?', default=True)):
+                    cli_message('Okay, exiting now. To learn more about Profilers, run great_expectations profile --help or visit docs.greatexpectations.io!')
                     sys.exit(1)
-                (
-                    success,
-                    suite_name,
-                    profiling_results,
-                ) = toolkit.create_expectation_suite(
-                    context,
-                    datasource_name=datasource_name,
-                    additional_batch_kwargs={"limit": 1000},
-                    flag_build_docs=False,
-                    open_docs=False,
-                )
+                (success, suite_name, profiling_results) = toolkit.create_expectation_suite(context, datasource_name=datasource_name, additional_batch_kwargs={'limit': 1000}, flag_build_docs=False, open_docs=False)
                 cli_message(SECTION_SEPARATOR)
-                if not click.confirm(
-                    "Would you like to build Data Docs?", default=True
-                ):
-                    cli_message(
-                        "Okay, exiting now. To learn more about Data Docs, run great_expectations docs --help or visit docs.greatexpectations.io!"
-                    )
+                if (not click.confirm('Would you like to build Data Docs?', default=True)):
+                    cli_message('Okay, exiting now. To learn more about Data Docs, run great_expectations docs --help or visit docs.greatexpectations.io!')
                     sys.exit(1)
                 build_docs(context, view=False)
-                if not click.confirm(
-                    "\nWould you like to view your new Expectations in Data Docs? This will open a new browser window.",
-                    default=True,
-                ):
-                    cli_message(
-                        "Okay, exiting now. You can view the site that has been created in a browser, or visit docs.greatexpectations.io for more information!"
-                    )
+                if (not click.confirm('\nWould you like to view your new Expectations in Data Docs? This will open a new browser window.', default=True)):
+                    cli_message('Okay, exiting now. You can view the site that has been created in a browser, or visit docs.greatexpectations.io for more information!')
                     sys.exit(1)
-                toolkit.attempt_to_open_validation_results_in_data_docs(
-                    context, profiling_results
-                )
+                toolkit.attempt_to_open_validation_results_in_data_docs(context, profiling_results)
                 cli_message(SECTION_SEPARATOR)
                 cli_message(SETUP_SUCCESS)
                 sys.exit(0)
-    except (
-        DataContextError,
-        ge_exceptions.ProfilerError,
-        OSError,
-        SQLAlchemyError,
-    ) as e:
-        cli_message(f"<red>{e}</red>")
+    except (DataContextError, ge_exceptions.ProfilerError, OSError, SQLAlchemyError) as e:
+        cli_message(f'<red>{e}</red>')
         sys.exit(1)
-
 
 def _slack_setup(context):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     webhook_url = None
     cli_message(SLACK_SETUP_INTRO)
-    if not click.confirm(SLACK_SETUP_PROMPT, default=True):
+    if (not click.confirm(SLACK_SETUP_PROMPT, default=True)):
         cli_message(SLACK_LATER)
         return context
     else:
-        webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
-    while not is_sane_slack_webhook(webhook_url):
-        cli_message("That URL was not valid.\n")
-        if not click.confirm(SLACK_SETUP_PROMPT, default=True):
+        webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default='')
+    while (not is_sane_slack_webhook(webhook_url)):
+        cli_message('That URL was not valid.\n')
+        if (not click.confirm(SLACK_SETUP_PROMPT, default=True)):
             cli_message(SLACK_LATER)
             return context
-        webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
-    context.save_config_variable("validation_notification_slack_webhook", webhook_url)
+        webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default='')
+    context.save_config_variable('validation_notification_slack_webhook', webhook_url)
     cli_message(SLACK_SETUP_COMPLETE)
     return context
 
-
 def _get_full_path_to_ge_dir(target_directory):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))

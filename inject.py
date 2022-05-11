@@ -1,7 +1,7 @@
 """
 1. Run this script to modify great_expectations/
-2. Run `black` to check for any bad injections
-  - Resolve as needed (should be very minimal)
+2. Resolve any conflicts but DO NOT run `black` or other formatters.
+  - Should be minimal (if any)
 3. Run `pytest` (with `-s` if required)
 """
 
@@ -17,9 +17,9 @@ __frame = inspect.currentframe()
 __file = __frame.f_code.co_filename
 __func = __frame.f_code.co_name
 for k, v in __frame.f_locals.items():
-    if any(var in k for var in ('__frame', '__file', '__func')):
+    if any(var in k for var in ('self', 'cls', '__frame', '__file', '__func')):
         continue
-    print(f'<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}')
+    print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
 """
 
 

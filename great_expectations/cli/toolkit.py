@@ -1,3 +1,4 @@
+
 import json
 import logging
 import os
@@ -6,9 +7,7 @@ import sys
 from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
-
 import click
-
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -22,491 +21,284 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
 from great_expectations.datasource import BaseDatasource
 from great_expectations.validator.validator import Validator
-
 logger = logging.getLogger(__name__)
-EXIT_UPGRADE_CONTINUATION_MESSAGE = "\nOk, exiting now. To upgrade at a later time, use the following command: <cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>.\n"
+EXIT_UPGRADE_CONTINUATION_MESSAGE = '\nOk, exiting now. To upgrade at a later time, use the following command: <cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>.\n'
 
-
-def prompt_profile_to_create_a_suite(
-    data_context: DataContext, expectation_suite_name: str
-) -> None:
+def prompt_profile_to_create_a_suite(data_context: DataContext, expectation_suite_name: str) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    cli_message(
-        string='\nGreat Expectations will create a notebook, containing code cells that select from available columns in your dataset and\ngenerate expectations about them to demonstrate some examples of assertions you can make about your data.\n\nWhen you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "{:s}" here:\n\n  {:s}\n'.format(
-            expectation_suite_name,
-            data_context.stores[
-                data_context.expectations_store_name
-            ].store_backend.get_url_for_key(
-                ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite_name
-                ).to_tuple()
-            ),
-        )
-    )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    cli_message(string='\nGreat Expectations will create a notebook, containing code cells that select from available columns in your dataset and\ngenerate expectations about them to demonstrate some examples of assertions you can make about your data.\n\nWhen you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "{:s}" here:\n\n  {:s}\n'.format(expectation_suite_name, data_context.stores[data_context.expectations_store_name].store_backend.get_url_for_key(ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name).to_tuple())))
     confirm_proceed_or_exit()
 
-
-def get_or_create_expectation_suite(
-    expectation_suite_name: str,
-    data_context: DataContext,
-    data_asset_name: Optional[str] = None,
-    usage_event: Optional[str] = None,
-    suppress_usage_message: bool = False,
-    batch_request: Optional[
-        Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
-    ] = None,
-    create_if_not_exist: bool = True,
-) -> ExpectationSuite:
+def get_or_create_expectation_suite(expectation_suite_name: str, data_context: DataContext, data_asset_name: Optional[str]=None, usage_event: Optional[str]=None, suppress_usage_message: bool=False, batch_request: Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]=None, create_if_not_exist: bool=True) -> ExpectationSuite:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    if expectation_suite_name is None:
-        default_expectation_suite_name: str = get_default_expectation_suite_name(
-            data_asset_name=data_asset_name, batch_request=batch_request
-        )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    if (expectation_suite_name is None):
+        default_expectation_suite_name: str = get_default_expectation_suite_name(data_asset_name=data_asset_name, batch_request=batch_request)
         while True:
-            expectation_suite_name = click.prompt(
-                "\nName the new Expectation Suite",
-                default=default_expectation_suite_name,
-            )
-            if (
-                expectation_suite_name
-                not in data_context.list_expectation_suite_names()
-            ):
+            expectation_suite_name = click.prompt('\nName the new Expectation Suite', default=default_expectation_suite_name)
+            if (expectation_suite_name not in data_context.list_expectation_suite_names()):
                 break
-            tell_user_suite_exists(
-                data_context=data_context,
-                expectation_suite_name=expectation_suite_name,
-                usage_event=usage_event,
-                suppress_usage_message=suppress_usage_message,
-            )
-    elif expectation_suite_name in data_context.list_expectation_suite_names():
-        tell_user_suite_exists(
-            data_context=data_context,
-            expectation_suite_name=expectation_suite_name,
-            usage_event=usage_event,
-            suppress_usage_message=suppress_usage_message,
-        )
-    suite: ExpectationSuite = load_expectation_suite(
-        data_context=data_context,
-        expectation_suite_name=expectation_suite_name,
-        usage_event=usage_event,
-        suppress_usage_message=suppress_usage_message,
-        create_if_not_exist=create_if_not_exist,
-    )
+            tell_user_suite_exists(data_context=data_context, expectation_suite_name=expectation_suite_name, usage_event=usage_event, suppress_usage_message=suppress_usage_message)
+    elif (expectation_suite_name in data_context.list_expectation_suite_names()):
+        tell_user_suite_exists(data_context=data_context, expectation_suite_name=expectation_suite_name, usage_event=usage_event, suppress_usage_message=suppress_usage_message)
+    suite: ExpectationSuite = load_expectation_suite(data_context=data_context, expectation_suite_name=expectation_suite_name, usage_event=usage_event, suppress_usage_message=suppress_usage_message, create_if_not_exist=create_if_not_exist)
     return suite
 
-
-def get_default_expectation_suite_name(
-    data_asset_name: str,
-    batch_request: Optional[
-        Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
-    ] = None,
-) -> str:
+def get_default_expectation_suite_name(data_asset_name: str, batch_request: Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]=None) -> str:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     suite_name: str
     if data_asset_name:
-        suite_name = f"{data_asset_name}.warning"
+        suite_name = f'{data_asset_name}.warning'
     elif batch_request:
-        suite_name = f"batch-{BatchRequest(**batch_request).id}"
+        suite_name = f'batch-{BatchRequest(**batch_request).id}'
     else:
-        suite_name = "warning"
+        suite_name = 'warning'
     return suite_name
 
-
-def tell_user_suite_exists(
-    data_context: DataContext,
-    expectation_suite_name: str,
-    usage_event: str,
-    suppress_usage_message: bool = False,
-) -> None:
+def tell_user_suite_exists(data_context: DataContext, expectation_suite_name: str, usage_event: str, suppress_usage_message: bool=False) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    exit_with_failure_message_and_stats(
-        data_context=data_context,
-        usage_event=usage_event,
-        suppress_usage_message=suppress_usage_message,
-        message=f"""<red>An expectation suite named `{expectation_suite_name}` already exists.</red>
-    - If you intend to edit the suite please use `great_expectations suite edit {expectation_suite_name}`.""",
-    )
-
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    exit_with_failure_message_and_stats(data_context=data_context, usage_event=usage_event, suppress_usage_message=suppress_usage_message, message=f'''<red>An expectation suite named `{expectation_suite_name}` already exists.</red>
+    - If you intend to edit the suite please use `great_expectations suite edit {expectation_suite_name}`.''')
 
 def launch_jupyter_notebook(notebook_path: str) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    jupyter_command_override: Optional[str] = os.getenv("GE_JUPYTER_CMD", None)
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    jupyter_command_override: Optional[str] = os.getenv('GE_JUPYTER_CMD', None)
     if jupyter_command_override:
-        subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
+        subprocess.call(f'{jupyter_command_override} {notebook_path}', shell=True)
     else:
-        subprocess.call(["jupyter", "notebook", notebook_path])
+        subprocess.call(['jupyter', 'notebook', notebook_path])
 
-
-def get_validator(
-    context: DataContext,
-    batch_request: Union[(dict, BatchRequest)],
-    suite: Union[(str, ExpectationSuite)],
-) -> Validator:
+def get_validator(context: DataContext, batch_request: Union[(dict, BatchRequest)], suite: Union[(str, ExpectationSuite)]) -> Validator:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    assert isinstance(
-        suite, (str, ExpectationSuite)
-    ), "Invalid suite type (must be ExpectationSuite) or a string."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    assert isinstance(suite, (str, ExpectationSuite)), 'Invalid suite type (must be ExpectationSuite) or a string.'
     if isinstance(batch_request, dict):
         batch_request = BatchRequest(**batch_request)
     validator: Validator
     if isinstance(suite, str):
-        validator = context.get_validator(
-            batch_request=batch_request, expectation_suite_name=suite
-        )
+        validator = context.get_validator(batch_request=batch_request, expectation_suite_name=suite)
     else:
-        validator = context.get_validator(
-            batch_request=batch_request, expectation_suite=suite
-        )
+        validator = context.get_validator(batch_request=batch_request, expectation_suite=suite)
     return validator
 
-
-def load_expectation_suite(
-    data_context: DataContext,
-    expectation_suite_name: str,
-    usage_event: str,
-    suppress_usage_message: bool = False,
-    create_if_not_exist: bool = True,
-) -> Optional[ExpectationSuite]:
+def load_expectation_suite(data_context: DataContext, expectation_suite_name: str, usage_event: str, suppress_usage_message: bool=False, create_if_not_exist: bool=True) -> Optional[ExpectationSuite]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "\n    Load an expectation suite from a given context.\n\n    Handles a suite name with or without `.json`\n    :param data_context:\n    :param expectation_suite_name:\n    :param usage_event:\n    :param suppress_usage_message:\n    :param create_if_not_exist:\n    "
-    if expectation_suite_name.endswith(".json"):
-        expectation_suite_name = expectation_suite_name[:(-5)]
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    '\n    Load an expectation suite from a given context.\n\n    Handles a suite name with or without `.json`\n    :param data_context:\n    :param expectation_suite_name:\n    :param usage_event:\n    :param suppress_usage_message:\n    :param create_if_not_exist:\n    '
+    if expectation_suite_name.endswith('.json'):
+        expectation_suite_name = expectation_suite_name[:(- 5)]
     suite: Optional[ExpectationSuite]
     try:
-        suite = data_context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
+        suite = data_context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
         return suite
     except ge_exceptions.DataContextError:
         if create_if_not_exist:
-            suite = data_context.create_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
+            suite = data_context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
             return suite
         else:
             suite = None
-            exit_with_failure_message_and_stats(
-                data_context=data_context,
-                usage_event=usage_event,
-                suppress_usage_message=suppress_usage_message,
-                message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check the name by running `great_expectations suite list` and try again.",
-            )
+            exit_with_failure_message_and_stats(data_context=data_context, usage_event=usage_event, suppress_usage_message=suppress_usage_message, message=f'<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check the name by running `great_expectations suite list` and try again.')
 
-
-def exit_with_failure_message_and_stats(
-    data_context: DataContext,
-    usage_event: str,
-    suppress_usage_message: bool = False,
-    message: Optional[str] = None,
-) -> None:
+def exit_with_failure_message_and_stats(data_context: DataContext, usage_event: str, suppress_usage_message: bool=False, message: Optional[str]=None) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     if message:
         cli_message(string=message)
-    if not suppress_usage_message:
+    if (not suppress_usage_message):
         send_usage_message(data_context=data_context, event=usage_event, success=False)
     sys.exit(1)
 
-
-def delete_checkpoint(
-    context: DataContext, checkpoint_name: str, usage_event: str, assume_yes: bool
-) -> None:
+def delete_checkpoint(context: DataContext, checkpoint_name: str, usage_event: str, assume_yes: bool) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Delete a Checkpoint or raise helpful errors."
-    validate_checkpoint(
-        context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
-    )
-    confirm_prompt: str = f"""
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Delete a Checkpoint or raise helpful errors.'
+    validate_checkpoint(context=context, checkpoint_name=checkpoint_name, usage_event=usage_event)
+    confirm_prompt: str = f'''
 Are you sure you want to delete the Checkpoint "{checkpoint_name}" (this action is irreversible)?"
-"""
-    continuation_message: str = (
-        f'The Checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
-    )
-    if not assume_yes:
-        confirm_proceed_or_exit(
-            confirm_prompt=confirm_prompt,
-            continuation_message=continuation_message,
-            data_context=context,
-            usage_stats_event=usage_event,
-        )
+'''
+    continuation_message: str = f'The Checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
+    if (not assume_yes):
+        confirm_proceed_or_exit(confirm_prompt=confirm_prompt, continuation_message=continuation_message, data_context=context, usage_stats_event=usage_event)
     context.delete_checkpoint(name=checkpoint_name)
 
-
-def run_checkpoint(
-    context: DataContext, checkpoint_name: str, usage_event: str
-) -> CheckpointResult:
+def run_checkpoint(context: DataContext, checkpoint_name: str, usage_event: str) -> CheckpointResult:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Run a Checkpoint or raise helpful errors."
-    failure_message: str = "Exception occurred while running Checkpoint."
-    validate_checkpoint(
-        context=context,
-        checkpoint_name=checkpoint_name,
-        usage_event=usage_event,
-        failure_message=failure_message,
-    )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Run a Checkpoint or raise helpful errors.'
+    failure_message: str = 'Exception occurred while running Checkpoint.'
+    validate_checkpoint(context=context, checkpoint_name=checkpoint_name, usage_event=usage_event, failure_message=failure_message)
     try:
-        result: CheckpointResult = context.run_checkpoint(
-            checkpoint_name=checkpoint_name
-        )
+        result: CheckpointResult = context.run_checkpoint(checkpoint_name=checkpoint_name)
         return result
     except ge_exceptions.CheckpointError as e:
         cli_message(string=failure_message)
-        exit_with_failure_message_and_stats(
-            data_context=context, usage_event=usage_event, message=f"<red>{e}.</red>"
-        )
+        exit_with_failure_message_and_stats(data_context=context, usage_event=usage_event, message=f'<red>{e}.</red>')
 
-
-def validate_checkpoint(
-    context: DataContext,
-    checkpoint_name: str,
-    usage_event: str,
-    failure_message: Optional[str] = None,
-) -> None:
+def validate_checkpoint(context: DataContext, checkpoint_name: str, usage_event: str, failure_message: Optional[str]=None) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     try:
-        checkpoint: Union[(Checkpoint, LegacyCheckpoint)] = load_checkpoint(
-            context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
-        )
+        checkpoint: Union[(Checkpoint, LegacyCheckpoint)] = load_checkpoint(context=context, checkpoint_name=checkpoint_name, usage_event=usage_event)
     except ge_exceptions.CheckpointError as e:
         if failure_message:
             cli_message(string=failure_message)
-        exit_with_failure_message_and_stats(
-            data_context=context, usage_event=usage_event, message=f"<red>{e}.</red>"
-        )
+        exit_with_failure_message_and_stats(data_context=context, usage_event=usage_event, message=f'<red>{e}.</red>')
 
-
-def load_checkpoint(
-    context: DataContext, checkpoint_name: str, usage_event: str
-) -> Union[(Checkpoint, LegacyCheckpoint)]:
+def load_checkpoint(context: DataContext, checkpoint_name: str, usage_event: str) -> Union[(Checkpoint, LegacyCheckpoint)]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Load a Checkpoint or raise helpful errors."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Load a Checkpoint or raise helpful errors.'
     try:
-        checkpoint: Union[(Checkpoint, LegacyCheckpoint)] = context.get_checkpoint(
-            name=checkpoint_name
-        )
+        checkpoint: Union[(Checkpoint, LegacyCheckpoint)] = context.get_checkpoint(name=checkpoint_name)
         return checkpoint
-    except (
-        ge_exceptions.CheckpointNotFoundError,
-        ge_exceptions.InvalidCheckpointConfigError,
-    ):
-        exit_with_failure_message_and_stats(
-            data_context=context,
-            usage_event=usage_event,
-            message=f"""<red>Could not find Checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
+    except (ge_exceptions.CheckpointNotFoundError, ge_exceptions.InvalidCheckpointConfigError):
+        exit_with_failure_message_and_stats(data_context=context, usage_event=usage_event, message=f'''<red>Could not find Checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
   - `<green>great_expectations checkpoint list</green>` to verify your Checkpoint exists
-  - `<green>great_expectations checkpoint new</green>` to configure a new Checkpoint""",
-        )
+  - `<green>great_expectations checkpoint new</green>` to configure a new Checkpoint''')
 
-
-def select_datasource(
-    context: DataContext, datasource_name: str = None
-) -> BaseDatasource:
+def select_datasource(context: DataContext, datasource_name: str=None) -> BaseDatasource:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Select a datasource interactively."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Select a datasource interactively.'
     data_source: Optional[BaseDatasource] = None
-    if datasource_name is None:
-        data_sources: List[BaseDatasource] = cast(
-            List[BaseDatasource],
-            list(
-                sorted(
-                    context.datasources.values(), key=(lambda x: (len(x.name), x.name))
-                )
-            ),
-        )
-        if len(data_sources) == 0:
-            cli_message(
-                string="<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
-            )
-        elif len(data_sources) == 1:
+    if (datasource_name is None):
+        data_sources: List[BaseDatasource] = cast(List[BaseDatasource], list(sorted(context.datasources.values(), key=(lambda x: (len(x.name), x.name)))))
+        if (len(data_sources) == 0):
+            cli_message(string='<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>')
+        elif (len(data_sources) == 1):
             datasource_name = data_sources[0].name
         else:
-            choices: str = "\n".join(
-                [
-                    f"    {i}. {data_source.name}"
-                    for (i, data_source) in enumerate(data_sources, 1)
-                ]
-            )
-            option_selection: str = click.prompt(
-                f"""Select a datasource
+            choices: str = '\n'.join([f'    {i}. {data_source.name}' for (i, data_source) in enumerate(data_sources, 1)])
+            option_selection: str = click.prompt(f'''Select a datasource
 {choices}
-""",
-                type=click.Choice(
-                    [str(i) for (i, data_source) in enumerate(data_sources, 1)]
-                ),
-                show_choices=False,
-            )
+''', type=click.Choice([str(i) for (i, data_source) in enumerate(data_sources, 1)]), show_choices=False)
             datasource_name = data_sources[(int(option_selection) - 1)].name
-    if datasource_name is not None:
+    if (datasource_name is not None):
         data_source = context.get_datasource(datasource_name=datasource_name)
     return data_source
 
-
-def load_data_context_with_error_handling(
-    directory: str, from_cli_upgrade_command: bool = False
-) -> Optional[DataContext]:
+def load_data_context_with_error_handling(directory: str, from_cli_upgrade_command: bool=False) -> Optional[DataContext]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Return a DataContext with good error handling and exit codes."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Return a DataContext with good error handling and exit codes.'
     context: Optional[DataContext]
     ge_config_version: float
     try:
-        directory = directory or DataContext.find_context_root_dir()
+        directory = (directory or DataContext.find_context_root_dir())
         context = DataContext(context_root_dir=directory)
         ge_config_version = context.get_config().config_version
         if from_cli_upgrade_command:
-            if ge_config_version < CURRENT_GE_CONFIG_VERSION:
-                context = upgrade_project_one_or_multiple_versions_increment(
-                    directory=directory,
-                    context=context,
-                    ge_config_version=ge_config_version,
-                    from_cli_upgrade_command=from_cli_upgrade_command,
-                )
-            elif ge_config_version > CURRENT_GE_CONFIG_VERSION:
-                raise ge_exceptions.UnsupportedConfigVersionError(
-                    f"""Invalid config version ({ge_config_version}).
+            if (ge_config_version < CURRENT_GE_CONFIG_VERSION):
+                context = upgrade_project_one_or_multiple_versions_increment(directory=directory, context=context, ge_config_version=ge_config_version, from_cli_upgrade_command=from_cli_upgrade_command)
+            elif (ge_config_version > CURRENT_GE_CONFIG_VERSION):
+                raise ge_exceptions.UnsupportedConfigVersionError(f'''Invalid config version ({ge_config_version}).
     The maximum valid version is {CURRENT_GE_CONFIG_VERSION}.
-"""
-                )
+''')
             else:
-                context = upgrade_project_zero_versions_increment(
-                    directory=directory,
-                    context=context,
-                    ge_config_version=ge_config_version,
-                    from_cli_upgrade_command=from_cli_upgrade_command,
-                )
+                context = upgrade_project_zero_versions_increment(directory=directory, context=context, ge_config_version=ge_config_version, from_cli_upgrade_command=from_cli_upgrade_command)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
-        directory = directory or DataContext.find_context_root_dir()
-        ge_config_version = DataContext.get_ge_config_version(
-            context_root_dir=directory
-        )
-        context = upgrade_project_strictly_multiple_versions_increment(
-            directory=directory,
-            ge_config_version=ge_config_version,
-            from_cli_upgrade_command=from_cli_upgrade_command,
-        )
+        directory = (directory or DataContext.find_context_root_dir())
+        ge_config_version = DataContext.get_ge_config_version(context_root_dir=directory)
+        context = upgrade_project_strictly_multiple_versions_increment(directory=directory, ge_config_version=ge_config_version, from_cli_upgrade_command=from_cli_upgrade_command)
         if context:
             return context
         else:
-            cli_message(string=f"<red>{err.message}</red>")
+            cli_message(string=f'<red>{err.message}</red>')
             sys.exit(1)
     except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidConfigError) as err:
-        cli_message(string=f"<red>{err.message}</red>")
+        cli_message(string=f'<red>{err.message}</red>')
         sys.exit(1)
     except ge_exceptions.PluginModuleNotFoundError as err:
         cli_message(string=err.cli_colored_message)
@@ -515,406 +307,248 @@ def load_data_context_with_error_handling(
         cli_message(string=err.cli_colored_message)
         sys.exit(1)
     except ge_exceptions.InvalidConfigurationYamlError as err:
-        cli_message(string=f"<red>{str(err)}</red>")
+        cli_message(string=f'<red>{str(err)}</red>')
         sys.exit(1)
 
-
-def upgrade_project_strictly_multiple_versions_increment(
-    directory: str, ge_config_version: float, from_cli_upgrade_command: bool = False
-) -> Optional[DataContext]:
+def upgrade_project_strictly_multiple_versions_increment(directory: str, ge_config_version: float, from_cli_upgrade_command: bool=False) -> Optional[DataContext]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    upgrade_helper_class = (
-        GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-        if ge_config_version
-        else None
-    )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    upgrade_helper_class = (GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version)) if ge_config_version else None)
     context: Optional[DataContext]
-    if upgrade_helper_class and (int(ge_config_version) < CURRENT_GE_CONFIG_VERSION):
-        upgrade_project(
-            context_root_dir=directory,
-            ge_config_version=ge_config_version,
-            from_cli_upgrade_command=from_cli_upgrade_command,
-        )
+    if (upgrade_helper_class and (int(ge_config_version) < CURRENT_GE_CONFIG_VERSION)):
+        upgrade_project(context_root_dir=directory, ge_config_version=ge_config_version, from_cli_upgrade_command=from_cli_upgrade_command)
         context = DataContext(context_root_dir=directory)
         try:
-            send_usage_message(
-                data_context=context,
-                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
-                success=True,
-            )
+            send_usage_message(data_context=context, event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value, success=True)
         except Exception:
             pass
     else:
         context = None
     return context
 
-
-def upgrade_project(
-    context_root_dir: str,
-    ge_config_version: float,
-    from_cli_upgrade_command: bool = False,
-) -> None:
+def upgrade_project(context_root_dir: str, ge_config_version: float, from_cli_upgrade_command: bool=False) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     if from_cli_upgrade_command:
-        message = f"""<red>
-Your project appears to have an out-of-date config version ({ge_config_version}) - the version number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>"""
+        message = f'''<red>
+Your project appears to have an out-of-date config version ({ge_config_version}) - the version number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>'''
     else:
-        message = f"""<red>
+        message = f'''<red>
 Your project appears to have an out-of-date config version ({ge_config_version}) - the version number must be at least {CURRENT_GE_CONFIG_VERSION}.
-In order to proceed, your project must be upgraded.</red>"""
+In order to proceed, your project must be upgraded.</red>'''
     cli_message(string=message)
-    upgrade_prompt = (
-        "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
-    )
+    upgrade_prompt = '\nWould you like to run the Upgrade Helper to bring your project up-to-date?'
     try:
         data_context = DataContext(context_root_dir)
     except Exception:
         data_context = None
-    confirm_proceed_or_exit(
-        confirm_prompt=upgrade_prompt,
-        continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-        data_context=data_context,
-        usage_stats_event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
-    )
+    confirm_proceed_or_exit(confirm_prompt=upgrade_prompt, continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE, data_context=data_context, usage_stats_event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value)
     cli_message(string=SECTION_SEPARATOR)
-    while int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
-        (
-            increment_version,
-            exception_occurred,
-        ) = upgrade_project_up_to_one_version_increment(
-            context_root_dir=context_root_dir,
-            ge_config_version=ge_config_version,
-            continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-            update_version=True,
-            from_cli_upgrade_command=from_cli_upgrade_command,
-        )
-        if exception_occurred or (not increment_version):
+    while (int(ge_config_version) < CURRENT_GE_CONFIG_VERSION):
+        (increment_version, exception_occurred) = upgrade_project_up_to_one_version_increment(context_root_dir=context_root_dir, ge_config_version=ge_config_version, continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE, update_version=True, from_cli_upgrade_command=from_cli_upgrade_command)
+        if (exception_occurred or (not increment_version)):
             break
         ge_config_version += 1.0
     cli_message(string=SECTION_SEPARATOR)
-    upgrade_success_message = "<green>Upgrade complete. Exiting...</green>\n"
-    upgrade_incomplete_message = f"""<red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
+    upgrade_success_message = '<green>Upgrade complete. Exiting...</green>\n'
+    upgrade_incomplete_message = f'''<red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
 
     - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
     - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{(ge_config_version + 1.0)}</cyan>
 
 To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>
-"""
-    if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+'''
+    if (int(ge_config_version) < CURRENT_GE_CONFIG_VERSION):
         cli_message(string=upgrade_incomplete_message)
     else:
         cli_message(upgrade_success_message)
     try:
         data_context: DataContext = DataContext(context_root_dir=context_root_dir)
-        send_usage_message(
-            data_context=data_context,
-            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
-            success=True,
-        )
+        send_usage_message(data_context=data_context, event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value, success=True)
     except Exception:
         pass
     sys.exit(0)
 
-
-def upgrade_project_one_or_multiple_versions_increment(
-    directory: str,
-    context: DataContext,
-    ge_config_version: float,
-    from_cli_upgrade_command: bool = False,
-) -> Optional[DataContext]:
+def upgrade_project_one_or_multiple_versions_increment(directory: str, context: DataContext, ge_config_version: float, from_cli_upgrade_command: bool=False) -> Optional[DataContext]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     try:
-        send_usage_message(
-            data_context=context,
-            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN.value,
-            success=True,
-        )
+        send_usage_message(data_context=context, event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN.value, success=True)
     except Exception:
         pass
     upgrade_successful: bool = False
-    if (CURRENT_GE_CONFIG_VERSION - int(ge_config_version)) == 1:
-        (
-            increment_version,
-            exception_occurred,
-        ) = upgrade_project_up_to_one_version_increment(
-            context_root_dir=directory,
-            ge_config_version=ge_config_version,
-            continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-            update_version=True,
-            from_cli_upgrade_command=from_cli_upgrade_command,
-        )
-        if (not exception_occurred) and increment_version:
+    if ((CURRENT_GE_CONFIG_VERSION - int(ge_config_version)) == 1):
+        (increment_version, exception_occurred) = upgrade_project_up_to_one_version_increment(context_root_dir=directory, ge_config_version=ge_config_version, continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE, update_version=True, from_cli_upgrade_command=from_cli_upgrade_command)
+        if ((not exception_occurred) and increment_version):
             upgrade_successful = True
     else:
-        upgrade_project(
-            context_root_dir=directory,
-            ge_config_version=ge_config_version,
-            from_cli_upgrade_command=from_cli_upgrade_command,
-        )
+        upgrade_project(context_root_dir=directory, ge_config_version=ge_config_version, from_cli_upgrade_command=from_cli_upgrade_command)
         upgrade_successful = True
     if upgrade_successful:
-        upgrade_helper_class = (
-            GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-            if ge_config_version
-            else None
-        )
+        upgrade_helper_class = (GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version)) if ge_config_version else None)
         if upgrade_helper_class:
-            upgrade_helper = upgrade_helper_class(
-                context_root_dir=directory, update_version=False
-            )
+            upgrade_helper = upgrade_helper_class(context_root_dir=directory, update_version=False)
         else:
-            error_message: str = f"The upgrade utility for version {ge_config_version} could not be found."
-            cli_message(string=f"<red>{error_message}</red>")
+            error_message: str = f'The upgrade utility for version {ge_config_version} could not be found.'
+            cli_message(string=f'<red>{error_message}</red>')
             sys.exit(1)
         manual_steps_required = upgrade_helper.manual_steps_required()
         if manual_steps_required:
-            upgrade_message = "Your project requires manual upgrade steps in order to be up-to-date.\n"
-            cli_message(f"<yellow>{upgrade_message}</yellow>")
+            upgrade_message = 'Your project requires manual upgrade steps in order to be up-to-date.\n'
+            cli_message(f'<yellow>{upgrade_message}</yellow>')
         else:
-            upgrade_message = (
-                "Your project is up-to-date - no further upgrade is necessary.\n"
-            )
-            cli_message(f"<green>{upgrade_message}</green>")
+            upgrade_message = 'Your project is up-to-date - no further upgrade is necessary.\n'
+            cli_message(f'<green>{upgrade_message}</green>')
         context = DataContext(context_root_dir=directory)
         try:
-            send_usage_message(
-                data_context=context,
-                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
-                success=True,
-            )
+            send_usage_message(data_context=context, event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value, success=True)
         except Exception:
             pass
     else:
         context = None
     return context
 
-
-def upgrade_project_zero_versions_increment(
-    directory: str,
-    context: DataContext,
-    ge_config_version: float,
-    from_cli_upgrade_command: bool = False,
-) -> Optional[DataContext]:
+def upgrade_project_zero_versions_increment(directory: str, context: DataContext, ge_config_version: float, from_cli_upgrade_command: bool=False) -> Optional[DataContext]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    upgrade_helper_class = (
-        GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-        if ge_config_version
-        else None
-    )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    upgrade_helper_class = (GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version)) if ge_config_version else None)
     if upgrade_helper_class:
-        upgrade_helper = upgrade_helper_class(
-            context_root_dir=directory, update_version=False
-        )
+        upgrade_helper = upgrade_helper_class(context_root_dir=directory, update_version=False)
     else:
-        error_message: str = (
-            f"The upgrade utility for version {ge_config_version} could not be found."
-        )
-        cli_message(string=f"<red>{error_message}</red>")
+        error_message: str = f'The upgrade utility for version {ge_config_version} could not be found.'
+        cli_message(string=f'<red>{error_message}</red>')
         sys.exit(1)
     manual_steps_required = upgrade_helper.manual_steps_required()
     if manual_steps_required:
         try:
-            send_usage_message(
-                data_context=context,
-                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN.value,
-                success=True,
-            )
+            send_usage_message(data_context=context, event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN.value, success=True)
         except Exception:
             pass
-    (
-        increment_version,
-        exception_occurred,
-    ) = upgrade_project_up_to_one_version_increment(
-        context_root_dir=directory,
-        ge_config_version=ge_config_version,
-        continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-        update_version=False,
-        from_cli_upgrade_command=from_cli_upgrade_command,
-    )
-    if exception_occurred or increment_version:
+    (increment_version, exception_occurred) = upgrade_project_up_to_one_version_increment(context_root_dir=directory, ge_config_version=ge_config_version, continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE, update_version=False, from_cli_upgrade_command=from_cli_upgrade_command)
+    if (exception_occurred or increment_version):
         context = None
     else:
         if manual_steps_required:
-            upgrade_message = "Your project requires manual upgrade steps in order to be up-to-date.\n"
-            cli_message(f"<yellow>{upgrade_message}</yellow>")
+            upgrade_message = 'Your project requires manual upgrade steps in order to be up-to-date.\n'
+            cli_message(f'<yellow>{upgrade_message}</yellow>')
         else:
-            upgrade_message = (
-                "Your project is up-to-date - no further upgrade is necessary.\n"
-            )
-            cli_message(f"<green>{upgrade_message}</green>")
+            upgrade_message = 'Your project is up-to-date - no further upgrade is necessary.\n'
+            cli_message(f'<green>{upgrade_message}</green>')
         context = DataContext(context_root_dir=directory)
         try:
-            send_usage_message(
-                data_context=context,
-                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
-                success=True,
-            )
+            send_usage_message(data_context=context, event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value, success=True)
         except Exception:
             pass
     return context
 
-
-def upgrade_project_up_to_one_version_increment(
-    context_root_dir: str,
-    ge_config_version: float,
-    continuation_message: str,
-    update_version: bool,
-    from_cli_upgrade_command: bool = False,
-) -> Tuple[(bool, bool)]:
+def upgrade_project_up_to_one_version_increment(context_root_dir: str, ge_config_version: float, continuation_message: str, update_version: bool, from_cli_upgrade_command: bool=False) -> Tuple[(bool, bool)]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-    if not upgrade_helper_class:
+    if (not upgrade_helper_class):
         return (False, False)
-    DataContext.set_ge_config_version(
-        config_version=CURRENT_GE_CONFIG_VERSION, context_root_dir=context_root_dir
-    )
-    upgrade_helper = upgrade_helper_class(
-        context_root_dir=context_root_dir, update_version=update_version
-    )
+    DataContext.set_ge_config_version(config_version=CURRENT_GE_CONFIG_VERSION, context_root_dir=context_root_dir)
+    upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir, update_version=update_version)
     manual_steps_required = upgrade_helper.manual_steps_required()
-    if not (update_version or manual_steps_required):
+    if (not (update_version or manual_steps_required)):
         return (False, False)
     (upgrade_overview, confirmation_required) = upgrade_helper.get_upgrade_overview()
-    if from_cli_upgrade_command and confirmation_required:
-        upgrade_confirmed = confirm_proceed_or_exit(
-            confirm_prompt=upgrade_overview,
-            continuation_message=continuation_message,
-            exit_on_no=False,
-        )
+    if (from_cli_upgrade_command and confirmation_required):
+        upgrade_confirmed = confirm_proceed_or_exit(confirm_prompt=upgrade_overview, continuation_message=continuation_message, exit_on_no=False)
     else:
         upgrade_confirmed = True
     if upgrade_confirmed:
         if confirmation_required:
-            cli_message(string="\nUpgrading project...")
+            cli_message(string='\nUpgrading project...')
             cli_message(string=SECTION_SEPARATOR)
-        (
-            upgrade_report,
-            increment_version,
-            exception_occurred,
-        ) = upgrade_helper.upgrade_project()
+        (upgrade_report, increment_version, exception_occurred) = upgrade_helper.upgrade_project()
         cli_message(string=upgrade_report)
         if exception_occurred:
-            DataContext.set_ge_config_version(
-                ge_config_version, context_root_dir, validate_config_version=False
-            )
+            DataContext.set_ge_config_version(ge_config_version, context_root_dir, validate_config_version=False)
             return (False, True)
         if increment_version:
-            DataContext.set_ge_config_version(
-                (int(ge_config_version) + 1),
-                context_root_dir,
-                validate_config_version=False,
-            )
+            DataContext.set_ge_config_version((int(ge_config_version) + 1), context_root_dir, validate_config_version=False)
             return (True, False)
-        DataContext.set_ge_config_version(
-            ge_config_version, context_root_dir, validate_config_version=False
-        )
+        DataContext.set_ge_config_version(ge_config_version, context_root_dir, validate_config_version=False)
         return (False, False)
-    DataContext.set_ge_config_version(
-        ge_config_version, context_root_dir, validate_config_version=False
-    )
+    DataContext.set_ge_config_version(ge_config_version, context_root_dir, validate_config_version=False)
     cli_message(string=continuation_message)
     sys.exit(0)
 
-
-def confirm_proceed_or_exit(
-    confirm_prompt: str = "Would you like to proceed?",
-    continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
-    exit_on_no: bool = True,
-    exit_code: int = 0,
-    data_context: Optional[DataContext] = None,
-    usage_stats_event: Optional[str] = None,
-) -> bool:
+def confirm_proceed_or_exit(confirm_prompt: str='Would you like to proceed?', continuation_message: str='Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !', exit_on_no: bool=True, exit_code: int=0, data_context: Optional[DataContext]=None, usage_stats_event: Optional[str]=None) -> bool:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     "\n    Every CLI command that starts a potentially lengthy (>1 sec) computation\n    or modifies some resources (e.g., edits the config file, adds objects\n    to the stores) must follow this pattern:\n    1. Explain which resources will be created/modified/deleted\n    2. Use this method to ask for user's confirmation\n\n    The goal of this standardization is for the users to expect consistency -\n    if you saw one command, you know what to expect from all others.\n\n    If the user does not confirm, the program should exit. The purpose of the exit_on_no parameter is to provide\n    the option to perform cleanup actions before exiting outside of the function.\n    "
     confirm_prompt_colorized = cli_colorize_string(confirm_prompt)
     continuation_message_colorized = cli_colorize_string(continuation_message)
-    if not click.confirm(confirm_prompt_colorized, default=True):
+    if (not click.confirm(confirm_prompt_colorized, default=True)):
         if exit_on_no:
             cli_message(string=continuation_message_colorized)
             cli_message(string=continuation_message_colorized)
-            if (usage_stats_event is not None) and (data_context is not None):
+            if ((usage_stats_event is not None) and (data_context is not None)):
                 try:
-                    send_usage_message(
-                        data_context=data_context,
-                        event=usage_stats_event,
-                        event_payload={"cancelled": True},
-                        success=True,
-                    )
+                    send_usage_message(data_context=data_context, event=usage_stats_event, event_payload={'cancelled': True}, success=True)
                 except Exception as e:
-                    logger.debug(f"Something went wrong when sending usage stats: {e}")
+                    logger.debug(f'Something went wrong when sending usage stats: {e}')
                     pass
             sys.exit(exit_code)
         else:
             return False
     return True
 
-
 def parse_cli_config_file_location(config_file_location: str) -> dict:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     '\n    Parse CLI yaml config file or directory location into directory and filename.\n    Uses pathlib to handle windows paths.\n    Args:\n        config_file_location: string of config_file_location\n\n    Returns:\n        {\n            "directory": "directory/where/config/file/is/located",\n            "filename": "great_expectations.yml"\n        }\n    '
-    if (config_file_location is not None) and (config_file_location != ""):
+    if ((config_file_location is not None) and (config_file_location != '')):
         config_file_location_path = Path(config_file_location)
         filename: Optional[str]
         directory: Optional[str]
         if config_file_location_path.is_file():
-            filename = f"{str(config_file_location_path.name)}"
-            directory = f"{str(config_file_location_path.parent)}"
+            filename = f'{str(config_file_location_path.name)}'
+            directory = f'{str(config_file_location_path.parent)}'
         elif config_file_location_path.is_dir():
             filename = None
             directory = config_file_location
@@ -923,241 +557,142 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
     else:
         directory = None
         filename = None
-    return {"directory": directory, "filename": filename}
-
+    return {'directory': directory, 'filename': filename}
 
 def is_cloud_file_url(file_path: str) -> bool:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Check for commonly used cloud urls."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Check for commonly used cloud urls.'
     sanitized = file_path.strip()
-    if sanitized[0:7] == "file://":
+    if (sanitized[0:7] == 'file://'):
         return False
-    if (
-        (sanitized[0:5] in ["s3://", "gs://"])
-        or (sanitized[0:6] == "ftp://")
-        or (sanitized[0:7] in ["http://", "wasb://"])
-        or (sanitized[0:8] == "https://")
-    ):
+    if ((sanitized[0:5] in ['s3://', 'gs://']) or (sanitized[0:6] == 'ftp://') or (sanitized[0:7] in ['http://', 'wasb://']) or (sanitized[0:8] == 'https://')):
         return True
     return False
 
-
-def get_relative_path_from_config_file_to_base_path(
-    context_root_directory: str, data_path: str
-) -> str:
+def get_relative_path_from_config_file_to_base_path(context_root_directory: str, data_path: str) -> str:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "\n    This function determines the relative path from a given data path relative\n    to the great_expectations.yml file independent of the current working\n    directory.\n\n    This allows a user to use the CLI from any directory, type a relative path\n    from their current working directory and have the correct relative path be\n    put in the great_expectations.yml file.\n    "
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    '\n    This function determines the relative path from a given data path relative\n    to the great_expectations.yml file independent of the current working\n    directory.\n\n    This allows a user to use the CLI from any directory, type a relative path\n    from their current working directory and have the correct relative path be\n    put in the great_expectations.yml file.\n    '
     data_from_working_dir = os.path.relpath(data_path)
     context_dir_from_working_dir = os.path.relpath(context_root_directory)
     return os.path.relpath(data_from_working_dir, context_dir_from_working_dir)
 
-
-def load_json_file_into_dict(
-    filepath: str, data_context: DataContext, usage_event: Optional[str] = None
-) -> Optional[Dict[(str, Union[(str, int, Dict[(str, Any)])])]]:
+def load_json_file_into_dict(filepath: str, data_context: DataContext, usage_event: Optional[str]=None) -> Optional[Dict[(str, Union[(str, int, Dict[(str, Any)])])]]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    suppress_usage_message: bool = (usage_event is None) or (data_context is None)
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    suppress_usage_message: bool = ((usage_event is None) or (data_context is None))
     error_message: str
-    if not filepath:
-        error_message = "The path to a JSON file was not specified."
-        exit_with_failure_message_and_stats(
-            data_context=data_context,
-            usage_event=usage_event,
-            suppress_usage_message=suppress_usage_message,
-            message=f"<red>{error_message}</red>",
-        )
-    if not filepath.endswith(".json"):
+    if (not filepath):
+        error_message = 'The path to a JSON file was not specified.'
+        exit_with_failure_message_and_stats(data_context=data_context, usage_event=usage_event, suppress_usage_message=suppress_usage_message, message=f'<red>{error_message}</red>')
+    if (not filepath.endswith('.json')):
         error_message = f'The JSON file path "{filepath}" does not have the ".json" extension in the file name.'
-        exit_with_failure_message_and_stats(
-            data_context=data_context,
-            usage_event=usage_event,
-            suppress_usage_message=suppress_usage_message,
-            message=f"<red>{error_message}</red>",
-        )
+        exit_with_failure_message_and_stats(data_context=data_context, usage_event=usage_event, suppress_usage_message=suppress_usage_message, message=f'<red>{error_message}</red>')
     contents: Optional[str] = None
     try:
         with open(filepath) as json_file:
             contents = json_file.read()
     except FileNotFoundError:
         error_message = f'The JSON file with the path "{filepath}" could not be found.'
-        exit_with_failure_message_and_stats(
-            data_context=data_context,
-            usage_event=usage_event,
-            suppress_usage_message=suppress_usage_message,
-            message=f"<red>{error_message}</red>",
-        )
+        exit_with_failure_message_and_stats(data_context=data_context, usage_event=usage_event, suppress_usage_message=suppress_usage_message, message=f'<red>{error_message}</red>')
     batch_request: Optional[Dict[(str, Union[(str, int, Dict[(str, Any)])])]] = None
     if contents:
         try:
             batch_request = json.loads(contents)
         except JSONDecodeError as jde:
-            error_message = f"""Error "{jde}" occurred while attempting to load the JSON file with the path
+            error_message = f'''Error "{jde}" occurred while attempting to load the JSON file with the path
 "{filepath}" into dictionary.
-"""
-            exit_with_failure_message_and_stats(
-                data_context=data_context,
-                usage_event=usage_event,
-                suppress_usage_message=suppress_usage_message,
-                message=f"<red>{error_message}</red>",
-            )
+'''
+            exit_with_failure_message_and_stats(data_context=data_context, usage_event=usage_event, suppress_usage_message=suppress_usage_message, message=f'<red>{error_message}</red>')
     else:
         error_message = f'The JSON file path "{filepath}" is empty.'
-        exit_with_failure_message_and_stats(
-            data_context=data_context,
-            usage_event=usage_event,
-            suppress_usage_message=suppress_usage_message,
-            message=f"<red>{error_message}</red>",
-        )
+        exit_with_failure_message_and_stats(data_context=data_context, usage_event=usage_event, suppress_usage_message=suppress_usage_message, message=f'<red>{error_message}</red>')
     return batch_request
 
-
-def get_batch_request_from_citations(
-    expectation_suite: Optional[ExpectationSuite] = None,
-) -> Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]:
+def get_batch_request_from_citations(expectation_suite: Optional[ExpectationSuite]=None) -> Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    batch_request_from_citation: Optional[
-        Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
-    ] = None
-    if expectation_suite is not None:
-        citations: List[Dict[(str, Any)]] = expectation_suite.get_citations(
-            require_batch_request=True
-        )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    batch_request_from_citation: Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]] = None
+    if (expectation_suite is not None):
+        citations: List[Dict[(str, Any)]] = expectation_suite.get_citations(require_batch_request=True)
         if citations:
-            citation: Dict[(str, Any)] = citations[(-1)]
-            batch_request_from_citation = citation.get("batch_request")
+            citation: Dict[(str, Any)] = citations[(- 1)]
+            batch_request_from_citation = citation.get('batch_request')
     return batch_request_from_citation
 
-
-def add_citation_with_batch_request(
-    data_context: DataContext,
-    expectation_suite: ExpectationSuite,
-    batch_request: Optional[Dict[(str, Union[(str, int, Dict[(str, Any)])])]] = None,
-) -> None:
+def add_citation_with_batch_request(data_context: DataContext, expectation_suite: ExpectationSuite, batch_request: Optional[Dict[(str, Union[(str, int, Dict[(str, Any)])])]]=None) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    if (
-        (expectation_suite is not None)
-        and batch_request
-        and isinstance(batch_request, dict)
-        and BatchRequest(**batch_request)
-    ):
-        expectation_suite.add_citation(
-            comment="Created suite added via CLI", batch_request=batch_request
-        )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    if ((expectation_suite is not None) and batch_request and isinstance(batch_request, dict) and BatchRequest(**batch_request)):
+        expectation_suite.add_citation(comment='Created suite added via CLI', batch_request=batch_request)
         data_context.save_expectation_suite(expectation_suite=expectation_suite)
 
-
-def get_batch_request_from_json_file(
-    batch_request_json_file_path: str,
-    data_context: DataContext,
-    usage_event: Optional[str] = None,
-    suppress_usage_message: bool = False,
-) -> Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]:
+def get_batch_request_from_json_file(batch_request_json_file_path: str, data_context: DataContext, usage_event: Optional[str]=None, suppress_usage_message: bool=False) -> Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    batch_request: Optional[
-        Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
-    ] = load_json_file_into_dict(
-        filepath=batch_request_json_file_path,
-        data_context=data_context,
-        usage_event=usage_event,
-    )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    batch_request: Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]] = load_json_file_into_dict(filepath=batch_request_json_file_path, data_context=data_context, usage_event=usage_event)
     try:
         batch_request = BatchRequest(**batch_request).to_json_dict()
     except TypeError as e:
-        cli_message(
-            string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
-        )
-        cli_message(string=f"<red>{e}</red>")
-        if not suppress_usage_message:
-            send_usage_message(
-                data_context=data_context, event=usage_event, success=False
-            )
+        cli_message(string='<red>Please check that your batch_request is valid and is able to load a batch.</red>')
+        cli_message(string=f'<red>{e}</red>')
+        if (not suppress_usage_message):
+            send_usage_message(data_context=data_context, event=usage_event, success=False)
         sys.exit(1)
     return batch_request
 
-
-def get_batch_request_using_datasource_name(
-    data_context: DataContext,
-    datasource_name: Optional[str] = None,
-    usage_event: Optional[str] = None,
-    suppress_usage_message: bool = False,
-    additional_batch_request_args: Optional[
-        Dict[(str, Union[(str, int, Dict[(str, Any)])])]
-    ] = None,
-) -> Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]:
+def get_batch_request_using_datasource_name(data_context: DataContext, datasource_name: Optional[str]=None, usage_event: Optional[str]=None, suppress_usage_message: bool=False, additional_batch_request_args: Optional[Dict[(str, Union[(str, int, Dict[(str, Any)])])]]=None) -> Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    cli_message(
-        string="\nA batch of data is required to edit the suite - let's help you to specify it.\n"
-    )
-    datasource: BaseDatasource = select_datasource(
-        context=data_context, datasource_name=datasource_name
-    )
-    if not datasource:
-        cli_message(string="<red>No datasources found in the context.</red>")
-        if not suppress_usage_message:
-            send_usage_message(
-                data_context=data_context, event=usage_event, success=False
-            )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    cli_message(string="\nA batch of data is required to edit the suite - let's help you to specify it.\n")
+    datasource: BaseDatasource = select_datasource(context=data_context, datasource_name=datasource_name)
+    if (not datasource):
+        cli_message(string='<red>No datasources found in the context.</red>')
+        if (not suppress_usage_message):
+            send_usage_message(data_context=data_context, event=usage_event, success=False)
         sys.exit(1)
-    batch_request: Optional[
-        Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
-    ] = get_batch_request(
-        datasource=datasource,
-        additional_batch_request_args=additional_batch_request_args,
-    )
+    batch_request: Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]] = get_batch_request(datasource=datasource, additional_batch_request_args=additional_batch_request_args)
     return batch_request

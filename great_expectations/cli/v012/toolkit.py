@@ -1,14 +1,13 @@
+
 import datetime
 import os
 import subprocess
 import sys
 import warnings
 from typing import Optional, Union
-
 import click
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
-
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.cli.v012.cli_messages import SECTION_SEPARATOR
@@ -23,512 +22,310 @@ from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-    RunIdentifier,
-    ValidationResultIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier, RunIdentifier, ValidationResultIdentifier
 from great_expectations.datasource import Datasource
 from great_expectations.profile import BasicSuiteBuilderProfiler
-
-EXIT_UPGRADE_CONTINUATION_MESSAGE = "\nOk, exiting now. To upgrade at a later time, use the following command: <cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>.\n"
-
+EXIT_UPGRADE_CONTINUATION_MESSAGE = '\nOk, exiting now. To upgrade at a later time, use the following command: <cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>.\n'
 
 class MyYAML(YAML):
+
     def dump(self, data, stream=None, **kw):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         inefficient = False
-        if stream is None:
+        if (stream is None):
             inefficient = True
             stream = StringIO()
         YAML.dump(self, data, stream, **kw)
         if inefficient:
             return stream.getvalue()
-
-
 yaml = MyYAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
-
-def create_expectation_suite(
-    context,
-    datasource_name=None,
-    batch_kwargs_generator_name=None,
-    generator_asset=None,
-    batch_kwargs=None,
-    expectation_suite_name=None,
-    additional_batch_kwargs=None,
-    empty_suite=False,
-    show_intro_message=False,
-    flag_build_docs=True,
-    open_docs=False,
-    profiler_configuration="demo",
-    data_asset_name=None,
-):
+def create_expectation_suite(context, datasource_name=None, batch_kwargs_generator_name=None, generator_asset=None, batch_kwargs=None, expectation_suite_name=None, additional_batch_kwargs=None, empty_suite=False, show_intro_message=False, flag_build_docs=True, open_docs=False, profiler_configuration='demo', data_asset_name=None):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "\n    Create a new expectation suite.\n\n    WARNING: the flow and name of this method and its interaction with _profile_to_create_a_suite\n    require a serious revisiting.\n    :return: a tuple: (success, suite name, profiling_results)\n    "
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    '\n    Create a new expectation suite.\n\n    WARNING: the flow and name of this method and its interaction with _profile_to_create_a_suite\n    require a serious revisiting.\n    :return: a tuple: (success, suite name, profiling_results)\n    '
     if generator_asset:
-        warnings.warn(
-            "The 'generator_asset' argument is deprecated as of v0.13.12 and will be removed in v0.16. Please use 'data_asset_name' instead.",
-            DeprecationWarning,
-        )
+        warnings.warn("The 'generator_asset' argument is deprecated as of v0.13.12 and will be removed in v0.16. Please use 'data_asset_name' instead.", DeprecationWarning)
         data_asset_name = generator_asset
-    if show_intro_message and (not empty_suite):
-        cli_message(
-            "\n<cyan>========== Create sample Expectations ==========</cyan>\n\n"
-        )
+    if (show_intro_message and (not empty_suite)):
+        cli_message('\n<cyan>========== Create sample Expectations ==========</cyan>\n\n')
     data_source = select_datasource(context, datasource_name=datasource_name)
-    if data_source is None:
+    if (data_source is None):
         sys.exit(1)
     datasource_name = data_source.name
-    if expectation_suite_name in context.list_expectation_suite_names():
+    if (expectation_suite_name in context.list_expectation_suite_names()):
         tell_user_suite_exists(expectation_suite_name)
         sys.exit(1)
-    if (
-        (batch_kwargs_generator_name is None)
-        or (data_asset_name is None)
-        or (batch_kwargs is None)
-    ):
-        (
-            datasource_name,
-            batch_kwargs_generator_name,
-            data_asset_name,
-            batch_kwargs,
-        ) = get_batch_kwargs(
-            context,
-            datasource_name=datasource_name,
-            batch_kwargs_generator_name=batch_kwargs_generator_name,
-            data_asset_name=data_asset_name,
-            additional_batch_kwargs=additional_batch_kwargs,
-        )
+    if ((batch_kwargs_generator_name is None) or (data_asset_name is None) or (batch_kwargs is None)):
+        (datasource_name, batch_kwargs_generator_name, data_asset_name, batch_kwargs) = get_batch_kwargs(context, datasource_name=datasource_name, batch_kwargs_generator_name=batch_kwargs_generator_name, data_asset_name=data_asset_name, additional_batch_kwargs=additional_batch_kwargs)
         additional_batch_kwargs = {}
-    if expectation_suite_name is None:
-        default_expectation_suite_name = _get_default_expectation_suite_name(
-            batch_kwargs, data_asset_name
-        )
+    if (expectation_suite_name is None):
+        default_expectation_suite_name = _get_default_expectation_suite_name(batch_kwargs, data_asset_name)
         while True:
-            expectation_suite_name = click.prompt(
-                "\nName the new Expectation Suite",
-                default=default_expectation_suite_name,
-            )
-            if expectation_suite_name in context.list_expectation_suite_names():
+            expectation_suite_name = click.prompt('\nName the new Expectation Suite', default=default_expectation_suite_name)
+            if (expectation_suite_name in context.list_expectation_suite_names()):
                 tell_user_suite_exists(expectation_suite_name)
             else:
                 break
     if empty_suite:
         create_empty_suite(context, expectation_suite_name, batch_kwargs)
         return (True, expectation_suite_name, None)
-    profiling_results = _profile_to_create_a_suite(
-        additional_batch_kwargs,
-        batch_kwargs,
-        batch_kwargs_generator_name,
-        context,
-        datasource_name,
-        expectation_suite_name,
-        data_asset_name,
-        profiler_configuration,
-    )
+    profiling_results = _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name, context, datasource_name, expectation_suite_name, data_asset_name, profiler_configuration)
     if flag_build_docs:
         build_docs(context, view=False)
         if open_docs:
             attempt_to_open_validation_results_in_data_docs(context, profiling_results)
     return (True, expectation_suite_name, profiling_results)
 
-
-def _profile_to_create_a_suite(
-    additional_batch_kwargs,
-    batch_kwargs,
-    batch_kwargs_generator_name,
-    context,
-    datasource_name,
-    expectation_suite_name,
-    data_asset_name,
-    profiler_configuration,
-):
+def _profile_to_create_a_suite(additional_batch_kwargs, batch_kwargs, batch_kwargs_generator_name, context, datasource_name, expectation_suite_name, data_asset_name, profiler_configuration):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    cli_message(
-        "\nGreat Expectations will choose a couple of columns and generate expectations about them\nto demonstrate some examples of assertions you can make about your data.\n\nGreat Expectations will store these expectations in a new Expectation Suite '{:s}' here:\n\n  {:s}\n".format(
-            expectation_suite_name,
-            context.stores[
-                context.expectations_store_name
-            ].store_backend.get_url_for_key(
-                ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite_name
-                ).to_tuple()
-            ),
-        )
-    )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    cli_message("\nGreat Expectations will choose a couple of columns and generate expectations about them\nto demonstrate some examples of assertions you can make about your data.\n\nGreat Expectations will store these expectations in a new Expectation Suite '{:s}' here:\n\n  {:s}\n".format(expectation_suite_name, context.stores[context.expectations_store_name].store_backend.get_url_for_key(ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name).to_tuple())))
     confirm_proceed_or_exit()
-    cli_message("\nGenerating example Expectation Suite...")
-    run_id = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
-    profiling_results = context.profile_data_asset(
-        datasource_name,
-        batch_kwargs_generator_name=batch_kwargs_generator_name,
-        data_asset_name=data_asset_name,
-        batch_kwargs=batch_kwargs,
-        profiler=BasicSuiteBuilderProfiler,
-        profiler_configuration=profiler_configuration,
-        expectation_suite_name=expectation_suite_name,
-        run_id=RunIdentifier(run_name=run_id),
-        additional_batch_kwargs=additional_batch_kwargs,
-    )
-    if not profiling_results["success"]:
+    cli_message('\nGenerating example Expectation Suite...')
+    run_id = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ')
+    profiling_results = context.profile_data_asset(datasource_name, batch_kwargs_generator_name=batch_kwargs_generator_name, data_asset_name=data_asset_name, batch_kwargs=batch_kwargs, profiler=BasicSuiteBuilderProfiler, profiler_configuration=profiler_configuration, expectation_suite_name=expectation_suite_name, run_id=RunIdentifier(run_name=run_id), additional_batch_kwargs=additional_batch_kwargs)
+    if (not profiling_results['success']):
         _raise_profiling_errors(profiling_results)
-    cli_message("\nDone generating example Expectation Suite")
+    cli_message('\nDone generating example Expectation Suite')
     return profiling_results
-
 
 def _raise_profiling_errors(profiling_results) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    if (
-        profiling_results["error"]["code"]
-        == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
-    ):
-        raise ge_exceptions.DataContextError(
-            "Some of the data assets you specified were not found: {:s}\n            ".format(
-                ",".join(profiling_results["error"]["not_found_data_assets"])
-            )
-        )
-    raise ge_exceptions.DataContextError(
-        f"Unknown profiling error code: {profiling_results['error']['code']}"
-    )
-
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    if (profiling_results['error']['code'] == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND):
+        raise ge_exceptions.DataContextError('Some of the data assets you specified were not found: {:s}\n            '.format(','.join(profiling_results['error']['not_found_data_assets'])))
+    raise ge_exceptions.DataContextError(f"Unknown profiling error code: {profiling_results['error']['code']}")
 
 def attempt_to_open_validation_results_in_data_docs(context, profiling_results) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     try:
-        validation_result = profiling_results["results"][0][1]
-        validation_result_identifier = ValidationResultIdentifier.from_object(
-            validation_result
-        )
+        validation_result = profiling_results['results'][0][1]
+        validation_result_identifier = ValidationResultIdentifier.from_object(validation_result)
         context.open_data_docs(resource_identifier=validation_result_identifier)
     except (KeyError, IndexError):
         context.open_data_docs()
 
-
 def _get_default_expectation_suite_name(batch_kwargs, data_asset_name):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     if data_asset_name:
-        suite_name = f"{data_asset_name}.warning"
-    elif "query" in batch_kwargs:
-        suite_name = "query.warning"
-    elif "path" in batch_kwargs:
+        suite_name = f'{data_asset_name}.warning'
+    elif ('query' in batch_kwargs):
+        suite_name = 'query.warning'
+    elif ('path' in batch_kwargs):
         try:
-            filename = os.path.split(os.path.normpath(batch_kwargs["path"]))[1]
-            filename = ".".join(filename.split(".")[:(-1)])
-            suite_name = f"{str(filename)}.warning"
+            filename = os.path.split(os.path.normpath(batch_kwargs['path']))[1]
+            filename = '.'.join(filename.split('.')[:(- 1)])
+            suite_name = f'{str(filename)}.warning'
         except (OSError, IndexError):
-            suite_name = "warning"
+            suite_name = 'warning'
     else:
-        suite_name = "warning"
+        suite_name = 'warning'
     return suite_name
-
 
 def tell_user_suite_exists(suite_name: str) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    cli_message(
-        f"""<red>An expectation suite named `{suite_name}` already exists.</red>
-  - If you intend to edit the suite please use `great_expectations suite edit {suite_name}`."""
-    )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    cli_message(f'''<red>An expectation suite named `{suite_name}` already exists.</red>
+  - If you intend to edit the suite please use `great_expectations suite edit {suite_name}`.''')
 
-
-def create_empty_suite(
-    context: DataContext, expectation_suite_name: str, batch_kwargs
-) -> None:
+def create_empty_suite(context: DataContext, expectation_suite_name: str, batch_kwargs) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    cli_message(
-        "\nGreat Expectations will create a new Expectation Suite '{:s}' and store it here:\n\n  {:s}\n".format(
-            expectation_suite_name,
-            context.stores[
-                context.expectations_store_name
-            ].store_backend.get_url_for_key(
-                ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite_name
-                ).to_tuple()
-            ),
-        )
-    )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    cli_message("\nGreat Expectations will create a new Expectation Suite '{:s}' and store it here:\n\n  {:s}\n".format(expectation_suite_name, context.stores[context.expectations_store_name].store_backend.get_url_for_key(ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name).to_tuple())))
     suite = context.create_expectation_suite(expectation_suite_name)
-    suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
+    suite.add_citation(comment='New suite added via CLI', batch_kwargs=batch_kwargs)
     context.save_expectation_suite(suite, expectation_suite_name)
-
 
 def launch_jupyter_notebook(notebook_path: str) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    jupyter_command_override = os.getenv("GE_JUPYTER_CMD", None)
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    jupyter_command_override = os.getenv('GE_JUPYTER_CMD', None)
     if jupyter_command_override:
-        subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
+        subprocess.call(f'{jupyter_command_override} {notebook_path}', shell=True)
     else:
-        subprocess.call(["jupyter", "notebook", notebook_path])
+        subprocess.call(['jupyter', 'notebook', notebook_path])
 
-
-def load_batch(
-    context: DataContext,
-    suite: Union[(str, ExpectationSuite)],
-    batch_kwargs: Union[(dict, BatchKwargs)],
-) -> Union[(Batch, DataAsset)]:
+def load_batch(context: DataContext, suite: Union[(str, ExpectationSuite)], batch_kwargs: Union[(dict, BatchKwargs)]) -> Union[(Batch, DataAsset)]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     batch: Union[(Batch, DataAsset)] = context.get_batch(batch_kwargs, suite)
-    assert isinstance(batch, DataAsset) or isinstance(
-        batch, Batch
-    ), "Batch failed to load. Please check your batch_kwargs"
+    assert (isinstance(batch, DataAsset) or isinstance(batch, Batch)), 'Batch failed to load. Please check your batch_kwargs'
     return batch
 
-
-def load_expectation_suite(
-    context: DataContext, suite_name: str, usage_event: str
-) -> ExpectationSuite:
+def load_expectation_suite(context: DataContext, suite_name: str, usage_event: str) -> ExpectationSuite:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "\n    Load an expectation suite from a given context.\n\n    Handles a suite name with or without `.json`\n    :param usage_event:\n    "
-    if suite_name.endswith(".json"):
-        suite_name = suite_name[:(-5)]
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    '\n    Load an expectation suite from a given context.\n\n    Handles a suite name with or without `.json`\n    :param usage_event:\n    '
+    if suite_name.endswith('.json'):
+        suite_name = suite_name[:(- 5)]
     try:
         suite = context.get_expectation_suite(suite_name)
         return suite
     except ge_exceptions.DataContextError:
-        exit_with_failure_message_and_stats(
-            context,
-            usage_event,
-            f"<red>Could not find a suite named `{suite_name}`.</red> Please check the name by running `great_expectations suite list` and try again.",
-        )
+        exit_with_failure_message_and_stats(context, usage_event, f'<red>Could not find a suite named `{suite_name}`.</red> Please check the name by running `great_expectations suite list` and try again.')
 
-
-def exit_with_failure_message_and_stats(
-    context: DataContext, usage_event: str, message: str
-) -> None:
+def exit_with_failure_message_and_stats(context: DataContext, usage_event: str, message: str) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     cli_message(message)
-    send_usage_message(
-        data_context=context, event=usage_event, api_version="v2", success=False
-    )
+    send_usage_message(data_context=context, event=usage_event, api_version='v2', success=False)
     sys.exit(1)
 
-
-def load_checkpoint(
-    context: DataContext, checkpoint_name: str, usage_event: str
-) -> Union[(Checkpoint, LegacyCheckpoint)]:
+def load_checkpoint(context: DataContext, checkpoint_name: str, usage_event: str) -> Union[(Checkpoint, LegacyCheckpoint)]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Load a checkpoint or raise helpful errors."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Load a checkpoint or raise helpful errors.'
     try:
-        checkpoint: Union[(Checkpoint, LegacyCheckpoint)] = context.get_checkpoint(
-            name=checkpoint_name
-        )
+        checkpoint: Union[(Checkpoint, LegacyCheckpoint)] = context.get_checkpoint(name=checkpoint_name)
         return checkpoint
-    except (
-        ge_exceptions.CheckpointNotFoundError,
-        ge_exceptions.InvalidCheckpointConfigError,
-    ):
-        exit_with_failure_message_and_stats(
-            context,
-            usage_event,
-            f"""<red>Could not find checkpoint `{checkpoint_name}`.</red> Try running:
+    except (ge_exceptions.CheckpointNotFoundError, ge_exceptions.InvalidCheckpointConfigError):
+        exit_with_failure_message_and_stats(context, usage_event, f'''<red>Could not find checkpoint `{checkpoint_name}`.</red> Try running:
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
-  - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
-        )
+  - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint''')
     except ge_exceptions.CheckpointError as e:
-        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
+        exit_with_failure_message_and_stats(context, usage_event, f'<red>{e}</red>')
 
-
-def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
+def select_datasource(context: DataContext, datasource_name: str=None) -> Datasource:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Select a datasource interactively."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Select a datasource interactively.'
     data_source = None
-    if datasource_name is None:
-        data_sources = sorted(context.list_datasources(), key=(lambda x: x["name"]))
-        if len(data_sources) == 0:
-            cli_message(
-                "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
-            )
-        elif len(data_sources) == 1:
-            datasource_name = data_sources[0]["name"]
+    if (datasource_name is None):
+        data_sources = sorted(context.list_datasources(), key=(lambda x: x['name']))
+        if (len(data_sources) == 0):
+            cli_message('<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>')
+        elif (len(data_sources) == 1):
+            datasource_name = data_sources[0]['name']
         else:
-            choices = "\n".join(
-                [
-                    f"    {i}. {data_source['name']}"
-                    for (i, data_source) in enumerate(data_sources, 1)
-                ]
-            )
-            option_selection = click.prompt(
-                f"""Select a datasource
+            choices = '\n'.join([f"    {i}. {data_source['name']}" for (i, data_source) in enumerate(data_sources, 1)])
+            option_selection = click.prompt(f'''Select a datasource
 {choices}
-""",
-                type=click.Choice(
-                    [str(i) for (i, data_source) in enumerate(data_sources, 1)]
-                ),
-                show_choices=False,
-            )
-            datasource_name = data_sources[(int(option_selection) - 1)]["name"]
-    if datasource_name is not None:
+''', type=click.Choice([str(i) for (i, data_source) in enumerate(data_sources, 1)]), show_choices=False)
+            datasource_name = data_sources[(int(option_selection) - 1)]['name']
+    if (datasource_name is not None):
         data_source = context.get_datasource(datasource_name)
     return data_source
 
-
-def load_data_context_with_error_handling(
-    directory: str, from_cli_upgrade_command: bool = False
-) -> DataContext:
+def load_data_context_with_error_handling(directory: str, from_cli_upgrade_command: bool=False) -> DataContext:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Return a DataContext with good error handling and exit codes."
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Return a DataContext with good error handling and exit codes.'
     try:
         context: DataContext = DataContext(context_root_dir=directory)
         ge_config_version: int = context.get_config().config_version
-        if from_cli_upgrade_command and (
-            int(ge_config_version) < CURRENT_GE_CONFIG_VERSION
-        ):
-            directory = directory or context.root_directory
-            (
-                increment_version,
-                exception_occurred,
-            ) = upgrade_project_up_to_one_version_increment(
-                context_root_dir=directory,
-                ge_config_version=ge_config_version,
-                continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-                from_cli_upgrade_command=from_cli_upgrade_command,
-            )
-            if (not exception_occurred) and increment_version:
+        if (from_cli_upgrade_command and (int(ge_config_version) < CURRENT_GE_CONFIG_VERSION)):
+            directory = (directory or context.root_directory)
+            (increment_version, exception_occurred) = upgrade_project_up_to_one_version_increment(context_root_dir=directory, ge_config_version=ge_config_version, continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE, from_cli_upgrade_command=from_cli_upgrade_command)
+            if ((not exception_occurred) and increment_version):
                 context = DataContext(context_root_dir=directory)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
-        directory = directory or DataContext.find_context_root_dir()
-        ge_config_version = DataContext.get_ge_config_version(
-            context_root_dir=directory
-        )
-        upgrade_helper_class = (
-            GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-            if ge_config_version
-            else None
-        )
-        if upgrade_helper_class and (ge_config_version < CURRENT_GE_CONFIG_VERSION):
-            upgrade_project(
-                context_root_dir=directory,
-                ge_config_version=ge_config_version,
-                from_cli_upgrade_command=from_cli_upgrade_command,
-            )
+        directory = (directory or DataContext.find_context_root_dir())
+        ge_config_version = DataContext.get_ge_config_version(context_root_dir=directory)
+        upgrade_helper_class = (GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version)) if ge_config_version else None)
+        if (upgrade_helper_class and (ge_config_version < CURRENT_GE_CONFIG_VERSION)):
+            upgrade_project(context_root_dir=directory, ge_config_version=ge_config_version, from_cli_upgrade_command=from_cli_upgrade_command)
         else:
-            cli_message(f"<red>{err.message}</red>")
+            cli_message(f'<red>{err.message}</red>')
             sys.exit(1)
     except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidConfigError) as err:
-        cli_message(f"<red>{err.message}</red>")
+        cli_message(f'<red>{err.message}</red>')
         sys.exit(1)
     except ge_exceptions.PluginModuleNotFoundError as err:
         cli_message(err.cli.v012_colored_message)
@@ -537,150 +334,99 @@ def load_data_context_with_error_handling(
         cli_message(err.cli.v012_colored_message)
         sys.exit(1)
     except ge_exceptions.InvalidConfigurationYamlError as err:
-        cli_message(f"<red>{str(err)}</red>")
+        cli_message(f'<red>{str(err)}</red>')
         sys.exit(1)
 
-
-def upgrade_project(
-    context_root_dir, ge_config_version, from_cli_upgrade_command=False
-) -> None:
+def upgrade_project(context_root_dir, ge_config_version, from_cli_upgrade_command=False) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     if from_cli_upgrade_command:
-        message = f"""<red>
-Your project appears to have an out-of-date config version ({ge_config_version}) - the version number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>"""
+        message = f'''<red>
+Your project appears to have an out-of-date config version ({ge_config_version}) - the version number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>'''
     else:
-        message = f"""<red>
+        message = f'''<red>
 Your project appears to have an out-of-date config version ({ge_config_version}) - the version number must be at least {CURRENT_GE_CONFIG_VERSION}.
-In order to proceed, your project must be upgraded.</red>"""
+In order to proceed, your project must be upgraded.</red>'''
     cli_message(message)
-    upgrade_prompt = (
-        "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
-    )
-    confirm_proceed_or_exit(
-        confirm_prompt=upgrade_prompt,
-        continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-    )
+    upgrade_prompt = '\nWould you like to run the Upgrade Helper to bring your project up-to-date?'
+    confirm_proceed_or_exit(confirm_prompt=upgrade_prompt, continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE)
     cli_message(SECTION_SEPARATOR)
-    while ge_config_version < CURRENT_GE_CONFIG_VERSION:
-        (
-            increment_version,
-            exception_occurred,
-        ) = upgrade_project_up_to_one_version_increment(
-            context_root_dir=context_root_dir,
-            ge_config_version=ge_config_version,
-            continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-            from_cli_upgrade_command=from_cli_upgrade_command,
-        )
-        if exception_occurred or (not increment_version):
+    while (ge_config_version < CURRENT_GE_CONFIG_VERSION):
+        (increment_version, exception_occurred) = upgrade_project_up_to_one_version_increment(context_root_dir=context_root_dir, ge_config_version=ge_config_version, continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE, from_cli_upgrade_command=from_cli_upgrade_command)
+        if (exception_occurred or (not increment_version)):
             break
         ge_config_version += 1
     cli_message(SECTION_SEPARATOR)
-    upgrade_success_message = "<green>Upgrade complete. Exiting...</green>\n"
-    upgrade_incomplete_message = f"""<red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
+    upgrade_success_message = '<green>Upgrade complete. Exiting...</green>\n'
+    upgrade_incomplete_message = f'''<red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
 
     - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
     - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{(ge_config_version + 1)}</cyan>
 
 To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>
-"""
-    if ge_config_version < CURRENT_GE_CONFIG_VERSION:
+'''
+    if (ge_config_version < CURRENT_GE_CONFIG_VERSION):
         cli_message(upgrade_incomplete_message)
     else:
         cli_message(upgrade_success_message)
     sys.exit(0)
 
-
-def upgrade_project_up_to_one_version_increment(
-    context_root_dir: str,
-    ge_config_version: float,
-    continuation_message: str,
-    from_cli_upgrade_command: bool = False,
-) -> [bool, bool]:
+def upgrade_project_up_to_one_version_increment(context_root_dir: str, ge_config_version: float, continuation_message: str, from_cli_upgrade_command: bool=False) -> [bool, bool]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-    if not upgrade_helper_class:
+    if (not upgrade_helper_class):
         return (False, False)
-    target_ge_config_version = int(ge_config_version) + 1
-    DataContext.set_ge_config_version(
-        config_version=CURRENT_GE_CONFIG_VERSION, context_root_dir=context_root_dir
-    )
+    target_ge_config_version = (int(ge_config_version) + 1)
+    DataContext.set_ge_config_version(config_version=CURRENT_GE_CONFIG_VERSION, context_root_dir=context_root_dir)
     upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir)
     (upgrade_overview, confirmation_required) = upgrade_helper.get_upgrade_overview()
-    if confirmation_required or from_cli_upgrade_command:
-        upgrade_confirmed = confirm_proceed_or_exit(
-            confirm_prompt=upgrade_overview,
-            continuation_message=continuation_message,
-            exit_on_no=False,
-        )
+    if (confirmation_required or from_cli_upgrade_command):
+        upgrade_confirmed = confirm_proceed_or_exit(confirm_prompt=upgrade_overview, continuation_message=continuation_message, exit_on_no=False)
     else:
         upgrade_confirmed = True
     if upgrade_confirmed:
-        cli_message("\nUpgrading project...")
+        cli_message('\nUpgrading project...')
         cli_message(SECTION_SEPARATOR)
-        (
-            upgrade_report,
-            increment_version,
-            exception_occurred,
-        ) = upgrade_helper.upgrade_project()
+        (upgrade_report, increment_version, exception_occurred) = upgrade_helper.upgrade_project()
         cli_message(upgrade_report)
         if exception_occurred:
-            DataContext.set_ge_config_version(
-                ge_config_version, context_root_dir, validate_config_version=False
-            )
+            DataContext.set_ge_config_version(ge_config_version, context_root_dir, validate_config_version=False)
             return (False, True)
         if increment_version:
-            DataContext.set_ge_config_version(
-                target_ge_config_version,
-                context_root_dir,
-                validate_config_version=False,
-            )
+            DataContext.set_ge_config_version(target_ge_config_version, context_root_dir, validate_config_version=False)
             return (True, False)
-        DataContext.set_ge_config_version(
-            ge_config_version, context_root_dir, validate_config_version=False
-        )
+        DataContext.set_ge_config_version(ge_config_version, context_root_dir, validate_config_version=False)
         return (False, False)
-    DataContext.set_ge_config_version(
-        ge_config_version, context_root_dir, validate_config_version=False
-    )
+    DataContext.set_ge_config_version(ge_config_version, context_root_dir, validate_config_version=False)
     cli_message(continuation_message)
     sys.exit(0)
 
-
-def confirm_proceed_or_exit(
-    confirm_prompt: str = "Would you like to proceed?",
-    continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
-    exit_on_no: bool = True,
-    exit_code: int = 0,
-) -> Optional[bool]:
+def confirm_proceed_or_exit(confirm_prompt: str='Would you like to proceed?', continuation_message: str='Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !', exit_on_no: bool=True, exit_code: int=0) -> Optional[bool]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     "\n    Every CLI command that starts a potentially lengthy (>1 sec) computation\n    or modifies some resources (e.g., edits the config file, adds objects\n    to the stores) must follow this pattern:\n    1. Explain which resources will be created/modified/deleted\n    2. Use this method to ask for user's confirmation\n\n    The goal of this standardization is for the users to expect consistency -\n    if you saw one command, you know what to expect from all others.\n\n    If the user does not confirm, the program should exit. The purpose of the exit_on_no parameter is to provide\n    the option to perform cleanup actions before exiting outside of the function.\n    "
     confirm_prompt_colorized = cli_colorize_string(confirm_prompt)
     continuation_message_colorized = cli_colorize_string(continuation_message)
-    if not click.confirm(confirm_prompt_colorized, default=True):
+    if (not click.confirm(confirm_prompt_colorized, default=True)):
         if exit_on_no:
             cli_message(continuation_message_colorized)
             sys.exit(exit_code)

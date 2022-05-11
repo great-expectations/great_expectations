@@ -1,120 +1,83 @@
+
 import os
 import sys
 import warnings
-
 import click
-
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
-from great_expectations.cli.cli_messages import (
-    COMPLETE_ONBOARDING_PROMPT,
-    GREETING,
-    HOW_TO_CUSTOMIZE,
-    LETS_BEGIN_PROMPT,
-    ONBOARDING_COMPLETE,
-    PROJECT_IS_COMPLETE,
-    READY_FOR_CUSTOMIZATION,
-    RUN_INIT_AGAIN,
-    SECTION_SEPARATOR,
-)
+from great_expectations.cli.cli_messages import COMPLETE_ONBOARDING_PROMPT, GREETING, HOW_TO_CUSTOMIZE, LETS_BEGIN_PROMPT, ONBOARDING_COMPLETE, PROJECT_IS_COMPLETE, READY_FOR_CUSTOMIZATION, RUN_INIT_AGAIN, SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
-from great_expectations.exceptions import (
-    DataContextError,
-    DatasourceInitializationError,
-)
-
+from great_expectations.exceptions import DataContextError, DatasourceInitializationError
 try:
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
-
 @click.command()
-@click.option(
-    "--usage-stats/--no-usage-stats",
-    help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
-    default=True,
-)
+@click.option('--usage-stats/--no-usage-stats', help='By default, usage statistics are enabled unless you specify the --no-usage-stats flag.', default=True)
 @click.pass_context
 def init(ctx: click.Context, usage_stats: bool) -> None:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "\n    Initialize a new Great Expectations project.\n\n    This guided input walks the user through setting up a new project and also\n    onboards a new developer in an existing project.\n\n    It scaffolds directories, creates a project file, and\n    appends to a `.gitignore` file.\n    "
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    if directory is None:
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    '\n    Initialize a new Great Expectations project.\n\n    This guided input walks the user through setting up a new project and also\n    onboards a new developer in an existing project.\n\n    It scaffolds directories, creates a project file, and\n    appends to a `.gitignore` file.\n    '
+    directory = toolkit.parse_cli_config_file_location(config_file_location=ctx.obj.config_file_location).get('directory')
+    if (directory is None):
         directory = os.getcwd()
     target_directory = os.path.abspath(directory)
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
     if DataContext.does_config_exist_on_disk(ge_dir):
-        message = (
-            f"Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}."
-        )
+        message = f'Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}.'
         warnings.warn(message)
         try:
-            project_file_structure_exists = (
-                DataContext.does_config_exist_on_disk(ge_dir)
-                and DataContext.all_uncommitted_directories_exist(ge_dir)
-                and DataContext.config_variables_yml_exist(ge_dir)
-            )
+            project_file_structure_exists = (DataContext.does_config_exist_on_disk(ge_dir) and DataContext.all_uncommitted_directories_exist(ge_dir) and DataContext.config_variables_yml_exist(ge_dir))
             if project_file_structure_exists:
                 cli_message(PROJECT_IS_COMPLETE)
                 sys.exit(0)
-            elif not ctx.obj.assume_yes:
-                if not click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
+            elif (not ctx.obj.assume_yes):
+                if (not click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True)):
                     cli_message(RUN_INIT_AGAIN)
                     exit(0)
         except (DataContextError, DatasourceInitializationError) as e:
-            cli_message(f"<red>{e.message}</red>")
+            cli_message(f'<red>{e.message}</red>')
             sys.exit(1)
         try:
             DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
             cli_message(ONBOARDING_COMPLETE)
         except DataContextError as e:
-            cli_message(f"<red>{e.message}</red>")
+            cli_message(f'<red>{e.message}</red>')
             exit(5)
     else:
-        if not ctx.obj.assume_yes:
-            if not click.confirm(LETS_BEGIN_PROMPT, default=True):
+        if (not ctx.obj.assume_yes):
+            if (not click.confirm(LETS_BEGIN_PROMPT, default=True)):
                 cli_message(RUN_INIT_AGAIN)
                 exit(0)
         try:
-            context = DataContext.create(
-                target_directory, usage_statistics_enabled=usage_stats
-            )
-            send_usage_message(
-                data_context=context,
-                event=UsageStatsEvents.CLI_INIT_CREATE.value,
-                success=True,
-            )
+            context = DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
+            send_usage_message(data_context=context, event=UsageStatsEvents.CLI_INIT_CREATE.value, success=True)
         except DataContextError as e:
-            cli_message(f"<red>{e}</red>")
+            cli_message(f'<red>{e}</red>')
     cli_message(SECTION_SEPARATOR)
     cli_message(READY_FOR_CUSTOMIZATION)
     cli_message(HOW_TO_CUSTOMIZE)
     sys.exit(0)
 
-
 def _get_full_path_to_ge_dir(target_directory: str) -> str:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))

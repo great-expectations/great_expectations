@@ -1,55 +1,31 @@
+
 import logging
 import os
 import warnings
-
-from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
-    BatchKwargsGenerator,
-)
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import BatchKwargsGenerator
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
-
 logger = logging.getLogger(__name__)
-KNOWN_EXTENSIONS = [
-    ".csv",
-    ".tsv",
-    ".parquet",
-    ".xls",
-    ".xlsx",
-    ".json",
-    ".csv.gz",
-    ".tsv.gz",
-    ".feather",
-    ".pkl",
-]
-
+KNOWN_EXTENSIONS = ['.csv', '.tsv', '.parquet', '.xls', '.xlsx', '.json', '.csv.gz', '.tsv.gz', '.feather', '.pkl']
 
 class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
-    "The SubdirReaderBatchKwargsGenerator inspects a filesystem and produces path-based batch_kwargs.\n\n    SubdirReaderBatchKwargsGenerator recognizes data assets using two criteria:\n      - for files directly in 'base_directory' with recognized extensions (.csv, .tsv, .parquet, .xls, .xlsx, .json\n        .csv.gz, tsv.gz, .feather, .pkl), it uses the name of the file without the extension\n      - for other files or directories in 'base_directory', is uses the file or directory name\n\n    SubdirReaderBatchKwargsGenerator sees all files inside a directory of base_directory as batches of one datasource.\n\n    SubdirReaderBatchKwargsGenerator can also include configured reader_options which will be added to batch_kwargs generated\n    by this generator.\n"
+    "The SubdirReaderBatchKwargsGenerator inspects a filesystem and produces path-based batch_kwargs.\n\n    SubdirReaderBatchKwargsGenerator recognizes data assets using two criteria:\n      - for files directly in 'base_directory' with recognized extensions (.csv, .tsv, .parquet, .xls, .xlsx, .json\n        .csv.gz, tsv.gz, .feather, .pkl), it uses the name of the file without the extension\n      - for other files or directories in 'base_directory', is uses the file or directory name\n\n    SubdirReaderBatchKwargsGenerator sees all files inside a directory of base_directory as batches of one datasource.\n\n    SubdirReaderBatchKwargsGenerator can also include configured reader_options which will be added to batch_kwargs generated\n    by this generator.\n    "
     _default_reader_options = {}
-    recognized_batch_parameters = {"data_asset_name", "partition_id"}
+    recognized_batch_parameters = {'data_asset_name', 'partition_id'}
 
-    def __init__(
-        self,
-        name="default",
-        datasource=None,
-        base_directory="/data",
-        reader_options=None,
-        known_extensions=None,
-        reader_method=None,
-    ) -> None:
+    def __init__(self, name='default', datasource=None, base_directory='/data', reader_options=None, known_extensions=None, reader_method=None) -> None:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         super().__init__(name, datasource=datasource)
-        if reader_options is None:
+        if (reader_options is None):
             reader_options = self._default_reader_options
-        if known_extensions is None:
+        if (known_extensions is None):
             known_extensions = KNOWN_EXTENSIONS
         self._known_extensions = known_extensions
         self._reader_options = reader_options
@@ -59,287 +35,191 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     @property
     def reader_options(self):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         return self._reader_options
 
     @property
     def known_extensions(self):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         return self._known_extensions
 
     @property
     def reader_method(self):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         return self._reader_method
 
     @property
     def base_directory(self):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        if os.path.isabs(self._base_directory) or (
-            self._datasource.data_context is None
-        ):
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        if (os.path.isabs(self._base_directory) or (self._datasource.data_context is None)):
             return self._base_directory
         else:
-            return os.path.join(
-                self._datasource.data_context.root_directory, self._base_directory
-            )
+            return os.path.join(self._datasource.data_context.root_directory, self._base_directory)
 
     def get_available_data_asset_names(self):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        if not os.path.isdir(self.base_directory):
-            return {"names": [], "is_complete_list": True}
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        if (not os.path.isdir(self.base_directory)):
+            return {'names': [], 'is_complete_list': True}
         known_assets = self._get_valid_file_options(base_directory=self.base_directory)
-        return {"names": known_assets, "is_complete_list": True}
+        return {'names': known_assets, 'is_complete_list': True}
 
     def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        assert (generator_asset and (not data_asset_name)) or (
-            (not generator_asset) and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        assert ((generator_asset and (not data_asset_name)) or ((not generator_asset) and data_asset_name)), 'Please provide either generator_asset or data_asset_name.'
         if generator_asset:
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
+            warnings.warn("The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. Please use 'data_asset_name' instead.", DeprecationWarning)
             data_asset_name = generator_asset
         for extension in self.known_extensions:
-            if os.path.isfile(
-                os.path.join(self.base_directory, (data_asset_name + extension))
-            ):
+            if os.path.isfile(os.path.join(self.base_directory, (data_asset_name + extension))):
                 return [data_asset_name]
         if os.path.isfile(os.path.join(self.base_directory, data_asset_name)):
             return [data_asset_name]
-        return [
-            path
-            for (path, type) in self._get_valid_file_options(
-                base_directory=os.path.join(self.base_directory, data_asset_name)
-            )
-        ]
+        return [path for (path, type) in self._get_valid_file_options(base_directory=os.path.join(self.base_directory, data_asset_name))]
 
     def _build_batch_kwargs(self, batch_parameters):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        "\n\n        Args:\n            batch_parameters:\n\n        Returns:\n            batch_kwargs\n\n        "
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        '\n\n        Args:\n            batch_parameters:\n\n        Returns:\n            batch_kwargs\n\n        '
         try:
-            data_asset_name = batch_parameters.pop("data_asset_name")
+            data_asset_name = batch_parameters.pop('data_asset_name')
         except KeyError:
-            raise BatchKwargsError(
-                "Unable to build BatchKwargs: no name provided in batch_parameters.",
-                batch_kwargs=batch_parameters,
-            )
-        if "partition_id" in batch_parameters:
-            partition_id = batch_parameters.pop("partition_id")
+            raise BatchKwargsError('Unable to build BatchKwargs: no name provided in batch_parameters.', batch_kwargs=batch_parameters)
+        if ('partition_id' in batch_parameters):
+            partition_id = batch_parameters.pop('partition_id')
             path = None
             for extension in self.known_extensions:
-                if os.path.isfile(
-                    os.path.join(
-                        self.base_directory, data_asset_name, (partition_id + extension)
-                    )
-                ):
-                    path = os.path.join(
-                        self.base_directory, data_asset_name, (partition_id + extension)
-                    )
-            if path is None:
-                logger.warning(
-                    "Unable to find path with the provided partition; searching for asset-name partitions."
-                )
+                if os.path.isfile(os.path.join(self.base_directory, data_asset_name, (partition_id + extension))):
+                    path = os.path.join(self.base_directory, data_asset_name, (partition_id + extension))
+            if (path is None):
+                logger.warning('Unable to find path with the provided partition; searching for asset-name partitions.')
                 if os.path.isfile(os.path.join(self.base_directory, data_asset_name)):
                     path = os.path.join(self.base_directory, data_asset_name)
                 for extension in self.known_extensions:
-                    if os.path.isfile(
-                        os.path.join(self.base_directory, (data_asset_name + extension))
-                    ):
-                        path = os.path.join(
-                            self.base_directory, (data_asset_name + extension)
-                        )
-            if path is None:
-                raise BatchKwargsError(
-                    f"Unable to build batch kwargs from for asset '{data_asset_name}'",
-                    batch_parameters,
-                )
+                    if os.path.isfile(os.path.join(self.base_directory, (data_asset_name + extension))):
+                        path = os.path.join(self.base_directory, (data_asset_name + extension))
+            if (path is None):
+                raise BatchKwargsError(f"Unable to build batch kwargs from for asset '{data_asset_name}'", batch_parameters)
             return self._build_batch_kwargs_from_path(path, **batch_parameters)
         else:
-            return self.yield_batch_kwargs(
-                data_asset_name=data_asset_name, **batch_parameters
-            )
+            return self.yield_batch_kwargs(data_asset_name=data_asset_name, **batch_parameters)
 
     def _get_valid_file_options(self, base_directory=None):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         valid_options = []
-        if base_directory is None:
+        if (base_directory is None):
             base_directory = self.base_directory
         file_options = os.listdir(base_directory)
         for file_option in file_options:
             for extension in self.known_extensions:
-                if (
-                    file_option.endswith(extension)
-                    and (not file_option.startswith("."))
-                    and (
-                        (file_option[: (-len(extension))], "file") not in valid_options
-                    )
-                ):
-                    valid_options.append((file_option[: (-len(extension))], "file"))
+                if (file_option.endswith(extension) and (not file_option.startswith('.')) and ((file_option[:(- len(extension))], 'file') not in valid_options)):
+                    valid_options.append((file_option[:(- len(extension))], 'file'))
                 elif os.path.isdir(os.path.join(self.base_directory, file_option)):
-                    subdir_options = self._get_valid_file_options(
-                        base_directory=os.path.join(base_directory, file_option)
-                    )
-                    if (len(subdir_options) > 0) and (
-                        (file_option, "directory") not in valid_options
-                    ):
-                        valid_options.append((file_option, "directory"))
+                    subdir_options = self._get_valid_file_options(base_directory=os.path.join(base_directory, file_option))
+                    if ((len(subdir_options) > 0) and ((file_option, 'directory') not in valid_options)):
+                        valid_options.append((file_option, 'directory'))
         return valid_options
 
     def _get_iterator(self, data_asset_name, reader_options=None, limit=None):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        logger.debug(
-            "Beginning SubdirReaderBatchKwargsGenerator _get_iterator for data_asset_name: %s"
-            % data_asset_name
-        )
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        logger.debug(('Beginning SubdirReaderBatchKwargsGenerator _get_iterator for data_asset_name: %s' % data_asset_name))
         if os.path.isdir(os.path.join(self.base_directory, data_asset_name)):
-            subdir_options = os.listdir(
-                os.path.join(self.base_directory, data_asset_name)
-            )
+            subdir_options = os.listdir(os.path.join(self.base_directory, data_asset_name))
             batches = []
             for file_option in subdir_options:
                 for extension in self.known_extensions:
-                    if file_option.endswith(extension) and (
-                        not file_option.startswith(".")
-                    ):
-                        batches.append(
-                            os.path.join(
-                                self.base_directory, data_asset_name, file_option
-                            )
-                        )
-            return self._build_batch_kwargs_path_iter(
-                batches, reader_options=reader_options, limit=limit
-            )
+                    if (file_option.endswith(extension) and (not file_option.startswith('.'))):
+                        batches.append(os.path.join(self.base_directory, data_asset_name, file_option))
+            return self._build_batch_kwargs_path_iter(batches, reader_options=reader_options, limit=limit)
         else:
             for extension in self.known_extensions:
                 path = os.path.join(self.base_directory, (data_asset_name + extension))
                 if os.path.isfile(path):
-                    return iter(
-                        [
-                            self._build_batch_kwargs_from_path(
-                                path, reader_options=reader_options, limit=limit
-                            )
-                        ]
-                    )
-            raise BatchKwargsError(
-                "No valid files found when searching {:s} using configured known_extensions: {:s} ".format(
-                    os.path.join(self.base_directory, data_asset_name),
-                    ", ".join(map(str, self.known_extensions)),
-                ),
-                batch_kwargs=PathBatchKwargs(
-                    path=os.path.join(self.base_directory, data_asset_name)
-                ),
-            )
+                    return iter([self._build_batch_kwargs_from_path(path, reader_options=reader_options, limit=limit)])
+            raise BatchKwargsError('No valid files found when searching {:s} using configured known_extensions: {:s} '.format(os.path.join(self.base_directory, data_asset_name), ', '.join(map(str, self.known_extensions))), batch_kwargs=PathBatchKwargs(path=os.path.join(self.base_directory, data_asset_name)))
 
-    def _build_batch_kwargs_path_iter(
-        self, path_list, reader_options=None, limit=None
-    ) -> None:
+    def _build_batch_kwargs_path_iter(self, path_list, reader_options=None, limit=None) -> None:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         for path in path_list:
-            (
-                yield self._build_batch_kwargs_from_path(
-                    path, reader_options=reader_options, limit=limit
-                )
-            )
+            (yield self._build_batch_kwargs_from_path(path, reader_options=reader_options, limit=limit))
 
-    def _build_batch_kwargs_from_path(
-        self, path, reader_method=None, reader_options=None, limit=None
-    ):
+    def _build_batch_kwargs_from_path(self, path, reader_method=None, reader_options=None, limit=None):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        batch_kwargs = self._datasource.process_batch_parameters(
-            reader_method=(reader_method or self.reader_method),
-            reader_options=(reader_options or self.reader_options),
-            limit=limit,
-        )
-        batch_kwargs["path"] = path
-        batch_kwargs["datasource"] = self._datasource.name
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        batch_kwargs = self._datasource.process_batch_parameters(reader_method=(reader_method or self.reader_method), reader_options=(reader_options or self.reader_options), limit=limit)
+        batch_kwargs['path'] = path
+        batch_kwargs['datasource'] = self._datasource.name
         return PathBatchKwargs(batch_kwargs)

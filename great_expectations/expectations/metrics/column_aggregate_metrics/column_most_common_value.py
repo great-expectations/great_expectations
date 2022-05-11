@@ -1,117 +1,65 @@
-from typing import Any, Dict, Optional
 
+from typing import Any, Dict, Optional
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
-    ColumnAggregateMetricProvider,
-    column_aggregate_value,
-)
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine, SparkDFExecutionEngine, SqlAlchemyExecutionEngine
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import ColumnAggregateMetricProvider, column_aggregate_value
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-
 class ColumnMostCommonValue(ColumnAggregateMetricProvider):
-    metric_name = "column.most_common_value"
+    metric_name = 'column.most_common_value'
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         mode_list = list(column.mode().values)
         return mode_list
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
-        cls,
-        execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict[(str, Any)],
-        runtime_configuration: Dict,
-    ):
+    def _spark(cls, execution_engine: SqlAlchemyExecutionEngine, metric_domain_kwargs: Dict, metric_value_kwargs: Dict, metrics: Dict[(str, Any)], runtime_configuration: Dict):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        column_value_counts = metrics.get("column.value_counts")
-        return list(
-            column_value_counts[
-                (column_value_counts == column_value_counts.max())
-            ].index
-        )
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        column_value_counts = metrics.get('column.value_counts')
+        return list(column_value_counts[(column_value_counts == column_value_counts.max())].index)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
-        cls,
-        execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict[(str, Any)],
-        runtime_configuration: Dict,
-    ):
+    def _sqlalchemy(cls, execution_engine: SqlAlchemyExecutionEngine, metric_domain_kwargs: Dict, metric_value_kwargs: Dict, metrics: Dict[(str, Any)], runtime_configuration: Dict):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        column_value_counts = metrics.get("column.value_counts")
-        return list(
-            column_value_counts[
-                (column_value_counts == column_value_counts.max())
-            ].index
-        )
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        column_value_counts = metrics.get('column.value_counts')
+        return list(column_value_counts[(column_value_counts == column_value_counts.max())].index)
 
     @classmethod
-    def _get_evaluation_dependencies(
-        cls,
-        metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[Dict] = None,
-    ):
+    def _get_evaluation_dependencies(cls, metric: MetricConfiguration, configuration: Optional[ExpectationConfiguration]=None, execution_engine: Optional[ExecutionEngine]=None, runtime_configuration: Optional[Dict]=None):
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        "Returns a dictionary of given metric names and their corresponding configuration,\n        specifying the metric types and their respective domains"
-        dependencies: dict = super()._get_evaluation_dependencies(
-            metric=metric,
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )
-        if isinstance(
-            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
-        ):
-            dependencies["column.value_counts"] = MetricConfiguration(
-                metric_name="column.value_counts",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs={"sort": "value", "collate": None},
-            )
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        'Returns a dictionary of given metric names and their corresponding configuration,\n        specifying the metric types and their respective domains'
+        dependencies: dict = super()._get_evaluation_dependencies(metric=metric, configuration=configuration, execution_engine=execution_engine, runtime_configuration=runtime_configuration)
+        if isinstance(execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)):
+            dependencies['column.value_counts'] = MetricConfiguration(metric_name='column.value_counts', metric_domain_kwargs=metric.metric_domain_kwargs, metric_value_kwargs={'sort': 'value', 'collate': None})
         return dependencies

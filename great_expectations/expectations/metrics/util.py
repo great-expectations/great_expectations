@@ -1,14 +1,12 @@
+
 import logging
 import warnings
 from typing import Any, Dict, List, Optional
-
 import numpy as np
 from dateutil.parser import parse
 from packaging import version
-
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
-
 try:
     import psycopg2
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
@@ -25,13 +23,7 @@ try:
     from sqlalchemy.engine.interfaces import Dialect
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Insert, Select, TableClause
-    from sqlalchemy.sql.elements import (
-        BinaryExpression,
-        ColumnElement,
-        Label,
-        TextClause,
-        literal,
-    )
+    from sqlalchemy.sql.elements import BinaryExpression, ColumnElement, Label, TextClause, literal
     from sqlalchemy.sql.operators import custom_op
 except ImportError:
     sa = None
@@ -56,36 +48,27 @@ except ImportError:
 logger = logging.getLogger(__name__)
 try:
     import sqlalchemy_dremio.pyodbc
-
-    registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
+    registry.register('dremio', 'sqlalchemy_dremio.pyodbc', 'dialect')
 except ImportError:
     sqlalchemy_dremio = None
-_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
+_BIGQUERY_MODULE_NAME = 'sqlalchemy_bigquery'
 try:
     import sqlalchemy_bigquery as sqla_bigquery
-
-    registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
+    registry.register('bigquery', _BIGQUERY_MODULE_NAME, 'BigQueryDialect')
     bigquery_types_tuple = None
 except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-
-        warnings.warn(
-            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
-            DeprecationWarning,
-        )
-        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        warnings.warn('The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. As support will be removed in v0.17, please transition to sqlalchemy-bigquery', DeprecationWarning)
+        _BIGQUERY_MODULE_NAME = 'pybigquery.sqlalchemy_bigquery'
+        registry.register('bigquery', _BIGQUERY_MODULE_NAME, 'dialect')
         try:
-            getattr(sqla_bigquery, "INTEGER")
+            getattr(sqla_bigquery, 'INTEGER')
             bigquery_types_tuple = None
         except AttributeError:
-            logger.warning(
-                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-            )
+            logger.warning('Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later.')
             from collections import namedtuple
-
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            BigQueryTypes = namedtuple('BigQueryTypes', sorted(sqla_bigquery._type_map))
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
     except ImportError:
         sqla_bigquery = None
@@ -99,65 +82,58 @@ except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
 
-
 def get_dialect_regex_expression(column, regex, dialect, positive=True):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     try:
         if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
             if positive:
-                return BinaryExpression(column, literal(regex), custom_op("~"))
+                return BinaryExpression(column, literal(regex), custom_op('~'))
             else:
-                return BinaryExpression(column, literal(regex), custom_op("!~"))
+                return BinaryExpression(column, literal(regex), custom_op('!~'))
     except AttributeError:
         pass
     try:
         if issubclass(dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             if positive:
-                return BinaryExpression(column, literal(regex), custom_op("~"))
+                return BinaryExpression(column, literal(regex), custom_op('~'))
             else:
-                return BinaryExpression(column, literal(regex), custom_op("!~"))
+                return BinaryExpression(column, literal(regex), custom_op('!~'))
     except (AttributeError, TypeError):
         pass
     try:
         if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
             if positive:
-                return BinaryExpression(column, literal(regex), custom_op("REGEXP"))
+                return BinaryExpression(column, literal(regex), custom_op('REGEXP'))
             else:
-                return BinaryExpression(column, literal(regex), custom_op("NOT REGEXP"))
+                return BinaryExpression(column, literal(regex), custom_op('NOT REGEXP'))
     except AttributeError:
         pass
     try:
-        if issubclass(
-            dialect.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect
-        ):
+        if issubclass(dialect.dialect, snowflake.sqlalchemy.snowdialect.SnowflakeDialect):
             if positive:
-                return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
+                return BinaryExpression(column, literal(regex), custom_op('RLIKE'))
             else:
-                return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
+                return BinaryExpression(column, literal(regex), custom_op('NOT RLIKE'))
     except (AttributeError, TypeError):
         pass
     try:
-        if hasattr(dialect, "BigQueryDialect"):
+        if hasattr(dialect, 'BigQueryDialect'):
             if positive:
                 return sa.func.REGEXP_CONTAINS(column, literal(regex))
             else:
                 return sa.not_(sa.func.REGEXP_CONTAINS(column, literal(regex)))
     except (AttributeError, TypeError):
-        logger.debug(
-            "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",
-            exc_info=True,
-        )
+        logger.debug('Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util', exc_info=True)
         pass
     try:
-        if hasattr(dialect, "DremioDialect"):
+        if hasattr(dialect, 'DremioDialect'):
             if positive:
                 return sa.func.REGEXP_MATCHES(column, literal(regex))
             else:
@@ -167,44 +143,35 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
     try:
         if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):
             if positive:
-                return sa.func.REGEXP_SIMILAR(column, literal(regex), literal("i")) == 1
+                return (sa.func.REGEXP_SIMILAR(column, literal(regex), literal('i')) == 1)
             else:
-                return sa.func.REGEXP_SIMILAR(column, literal(regex), literal("i")) == 0
+                return (sa.func.REGEXP_SIMILAR(column, literal(regex), literal('i')) == 0)
     except (AttributeError, TypeError):
         pass
     try:
-        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and (
-            version.parse(sa.__version__) >= version.parse("1.4")
-        ):
+        if (issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and (version.parse(sa.__version__) >= version.parse('1.4'))):
             if positive:
                 return column.regexp_match(literal(regex))
             else:
                 return sa.not_(column.regexp_match(literal(regex)))
         else:
-            logger.debug(
-                "regex_match is only enabled for sqlite when SQLAlchemy version is >= 1.4",
-                exc_info=True,
-            )
+            logger.debug('regex_match is only enabled for sqlite when SQLAlchemy version is >= 1.4', exc_info=True)
             pass
     except AttributeError:
         pass
     return None
 
-
 def _get_dialect_type_module(dialect=None):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    if dialect is None:
-        logger.warning(
-            "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
-        )
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    if (dialect is None):
+        logger.warning('No sqlalchemy dialect found; relying in top-level sqlalchemy types.')
         return sa
     try:
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
@@ -212,83 +179,52 @@ def _get_dialect_type_module(dialect=None):
     except (TypeError, AttributeError):
         pass
     try:
-        if isinstance(dialect, sqla_bigquery.BigQueryDialect) and (
-            bigquery_types_tuple is not None
-        ):
+        if (isinstance(dialect, sqla_bigquery.BigQueryDialect) and (bigquery_types_tuple is not None)):
             return bigquery_types_tuple
     except (TypeError, AttributeError):
         pass
     try:
-        if issubclass(dialect, teradatasqlalchemy.dialect.TeradataDialect) and (
-            teradatatypes is not None
-        ):
+        if (issubclass(dialect, teradatasqlalchemy.dialect.TeradataDialect) and (teradatatypes is not None)):
             return teradatatypes
     except (TypeError, AttributeError):
         pass
     return dialect
 
-
 def attempt_allowing_relative_error(dialect):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    detected_redshift: bool = (
-        sqlalchemy_redshift is not None
-    ) and check_sql_engine_dialect(
-        actual_sql_engine_dialect=dialect,
-        candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
-    )
-    detected_psycopg2: bool = (
-        sqlalchemy_psycopg2 is not None
-    ) and check_sql_engine_dialect(
-        actual_sql_engine_dialect=dialect,
-        candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2,
-    )
-    return detected_redshift or detected_psycopg2
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    detected_redshift: bool = ((sqlalchemy_redshift is not None) and check_sql_engine_dialect(actual_sql_engine_dialect=dialect, candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect))
+    detected_psycopg2: bool = ((sqlalchemy_psycopg2 is not None) and check_sql_engine_dialect(actual_sql_engine_dialect=dialect, candidate_sql_engine_dialect=sqlalchemy_psycopg2.PGDialect_psycopg2))
+    return (detected_redshift or detected_psycopg2)
 
-
-def is_column_present_in_table(
-    engine: Engine,
-    table_selectable: Select,
-    column_name: str,
-    schema_name: Optional[str] = None,
-) -> bool:
+def is_column_present_in_table(engine: Engine, table_selectable: Select, column_name: str, schema_name: Optional[str]=None) -> bool:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    all_columns_metadata: Optional[
-        List[Dict[(str, Any)]]
-    ] = get_sqlalchemy_column_metadata(
-        engine=engine, table_selectable=table_selectable, schema_name=schema_name
-    )
-    column_names: List[str] = [col_md["name"] for col_md in all_columns_metadata]
-    return column_name in column_names
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    all_columns_metadata: Optional[List[Dict[(str, Any)]]] = get_sqlalchemy_column_metadata(engine=engine, table_selectable=table_selectable, schema_name=schema_name)
+    column_names: List[str] = [col_md['name'] for col_md in all_columns_metadata]
+    return (column_name in column_names)
 
-
-def get_sqlalchemy_column_metadata(
-    engine: Engine, table_selectable: Select, schema_name: Optional[str] = None
-) -> Optional[List[Dict[(str, Any)]]]:
+def get_sqlalchemy_column_metadata(engine: Engine, table_selectable: Select, schema_name: Optional[str]=None) -> Optional[List[Dict[(str, Any)]]]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     try:
         columns: List[Dict[(str, Any)]]
         inspector: reflection.Inspector = get_sqlalchemy_inspector(engine)
@@ -297,282 +233,89 @@ def get_sqlalchemy_column_metadata(
                 columns = table_selectable.selected_columns.columns
             else:
                 columns = inspector.get_columns(table_selectable, schema=schema_name)
-        except (
-            KeyError,
-            AttributeError,
-            sa.exc.NoSuchTableError,
-            sa.exc.ProgrammingError,
-        ):
-            columns = column_reflection_fallback(
-                selectable=table_selectable,
-                dialect=engine.dialect,
-                sqlalchemy_engine=engine,
-            )
-        if len(columns) == 0:
-            columns = column_reflection_fallback(
-                selectable=table_selectable,
-                dialect=engine.dialect,
-                sqlalchemy_engine=engine,
-            )
+        except (KeyError, AttributeError, sa.exc.NoSuchTableError, sa.exc.ProgrammingError):
+            columns = column_reflection_fallback(selectable=table_selectable, dialect=engine.dialect, sqlalchemy_engine=engine)
+        if (len(columns) == 0):
+            columns = column_reflection_fallback(selectable=table_selectable, dialect=engine.dialect, sqlalchemy_engine=engine)
         return columns
     except AttributeError as e:
-        logger.debug(f"Error while introspecting columns: {str(e)}")
+        logger.debug(f'Error while introspecting columns: {str(e)}')
         return None
 
-
-def column_reflection_fallback(
-    selectable: Select, dialect: Dialect, sqlalchemy_engine: Engine
-) -> List[Dict[(str, str)]]:
+def column_reflection_fallback(selectable: Select, dialect: Dialect, sqlalchemy_engine: Engine) -> List[Dict[(str, str)]]:
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     "If we can't reflect the table, use a query to at least get column names."
     col_info_dict_list: List[Dict[(str, str)]]
-    if dialect.name.lower() == "mssql":
-        tables_table_clause: TableClause = sa.table(
-            "tables",
-            sa.column("object_id"),
-            sa.column("schema_id"),
-            sa.column("name"),
-            schema="sys",
-        ).alias("sys_tables_table_clause")
-        tables_table_query: Select = (
-            sa.select(
-                [
-                    tables_table_clause.c.object_id.label("object_id"),
-                    sa.func.schema_name(tables_table_clause.c.schema_id).label(
-                        "schema_name"
-                    ),
-                    tables_table_clause.c.name.label("table_name"),
-                ]
-            )
-            .select_from(tables_table_clause)
-            .alias("sys_tables_table_subquery")
-        )
-        columns_table_clause: TableClause = sa.table(
-            "columns",
-            sa.column("object_id"),
-            sa.column("user_type_id"),
-            sa.column("column_id"),
-            sa.column("name"),
-            sa.column("max_length"),
-            sa.column("precision"),
-            schema="sys",
-        ).alias("sys_columns_table_clause")
-        columns_table_query: Select = (
-            sa.select(
-                [
-                    columns_table_clause.c.object_id.label("object_id"),
-                    columns_table_clause.c.user_type_id.label("user_type_id"),
-                    columns_table_clause.c.column_id.label("column_id"),
-                    columns_table_clause.c.name.label("column_name"),
-                    columns_table_clause.c.max_length.label("column_max_length"),
-                    columns_table_clause.c.precision.label("column_precision"),
-                ]
-            )
-            .select_from(columns_table_clause)
-            .alias("sys_columns_table_subquery")
-        )
-        types_table_clause: TableClause = sa.table(
-            "types", sa.column("user_type_id"), sa.column("name"), schema="sys"
-        ).alias("sys_types_table_clause")
-        types_table_query: Select = (
-            sa.select(
-                [
-                    types_table_clause.c.user_type_id.label("user_type_id"),
-                    types_table_clause.c.name.label("column_data_type"),
-                ]
-            )
-            .select_from(types_table_clause)
-            .alias("sys_types_table_subquery")
-        )
-        inner_join_conditions: BinaryExpression = sa.and_(
-            *((tables_table_query.c.object_id == columns_table_query.c.object_id),)
-        )
-        outer_join_conditions: BinaryExpression = sa.and_(
-            *(
-                (
-                    columns_table_query.columns.user_type_id
-                    == types_table_query.columns.user_type_id
-                ),
-            )
-        )
-        col_info_query: Select = (
-            sa.select(
-                [
-                    tables_table_query.c.schema_name,
-                    tables_table_query.c.table_name,
-                    columns_table_query.c.column_id,
-                    columns_table_query.c.column_name,
-                    types_table_query.c.column_data_type,
-                    columns_table_query.c.column_max_length,
-                    columns_table_query.c.column_precision,
-                ]
-            )
-            .select_from(
-                tables_table_query.join(
-                    right=columns_table_query,
-                    onclause=inner_join_conditions,
-                    isouter=False,
-                ).join(
-                    right=types_table_query,
-                    onclause=outer_join_conditions,
-                    isouter=True,
-                )
-            )
-            .where(tables_table_query.c.table_name == selectable.name)
-            .order_by(
-                tables_table_query.c.schema_name.asc(),
-                tables_table_query.c.table_name.asc(),
-                columns_table_query.c.column_id.asc(),
-            )
-        )
-        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
-            col_info_query
-        ).fetchall()
-        col_info_dict_list: List[Dict[(str, str)]] = [
-            {"name": column_name, "type": column_data_type.upper()}
-            for (
-                schema_name,
-                table_name,
-                column_id,
-                column_name,
-                column_data_type,
-                column_max_length,
-                column_precision,
-            ) in col_info_tuples_list
-        ]
-    elif dialect.name.lower() == "trino":
+    if (dialect.name.lower() == 'mssql'):
+        tables_table_clause: TableClause = sa.table('tables', sa.column('object_id'), sa.column('schema_id'), sa.column('name'), schema='sys').alias('sys_tables_table_clause')
+        tables_table_query: Select = sa.select([tables_table_clause.c.object_id.label('object_id'), sa.func.schema_name(tables_table_clause.c.schema_id).label('schema_name'), tables_table_clause.c.name.label('table_name')]).select_from(tables_table_clause).alias('sys_tables_table_subquery')
+        columns_table_clause: TableClause = sa.table('columns', sa.column('object_id'), sa.column('user_type_id'), sa.column('column_id'), sa.column('name'), sa.column('max_length'), sa.column('precision'), schema='sys').alias('sys_columns_table_clause')
+        columns_table_query: Select = sa.select([columns_table_clause.c.object_id.label('object_id'), columns_table_clause.c.user_type_id.label('user_type_id'), columns_table_clause.c.column_id.label('column_id'), columns_table_clause.c.name.label('column_name'), columns_table_clause.c.max_length.label('column_max_length'), columns_table_clause.c.precision.label('column_precision')]).select_from(columns_table_clause).alias('sys_columns_table_subquery')
+        types_table_clause: TableClause = sa.table('types', sa.column('user_type_id'), sa.column('name'), schema='sys').alias('sys_types_table_clause')
+        types_table_query: Select = sa.select([types_table_clause.c.user_type_id.label('user_type_id'), types_table_clause.c.name.label('column_data_type')]).select_from(types_table_clause).alias('sys_types_table_subquery')
+        inner_join_conditions: BinaryExpression = sa.and_(*((tables_table_query.c.object_id == columns_table_query.c.object_id),))
+        outer_join_conditions: BinaryExpression = sa.and_(*((columns_table_query.columns.user_type_id == types_table_query.columns.user_type_id),))
+        col_info_query: Select = sa.select([tables_table_query.c.schema_name, tables_table_query.c.table_name, columns_table_query.c.column_id, columns_table_query.c.column_name, types_table_query.c.column_data_type, columns_table_query.c.column_max_length, columns_table_query.c.column_precision]).select_from(tables_table_query.join(right=columns_table_query, onclause=inner_join_conditions, isouter=False).join(right=types_table_query, onclause=outer_join_conditions, isouter=True)).where((tables_table_query.c.table_name == selectable.name)).order_by(tables_table_query.c.schema_name.asc(), tables_table_query.c.table_name.asc(), columns_table_query.c.column_id.asc())
+        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(col_info_query).fetchall()
+        col_info_dict_list: List[Dict[(str, str)]] = [{'name': column_name, 'type': column_data_type.upper()} for (schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision) in col_info_tuples_list]
+    elif (dialect.name.lower() == 'trino'):
         try:
             table_name = selectable.name
         except AttributeError:
             table_name = selectable
-        tables_table: sa.Table = sa.Table(
-            "tables", sa.MetaData(), schema="information_schema"
-        )
-        tables_table_query: Select = (
-            sa.select(
-                [
-                    sa.column("table_schema").label("schema_name"),
-                    sa.column("table_name").label("table_name"),
-                ]
-            )
-            .select_from(tables_table)
-            .alias("information_schema_tables_table")
-        )
-        columns_table: sa.Table = sa.Table(
-            "columns", sa.MetaData(), schema="information_schema"
-        )
-        columns_table_query: Select = (
-            sa.select(
-                [
-                    sa.column("column_name").label("column_name"),
-                    sa.column("table_name").label("table_name"),
-                    sa.column("table_schema").label("schema_name"),
-                    sa.column("data_type").label("column_data_type"),
-                ]
-            )
-            .select_from(columns_table)
-            .alias("information_schema_columns_table")
-        )
-        conditions = sa.and_(
-            *(
-                (tables_table_query.c.table_name == columns_table_query.c.table_name),
-                (tables_table_query.c.schema_name == columns_table_query.c.schema_name),
-            )
-        )
-        col_info_query: Select = (
-            sa.select(
-                [
-                    tables_table_query.c.schema_name,
-                    tables_table_query.c.table_name,
-                    columns_table_query.c.column_name,
-                    columns_table_query.c.column_data_type,
-                ]
-            )
-            .select_from(
-                tables_table_query.join(
-                    right=columns_table_query, onclause=conditions, isouter=False
-                )
-            )
-            .where(tables_table_query.c.table_name == table_name)
-            .order_by(
-                tables_table_query.c.schema_name.asc(),
-                tables_table_query.c.table_name.asc(),
-                columns_table_query.c.column_name.asc(),
-            )
-            .alias("column_info")
-        )
-        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
-            col_info_query
-        ).fetchall()
-        col_info_dict_list: List[Dict[(str, str)]] = [
-            {"name": column_name, "type": column_data_type.upper()}
-            for (
-                schema_name,
-                table_name,
-                column_name,
-                column_data_type,
-            ) in col_info_tuples_list
-        ]
+        tables_table: sa.Table = sa.Table('tables', sa.MetaData(), schema='information_schema')
+        tables_table_query: Select = sa.select([sa.column('table_schema').label('schema_name'), sa.column('table_name').label('table_name')]).select_from(tables_table).alias('information_schema_tables_table')
+        columns_table: sa.Table = sa.Table('columns', sa.MetaData(), schema='information_schema')
+        columns_table_query: Select = sa.select([sa.column('column_name').label('column_name'), sa.column('table_name').label('table_name'), sa.column('table_schema').label('schema_name'), sa.column('data_type').label('column_data_type')]).select_from(columns_table).alias('information_schema_columns_table')
+        conditions = sa.and_(*((tables_table_query.c.table_name == columns_table_query.c.table_name), (tables_table_query.c.schema_name == columns_table_query.c.schema_name)))
+        col_info_query: Select = sa.select([tables_table_query.c.schema_name, tables_table_query.c.table_name, columns_table_query.c.column_name, columns_table_query.c.column_data_type]).select_from(tables_table_query.join(right=columns_table_query, onclause=conditions, isouter=False)).where((tables_table_query.c.table_name == table_name)).order_by(tables_table_query.c.schema_name.asc(), tables_table_query.c.table_name.asc(), columns_table_query.c.column_name.asc()).alias('column_info')
+        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(col_info_query).fetchall()
+        col_info_dict_list: List[Dict[(str, str)]] = [{'name': column_name, 'type': column_data_type.upper()} for (schema_name, table_name, column_name, column_data_type) in col_info_tuples_list]
     else:
         if isinstance(selectable, TextClause):
             query: TextClause = selectable
         else:
-            query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
+            query: Select = sa.select([sa.text('*')]).select_from(selectable).limit(1)
         result_object = sqlalchemy_engine.execute(query)
         col_names: List[str] = result_object._metadata.keys
-        col_info_dict_list = [{"name": col_name} for col_name in col_names]
+        col_info_dict_list = [{'name': col_name} for col_name in col_names]
     return col_info_dict_list
-
 
 def parse_value_set(value_set):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    parsed_value_set = [
-        (parse(value) if isinstance(value, str) else value) for value in value_set
-    ]
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    parsed_value_set = [(parse(value) if isinstance(value, str) else value) for value in value_set]
     return parsed_value_set
-
 
 def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=True):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     dialect_supported: bool = False
     try:
-        if hasattr(dialect, "BigQueryDialect"):
+        if hasattr(dialect, 'BigQueryDialect'):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass
-    if issubclass(
-        dialect.dialect,
-        (
-            sa.dialects.sqlite.dialect,
-            sa.dialects.postgresql.dialect,
-            sa.dialects.mysql.dialect,
-            sa.dialects.mssql.dialect,
-        ),
-    ):
+    if issubclass(dialect.dialect, (sa.dialects.sqlite.dialect, sa.dialects.postgresql.dialect, sa.dialects.mysql.dialect, sa.dialects.mssql.dialect)):
         dialect_supported = True
     try:
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
@@ -580,7 +323,7 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     except (AttributeError, TypeError):
         pass
     try:
-        if hasattr(dialect, "DremioDialect"):
+        if hasattr(dialect, 'DremioDialect'):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass
@@ -599,157 +342,125 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
             pass
     return None
 
-
 def validate_distribution_parameters(distribution, params):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     "Ensures that necessary parameters for a distribution are present and that all parameters are sensical.\n\n       If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError       with an informative description. Note that 'loc' and 'scale' are optional arguments, and that 'scale'       must be positive.\n\n       Args:\n           distribution (string):                The scipy distribution name, e.g. normal distribution is 'norm'.\n           params (dict or list):                The distribution shape parameters in a named dictionary or positional list form following the scipy                cdf argument scheme.\n\n               params={'mean': 40, 'std_dev': 5} or params=[40, 5]\n\n       Exceptions:\n           ValueError:                With an informative description, usually when necessary parameters are omitted or are invalid.\n\n    "
-    norm_msg = (
-        "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
-    )
+    norm_msg = "norm distributions require 0 parameters and optionally 'mean', 'std_dev'."
     beta_msg = "beta distributions require 2 positive parameters 'alpha', 'beta' and optionally 'loc', 'scale'."
     gamma_msg = "gamma distributions require 1 positive parameter 'alpha' and optionally 'loc','scale'."
-    uniform_msg = (
-        "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
-    )
+    uniform_msg = "uniform distributions require 0 parameters and optionally 'loc', 'scale'."
     chi2_msg = "chi2 distributions require 1 positive parameter 'df' and optionally 'loc', 'scale'."
-    expon_msg = (
-        "expon distributions require 0 parameters and optionally 'loc', 'scale'."
-    )
-    if distribution not in [
-        "norm",
-        "beta",
-        "gamma",
-        "poisson",
-        "uniform",
-        "chi2",
-        "expon",
-    ]:
-        raise AttributeError(f"Unsupported  distribution provided: {distribution}")
+    expon_msg = "expon distributions require 0 parameters and optionally 'loc', 'scale'."
+    if (distribution not in ['norm', 'beta', 'gamma', 'poisson', 'uniform', 'chi2', 'expon']):
+        raise AttributeError(f'Unsupported  distribution provided: {distribution}')
     if isinstance(params, dict):
-        if (params.get("std_dev", 1) <= 0) or (params.get("scale", 1) <= 0):
-            raise ValueError("std_dev and scale must be positive.")
-        if (distribution == "beta") and (
-            (params.get("alpha", (-1)) <= 0) or (params.get("beta", (-1)) <= 0)
-        ):
-            raise ValueError(f"Invalid parameters: {beta_msg}")
-        elif (distribution == "gamma") and (params.get("alpha", (-1)) <= 0):
-            raise ValueError(f"Invalid parameters: {gamma_msg}")
-        elif (distribution == "chi2") and (params.get("df", (-1)) <= 0):
-            raise ValueError(f"Invalid parameters: {chi2_msg}:")
-    elif isinstance(params, tuple) or isinstance(params, list):
+        if ((params.get('std_dev', 1) <= 0) or (params.get('scale', 1) <= 0)):
+            raise ValueError('std_dev and scale must be positive.')
+        if ((distribution == 'beta') and ((params.get('alpha', (- 1)) <= 0) or (params.get('beta', (- 1)) <= 0))):
+            raise ValueError(f'Invalid parameters: {beta_msg}')
+        elif ((distribution == 'gamma') and (params.get('alpha', (- 1)) <= 0)):
+            raise ValueError(f'Invalid parameters: {gamma_msg}')
+        elif ((distribution == 'chi2') and (params.get('df', (- 1)) <= 0)):
+            raise ValueError(f'Invalid parameters: {chi2_msg}:')
+    elif (isinstance(params, tuple) or isinstance(params, list)):
         scale = None
-        if distribution == "beta":
-            if len(params) < 2:
-                raise ValueError(f"Missing required parameters: {beta_msg}")
-            if (params[0] <= 0) or (params[1] <= 0):
-                raise ValueError(f"Invalid parameters: {beta_msg}")
-            if len(params) == 4:
+        if (distribution == 'beta'):
+            if (len(params) < 2):
+                raise ValueError(f'Missing required parameters: {beta_msg}')
+            if ((params[0] <= 0) or (params[1] <= 0)):
+                raise ValueError(f'Invalid parameters: {beta_msg}')
+            if (len(params) == 4):
                 scale = params[3]
-            elif len(params) > 4:
-                raise ValueError(f"Too many parameters provided: {beta_msg}")
-        elif distribution == "norm":
-            if len(params) > 2:
-                raise ValueError(f"Too many parameters provided: {norm_msg}")
-            if len(params) == 2:
+            elif (len(params) > 4):
+                raise ValueError(f'Too many parameters provided: {beta_msg}')
+        elif (distribution == 'norm'):
+            if (len(params) > 2):
+                raise ValueError(f'Too many parameters provided: {norm_msg}')
+            if (len(params) == 2):
                 scale = params[1]
-        elif distribution == "gamma":
-            if len(params) < 1:
-                raise ValueError(f"Missing required parameters: {gamma_msg}")
-            if len(params) == 3:
+        elif (distribution == 'gamma'):
+            if (len(params) < 1):
+                raise ValueError(f'Missing required parameters: {gamma_msg}')
+            if (len(params) == 3):
                 scale = params[2]
-            if len(params) > 3:
-                raise ValueError(f"Too many parameters provided: {gamma_msg}")
-            elif params[0] <= 0:
-                raise ValueError(f"Invalid parameters: {gamma_msg}")
-        elif distribution == "uniform":
-            if len(params) == 2:
+            if (len(params) > 3):
+                raise ValueError(f'Too many parameters provided: {gamma_msg}')
+            elif (params[0] <= 0):
+                raise ValueError(f'Invalid parameters: {gamma_msg}')
+        elif (distribution == 'uniform'):
+            if (len(params) == 2):
                 scale = params[1]
-            if len(params) > 2:
-                raise ValueError(f"Too many arguments provided: {uniform_msg}")
-        elif distribution == "chi2":
-            if len(params) < 1:
-                raise ValueError(f"Missing required parameters: {chi2_msg}")
-            elif len(params) == 3:
+            if (len(params) > 2):
+                raise ValueError(f'Too many arguments provided: {uniform_msg}')
+        elif (distribution == 'chi2'):
+            if (len(params) < 1):
+                raise ValueError(f'Missing required parameters: {chi2_msg}')
+            elif (len(params) == 3):
                 scale = params[2]
-            elif len(params) > 3:
-                raise ValueError(f"Too many arguments provided: {chi2_msg}")
-            if params[0] <= 0:
-                raise ValueError(f"Invalid parameters: {chi2_msg}")
-        elif distribution == "expon":
-            if len(params) == 2:
+            elif (len(params) > 3):
+                raise ValueError(f'Too many arguments provided: {chi2_msg}')
+            if (params[0] <= 0):
+                raise ValueError(f'Invalid parameters: {chi2_msg}')
+        elif (distribution == 'expon'):
+            if (len(params) == 2):
                 scale = params[1]
-            if len(params) > 2:
-                raise ValueError(f"Too many arguments provided: {expon_msg}")
-        if (scale is not None) and (scale <= 0):
-            raise ValueError("std_dev and scale must be positive.")
+            if (len(params) > 2):
+                raise ValueError(f'Too many arguments provided: {expon_msg}')
+        if ((scale is not None) and (scale <= 0)):
+            raise ValueError('std_dev and scale must be positive.')
     else:
-        raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
-        )
+        raise ValueError('params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)')
     return
-
 
 def _scipy_distribution_positional_args_from_dict(distribution, params):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
     "Helper function that returns positional arguments for a scipy distribution using a dict of parameters.\n\n       See the `cdf()` function here https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html#Methods       to see an example of scipy's positional arguments. This function returns the arguments specified by the        scipy.stat.distribution.cdf() for that distribution.\n\n       Args:\n           distribution (string):                The scipy distribution name.\n           params (dict):                A dict of named parameters.\n\n       Raises:\n           AttributeError:                If an unsupported distribution is provided.\n    "
-    params["loc"] = params.get("loc", 0)
-    if "scale" not in params:
-        params["scale"] = 1
-    if distribution == "norm":
-        return (params["mean"], params["std_dev"])
-    elif distribution == "beta":
-        return (params["alpha"], params["beta"], params["loc"], params["scale"])
-    elif distribution == "gamma":
-        return (params["alpha"], params["loc"], params["scale"])
-    elif distribution == "uniform":
-        return (params["min"], params["max"])
-    elif distribution == "chi2":
-        return (params["df"], params["loc"], params["scale"])
-    elif distribution == "expon":
-        return (params["loc"], params["scale"])
-
+    params['loc'] = params.get('loc', 0)
+    if ('scale' not in params):
+        params['scale'] = 1
+    if (distribution == 'norm'):
+        return (params['mean'], params['std_dev'])
+    elif (distribution == 'beta'):
+        return (params['alpha'], params['beta'], params['loc'], params['scale'])
+    elif (distribution == 'gamma'):
+        return (params['alpha'], params['loc'], params['scale'])
+    elif (distribution == 'uniform'):
+        return (params['min'], params['max'])
+    elif (distribution == 'chi2'):
+        return (params['df'], params['loc'], params['scale'])
+    elif (distribution == 'expon'):
+        return (params['loc'], params['scale'])
 
 def is_valid_continuous_partition_object(partition_object):
     import inspect
-
     __frame = inspect.currentframe()
     __file = __frame.f_code.co_filename
     __func = __frame.f_code.co_name
     for (k, v) in __frame.f_locals.items():
-        if any((var in k) for var in ("__frame", "__file", "__func")):
+        if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
             continue
-        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-    "Tests whether a given object is a valid continuous partition object. See :ref:`partition_object`.\n\n    :param partition_object: The partition_object to evaluate\n    :return: Boolean\n    "
-    if (
-        (partition_object is None)
-        or ("weights" not in partition_object)
-        or ("bins" not in partition_object)
-    ):
+        print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    'Tests whether a given object is a valid continuous partition object. See :ref:`partition_object`.\n\n    :param partition_object: The partition_object to evaluate\n    :return: Boolean\n    '
+    if ((partition_object is None) or ('weights' not in partition_object) or ('bins' not in partition_object)):
         return False
-    if "tail_weights" in partition_object:
-        if len(partition_object["tail_weights"]) != 2:
+    if ('tail_weights' in partition_object):
+        if (len(partition_object['tail_weights']) != 2):
             return False
-        comb_weights = partition_object["tail_weights"] + partition_object["weights"]
+        comb_weights = (partition_object['tail_weights'] + partition_object['weights'])
     else:
-        comb_weights = partition_object["weights"]
-    return (
-        (len(partition_object["bins"]) == (len(partition_object["weights"]) + 1))
-        and np.all(np.diff(partition_object["bins"]) > 0)
-        and np.allclose(np.sum(comb_weights), 1.0)
-    )
+        comb_weights = partition_object['weights']
+    return ((len(partition_object['bins']) == (len(partition_object['weights']) + 1)) and np.all((np.diff(partition_object['bins']) > 0)) and np.allclose(np.sum(comb_weights), 1.0))

@@ -1,122 +1,74 @@
+
 import logging
 from typing import Any, Callable, Dict, List, Optional, Type
-
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
-
 logger = logging.getLogger(__name__)
 
-
 class Anonymizer(BaseAnonymizer):
-    def __init__(self, salt: Optional[str] = None) -> None:
-        import inspect
 
+    def __init__(self, salt: Optional[str]=None) -> None:
+        import inspect
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         super().__init__(salt=salt)
-        from great_expectations.core.usage_statistics.anonymizers.action_anonymizer import (
-            ActionAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
-            BatchAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
-            BatchRequestAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import (
-            CheckpointAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymizer import (
-            DataConnectorAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.data_docs_anonymizer import (
-            DataDocsAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
-            DatasourceAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
-            ExpectationSuiteAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
-            ProfilerAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
-            StoreAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import (
-            StoreBackendAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
-            ValidationOperatorAnonymizer,
-        )
+        from great_expectations.core.usage_statistics.anonymizers.action_anonymizer import ActionAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import BatchAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import BatchRequestAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import CheckpointAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymizer import DataConnectorAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.data_docs_anonymizer import DataDocsAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import DatasourceAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import ExpectationSuiteAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import ProfilerAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import StoreAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import StoreBackendAnonymizer
+        from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import ValidationOperatorAnonymizer
+        self._strategies: List[Type[BaseAnonymizer]] = [CheckpointAnonymizer, ProfilerAnonymizer, DatasourceAnonymizer, DataConnectorAnonymizer, ActionAnonymizer, DataDocsAnonymizer, ExpectationSuiteAnonymizer, ValidationOperatorAnonymizer, BatchRequestAnonymizer, BatchAnonymizer, StoreAnonymizer, StoreBackendAnonymizer]
+        self._anonymizers: Dict[(Type[BaseAnonymizer], BaseAnonymizer)] = {strategy: strategy(salt=self._salt, aggregate_anonymizer=self) for strategy in self._strategies}
 
-        self._strategies: List[Type[BaseAnonymizer]] = [
-            CheckpointAnonymizer,
-            ProfilerAnonymizer,
-            DatasourceAnonymizer,
-            DataConnectorAnonymizer,
-            ActionAnonymizer,
-            DataDocsAnonymizer,
-            ExpectationSuiteAnonymizer,
-            ValidationOperatorAnonymizer,
-            BatchRequestAnonymizer,
-            BatchAnonymizer,
-            StoreAnonymizer,
-            StoreBackendAnonymizer,
-        ]
-        self._anonymizers: Dict[(Type[BaseAnonymizer], BaseAnonymizer)] = {
-            strategy: strategy(salt=self._salt, aggregate_anonymizer=self)
-            for strategy in self._strategies
-        }
-
-    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
+    def anonymize(self, obj: Optional[object]=None, **kwargs) -> Any:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         anonymizer: Optional[BaseAnonymizer] = self._get_anonymizer(obj=obj, **kwargs)
-        if anonymizer is not None:
+        if (anonymizer is not None):
             return anonymizer.anonymize(obj=obj, **kwargs)
         elif isinstance(obj, str):
             return self._anonymize_string(string_=obj)
-        elif not obj:
+        elif (not obj):
             return obj
-        raise TypeError(
-            f"The type {type(obj)} cannot be handled by the Anonymizer; no suitable strategy found."
-        )
+        raise TypeError(f'The type {type(obj)} cannot be handled by the Anonymizer; no suitable strategy found.')
 
     def can_handle(self, obj: object, **kwargs) -> bool:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        return Anonymizer._get_anonymizer(obj=obj, **kwargs) is not None
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        return (Anonymizer._get_anonymizer(obj=obj, **kwargs) is not None)
 
     def _get_anonymizer(self, obj: object, **kwargs) -> Optional[BaseAnonymizer]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         for anonymizer in self._anonymizers.values():
             if anonymizer.can_handle(obj=obj, **kwargs):
                 return anonymizer
@@ -124,27 +76,19 @@ class Anonymizer(BaseAnonymizer):
 
     def anonymize_init_payload(self, init_payload: dict) -> dict:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
         anonymized_init_payload = {}
-        anonymizer_funcs = {
-            "datasources": self._anonymize_datasources_init_payload,
-            "stores": self._anonymize_stores_init_payload,
-            "validation_operators": self._anonymize_validation_operator_init_payload,
-            "data_docs_sites": self._anonymize_data_docs_sites_init_payload,
-            "expectation_suites": self._anonymize_expectation_suite_init_payload,
-            "dependencies": None,
-        }
+        anonymizer_funcs = {'datasources': self._anonymize_datasources_init_payload, 'stores': self._anonymize_stores_init_payload, 'validation_operators': self._anonymize_validation_operator_init_payload, 'data_docs_sites': self._anonymize_data_docs_sites_init_payload, 'expectation_suites': self._anonymize_expectation_suite_init_payload, 'dependencies': None}
         for (key, val) in init_payload.items():
             anonymizer_func: Optional[Callable] = anonymizer_funcs.get(key)
             if anonymizer_func:
-                anonymized_key: str = f"anonymized_{key}"
+                anonymized_key: str = f'anonymized_{key}'
                 anonymized_init_payload[anonymized_key] = anonymizer_func(val)
             else:
                 anonymized_init_payload[key] = val
@@ -152,119 +96,82 @@ class Anonymizer(BaseAnonymizer):
 
     def _anonymize_datasources_init_payload(self, payload: dict) -> List[dict]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
-            DatasourceAnonymizer,
-        )
-
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import DatasourceAnonymizer
         anonymizer = self._anonymizers[DatasourceAnonymizer]
         anonymized_values: List[dict] = []
         for (name, config) in payload.items():
-            anonymize_value: dict = anonymizer._anonymize_datasource_info(
-                name=name, config=config
-            )
+            anonymize_value: dict = anonymizer._anonymize_datasource_info(name=name, config=config)
             anonymized_values.append(anonymize_value)
         return anonymized_values
 
-    def _anonymize_stores_init_payload(
-        self, payload: Dict[(str, "Store")]
-    ) -> List[dict]:
+    def _anonymize_stores_init_payload(self, payload: Dict[(str, 'Store')]) -> List[dict]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
-            StoreAnonymizer,
-        )
-
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import StoreAnonymizer
         anonymizer = self._anonymizers[StoreAnonymizer]
         anonymized_values: List[dict] = []
         for (store_name, store_obj) in payload.items():
-            anonymize_value: dict = anonymizer.anonymize(
-                store_name=store_name, store_obj=store_obj
-            )
+            anonymize_value: dict = anonymizer.anonymize(store_name=store_name, store_obj=store_obj)
             anonymized_values.append(anonymize_value)
         return anonymized_values
 
-    def _anonymize_validation_operator_init_payload(
-        self, payload: Dict[(str, "ValidationOperator")]
-    ) -> List[dict]:
+    def _anonymize_validation_operator_init_payload(self, payload: Dict[(str, 'ValidationOperator')]) -> List[dict]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
-            ValidationOperatorAnonymizer,
-        )
-
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import ValidationOperatorAnonymizer
         anonymizer = self._anonymizers[ValidationOperatorAnonymizer]
         anonymized_values: List[dict] = []
         for (validation_operator_name, validation_operator_obj) in payload.items():
-            anonymize_value: dict = anonymizer.anonymize(
-                validation_operator_name=validation_operator_name,
-                validation_operator_obj=validation_operator_obj,
-            )
+            anonymize_value: dict = anonymizer.anonymize(validation_operator_name=validation_operator_name, validation_operator_obj=validation_operator_obj)
             anonymized_values.append(anonymize_value)
         return anonymized_values
 
-    def _anonymize_data_docs_sites_init_payload(
-        self, payload: Dict[(str, dict)]
-    ) -> List[dict]:
+    def _anonymize_data_docs_sites_init_payload(self, payload: Dict[(str, dict)]) -> List[dict]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        from great_expectations.core.usage_statistics.anonymizers.data_docs_anonymizer import (
-            DataDocsAnonymizer,
-        )
-
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        from great_expectations.core.usage_statistics.anonymizers.data_docs_anonymizer import DataDocsAnonymizer
         anonymizer = self._anonymizers[DataDocsAnonymizer]
         anonymized_values: List[dict] = []
         for (site_name, site_config) in payload.items():
-            anonymize_value: dict = anonymizer.anonymize(
-                site_name=site_name, site_config=site_config
-            )
+            anonymize_value: dict = anonymizer.anonymize(site_name=site_name, site_config=site_config)
             anonymized_values.append(anonymize_value)
         return anonymized_values
 
-    def _anonymize_expectation_suite_init_payload(
-        self, payload: List["ExpectationSuite"]
-    ) -> List[dict]:
+    def _anonymize_expectation_suite_init_payload(self, payload: List['ExpectationSuite']) -> List[dict]:
         import inspect
-
         __frame = inspect.currentframe()
         __file = __frame.f_code.co_filename
         __func = __frame.f_code.co_name
         for (k, v) in __frame.f_locals.items():
-            if any((var in k) for var in ("__frame", "__file", "__func")):
+            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
                 continue
-            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
-        from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
-            ExpectationSuiteAnonymizer,
-        )
-
+            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+        from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import ExpectationSuiteAnonymizer
         anonymizer = self._anonymizers[ExpectationSuiteAnonymizer]
         anonymized_values: List[dict] = []
         for suite in payload:
