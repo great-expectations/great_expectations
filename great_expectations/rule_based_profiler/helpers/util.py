@@ -502,6 +502,10 @@ def compute_kde_quantiles_point_estimate(
     An internal implementation of the "kernel density estimation" estimator method, returning a point estimate for a
     population parameter of interest (lower and upper quantiles in this case).
 
+    Overview: https://en.wikipedia.org/wiki/Kernel_density_estimation
+    Bandwidth Effect: https://en.wikipedia.org/wiki/Kernel_density_estimation#Bandwidth_selection
+    Bandwidth Method: https://stats.stackexchange.com/questions/90656/kernel-bandwidth-scotts-vs-silvermans-rules
+
     Args:
         false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
             identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
@@ -515,7 +519,10 @@ def compute_kde_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
 
-    metric_values_density_estimate = stats.gaussian_kde(metric_values)
+    kde_bandwidth: float = 0.5
+    metric_values_density_estimate = stats.gaussian_kde(
+        metric_values, bw_method=kde_bandwidth
+    )
     if random_seed:
         metric_values_gaussian_sample = metric_values_density_estimate.resample(
             n_resamples,
