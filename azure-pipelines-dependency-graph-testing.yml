@@ -295,11 +295,6 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
-
-          - script: |
               if [[ $(pandas.version) == 'latest' ]]; then
                 pip install pandas
               else
@@ -554,11 +549,6 @@ stages:
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
-
-          - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
 
           - script: |
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
