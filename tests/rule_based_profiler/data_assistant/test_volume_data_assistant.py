@@ -1,5 +1,5 @@
 import os
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 
 import altair as alt
 import nbconvert
@@ -19,8 +19,10 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
+    ParameterNode,
     SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
@@ -2683,11 +2685,34 @@ def test_volume_data_assistant_result_serialization(
     volume_data_assistant_result_as_dict: dict = volume_data_assistant_result.to_dict()
     assert (
         volume_data_assistant_result_as_dict is not None
-        and len(volume_data_assistant_result_as_dict) == 4
+        and len(volume_data_assistant_result_as_dict) == 5
     )
     assert (
         volume_data_assistant_result.to_json_dict()
         == volume_data_assistant_result_as_dict
+    )
+
+
+def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+):
+    metrics_by_domain: Optional[
+        Dict[Domain, Dict[str, ParameterNode]]
+    ] = volume_data_assistant_result.metrics_by_domain
+
+    parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+    parameter_node: ParameterNode
+    batch_id: str
+    assert all(
+        volume_data_assistant_result.batch_id_to_batch_identifier_display_name_map[
+            batch_id
+        ]
+        is not None
+        for parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.values()
+        for parameter_node in parameter_values_for_fully_qualified_parameter_names.values()
+        for batch_id in parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+        ].keys()
     )
 
 
@@ -2785,8 +2810,7 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
     )
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request,
-        expectation_suite_name=expected_expectation_suite.expectation_suite_name,
+        batch_request=batch_request
     )
 
     assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
@@ -2864,7 +2888,7 @@ def test_execution_time_within_proper_bounds_using_implicit_invocation(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request,
+        batch_request=batch_request
     )
 
     # Execution time (in seconds) must have non-trivial value.
