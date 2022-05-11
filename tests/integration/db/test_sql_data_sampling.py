@@ -75,7 +75,7 @@ if __name__ == "test_script_module":
         athena_db_name: str = get_awsathena_db_name(
             db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
         )
-        table_name: str = f"{athena_db_name}.ten_trips_from_each_month"
+        table_name: str = "ten_trips_from_each_month"
         test_df: pd.DataFrame = load_and_concatenate_csvs(
             csv_paths=[
                 f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
