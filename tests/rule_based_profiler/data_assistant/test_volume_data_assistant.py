@@ -18,9 +18,6 @@ from great_expectations.rule_based_profiler.data_assistant import (
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
-    MetricValue,
-)
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -2813,8 +2810,7 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
     )
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request,
-        expectation_suite_name=expected_expectation_suite.expectation_suite_name,
+        batch_request=batch_request
     )
 
     assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
@@ -2892,7 +2888,7 @@ def test_execution_time_within_proper_bounds_using_implicit_invocation(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request,
+        batch_request=batch_request
     )
 
     # Execution time (in seconds) must have non-trivial value.

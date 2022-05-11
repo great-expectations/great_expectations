@@ -321,7 +321,7 @@ module.exports = {
           type: 'category',
           label: 'Contributing basics',
           items: [
-            { type: 'doc', id: 'contributing/contributing', label: 'Introduction' },
+            { type: 'doc', id: 'contributing/contributing', label: 'Contributing overview' },
             { type: 'doc', id: 'contributing/contributing_setup' },
             { type: 'doc', id: 'contributing/contributing_checklist' },
             { type: 'doc', id: 'contributing/contributing_github' },

@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 from inspect import isabstract
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -69,18 +70,15 @@ class DataAssistant(metaclass=MetaDataAssistant):
         validator=validator,
     )
     result: DataAssistantResult = data_assistant.run(
-        expectation_suite=None,
-        expectation_suite_name="my_suite",
-        include_citation=True,
-        save_updated_expectation_suite=False,
+        variables=None,
+        rules=None,
     )
 
     Then:
-        metrics: Dict[Domain, Dict[str, ParameterNode]] = result.metrics
-        expectation_suite: ExpectationSuite = result.expectation_suite
-        expectation_configurations: List[ExpectationConfiguration] = result.expectation_suite.expectations
-        expectation_suite_meta: Dict[str, Any] = expectation_suite.meta
+        metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = result.metrics_by_domain
+        expectation_configurations: List[ExpectationConfiguration] = result.expectation_configurations
         profiler_config: RuleBasedProfilerConfig = result.profiler_config
+        ...
     """
 
     __alias__: Optional[str] = None
@@ -129,7 +127,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         rules: List[Rule]
         rule: Rule
         domain_builder: DomainBuilder
-        parameter_builders: List[ParameterBuilder]
+        rule_parameter_builders: List[ParameterBuilder]
+        metric_parameter_builders: List[ParameterBuilder]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder]
 
         """
@@ -150,37 +149,34 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )(**expectation_kwargs)
             variables.update(convert_variables_to_dict(variables=profiler.variables))
             rules = profiler.rules
-            for rule in rules:
-                domain_builder = rule.domain_builder
-                parameter_builders = rule.parameter_builders or []
-                parameter_builders.extend(
-                    self.metrics_parameter_builders_by_domain[
-                        Domain(
-                            domain_builder.domain_type,
-                        )
-                    ]
-                )
-                expectation_configuration_builders = (
-                    rule.expectation_configuration_builders or []
-                )
-                self.profiler.add_rule(
-                    rule=Rule(
-                        name=rule.name,
-                        variables=rule.variables,
-                        domain_builder=domain_builder,
-                        parameter_builders=parameter_builders,
-                        expectation_configuration_builders=expectation_configuration_builders,
-                    )
-                )
+            self._add_rules_to_profiler(rules=rules)
+
+        self._validate_profiler_rule_name_uniqueness()
+
+        self._add_rules_to_profiler(rules=self.rules)
+
+        custom_variables: Optional[Dict[str, Any]] = self.variables
+        if custom_variables is None:
+            custom_variables = {}
+
+        variables.update(custom_variables)
 
         self.profiler.variables = self.profiler.reconcile_profiler_variables(
             variables=variables,
             reconciliation_strategy=DEFAULT_RECONCILATION_DIRECTIVES.variables,
         )
 
-    def run(self) -> DataAssistantResult:
+    def run(
+        self,
+        variables: Optional[Dict[str, Any]] = None,
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+    ) -> DataAssistantResult:
         """
         Run the DataAssistant as it is currently configured.
+
+        Args:
+            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
+            rules: name/(configuration-dictionary) (overrides)
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
@@ -193,8 +189,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
             data_assistant=self,
             data_assistant_result=data_assistant_result,
             profiler=self.profiler,
-            variables=self.variables,
-            rules=self.rules,
+            variables=variables,
+            rules=rules,
             batch_list=list(self._batches.values()),
             batch_request=None,
         )
@@ -353,6 +349,73 @@ class DataAssistant(metaclass=MetaDataAssistant):
             for batch_id, batch in self._batches.items()
         }
 
+    def _validate_profiler_rule_name_uniqueness(self) -> None:
+        """
+        This private utility method insures that all "Rule" objects in underlying "BaseRuleBasedProfiler" are unique.
+        """
+        rule: Rule
+
+        profiler_rules: List[Rule] = self.profiler.rules
+        if profiler_rules is None:
+            profiler_rules = []
+
+        profiler_rule_names: Set[str] = {rule.name for rule in profiler_rules}
+
+        custom_rules: List[Rule] = self.rules
+        if custom_rules is None:
+            custom_rules = []
+
+        custom_rule_names: Set[str] = {rule.name for rule in custom_rules}
+
+        common_rule_names: Set[str] = profiler_rule_names & custom_rule_names
+        if common_rule_names:
+            raise ge_exceptions.ProfilerConfigurationError(
+                message=f"""Rule names in {self.__class__.__name__} must be unique; duplicate(s) found \
+({common_rule_names}).
+"""
+            )
+
+    def _add_rules_to_profiler(
+        self,
+        rules: Optional[List[Rule]] = None,
+    ) -> None:
+        """
+        This private utility method adds supplied "Rule" objects to underlying "BaseRuleBasedProfiler" object.
+
+        Args:
+            rules: List of "Rule" objects to be added to given "BaseRuleBasedProfiler" object
+        """
+        rule: Rule
+        domain_builder: DomainBuilder
+        rule_parameter_builders: List[ParameterBuilder]
+        metric_parameter_builders: Optional[List[ParameterBuilder]]
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder]
+
+        rules = rules or []
+        for rule in rules:
+            domain_builder = rule.domain_builder
+            rule_parameter_builders = rule.parameter_builders or []
+            metric_parameter_builders = self.metrics_parameter_builders_by_domain.get(
+                Domain(
+                    domain_builder.domain_type,
+                )
+            )
+            if metric_parameter_builders:
+                rule_parameter_builders.extend(metric_parameter_builders)
+
+            expectation_configuration_builders = (
+                rule.expectation_configuration_builders or []
+            )
+            self.profiler.add_rule(
+                rule=Rule(
+                    name=rule.name,
+                    variables=rule.variables,
+                    domain_builder=domain_builder,
+                    parameter_builders=rule_parameter_builders,
+                    expectation_configuration_builders=expectation_configuration_builders,
+                )
+            )
+
 
 @measure_execution_time(
     execution_time_holder_object_reference_name="data_assistant_result",
@@ -374,7 +437,7 @@ def run_profiler_on_data(
     Args:
         data_assistant: Containing "DataAssistant" object, which defines interfaces for computing "DataAssistantResult"
         data_assistant_result: Destination "DataAssistantResult" object to hold outputs of executing "RuleBasedProfiler"
-        profiler: Effective "RuleBasedProfiler", representing containing "DataAssistant" object
+        profiler: Effective "BaseRuleBasedProfiler", representing containing "DataAssistant" object
         variables: attribute name/value pairs (overrides), commonly-used in Builder objects
         rules: name/(configuration-dictionary) (overrides)
         batch_list: Explicit list of Batch objects to supply data at runtime
