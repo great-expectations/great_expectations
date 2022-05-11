@@ -19,7 +19,7 @@ __func = __frame.f_code.co_name
 for k, v in __frame.f_locals.items():
     if any(var in k for var in ('self', 'cls', '__frame', '__file', '__func', 'inspect')):
         continue
-    print(f'META:{__file}:{__func}:{k} - {v.__class__.__name__}')
+    print(f'META:{__file}:{__func}:{k}:{v.__class__.__name__}')
 """
 
 
