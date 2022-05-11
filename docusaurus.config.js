@@ -39,9 +39,8 @@ module.exports = {
     navbar: {
       logo: {
         alt: 'Great Expectations',
-        src: 'img/great-expectations-logo-full-size.png',
-        href: 'https://greatexpectations.io',
-        height: 64
+        src: 'img/great-expectations-long-logo.svg',
+        href: 'https://greatexpectations.io'
       },
       items: [
         {
