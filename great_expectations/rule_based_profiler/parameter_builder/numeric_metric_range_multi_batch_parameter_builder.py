@@ -92,6 +92,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         quantile_statistic_interpolation_method: str = "auto",
         estimator: str = "bootstrap",
         n_resamples: Optional[Union[str, int]] = None,
+        bw_method: Optional[Any] = None,
         random_seed: Optional[Union[str, int]] = None,
         include_estimator_samples_histogram_in_details: Union[str, bool] = False,
         truncate_values: Optional[
@@ -125,6 +126,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             n_resamples: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 9999 is used (default in
                 "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
+            bw_method: Applicable only for the "kde" sampling method -- if omitted (default), then 0.5 is used.
             random_seed: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 uses "np.random.choice"; otherwise, utilizes "np.random.Generator(np.random.PCG64(bootstrap_random_seed))".
             include_estimator_samples_histogram_in_details: Applicable only for the "bootstrap" sampling method -- if
@@ -162,6 +164,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         self._estimator = estimator
 
         self._n_resamples = n_resamples
+
+        self._bw_method = bw_method
 
         self._random_seed = random_seed
 
@@ -211,6 +215,10 @@ detected.
     @property
     def n_resamples(self) -> Optional[Union[str, int]]:
         return self._n_resamples
+
+    @property
+    def bw_method(self) -> Optional[Union[str, int]]:
+        return self._bw_method
 
     @property
     def random_seed(self) -> Optional[Union[str, int]]:
@@ -381,6 +389,7 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
                 "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
+                "bw_method": self.bw_method,
                 "n_resamples": self.n_resamples,
                 "random_seed": self.random_seed,
             }
@@ -705,6 +714,15 @@ positive integer, or must be omitted (or set to None).
                 NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_KDE_NUM_RESAMPLES
             )
 
+        # Obtain bw_method override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        bw_method: Optional[Any] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=kwargs.get("bw_method"),
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
         # Obtain random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -722,8 +740,9 @@ positive integer, or must be omitted (or set to None).
         return compute_kde_quantiles_point_estimate(
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
-            n_resamples=n_resamples,
             quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+            n_resamples=n_resamples,
+            bw_method=bw_method,
             random_seed=random_seed,
         )
 
