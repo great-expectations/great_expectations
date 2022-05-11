@@ -163,12 +163,12 @@ We can now use the `mysql_runtime_batch_request` defined above to build a <Techn
 
 Instantiate our `UserConfigurableProfiler`:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L104-L107
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L104-L110
 ```
 
 And use that profiler to build and save an Expectation Suite:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L110-L114
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L113-L117
 ```
 
 <details>
@@ -187,7 +187,7 @@ Before we can validate our second table, we need to define a <TechnicalTag tag="
 
 We will pass both the `pg_runtime_batch_request` and Expectation Suite defined above to this checkpoint.
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L117-L127
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L120-L130
 ```
 
 ### 6. Validation
@@ -195,7 +195,7 @@ We will pass both the `pg_runtime_batch_request` and Expectation Suite defined a
 
 Finally, we can use our Checkpoint to validate that our two batches of data - queried from two different tables - are identical:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L130-L132
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py#L133-L135
 ```
 
 If we now inspect the results of this Checkpoint (`results["success"]`), we can see that our Validation was successful!
