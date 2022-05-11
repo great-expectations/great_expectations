@@ -95,6 +95,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
     version: Optional[str] = None
 
     def to_json_dict(self) -> dict:
+        # Chetan - 20220511 - this is a TEMPORARY patch to pop non-serializable values from the result dict
         json_dict = asdict(self)
         for value in json_dict["expectations"].values():
             for test in value["tests"]:
