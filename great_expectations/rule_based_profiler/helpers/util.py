@@ -496,8 +496,21 @@ def compute_kde_quantiles_point_estimate(
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
     """
+    ML Flow Experiment: parameter_builders_bootstrap/kde_quantiles
+    ML Flow Experiment ID: 721280826919117
+
     An internal implementation of the "kernel density estimation" estimator method, returning a point estimate for a
     population parameter of interest (lower and upper quantiles in this case).
+
+    Args:
+        false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
+            identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
+        quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
+            statistic, used for confidence intervals.
+        n_resamples: A positive integer indicating the sample size resulting from the sampling with replacement
+            procedure.
+        random_seed: An optional random_seed to pass to "np.random.Generator(np.random.PCG64(bootstrap_random_seed))"
+            for making probabilistic sampling deterministic.
     """
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
