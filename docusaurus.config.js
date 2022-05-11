@@ -1,6 +1,7 @@
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 
 const remarkCodeImport = require('remark-code-import')
+const lightCodeTheme = require('prism-react-renderer/themes/vsDark')
 
 module.exports = {
   title: 'Great Expectations',
@@ -20,7 +21,7 @@ module.exports = {
 
   themeConfig: {
     prism: {
-      theme: require('prism-react-renderer/themes/vsDark')
+      theme: lightCodeTheme
     },
     colorMode: {
       disableSwitch: true
@@ -134,31 +135,24 @@ module.exports = {
   presets: [
     [
       '@docusaurus/preset-classic',
-      {
+      ({
         docs: {
-          lastVersion: 'current',
-          versions: {
-            // Example configuration:
-            // <WILL> may have to be fixed
-            current: {
-              label: 'Current'
-            }
-          },
           sidebarPath: require.resolve('./sidebars.js'),
           remarkPlugins: [remarkCodeImport],
-          editUrl:
-                        'https://github.com/great-expectations/great_expectations/tree/develop/'
+          // Please change this to your repo.
+          // Remove this to remove the "edit this page" links.
+          editUrl: 'https://github.com/great-expectations/great_expectations/tree/develop/'
+        },
+        theme: {
+          customCss: require.resolve('./src/css/custom.css')
         },
         gtag: {
           // You can also use your "G-" Measurement ID here.
           trackingID: 'UA-138955219-1',
           // Optional fields.
           anonymizeIP: true // Should IPs be anonymized?
-        },
-        theme: {
-          customCss: require.resolve('./src/css/custom.css')
         }
-      }
+      })
     ]
   ]
 }
