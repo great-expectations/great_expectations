@@ -160,6 +160,7 @@ class ExpectationValidationResult(SerializableDictDot):
                 "expectation_config" in json_dict
                 and "kwargs" in json_dict["expectation_config"]
                 and "auto" in json_dict["expectation_config"]["kwargs"]
+                and json_dict["expectation_config"]["kwargs"]["auto"]
             ):
                 json_dict["expectation_config"]["meta"] = {
                     "auto_generated_at": datetime.datetime.now(
