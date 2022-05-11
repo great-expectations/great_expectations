@@ -377,7 +377,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             for batch_id in batch_ids
         ]
 
-        # find and sort all possible keys and values for batch_identifiers
+        # make sure batch_identifier keys are sorted the same from batch to batch
+        # e.g. prevent batch 1 from having keys "month", "year" and batch 2 from having keys "year", "month"
         batch_identifier_set: Set
         batch_identifier_str: str
         batch_identifier_set_sorted: Set
@@ -386,7 +387,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
         batch_identifier_value: str
         batch_identifier_keys: Set[str] = set()
         batch_identifiers: List[str] = []
-        batch_identifier_sort_list: List[List] = []
         for batch_identifier_set in batch_identifier_list:
             batch_identifier_str = ""
             batch_identifier_set_sorted = sorted(
@@ -403,22 +403,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 )
 
             batch_identifiers.append(batch_identifier_str)
-            batch_identifier_sort_list.append(
-                [
-                    batch_identifier_value
-                    for _, batch_identifier_value in batch_identifier_set_sorted
-                ]
-            )
 
         df["batch_id"] = batch_identifiers
-
-        batch_identifier_sort_keys: pd.DataFrame = pd.DataFrame(
-            np.array(batch_identifier_sort_list), columns=batch_identifier_keys
-        )
-        df = pd.concat([batch_identifier_sort_keys, df], axis=1)
-        sort_order: List[str] = list(reversed(batch_identifier_sort_keys.columns))
-        df = df.sort_values(by=sort_order)
-        df = df.drop(batch_identifier_sort_keys.columns, axis=1)
 
         idx: int
         batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_identifiers))]
