@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import List, Tuple
 
 import pandas as pd
@@ -10,12 +9,19 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.datasource import BaseDatasource, Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_data_splitter import DatePart
+from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
+    TaxiSplittingTestCase,
+    TaxiSplittingTestCases,
+    TaxiTestData,
+)
 from tests.test_utils import (
+    LoadedTable,
+    clean_up_tables_with_prefix,
     get_bigquery_connection_url,
     get_snowflake_connection_url,
     load_data_into_test_database,
@@ -31,186 +37,110 @@ def _get_connection_string_and_dialect() -> Tuple[str, str]:
 
     dialect: str = db_config["dialect"]
     if dialect == "snowflake":
-        CONNECTION_STRING: str = get_snowflake_connection_url()
+        connection_string: str = get_snowflake_connection_url()
     elif dialect == "bigquery":
-        CONNECTION_STRING: str = get_bigquery_connection_url()
+        connection_string: str = get_bigquery_connection_url()
     else:
-        CONNECTION_STRING: str = db_config["connection_string"]
+        connection_string: str = db_config["connection_string"]
 
-    return dialect, CONNECTION_STRING
+    return dialect, connection_string
 
 
 TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
 
 
 def _load_data(
-    connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME
-) -> pd.DataFrame:
+    connection_string: str, dialect: str, table_name: str = TAXI_DATA_TABLE_NAME
+) -> LoadedTable:
+
+    dialects_supporting_multiple_values_in_single_insert_clause: List[str] = [
+        "redshift"
+    ]
+    to_sql_method: str = (
+        "multi"
+        if dialect in dialects_supporting_multiple_values_in_single_insert_clause
+        else None
+    )
 
     # Load the first 10 rows of each month of taxi data
     return load_data_into_test_database(
         table_name=table_name,
         csv_paths=[
-            f"./data/yellow_tripdata_sample_{year}-{month}.csv"
-            for year in ["2018", "2019", "2020"]
-            for month in [f"{mo:02d}" for mo in range(1, 12 + 1)]
+            f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
         ],
         connection_string=connection_string,
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
+        load_full_dataset=True,
+        random_table_suffix=True,
+        to_sql_method=to_sql_method,
     )
 
 
 if __name__ == "test_script_module":
 
-    dialect, CONNECTION_STRING = _get_connection_string_and_dialect()
+    dialect, connection_string = _get_connection_string_and_dialect()
     print(f"Testing dialect: {dialect}")
 
-    test_df = _load_data(connection_string=CONNECTION_STRING)
-
-    YEARS_IN_TAXI_DATA = (
-        pd.date_range(start="2018-01-01", end="2020-12-31", freq="AS")
-        .to_pydatetime()
-        .tolist()
-    )
-    YEAR_BATCH_IDENTIFIER_DATA: List[dict] = [
-        {DatePart.YEAR.value: dt.year} for dt in YEARS_IN_TAXI_DATA
-    ]
-
-    MONTHS_IN_TAXI_DATA = (
-        pd.date_range(start="2018-01-01", end="2020-12-31", freq="MS")
-        .to_pydatetime()
-        .tolist()
-    )
-    YEAR_MONTH_BATCH_IDENTIFIER_DATA: List[dict] = [
-        {DatePart.YEAR.value: dt.year, DatePart.MONTH.value: dt.month}
-        for dt in MONTHS_IN_TAXI_DATA
-    ]
-    MONTH_BATCH_IDENTIFIER_DATA: List[dict] = [
-        {DatePart.MONTH.value: dt.month} for dt in MONTHS_IN_TAXI_DATA
-    ]
-
-    TEST_COLUMN: str = "pickup_datetime"
-
-    # Since taxi data does not contain all days, we need to introspect the data to build the fixture:
-    YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = list(
-        {val[0]: val[1], val[2]: val[3], val[4]: val[5]}
-        for val in {
-            (
-                DatePart.YEAR.value,
-                dt.year,
-                DatePart.MONTH.value,
-                dt.month,
-                DatePart.DAY.value,
-                dt.day,
-            )
-            for dt in test_df[TEST_COLUMN]
-        }
-    )
-    YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = sorted(
-        YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA,
-        key=lambda x: (
-            x[DatePart.YEAR.value],
-            x[DatePart.MONTH.value],
-            x[DatePart.DAY.value],
-        ),
+    print("Preemptively cleaning old tables")
+    clean_up_tables_with_prefix(
+        connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
     )
 
-    @dataclass
-    class SqlSplittingTestCase:
-        splitter_method_name: str
-        splitter_kwargs: dict
-        num_expected_batch_definitions: int
-        num_expected_rows_in_first_batch_definition: int
-        expected_pickup_datetimes: List[dict]
+    loaded_table: LoadedTable = _load_data(
+        connection_string=connection_string, dialect=dialect
+    )
+    test_df: pd.DataFrame = loaded_table.inserted_dataframe
+    table_name: str = loaded_table.table_name
 
-    test_cases: List[SqlSplittingTestCase] = [
-        SqlSplittingTestCase(
-            splitter_method_name="split_on_year",
-            splitter_kwargs={"column_name": TEST_COLUMN},
-            num_expected_batch_definitions=3,
-            num_expected_rows_in_first_batch_definition=120,
-            expected_pickup_datetimes=YEAR_BATCH_IDENTIFIER_DATA,
-        ),
-        SqlSplittingTestCase(
-            splitter_method_name="split_on_year_and_month",
-            splitter_kwargs={"column_name": TEST_COLUMN},
-            num_expected_batch_definitions=36,
-            num_expected_rows_in_first_batch_definition=10,
-            expected_pickup_datetimes=YEAR_MONTH_BATCH_IDENTIFIER_DATA,
-        ),
-        SqlSplittingTestCase(
-            splitter_method_name="split_on_year_and_month_and_day",
-            splitter_kwargs={"column_name": TEST_COLUMN},
-            num_expected_batch_definitions=299,
-            num_expected_rows_in_first_batch_definition=2,
-            expected_pickup_datetimes=YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA,
-        ),
-        SqlSplittingTestCase(
-            splitter_method_name="split_on_date_parts",
-            splitter_kwargs={
-                "column_name": TEST_COLUMN,
-                "date_parts": [DatePart.MONTH],
-            },
-            num_expected_batch_definitions=12,
-            num_expected_rows_in_first_batch_definition=30,
-            expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA,
-        ),
-        # date_parts as a string (with mixed case):
-        SqlSplittingTestCase(
-            splitter_method_name="split_on_date_parts",
-            splitter_kwargs={"column_name": TEST_COLUMN, "date_parts": ["mOnTh"]},
-            num_expected_batch_definitions=12,
-            num_expected_rows_in_first_batch_definition=30,
-            expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA,
-        ),
-        # Mix of types of date_parts:
-        SqlSplittingTestCase(
-            splitter_method_name="split_on_date_parts",
-            splitter_kwargs={
-                "column_name": TEST_COLUMN,
-                "date_parts": [DatePart.YEAR, "month"],
-            },
-            num_expected_batch_definitions=36,
-            num_expected_rows_in_first_batch_definition=10,
-            expected_pickup_datetimes=YEAR_MONTH_BATCH_IDENTIFIER_DATA,
-        ),
-    ]
+    taxi_test_data: TaxiTestData = TaxiTestData(
+        test_df, test_column_name="pickup_datetime"
+    )
+    taxi_splitting_test_cases: TaxiSplittingTestCases = TaxiSplittingTestCases(
+        taxi_test_data
+    )
+
+    test_cases: List[TaxiSplittingTestCase] = taxi_splitting_test_cases.test_cases()
 
     for test_case in test_cases:
 
         print("Testing splitter method:", test_case.splitter_method_name)
 
         # 1. Setup
-
         context: DataContext = ge.get_context()
 
         datasource_name: str = "test_datasource"
+        data_connector_name: str = "test_data_connector"
+        data_asset_name: str = table_name  # Read from generated table name
+        column_name: str = taxi_splitting_test_cases.test_column_name
+
+        # 2. Set splitter in DataConnector config
+        data_connector_config: dict = {
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "assets": {
+                data_asset_name: {
+                    "splitter_method": test_case.splitter_method_name,
+                    "splitter_kwargs": test_case.splitter_kwargs,
+                }
+            },
+        }
+
         context.add_datasource(
             name=datasource_name,
             class_name="Datasource",
             execution_engine={
                 "class_name": "SqlAlchemyExecutionEngine",
-                "connection_string": CONNECTION_STRING,
+                "connection_string": connection_string,
             },
+            data_connectors={data_connector_name: data_connector_config},
         )
 
-        # 2. Set splitter in data connector config
-        data_connector_name: str = "test_data_connector"
-        data_asset_name: str = TAXI_DATA_TABLE_NAME
-        column_name: str = TEST_COLUMN
-        data_connector: ConfiguredAssetSqlDataConnector = (
-            ConfiguredAssetSqlDataConnector(
-                name=data_connector_name,
-                datasource_name=datasource_name,
-                execution_engine=context.datasources[datasource_name].execution_engine,
-                assets={
-                    data_asset_name: {
-                        "splitter_method": test_case.splitter_method_name,
-                        "splitter_kwargs": test_case.splitter_kwargs,
-                    }
-                },
-            )
+        datasource: BaseDatasource = context.get_datasource(
+            datasource_name="test_datasource"
         )
+
+        data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
+            "test_data_connector"
+        ]
 
         # 3. Check if resulting batches are as expected
         # using data_connector.get_batch_definition_list_from_batch_request()
@@ -255,3 +185,8 @@ if __name__ == "test_script_module":
             sa.select([sa.func.count()]).select_from(batch_data.selectable)
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
+
+    print("Clean up tables used in this test")
+    clean_up_tables_with_prefix(
+        connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
+    )

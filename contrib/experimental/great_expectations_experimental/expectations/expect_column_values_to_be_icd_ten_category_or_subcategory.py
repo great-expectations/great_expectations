@@ -166,7 +166,7 @@ class ExpectColumnValuesToBeIcdTenCategoryOrSubcategory(ColumnMapExpectation):
         "contributors": [
             "@andyjessen",
         ],
-        "requirements": "simple_icd_10",
+        "requirements": ["simple_icd_10"],
     }
 
 

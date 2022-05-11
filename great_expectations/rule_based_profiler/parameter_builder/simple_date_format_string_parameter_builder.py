@@ -2,7 +2,6 @@ import logging
 from typing import Dict, Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -16,11 +15,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    Attributes,
     Domain,
     ParameterContainer,
 )
+from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)
 
@@ -105,12 +103,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             List[ParameterBuilderConfig]
         ] = None,
         json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         Configure this SimpleDateFormatStringParameterBuilder
         Args:
@@ -125,16 +119,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
         )
 
@@ -147,14 +137,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             self._candidate_strings = set(candidate_strings)
         else:
             self._candidate_strings = DEFAULT_CANDIDATE_STRINGS
-
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"{PARAMETER_KEY}{self.name}"
-
-    """
-    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
-    """
 
     @property
     def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
@@ -220,6 +202,11 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         metric_values: MetricValues
 
         metric_values = attributed_resolved_metrics.metric_values
+
+        if metric_values is None:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"Result of metric computations for {self.__class__.__name__} is empty."
+            )
 
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]

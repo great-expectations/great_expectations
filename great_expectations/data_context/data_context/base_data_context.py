@@ -11,16 +11,20 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
+)
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+    DataAssistantDispatcher,
 )
 
 try:
@@ -73,6 +77,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
+    GeCloudConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
@@ -98,11 +103,13 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler import (
+    RuleBasedProfiler,
+    RuleBasedProfilerResult,
+)
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import (
     filter_properties_dict,
@@ -300,7 +307,7 @@ class BaseDataContext(ConfigPeer):
     _data_context = None
 
     @classmethod
-    def validate_config(cls, project_config):
+    def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
         if isinstance(project_config, DataContextConfig):
             return True
         try:
@@ -310,16 +317,16 @@ class BaseDataContext(ConfigPeer):
         return True
 
     @usage_statistics_enabled_method(
-        event_name="data_context.__init__",
+        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__.value,
     )
     def __init__(
         self,
-        project_config,
-        context_root_dir=None,
-        runtime_environment=None,
-        ge_cloud_mode=False,
-        ge_cloud_config=None,
-    ):
+        project_config: Union[DataContextConfig, Mapping],
+        context_root_dir: Optional[str] = None,
+        runtime_environment: Optional[dict] = None,
+        ge_cloud_mode: bool = False,
+        ge_cloud_config: Optional[GeCloudConfig] = None,
+    ) -> None:
         """DataContext constructor
 
         Args:
@@ -398,15 +405,19 @@ class BaseDataContext(ConfigPeer):
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
+        self._assistants = DataAssistantDispatcher(data_context=self)
+
     @property
-    def ge_cloud_config(self):
+    def ge_cloud_config(self) -> Optional[GeCloudConfig]:
         return self._ge_cloud_config
 
     @property
-    def ge_cloud_mode(self):
+    def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
 
-    def _build_store_from_config(self, store_name, store_config):
+    def _build_store_from_config(
+        self, store_name: str, store_config: dict
+    ) -> Optional[Store]:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
         # the expectations_store does not yet exist by:
@@ -439,7 +450,7 @@ class BaseDataContext(ConfigPeer):
         self._stores[store_name] = new_store
         return new_store
 
-    def _init_stores(self, store_configs):
+    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
@@ -466,7 +477,7 @@ class BaseDataContext(ConfigPeer):
                 # caught at the context.get_batch() step. So we just pass here.
                 pass
 
-    def _apply_global_config_overrides(self):
+    def _apply_global_config_overrides(self) -> None:
         # check for global usage statistics opt out
         validation_errors = {}
 
@@ -524,8 +535,11 @@ class BaseDataContext(ConfigPeer):
 
     @classmethod
     def _get_global_config_value(
-        cls, environment_variable=None, conf_file_section=None, conf_file_option=None
-    ):
+        cls,
+        environment_variable: Optional[str] = None,
+        conf_file_section=None,
+        conf_file_option=None,
+    ) -> Optional[str]:
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
         ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
@@ -543,7 +557,7 @@ class BaseDataContext(ConfigPeer):
         return None
 
     @staticmethod
-    def _check_global_usage_statistics_opt_out():
+    def _check_global_usage_statistics_opt_out() -> bool:
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
@@ -598,7 +612,7 @@ class BaseDataContext(ConfigPeer):
 
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ):
+    ) -> None:
         """Initialize the usage statistics system."""
         if not usage_statistics_config.enabled:
             logger.info("Usage statistics is disabled; skipping initialization.")
@@ -611,7 +625,7 @@ class BaseDataContext(ConfigPeer):
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
-    def add_store(self, store_name, store_config):
+    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
@@ -626,8 +640,8 @@ class BaseDataContext(ConfigPeer):
         return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
-        self, validation_operator_name, validation_operator_config
-    ):
+        self, validation_operator_name: str, validation_operator_config: dict
+    ) -> "ValidationOperator":
         """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
 
         Args:
@@ -662,7 +676,9 @@ class BaseDataContext(ConfigPeer):
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
-    def _normalize_absolute_or_relative_path(self, path):
+    def _normalize_absolute_or_relative_path(
+        self, path: Optional[str]
+    ) -> Optional[str]:
         if path is None:
             return
         if os.path.isabs(path):
@@ -768,7 +784,7 @@ class BaseDataContext(ConfigPeer):
         return site_builder
 
     @usage_statistics_enabled_method(
-        event_name="data_context.open_data_docs",
+        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS.value,
     )
     def open_data_docs(
         self,
@@ -1101,7 +1117,7 @@ class BaseDataContext(ConfigPeer):
 
     def save_config_variable(
         self, config_variable_name, value, skip_if_substitution_variable: bool = True
-    ):
+    ) -> None:
         r"""Save config variable value
         Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
 
@@ -1145,7 +1161,7 @@ class BaseDataContext(ConfigPeer):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self, datasource_name: str):
+    def delete_datasource(self, datasource_name: str) -> None:
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
@@ -1437,7 +1453,7 @@ class BaseDataContext(ConfigPeer):
         return batch_list[0]
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_validation_operator",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR.value,
         args_payload_fn=run_validation_operator_usage_statistics,
     )
     def run_validation_operator(
@@ -1640,7 +1656,7 @@ class BaseDataContext(ConfigPeer):
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.get_batch_list",
+        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST.value,
         args_payload_fn=get_batch_list_usage_statistics,
     )
     def get_batch_list(
@@ -1889,7 +1905,7 @@ class BaseDataContext(ConfigPeer):
         return list(self.validation_operators.keys())
 
     @usage_statistics_enabled_method(
-        event_name="data_context.add_datasource",
+        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE.value,
         args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
@@ -1999,7 +2015,7 @@ class BaseDataContext(ConfigPeer):
         )
         return generator
 
-    def set_config(self, project_config: DataContextConfig):
+    def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
 
     def _build_datasource_from_config(
@@ -2154,7 +2170,7 @@ class BaseDataContext(ConfigPeer):
 
     def send_usage_message(
         self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
-    ):
+    ) -> None:
         """helper method to send a usage method using DataContext. Used when sending usage events from
             classes like ExpectationSuite.
             event
@@ -2296,7 +2312,7 @@ class BaseDataContext(ConfigPeer):
         return sorted_expectation_suite_names
 
     @usage_statistics_enabled_method(
-        event_name="data_context.save_expectation_suite",
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
         args_payload_fn=save_expectation_suite_usage_statistics,
     )
     def save_expectation_suite(
@@ -2352,7 +2368,9 @@ class BaseDataContext(ConfigPeer):
         self._evaluation_parameter_dependencies_compiled = False
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
-    def _store_metrics(self, requested_metrics, validation_results, target_store_name):
+    def _store_metrics(
+        self, requested_metrics, validation_results, target_store_name
+    ) -> None:
         """
         requested_metrics is a dictionary like this:
 
@@ -2426,10 +2444,12 @@ class BaseDataContext(ConfigPeer):
 
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
-    ):
+    ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
 
-    def store_evaluation_parameters(self, validation_results, target_store_name=None):
+    def store_evaluation_parameters(
+        self, validation_results, target_store_name=None
+    ) -> None:
         if not self._evaluation_parameter_dependencies_compiled:
             self._compile_evaluation_parameter_dependencies()
 
@@ -2460,7 +2480,11 @@ class BaseDataContext(ConfigPeer):
     def validations_store(self) -> ValidationsStore:
         return self.stores[self.validations_store_name]
 
-    def _compile_evaluation_parameter_dependencies(self):
+    @property
+    def assistants(self) -> DataAssistantDispatcher:
+        return self._assistants
+
+    def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
@@ -2559,7 +2583,7 @@ class BaseDataContext(ConfigPeer):
         return return_obj
 
     @usage_statistics_enabled_method(
-        event_name="data_context.build_data_docs",
+        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,
     )
     def build_data_docs(
         self,
@@ -3210,7 +3234,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_checkpoint",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT.value,
     )
     def run_checkpoint(
         self,
@@ -3354,7 +3378,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_profiler_with_dynamic_arguments",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
     )
     def run_profiler_with_dynamic_arguments(
         self,
@@ -3362,10 +3386,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> RuleBasedProfilerResult:
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
 
         Args:
@@ -3373,12 +3394,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
             variables: Attribute name/value pairs (overrides)
             rules: Key-value pairs of name/configuration-dictionary (overrides)
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
 
         Returns:
-            Set of rule evaluation results in the form of an ExpectationSuite.
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
 
         Raises:
             AssertionError if both a `name` and `ge_cloud_id` are provided.
@@ -3391,13 +3409,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id=ge_cloud_id,
             variables=variables,
             rules=rules,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_profiler_on_data",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_PROFILER_ON_DATA.value,
     )
     def run_profiler_on_data(
         self,
@@ -3405,10 +3420,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         batch_request: Optional[BatchRequestBase] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> RuleBasedProfilerResult:
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
         Args:
@@ -3416,12 +3428,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             batch_request: Explicit batch_request used to supply data at runtime.
             name: Identifier used to retrieve the profiler from a store.
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
 
         Returns:
-            Set of rule evaluation results in the form of an ExpectationSuite.
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
 
         Raises:
             ProfilerConfigurationError is both "batch_list" and "batch_request" arguments are specified.
@@ -3435,9 +3444,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             batch_request=batch_request,
             name=name,
             ge_cloud_id=ge_cloud_id,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
         )
 
     def test_yaml_config(

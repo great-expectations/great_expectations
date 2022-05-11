@@ -18,7 +18,7 @@ class BatchMarkers(BatchSpec):
     NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch
     process, such as the timestamp at which a query was executed."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "ge_load_time" not in self:
             raise InvalidBatchIdError("BatchMarkers requires a ge_load_time")
@@ -29,7 +29,7 @@ class BatchMarkers(BatchSpec):
 
 
 class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "path" not in self:
             raise InvalidBatchSpecError("PathBatchSpec requires a path element")
@@ -76,7 +76,7 @@ class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
 class RuntimeDataBatchSpec(BatchSpec):
     _id_ignore_keys = set("batch_data")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         if self.batch_data is None:
@@ -89,12 +89,12 @@ class RuntimeDataBatchSpec(BatchSpec):
         return self.get("batch_data")
 
     @batch_data.setter
-    def batch_data(self, batch_data):
+    def batch_data(self, batch_data) -> None:
         self["batch_data"] = batch_data
 
 
 class RuntimeQueryBatchSpec(BatchSpec):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         if self.query is None:
@@ -105,5 +105,5 @@ class RuntimeQueryBatchSpec(BatchSpec):
         return self.get("query")
 
     @query.setter
-    def query(self, query):
+    def query(self, query) -> None:
         self["query"] = query

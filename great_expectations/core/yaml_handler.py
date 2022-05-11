@@ -31,7 +31,7 @@ class YAMLHandler:
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._handler: YAML = YAML(typ="safe")
         # TODO: ensure this does not break all usage of ruamel in GE codebase.
         self._handler.indent(mapping=2, sequence=4, offset=2)

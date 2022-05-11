@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple, cast
 Diagnostics = Dict[str, List[Tuple[ast.FunctionDef, bool]]]
 
 DOCSTRING_ERROR_THRESHOLD: int = (
-    1112  # This number is to be reduced as we document more public functions!
+    1107  # This number is to be reduced as we document more public functions!
 )
 
 
@@ -125,8 +125,9 @@ def review_diagnostics(diagnostics: Diagnostics, changed_files: List[str]) -> No
                 relevant_diagnostics[file].append(func)
             total_funcs += 1
 
+    total_failed: int = total_funcs - total_passed
     print(
-        f"[SUMMARY] {total_passed} of {total_funcs} public functions ({100 * total_passed / total_funcs:.2f}%) have docstrings!"
+        f"[SUMMARY] {total_failed} of {total_funcs} public functions ({100 * total_failed / total_funcs:.2f}%) are missing docstrings!"
     )
 
     if relevant_diagnostics:
@@ -142,7 +143,6 @@ def review_diagnostics(diagnostics: Diagnostics, changed_files: List[str]) -> No
     # Chetan - 20220305 - While this number should be 0, getting the number of style guide violations down takes time
     # and effort. In the meanwhile, we want to set an upper bound on errors to ensure we're not introducing
     # further regressions. As docstrings are added, developers should update this number.
-    total_failed: int = total_funcs - total_passed
     assert (
         total_failed <= DOCSTRING_ERROR_THRESHOLD
     ), f"""A public function without a docstring was introduced; please resolve the matter before merging.

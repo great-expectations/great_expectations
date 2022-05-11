@@ -117,7 +117,7 @@ class CardinalityChecker:
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[int] = None,
         max_proportion_unique: Optional[float] = None,
-    ):
+    ) -> None:
         self._limit_mode = self._convert_to_cardinality_mode(
             limit_mode=limit_mode,
             max_unique_values=max_unique_values,
@@ -139,7 +139,7 @@ class CardinalityChecker:
                 of unique values.
 
         Returns:
-            boolean of whether the cardinality is within the configured limit
+            Boolean of whether the cardinality is within the configured limit
         """
         self._validate_metric_value(metric_value=metric_value)
         if isinstance(self._limit_mode, AbsoluteCardinalityLimit):

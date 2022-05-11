@@ -18,6 +18,7 @@ from great_expectations.cli.pretty_printing import cli_colorize_string, cli_mess
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
@@ -470,7 +471,7 @@ def upgrade_project_strictly_multiple_versions_increment(
         try:
             send_usage_message(
                 data_context=context,
-                event="cli.project.upgrade.end",
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
                 success=True,
             )
         except Exception:
@@ -517,7 +518,7 @@ def upgrade_project(
         confirm_prompt=upgrade_prompt,
         continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
         data_context=data_context,
-        usage_stats_event="cli.project.upgrade.end",
+        usage_stats_event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
     )
     cli_message(string=SECTION_SEPARATOR)
 
@@ -559,7 +560,7 @@ To learn more about the upgrade process, visit \
         data_context: DataContext = DataContext(context_root_dir=context_root_dir)
         send_usage_message(
             data_context=data_context,
-            event="cli.project.upgrade.end",
+            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
             success=True,
         )
     except Exception:
@@ -579,7 +580,7 @@ def upgrade_project_one_or_multiple_versions_increment(
     try:
         send_usage_message(
             data_context=context,
-            event="cli.project.upgrade.begin",
+            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN.value,
             success=True,
         )
     except Exception:
@@ -640,7 +641,7 @@ def upgrade_project_one_or_multiple_versions_increment(
         try:
             send_usage_message(
                 data_context=context,
-                event="cli.project.upgrade.end",
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
                 success=True,
             )
         except Exception:
@@ -681,7 +682,7 @@ def upgrade_project_zero_versions_increment(
         try:
             send_usage_message(
                 data_context=context,
-                event="cli.project.upgrade.begin",
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN.value,
                 success=True,
             )
         except Exception:
@@ -716,7 +717,7 @@ def upgrade_project_zero_versions_increment(
         try:
             send_usage_message(
                 data_context=context,
-                event="cli.project.upgrade.end",
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
                 success=True,
             )
         except Exception:

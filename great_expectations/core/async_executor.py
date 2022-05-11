@@ -21,7 +21,9 @@ class AsyncResult:
     WARNING: This class is experimental.
     """
 
-    def __init__(self, future: Optional[Future] = None, value: Optional[Any] = None):
+    def __init__(
+        self, future: Optional[Future] = None, value: Optional[Any] = None
+    ) -> None:
         """AsyncResult instances are created by AsyncExecutor.submit() and should not otherwise be created directly."""
         self._future = future
         self._value = value
@@ -44,7 +46,7 @@ class AsyncExecutor(AbstractContextManager):
         self,
         concurrency_config: Optional[ConcurrencyConfig],
         max_workers: int,
-    ):
+    ) -> None:
         """Initializes a new AsyncExecutor instance used to organize code for multithreaded execution.
 
         If multithreading is disabled, all execution will be done synchronously (e.g. on the main thread) during the
@@ -80,7 +82,7 @@ class AsyncExecutor(AbstractContextManager):
             else None
         )
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.shutdown()
         # Do NOT use the context manager exception arguments in order to get the desired default behavior (i.e. any
         # exception is NOT suppressed and the exception is propagated normally upon exit from this method). For more
@@ -99,7 +101,7 @@ class AsyncExecutor(AbstractContextManager):
         else:
             return AsyncResult(value=fn(*args, **kwargs))
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Clean-up the resources associated with the AsyncExecutor and blocks until all running async results finish
         executing.
 
@@ -114,7 +116,7 @@ class AsyncExecutor(AbstractContextManager):
         return self._execute_concurrently
 
 
-def patch_https_connection_pool(concurrency_config: ConcurrencyConfig):
+def patch_https_connection_pool(concurrency_config: ConcurrencyConfig) -> None:
     """Patch urllib3 to enable a higher default max pool size to reduce concurrency bottlenecks.
 
     To have any effect, this method must be called before any database connections are made, e.g. by scripts leveraging
@@ -131,7 +133,7 @@ def patch_https_connection_pool(concurrency_config: ConcurrencyConfig):
     # google-cloud-python to python-bigquery-sqlalchemy and python-bigquery, this patching code can be replaced
     # following the instructions at https://github.com/googleapis/python-bigquery/issues/59#issuecomment-619047244.
     class HTTPSConnectionPoolWithHigherMaxSize(connectionpool.HTTPSConnectionPool):
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, **kwargs) -> None:
             kwargs.update(maxsize=concurrency_config.max_database_query_concurrency)
             super().__init__(*args, **kwargs)
 

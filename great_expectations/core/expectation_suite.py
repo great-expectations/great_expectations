@@ -15,6 +15,7 @@ from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
     expectationConfigurationSchema,
 )
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
@@ -56,7 +57,7 @@ class ExpectationSuite(SerializableDictDot):
         execution_engine_type=None,
         meta=None,
         ge_cloud_id=None,
-    ):
+    ) -> None:
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
         self._data_context = data_context
@@ -98,7 +99,7 @@ class ExpectationSuite(SerializableDictDot):
         batch_parameters: Optional[dict] = None,
         profiler_config: Optional[dict] = None,
         citation_date: Optional[Union[str, datetime.datetime]] = None,
-    ):
+    ) -> None:
         if "citations" not in self.meta:
             self.meta["citations"] = []
 
@@ -270,7 +271,7 @@ class ExpectationSuite(SerializableDictDot):
 
     # CRUD methods #
 
-    def append_expectation(self, expectation_config):
+    def append_expectation(self, expectation_config) -> None:
         """Appends an expectation.
 
            Args:
@@ -439,7 +440,7 @@ class ExpectationSuite(SerializableDictDot):
         existing_expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
         ge_cloud_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Find Expectations matching the given ExpectationConfiguration on the given match_type.
         If a ge_cloud_id is provided, match_type is ignored and only Expectations with matching
@@ -522,7 +523,7 @@ class ExpectationSuite(SerializableDictDot):
     def _add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
-        send_usage_event: bool,
+        send_usage_event: bool = True,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
@@ -539,6 +540,7 @@ class ExpectationSuite(SerializableDictDot):
                 and so whether we should add or replace.
             overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
                 False.
+
         Returns:
             The ExpectationConfiguration to add or replace.
         Raises:
@@ -588,29 +590,70 @@ class ExpectationSuite(SerializableDictDot):
             self.send_usage_event(success=True)
         return expectation_configuration
 
-    def send_usage_event(self, success: bool):
-        usage_stats_event_name: str = "expectation_suite.add_expectation"
+    def send_usage_event(self, success: bool) -> None:
         usage_stats_event_payload: dict = {}
         if self._data_context is not None:
             self._data_context.send_usage_message(
-                event=usage_stats_event_name,
+                event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION.value,
                 event_payload=usage_stats_event_payload,
                 success=success,
             )
 
+    def add_expectation_configurations(
+        self,
+        expectation_configurations: List[ExpectationConfiguration],
+        send_usage_event: bool = True,
+        match_type: str = "domain",
+        overwrite_existing: bool = True,
+    ) -> List[ExpectationConfiguration]:
+        """
+        Args:
+            expectation_configurations: The List of candidate new/modifed "ExpectationConfiguration" objects for Suite.
+            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
+                public add_expectation() method, this is set to `True`.
+            match_type: The criteria used to determine whether the Suite already has an "ExpectationConfiguration"
+                object, matching the specified criteria, and thus whether we should add or replace (i.e., "upsert").
+            overwrite_existing: If "ExpectationConfiguration" already exists, this will cause it to be overwritten if
+                True and raise an error if False.
+
+        Returns:
+            The List of "ExpectationConfiguration" objects attempted to be added or replaced (can differ from the list
+            of "ExpectationConfiguration" objects in "self.expectations" at the completion of this method's execution).
+        Raises:
+            More than one match
+            One match if overwrite_existing = False
+        """
+        expectation_configuration: ExpectationConfiguration
+        expectation_configurations_attempted_to_be_added: List[
+            ExpectationConfiguration
+        ] = [
+            self.add_expectation(
+                expectation_configuration=expectation_configuration,
+                send_usage_event=send_usage_event,
+                match_type=match_type,
+                overwrite_existing=overwrite_existing,
+            )
+            for expectation_configuration in expectation_configurations
+        ]
+        return expectation_configurations_attempted_to_be_added
+
     def add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
+        send_usage_event: bool = True,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
         """
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
+            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
+                public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
                 and so whether we should add or replace.
             overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
                 False.
+
         Returns:
             The ExpectationConfiguration to add or replace.
         Raises:
@@ -619,7 +662,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
-            send_usage_event=True,
+            send_usage_event=send_usage_event,
             match_type=match_type,
             overwrite_existing=overwrite_existing,
         )

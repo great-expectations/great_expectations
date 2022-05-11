@@ -1,6 +1,4 @@
-import math
-from numbers import Number
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Dict, Union
 
 import numpy as np
 import pandas as pd
@@ -8,11 +6,13 @@ import pandas as pd
 from great_expectations.rule_based_profiler.helpers.util import (
     compute_bootstrap_quantiles_point_estimate,
 )
-from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
-    DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+from great_expectations.rule_based_profiler.parameter_builder import (
+    NumericMetricRangeMultiBatchParameterBuilder,
 )
 
 # Allowable tolerance for how closely a bootstrap method approximates the sample
+from great_expectations.rule_based_profiler.types import NumericRangeEstimationResult
+
 EFFICACY_TOLERANCE: float = 1.0e-2
 
 # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
@@ -40,18 +40,19 @@ def test_bootstrap_point_estimate_efficacy(
 
     distribution_types: pd.Index = distribution_samples.columns
     distribution: str
+    numeric_range_estimation_result: NumericRangeEstimationResult
     lower_quantile_point_estimate: np.float64
     upper_quantile_point_estimate: np.float64
     actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
     for distribution in distribution_types:
-        (
-            lower_quantile_point_estimate,
-            upper_quantile_point_estimate,
-        ) = compute_bootstrap_quantiles_point_estimate(
+        numeric_range_estimation_result = compute_bootstrap_quantiles_point_estimate(
             metric_values=distribution_samples[distribution],
             false_positive_rate=false_positive_rate,
-            n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+            quantile_statistic_interpolation_method="linear",
+            n_resamples=NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
         )
+        lower_quantile_point_estimate = numeric_range_estimation_result.value_range[0]
+        upper_quantile_point_estimate = numeric_range_estimation_result.value_range[1]
         actual_false_positive_rates[distribution] = (
             1.0
             - np.sum(

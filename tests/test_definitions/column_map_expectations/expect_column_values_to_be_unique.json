@@ -51,6 +51,16 @@
         "unique": "NUMERIC",
         "null": "STRING",
         "mult_dup": "STRING"
+      },
+      "trino": {
+        "a": "VARCHAR",
+        "b": "VARCHAR",
+        "c": "INTEGER",
+        "d": "VARCHAR",
+        "n": "INTEGER",
+        "unique": "INTEGER",
+        "null": "VARCHAR",
+        "mult_dup": "VARCHAR"
       }
     },
     "tests" : [
@@ -140,6 +150,7 @@
       },{
         "title": "positive_case_all_null_values",
         "exact_match_out": false,
+        "suppress_test_for": ["trino"],
         "in": {
           "column": "null"
         },

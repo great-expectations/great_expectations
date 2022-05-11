@@ -1327,6 +1327,33 @@ def is_nan(value: Any) -> bool:
         return True
 
 
+def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
+    """
+    This method checks whether or not candidate object is subset of target object.
+    """
+    if isinstance(candidate, dict):
+        key: Any  # must be "hashable"
+        value: Any
+        return all(
+            key in target
+            and is_candidate_subset_of_target(candidate=val, target=target[key])
+            for key, val in candidate.items()
+        )
+
+    if isinstance(candidate, (list, set, tuple)):
+        subitem: Any
+        superitem: Any
+        return all(
+            any(
+                is_candidate_subset_of_target(subitem, superitem)
+                for superitem in target
+            )
+            for subitem in candidate
+        )
+
+    return candidate == target
+
+
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
         # noinspection PyUnusedLocal
@@ -1401,11 +1428,16 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this
     conversion takes place.
 
+    For versions of SQLAlchemy < 1.4 the implicit conversion to a subquery may not always work, so that
+    also needs to be handled here, using the old equivalent method.
+
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if version.parse(sa.__version__) >= version.parse("1.4"):
-        if isinstance(selectable, Select):
+    if isinstance(selectable, Select):
+        if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
+        else:
+            selectable = selectable.alias()
     return selectable
 
 

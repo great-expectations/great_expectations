@@ -32,7 +32,7 @@ class Asset:
         prefix: Optional[str] = None,
         # Both S3/Azure
         delimiter: Optional[str] = None,
-    ):
+    ) -> None:
         self._name = name
         self._base_directory = base_directory
         self._glob_directive = glob_directive
