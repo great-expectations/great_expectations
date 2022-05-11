@@ -349,7 +349,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             for batch_id, batch in self._batches.items()
         }
 
-    def _validate_profiler_rule_name_uniqueness(self):
+    def _validate_profiler_rule_name_uniqueness(self) -> None:
+        """
+        This private utility method insures that all "Rule" objects in underlying "BaseRuleBasedProfiler" are unique.
+        """
         rule: Rule
 
         profiler_rules: List[Rule] = self.profiler.rules
