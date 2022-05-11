@@ -10,7 +10,7 @@ from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
 
 try:
-    import psycopg2
+    import psycopg2  # noqa: F401
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
@@ -334,7 +334,7 @@ def get_sqlalchemy_column_metadata(
                 sqlalchemy_engine=engine,
             )
 
-        # Use fallback because mssql reflection mechanism does not throw an error but returns an empty list
+        # Use fallback because for mssql and trino reflection mechanisms do not throw an error but return an empty list
         if len(columns) == 0:
             columns = column_reflection_fallback(
                 selectable=table_selectable,
@@ -343,7 +343,8 @@ def get_sqlalchemy_column_metadata(
             )
 
         return columns
-    except AttributeError:
+    except AttributeError as e:
+        logger.debug(f"Error while introspecting columns: {str(e)}")
         return None
 
 
@@ -466,6 +467,83 @@ def column_reflection_fallback(
                 "type": column_data_type.upper(),
             }
             for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
+        ]
+    elif dialect.name.lower() == "trino":
+        try:
+            table_name = selectable.name
+        except AttributeError:
+            table_name = selectable
+
+        tables_table: sa.Table = sa.Table(
+            "tables",
+            sa.MetaData(),
+            schema="information_schema",
+        )
+        tables_table_query: Select = (
+            sa.select(
+                [
+                    sa.column("table_schema").label("schema_name"),
+                    sa.column("table_name").label("table_name"),
+                ]
+            )
+            .select_from(tables_table)
+            .alias("information_schema_tables_table")
+        )
+        columns_table: sa.Table = sa.Table(
+            "columns",
+            sa.MetaData(),
+            schema="information_schema",
+        )
+        columns_table_query: Select = (
+            sa.select(
+                [
+                    sa.column("column_name").label("column_name"),
+                    sa.column("table_name").label("table_name"),
+                    sa.column("table_schema").label("schema_name"),
+                    sa.column("data_type").label("column_data_type"),
+                ]
+            )
+            .select_from(columns_table)
+            .alias("information_schema_columns_table")
+        )
+        conditions = sa.and_(
+            *(
+                tables_table_query.c.table_name == columns_table_query.c.table_name,
+                tables_table_query.c.schema_name == columns_table_query.c.schema_name,
+            )
+        )
+        col_info_query: Select = (
+            sa.select(
+                [
+                    tables_table_query.c.schema_name,
+                    tables_table_query.c.table_name,
+                    columns_table_query.c.column_name,
+                    columns_table_query.c.column_data_type,
+                ]
+            )
+            .select_from(
+                tables_table_query.join(
+                    right=columns_table_query, onclause=conditions, isouter=False
+                )
+            )
+            .where(tables_table_query.c.table_name == table_name)
+            .order_by(
+                tables_table_query.c.schema_name.asc(),
+                tables_table_query.c.table_name.asc(),
+                columns_table_query.c.column_name.asc(),
+            )
+            .alias("column_info")
+        )
+        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
+            col_info_query
+        ).fetchall()
+        # type_module = _get_dialect_type_module(dialect=dialect)
+        col_info_dict_list: List[Dict[str, str]] = [
+            {
+                "name": column_name,
+                "type": column_data_type.upper(),
+            }
+            for schema_name, table_name, column_name, column_data_type in col_info_tuples_list
         ]
     else:
         # if a custom query was passed

@@ -1,14 +1,15 @@
 import re
 import sys
+from typing import List, Optional
 
 from termcolor import colored
 
 
-def cli_message(string):
+def cli_message(string: str) -> None:
     print(cli_colorize_string(string))
 
 
-def cli_colorize_string(string):
+def cli_colorize_string(string: str) -> str:
     # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
     flags = re.DOTALL
     mod_string = re.sub(
@@ -30,14 +31,16 @@ def cli_colorize_string(string):
     return colored(mod_string)
 
 
-def display_not_implemented_message_and_exit():
+def display_not_implemented_message_and_exit() -> None:
     cli_message(
         "<red>This command is not yet implemented for the v3 (Batch Request) API</red>"
     )
     sys.exit(1)
 
 
-def cli_message_list(string_list, list_intro_string=None):
+def cli_message_list(
+    string_list: List[str], list_intro_string: Optional[str] = None
+) -> None:
     """Simple util function for displaying simple lists in cli"""
     if list_intro_string:
         cli_message(list_intro_string)
@@ -45,7 +48,7 @@ def cli_message_list(string_list, list_intro_string=None):
         cli_message(string)
 
 
-def action_list_to_string(action_list):
+def action_list_to_string(action_list: list) -> str:
     """Util function for turning an action list into pretty string"""
     action_list_string = ""
     for idx, action in enumerate(action_list):
@@ -57,8 +60,12 @@ def action_list_to_string(action_list):
 
 
 def cli_message_dict(
-    dict_, indent=3, bullet_char="-", message_list=None, recursion_flag=False
-):
+    dict_: dict,
+    indent: int = 3,
+    bullet_char: str = "-",
+    message_list: Optional[list] = None,
+    recursion_flag: bool = False,
+) -> None:
     """Util function for displaying nested dicts representing ge objects in cli"""
     if message_list is None:
         message_list = []

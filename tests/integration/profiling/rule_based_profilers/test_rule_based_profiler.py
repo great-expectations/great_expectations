@@ -151,7 +151,15 @@ def test_profile_includes_citations(
         data_context=data_context,
     )
 
-    profiler.run()
+    # BatchRequest yielding exactly one batch
+    alice_single_batch_data_batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    profiler.run(batch_request=alice_single_batch_data_batch_request)
+
     expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
@@ -161,7 +169,7 @@ def test_profile_includes_citations(
 
     assert len(expectation_suite.meta["citations"]) > 0
 
-    assert mock_emit.call_count == 43
+    assert mock_emit.call_count == 54
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
@@ -200,7 +208,15 @@ def test_profile_excludes_citations(
         data_context=data_context,
     )
 
-    profiler.run()
+    # BatchRequest yielding exactly one batch
+    alice_single_batch_data_batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    profiler.run(batch_request=alice_single_batch_data_batch_request)
+
     expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
@@ -210,7 +226,7 @@ def test_profile_excludes_citations(
 
     assert expectation_suite.meta.get("citations") is None
 
-    assert mock_emit.call_count == 43
+    assert mock_emit.call_count == 54
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]

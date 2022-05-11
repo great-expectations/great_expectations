@@ -319,7 +319,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_data/postgres_connection_string.yml",
+                "tests/integration/fixtures/split_and_sample_data/postgres_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -333,7 +333,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_data/mssql_connection_string.yml",
+                "tests/integration/fixtures/split_and_sample_data/mssql_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -347,7 +347,49 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_data/mysql_connection_string.yml",
+                "tests/integration/fixtures/split_and_sample_data/mysql_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.MYSQL,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_postgres",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/postgres_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_mssql",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/mssql_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.MSSQL,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_mysql",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/mysql_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -436,7 +478,21 @@ cloud_snowflake_tests = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_data/snowflake_connection_string.yml",
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
@@ -557,10 +613,30 @@ cloud_bigquery_tests = [
         util_script="tests/test_utils.py",
         other_files=(
             (
-                "tests/integration/fixtures/split_data/bigquery_connection_string.yml",
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
                 "connection_string.yml",
             ),
         ),
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="test_runtime_parameters_bigquery",
+        user_flow_script="tests/integration/db/bigquery.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
 ]
@@ -896,8 +972,10 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
     elif dependencies == BackendDependencies.BIGQUERY and (
         pytest_args.no_sqlalchemy or not pytest_args.bigquery
     ):
+        # TODO : Investigate whether this test should be handled by azure-pipelines-cloud-db-integration.yml
         pytest.skip("Skipping bigquery tests")
     elif dependencies == BackendDependencies.GCS and not pytest_args.bigquery:
+        # TODO : Investigate whether this test should be handled by azure-pipelines-cloud-db-integration.yml
         pytest.skip("Skipping GCS tests")
     elif dependencies == BackendDependencies.AWS and not pytest_args.aws:
         pytest.skip("Skipping AWS tests")
