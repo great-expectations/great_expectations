@@ -980,8 +980,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             split_query: str = str(
                 split_query.compile(self.engine, compile_kwargs={"literal_binds": True})
             )
-            split_query = split_query.replace("STRING", "VARCHAR").replace(
-                "string", "VARCHAR"
+            split_query = split_query.replace("AS STRING", "AS VARCHAR").replace(
+                "as string", "AS VARCHAR"
             )
 
         return self.engine.execute(split_query).fetchall()
