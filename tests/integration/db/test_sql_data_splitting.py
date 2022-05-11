@@ -112,6 +112,7 @@ if __name__ == "test_script_module":
         print("Testing splitter method:", test_case.splitter_method_name)
 
         # 1. Setup
+
         context: DataContext = ge.get_context()
 
         datasource_name: str = "test_datasource"
@@ -141,11 +142,11 @@ if __name__ == "test_script_module":
         )
 
         datasource: BaseDatasource = context.get_datasource(
-            datasource_name="test_datasource"
+            datasource_name=datasource_name
         )
 
         data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
-            "test_data_connector"
+            data_connector_name
         ]
 
         # 3. Check if resulting batches are as expected
