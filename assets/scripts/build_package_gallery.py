@@ -107,6 +107,9 @@ if __name__ == "__main__":
         os.chdir(root)
         package_paths = gather_all_contrib_package_paths()
         payload = gather_all_package_manifests(package_paths)
+        assert (
+            len(payload) > 0
+        ), "Something went wrong; there should packages in the payload!"
         write_results_to_disk(os.path.join(pwd, "./package_manifests.json"), payload)
     finally:
         os.chdir(pwd)
