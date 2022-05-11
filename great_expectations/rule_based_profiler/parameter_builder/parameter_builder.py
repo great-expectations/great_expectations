@@ -2,17 +2,19 @@ import copy
 import itertools
 import logging
 from abc import ABC, abstractmethod
-from collections import OrderedDict
-from dataclasses import asdict, dataclass, make_dataclass
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
-import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.rule_based_profiler import (
+    MetricComputationDetails,
+    MetricValue,
+    MetricValues,
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
@@ -34,12 +36,8 @@ from great_expectations.rule_based_profiler.types import (
     build_parameter_container,
     get_fully_qualified_parameter_names,
 )
-from great_expectations.rule_based_profiler.types.metric import (
+from great_expectations.rule_based_profiler.types.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
-    MetricComputationDetails,
-    MetricComputationResult,
-    MetricValue,
-    MetricValues,
 )
 from great_expectations.types.attributes import Attributes
 from great_expectations.validator.metric_configuration import MetricConfiguration

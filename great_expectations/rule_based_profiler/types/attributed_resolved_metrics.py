@@ -1,31 +1,13 @@
 from collections import OrderedDict
-from dataclasses import asdict, dataclass, make_dataclass
-from typing import Any, Dict, List, Optional, Union
+from dataclasses import asdict, dataclass
+from typing import Dict, Optional
 
-import numpy as np
 import pandas as pd
 
-# circular import!?!?!
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.rule_based_profiler import MetricValue, MetricValues
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
-
-# MetricValue = Union[Any, List[Any], pd.DataFrame, pd.Series, np.ndarray]
-# MetricValues = Union[MetricValue, pd.DataFrame, pd.Series, np.ndarray]
-# MetricComputationDetails = Dict[str, Any]
-# MetricComputationResult = make_dataclass(
-#     "MetricComputationResult", ["attributed_resolved_metrics", "details"]
-# )
-
-
-# TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
-# what does it mean to ahve a formal metric computation state?
-MetricValue = Union[Any, List[Any], pd.DataFrame, pd.Series, np.ndarray]
-MetricValues = Union[MetricValue, pd.DataFrame, pd.Series, np.ndarray]
-MetricComputationDetails = Dict[str, Any]
-# MetricComputationResult = make_dataclass(
-#    "MetricComputationResult", ["attributed_resolved_metrics", "details"]
-# )
 
 
 @dataclass
@@ -83,17 +65,3 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
-
-
-@dataclass
-class MetricComputationResult(SerializableDictDot):
-    """
-    This class facilitates computing multiple metrics as one operation.
-
-    In order to gather results pertaining to diverse MetricConfiguration directives, computed metrics are augmented
-    with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
-    """
-
-    attributed_resolved_metrics: Optional[AttributedResolvedMetrics] = None
-    # details: Optional[MetricComputationDetails] = None
-    details: Optional[Dict[str, Any]] = None
