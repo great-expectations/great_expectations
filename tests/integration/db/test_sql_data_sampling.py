@@ -170,9 +170,6 @@ if __name__ == "test_script_module":
         num_rows: int = batch_data.execution_engine.engine.execute(
             sa.select([sa.func.count()]).select_from(batch_data.selectable)
         ).scalar()
-        print(
-            f"DIAGNOSTIC num_rows: {num_rows} test_case.num_expected_rows_in_first_batch_definition: {test_case.num_expected_rows_in_first_batch_definition}"
-        )
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
 
         # TODO: AJB 20220502 Test the actual rows that are returned e.g. for random sampling.
