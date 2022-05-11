@@ -70,18 +70,15 @@ class DataAssistant(metaclass=MetaDataAssistant):
         validator=validator,
     )
     result: DataAssistantResult = data_assistant.run(
-        expectation_suite=None,
-        expectation_suite_name="my_suite",
-        include_citation=True,
-        save_updated_expectation_suite=False,
+        variables=None,
+        rules=None,
     )
 
     Then:
-        metrics: Dict[Domain, Dict[str, ParameterNode]] = result.metrics
-        expectation_suite: ExpectationSuite = result.expectation_suite
-        expectation_configurations: List[ExpectationConfiguration] = result.expectation_suite.expectations
-        expectation_suite_meta: Dict[str, Any] = expectation_suite.meta
+        metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = result.metrics_by_domain
+        expectation_configurations: List[ExpectationConfiguration] = result.expectation_configurations
         profiler_config: RuleBasedProfilerConfig = result.profiler_config
+        ...
     """
 
     __alias__: Optional[str] = None
@@ -154,15 +151,15 @@ class DataAssistant(metaclass=MetaDataAssistant):
             rules = profiler.rules
             self._add_rules_to_profiler(rules=rules)
 
-        common_rule_names: Set[str] = {
-            rule.name for rule in (self.profiler.rules or {})
-        } & {rule.name for rule in (self.rules or {})}
-        if common_rule_names:
-            raise ge_exceptions.ProfilerConfigurationError(
-                message=f"""Rule names in {self.__class__.__name__} must be unique; duplicate(s) found \
-({common_rule_names}).
-"""
-            )
+        self._validate_profiler_rule_name_uniqueness()
+
+        self._add_rules_to_profiler(rules=self.rules)
+
+        custom_variables: Optional[Dict[str, Any]] = self.variables
+        if custom_variables is None:
+            custom_variables = {}
+
+        variables.update(custom_variables)
 
         self._add_rules_to_profiler(rules=self.rules)
 
@@ -355,6 +352,32 @@ class DataAssistant(metaclass=MetaDataAssistant):
             for batch_id, batch in self._batches.items()
         }
 
+    def _validate_profiler_rule_name_uniqueness(self) -> None:
+        """
+        This private utility method insures that all "Rule" objects in underlying "BaseRuleBasedProfiler" are unique.
+        """
+        rule: Rule
+
+        profiler_rules: List[Rule] = self.profiler.rules
+        if profiler_rules is None:
+            profiler_rules = []
+
+        profiler_rule_names: Set[str] = {rule.name for rule in profiler_rules}
+
+        custom_rules: List[Rule] = self.rules
+        if custom_rules is None:
+            custom_rules = []
+
+        custom_rule_names: Set[str] = {rule.name for rule in custom_rules}
+
+        common_rule_names: Set[str] = profiler_rule_names & custom_rule_names
+        if common_rule_names:
+            raise ge_exceptions.ProfilerConfigurationError(
+                message=f"""Rule names in {self.__class__.__name__} must be unique; duplicate(s) found \
+({common_rule_names}).
+"""
+            )
+
     def _add_rules_to_profiler(
         self,
         rules: Optional[List[Rule]] = None,
@@ -368,7 +391,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         rule: Rule
         domain_builder: DomainBuilder
         rule_parameter_builders: List[ParameterBuilder]
-        metric_parameter_builders: List[ParameterBuilder]
+        metric_parameter_builders: Optional[List[ParameterBuilder]]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder]
 
         rules = rules or []
