@@ -1,139 +1,306 @@
-
 import logging
 from typing import Dict, Iterable, List, Optional, Set, Union
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.helpers.util import get_parameter_value_and_validate_return_type
-from great_expectations.rule_based_profiler.parameter_builder import AttributedResolvedMetrics, MetricComputationResult, MetricValues, ParameterBuilder
-from great_expectations.rule_based_profiler.types import FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY, FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY, Domain, ParameterContainer
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.parameter_builder import (
+    AttributedResolvedMetrics,
+    MetricComputationResult,
+    MetricValues,
+    ParameterBuilder,
+)
+from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    Domain,
+    ParameterContainer,
+)
 from great_expectations.types.attributes import Attributes
+
 logger = logging.getLogger(__name__)
-DEFAULT_CANDIDATE_STRINGS: Set[str] = {'%H:%M:%S', '%H:%M:%S,%f', '%H:%M:%S.%f', '%Y %b %d %H:%M:%S.%f', '%Y %b %d %H:%M:%S.%f %Z', '%Y %b %d %H:%M:%S.%f*%Z', '%Y%m%d %H:%M:%S.%f', '%Y-%m-%d', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S %z', '%Y-%m-%d %H:%M:%S%z', '%Y-%m-%d %H:%M:%S,%f', '%Y-%m-%d %H:%M:%S,%f%z', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M:%S.%f%z', "%Y-%m-%d'T'%H:%M:%S", "%Y-%m-%d'T'%H:%M:%S%z", "%Y-%m-%d'T'%H:%M:%S'%z'", "%Y-%m-%d'T'%H:%M:%S.%f", "%Y-%m-%d'T'%H:%M:%S.%f'%z'", '%Y-%m-%d*%H:%M:%S', '%Y-%m-%d*%H:%M:%S:%f', '%Y-%m-%dT%z', '%Y/%m/%d', '%Y/%m/%d*%H:%M:%S', '%b %d %H:%M:%S', '%b %d %H:%M:%S %Y', '%b %d %H:%M:%S %z', '%b %d %H:%M:%S %z %Y', '%b %d %Y %H:%M:%S', '%b %d, %Y %H:%M:%S %p', '%d %b %Y %H:%M:%S', '%d %b %Y %H:%M:%S*%f', '%d-%b-%Y %H:%M:%S', '%d-%b-%Y %H:%M:%S.%f', '%d-%m-%Y', '%d/%b %H:%M:%S,%f', '%d/%b/%Y %H:%M:%S', '%d/%b/%Y:%H:%M:%S', '%d/%b/%Y:%H:%M:%S %z', '%d/%m/%Y', '%m%d_%H:%M:%S', '%m%d_%H:%M:%S.%f', '%m-%d-%Y', '%m/%d/%Y', '%m/%d/%Y %H:%M:%S %p', '%m/%d/%Y %H:%M:%S %p:%f', '%m/%d/%Y %H:%M:%S %z', '%m/%d/%Y*%H:%M:%S', '%m/%d/%Y*%H:%M:%S*%f', '%m/%d/%y %H:%M:%S %z', '%m/%d/%y*%H:%M:%S', '%y%m%d %H:%M:%S', '%y-%m-%d', '%y-%m-%d %H:%M:%S', '%y-%m-%d %H:%M:%S,%f', '%y-%m-%d %H:%M:%S,%f %z', '%y/%m/%d', '%y/%m/%d %H:%M:%S'}
+
+DEFAULT_CANDIDATE_STRINGS: Set[str] = {
+    "%H:%M:%S",
+    "%H:%M:%S,%f",
+    "%H:%M:%S.%f",
+    "%Y %b %d %H:%M:%S.%f",
+    "%Y %b %d %H:%M:%S.%f %Z",
+    "%Y %b %d %H:%M:%S.%f*%Z",
+    "%Y%m%d %H:%M:%S.%f",
+    "%Y-%m-%d",
+    "%Y-%m-%d %H:%M:%S",
+    "%Y-%m-%d %H:%M:%S %z",
+    "%Y-%m-%d %H:%M:%S%z",
+    "%Y-%m-%d %H:%M:%S,%f",
+    "%Y-%m-%d %H:%M:%S,%f%z",
+    "%Y-%m-%d %H:%M:%S.%f",
+    "%Y-%m-%d %H:%M:%S.%f%z",
+    "%Y-%m-%d'T'%H:%M:%S",
+    "%Y-%m-%d'T'%H:%M:%S%z",
+    "%Y-%m-%d'T'%H:%M:%S'%z'",
+    "%Y-%m-%d'T'%H:%M:%S.%f",
+    "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
+    "%Y-%m-%d*%H:%M:%S",
+    "%Y-%m-%d*%H:%M:%S:%f",
+    "%Y-%m-%dT%z",
+    "%Y/%m/%d",
+    "%Y/%m/%d*%H:%M:%S",
+    "%b %d %H:%M:%S",
+    "%b %d %H:%M:%S %Y",
+    "%b %d %H:%M:%S %z",
+    "%b %d %H:%M:%S %z %Y",
+    "%b %d %Y %H:%M:%S",
+    "%b %d, %Y %H:%M:%S %p",
+    "%d %b %Y %H:%M:%S",
+    "%d %b %Y %H:%M:%S*%f",
+    "%d-%b-%Y %H:%M:%S",
+    "%d-%b-%Y %H:%M:%S.%f",
+    "%d-%m-%Y",
+    "%d/%b %H:%M:%S,%f",
+    "%d/%b/%Y %H:%M:%S",
+    "%d/%b/%Y:%H:%M:%S",
+    "%d/%b/%Y:%H:%M:%S %z",
+    "%d/%m/%Y",
+    "%m%d_%H:%M:%S",
+    "%m%d_%H:%M:%S.%f",
+    "%m-%d-%Y",
+    "%m/%d/%Y",
+    "%m/%d/%Y %H:%M:%S %p",
+    "%m/%d/%Y %H:%M:%S %p:%f",
+    "%m/%d/%Y %H:%M:%S %z",
+    "%m/%d/%Y*%H:%M:%S",
+    "%m/%d/%Y*%H:%M:%S*%f",
+    "%m/%d/%y %H:%M:%S %z",
+    "%m/%d/%y*%H:%M:%S",
+    "%y%m%d %H:%M:%S",
+    "%y-%m-%d",
+    "%y-%m-%d %H:%M:%S",
+    "%y-%m-%d %H:%M:%S,%f",
+    "%y-%m-%d %H:%M:%S,%f %z",
+    "%y/%m/%d",
+    "%y/%m/%d %H:%M:%S",
+}
+
 
 class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
-    '\n    Detects the domain date format from a set of candidate date format strings by computing the\n    column_values.match_strftime_format.unexpected_count metric for each candidate format and returning the format that\n    has the lowest unexpected_count ratio.\n    '
+    """
+    Detects the domain date format from a set of candidate date format strings by computing the
+    column_values.match_strftime_format.unexpected_count metric for each candidate format and returning the format that
+    has the lowest unexpected_count ratio.
+    """
 
-    def __init__(self, name: str, metric_domain_kwargs: Optional[Union[(str, dict)]]=None, metric_value_kwargs: Optional[Union[(str, dict)]]=None, threshold: Union[(str, float)]=1.0, candidate_strings: Optional[Union[(Iterable[str], str)]]=None, evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]=None, json_serialize: Union[(str, bool)]=True, data_context: Optional['BaseDataContext']=None) -> None:
-        import inspect
-        __frame = inspect.currentframe()
-        __file = __frame.f_code.co_filename
-        __func = __frame.f_code.co_name
-        for (k, v) in __frame.f_locals.items():
-            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
-                continue
-            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
-        '\n        Configure this SimpleDateFormatStringParameterBuilder\n        Args:\n            name: the name of this parameter -- this is user-specified parameter name (from configuration);\n            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."\n            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").\n            metric_domain_kwargs: used in MetricConfiguration\n            metric_value_kwargs: used in MetricConfiguration\n            threshold: the ratio of values that must match a format string for it to be accepted\n            candidate_strings: a list of candidate date format strings that will replace the default\n            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective\n            ParameterBuilder objects\' outputs available (as fully-qualified parameter names) is pre-requisite.\n            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".\n            json_serialize: If True (default), convert computed value to JSON prior to saving results.\n            data_context: BaseDataContext associated with this ParameterBuilder\n        '
-        super().__init__(name=name, evaluation_parameter_builder_configs=evaluation_parameter_builder_configs, json_serialize=json_serialize, data_context=data_context)
+    def __init__(
+        self,
+        name: str,
+        metric_domain_kwargs: Optional[Union[str, dict]] = None,
+        metric_value_kwargs: Optional[Union[str, dict]] = None,
+        threshold: Union[str, float] = 1.0,
+        candidate_strings: Optional[Union[Iterable[str], str]] = None,
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
+        ] = None,
+        json_serialize: Union[str, bool] = True,
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
+        """
+        Configure this SimpleDateFormatStringParameterBuilder
+        Args:
+            name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
+            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            metric_domain_kwargs: used in MetricConfiguration
+            metric_value_kwargs: used in MetricConfiguration
+            threshold: the ratio of values that must match a format string for it to be accepted
+            candidate_strings: a list of candidate date format strings that will replace the default
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
+            data_context: BaseDataContext associated with this ParameterBuilder
+        """
+        super().__init__(
+            name=name,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            json_serialize=json_serialize,
+            data_context=data_context,
+        )
+
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
+
         self._threshold = threshold
-        if ((candidate_strings is not None) and isinstance(candidate_strings, list)):
+
+        if candidate_strings is not None and isinstance(candidate_strings, list):
             self._candidate_strings = set(candidate_strings)
         else:
             self._candidate_strings = DEFAULT_CANDIDATE_STRINGS
 
     @property
-    def metric_domain_kwargs(self) -> Optional[Union[(str, dict)]]:
-        import inspect
-        __frame = inspect.currentframe()
-        __file = __frame.f_code.co_filename
-        __func = __frame.f_code.co_name
-        for (k, v) in __frame.f_locals.items():
-            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
-                continue
-            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
         return self._metric_domain_kwargs
 
     @property
-    def metric_value_kwargs(self) -> Optional[Union[(str, dict)]]:
-        import inspect
-        __frame = inspect.currentframe()
-        __file = __frame.f_code.co_filename
-        __func = __frame.f_code.co_name
-        for (k, v) in __frame.f_locals.items():
-            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
-                continue
-            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
         return self._metric_value_kwargs
 
     @metric_value_kwargs.setter
-    def metric_value_kwargs(self, value: Optional[Union[(str, dict)]]) -> None:
-        import inspect
-        __frame = inspect.currentframe()
-        __file = __frame.f_code.co_filename
-        __func = __frame.f_code.co_name
-        for (k, v) in __frame.f_locals.items():
-            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
-                continue
-            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    def metric_value_kwargs(self, value: Optional[Union[str, dict]]) -> None:
         self._metric_value_kwargs = value
 
     @property
-    def threshold(self) -> Union[(str, float)]:
-        import inspect
-        __frame = inspect.currentframe()
-        __file = __frame.f_code.co_filename
-        __func = __frame.f_code.co_name
-        for (k, v) in __frame.f_locals.items():
-            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
-                continue
-            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    def threshold(self) -> Union[str, float]:
         return self._threshold
 
     @property
-    def candidate_strings(self) -> Union[(str, Union[(List[str], Set[str])])]:
-        import inspect
-        __frame = inspect.currentframe()
-        __file = __frame.f_code.co_filename
-        __func = __frame.f_code.co_name
-        for (k, v) in __frame.f_locals.items():
-            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
-                continue
-            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
+    def candidate_strings(
+        self,
+    ) -> Union[str, Union[List[str], Set[str]]]:
         return self._candidate_strings
 
-    def _build_parameters(self, domain: Domain, variables: Optional[ParameterContainer]=None, parameters: Optional[Dict[(str, ParameterContainer)]]=None, recompute_existing_parameter_values: bool=False) -> Attributes:
-        import inspect
-        __frame = inspect.currentframe()
-        __file = __frame.f_code.co_filename
-        __func = __frame.f_code.co_name
-        for (k, v) in __frame.f_locals.items():
-            if any(((var in k) for var in ('self', 'cls', '__frame', '__file', '__func'))):
-                continue
-            print(f'<INTROSPECT> {__file}:{__func}:{k} - {v.__class__.__name__}')
-        '\n        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.\n\n        Check the percentage of values matching each string, and return the best fit, or None if no string exceeds the\n        configured threshold.\n\n        Returns:\n            Attributes object, containing computed parameter values and parameter computation details metadata.\n        '
+    def _build_parameters(
+        self,
+        domain: Domain,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        recompute_existing_parameter_values: bool = False,
+    ) -> Attributes:
+        """
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
+
+        Check the percentage of values matching each string, and return the best fit, or None if no string exceeds the
+        configured threshold.
+
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
+        """
         metric_computation_result: MetricComputationResult
-        metric_computation_result = self.get_metrics(metric_name='column_values.nonnull.count', metric_domain_kwargs=self.metric_domain_kwargs, metric_value_kwargs=self.metric_value_kwargs, domain=domain, variables=variables, parameters=parameters)
-        if (len(metric_computation_result.attributed_resolved_metrics) != 1):
-            raise ge_exceptions.ProfilerExecutionError(message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).')
+
+        metric_computation_result = self.get_metrics(
+            metric_name="column_values.nonnull.count",
+            metric_domain_kwargs=self.metric_domain_kwargs,
+            metric_value_kwargs=self.metric_value_kwargs,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        # This should never happen.
+        if len(metric_computation_result.attributed_resolved_metrics) != 1:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'
+            )
+
         attributed_resolved_metrics: AttributedResolvedMetrics
-        attributed_resolved_metrics = metric_computation_result.attributed_resolved_metrics[0]
+
+        attributed_resolved_metrics = (
+            metric_computation_result.attributed_resolved_metrics[0]
+        )
+
         metric_values: MetricValues
+
         metric_values = attributed_resolved_metrics.metric_values
-        if (metric_values is None):
-            raise ge_exceptions.ProfilerExecutionError(message=f'Result of metric computations for {self.__class__.__name__} is empty.')
+
+        if metric_values is None:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"Result of metric computations for {self.__class__.__name__} is empty."
+            )
+
+        # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
+
         nonnull_count: int = sum(metric_values)
-        candidate_strings: Union[(List[str], Set[str])] = get_parameter_value_and_validate_return_type(domain=domain, parameter_reference=self.candidate_strings, expected_return_type=None, variables=variables, parameters=parameters)
+
+        # Obtain candidate_strings from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        candidate_strings: Union[
+            List[str],
+            Set[str],
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.candidate_strings,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        # Gather "metric_value_kwargs" for all candidate "strftime_format" strings.
         format_string: str
         match_strftime_metric_value_kwargs_list: List[dict] = []
         match_strftime_metric_value_kwargs: dict
         for format_string in candidate_strings:
             if self.metric_value_kwargs:
-                match_strftime_metric_value_kwargs = {**self.metric_value_kwargs, **{'strftime_format': format_string}}
+                match_strftime_metric_value_kwargs = {
+                    **self.metric_value_kwargs,
+                    **{"strftime_format": format_string},
+                }
             else:
-                match_strftime_metric_value_kwargs = {'strftime_format': format_string}
-            match_strftime_metric_value_kwargs_list.append(match_strftime_metric_value_kwargs)
-        metric_computation_result = self.get_metrics(metric_name='column_values.match_strftime_format.unexpected_count', metric_domain_kwargs=self.metric_domain_kwargs, metric_value_kwargs=match_strftime_metric_value_kwargs_list, domain=domain, variables=variables, parameters=parameters)
+                match_strftime_metric_value_kwargs = {
+                    "strftime_format": format_string,
+                }
+
+            match_strftime_metric_value_kwargs_list.append(
+                match_strftime_metric_value_kwargs
+            )
+
+        # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
+        metric_computation_result = self.get_metrics(
+            metric_name="column_values.match_strftime_format.unexpected_count",
+            metric_domain_kwargs=self.metric_domain_kwargs,
+            metric_value_kwargs=match_strftime_metric_value_kwargs_list,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
         format_string_success_ratios: dict = {}
-        for attributed_resolved_metrics in metric_computation_result.attributed_resolved_metrics:
+
+        for (
+            attributed_resolved_metrics
+        ) in metric_computation_result.attributed_resolved_metrics:
+            # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = attributed_resolved_metrics.metric_values[:, 0]
+
             match_strftime_unexpected_count: int = sum(metric_values)
-            success_ratio: float = ((nonnull_count - match_strftime_unexpected_count) / nonnull_count)
-            format_string_success_ratios[attributed_resolved_metrics.metric_attributes['strftime_format']] = success_ratio
-        threshold: float = get_parameter_value_and_validate_return_type(domain=domain, parameter_reference=self.threshold, expected_return_type=float, variables=variables, parameters=parameters)
+            success_ratio: float = (
+                nonnull_count - match_strftime_unexpected_count
+            ) / nonnull_count
+            format_string_success_ratios[
+                attributed_resolved_metrics.metric_attributes["strftime_format"]
+            ] = success_ratio
+
+        # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        threshold: float = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.threshold,
+            expected_return_type=float,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        # get best-matching datetime string that matches greater than threshold
         best_format_string: str
         best_ratio: float
-        (best_format_string, best_ratio) = ParameterBuilder._get_best_candidate_above_threshold(format_string_success_ratios, threshold)
-        sorted_format_strings_and_ratios: dict = ParameterBuilder._get_sorted_candidates_and_ratios(format_string_success_ratios)
-        return Attributes({FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: best_format_string, FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: {'success_ratio': best_ratio, 'candidate_strings': sorted_format_strings_and_ratios}})
+        (
+            best_format_string,
+            best_ratio,
+        ) = ParameterBuilder._get_best_candidate_above_threshold(
+            format_string_success_ratios, threshold
+        )
+        # dict of sorted datetime and ratios for all evaluated candidates
+        sorted_format_strings_and_ratios: dict = (
+            ParameterBuilder._get_sorted_candidates_and_ratios(
+                format_string_success_ratios
+            )
+        )
+
+        return Attributes(
+            {
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: best_format_string,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: {
+                    "success_ratio": best_ratio,
+                    "candidate_strings": sorted_format_strings_and_ratios,
+                },
+            }
+        )

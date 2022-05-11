@@ -1,4 +1,3 @@
-
 from .column_value_lengths import ColumnValuesValueLength, ColumnValuesValueLengthEquals
 from .column_values_between import ColumnValuesBetween
 from .column_values_dateutil_parseable import ColumnValuesDateutilParseable
@@ -16,7 +15,9 @@ from .column_values_match_strftime_format import ColumnValuesMatchStrftimeFormat
 from .column_values_non_null import ColumnValuesNonNull
 from .column_values_not_in_set import ColumnValuesNotInSet
 from .column_values_not_match_like_pattern import ColumnValuesNotMatchLikePattern
-from .column_values_not_match_like_pattern_list import ColumnValuesNotMatchLikePatternList
+from .column_values_not_match_like_pattern_list import (
+    ColumnValuesNotMatchLikePatternList,
+)
 from .column_values_not_match_regex import ColumnValuesNotMatchRegex
 from .column_values_not_match_regex_list import ColumnValuesNotMatchRegexList
 from .column_values_null import ColumnValuesNull

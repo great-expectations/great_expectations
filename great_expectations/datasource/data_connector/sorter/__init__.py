@@ -1,5 +1,4 @@
-
-from .sorter import Sorter
+from .sorter import Sorter  # isort:skip
 from .custom_list_sorter import CustomListSorter
 from .date_time_sorter import DateTimeSorter
 from .lexicographic_sorter import LexicographicSorter
