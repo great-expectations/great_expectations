@@ -29,8 +29,6 @@ from great_expectations.exceptions import (
 try:
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
-    # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
-    # just fall through
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 
@@ -42,15 +40,16 @@ except ImportError:
 )
 @click.pass_context
 def init(ctx: click.Context, usage_stats: bool) -> None:
-    """
-    Initialize a new Great Expectations project.
+    import inspect
 
-    This guided input walks the user through setting up a new project and also
-    onboards a new developer in an existing project.
-
-    It scaffolds directories, creates a project file, and
-    appends to a `.gitignore` file.
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Initialize a new Great Expectations project.\n\n    This guided input walks the user through setting up a new project and also\n    onboards a new developer in an existing project.\n\n    It scaffolds directories, creates a project file, and\n    appends to a `.gitignore` file.\n    "
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
@@ -59,10 +58,9 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
     target_directory = os.path.abspath(directory)
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
-
     if DataContext.does_config_exist_on_disk(ge_dir):
         message = (
-            f"""Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}."""
+            f"Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}."
         )
         warnings.warn(message)
         try:
@@ -74,31 +72,24 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
             if project_file_structure_exists:
                 cli_message(PROJECT_IS_COMPLETE)
                 sys.exit(0)
-            else:
-                # Prompt to modify the project to add missing files
-                if not ctx.obj.assume_yes:
-                    if not click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
-                        cli_message(RUN_INIT_AGAIN)
-                        exit(0)
-
+            elif not ctx.obj.assume_yes:
+                if not click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
+                    cli_message(RUN_INIT_AGAIN)
+                    exit(0)
         except (DataContextError, DatasourceInitializationError) as e:
             cli_message(f"<red>{e.message}</red>")
             sys.exit(1)
-
         try:
             DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
             cli_message(ONBOARDING_COMPLETE)
-
         except DataContextError as e:
             cli_message(f"<red>{e.message}</red>")
-            # TODO ensure this is covered by a test
             exit(5)
     else:
         if not ctx.obj.assume_yes:
             if not click.confirm(LETS_BEGIN_PROMPT, default=True):
                 cli_message(RUN_INIT_AGAIN)
                 exit(0)
-
         try:
             context = DataContext.create(
                 target_directory, usage_statistics_enabled=usage_stats
@@ -109,9 +100,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
                 success=True,
             )
         except DataContextError as e:
-            # TODO ensure this is covered by a test
             cli_message(f"<red>{e}</red>")
-
     cli_message(SECTION_SEPARATOR)
     cli_message(READY_FOR_CUSTOMIZATION)
     cli_message(HOW_TO_CUSTOMIZE)
@@ -119,4 +108,13 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
 
 
 def _get_full_path_to_ge_dir(target_directory: str) -> str:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))

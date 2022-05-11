@@ -16,24 +16,36 @@ from great_expectations.render.types import (
 class ProfilingResultsOverviewSectionRenderer(Renderer):
     @classmethod
     def render(cls, evrs, section_name=None):
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         content_blocks = []
-        # NOTE: I don't love the way this builds content_blocks as a side effect.
-        # The top-level API is clean and scannable, but the function internals are counterintutitive and hard to test.
-        # I wonder if we can enable something like jquery chaining for this. That would be concise AND testable.
-        # Pressing on for now...
         cls._render_header(evrs, content_blocks)
         cls._render_dataset_info(evrs, content_blocks)
         cls._render_variable_types(evrs, content_blocks)
         cls._render_warnings(evrs, content_blocks)
         cls._render_expectation_types(evrs, content_blocks)
-
         return RenderedSectionContent(
             **{"section_name": section_name, "content_blocks": content_blocks}
         )
 
     @classmethod
     def _render_header(cls, evrs, content_blocks) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         content_blocks.append(
             RenderedHeaderContent(
                 **{
@@ -58,18 +70,22 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _render_dataset_info(cls, evrs, content_blocks) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(
             evrs["results"], "expect_table_row_count_to_be_between"
         )
-
         table_rows = []
         table_rows.append(
-            [
-                "Number of variables",
-                len(cls._get_column_list_from_evrs(evrs)),
-            ]
+            ["Number of variables", len(cls._get_column_list_from_evrs(evrs))]
         )
-
         table_rows.append(
             [
                 RenderedStringTemplateContent(
@@ -84,20 +100,16 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                         },
                     }
                 ),
-                "--"
-                if not expect_table_row_count_to_be_between_evr
-                else expect_table_row_count_to_be_between_evr.result["observed_value"],
+                (
+                    "--"
+                    if (not expect_table_row_count_to_be_between_evr)
+                    else expect_table_row_count_to_be_between_evr.result[
+                        "observed_value"
+                    ]
+                ),
             ]
         )
-
-        table_rows += [
-            [
-                "Missing cells",
-                cls._get_percentage_missing_cells_str(evrs),
-            ],
-            # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
-        ]
-
+        table_rows += [["Missing cells", cls._get_percentage_missing_cells_str(evrs)]]
         content_blocks.append(
             RenderedTableContent(
                 **{
@@ -122,15 +134,21 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _render_variable_types(cls, evrs, content_blocks) -> None:
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         column_types = cls._get_column_types(evrs)
-        # TODO: check if we have the information to make this statement. Do all columns have type expectations?
         column_type_counter = Counter(column_types.values())
         table_rows = [
             [type, str(column_type_counter[type])]
             for type in ["int", "float", "string", "datetime", "bool", "unknown"]
         ]
-
         content_blocks.append(
             RenderedTableContent(
                 **{
@@ -155,14 +173,19 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _render_expectation_types(cls, evrs, content_blocks) -> None:
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         type_counts = defaultdict(int)
-
         for evr in evrs.results:
             type_counts[evr.expectation_config.expectation_type] += 1
-
-        bullet_list_items = sorted(type_counts.items(), key=lambda kv: -1 * kv[1])
-
+        bullet_list_items = sorted(type_counts.items(), key=(lambda kv: ((-1) * kv[1])))
         bullet_list_items = [
             RenderedStringTemplateContent(
                 **{
@@ -186,7 +209,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                                         "badge",
                                         "badge-secondary",
                                         "badge-pill",
-                                    ],
+                                    ]
                                 }
                             },
                         },
@@ -196,20 +219,16 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
             )
             for tr in bullet_list_items
         ]
-
         bullet_list = RenderedBulletListContent(
             **{
                 "content_block_type": "bullet_list",
                 "bullet_list": bullet_list_items,
                 "styling": {
                     "classes": ["col-12", "mt-1"],
-                    "body": {
-                        "classes": ["list-group"],
-                    },
+                    "body": {"classes": ["list-group"]},
                 },
             }
         )
-
         bullet_list_collapse = CollapseContent(
             **{
                 "collapse_toggle_link": "Show Expectation Types...",
@@ -217,97 +236,54 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 "styling": {"classes": ["col-12", "p-1"]},
             }
         )
-
         content_blocks.append(bullet_list_collapse)
 
     @classmethod
     def _render_warnings(cls, evrs, content_blocks):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return
-
-        # def render_warning_row(template, column, n, p, badge_label):
-        #     return [{
-        #         "template": template,
-        #         "params": {
-        #             "column": column,
-        #             "n": n,
-        #             "p": p,
-        #         },
-        #         "styling": {
-        #             "params": {
-        #                 "column": {
-        #                     "classes": ["badge", "badge-primary", ]
-        #                 }
-        #             }
-        #         }
-        #     }, {
-        #         "template": "$badge_label",
-        #         "params": {
-        #             "badge_label": badge_label,
-        #         },
-        #         "styling": {
-        #             "params": {
-        #                 "badge_label": {
-        #                     "classes": ["badge", "badge-warning", ]
-        #                 }
-        #             }
-        #         }
-        #     }]
-
-        # table_rows = [
-        #     render_warning_row(
-        #         "$column has $n ($p%) missing values", "Age", 177, 19.9, "Missing"),
-        #     render_warning_row(
-        #         "$column has a high cardinality: $n distinct values", "Cabin", 148, None, "Warning"),
-        #     render_warning_row(
-        #         "$column has $n ($p%) missing values", "Cabin", 687, 77.1, "Missing"),
-        #     render_warning_row(
-        #         "$column has $n (< $p%) zeros", "Fare", 15, "0.1", "Zeros"),
-        #     render_warning_row(
-        #         "$column has $n (< $p%) zeros", "Parch", 678, "76.1", "Zeros"),
-        #     render_warning_row(
-        #         "$column has $n (< $p%) zeros", "SibSp", 608, "68.2", "Zeros"),
-        # ]
-
-        # content_blocks.append({
-        #     "content_block_type": "table",
-        #     "header": "Warnings",
-        #     "table": table_rows,
-        #     "styling": {
-        #         "classes": ["col-12"],
-        #         "styles": {
-        #             "margin-top": "20px"
-        #         },
-        #         "body": {
-        #             "classes": ["table", "table-sm"]
-        #         }
-        #     },
-        # })
 
     @classmethod
     def _get_percentage_missing_cells_str(cls, evrs):
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         columns = cls._get_column_list_from_evrs(evrs)
-        if not columns or len(columns) == 0:
+        if (not columns) or (len(columns) == 0):
             warnings.warn("Cannot get % of missing cells - column list is empty")
             return "?"
-
         expect_column_values_to_not_be_null_evrs = cls._find_all_evrs_by_type(
             evrs.results, "expect_column_values_to_not_be_null"
         )
-
         if len(columns) > len(expect_column_values_to_not_be_null_evrs):
             warnings.warn(
                 "Cannot get % of missing cells - not all columns have expect_column_values_to_not_be_null expectations"
             )
             return "?"
-
-        # assume 100.0 missing for columns where ["result"]["unexpected_percent"] is not available
         return "{:.2f}%".format(
             sum(
-                evr.result["unexpected_percent"]
-                if "unexpected_percent" in evr.result
-                and evr.result["unexpected_percent"] is not None
-                else 100.0
+                (
+                    evr.result["unexpected_percent"]
+                    if (
+                        ("unexpected_percent" in evr.result)
+                        and (evr.result["unexpected_percent"] is not None)
+                    )
+                    else 100.0
+                )
                 for evr in expect_column_values_to_not_be_null_evrs
             )
             / len(columns)
@@ -315,18 +291,24 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _get_column_types(cls, evrs):
-        columns = cls._get_column_list_from_evrs(evrs)
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        columns = cls._get_column_list_from_evrs(evrs)
         type_evrs = cls._find_all_evrs_by_type(
             evrs.results, "expect_column_values_to_be_in_type_list"
         ) + cls._find_all_evrs_by_type(
             evrs.results, "expect_column_values_to_be_of_type"
         )
-
         column_types = {}
         for column in columns:
             column_types[column] = "unknown"
-
         for evr in type_evrs:
             column = evr.expectation_config.kwargs["column"]
             if (
@@ -338,9 +320,8 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                     continue
                 else:
                     expected_types = set(evr.expectation_config.kwargs["type_list"])
-            else:  # assuming expect_column_values_to_be_of_type
+            else:
                 expected_types = {evr.expectation_config.kwargs["type_"]}
-
             if expected_types.issubset(ProfilerTypeMapping.INT_TYPE_NAMES):
                 column_types[column] = "int"
             elif expected_types.issubset(ProfilerTypeMapping.FLOAT_TYPE_NAMES):
@@ -358,5 +339,4 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                     )
                 )
                 column_types[column] = "unknown"
-
         return column_types

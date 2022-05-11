@@ -22,7 +22,6 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
 logger = logging.getLogger(__name__)
-
 try:
     from sqlalchemy.exc import ProgrammingError
     from sqlalchemy.sql import Select
@@ -38,7 +37,6 @@ except ImportError:
     TextClause = None
     WithinGroup = None
     CTE = None
-
 try:
     from sqlalchemy.engine.row import Row
 except ImportError:
@@ -60,16 +58,22 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, quantiles, allow_relative_error, **kwargs):
-        """Quantile Function"""
-        interpolation_options = ("linear", "lower", "higher", "midpoint", "nearest")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Quantile Function"
+        interpolation_options = ("linear", "lower", "higher", "midpoint", "nearest")
         if not allow_relative_error:
             allow_relative_error = "nearest"
-
         if allow_relative_error not in interpolation_options:
             raise ValueError(
-                f"If specified for pandas, allow_relative_error must be one an allowed value for the 'interpolation'"
-                f"parameter of .quantile() (one of {interpolation_options})"
+                f"If specified for pandas, allow_relative_error must be one an allowed value for the 'interpolation'parameter of .quantile() (one of {interpolation_options})"
             )
         return column.quantile(quantiles, interpolation=allow_relative_error).tolist()
 
@@ -79,9 +83,18 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         (
             selectable,
             compute_domain_kwargs,
@@ -118,13 +131,6 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 sqlalchemy_engine=sqlalchemy_engine,
             )
         elif dialect.name.lower() == "snowflake":
-            # NOTE: 20201216 - JPC - snowflake has a representation/precision limitation
-            # in its percentile_disc implementation that causes an error when we do
-            # not round. It is unclear to me *how* the call to round affects the behavior --
-            # the binary representation should be identical before and after, and I do
-            # not observe a type difference. However, the issue is replicable in the
-            # snowflake console and directly observable in side-by-side comparisons with
-            # and without the call to round()
             quantiles = [round(x, 10) for x in quantiles]
             return _get_column_quantiles_generic_sqlalchemy(
                 column=column,
@@ -158,9 +164,18 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         (
             df,
             compute_domain_kwargs,
@@ -174,9 +189,9 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         if allow_relative_error is False:
             allow_relative_error = 0.0
         if (
-            not isinstance(allow_relative_error, float)
-            or allow_relative_error < 0
-            or allow_relative_error > 1
+            (not isinstance(allow_relative_error, float))
+            or (allow_relative_error < 0)
+            or (allow_relative_error > 1)
         ):
             raise ValueError(
                 "SparkDFDataset requires relative error to be False or to be a float between 0 and 1."
@@ -187,13 +202,20 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
 def _get_column_quantiles_mssql(
     column, quantiles: Iterable, selectable, sqlalchemy_engine
 ) -> list:
-    # mssql requires over(), so we add an empty over() clause
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     selects: List[WithinGroup] = [
         sa.func.percentile_disc(quantile).within_group(column.asc()).over()
         for quantile in quantiles
     ]
     quantiles_query: Select = sa.select(selects).select_from(selectable)
-
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
@@ -210,12 +232,19 @@ def _get_column_quantiles_mssql(
 def _get_column_quantiles_bigquery(
     column, quantiles: Iterable, selectable, sqlalchemy_engine
 ) -> list:
-    # BigQuery does not support "WITHIN", so we need a special case for it
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     selects: List[WithinGroup] = [
         sa.func.percentile_disc(column, quantile).over() for quantile in quantiles
     ]
     quantiles_query: Select = sa.select(selects).select_from(selectable)
-
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
@@ -232,8 +261,15 @@ def _get_column_quantiles_bigquery(
 def _get_column_quantiles_mysql(
     column, quantiles: Iterable, selectable, sqlalchemy_engine
 ) -> list:
-    # MySQL does not support "percentile_disc", so we implement it as a compound query.
-    # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     percent_rank_query: CTE = (
         sa.select(
             [
@@ -248,10 +284,8 @@ def _get_column_quantiles_mysql(
         .select_from(selectable)
         .cte("t")
     )
-
     selects: List[WithinGroup] = []
-    for idx, quantile in enumerate(quantiles):
-        # pymysql cannot handle conversion of numpy float64 to float; convert just in case
+    for (idx, quantile) in enumerate(quantiles):
         if np.issubdtype(type(quantile), np.float_):
             quantile = float(quantile)
         quantile_column: Label = (
@@ -260,8 +294,10 @@ def _get_column_quantiles_mysql(
                 order_by=sa.case(
                     [
                         (
-                            percent_rank_query.c.p
-                            <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
+                            (
+                                percent_rank_query.c.p
+                                <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15))
+                            ),
                             percent_rank_query.c.p,
                         )
                     ],
@@ -274,7 +310,6 @@ def _get_column_quantiles_mysql(
     quantiles_query: Select = (
         sa.select(selects).distinct().order_by(percent_rank_query.c.p.desc())
     )
-
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
@@ -291,13 +326,17 @@ def _get_column_quantiles_mysql(
 def _get_column_quantiles_sqlite(
     column, quantiles: Iterable, selectable, sqlalchemy_engine, table_row_count
 ) -> list:
-    """
-    The present implementation is somewhat inefficient, because it requires as many calls to
-    "sqlalchemy_engine.execute()" as the number of partitions in the "quantiles" parameter (albeit, typically,
-    only a few).  However, this is the only mechanism available for SQLite at the present time (11/17/2021), because
-    the analytical processing is not a very strongly represented capability of the SQLite database management system.
-    """
-    offsets: List[int] = [quantile * table_row_count - 1 for quantile in quantiles]
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    '\n    The present implementation is somewhat inefficient, because it requires as many calls to\n    "sqlalchemy_engine.execute()" as the number of partitions in the "quantiles" parameter (albeit, typically,\n    only a few).  However, this is the only mechanism available for SQLite at the present time (11/17/2021), because\n    the analytical processing is not a very strongly represented capability of the SQLite database management system.\n    '
+    offsets: List[int] = [((quantile * table_row_count) - 1) for quantile in quantiles]
     quantile_queries: List[Select] = [
         sa.select([column])
         .order_by(column.asc())
@@ -306,7 +345,6 @@ def _get_column_quantiles_sqlite(
         .select_from(selectable)
         for offset in offsets
     ]
-
     quantile_result: Row
     quantile_query: Select
     try:
@@ -329,10 +367,6 @@ def _get_column_quantiles_sqlite(
         raise pe
 
 
-# Support for computing the quantiles column for PostGreSQL and Redshift is included in the same method as that for
-# the generic sqlalchemy compatible DBMS engine, because users often use the postgresql driver to connect to Redshift
-# The key functional difference is that Redshift does not support the aggregate function
-# "percentile_disc", but does support the approximate percentile_disc or percentile_cont function version instead.```
 def _get_column_quantiles_generic_sqlalchemy(
     column,
     quantiles: Iterable,
@@ -341,20 +375,25 @@ def _get_column_quantiles_generic_sqlalchemy(
     selectable,
     sqlalchemy_engine,
 ) -> list:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     selects: List[WithinGroup] = [
         sa.func.percentile_disc(quantile).within_group(column.asc())
         for quantile in quantiles
     ]
     quantiles_query: Select = sa.select(selects).select_from(selectable)
-
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
     except ProgrammingError:
-        # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
-        # use approximate percentile_disc or percentile_cont instead.
         if attempt_allowing_relative_error(dialect):
-            # Redshift does not have a percentile_disc method, but does support an approximate version.
             sql_approx: str = get_approximate_percentile_disc_sql(
                 selects=selects, sql_engine_dialect=dialect
             )
@@ -376,11 +415,9 @@ def _get_column_quantiles_generic_sqlalchemy(
                     raise pe
             else:
                 raise ValueError(
-                    f'The SQL engine dialect "{str(dialect)}" does not support computing quantiles '
-                    "without approximation error; set allow_relative_error to True to allow approximate quantiles."
+                    f'The SQL engine dialect "{str(dialect)}" does not support computing quantiles without approximation error; set allow_relative_error to True to allow approximate quantiles.'
                 )
         else:
             raise ValueError(
-                f'The SQL engine dialect "{str(dialect)}" does not support computing quantiles with '
-                "approximation error; set allow_relative_error to False to disable approximate quantiles."
+                f'The SQL engine dialect "{str(dialect)}" does not support computing quantiles with approximation error; set allow_relative_error to False to disable approximate quantiles.'
             )

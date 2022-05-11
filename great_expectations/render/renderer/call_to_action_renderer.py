@@ -21,22 +21,18 @@ class CallToActionRenderer:
 
     @classmethod
     def render(cls, cta_object):
-        """
-        :param cta_object: dict
-            {
-                "header": # optional, can be a string or string template
-                "buttons": # list of CallToActionButtons
-            }
-        :return: dict
-            {
-                "header": # optional, can be a string or string template
-                "buttons": # list of CallToActionButtons
-            }
-        """
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        '\n        :param cta_object: dict\n            {\n                "header": # optional, can be a string or string template\n                "buttons": # list of CallToActionButtons\n            }\n        :return: dict\n            {\n                "header": # optional, can be a string or string template\n                "buttons": # list of CallToActionButtons\n            }\n        '
         if not cta_object.get("header"):
             cta_object["header"] = cls._document_defaults.get("header")
-
         cta_object["styling"] = cls._document_defaults.get("styling")
         cta_object["tooltip_icon"] = {
             "template": "$icon",
@@ -53,5 +49,4 @@ class CallToActionRenderer:
                 }
             },
         }
-
         return cta_object

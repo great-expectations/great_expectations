@@ -30,38 +30,89 @@ class CLIState:
         data_context: Optional[DataContext] = None,
         assume_yes: bool = False,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.v3_api = v3_api
         self.config_file_location = config_file_location
         self._data_context = data_context
         self.assume_yes = assume_yes
 
     def get_data_context_from_config_file(self) -> DataContext:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         directory: str = toolkit.parse_cli_config_file_location(
             config_file_location=self.config_file_location
         ).get("directory")
         context: DataContext = toolkit.load_data_context_with_error_handling(
-            directory=directory,
-            from_cli_upgrade_command=False,
+            directory=directory, from_cli_upgrade_command=False
         )
         return context
 
     @property
     def data_context(self) -> Optional[DataContext]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._data_context
 
     @data_context.setter
     def data_context(self, data_context: DataContext) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert isinstance(data_context, DataContext)
         self._data_context = data_context
 
     def __repr__(self) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return f"CLIState(v3_api={self.v3_api}, config_file_location={self.config_file_location})"
 
 
 class CLI(click.MultiCommand):
     def list_commands(self, ctx: click.Context) -> List[str]:
-        # note that if --help is called this method is invoked before any flags
-        # are parsed or context set.
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         commands = [
             "checkpoint",
             "datasource",
@@ -71,28 +122,44 @@ class CLI(click.MultiCommand):
             "store",
             "suite",
         ]
-
         return commands
 
     def get_command(self, ctx: click.Context, name: str) -> Optional[str]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         module_name = name.replace("-", "_")
         legacy_module = ""
         if not self.is_v3_api(ctx):
             legacy_module += ".v012"
-
         try:
             requested_module = f"great_expectations.cli{legacy_module}.{module_name}"
             module = importlib.import_module(requested_module)
             return getattr(module, module_name)
-
         except ModuleNotFoundError:
             cli_message(
-                f"<red>The command `{name}` does not exist.\nPlease use one of: {self.list_commands(None)}</red>"
+                f"""<red>The command `{name}` does not exist.
+Please use one of: {self.list_commands(None)}</red>"""
             )
             return None
 
     @staticmethod
     def print_ctx_debugging(ctx: click.Context) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         print(f"ctx.args: {ctx.args}")
         print(f"ctx.params: {ctx.params}")
         print(f"ctx.obj: {ctx.obj}")
@@ -104,14 +171,24 @@ class CLI(click.MultiCommand):
 
     @staticmethod
     def is_v3_api(ctx: click.Context) -> bool:
-        """Determine if v3 api is requested by searching context params."""
-        if ctx.params:
-            return ctx.params and "v3_api" in ctx.params.keys() and ctx.params["v3_api"]
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Determine if v3 api is requested by searching context params."
+        if ctx.params:
+            return (
+                ctx.params and ("v3_api" in ctx.params.keys()) and ctx.params["v3_api"]
+            )
         root_ctx_params = ctx.find_root().params
         return (
             root_ctx_params
-            and "v3_api" in root_ctx_params.keys()
+            and ("v3_api" in root_ctx_params.keys())
             and root_ctx_params["v3_api"]
         )
 
@@ -155,28 +232,26 @@ def cli(
     config_file_location: Optional[str],
     assume_yes: bool,
 ) -> None:
-    """
-    Welcome to the great_expectations CLI!
+    import inspect
 
-    Most commands follow this format: great_expectations <NOUN> <VERB>
-
-    The nouns are: checkpoint, datasource, docs, init, project, store, suite, validation-operator.
-    Most nouns accept the following verbs: new, list, edit
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Welcome to the great_expectations CLI!\n\n    Most commands follow this format: great_expectations <NOUN> <VERB>\n\n    The nouns are: checkpoint, datasource, docs, init, project, store, suite, validation-operator.\n    Most nouns accept the following verbs: new, list, edit\n    "
     logger = _set_up_logger()
     if verbose:
-        # Note we are explicitly not using a logger in all CLI output to have
-        # more control over console UI.
         logger.setLevel(logging.DEBUG)
     ctx.obj = CLIState(
         v3_api=v3_api, config_file_location=config_file_location, assume_yes=assume_yes
     )
-
     if v3_api:
         cli_message("Using v3 (Batch Request) API")
     else:
         cli_message("Using v2 (Batch Kwargs) API")
-
         ge_config_version: float = (
             ctx.obj.get_data_context_from_config_file().get_config().config_version
         )
@@ -187,6 +262,15 @@ def cli(
 
 
 def main() -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     cli()
 
 

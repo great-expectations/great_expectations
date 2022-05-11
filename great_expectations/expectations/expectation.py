@@ -79,39 +79,33 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-
 _TEST_DEFS_DIR = os.path.join(
-    os.path.dirname(__file__),
-    "..",
-    "..",
-    "tests",
-    "test_definitions",
+    os.path.dirname(__file__), "..", "..", "tests", "test_definitions"
 )
 
 
-# noinspection PyMethodParameters
 class MetaExpectation(ABCMeta):
-    """MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.
-
-    Any class inheriting from Expectation will be registered based on the value of the "expectation_type" class
-    attribute, or, if that is not set, by snake-casing the name of the class.
-    """
+    'MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.\n\n    Any class inheriting from Expectation will be registered based on the value of the "expectation_type" class\n    attribute, or, if that is not set, by snake-casing the name of the class.\n'
 
     def __new__(cls, clsname, bases, attrs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         newclass = super().__new__(cls, clsname, bases, attrs)
-        # noinspection PyUnresolvedReferences
         if not newclass.is_abstract():
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
-
-        # noinspection PyUnresolvedReferences
         newclass._register_renderer_functions()
         default_kwarg_values = {}
         for base in reversed(bases):
             default_kwargs = getattr(base, "default_kwarg_values", {})
             default_kwarg_values = nested_update(default_kwarg_values, default_kwargs)
-
         newclass.default_kwarg_values = nested_update(
             default_kwarg_values, attrs.get("default_kwarg_values", {})
         )
@@ -119,45 +113,11 @@ class MetaExpectation(ABCMeta):
 
 
 class Expectation(metaclass=MetaExpectation):
-    """Base class for all Expectations.
-
-    Expectation classes *must* have the following attributes set:
-        1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
-           expectation
-        2. `success_keys`: a tuple of the *keys* used to determine the success of
-           the expectation.
-
-    In some cases, subclasses of Expectation (such as TableExpectation) can
-    inherit these properties from their parent class.
-
-    They *may* optionally override `runtime_keys` and `default_kwarg_values`, and
-    may optionally set an explicit value for expectation_type.
-        1. runtime_keys lists the keys that can be used to control output but will
-           not affect the actual success value of the expectation (such as result_format).
-        2. default_kwarg_values is a dictionary that will be used to fill unspecified
-           kwargs from the Expectation Configuration.
-
-    Expectation classes *must* implement the following:
-        1. `_validate`
-        2. `get_validation_dependencies`
-
-    In some cases, subclasses of Expectation, such as ColumnMapExpectation will already
-    have correct implementations that may simply be inherited.
-
-    Additionally, they *may* provide implementations of:
-        1. `validate_configuration`, which should raise an error if the configuration
-           will not be usable for the Expectation
-        2. Data Docs rendering methods decorated with the @renderer decorator. See the
-    """
-
+    "Base class for all Expectations.\n\n    Expectation classes *must* have the following attributes set:\n        1. `domain_keys`: a tuple of the *keys* used to determine the domain of the\n           expectation\n        2. `success_keys`: a tuple of the *keys* used to determine the success of\n           the expectation.\n\n    In some cases, subclasses of Expectation (such as TableExpectation) can\n    inherit these properties from their parent class.\n\n    They *may* optionally override `runtime_keys` and `default_kwarg_values`, and\n    may optionally set an explicit value for expectation_type.\n        1. runtime_keys lists the keys that can be used to control output but will\n           not affect the actual success value of the expectation (such as result_format).\n        2. default_kwarg_values is a dictionary that will be used to fill unspecified\n           kwargs from the Expectation Configuration.\n\n    Expectation classes *must* implement the following:\n        1. `_validate`\n        2. `get_validation_dependencies`\n\n    In some cases, subclasses of Expectation, such as ColumnMapExpectation will already\n    have correct implementations that may simply be inherited.\n\n    Additionally, they *may* provide implementations of:\n        1. `validate_configuration`, which should raise an error if the configuration\n           will not be usable for the Expectation\n        2. Data Docs rendering methods decorated with the @renderer decorator. See the\n"
     version = ge_version
     domain_keys = tuple()
     success_keys = tuple()
-    runtime_keys = (
-        "include_config",
-        "catch_exceptions",
-        "result_format",
-    )
+    runtime_keys = ("include_config", "catch_exceptions", "result_format")
     default_kwarg_values = {
         "include_config": True,
         "catch_exceptions": False,
@@ -168,18 +128,44 @@ class Expectation(metaclass=MetaExpectation):
     def __init__(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if configuration is not None:
             self.validate_configuration(configuration)
         self._configuration = configuration
 
     @classmethod
     def is_abstract(cls):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return isabstract(cls)
 
     @classmethod
     def _register_renderer_functions(cls) -> None:
-        expectation_type = camel_to_snake(cls.__name__)
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        expectation_type = camel_to_snake(cls.__name__)
         for candidate_renderer_fn_name in dir(cls):
             attr_obj = getattr(cls, candidate_renderer_fn_name)
             if not hasattr(attr_obj, "_renderer_type"):
@@ -195,7 +181,16 @@ class Expectation(metaclass=MetaExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-    ) -> Union[ExpectationValidationResult, dict]:
+    ) -> Union[(ExpectationValidationResult, dict)]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     @classmethod
@@ -207,21 +202,24 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        """
-        Template function that contains the logic that is shared by atomic.prescriptive.summary (GE Cloud) and
-        renderer.prescriptive (OSS GE)
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Template function that contains the logic that is shared by atomic.prescriptive.summary (GE Cloud) and\n        renderer.prescriptive (OSS GE)\n        "
         if runtime_configuration is None:
             runtime_configuration = {}
-
         styling = runtime_configuration.get("styling")
-
         template_str = "$expectation_type(**$kwargs)"
         params = {
             "expectation_type": configuration.expectation_type,
             "kwargs": configuration.kwargs,
         }
-
         params_with_json_schema = {
             "expectation_type": {
                 "schema": {"type": "string"},
@@ -242,9 +240,16 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Rendering function that is utilized by GE Cloud Front-end\n        "
         (
             template_str,
             params_with_json_schema,
@@ -276,6 +281,15 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return [
             RenderedStringTemplateContent(
                 **{
@@ -290,7 +304,7 @@ class Expectation(metaclass=MetaExpectation):
                         "styling": {
                             "params": {
                                 "expectation_type": {
-                                    "classes": ["badge", "badge-warning"],
+                                    "classes": ["badge", "badge-warning"]
                                 }
                             }
                         },
@@ -302,27 +316,16 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     @renderer(renderer_type="renderer.diagnostic.meta_properties")
     def _diagnostic_meta_properties_renderer(cls, result=None, **kwargs):
-        """
-            Render function used to add custom meta to Data Docs
-            It gets a column set in the `properties_to_render` dictionary within `meta` and adds columns in Data Docs with the values that were set.
-            example:
-            meta = {
-                "properties_to_render": {
-                "Custom Column Header": "custom.value"
-            },
-                "custom": {
-                "value": "1"
-                }
-            }
-        data docs:
-        ----------------------------------------------------------------
-        | status|  Expectation                          | Observed value | Custom Column Header |
-        ----------------------------------------------------------------
-        |       | must be exactly 4 columns             |         4       |          1            |
+        import inspect
 
-        Here the custom column will be added in data docs.
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        '\n            Render function used to add custom meta to Data Docs\n            It gets a column set in the `properties_to_render` dictionary within `meta` and adds columns in Data Docs with the values that were set.\n            example:\n            meta = {\n                "properties_to_render": {\n                "Custom Column Header": "custom.value"\n            },\n                "custom": {\n                "value": "1"\n                }\n            }\n        data docs:\n        ----------------------------------------------------------------\n        | status|  Expectation                          | Observed value | Custom Column Header |\n        ----------------------------------------------------------------\n        |       | must be exactly 4 columns             |         4       |          1            |\n\n        Here the custom column will be added in data docs.\n        '
         if result is None:
             return []
         custom_property_values = []
@@ -334,18 +337,15 @@ class Expectation(metaclass=MetaExpectation):
                 meta_property = meta_properties_to_render[key]
                 if meta_property is not None:
                     try:
-                        # Allow complex structure with . usage
                         obj = result.expectation_config.meta["attributes"]
                         keys = meta_property.split(".")
                         for i in range(0, len(keys)):
-                            # Allow for keys with a . in the string like {"item.key": "1"}
                             remaining_key = "".join(keys[i:])
                             if remaining_key in obj:
                                 obj = obj[remaining_key]
                                 break
                             else:
                                 obj = obj[keys[i]]
-
                         custom_property_values.append([obj])
                     except KeyError:
                         custom_property_values.append(["N/A"])
@@ -363,6 +363,15 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert result, "Must provide a result object."
         if result.exception_info["raised_exception"]:
             return RenderedStringTemplateContent(
@@ -386,7 +395,6 @@ class Expectation(metaclass=MetaExpectation):
                     },
                 }
             )
-
         if result.success:
             return RenderedStringTemplateContent(
                 **{
@@ -443,15 +451,22 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert result, "Must provide a result object."
         success = result.success
         result_dict = result.result
-
         if result.exception_info["raised_exception"]:
             exception_message_template_str = (
                 "\n\n$expectation_type raised an exception:\n$exception_message"
             )
-
             exception_message = RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
@@ -476,7 +491,6 @@ class Expectation(metaclass=MetaExpectation):
                     },
                 }
             )
-
             exception_traceback_collapse = CollapseContent(
                 **{
                     "collapse_toggle_link": "Show exception traceback...",
@@ -495,10 +509,8 @@ class Expectation(metaclass=MetaExpectation):
                     ],
                 }
             )
-
             return [exception_message, exception_traceback_collapse]
-
-        if success or not result_dict.get("unexpected_count"):
+        if success or (not result_dict.get("unexpected_count")):
             return []
         else:
             unexpected_count = num_to_str(
@@ -510,12 +522,7 @@ class Expectation(metaclass=MetaExpectation):
             element_count = num_to_str(
                 result_dict["element_count"], use_locale=True, precision=20
             )
-
-            template_str = (
-                "\n\n$unexpected_count unexpected values found. "
-                "$unexpected_percent of $element_count total rows."
-            )
-
+            template_str = "\n\n$unexpected_count unexpected values found. $unexpected_percent of $element_count total rows."
             return [
                 RenderedStringTemplateContent(
                     **{
@@ -544,40 +551,38 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         try:
             result_dict = result.result
         except KeyError:
             return None
-
         if result_dict is None:
             return None
-
-        if not result_dict.get("partial_unexpected_list") and not result_dict.get(
-            "partial_unexpected_counts"
+        if (not result_dict.get("partial_unexpected_list")) and (
+            not result_dict.get("partial_unexpected_counts")
         ):
             return None
-
         table_rows = []
-
         if result_dict.get("partial_unexpected_counts"):
-            # We will check to see whether we have *all* of the unexpected values
-            # accounted for in our count, and include counts if we do. If we do not,
-            # we will use this as simply a better (non-repeating) source of
-            # "sampled" unexpected values
             total_count = 0
             for unexpected_count_dict in result_dict.get("partial_unexpected_counts"):
                 value = unexpected_count_dict.get("value")
                 count = unexpected_count_dict.get("count")
                 total_count += count
-                if value is not None and value != "":
+                if (value is not None) and (value != ""):
                     table_rows.append([value, count])
                 elif value == "":
                     table_rows.append(["EMPTY", count])
                 else:
                     table_rows.append(["null", count])
-
-            # Check to see if we have *all* of the unexpected values accounted for. If so,
-            # we show counts. If not, we only show "sampled" unexpected values.
             if total_count == result_dict.get("unexpected_count"):
                 header_row = ["Unexpected Value", "Count"]
             else:
@@ -596,7 +601,6 @@ class Expectation(metaclass=MetaExpectation):
                 if string_unexpected_value not in sampled_values_set:
                     table_rows.append([unexpected_value])
                     sampled_values_set.add(string_unexpected_value)
-
         unexpected_table_content_block = RenderedTableContent(
             **{
                 "content_block_type": "table",
@@ -607,19 +611,26 @@ class Expectation(metaclass=MetaExpectation):
                 },
             }
         )
-
         return unexpected_table_content_block
 
     @classmethod
     def _get_observed_value_from_evr(self, result: ExpectationValidationResult) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         result_dict = result.result
         if result_dict is None:
             return "--"
-
         if result_dict.get("observed_value") is not None:
             observed_value = result_dict.get("observed_value")
-            if isinstance(observed_value, (int, float)) and not isinstance(
-                observed_value, bool
+            if isinstance(observed_value, (int, float)) and (
+                not isinstance(observed_value, bool)
             ):
                 return num_to_str(observed_value, precision=10, use_locale=True)
             return str(observed_value)
@@ -641,9 +652,16 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        """
-        Rendering function that is utilized by GE Cloud Front-end
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Rendering function that is utilized by GE Cloud Front-end\n        "
         observed_value = cls._get_observed_value_from_evr(result=result)
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -669,11 +687,29 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls._get_observed_value_from_evr(result=result)
 
     @classmethod
     def get_allowed_config_keys(cls):
-        return cls.domain_keys + cls.success_keys + cls.runtime_keys
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        return (cls.domain_keys + cls.success_keys) + cls.runtime_keys
 
     def metrics_validate(
         self,
@@ -682,9 +718,17 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> ExpectationValidationResult:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if configuration is None:
             configuration = self.configuration
-
         validation_dependencies: dict = self.get_validation_dependencies(
             configuration,
             execution_engine=execution_engine,
@@ -694,13 +738,11 @@ class Expectation(metaclass=MetaExpectation):
             "result_format"
         ]
         requested_metrics = validation_dependencies["metrics"]
-
         provided_metrics = {}
-        for name, metric_edge_key in requested_metrics.items():
+        for (name, metric_edge_key) in requested_metrics.items():
             provided_metrics[name] = metrics[metric_edge_key.id]
-
         expectation_validation_result: Union[
-            ExpectationValidationResult, dict
+            (ExpectationValidationResult, dict)
         ] = self._validate(
             configuration=configuration,
             metrics=provided_metrics,
@@ -714,8 +756,16 @@ class Expectation(metaclass=MetaExpectation):
 
     @staticmethod
     def _build_evr(raw_response, configuration) -> ExpectationValidationResult:
-        """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
-        fails to return an EVR but returns the necessary components in a dictionary."""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor\n        fails to return an EVR but returns the necessary components in a dictionary."
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):
                 evr = ExpectationValidationResult(**raw_response)
@@ -733,30 +783,41 @@ class Expectation(metaclass=MetaExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> dict:
-        """Returns the result format and metrics required to validate this Expectation using the provided result format."""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Returns the result format and metrics required to validate this Expectation using the provided result format."
         runtime_configuration = self.get_runtime_kwargs(
-            configuration=configuration,
-            runtime_configuration=runtime_configuration,
+            configuration=configuration, runtime_configuration=runtime_configuration
         )
         result_format: dict = runtime_configuration["result_format"]
         result_format = parse_result_format(result_format=result_format)
-        return {
-            "result_format": result_format,
-            "metrics": {},
-        }
+        return {"result_format": result_format, "metrics": {}}
 
     def get_domain_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not configuration:
             configuration = self.configuration
-
         domain_kwargs = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
             for key in self.domain_keys
         }
-        # Process evaluation parameter dependencies
-
         missing_kwargs = set(self.domain_keys) - set(domain_kwargs.keys())
         if missing_kwargs:
             raise InvalidExpectationKwargsError(
@@ -767,9 +828,17 @@ class Expectation(metaclass=MetaExpectation):
     def get_success_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not configuration:
             configuration = self.configuration
-
         domain_kwargs = self.get_domain_kwargs(configuration)
         success_kwargs = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
@@ -783,25 +852,29 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
     ) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not configuration:
             configuration = self.configuration
-
         configuration = deepcopy(configuration)
-
         if runtime_configuration:
             configuration.kwargs.update(runtime_configuration)
-
         success_kwargs = self.get_success_kwargs(configuration)
         runtime_kwargs = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
             for key in self.runtime_keys
         }
         runtime_kwargs.update(success_kwargs)
-
         runtime_kwargs["result_format"] = parse_result_format(
             runtime_kwargs["result_format"]
         )
-
         return runtime_kwargs
 
     def get_result_format(
@@ -809,8 +882,17 @@ class Expectation(metaclass=MetaExpectation):
         configuration: ExpectationConfiguration,
         runtime_configuration: dict = None,
     ) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         default_result_format: Optional[
-            Union[bool, str]
+            Union[(bool, str)]
         ] = self.default_kwarg_values.get("result_format")
         configuration_result_format: dict = configuration.kwargs.get(
             "result_format", default_result_format
@@ -818,8 +900,7 @@ class Expectation(metaclass=MetaExpectation):
         result_format: dict
         if runtime_configuration:
             result_format = runtime_configuration.get(
-                "result_format",
-                configuration_result_format,
+                "result_format", configuration_result_format
             )
         else:
             result_format = configuration_result_format
@@ -828,6 +909,15 @@ class Expectation(metaclass=MetaExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if configuration is None:
             configuration = self.configuration
         try:
@@ -846,21 +936,36 @@ class Expectation(metaclass=MetaExpectation):
         data_context=None,
         runtime_configuration=None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if configuration is None:
             configuration = deepcopy(self.configuration)
-
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )
         evr = validator.graph_validate(
-            configurations=[configuration],
-            runtime_configuration=runtime_configuration,
+            configurations=[configuration], runtime_configuration=runtime_configuration
         )[0]
-
         return evr
 
     @property
     def configuration(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self._configuration is None:
             raise InvalidExpectationConfigurationError(
                 "cannot access configuration: expectation has not yet been configured"
@@ -869,36 +974,36 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     def build_configuration(cls, *args, **kwargs):
-        # Combine all arguments into a single new "all_args" dictionary to name positional parameters
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         all_args = dict(zip(cls.validation_kwargs, args))
         all_args.update(kwargs)
-
-        # Unpack display parameters; remove them from all_args if appropriate
         if "include_config" in kwargs:
             include_config = kwargs["include_config"]
             del all_args["include_config"]
         else:
             include_config = cls.default_expectation_args["include_config"]
-
         if "catch_exceptions" in kwargs:
             catch_exceptions = kwargs["catch_exceptions"]
             del all_args["catch_exceptions"]
         else:
             catch_exceptions = cls.default_expectation_args["catch_exceptions"]
-
         if "result_format" in kwargs:
             result_format = kwargs["result_format"]
         else:
             result_format = cls.default_expectation_args["result_format"]
-
-        # Extract the meta object for use as a top-level expectation_config holder
         if "meta" in kwargs:
             meta = kwargs["meta"]
             del all_args["meta"]
         else:
             meta = None
-
-        # Construct the expectation_config object
         return ExpectationConfiguration(
             expectation_type=cls.expectation_type,
             kwargs=convert_to_json_serializable(deepcopy(all_args)),
@@ -906,32 +1011,19 @@ class Expectation(metaclass=MetaExpectation):
         )
 
     def run_diagnostics(
-        self,
-        raise_exceptions_for_backends: bool = False,
+        self, raise_exceptions_for_backends: bool = False
     ) -> ExpectationDiagnostics:
-        """Produce a diagnostic report about this Expectation.
+        import inspect
 
-        The current uses for this method's output are
-        using the JSON structure to populate the Public Expectation Gallery
-        and enabling a fast dev loop for developing new Expectations where the
-        contributors can quickly check the completeness of their expectations.
-
-        The contents of the report are captured in the ExpectationDiagnostics dataclass.
-        You can see some examples in test_expectation_diagnostics.py
-
-        Some components (e.g. description, examples, library_metadata) of the diagnostic report can be introspected directly from the Exepctation class.
-        Other components (e.g. metrics, renderers, executions) are at least partly dependent on instantiating, validating, and/or executing the Expectation class.
-        For these kinds of components, at least one test case with include_in_gallery=True must be present in the examples to
-        produce the metrics, renderers and execution engines parts of the report. This is due to
-        a get_validation_dependencies requiring expectation_config as an argument.
-
-        If errors are encountered in the process of running the diagnostics, they are assumed to be due to
-        incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
-        that do not exist). These errors are added under "errors" key in the report.
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Produce a diagnostic report about this Expectation.\n\n        The current uses for this method's output are\n        using the JSON structure to populate the Public Expectation Gallery\n        and enabling a fast dev loop for developing new Expectations where the\n        contributors can quickly check the completeness of their expectations.\n\n        The contents of the report are captured in the ExpectationDiagnostics dataclass.\n        You can see some examples in test_expectation_diagnostics.py\n\n        Some components (e.g. description, examples, library_metadata) of the diagnostic report can be introspected directly from the Exepctation class.\n        Other components (e.g. metrics, renderers, executions) are at least partly dependent on instantiating, validating, and/or executing the Expectation class.\n        For these kinds of components, at least one test case with include_in_gallery=True must be present in the examples to\n        produce the metrics, renderers and execution engines parts of the report. This is due to\n        a get_validation_dependencies requiring expectation_config as an argument.\n\n        If errors are encountered in the process of running the diagnostics, they are assumed to be due to\n        incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics\n        that do not exist). These errors are added under \"errors\" key in the report.\n        "
         errors: List[ExpectationErrorDiagnostics] = []
-
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
         )
@@ -947,38 +1039,30 @@ class Expectation(metaclass=MetaExpectation):
             if _tests_to_include:
                 example.tests = _tests_to_include
                 gallery_examples.append(example)
-
         description_diagnostics: ExpectationDescriptionDiagnostics = (
             self._get_description_diagnostics()
         )
-
         _expectation_config: ExpectationConfiguration = (
             self._get_expectation_configuration_from_examples(examples)
         )
         metric_diagnostics_list: List[
             ExpectationMetricDiagnostics
-        ] = self._get_metric_diagnostics_list(
-            expectation_config=_expectation_config,
-        )
-
+        ] = self._get_metric_diagnostics_list(expectation_config=_expectation_config)
         introspected_execution_engines: ExpectationExecutionEngineDiagnostics = (
             self._get_execution_engine_diagnostics(
                 metric_diagnostics_list=metric_diagnostics_list,
                 registered_metrics=_registered_metrics,
             )
         )
-
         test_results: List[ExpectationTestDiagnostics] = self._get_test_results(
             expectation_type=description_diagnostics.snake_name,
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
-
         backend_test_result_counts: List[
             ExpectationBackendTestResultCounts
         ] = ExpectationDiagnostics._get_backends_from_test_results(test_results)
-
         renderers: List[
             ExpectationRendererDiagnostics
         ] = self._get_renderer_diagnostics(
@@ -986,7 +1070,6 @@ class Expectation(metaclass=MetaExpectation):
             test_diagnostics=test_results,
             registered_renderers=_registered_renderers,
         )
-
         maturity_checklist: ExpectationDiagnosticMaturityMessages = (
             self._get_maturity_checklist(
                 library_metadata=library_metadata,
@@ -997,8 +1080,6 @@ class Expectation(metaclass=MetaExpectation):
                 execution_engines=introspected_execution_engines,
             )
         )
-
-        # Set final maturity level based on status of all checks
         all_experimental = all(
             [check.passed for check in maturity_checklist.experimental]
         )
@@ -1010,14 +1091,11 @@ class Expectation(metaclass=MetaExpectation):
             library_metadata.maturity = "BETA"
         else:
             library_metadata.maturity = "EXPERIMENTAL"
-
-        # Set the errors found when running tests
         errors = [
             test_result.error_diagnostics
             for test_result in test_results
             if test_result.error_diagnostics
         ]
-
         return ExpectationDiagnostics(
             library_metadata=library_metadata,
             examples=examples,
@@ -1037,29 +1115,45 @@ class Expectation(metaclass=MetaExpectation):
         diagnostics: Optional[ExpectationDiagnostics] = None,
         show_failed_tests: bool = False,
     ) -> str:
-        """Runs self.run_diagnostics and generates a diagnostic checklist.
+        import inspect
 
-        This output from this method is a thin wrapper for ExpectationDiagnostics.generate_checklist()
-        This method is experimental.
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Runs self.run_diagnostics and generates a diagnostic checklist.\n\n        This output from this method is a thin wrapper for ExpectationDiagnostics.generate_checklist()\n        This method is experimental.\n        "
         if diagnostics is None:
             diagnostics = self.run_diagnostics()
-
         if show_failed_tests:
             for test in diagnostics.tests:
                 if test.test_passed is False:
-                    print(f"=== {test.test_title} ({test.backend}) ===\n")
+                    print(
+                        f"""=== {test.test_title} ({test.backend}) ===
+"""
+                    )
                     print(test.stack_trace)
-                    print(f"{80 * '='}\n")
-
+                    print(
+                        f"""{(80 * '=')}
+"""
+                    )
         checklist: str = diagnostics.generate_checklist()
         print(checklist)
-
         return checklist
 
     def _get_examples_from_json(self):
-        """Only meant to be called by self._get_examples"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Only meant to be called by self._get_examples"
         results = []
         found = glob.glob(
             os.path.join(_TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"),
@@ -1074,45 +1168,36 @@ class Expectation(metaclass=MetaExpectation):
     def _get_examples(
         self, return_only_gallery_examples: bool = True
     ) -> List[ExpectationTestDataCases]:
-        """
-        Get a list of examples from the object's `examples` member variable.
+        import inspect
 
-        For core expectations, the examples are found in tests/test_definitions/
-
-        :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
-        :return: list of examples or [], if no examples exist
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Get a list of examples from the object's `examples` member variable.\n\n        For core expectations, the examples are found in tests/test_definitions/\n\n        :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true\n        :return: list of examples or [], if no examples exist\n        "
         try:
-            # Currently, only community contrib expectations have an examples attribute
             all_examples = self.examples
         except AttributeError:
             all_examples = self._get_examples_from_json()
             if all_examples == []:
                 return []
-
         included_examples = []
         for example in all_examples:
-
             included_test_cases = []
-            # As of commit 7766bb5caa4e0 on 1/28/22, only_for does not need to be applied to individual tests
-            # See:
-            #   - https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/column_map_expectations/expect_column_values_to_be_unique.json#L174
-            #   - https://github.com/great-expectations/great_expectations/pull/4073
             top_level_only_for = example.get("only_for")
             for test in example["tests"]:
-                if (
-                    test.get("include_in_gallery") == True
-                    or return_only_gallery_examples == False
+                if (test.get("include_in_gallery") == True) or (
+                    return_only_gallery_examples == False
                 ):
                     copied_test = deepcopy(test)
-                    if top_level_only_for and "only_for" not in copied_test:
+                    if top_level_only_for and ("only_for" not in copied_test):
                         copied_test["only_for"] = top_level_only_for
                     included_test_cases.append(
                         ExpectationLegacyTestCaseAdapter(**copied_test)
                     )
-
-            # If at least one ExpectationTestCase from the ExpectationTestDataCases was selected,
-            # then keep a copy of the ExpectationTestDataCases including data and the selected ExpectationTestCases.
             if len(included_test_cases) > 0:
                 copied_example = deepcopy(example)
                 copied_example["tests"] = included_test_cases
@@ -1123,28 +1208,41 @@ class Expectation(metaclass=MetaExpectation):
                         TestBackend(**tb) for tb in copied_example["test_backends"]
                     ]
                 included_examples.append(ExpectationTestDataCases(**copied_example))
-
         return included_examples
 
-    def _get_docstring_and_short_description(self) -> Tuple[str, str]:
-        """Conveninence method to get the Exepctation's docstring and first line"""
+    def _get_docstring_and_short_description(self) -> Tuple[(str, str)]:
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Conveninence method to get the Exepctation's docstring and first line"
         if self.__doc__ is not None:
             docstring = self.__doc__
             short_description = next(line for line in self.__doc__.split("\n") if line)
         else:
             docstring = ""
             short_description = ""
-
-        return docstring, short_description
+        return (docstring, short_description)
 
     def _get_description_diagnostics(self) -> ExpectationDescriptionDiagnostics:
-        """Introspect the Expectation and create its ExpectationDescriptionDiagnostics object"""
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Introspect the Expectation and create its ExpectationDescriptionDiagnostics object"
         camel_name = self.__class__.__name__
         snake_name = camel_to_snake(self.__class__.__name__)
-        docstring, short_description = self._get_docstring_and_short_description()
-
+        (docstring, short_description) = self._get_docstring_and_short_description()
         return ExpectationDescriptionDiagnostics(
             **{
                 "camel_name": camel_name,
@@ -1155,10 +1253,18 @@ class Expectation(metaclass=MetaExpectation):
         )
 
     def _get_expectation_configuration_from_examples(
-        self,
-        examples: List[ExpectationTestDataCases],
+        self, examples: List[ExpectationTestDataCases]
     ) -> ExpectationConfiguration:
-        """Return an ExpectationConfiguration instance using test input expected to succeed"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Return an ExpectationConfiguration instance using test input expected to succeed"
         if examples:
             for example in examples:
                 tests = example.tests
@@ -1173,24 +1279,36 @@ class Expectation(metaclass=MetaExpectation):
     @staticmethod
     def _choose_example(
         examples: List[ExpectationTestDataCases],
-    ) -> Tuple[TestData, ExpectationTestCase]:
-        """Choose examples to use for run_diagnostics.
+    ) -> Tuple[(TestData, ExpectationTestCase)]:
+        import inspect
 
-        This implementation of this method is very naive---it just takes the first one.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Choose examples to use for run_diagnostics.\n\n        This implementation of this method is very naive---it just takes the first one.\n        "
         example = examples[0]
-
         example_test_data = example["data"]
         example_test_case = example["tests"][0]
-
-        return example_test_data, example_test_case
+        return (example_test_data, example_test_case)
 
     @staticmethod
     def _get_registered_renderers(
-        expectation_type: str,
-        registered_renderers: dict,
+        expectation_type: str, registered_renderers: dict
     ) -> List[str]:
-        """Get a list of supported renderers for this Expectation, in sorted order."""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Get a list of supported renderers for this Expectation, in sorted order."
         supported_renderers = list(registered_renderers[expectation_type].keys())
         supported_renderers.sort()
         return supported_renderers
@@ -1203,18 +1321,25 @@ class Expectation(metaclass=MetaExpectation):
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
         raise_exceptions_for_backends: bool = False,
     ) -> List[ExpectationTestDiagnostics]:
-        """Generate test results. This is an internal method for run_diagnostics."""
-        test_results = []
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Generate test results. This is an internal method for run_diagnostics."
+        test_results = []
         exp_tests = generate_expectation_tests(
             expectation_type=expectation_type,
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
-
         for exp_test in exp_tests:
-            validation_result, error_message, stack_trace = evaluate_json_test_cfe(
+            (validation_result, error_message, stack_trace) = evaluate_json_test_cfe(
                 validator=exp_test["validator_with_data"],
                 expectation_type=exp_test["expectation_type"],
                 test=exp_test["test"],
@@ -1231,14 +1356,10 @@ class Expectation(metaclass=MetaExpectation):
                     test_backend=exp_test["backend"],
                 )
                 test_passed = False
-
             if validation_result:
-                # The ExpectationTestDiagnostics instance will error when calling it's to_dict()
-                # method (AttributeError: 'ExpectationConfiguration' object has no attribute 'raw_kwargs')
                 validation_result.expectation_config.raw_kwargs = (
                     validation_result.expectation_config._raw_kwargs
                 )
-
             test_results.append(
                 ExpectationTestDiagnostics(
                     test_title=exp_test["test"]["title"],
@@ -1249,56 +1370,50 @@ class Expectation(metaclass=MetaExpectation):
                     error_diagnostics=error_diagnostics,
                 )
             )
-
         return test_results
 
     def _get_rendered_result_as_string(self, rendered_result) -> str:
-        """Convenience method to get rendered results as strings."""
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Convenience method to get rendered results as strings."
         if type(rendered_result) == str:
             return rendered_result
-
         elif type(rendered_result) == list:
             sub_result_list = []
             for sub_result in rendered_result:
                 res = self._get_rendered_result_as_string(sub_result)
                 if res is not None:
                     sub_result_list.append(res)
-
             return "\n".join(sub_result_list)
-
         elif isinstance(rendered_result, RenderedStringTemplateContent):
             return rendered_result.__str__()
-
         elif isinstance(rendered_result, CollapseContent):
             return rendered_result.__str__()
-
         elif isinstance(rendered_result, RenderedAtomicContent):
             return f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
-
         elif isinstance(rendered_result, RenderedContentBlockContainer):
             return "(RenderedContentBlockContainer) " + repr(
                 rendered_result.to_json_dict()
             )
-
         elif isinstance(rendered_result, RenderedTableContent):
             return f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
-
         elif isinstance(rendered_result, RenderedGraphContent):
             return f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
-
         elif isinstance(rendered_result, ValueListContent):
             return f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
-
         elif isinstance(rendered_result, dict):
             return f"(dict) {repr(rendered_result)}"
-
         elif isinstance(rendered_result, int):
             return repr(rendered_result)
-
         elif rendered_result == None:
             return ""
-
         else:
             raise TypeError(
                 f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."
@@ -1319,22 +1434,26 @@ class Expectation(metaclass=MetaExpectation):
             "renderer.question",
         ],
     ) -> List[ExpectationRendererDiagnostics]:
-        """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExpectationTestDiagnostics."""
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Generate Renderer diagnostics for this Expectation, based primarily on a list of ExpectationTestDiagnostics."
         supported_renderers = self._get_registered_renderers(
-            expectation_type=expectation_type,
-            registered_renderers=registered_renderers,
+            expectation_type=expectation_type, registered_renderers=registered_renderers
         )
-
         renderer_diagnostic_list = []
         for renderer_name in set(standard_renderers).union(set(supported_renderers)):
             samples = []
             if renderer_name in supported_renderers:
-                _, renderer = registered_renderers[expectation_type][renderer_name]
-
+                (_, renderer) = registered_renderers[expectation_type][renderer_name]
                 for test_diagnostic in test_diagnostics:
                     test_title = test_diagnostic["test_title"]
-
                     try:
                         rendered_result = renderer(
                             configuration=test_diagnostic["validation_result"][
@@ -1345,7 +1464,6 @@ class Expectation(metaclass=MetaExpectation):
                         rendered_result_str = self._get_rendered_result_as_string(
                             rendered_result
                         )
-
                     except Exception as e:
                         new_sample = RendererTestDiagnostics(
                             test_title=test_title,
@@ -1354,28 +1472,22 @@ class Expectation(metaclass=MetaExpectation):
                             error_message=str(e),
                             stack_trace=traceback.format_exc(),
                         )
-
                     else:
                         new_sample = RendererTestDiagnostics(
                             test_title=test_title,
                             renderered_str=rendered_result_str,
                             rendered_successfully=True,
                         )
-
                     finally:
                         samples.append(new_sample)
-
             new_renderer_diagnostics = ExpectationRendererDiagnostics(
                 name=renderer_name,
-                is_supported=renderer_name in supported_renderers,
-                is_standard=renderer_name in standard_renderers,
+                is_supported=(renderer_name in supported_renderers),
+                is_standard=(renderer_name in standard_renderers),
                 samples=samples,
             )
             renderer_diagnostic_list.append(new_renderer_diagnostics)
-
-        # Sort to enforce consistency for testing
-        renderer_diagnostic_list.sort(key=lambda x: x.name)
-
+        renderer_diagnostic_list.sort(key=(lambda x: x.name))
         return renderer_diagnostic_list
 
     @staticmethod
@@ -1388,11 +1500,16 @@ class Expectation(metaclass=MetaExpectation):
             "SparkDFExecutionEngine",
         ],
     ) -> ExpectationExecutionEngineDiagnostics:
-        """Check to see which execution_engines are fully supported for this Expectation.
+        import inspect
 
-        In order for a given execution engine to count, *every* metric must have support on that execution engines.
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Check to see which execution_engines are fully supported for this Expectation.\n\n        In order for a given execution engine to count, *every* metric must have support on that execution engines.\n        "
         execution_engines = {}
         for provider in execution_engine_names:
             all_true = True
@@ -1405,44 +1522,48 @@ class Expectation(metaclass=MetaExpectation):
                     if not has_provider:
                         all_true = False
                 except KeyError:
-                    # https://github.com/great-expectations/great_expectations/blob/abd8f68a162eaf9c33839d2c412d8ba84f5d725b/great_expectations/expectations/core/expect_table_row_count_to_equal_other_table.py#L174-L181
-                    # expect_table_row_count_to_equal_other_table does tricky things and replaces
-                    # registered metric "table.row_count" with "table.row_count.self" and "table.row_count.other"
                     if "table.row_count" in metric_diagnostics.name:
                         continue
-
             execution_engines[provider] = all_true
-
         return ExpectationExecutionEngineDiagnostics(**execution_engines)
 
     def _get_metric_diagnostics_list(
-        self,
-        expectation_config: ExpectationConfiguration,
+        self, expectation_config: ExpectationConfiguration
     ) -> List[ExpectationMetricDiagnostics]:
-        """Check to see which Metrics are upstream dependencies for this Expectation."""
+        import inspect
 
-        # NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
-        # There's probably some part of get_validation_dependencies that can be factored out to remove the dependency.
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Check to see which Metrics are upstream dependencies for this Expectation."
         if not expectation_config:
             return []
         validation_dependencies = self.get_validation_dependencies(
             configuration=expectation_config
         )
-
         metric_diagnostics_list = []
         for metric in validation_dependencies["metrics"].keys():
             new_metric_diagnostics = ExpectationMetricDiagnostics(
-                name=metric,
-                has_question_renderer=False,
+                name=metric, has_question_renderer=False
             )
             metric_diagnostics_list.append(new_metric_diagnostics)
-
         return metric_diagnostics_list
 
     def _get_augmented_library_metadata(self):
-        """Introspect the Expectation's library_metadata object (if it exists), and augment it with additional information."""
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Introspect the Expectation's library_metadata object (if it exists), and augment it with additional information."
         augmented_library_metadata = {
             "maturity": "CONCEPT_ONLY",
             "tags": [],
@@ -1462,13 +1583,11 @@ class Expectation(metaclass=MetaExpectation):
             "tags",
         }
         problems = []
-
         if hasattr(self, "library_metadata"):
             augmented_library_metadata.update(self.library_metadata)
             keys = set(self.library_metadata.keys())
             missing_required_keys = required_keys - keys
             forbidden_keys = keys - allowed_keys
-
             if missing_required_keys:
                 problems.append(
                     f"Missing required key(s): {sorted(missing_required_keys)}"
@@ -1481,7 +1600,6 @@ class Expectation(metaclass=MetaExpectation):
                 augmented_library_metadata["library_metadata_passed_checks"] = True
         else:
             problems.append("No library_metadata attribute found")
-
         augmented_library_metadata["problems"] = problems
         return AugmentedLibraryMetadata.from_legacy_dict(augmented_library_metadata)
 
@@ -1494,11 +1612,19 @@ class Expectation(metaclass=MetaExpectation):
         backend_test_result_counts: List[ExpectationBackendTestResultCounts],
         execution_engines: ExpectationExecutionEngineDiagnostics,
     ) -> ExpectationDiagnosticMaturityMessages:
-        """Generate maturity checklist messages"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Generate maturity checklist messages"
         experimental_checks = []
         beta_checks = []
         production_checks = []
-
         experimental_checks.append(
             ExpectationDiagnostics._check_library_metadata(library_metadata)
         )
@@ -1512,7 +1638,6 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
         experimental_checks.append(ExpectationDiagnostics._check_linting(self))
-
         beta_checks.append(
             ExpectationDiagnostics._check_input_validation(self, examples)
         )
@@ -1522,14 +1647,12 @@ class Expectation(metaclass=MetaExpectation):
                 backend_test_result_counts
             )
         )
-
         production_checks.append(
             ExpectationDiagnostics._check_full_test_suite(library_metadata)
         )
         production_checks.append(
             ExpectationDiagnostics._check_manual_code_review(library_metadata)
         )
-
         return ExpectationDiagnosticMaturityMessages(
             experimental=experimental_checks,
             beta=beta_checks,
@@ -1538,12 +1661,7 @@ class Expectation(metaclass=MetaExpectation):
 
 
 class TableExpectation(Expectation, ABC):
-    domain_keys = (
-        "batch_id",
-        "table",
-        "row_condition",
-        "condition_parser",
-    )
+    domain_keys = ("batch_id", "table", "row_condition", "condition_parser")
     metric_dependencies = tuple()
     domain_type = MetricDomainTypes.TABLE
 
@@ -1553,6 +1671,15 @@ class TableExpectation(Expectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
@@ -1567,26 +1694,30 @@ class TableExpectation(Expectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-
         return dependencies
 
     @staticmethod
     def validate_metric_value_between_configuration(
         configuration: Optional[ExpectationConfiguration],
     ):
-        # Validating that Minimum and Maximum values are of the proper format and type
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         min_val = None
         max_val = None
-
         if "min_value" in configuration.kwargs:
             min_val = configuration.kwargs["min_value"]
-
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
-
         try:
             assert (
-                min_val is None
+                (min_val is None)
                 or is_parseable_date(min_val)
                 or isinstance(min_val, (float, int, dict))
             ), "Provided min threshold must be a datetime (for datetime columns) or number"
@@ -1594,9 +1725,8 @@ class TableExpectation(Expectation, ABC):
                 assert (
                     "$PARAMETER" in min_val
                 ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key'
-
             assert (
-                max_val is None
+                (max_val is None)
                 or is_parseable_date(max_val)
                 or isinstance(max_val, (float, int, dict))
             ), "Provided max threshold must be a datetime (for datetime columns) or number"
@@ -1604,15 +1734,12 @@ class TableExpectation(Expectation, ABC):
                 assert (
                     "$PARAMETER" in max_val
                 ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key'
-
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-
-        if min_val is not None and max_val is not None and min_val > max_val:
+        if (min_val is not None) and (max_val is not None) and (min_val > max_val):
             raise InvalidExpectationConfigurationError(
                 "Minimum Threshold cannot be larger than Maximum Threshold"
             )
-
         return True
 
     def _validate_metric_value_between(
@@ -1623,44 +1750,40 @@ class TableExpectation(Expectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        metric_value = metrics.get(metric_name)
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        metric_value = metrics.get(metric_name)
         if metric_value is None:
             return {"success": False, "result": {"observed_value": metric_value}}
-
-        # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
         strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")
         strict_max = self.get_success_kwargs(configuration).get("strict_max")
-
         parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
             "parse_strings_as_datetimes"
         )
-
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
+                'The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in v0.16. As part of the V3 API transition, we\'ve moved away from input transformation. For more information, please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/\n',
                 DeprecationWarning,
             )
-
             if min_value is not None:
                 try:
                     min_value = parse(min_value)
                 except TypeError:
                     pass
-
             if max_value is not None:
                 try:
                     max_value = parse(max_value)
                 except TypeError:
                     pass
-
-        # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
                 above_min = metric_value > min_value
@@ -1668,7 +1791,6 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 above_min = metric_value >= min_value
         else:
             above_min = True
-
         if max_value is not None:
             if strict_max:
                 below_max = metric_value < max_value
@@ -1676,9 +1798,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 below_max = metric_value <= max_value
         else:
             below_max = True
-
         success = above_min and below_max
-
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
@@ -1689,7 +1809,15 @@ class ColumnExpectation(TableExpectation, ABC):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        # Ensuring basic configuration parameters are properly set
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         try:
             assert (
                 "column" in configuration.kwargs
@@ -1705,7 +1833,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "condition_parser": None,
         "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
@@ -1714,11 +1842,29 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
     @classmethod
     def is_abstract(cls):
-        return cls.map_metric is None or super().is_abstract()
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        return (cls.map_metric is None) or super().is_abstract()
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().validate_configuration(configuration)
         try:
             assert (
@@ -1739,6 +1885,15 @@ class ColumnMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
@@ -1748,10 +1903,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         assert (
             self.metric_dependencies == tuple()
         ), "ColumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
-        # convenient name for updates
-
         metric_dependencies = dependencies["metrics"]
-
         metric_kwargs = get_metric_kwargs(
             metric_name="column_values.nonnull.unexpected_count",
             configuration=configuration,
@@ -1776,7 +1928,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         metric_kwargs = get_metric_kwargs(
             metric_name="table.row_count",
             configuration=configuration,
@@ -1787,15 +1938,12 @@ class ColumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         result_format_str = dependencies["result_format"].get("result_format")
         include_unexpected_rows = dependencies["result_format"].get(
             "include_unexpected_rows"
         )
-
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
-
         metric_kwargs = get_metric_kwargs(
             f"{self.map_metric}.unexpected_values",
             configuration=configuration,
@@ -1808,7 +1956,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_rows",
@@ -1822,10 +1969,8 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
-
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_rows",
@@ -1839,7 +1984,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_index_list",
@@ -1853,7 +1997,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-
         return dependencies
 
     def _validate(
@@ -1863,11 +2006,19 @@ class ColumnMapExpectation(TableExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
         include_unexpected_rows = result_format.get("include_unexpected_rows")
-
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
@@ -1879,20 +2030,16 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_rows = None
         if include_unexpected_rows:
             unexpected_rows = metrics.get(f"{self.map_metric}.unexpected_rows")
-
-        if total_count is None or null_count is None:
+        if (total_count is None) or (null_count is None):
             total_count = nonnull_count = 0
         else:
             nonnull_count = total_count - null_count
-
         success = None
-        if total_count == 0 or nonnull_count == 0:
-            # Vacuously true
+        if (total_count == 0) or (nonnull_count == 0):
             success = True
         elif nonnull_count > 0:
             success_ratio = float(nonnull_count - unexpected_count) / nonnull_count
             success = success_ratio >= mostly
-
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
@@ -1919,7 +2066,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "condition_parser": None,
         "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
@@ -1928,11 +2075,29 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
 
     @classmethod
     def is_abstract(cls):
-        return cls.map_metric is None or super().is_abstract()
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        return (cls.map_metric is None) or super().is_abstract()
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().validate_configuration(configuration)
         try:
             assert (
@@ -1956,6 +2121,15 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
@@ -1965,10 +2139,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         assert (
             self.metric_dependencies == tuple()
         ), "ColumnPairMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
-        # convenient name for updates
-
         metric_dependencies = dependencies["metrics"]
-
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.unexpected_count",
             configuration=configuration,
@@ -1981,7 +2152,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         metric_kwargs = get_metric_kwargs(
             metric_name="table.row_count",
             configuration=configuration,
@@ -1992,7 +2162,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         metric_kwargs = get_metric_kwargs(
             f"{self.map_metric}.filtered_row_count",
             configuration=configuration,
@@ -2005,15 +2174,12 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         result_format_str = dependencies["result_format"].get("result_format")
         include_unexpected_rows = dependencies["result_format"].get(
             "include_unexpected_rows"
         )
-
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
-
         metric_kwargs = get_metric_kwargs(
             f"{self.map_metric}.unexpected_values",
             configuration=configuration,
@@ -2026,10 +2192,8 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
-
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_rows",
@@ -2043,7 +2207,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_index_list",
@@ -2057,7 +2220,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-
         return dependencies
 
     def _validate(
@@ -2067,6 +2229,15 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
@@ -2078,21 +2249,18 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         unexpected_values = metrics.get(f"{self.map_metric}.unexpected_values")
         unexpected_index_list = metrics.get(f"{self.map_metric}.unexpected_index_list")
         filtered_row_count = metrics.get(f"{self.map_metric}.filtered_row_count")
-
         if (
-            total_count is None
-            or filtered_row_count is None
-            or total_count == 0
-            or filtered_row_count == 0
+            (total_count is None)
+            or (filtered_row_count is None)
+            or (total_count == 0)
+            or (filtered_row_count == 0)
         ):
-            # Vacuously true
             success = True
         else:
             success_ratio = (
                 float(filtered_row_count - unexpected_count) / filtered_row_count
             )
             success = success_ratio >= mostly
-
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
@@ -2118,7 +2286,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
     success_keys = tuple()
     default_kwarg_values = {
         "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "condition_parser": None,
         "ignore_row_if": "all_value_are_missing",
         "result_format": "BASIC",
         "include_config": True,
@@ -2127,11 +2295,29 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
 
     @classmethod
     def is_abstract(cls):
-        return cls.map_metric is None or super().is_abstract()
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        return (cls.map_metric is None) or super().is_abstract()
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().validate_configuration(configuration)
         try:
             assert (
@@ -2146,6 +2332,15 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
@@ -2155,10 +2350,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         assert (
             self.metric_dependencies == tuple()
         ), "MulticolumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
-        # convenient name for updates
-
         metric_dependencies = dependencies["metrics"]
-
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.unexpected_count",
             configuration=configuration,
@@ -2171,7 +2363,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         metric_kwargs = get_metric_kwargs(
             metric_name="table.row_count",
             configuration=configuration,
@@ -2182,7 +2373,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         metric_kwargs = get_metric_kwargs(
             f"{self.map_metric}.filtered_row_count",
             configuration=configuration,
@@ -2195,15 +2385,12 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         result_format_str = dependencies["result_format"].get("result_format")
         include_unexpected_rows = dependencies["result_format"].get(
             "include_unexpected_rows"
         )
-
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
-
         metric_kwargs = get_metric_kwargs(
             f"{self.map_metric}.unexpected_values",
             configuration=configuration,
@@ -2216,10 +2403,8 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
-
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_rows",
@@ -2233,7 +2418,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_index_list",
@@ -2247,7 +2431,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-
         return dependencies
 
     def _validate(
@@ -2257,6 +2440,15 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
@@ -2265,18 +2457,15 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         unexpected_values = metrics.get(f"{self.map_metric}.unexpected_values")
         unexpected_index_list = metrics.get(f"{self.map_metric}.unexpected_index_list")
         filtered_row_count = metrics.get(f"{self.map_metric}.filtered_row_count")
-
         if (
-            total_count is None
-            or filtered_row_count is None
-            or total_count == 0
-            or filtered_row_count == 0
+            (total_count is None)
+            or (filtered_row_count is None)
+            or (total_count == 0)
+            or (filtered_row_count == 0)
         ):
-            # Vacuously true
             success = True
         else:
             success = unexpected_count == 0
-
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
@@ -2298,47 +2487,39 @@ def _format_map_output(
     unexpected_index_list,
     unexpected_rows=None,
 ):
-    """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
-    and file_lines_map_expectation).
+    import inspect
 
-    Expectations support four result_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.
-    In each case, the object returned has a different set of populated fields.
-    See :ref:`result_format` for more information.
-
-    This function handles the logic for mapping those fields for column_map_expectations.
-    """
-    # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
-    # Incrementally add to result and return when all values for the specified level are present
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Helper function to construct expectation result objects for map_expectations (such as column_map_expectation\n    and file_lines_map_expectation).\n\n    Expectations support four result_formats: BOOLEAN_ONLY, BASIC, SUMMARY, and COMPLETE.\n    In each case, the object returned has a different set of populated fields.\n    See :ref:`result_format` for more information.\n\n    This function handles the logic for mapping those fields for column_map_expectations.\n    "
     return_obj = {"success": success}
-
     if result_format["result_format"] == "BOOLEAN_ONLY":
         return return_obj
-
     skip_missing = False
-
     if nonnull_count is None:
         missing_count = None
         skip_missing: bool = True
     else:
         missing_count = element_count - nonnull_count
-
     if element_count > 0:
-        unexpected_percent_total = unexpected_count / element_count * 100
-
+        unexpected_percent_total = (unexpected_count / element_count) * 100
         if not skip_missing:
-            missing_percent = missing_count / element_count * 100
+            missing_percent = (missing_count / element_count) * 100
             if nonnull_count > 0:
-                unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
+                unexpected_percent_nonmissing = (unexpected_count / nonnull_count) * 100
             else:
                 unexpected_percent_nonmissing = None
         else:
             unexpected_percent_nonmissing = unexpected_percent_total
-
     else:
         missing_percent = None
         unexpected_percent_total = None
         unexpected_percent_nonmissing = None
-
     return_obj["result"] = {
         "element_count": element_count,
         "unexpected_count": unexpected_count,
@@ -2347,7 +2528,6 @@ def _format_map_output(
             : result_format["partial_unexpected_count"]
         ],
     }
-
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count
         return_obj["result"]["missing_percent"] = missing_percent
@@ -2355,38 +2535,26 @@ def _format_map_output(
         return_obj["result"][
             "unexpected_percent_nonmissing"
         ] = unexpected_percent_nonmissing
-
     if result_format["include_unexpected_rows"]:
-        return_obj["result"].update(
-            {
-                "unexpected_rows": unexpected_rows,
-            }
-        )
-
+        return_obj["result"].update({"unexpected_rows": unexpected_rows})
     if result_format["result_format"] == "BASIC":
         return return_obj
-
     if len(unexpected_list) and isinstance(unexpected_list[0], dict):
-        # in the case of multicolumn map expectations `unexpected_list` contains dicts,
-        # which will throw an exception when we hash it to count unique members.
-        # As a workaround, we flatten the values out to tuples.
         immutable_unexpected_list = [
             tuple([val for val in item.values()]) for item in unexpected_list
         ]
     else:
         immutable_unexpected_list = unexpected_list
-
-    # Try to return the most common values, if possible.
     partial_unexpected_counts = None
     if 0 < result_format.get("partial_unexpected_count"):
         try:
             partial_unexpected_counts = [
                 {"value": key, "count": value}
-                for key, value in sorted(
+                for (key, value) in sorted(
                     Counter(immutable_unexpected_list).most_common(
                         result_format["partial_unexpected_count"]
                     ),
-                    key=lambda x: (-x[1], x[0]),
+                    key=(lambda x: ((-x[1]), x[0])),
                 )
             ]
         except TypeError:
@@ -2396,26 +2564,24 @@ def _format_map_output(
         finally:
             return_obj["result"].update(
                 {
-                    "partial_unexpected_index_list": unexpected_index_list[
-                        : result_format["partial_unexpected_count"]
-                    ]
-                    if unexpected_index_list is not None
-                    else None,
+                    "partial_unexpected_index_list": (
+                        unexpected_index_list[
+                            : result_format["partial_unexpected_count"]
+                        ]
+                        if (unexpected_index_list is not None)
+                        else None
+                    ),
                     "partial_unexpected_counts": partial_unexpected_counts,
                 }
             )
-
     if result_format["result_format"] == "SUMMARY":
         return return_obj
-
     return_obj["result"].update(
         {
             "unexpected_list": unexpected_list,
             "unexpected_index_list": unexpected_index_list,
         }
     )
-
     if result_format["result_format"] == "COMPLETE":
         return return_obj
-
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")

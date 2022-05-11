@@ -15,19 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
-    """
-    The ConfiguredAssetFilePathDataConnector is one of two classes (InferredAssetFilePathDataConnector being the
-    other) designed for connecting to filesystem-like data. This includes files on disk, but also things
-    like S3 object stores, etc:
-
-    A ConfiguredAssetFilePathDataConnector requires an explicit listing of each DataAsset you want to connect to.
-    This allows more fine-tuning, but also requires more setup.
-
-    *Note*: ConfiguredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
-    ConfiguredAssetFilesystemDataConnector, ConfiguredAssetS3DataConnector, ConfiguredAssetAzureDataConnector, and
-    ConfiguredAssetGCSDataConnector are subclasses of ConfiguredAssetFilePathDataConnector.
-
-    """
+    "\n    The ConfiguredAssetFilePathDataConnector is one of two classes (InferredAssetFilePathDataConnector being the\n    other) designed for connecting to filesystem-like data. This includes files on disk, but also things\n    like S3 object stores, etc:\n\n    A ConfiguredAssetFilePathDataConnector requires an explicit listing of each DataAsset you want to connect to.\n    This allows more fine-tuning, but also requires more setup.\n\n    *Note*: ConfiguredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently\n    ConfiguredAssetFilesystemDataConnector, ConfiguredAssetS3DataConnector, ConfiguredAssetAzureDataConnector, and\n    ConfiguredAssetGCSDataConnector are subclasses of ConfiguredAssetFilePathDataConnector.\n\n"
 
     def __init__(
         self,
@@ -39,20 +27,16 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ) -> None:
-        """
-        Base class for DataConnectors that connect to filesystem-like data by taking in
-        configured `assets` as a dictionary. This class supports the configuration of default_regex and
-        sorters for filtering and sorting data_references.
+        import inspect
 
-        Args:
-            name (str): name of ConfiguredAssetFilePathDataConnector
-            datasource_name (str): Name of datasource that this DataConnector is connected to
-            assets (dict): configured assets as a dictionary. These can each have their own regex and sorters
-            execution_engine (ExecutionEngine): Execution Engine object to actually read the data
-            default_regex (dict): Optional dict the filter and organize the data_references.
-            sorters (list): Optional list if you want to sort the data_references
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Base class for DataConnectors that connect to filesystem-like data by taking in\n        configured `assets` as a dictionary. This class supports the configuration of default_regex and\n        sorters for filtering and sorting data_references.\n\n        Args:\n            name (str): name of ConfiguredAssetFilePathDataConnector\n            datasource_name (str): Name of datasource that this DataConnector is connected to\n            assets (dict): configured assets as a dictionary. These can each have their own regex and sorters\n            execution_engine (ExecutionEngine): Execution Engine object to actually read the data\n            default_regex (dict): Optional dict the filter and organize the data_references.\n            sorters (list): Optional list if you want to sort the data_references\n            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec\n        "
         logger.debug(f'Constructing ConfiguredAssetFilePathDataConnector "{name}".')
         super().__init__(
             name=name,
@@ -62,53 +46,77 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             sorters=sorters,
             batch_spec_passthrough=batch_spec_passthrough,
         )
-
         if assets is None:
             assets = {}
-        _assets: Dict[str, Union[dict, Asset]] = assets
+        _assets: Dict[(str, Union[(dict, Asset)])] = assets
         self._assets = _assets
         self._build_assets_from_config(config=assets)
 
     @property
-    def assets(self) -> Dict[str, Union[dict, Asset]]:
+    def assets(self) -> Dict[(str, Union[(dict, Asset)])]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._assets
 
-    def _build_assets_from_config(self, config: Dict[str, dict]) -> None:
-        for name, asset_config in config.items():
+    def _build_assets_from_config(self, config: Dict[(str, dict)]) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        for (name, asset_config) in config.items():
             if asset_config is None:
                 asset_config = {}
             asset_config.update({"name": name})
             new_asset: Asset = _build_asset_from_config(
-                runtime_environment=self,
-                config=asset_config,
+                runtime_environment=self, config=asset_config
             )
             self.assets[name] = new_asset
 
     def get_available_data_asset_names(self) -> List[str]:
-        """
-        Return the list of asset names known by this DataConnector.
+        import inspect
 
-        Returns:
-            A list of available names
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Return the list of asset names known by this DataConnector.\n\n        Returns:\n            A list of available names\n        "
         return list(self.assets.keys())
 
     def _refresh_data_references_cache(self) -> None:
+        import inspect
 
-        # Map data_references to batch_definitions
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._data_references_cache = {}
-
         for data_asset_name in self.get_available_data_asset_names():
             self._data_references_cache[data_asset_name] = {}
-
             for data_reference in self._get_data_reference_list(
                 data_asset_name=data_asset_name
             ):
                 mapped_batch_definition_list: List[
                     BatchDefinition
                 ] = self._map_data_reference_to_batch_definition_list(
-                    data_reference=data_reference,
-                    data_asset_name=data_asset_name,
+                    data_reference=data_reference, data_asset_name=data_asset_name
                 )
                 self._data_references_cache[data_asset_name][
                     data_reference
@@ -117,72 +125,108 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
-        """
-        List objects in the underlying data store to create a list of data_references.
-        This method is used to refresh the cache.
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        List objects in the underlying data store to create a list of data_references.\n        This method is used to refresh the cache.\n        "
         asset: Optional[Asset] = self._get_asset(data_asset_name=data_asset_name)
         path_list: List[str] = self._get_data_reference_list_for_asset(asset=asset)
         return path_list
 
     def get_data_reference_list_count(self) -> int:
-        """
-        Returns the list of data_references known by this DataConnector by looping over all data_asset_names in
-        _data_references_cache
+        import inspect
 
-        Returns:
-            number of data_references known by this DataConnector.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Returns the list of data_references known by this DataConnector by looping over all data_asset_names in\n        _data_references_cache\n\n        Returns:\n            number of data_references known by this DataConnector.\n        "
         total_references: int = sum(
             len(self._data_references_cache[data_asset_name])
             for data_asset_name in self._data_references_cache
         )
-
         return total_references
 
     def get_unmatched_data_references(self) -> List[str]:
-        """
-        Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
-        and returning data_reference that do not have an associated data_asset.
+        import inspect
 
-        Returns:
-            list of data_references that are not matched by configuration.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache\n        and returning data_reference that do not have an associated data_asset.\n\n        Returns:\n            list of data_references that are not matched by configuration.\n        "
         unmatched_data_references: List[str] = []
         for (
             data_asset_name,
             data_reference_sub_cache,
         ) in self._data_references_cache.items():
             unmatched_data_references += [
-                k for k, v in data_reference_sub_cache.items() if v is None
+                k for (k, v) in data_reference_sub_cache.items() if (v is None)
             ]
-
         return unmatched_data_references
 
     def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         batch_definition_list: List[BatchDefinition] = [
             batch_definitions[0]
             for data_reference_sub_cache in self._data_references_cache.values()
             for batch_definitions in data_reference_sub_cache.values()
-            if batch_definitions is not None
+            if (batch_definitions is not None)
         ]
         return batch_definition_list
 
     def _get_full_file_path(
         self, path: str, data_asset_name: Optional[str] = None
     ) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
         return self._get_full_file_path_for_asset(path=path, asset=asset)
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         regex_config: dict = deepcopy(self._default_regex)
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
         if asset is not None:
-            # Override the defaults
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern
             if asset.group_names:
@@ -190,51 +234,74 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return regex_config
 
     def _get_asset(self, data_asset_name: str) -> Asset:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         asset: Optional[Asset] = None
         if (
-            data_asset_name is not None
+            (data_asset_name is not None)
             and self.assets
-            and data_asset_name in self.assets
+            and (data_asset_name in self.assets)
         ):
             asset = self.assets[data_asset_name]
         return asset
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset]) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
-        """
-        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+        import inspect
 
-        Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
-
-        Returns:
-            BatchSpec built from batch_definition
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.\n\n        Args:\n            batch_definition (BatchDefinition): to be used to build batch_spec\n\n        Returns:\n            BatchSpec built from batch_definition\n        "
         data_asset_name: str = batch_definition.data_asset_name
         if (
-            data_asset_name in self.assets
+            (data_asset_name in self.assets)
             and self.assets[data_asset_name].batch_spec_passthrough
             and isinstance(self.assets[data_asset_name].batch_spec_passthrough, dict)
         ):
-            # batch_spec_passthrough from data_asset
             batch_spec_passthrough = deepcopy(
                 self.assets[data_asset_name]["batch_spec_passthrough"]
             )
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}
             )
-            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
-
         batch_spec: PathBatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-
         return batch_spec

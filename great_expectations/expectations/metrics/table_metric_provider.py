@@ -6,9 +6,4 @@ logger = logging.getLogger(__name__)
 
 
 class TableMetricProvider(MetricProvider):
-    domain_keys = (
-        "batch_id",
-        "table",
-        "row_condition",
-        "condition_parser",
-    )
+    domain_keys = ("batch_id", "table", "row_condition", "condition_parser")

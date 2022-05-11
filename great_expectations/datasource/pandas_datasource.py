@@ -19,16 +19,11 @@ from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
-
-HASH_THRESHOLD = 1e9
+HASH_THRESHOLD = 1000000000.0
 
 
 class PandasDatasource(LegacyDatasource):
-    """The PandasDatasource produces PandasDataset objects and supports generators capable of
-    interacting with the local filesystem (the default subdir_reader generator), and from
-    existing in-memory dataframes.
-    """
-
+    "The PandasDatasource produces PandasDataset objects and supports generators capable of\n    interacting with the local filesystem (the default subdir_reader generator), and from\n    existing in-memory dataframes.\n"
     recognized_batch_parameters = {
         "reader_method",
         "reader_options",
@@ -48,23 +43,16 @@ class PandasDatasource(LegacyDatasource):
         limit=None,
         **kwargs,
     ):
-        """
-        Build a full configuration object for a datasource, potentially including generators with defaults.
+        import inspect
 
-        Args:
-            data_asset_type: A ClassConfig dictionary
-            batch_kwargs_generators: Generator configuration dictionary
-            boto3_options: Optional dictionary with key-value pairs to pass to boto3 during instantiation.
-            reader_method: Optional default reader_method for generated batches
-            reader_options: Optional default reader_options for generated batches
-            limit: Optional default limit for generated batches
-            **kwargs: Additional kwargs to be part of the datasource constructor's initialization
-
-        Returns:
-            A complete datasource configuration.
-
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Build a full configuration object for a datasource, potentially including generators with defaults.\n\n        Args:\n            data_asset_type: A ClassConfig dictionary\n            batch_kwargs_generators: Generator configuration dictionary\n            boto3_options: Optional dictionary with key-value pairs to pass to boto3 during instantiation.\n            reader_method: Optional default reader_method for generated batches\n            reader_options: Optional default reader_options for generated batches\n            limit: Optional default limit for generated batches\n            **kwargs: Additional kwargs to be part of the datasource constructor's initialization\n\n        Returns:\n            A complete datasource configuration.\n\n        "
         if data_asset_type is None:
             data_asset_type = {
                 "class_name": "PandasDataset",
@@ -72,37 +60,29 @@ class PandasDatasource(LegacyDatasource):
             }
         else:
             data_asset_type = classConfigSchema.dump(ClassConfig(**data_asset_type))
-
         configuration = kwargs
         configuration["data_asset_type"] = data_asset_type
         if batch_kwargs_generators:
             configuration["batch_kwargs_generators"] = batch_kwargs_generators
-
         if boto3_options is not None:
             if isinstance(boto3_options, dict):
                 configuration.update(boto3_options)
             else:
                 raise ValueError(
-                    "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon "
-                    "initialization."
+                    "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon initialization."
                 )
             configuration["boto3_options"] = boto3_options
-
         if reader_options is not None:
             if isinstance(reader_options, dict):
                 configuration.update(reader_options)
             else:
                 raise ValueError(
-                    "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon "
-                    "initialization."
+                    "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon initialization."
                 )
-
         if reader_method is not None:
             configuration["reader_method"] = reader_method
-
         if limit is not None:
             configuration["limit"] = limit
-
         return configuration
 
     def __init__(
@@ -117,6 +97,15 @@ class PandasDatasource(LegacyDatasource):
         limit=None,
         **kwargs,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         configuration_with_defaults = PandasDatasource.build_configuration(
             data_asset_type,
             batch_kwargs_generators,
@@ -126,7 +115,6 @@ class PandasDatasource(LegacyDatasource):
             limit=limit,
             **kwargs,
         )
-
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
         batch_kwargs_generators = configuration_with_defaults.pop(
             "batch_kwargs_generators", None
@@ -138,61 +126,58 @@ class PandasDatasource(LegacyDatasource):
             batch_kwargs_generators=batch_kwargs_generators,
             **configuration_with_defaults,
         )
-
         self._build_generators()
         self._boto3_options = configuration_with_defaults.get("boto3_options", {})
         self._reader_method = configuration_with_defaults.get("reader_method", None)
         self._reader_options = configuration_with_defaults.get("reader_options", None)
         self._limit = configuration_with_defaults.get("limit", None)
 
-    # TODO: move to data connector
     def process_batch_parameters(
-        self,
-        reader_method=None,
-        reader_options=None,
-        limit=None,
-        dataset_options=None,
+        self, reader_method=None, reader_options=None, limit=None, dataset_options=None
     ):
-        # Note that we do not pass limit up, since even that will be handled by PandasDatasource
-        batch_kwargs = super().process_batch_parameters(dataset_options=dataset_options)
+        import inspect
 
-        # Apply globally-configured reader options first
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        batch_kwargs = super().process_batch_parameters(dataset_options=dataset_options)
         if self._reader_options:
-            # Then update with any locally-specified reader options
             if not batch_kwargs.get("reader_options"):
                 batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"].update(self._reader_options)
-
-        # Then update with any locally-specified reader options
         if reader_options:
             if not batch_kwargs.get("reader_options"):
                 batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"].update(reader_options)
-
         if self._limit:
             if not batch_kwargs.get("reader_options"):
                 batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"]["nrows"] = self._limit
-
         if limit is not None:
             if not batch_kwargs.get("reader_options"):
                 batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"]["nrows"] = limit
-
         if self._reader_method:
             batch_kwargs["reader_method"] = self._reader_method
-
         if reader_method is not None:
             batch_kwargs["reader_method"] = reader_method
-
         return batch_kwargs
 
-    # TODO: move to execution engine or make a wrapper
     def get_batch(self, batch_kwargs, batch_parameters=None):
-        # We will use and manipulate reader_options along the way
-        reader_options = batch_kwargs.get("reader_options", {})
+        import inspect
 
-        # We need to build a batch_markers to be used in the dataframe
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        reader_options = batch_kwargs.get("reader_options", {})
         batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
@@ -200,18 +185,14 @@ class PandasDatasource(LegacyDatasource):
                 )
             }
         )
-
         if "path" in batch_kwargs:
             path = batch_kwargs["path"]
             reader_method = batch_kwargs.get("reader_method")
             reader_fn = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
-
         elif "s3" in batch_kwargs:
-            # deprecated-v0.13.0
             warnings.warn(
-                "Direct GE Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "
-                "Please use a path including the s3a:// protocol instead.",
+                "Direct GE Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. Please use a path including the s3a:// protocol instead.",
                 DeprecationWarning,
             )
             try:
@@ -231,32 +212,29 @@ class PandasDatasource(LegacyDatasource):
             default_reader_options = self._infer_default_options(
                 reader_fn, reader_options
             )
-            if not reader_options.get("encoding") and default_reader_options.get(
+            if (not reader_options.get("encoding")) and default_reader_options.get(
                 "encoding"
             ):
                 reader_options["encoding"] = s3_object.get(
                     "ContentEncoding", default_reader_options.get("encoding")
                 )
             df = reader_fn(BytesIO(s3_object["Body"].read()), **reader_options)
-
-        elif "dataset" in batch_kwargs and isinstance(
+        elif ("dataset" in batch_kwargs) and isinstance(
             batch_kwargs["dataset"], (pd.DataFrame, pd.Series)
         ):
             df = batch_kwargs.get("dataset")
-            # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs
-            batch_kwargs = {k: batch_kwargs[k] for k in batch_kwargs if k != "dataset"}
+            batch_kwargs = {
+                k: batch_kwargs[k] for k in batch_kwargs if (k != "dataset")
+            }
             batch_kwargs["PandasInMemoryDF"] = True
             batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
-
         else:
             raise BatchKwargsError(
                 "Invalid batch_kwargs: path, s3, or dataset is required for a PandasDatasource",
                 batch_kwargs,
             )
-
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
-
         return Batch(
             datasource_name=self.name,
             batch_kwargs=batch_kwargs,
@@ -268,6 +246,15 @@ class PandasDatasource(LegacyDatasource):
 
     @staticmethod
     def guess_reader_method_from_path(path):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif path.endswith(".parquet"):
@@ -287,24 +274,22 @@ class PandasDatasource(LegacyDatasource):
             }
         elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
             return {"reader_method": "read_sas"}
-
         raise BatchKwargsError(
             f"Unable to determine reader method from path: {path}", {"path": path}
         )
 
     def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:
-        """
-        Allows reader options to be customized based on file context before loading to a DataFrame
+        import inspect
 
-        Args:
-            reader_method (str): pandas reader method
-            reader_options: Current options and defaults set to pass to the reader method
-
-        Returns:
-            dict: A copy of the reader options post-inference
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Allows reader options to be customized based on file context before loading to a DataFrame\n\n        Args:\n            reader_method (str): pandas reader method\n            reader_options: Current options and defaults set to pass to the reader method\n\n        Returns:\n            dict: A copy of the reader options post-inference\n        "
         while isinstance(reader_fn, partial):
-            # reader_fn might be partial so need to unwrap to get underlying method
             reader_fn = reader_fn.func
         name = reader_fn.__name__
         if name == "read_parquet":
@@ -315,31 +300,26 @@ class PandasDatasource(LegacyDatasource):
             return {"encoding": "utf-8"}
 
     def _get_reader_fn(self, reader_method=None, path=None):
-        """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
-        correct reader_method.
+        import inspect
 
-        Args:
-            reader_method (str): the name of the reader method to use, if available.
-            path (str): the to use to guess
-
-        Returns:
-            ReaderMethod to use for the filepath
-
-        """
-        if reader_method is None and path is None:
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the\n        correct reader_method.\n\n        Args:\n            reader_method (str): the name of the reader method to use, if available.\n            path (str): the to use to guess\n\n        Returns:\n            ReaderMethod to use for the filepath\n\n        "
+        if (reader_method is None) and (path is None):
             raise BatchKwargsError(
                 "Unable to determine pandas reader function without reader_method or path.",
                 {"reader_method": reader_method},
             )
-
         reader_options = None
         if reader_method is None:
             path_guess = self.guess_reader_method_from_path(path)
             reader_method = path_guess["reader_method"]
-            reader_options = path_guess.get(
-                "reader_options"
-            )  # This may not be there; use None in that case
-
+            reader_options = path_guess.get("reader_options")
         try:
             reader_fn = getattr(pd, reader_method)
             if reader_options:

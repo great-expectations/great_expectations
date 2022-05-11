@@ -33,84 +33,32 @@ logger = logging.getLogger(__name__)
 
 
 class UserConfigurableProfiler:
-
-    """
-    The UserConfigurableProfiler is used to build an expectation suite from a dataset. The expectations built are
-    strict - they can be used to determine whether two tables are the same.
-
-    The profiler may be instantiated with or without a number of configuration arguments. Once a profiler is
-    instantiated, if these arguments change, a new profiler will be needed.
-
-    A profiler is used to build a suite without a config as follows:
-
-    profiler = UserConfigurableProfiler(dataset)
-    suite = profiler.build_suite()
-
-
-    A profiler is used to build a suite with a semantic_types dict, as follows:
-
-    semantic_types_dict = {
-                "numeric": ["c_acctbal"],
-                "string": ["c_address","c_custkey"],
-                "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone'],
-            }
-
-    profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)
-    suite = profiler.build_suite()
-    """
+    '\n    The UserConfigurableProfiler is used to build an expectation suite from a dataset. The expectations built are\n    strict - they can be used to determine whether two tables are the same.\n\n    The profiler may be instantiated with or without a number of configuration arguments. Once a profiler is\n    instantiated, if these arguments change, a new profiler will be needed.\n\n    A profiler is used to build a suite without a config as follows:\n\n    profiler = UserConfigurableProfiler(dataset)\n    suite = profiler.build_suite()\n\n\n    A profiler is used to build a suite with a semantic_types dict, as follows:\n\n    semantic_types_dict = {\n                "numeric": ["c_acctbal"],\n                "string": ["c_address","c_custkey"],\n                "value_set": ["c_nationkey","c_mktsegment", \'c_custkey\', \'c_name\', \'c_address\', \'c_phone\'],\n            }\n\n    profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)\n    suite = profiler.build_suite()\n'
 
     def __init__(
         self,
-        profile_dataset: Union[Batch, Dataset, Validator],
+        profile_dataset: Union[(Batch, Dataset, Validator)],
         excluded_expectations: Optional[List[str]] = None,
         ignored_columns: Optional[List[str]] = None,
         not_null_only: bool = False,
         primary_or_compound_key: Optional[List[str]] = None,
-        semantic_types_dict: Optional[Dict[str, List[str]]] = None,
+        semantic_types_dict: Optional[Dict[(str, List[str])]] = None,
         table_expectations_only: bool = False,
         value_set_threshold: str = "MANY",
     ) -> None:
-        """
-        The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
-        instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
-        instantiated, if config items change, a new profiler will be needed.
+        import inspect
 
-        Write an entry on how to use the profiler for the GE docs site
-                Args:
-                    profile_dataset: A Great Expectations Dataset or Validator object
-                    excluded_expectations: A list of expectations to not include in the suite
-                    ignored_columns: A list of columns for which you would like to NOT create expectations
-                    not_null_only: Boolean, default False. By default, each column is evaluated for nullity. If the
-                        column values contain fewer than 50% null values, then the profiler will add
-                        `expect_column_values_to_not_be_null`; if greater than 50% it will add
-                        `expect_column_values_to_be_null`. If not_null_only is set to True, the profiler will add a
-                        not_null expectation irrespective of the percent nullity (and therefore will not add an
-                        `expect_column_values_to_be_null`
-                    primary_or_compound_key: A list containing one or more columns which are a dataset's primary or
-                        compound key. This will create an `expect_column_values_to_be_unique` or
-                        `expect_compound_columns_to_be_unique` expectation. This will occur even if one or more of the
-                        primary_or_compound_key columns are specified in ignored_columns
-                    semantic_types_dict: A dictionary where the keys are available semantic_types
-                        (see profiler.base.ProfilerSemanticTypes) and the values are lists of columns for which you
-                        would like to create semantic_type specific expectations e.g.:
-                        "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
-                    table_expectations_only: Boolean, default False. If True, this will only create the two table level
-                        expectations available to this profiler (`expect_table_columns_to_match_ordered_list` and
-                        `expect_table_row_count_to_be_between`). If a primary_or_compound key is specified, it will
-                        create a uniqueness expectation for that column as well
-                    value_set_threshold: Takes a string from the following ordered list - "none", "one", "two",
-                        "very_few", "few", "many", "very_many", "unique". When the profiler runs without a
-                        semantic_types dict, each column is profiled for cardinality. This threshold determines the
-                        greatest cardinality for which to add `expect_column_values_to_be_in_set`. For example, if
-                        value_set_threshold is set to "unique", it will add a value_set expectation for every included
-                        column. If set to "few", it will add a value_set expectation for columns whose cardinality is
-                        one of "one", "two", "very_few" or "few". The default value is "many". For the purposes of
-                        comparing whether two tables are identical, it might make the most sense to set this to "unique"
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        '\n        The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be\n        instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is\n        instantiated, if config items change, a new profiler will be needed.\n\n        Write an entry on how to use the profiler for the GE docs site\n                Args:\n                    profile_dataset: A Great Expectations Dataset or Validator object\n                    excluded_expectations: A list of expectations to not include in the suite\n                    ignored_columns: A list of columns for which you would like to NOT create expectations\n                    not_null_only: Boolean, default False. By default, each column is evaluated for nullity. If the\n                        column values contain fewer than 50% null values, then the profiler will add\n                        `expect_column_values_to_not_be_null`; if greater than 50% it will add\n                        `expect_column_values_to_be_null`. If not_null_only is set to True, the profiler will add a\n                        not_null expectation irrespective of the percent nullity (and therefore will not add an\n                        `expect_column_values_to_be_null`\n                    primary_or_compound_key: A list containing one or more columns which are a dataset\'s primary or\n                        compound key. This will create an `expect_column_values_to_be_unique` or\n                        `expect_compound_columns_to_be_unique` expectation. This will occur even if one or more of the\n                        primary_or_compound_key columns are specified in ignored_columns\n                    semantic_types_dict: A dictionary where the keys are available semantic_types\n                        (see profiler.base.ProfilerSemanticTypes) and the values are lists of columns for which you\n                        would like to create semantic_type specific expectations e.g.:\n                        "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}\n                    table_expectations_only: Boolean, default False. If True, this will only create the two table level\n                        expectations available to this profiler (`expect_table_columns_to_match_ordered_list` and\n                        `expect_table_row_count_to_be_between`). If a primary_or_compound key is specified, it will\n                        create a uniqueness expectation for that column as well\n                    value_set_threshold: Takes a string from the following ordered list - "none", "one", "two",\n                        "very_few", "few", "many", "very_many", "unique". When the profiler runs without a\n                        semantic_types dict, each column is profiled for cardinality. This threshold determines the\n                        greatest cardinality for which to add `expect_column_values_to_be_in_set`. For example, if\n                        value_set_threshold is set to "unique", it will add a value_set expectation for every included\n                        column. If set to "few", it will add a value_set expectation for columns whose cardinality is\n                        one of "one", "two", "very_few" or "few". The default value is "many". For the purposes of\n                        comparing whether two tables are identical, it might make the most sense to set this to "unique"\n        '
         self.column_info = {}
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
-
         context: Optional["DataContext"] = None
         if isinstance(self.profile_dataset, Batch):
             context = self.profile_dataset.data_context
@@ -128,8 +76,6 @@ class UserConfigurableProfiler:
             )
         else:
             self.all_table_columns = self.profile_dataset.get_table_columns()
-
-        # Check to see if the user has disabled progress bars
         self._enable_progress_bars = True
         if context:
             progress_bars = context.progress_bars
@@ -138,16 +84,12 @@ class UserConfigurableProfiler:
                     self._enable_progress_bars = progress_bars["globally"]
                 if "profilers" in progress_bars:
                     self._enable_progress_bars = progress_bars["profilers"]
-
         self.semantic_types_dict = semantic_types_dict
         assert isinstance(self.semantic_types_dict, (dict, type(None)))
-
         self.ignored_columns = ignored_columns or []
         assert isinstance(self.ignored_columns, list)
-
         self.excluded_expectations = excluded_expectations or []
         assert isinstance(self.excluded_expectations, list)
-
         assert isinstance(
             value_set_threshold, str
         ), "value_set_threshold must be a string"
@@ -155,47 +97,35 @@ class UserConfigurableProfiler:
         assert (
             self.value_set_threshold in OrderedProfilerCardinality.__members__
         ), f"value_set_threshold must be one of {[i for i in OrderedProfilerCardinality.__members__]}"
-
         self.not_null_only = not_null_only
         assert isinstance(self.not_null_only, bool)
-
         self.table_expectations_only = table_expectations_only
         assert isinstance(self.table_expectations_only, bool)
         if self.table_expectations_only is True:
             logger.info(
-                "table_expectations_only is set to True. When used to build a suite, this profiler will ignore all"
-                "columns and create expectations only at the table level. If you would also like to create "
-                "expectations at the column level, you can instantiate a new profiler with table_expectations_only set "
-                "to False"
+                "table_expectations_only is set to True. When used to build a suite, this profiler will ignore allcolumns and create expectations only at the table level. If you would also like to create expectations at the column level, you can instantiate a new profiler with table_expectations_only set to False"
             )
-
         self.primary_or_compound_key = primary_or_compound_key or []
         assert isinstance(self.primary_or_compound_key, list)
-
         if self.table_expectations_only:
             self.ignored_columns = self.all_table_columns
-
         if self.primary_or_compound_key:
             for column in self.primary_or_compound_key:
                 if column not in self.all_table_columns:
                     raise ValueError(
-                        f"""Column {column} not found. Please ensure that this column is in the \
-{type(profile_dataset).__name__} if you would like to use it as a primary_or_compound_key.
+                        f"""Column {column} not found. Please ensure that this column is in the {type(profile_dataset).__name__} if you would like to use it as a primary_or_compound_key.
 """
                     )
-
         included_columns = [
             column_name
             for column_name in self.all_table_columns
-            if column_name not in self.ignored_columns
+            if (column_name not in self.ignored_columns)
         ]
-
         for column_name in included_columns:
             self._add_column_cardinality_to_column_info(
                 self.profile_dataset, column_name
             )
             self._add_column_type_to_column_info(self.profile_dataset, column_name)
-
         if self.semantic_types_dict is not None:
             self._validate_semantic_types_dict()
             for column_name in included_columns:
@@ -211,34 +141,41 @@ class UserConfigurableProfiler:
         }
 
     def build_suite(self) -> ExpectationSuite:
-        """
-        User-facing expectation-suite building function. Works with an instantiated UserConfigurableProfiler object.
-        Args:
+        import inspect
 
-        Returns:
-            An expectation suite built either with or without a semantic_types dict
-
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        User-facing expectation-suite building function. Works with an instantiated UserConfigurableProfiler object.\n        Args:\n\n        Returns:\n            An expectation suite built either with or without a semantic_types dict\n\n        "
         expectation_suite: ExpectationSuite
         if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
-            # noinspection PyProtectedMember
             suite_name: str = (
                 self.profile_dataset._expectation_suite.expectation_suite_name
             )
             self.profile_dataset._expectation_suite = ExpectationSuite(
                 expectation_suite_name=suite_name, data_context=None
             )
-
         if self.semantic_types_dict:
             expectation_suite = self._build_expectation_suite_from_semantic_types_dict()
         else:
             expectation_suite = self._profile_and_build_expectation_suite()
-
         self._send_usage_stats_message()
-
         return expectation_suite
 
     def _send_usage_stats_message(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         profile_dataset_type: str = str(type(self.profile_dataset))
         if "Dataset" in profile_dataset_type:
             profile_dataset_type = "Dataset"
@@ -248,31 +185,38 @@ class UserConfigurableProfiler:
             profile_dataset_type = "Validator"
         else:
             raise ValueError(
-                f"""The "profile_dataset_type" property must be one of "Dataset", "Batch", or "Validator" objects. The \
-type detected is "{str(type(self.profile_dataset))}", which is illegal.
+                f"""The "profile_dataset_type" property must be one of "Dataset", "Batch", or "Validator" objects. The type detected is "{str(type(self.profile_dataset))}", which is illegal.
 """
             )
-
         event_payload: dict = {
             "profile_dataset_type": profile_dataset_type,
-            "excluded_expectations_specified": self.excluded_expectations is not None
-            and isinstance(self.excluded_expectations, list)
-            and len(self.excluded_expectations) > 0,
-            "ignored_columns_specified": self.ignored_columns is not None
-            and isinstance(self.ignored_columns, list)
-            and len(self.ignored_columns) > 0,
+            "excluded_expectations_specified": (
+                (self.excluded_expectations is not None)
+                and isinstance(self.excluded_expectations, list)
+                and (len(self.excluded_expectations) > 0)
+            ),
+            "ignored_columns_specified": (
+                (self.ignored_columns is not None)
+                and isinstance(self.ignored_columns, list)
+                and (len(self.ignored_columns) > 0)
+            ),
             "not_null_only": self.not_null_only,
-            "primary_or_compound_key_specified": self.primary_or_compound_key
-            is not None
-            and isinstance(self.primary_or_compound_key, list)
-            and len(self.primary_or_compound_key) > 0,
-            "semantic_types_dict_specified": self.semantic_types_dict is not None
-            and isinstance(self.semantic_types_dict, dict)
-            and len(self.semantic_types_dict.keys()) > 0,
+            "primary_or_compound_key_specified": (
+                (self.primary_or_compound_key is not None)
+                and isinstance(self.primary_or_compound_key, list)
+                and (len(self.primary_or_compound_key) > 0)
+            ),
+            "semantic_types_dict_specified": (
+                (self.semantic_types_dict is not None)
+                and isinstance(self.semantic_types_dict, dict)
+                and (len(self.semantic_types_dict.keys()) > 0)
+            ),
             "table_expectations_only": self.table_expectations_only,
-            "value_set_threshold_specified": self.value_set_threshold is not None
-            and isinstance(self.value_set_threshold, str)
-            and len(self.value_set_threshold) > 0,
+            "value_set_threshold_specified": (
+                (self.value_set_threshold is not None)
+                and isinstance(self.value_set_threshold, str)
+                and (len(self.value_set_threshold) > 0)
+            ),
         }
         send_usage_message(
             data_context=self.profile_dataset._data_context,
@@ -283,46 +227,42 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         )
 
     def _build_expectation_suite_from_semantic_types_dict(self):
-        """
-        Uses a semantic_type dict to determine which expectations to add to the suite, then builds the suite
-        Args:
+        import inspect
 
-        Returns:
-            An expectation suite built from a semantic_types dict
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Uses a semantic_type dict to determine which expectations to add to the suite, then builds the suite\n        Args:\n\n        Returns:\n            An expectation suite built from a semantic_types dict\n        "
         if not self.semantic_types_dict:
             raise ValueError(
                 "A config with a semantic_types dict must be included in order to use this profiler."
             )
-
         self._build_expectations_table(self.profile_dataset)
-
         if self.value_set_threshold:
             logger.info(
-                "Using this profiler with a semantic_types dict will ignore the value_set_threshold parameter. If "
-                "you would like to include value_set expectations, you can include a 'value_set' entry in your "
-                "semantic_types dict with any columns for which you would like a value_set expectation, or you can "
-                "remove the semantic_types dict from the config."
+                "Using this profiler with a semantic_types dict will ignore the value_set_threshold parameter. If you would like to include value_set expectations, you can include a 'value_set' entry in your semantic_types dict with any columns for which you would like a value_set expectation, or you can remove the semantic_types dict from the config."
             )
-
         if self.primary_or_compound_key:
             self._build_expectations_primary_or_compound_key(
                 self.profile_dataset, self.primary_or_compound_key
             )
-
         with tqdm(
             desc="Profiling Columns",
             total=len(self.column_info),
             delay=5,
-            disable=not self._enable_progress_bars,
+            disable=(not self._enable_progress_bars),
         ) as pbar:
-            for column_name, column_info in self.column_info.items():
+            for (column_name, column_info) in self.column_info.items():
                 pbar.set_postfix_str(f"Column={column_name}")
                 semantic_types = column_info.get("semantic_types")
                 for semantic_type in semantic_types:
                     semantic_type_fn = self.semantic_type_functions.get(semantic_type)
-                    if semantic_type_fn is None or not isinstance(
-                        semantic_type_fn, Callable
+                    if (semantic_type_fn is None) or (
+                        not isinstance(semantic_type_fn, Callable)
                     ):
                         raise ValueError(
                             f'Callable function for semantic type "{semantic_type}" could not be found.'
@@ -334,54 +274,47 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     self.profile_dataset, column_name
                 )
                 pbar.update()
-
         expectation_suite = self._build_column_description_metadata(
             self.profile_dataset
         )
-
         self._display_suite_by_column(suite=expectation_suite)
-
         return expectation_suite
 
     def _profile_and_build_expectation_suite(self):
-        """
-        Profiles the provided dataset to determine which expectations to add to the suite, then builds the suite
-        Args:
+        import inspect
 
-        Returns:
-            An expectation suite built after profiling the dataset
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Profiles the provided dataset to determine which expectations to add to the suite, then builds the suite\n        Args:\n\n        Returns:\n            An expectation suite built after profiling the dataset\n        "
         if self.primary_or_compound_key:
             self._build_expectations_primary_or_compound_key(
                 profile_dataset=self.profile_dataset,
                 column_list=self.primary_or_compound_key,
             )
-
         self._build_expectations_table(profile_dataset=self.profile_dataset)
-
         with tqdm(
             desc="Profiling",
             total=len(self.column_info),
             delay=5,
-            disable=not self._enable_progress_bars,
+            disable=(not self._enable_progress_bars),
         ) as pbar:
-            for column_name, column_info in self.column_info.items():
+            for (column_name, column_info) in self.column_info.items():
                 pbar.set_postfix_str(f"Column={column_name}")
                 data_type = column_info.get("type")
                 cardinality = column_info.get("cardinality")
-
                 if data_type in ("FLOAT", "INT", "NUMERIC"):
                     self._build_expectations_numeric(
-                        profile_dataset=self.profile_dataset,
-                        column=column_name,
+                        profile_dataset=self.profile_dataset, column=column_name
                     )
-
                 if data_type == "DATETIME":
                     self._build_expectations_datetime(
-                        profile_dataset=self.profile_dataset,
-                        column=column_name,
+                        profile_dataset=self.profile_dataset, column=column_name
                     )
-
                 if (
                     OrderedProfilerCardinality[self.value_set_threshold]
                     >= OrderedProfilerCardinality[cardinality]
@@ -389,51 +322,42 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     self._build_expectations_value_set(
                         profile_dataset=self.profile_dataset, column=column_name
                     )
-
                 self._build_expectations_for_all_column_types(
                     profile_dataset=self.profile_dataset, column=column_name
                 )
                 pbar.update()
-
         expectation_suite = self._build_column_description_metadata(
             self.profile_dataset
         )
-
-        self._display_suite_by_column(
-            suite=expectation_suite
-        )  # include in the actual profiler
-
+        self._display_suite_by_column(suite=expectation_suite)
         return expectation_suite
 
     def _validate_semantic_types_dict(self):
-        """
-        Validates a semantic_types dict to ensure correct formatting, that all semantic_types are recognized, and that
-        the semantic_types align with the column data types
-        Args:
+        import inspect
 
-        Returns:
-            The validated semantic_types dictionary
-
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Validates a semantic_types dict to ensure correct formatting, that all semantic_types are recognized, and that\n        the semantic_types align with the column data types\n        Args:\n\n        Returns:\n            The validated semantic_types dictionary\n\n        "
         if not isinstance(self.semantic_types_dict, dict):
             raise ValueError(
-                f"The semantic_types dict in the config must be a dictionary, but is currently a "
-                f"{type(self.semantic_types_dict)}. Please reformat."
+                f"The semantic_types dict in the config must be a dictionary, but is currently a {type(self.semantic_types_dict)}. Please reformat."
             )
-        for k, v in self.semantic_types_dict.items():
-            assert isinstance(v, list), (
-                "Entries in semantic type dict must be lists of column names e.g. "
-                "{'semantic_types': {'numeric': ['number_of_transactions']}}"
-            )
+        for (k, v) in self.semantic_types_dict.items():
+            assert isinstance(
+                v, list
+            ), "Entries in semantic type dict must be lists of column names e.g. {'semantic_types': {'numeric': ['number_of_transactions']}}"
             if not any(
-                k.upper() == semantic_type.value
+                (k.upper() == semantic_type.value)
                 for semantic_type in ProfilerSemanticTypes
             ):
                 raise ValueError(
-                    f"{k} is not a recognized semantic_type. Please only include one of "
-                    f"{[semantic_type.value for semantic_type in ProfilerSemanticTypes]}"
+                    f"{k} is not a recognized semantic_type. Please only include one of {[semantic_type.value for semantic_type in ProfilerSemanticTypes]}"
                 )
-
         selected_columns = [
             column
             for column_list in self.semantic_types_dict.values()
@@ -445,45 +369,40 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     raise ProfilerError(f"Column {column} does not exist.")
                 elif column in self.ignored_columns:
                     raise ValueError(
-                        f"Column {column} is specified in both the semantic_types_dict and the list of "
-                        f"ignored columns. Please remove one of these entries to proceed."
+                        f"Column {column} is specified in both the semantic_types_dict and the list of ignored columns. Please remove one of these entries to proceed."
                     )
-
-        for semantic_type, column_list in self.semantic_types_dict.items():
+        for (semantic_type, column_list) in self.semantic_types_dict.items():
             for column_name in column_list:
                 processed_column = self.column_info.get(column_name)
                 if semantic_type == "datetime":
-                    assert processed_column.get("type") in ("DATETIME", "STRING",), (
-                        f"Column {column_name} must be a datetime column or a string but appears to be "
-                        f"{processed_column.get('type')}"
-                    )
+                    assert processed_column.get("type") in (
+                        "DATETIME",
+                        "STRING",
+                    ), f"Column {column_name} must be a datetime column or a string but appears to be {processed_column.get('type')}"
                 elif semantic_type == "numeric":
                     assert processed_column.get("type") in (
                         "INT",
                         "FLOAT",
                         "NUMERIC",
-                    ), f"""Column {column_name} must be an int or a float but appears to be \
-{processed_column.get('type')}"""
+                    ), f"Column {column_name} must be an int or a float but appears to be {processed_column.get('type')}"
                 elif semantic_type in ("STRING", "VALUE_SET"):
                     pass
-
         return self.semantic_types_dict
 
     def _add_column_type_to_column_info(self, profile_dataset, column_name):
-        """
-        Adds the data type of a column to the column_info dictionary on self
-        Args:
-            profile_dataset: A GE dataset
-            column_name: The name of the column for which to retrieve the data type
+        import inspect
 
-        Returns:
-            The type of the column
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds the data type of a column to the column_info dictionary on self\n        Args:\n            profile_dataset: A GE dataset\n            column_name: The name of the column for which to retrieve the data type\n\n        Returns:\n            The type of the column\n        "
         if "expect_column_values_to_be_in_type_list" in self.excluded_expectations:
             logger.info(
-                "expect_column_values_to_be_in_type_list is in the excluded_expectations list. This"
-                "expectation is required to establish column data, so it will be run and then removed from the"
-                "expectation suite."
+                "expect_column_values_to_be_in_type_list is in the excluded_expectations list. Thisexpectation is required to establish column data, so it will be run and then removed from theexpectation suite."
             )
         column_info_entry = self.column_info.get(column_name)
         if not column_info_entry:
@@ -493,30 +412,21 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         if not column_type:
             column_type = self._get_column_type(profile_dataset, column_name)
             column_info_entry["type"] = column_type
-
         return column_type
 
     @staticmethod
     def _get_column_type(profile_dataset, column) -> str:
-        """
-        Determines the data type of a column by evaluating the success of `expect_column_values_to_be_in_type_list`.
-        In the case of type Decimal, this data type is returned as NUMERIC, which contains the type lists for both INTs
-        and FLOATs.
+        import inspect
 
-        The type_list expectation used here is removed, since it will need to be built once the build_suite function is
-        actually called. This is because calling build_suite wipes any existing expectations, so expectations called
-        during the init of the profiler do not persist.
-
-        Args:
-            profile_dataset: A GE dataset
-            column: The column for which to get the data type
-
-        Returns:
-            The data type of the specified column
-        """
-        # list of types is used to support pandas and sqlalchemy
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Determines the data type of a column by evaluating the success of `expect_column_values_to_be_in_type_list`.\n        In the case of type Decimal, this data type is returned as NUMERIC, which contains the type lists for both INTs\n        and FLOATs.\n\n        The type_list expectation used here is removed, since it will need to be built once the build_suite function is\n        actually called. This is because calling build_suite wipes any existing expectations, so expectations called\n        during the init of the profiler do not persist.\n\n        Args:\n            profile_dataset: A GE dataset\n            column: The column for which to get the data type\n\n        Returns:\n            The data type of the specified column\n        "
         try:
-
             if (
                 profile_dataset.expect_column_values_to_be_in_type_list(
                     column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
@@ -526,63 +436,57 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 ).success
             ):
                 type_ = "NUMERIC"
-
             elif profile_dataset.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
             ).success:
                 type_ = "INT"
-
             elif profile_dataset.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
             ).success:
                 type_ = "FLOAT"
-
             elif profile_dataset.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.STRING_TYPE_NAMES))
             ).success:
                 type_ = "STRING"
-
             elif profile_dataset.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES))
             ).success:
                 type_ = "BOOLEAN"
-
             elif profile_dataset.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.DATETIME_TYPE_NAMES))
             ).success:
                 type_ = "DATETIME"
-
             else:
                 type_ = "UNKNOWN"
         except NotImplementedError:
             type_ = "unknown"
-
         if type_ == "NUMERIC":
             profile_dataset.expect_column_values_to_be_in_type_list(
                 column,
-                type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
-                + sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)),
+                type_list=(
+                    sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
+                    + sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
+                ),
             )
-
         profile_dataset._expectation_suite.remove_expectation(
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs={"column": column},
             )
         )
-
         return type_
 
     def _add_column_cardinality_to_column_info(self, profile_dataset, column_name):
-        """
-        Adds the cardinality of a column to the column_info dictionary on self
-        Args:
-            profile_dataset: A GE Dataset
-            column_name: The name of the column for which to add cardinality
+        import inspect
 
-        Returns:
-            The cardinality of the column
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds the cardinality of a column to the column_info dictionary on self\n        Args:\n            profile_dataset: A GE Dataset\n            column_name: The name of the column for which to add cardinality\n\n        Returns:\n            The cardinality of the column\n        "
         column_info_entry = self.column_info.get(column_name)
         if not column_info_entry:
             column_info_entry = {}
@@ -593,7 +497,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 profile_dataset, column_name
             )
             column_info_entry["cardinality"] = column_cardinality
-            # remove the expectations
             profile_dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_unique_value_count_to_be_between",
@@ -606,24 +509,22 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     kwargs={"column": column_name},
                 )
             )
-
         return column_cardinality
 
     @staticmethod
     def _get_column_cardinality(profile_dataset, column) -> OrderedProfilerCardinality:
-        """
-        Determines the cardinality of a column using the get_basic_column_cardinality method from
-        OrderedProfilerCardinality
-        Args:
-            profile_dataset: A GE Dataset
-            column: The column for which to get cardinality
+        import inspect
 
-        Returns:
-            The cardinality of the specified column
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Determines the cardinality of a column using the get_basic_column_cardinality method from\n        OrderedProfilerCardinality\n        Args:\n            profile_dataset: A GE Dataset\n            column: The column for which to get cardinality\n\n        Returns:\n            The cardinality of the specified column\n        "
         num_unique = None
         pct_unique = None
-
         try:
             num_unique = profile_dataset.expect_column_unique_value_count_to_be_between(
                 column, None, None
@@ -633,75 +534,69 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     column, None, None
                 ).result["observed_value"]
             )
-        except KeyError:  # if observed_value value is not set
+        except KeyError:
             logger.error(
                 f"Failed to get cardinality of column {column:s} - continuing..."
             )
-        # Previously, if we had 25 possible categories out of 1000 rows, this would comes up as many, because of its
-        #  percentage, so it was tweaked here, but is still experimental.
         cardinality: OrderedProfilerCardinality = (
             OrderedProfilerCardinality.get_basic_column_cardinality(
                 num_unique, pct_unique
             )
         )
-
         return cardinality.name
 
     def _add_semantic_types_by_column_from_config_to_column_info(self, column_name):
-        """
-        Adds the semantic type of a column to the column_info dict on self, for display purposes after suite creation
-        Args:
-            column_name: The name of the column
+        import inspect
 
-        Returns:
-            A list of semantic_types for a given column
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds the semantic type of a column to the column_info dict on self, for display purposes after suite creation\n        Args:\n            column_name: The name of the column\n\n        Returns:\n            A list of semantic_types for a given column\n        "
         column_info_entry = self.column_info.get(column_name)
         if not column_info_entry:
             column_info_entry = {}
             self.column_info[column_name] = column_info_entry
-
         semantic_types = column_info_entry.get("semantic_types")
-
         if not semantic_types:
             assert isinstance(
                 self.semantic_types_dict, dict
-            ), f"""The semantic_types dict in the config must be a dictionary, but is currently a \
-{type(self.semantic_types_dict)}. Please reformat.
+            ), f"""The semantic_types dict in the config must be a dictionary, but is currently a {type(self.semantic_types_dict)}. Please reformat.
 """
             semantic_types = []
-            for semantic_type, column_list in self.semantic_types_dict.items():
+            for (semantic_type, column_list) in self.semantic_types_dict.items():
                 if column_name in column_list:
                     semantic_types.append(semantic_type.upper())
             column_info_entry["semantic_types"] = semantic_types
             if all(
-                i in column_info_entry.get("semantic_types")
+                (i in column_info_entry.get("semantic_types"))
                 for i in ["BOOLEAN", "VALUE_SET"]
             ):
                 logger.info(
-                    f"Column {column_name} has both 'BOOLEAN' and 'VALUE_SET' specified as semantic_types."
-                    f"As these are currently the same in function, the 'VALUE_SET' type will be removed."
+                    f"Column {column_name} has both 'BOOLEAN' and 'VALUE_SET' specified as semantic_types.As these are currently the same in function, the 'VALUE_SET' type will be removed."
                 )
                 column_info_entry["semantic_types"].remove("VALUE_SET")
-
         self.column_info[column_name] = column_info_entry
-
         return semantic_types
 
     def _build_column_description_metadata(self, profile_dataset):
-        """
-        Adds column description metadata to the suite on a Dataset object
-        Args:
-            profile_dataset: A GE Dataset
+        import inspect
 
-        Returns:
-            An expectation suite with column description metadata
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds column description metadata to the suite on a Dataset object\n        Args:\n            profile_dataset: A GE Dataset\n\n        Returns:\n            An expectation suite with column description metadata\n        "
         columns = self.all_table_columns
         expectation_suite = profile_dataset.get_expectation_suite(
             suppress_warnings=True, discard_failed_expectations=False
         )
-
         meta_columns = {}
         for column in columns:
             meta_columns[column] = {"description": ""}
@@ -709,19 +604,19 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             expectation_suite.meta = {"columns": meta_columns, "notes": {""}}
         else:
             expectation_suite.meta["columns"] = meta_columns
-
         return expectation_suite
 
     def _display_suite_by_column(self, suite):
-        """
-        Displays the expectations of a suite by column, along with the column cardinality, and semantic or data type so
-        that a user can easily see which expectations were created for which columns
-        Args:
-            suite: An ExpectationSuite
+        import inspect
 
-        Returns:
-            The ExpectationSuite
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Displays the expectations of a suite by column, along with the column cardinality, and semantic or data type so\n        that a user can easily see which expectations were created for which columns\n        Args:\n            suite: An ExpectationSuite\n\n        Returns:\n            The ExpectationSuite\n        "
         expectations = suite.expectations
         expectations_by_column = {}
         for expectation in expectations:
@@ -730,75 +625,63 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 expectations_by_column[domain] = [expectation]
             else:
                 expectations_by_column[domain].append(expectation)
-
         if not expectations_by_column:
             print("No expectations included in suite.")
         else:
             print("Creating an expectation suite with the following expectations:\n")
-
         if "table_level_expectations" in expectations_by_column:
             table_level_expectations = expectations_by_column.pop(
                 "table_level_expectations"
             )
             print("Table-Level Expectations")
             for expectation in sorted(
-                table_level_expectations, key=lambda x: x.expectation_type
+                table_level_expectations, key=(lambda x: x.expectation_type)
             ):
                 print(expectation.expectation_type)
-
         if expectations_by_column:
             print("\nExpectations by Column")
-
         contains_semantic_types = [
             v for v in self.column_info.values() if v.get("semantic_types")
         ]
         for column in sorted(expectations_by_column):
             info_column = self.column_info.get(column) or {}
-
             semantic_types = info_column.get("semantic_types") or "not_specified"
             type_ = info_column.get("type")
             cardinality = info_column.get("cardinality")
-
             if len(contains_semantic_types) > 0:
-                type_string = f" | Semantic Type: {semantic_types[0] if len(semantic_types)==1 else semantic_types}"
+                type_string = f" | Semantic Type: {(semantic_types[0] if (len(semantic_types) == 1) else semantic_types)}"
             elif type_:
                 type_string = f" | Column Data Type: {type_}"
             else:
                 type_string = ""
-
             if cardinality:
                 cardinality_string = f" | Cardinality: {cardinality}"
             else:
                 cardinality_string = ""
-
-            column_string = (
-                f"Column Name: {column}{type_string or ''}{cardinality_string or ''}"
-            )
+            column_string = f"Column Name: {column}{(type_string or '')}{(cardinality_string or '')}"
             print(column_string)
-
             for expectation in sorted(
-                expectations_by_column.get(column), key=lambda x: x.expectation_type
+                expectations_by_column.get(column), key=(lambda x: x.expectation_type)
             ):
                 print(expectation.expectation_type)
             print("\n")
-
         return True
 
     def _build_expectations_value_set(self, profile_dataset, column):
-        """
-        Adds a value_set expectation for a given column
-        Args:
-            profile_dataset: A GE Dataset
-            column: The column for which to add an expectation
+        import inspect
 
-        Returns:
-            The GE Dataset
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds a value_set expectation for a given column\n        Args:\n            profile_dataset: A GE Dataset\n            column: The column for which to add an expectation\n\n        Returns:\n            The GE Dataset\n        "
         if "expect_column_values_to_be_in_set" not in self.excluded_expectations:
             value_set = profile_dataset.expect_column_distinct_values_to_be_in_set(
                 column, value_set=None, result_format="SUMMARY"
             ).result["observed_value"]
-
             profile_dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_distinct_values_to_be_in_set",
@@ -806,37 +689,30 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 ),
                 match_type="domain",
             )
-
             profile_dataset.expect_column_values_to_be_in_set(
                 column, value_set=value_set
             )
-
         return profile_dataset
 
     def _build_expectations_numeric(self, profile_dataset, column):
-        """
-        Adds a set of numeric expectations for a given column
-        Args:
-            profile_dataset: A GE Dataset
-            column: The column for which to add expectations
+        import inspect
 
-        Returns:
-            The GE Dataset
-        """
-
-        # min
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds a set of numeric expectations for a given column\n        Args:\n            profile_dataset: A GE Dataset\n            column: The column for which to add expectations\n\n        Returns:\n            The GE Dataset\n        "
         if "expect_column_min_to_be_between" not in self.excluded_expectations:
             observed_min = profile_dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not is_nan(observed_min):
-
                 profile_dataset.expect_column_min_to_be_between(
-                    column,
-                    min_value=observed_min,
-                    max_value=observed_min,
+                    column, min_value=observed_min, max_value=observed_min
                 )
-
             else:
                 profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
@@ -848,19 +724,14 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 logger.debug(
                     f"Skipping expect_column_min_to_be_between because observed value is nan: {observed_min}"
                 )
-
-        # max
         if "expect_column_max_to_be_between" not in self.excluded_expectations:
             observed_max = profile_dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not is_nan(observed_max):
                 profile_dataset.expect_column_max_to_be_between(
-                    column,
-                    min_value=observed_max,
-                    max_value=observed_max,
+                    column, min_value=observed_max, max_value=observed_max
                 )
-
             else:
                 profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
@@ -872,19 +743,14 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 logger.debug(
                     f"Skipping expect_column_max_to_be_between because observed value is nan: {observed_max}"
                 )
-
-        # mean
         if "expect_column_mean_to_be_between" not in self.excluded_expectations:
             observed_mean = profile_dataset.expect_column_mean_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not is_nan(observed_mean):
                 profile_dataset.expect_column_mean_to_be_between(
-                    column,
-                    min_value=observed_mean,
-                    max_value=observed_mean,
+                    column, min_value=observed_mean, max_value=observed_mean
                 )
-
             else:
                 profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
@@ -896,20 +762,14 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 logger.debug(
                     f"Skipping expect_column_mean_to_be_between because observed value is nan: {observed_mean}"
                 )
-
-        # median
         if "expect_column_median_to_be_between" not in self.excluded_expectations:
             observed_median = profile_dataset.expect_column_median_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not is_nan(observed_median):
-
                 profile_dataset.expect_column_median_to_be_between(
-                    column,
-                    min_value=observed_median,
-                    max_value=observed_median,
+                    column, min_value=observed_median, max_value=observed_median
                 )
-
             else:
                 profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
@@ -921,8 +781,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 logger.debug(
                     f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
                 )
-
-        allow_relative_error: Union[bool, str, float] = False
+        allow_relative_error: Union[(bool, str, float)] = False
         if (
             "expect_column_quantile_values_to_be_between"
             not in self.excluded_expectations
@@ -948,7 +807,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     allow_relative_error = attempt_allowing_relative_error(
                         sqlalchemy_execution_engine.engine.dialect
                     )
-
             quantile_result = (
                 profile_dataset.expect_column_quantile_values_to_be_between(
                     column,
@@ -980,7 +838,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 logger.debug(quantile_result.exception_info["exception_traceback"])
                 logger.debug(quantile_result.exception_info["exception_message"])
             else:
-
                 profile_dataset.expect_column_quantile_values_to_be_between(
                     column,
                     quantile_ranges={
@@ -994,23 +851,21 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     },
                     allow_relative_error=allow_relative_error,
                 )
-
         return profile_dataset
 
     def _build_expectations_primary_or_compound_key(self, profile_dataset, column_list):
-        """
-        Adds a uniqueness expectation for a given column or set of columns
-        Args:
-            profile_dataset: A GE Dataset
-            column_list: A list containing one or more columns for which to add a uniqueness expectation
+        import inspect
 
-        Returns:
-            The GE Dataset
-        """
-        # uniqueness
-        if (
-            len(column_list) > 1
-            and "expect_compound_columns_to_be_unique" not in self.excluded_expectations
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds a uniqueness expectation for a given column or set of columns\n        Args:\n            profile_dataset: A GE Dataset\n            column_list: A list containing one or more columns for which to add a uniqueness expectation\n\n        Returns:\n            The GE Dataset\n        "
+        if (len(column_list) > 1) and (
+            "expect_compound_columns_to_be_unique" not in self.excluded_expectations
         ):
             profile_dataset.expect_compound_columns_to_be_unique(column_list)
         elif len(column_list) < 1:
@@ -1021,43 +876,37 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             [column] = column_list
             if "expect_column_values_to_be_unique" not in self.excluded_expectations:
                 profile_dataset.expect_column_values_to_be_unique(column)
-
         return profile_dataset
 
-    # noinspection PyUnusedLocal
     def _build_expectations_string(self, profile_dataset, column):
-        """
-        Adds a set of string expectations for a given column. Currently does not do anything.
-        With the 0.12 API there isn't a quick way to introspect for value_lengths - if we did that, we could build a
-        potentially useful value_lengths expectation here.
-        Args:
-            profile_dataset: A GE Dataset
-            column: The column for which to add the expectation
+        import inspect
 
-        Returns:
-            The GE Dataset
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds a set of string expectations for a given column. Currently does not do anything.\n        With the 0.12 API there isn't a quick way to introspect for value_lengths - if we did that, we could build a\n        potentially useful value_lengths expectation here.\n        Args:\n            profile_dataset: A GE Dataset\n            column: The column for which to add the expectation\n\n        Returns:\n            The GE Dataset\n        "
         if (
             "expect_column_value_lengths_to_be_between"
             not in self.excluded_expectations
         ):
-
             pass
-
         return profile_dataset
 
     def _build_expectations_datetime(self, profile_dataset, column):
-        """
-        Adds `expect_column_values_to_be_between` for a given column
-        Args:
-            profile_dataset: A GE Dataset
-            column: The column for which to add the expectation
+        import inspect
 
-        Returns:
-            The GE Dataset
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds `expect_column_values_to_be_between` for a given column\n        Args:\n            profile_dataset: A GE Dataset\n            column: The column for which to add the expectation\n\n        Returns:\n            The GE Dataset\n        "
         if "expect_column_values_to_be_between" not in self.excluded_expectations:
             min_value = profile_dataset.expect_column_min_to_be_between(
                 column,
@@ -1066,13 +915,11 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 result_format="SUMMARY",
                 parse_strings_as_datetimes=False,
             ).result["observed_value"]
-
             if min_value is not None:
                 try:
                     min_value = parse(min_value)
                 except TypeError:
                     pass
-
             profile_dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_min_to_be_between",
@@ -1080,7 +927,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 ),
                 match_type="domain",
             )
-
             max_value = profile_dataset.expect_column_max_to_be_between(
                 column,
                 min_value=None,
@@ -1093,7 +939,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     max_value = parse(max_value)
                 except TypeError:
                     pass
-
             profile_dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_max_to_be_between",
@@ -1101,39 +946,34 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 ),
                 match_type="domain",
             )
-            if min_value is not None or max_value is not None:
+            if (min_value is not None) or (max_value is not None):
                 profile_dataset.expect_column_values_to_be_between(
                     column,
                     min_value=min_value,
                     max_value=max_value,
                     parse_strings_as_datetimes=False,
                 )
-
         return profile_dataset
 
     def _build_expectations_for_all_column_types(self, profile_dataset, column) -> None:
-        """
-        Adds these expectations for all included columns irrespective of type. Includes:
-            - `expect_column_values_to_not_be_null` (or `expect_column_values_to_be_null`)
-            - `expect_column_proportion_of_unique_values_to_be_between`
-            - `expect_column_values_to_be_in_type_list`
-        Args:
-            profile_dataset: A GE Dataset
-            column: The column for which to add the expectations
+        import inspect
 
-        Returns:
-            The GE Dataset
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds these expectations for all included columns irrespective of type. Includes:\n            - `expect_column_values_to_not_be_null` (or `expect_column_values_to_be_null`)\n            - `expect_column_proportion_of_unique_values_to_be_between`\n            - `expect_column_values_to_be_in_type_list`\n        Args:\n            profile_dataset: A GE Dataset\n            column: The column for which to add the expectations\n\n        Returns:\n            The GE Dataset\n        "
         if "expect_column_values_to_not_be_null" not in self.excluded_expectations:
             not_null_result = profile_dataset.expect_column_values_to_not_be_null(
                 column
             )
             if not not_null_result.success:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
-                if unexpected_percent >= 50 and not self.not_null_only:
+                if (unexpected_percent >= 50) and (not self.not_null_only):
                     potential_mostly_value = math.floor(unexpected_percent) / 100.0
-                    # A safe_mostly_value of 0.001 gives us a rough way of ensuring that we don't wind up with a mostly
-                    # value of 0 when we round
                     safe_mostly_value = max(0.001, potential_mostly_value)
                     profile_dataset._expectation_suite.remove_expectation(
                         ExpectationConfiguration(
@@ -1153,9 +993,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     potential_mostly_value = (
                         100.0 - math.ceil(unexpected_percent)
                     ) / 100.0
-
-                    # A safe_mostly_value of 0.001 gives us a rough way of ensuring that we don't wind up with a mostly
-                    # value of 0 when we round
                     safe_mostly_value = max(0.001, potential_mostly_value)
                     profile_dataset.expect_column_values_to_not_be_null(
                         column, mostly=safe_mostly_value
@@ -1169,13 +1006,11 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     column, None, None
                 ).result["observed_value"]
             )
-
             if not is_nan(pct_unique):
                 profile_dataset.expect_column_proportion_of_unique_values_to_be_between(
                     column, min_value=pct_unique, max_value=pct_unique
                 )
             else:
-                # noinspection PyProtectedMember
                 profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_proportion_of_unique_values_to_be_between",
@@ -1183,13 +1018,10 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     ),
                     match_type="domain",
                 )
-
                 logger.debug(
-                    f"""Skipping expect_column_proportion_of_unique_values_to_be_between because observed value is \
-nan: {pct_unique}
+                    f"""Skipping expect_column_proportion_of_unique_values_to_be_between because observed value is nan: {pct_unique}
 """
                 )
-
         if "expect_column_values_to_be_in_type_list" not in self.excluded_expectations:
             col_type = self.column_info.get(column).get("type")
             if col_type != "UNKNOWN":
@@ -1199,34 +1031,32 @@ nan: {pct_unique}
                 )
             else:
                 logger.info(
-                    f"Column type for column {column} is unknown. "
-                    f"Skipping expect_column_values_to_be_in_type_list for this column."
+                    f"Column type for column {column} is unknown. Skipping expect_column_values_to_be_in_type_list for this column."
                 )
 
     def _build_expectations_table(self, profile_dataset) -> None:
-        """
-        Adds two table level expectations to the dataset
-        Args:
-            profile_dataset: A GE Dataset
+        import inspect
 
-        Returns:
-            The GE Dataset
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Adds two table level expectations to the dataset\n        Args:\n            profile_dataset: A GE Dataset\n\n        Returns:\n            The GE Dataset\n        "
         if (
             "expect_table_columns_to_match_ordered_list"
             not in self.excluded_expectations
         ):
             columns = self.all_table_columns
             profile_dataset.expect_table_columns_to_match_ordered_list(columns)
-
         if "expect_table_row_count_to_be_between" not in self.excluded_expectations:
             row_count = profile_dataset.expect_table_row_count_to_be_between(
                 min_value=0, max_value=None
             ).result["observed_value"]
             min_value = max(0, int(row_count))
             max_value = int(row_count)
-
             profile_dataset.expect_table_row_count_to_be_between(
                 min_value=min_value, max_value=max_value
             )

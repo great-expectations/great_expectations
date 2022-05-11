@@ -28,13 +28,7 @@ from great_expectations.util import (
 
 
 class SuiteEditNotebookRenderer(BaseNotebookRenderer):
-    """
-    Render a notebook that can re-create or edit a suite.
-
-    Use cases:
-    - Make an easy path to edit a suite that a Profiler created.
-    - Make it easy to edit a suite where only JSON exists.
-    """
+    "\n    Render a notebook that can re-create or edit a suite.\n\n    Use cases:\n    - Make an easy path to edit a suite that a Profiler created.\n    - Make it easy to edit a suite where only JSON exists.\n"
 
     def __init__(
         self,
@@ -53,9 +47,17 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
         context: Optional[DataContext] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(context=context)
         custom_loader: list = []
-
         if custom_templates_module:
             try:
                 path_info_list: List[str] = custom_templates_module.rsplit(".", 1)
@@ -63,27 +65,23 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
                 package_path: str = path_info_list[1]
                 custom_loader: list = [
                     jinja2.PackageLoader(
-                        package_name=package_name,
-                        package_path=package_path,
-                    ),
+                        package_name=package_name, package_path=package_path
+                    )
                 ]
             except ModuleNotFoundError as e:
                 raise SuiteEditNotebookCustomTemplateModuleNotFoundError(
                     custom_templates_module
                 ) from e
-
         loaders: list = custom_loader + [
             jinja2.PackageLoader(
                 package_name="great_expectations.render.v3.notebook_assets",
                 package_path="suite_edit",
-            ),
+            )
         ]
         self.template_env = None
-
         self.template_env = jinja2.Environment(
             loader=jinja2.ChoiceLoader(loaders=loaders)
         )
-
         self.header_markdown = header_markdown
         self.footer_markdown = footer_markdown
         self.table_expectations_header_markdown = table_expectations_header_markdown
@@ -96,7 +94,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         )
         self.authoring_intro_markdown = authoring_intro_markdown
         self.column_expectations_markdown = column_expectations_markdown
-
         self.header_code = header_code
         self.footer_code = footer_code
         self.column_expectation_code = column_expectation_code
@@ -104,12 +101,20 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     @staticmethod
     def from_data_context(data_context: DataContext):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         suite_edit_notebook_config: Optional[NotebookConfig] = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
             suite_edit_notebook_config = notebookConfigSchema.load(
                 data_context.notebooks.get("suite_edit")
             )
-
         if suite_edit_notebook_config:
             return instantiate_class_from_config(
                 config=suite_edit_notebook_config.__dict__,
@@ -128,12 +133,19 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     @classmethod
     def _get_expectations_by_column(
         cls, expectations: List[ExpectationConfiguration]
-    ) -> Dict[str, List[ExpectationConfiguration]]:
-        # TODO probably replace this with Suite logic at some point
-        expectations_by_column: Dict[str, List[ExpectationConfiguration]] = {
+    ) -> Dict[(str, List[ExpectationConfiguration])]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        expectations_by_column: Dict[(str, List[ExpectationConfiguration])] = {
             "table_expectations": []
         }
-
         expectation: ExpectationConfiguration
         column_name: str
         for expectation in expectations:
@@ -144,7 +156,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
                 expectations_by_column[column_name].append(expectation)
             else:
                 expectations_by_column["table_expectations"].append(expectation)
-
         return expectations_by_column
 
     def render_with_overwrite(
@@ -153,6 +164,15 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         default_file_name: str,
         **default_kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         template: jinja2.Template
         rendered: str
         if notebook_config:
@@ -163,26 +183,32 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         else:
             template = self.template_env.get_template(name=default_file_name)
             rendered = template.render(**default_kwargs)
-
         return rendered
 
     def add_header(
         self,
         suite_name: str,
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+            Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
         ] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         markdown: str = self.render_with_overwrite(
             notebook_config=self.header_markdown,
             default_file_name="HEADER.md",
             suite_name=suite_name,
         )
         self.add_markdown_cell(markdown=markdown)
-
         if batch_request is None:
             batch_request = {}
-
         code: str = self.render_with_overwrite(
             notebook_config=self.header_code,
             default_file_name="header.py.j2",
@@ -195,12 +221,20 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def add_footer(
         self,
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+            Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
         ] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         markdown: str = self.render_with_overwrite(
-            notebook_config=self.footer_markdown,
-            default_file_name="FOOTER.md",
+            notebook_config=self.footer_markdown, default_file_name="FOOTER.md"
         )
         self.add_markdown_cell(markdown=markdown)
         code: str = self.render_with_overwrite(
@@ -215,15 +249,22 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         expectations: List[ExpectationConfiguration],
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+            Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
         ] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectations_by_column: Dict[
-            str, List[ExpectationConfiguration]
+            (str, List[ExpectationConfiguration])
         ] = self._get_expectations_by_column(expectations=expectations)
-
         markdown: str
-
         markdown = self.render_with_overwrite(
             notebook_config=self.table_expectations_header_markdown,
             default_file_name="TABLE_EXPECTATIONS_HEADER.md",
@@ -232,10 +273,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self._add_table_level_expectations(
             expectations_by_column=expectations_by_column, batch_request=batch_request
         )
-
-        # Remove the table expectations since they are dealt with
         expectations_by_column.pop("table_expectations")
-
         markdown = self.render_with_overwrite(
             notebook_config=self.column_expectations_header_markdown,
             default_file_name="COLUMN_EXPECTATIONS_HEADER.md",
@@ -247,11 +285,20 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def _add_table_level_expectations(
         self,
-        expectations_by_column: Dict[str, List[ExpectationConfiguration]],
+        expectations_by_column: Dict[(str, List[ExpectationConfiguration])],
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+            Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
         ] = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not expectations_by_column["table_expectations"]:
             markdown: str = self.render_with_overwrite(
                 notebook_config=self.table_expectations_not_found_markdown,
@@ -261,7 +308,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             )
             self.add_markdown_cell(markdown=markdown)
             return
-
         expectation: ExpectationConfiguration
         for expectation in expectations_by_column["table_expectations"]:
             filter_properties_dict(
@@ -280,11 +326,20 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def _add_column_level_expectations(
         self,
-        expectations_by_column: Dict[str, List[ExpectationConfiguration]],
+        expectations_by_column: Dict[(str, List[ExpectationConfiguration])],
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+            Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
         ] = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not expectations_by_column:
             markdown: str = self.render_with_overwrite(
                 notebook_config=self.column_expectations_not_found_markdown,
@@ -294,17 +349,15 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             )
             self.add_markdown_cell(markdown=markdown)
             return
-
         column_name: str
         expectations: List[ExpectationConfiguration]
-        for column_name, expectations in expectations_by_column.items():
+        for (column_name, expectations) in expectations_by_column.items():
             markdown: str = self.render_with_overwrite(
                 notebook_config=self.column_expectations_markdown,
                 default_file_name="COLUMN_EXPECTATIONS.md",
                 column=column_name,
             )
             self.add_markdown_cell(markdown=markdown)
-
             expectation: ExpectationConfiguration
             for expectation in expectations:
                 filter_properties_dict(
@@ -323,55 +376,69 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     @classmethod
     def _build_kwargs_string(cls, expectation: ExpectationConfiguration) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         kwargs: List[str] = []
         expectation_kwargs: dict = filter_properties_dict(
             properties=expectation["kwargs"], clean_falsy=True
         )
-        for k, v in expectation_kwargs.items():
+        for (k, v) in expectation_kwargs.items():
             if k == "column":
-                # make the column a positional argument
                 kwargs.insert(0, f"{k}='{v}'")
             elif isinstance(v, str):
-                # Put strings in quotes
                 kwargs.append(f"{k}='{v}'")
             else:
-                # Pass other types as is
                 kwargs.append(f"{k}={v}")
-
         return ", ".join(kwargs)
 
     @staticmethod
-    def _build_meta_arguments(meta: Dict[str, str]) -> str:
+    def _build_meta_arguments(meta: Dict[(str, str)]) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not meta:
             return ""
-
         profiler: str = "BasicSuiteBuilderProfiler"
         if profiler in meta.keys():
             meta.pop(profiler)
-
         if meta.keys():
             return f", meta={meta}"
-
         return ""
 
-    # noinspection PyMethodOverriding
     def render(
         self,
         suite: ExpectationSuite,
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+            Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
         ] = None,
     ) -> nbformat.NotebookNode:
-        """
-        Render a notebook dict from an expectation suite.
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Render a notebook dict from an expectation suite.\n        "
         if not isinstance(suite, ExpectationSuite):
             raise RuntimeWarning("render must be given an ExpectationSuite.")
-
         self._notebook = nbformat.v4.new_notebook()
-
         suite_name: str = suite.expectation_suite_name
-
         if (
             batch_request
             and isinstance(batch_request, dict)
@@ -382,38 +449,34 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             )
         else:
             batch_request = None
-
         self.add_header(suite_name=suite_name, batch_request=batch_request)
         self.add_authoring_intro(batch_request=batch_request)
         self.add_expectation_cells_from_suite(
             expectations=suite.expectations, batch_request=batch_request
         )
         self.add_footer(batch_request=batch_request)
-
         return self._notebook
 
-    # noinspection PyMethodOverriding
     def render_to_disk(
         self,
         suite: ExpectationSuite,
         notebook_file_path: str,
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+            Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
         ] = None,
     ) -> None:
-        """
-        Render a notebook to disk from an expectation suite.
+        import inspect
 
-        If batch_request dictionary is passed, its properties will override any found in suite citations.
-        """
-        deep_filter_properties_iterable(
-            properties=batch_request,
-            inplace=True,
-        )
-        self.render(
-            suite=suite,
-            batch_request=batch_request,
-        )
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Render a notebook to disk from an expectation suite.\n\n        If batch_request dictionary is passed, its properties will override any found in suite citations.\n        "
+        deep_filter_properties_iterable(properties=batch_request, inplace=True)
+        self.render(suite=suite, batch_request=batch_request)
         self.write_notebook_to_disk(
             notebook=self._notebook, notebook_file_path=notebook_file_path
         )
@@ -421,9 +484,18 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def add_authoring_intro(
         self,
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+            Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
         ] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         markdown: str = self.render_with_overwrite(
             notebook_config=self.authoring_intro_markdown,
             default_file_name="AUTHORING_INTRO.md",

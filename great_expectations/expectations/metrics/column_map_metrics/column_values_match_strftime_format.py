@@ -17,7 +17,26 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, strftime_format, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
         def is_parseable_by_format(val):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             try:
                 datetime.strptime(val, strftime_format)
                 return True
@@ -32,8 +51,15 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, strftime_format, **kwargs):
-        # Below is a simple validation that the provided format can both format and parse a datetime object.
-        # %D is an example of a format that can format but not parse, e.g.
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         try:
             datetime.strptime(
                 datetime.strftime(datetime.now(), strftime_format), strftime_format
@@ -42,6 +68,15 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
             raise ValueError(f"Unable to use provided strftime_format: {str(e)}")
 
         def is_parseable_by_format(val):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             if val is None:
                 return False
             try:

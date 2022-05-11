@@ -1,10 +1,3 @@
-###
-# These schemas are used to ensure that we *never* take unexpected usage stats message and provide full transparency
-# about usage statistics. Please reach out to the Great Expectations with any questions!
-###
-
-
-# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
@@ -13,7 +6,6 @@ from great_expectations.core.usage_statistics.execution_environment import (
 )
 
 SCHEMA: str = "http://json-schema.org/draft-04/schema#"
-
 anonymized_string_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-string",
@@ -21,37 +13,24 @@ anonymized_string_schema = {
     "minLength": 32,
     "maxLength": 32,
 }
-
 anonymized_datasource_name_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-datasource-name",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "anyOf": [
-        {
-            "type": "string",
-            "maxLength": 256,
-        },
-        {
-            "$ref": "#/definitions/anonymized_string",
-        },
+        {"type": "string", "maxLength": 256},
+        {"$ref": "#/definitions/anonymized_string"},
     ],
 }
-
 anonymized_run_time_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-run-time",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "anyOf": [
-        {
-            "type": "string",
-            "format": "date-time",
-        },
-        {
-            "$ref": "#/definitions/anonymized_string",
-        },
+        {"type": "string", "format": "date-time"},
+        {"$ref": "#/definitions/anonymized_string"},
     ],
 }
-
 anonymized_class_info_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-class-info",
@@ -65,13 +44,10 @@ anonymized_class_info_schema = {
                 "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
             },
             "additionalProperties": True,
-            # we don't want this to be true, but this is required to allow show_cta_footer
-            # Note AJB-20201218 show_cta_footer was removed in v 0.9.9 via PR #1249
             "required": ["parent_class"],
-        },
+        }
     ],
 }
-
 anonymized_datasource_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-datasource",
@@ -80,7 +56,6 @@ anonymized_datasource_schema = {
         "anonymized_class_info": anonymized_class_info_schema,
     },
     "anyOf": [
-        # v2 (Batch Kwargs) API:
         {
             "type": "object",
             "properties": {
@@ -92,7 +67,6 @@ anonymized_datasource_schema = {
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
         },
-        # v3 (Batch Request) API:
         {
             "type": "object",
             "properties": {
@@ -114,7 +88,6 @@ anonymized_datasource_schema = {
         },
     ],
 }
-
 anonymized_store_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-store",
@@ -135,10 +108,9 @@ anonymized_store_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        },
+        }
     ],
 }
-
 anonymized_action_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-action",
@@ -153,10 +125,9 @@ anonymized_action_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        },
+        }
     ],
 }
-
 anonymized_action_list_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-action-list",
@@ -165,7 +136,6 @@ anonymized_action_list_schema = {
     "maxItems": 1000,
     "items": {"$ref": "#/definitions/anonymized_action"},
 }
-
 anonymized_validation_operator_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-validation-operator",
@@ -186,10 +156,9 @@ anonymized_validation_operator_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        },
+        }
     ],
 }
-
 empty_payload_schema = {
     "$schema": SCHEMA,
     "title": "empty-payload",
@@ -197,7 +166,6 @@ empty_payload_schema = {
     "properties": {},
     "additionalProperties": False,
 }
-
 anonymized_data_docs_site_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-data-docs-site",
@@ -221,10 +189,9 @@ anonymized_data_docs_site_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        },
+        }
     ],
 }
-
 anonymized_expectation_suite_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-expectation-suite",
@@ -262,7 +229,6 @@ anonymized_expectation_suite_schema = {
         },
     ],
 }
-
 package_info_schema = {
     "$schema": SCHEMA,
     "title": "package-info",
@@ -270,14 +236,11 @@ package_info_schema = {
     "properties": {
         "package_name": {"type": "string", "maxLength": 256},
         "installed": {"type": "boolean"},
-        "install_environment": {
-            "enum": [ie.value for ie in InstallEnvironment],
-        },
+        "install_environment": {"enum": [ie.value for ie in InstallEnvironment]},
         "version": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]},
     },
     "additionalProperties": False,
 }
-
 anonymized_init_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-init-payload",
@@ -340,7 +303,6 @@ anonymized_init_payload_schema = {
     ],
     "additionalProperties": False,
 }
-
 anonymized_batch_request_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-batch-request",
@@ -354,13 +316,13 @@ anonymized_batch_request_schema = {
             "type": "object",
             "properties": {
                 "anonymized_datasource_name": {
-                    "$ref": "#/definitions/anonymized_datasource_name",
+                    "$ref": "#/definitions/anonymized_datasource_name"
                 },
                 "anonymized_data_connector_name": {
-                    "$ref": "#/definitions/anonymized_string",
+                    "$ref": "#/definitions/anonymized_string"
                 },
                 "anonymized_data_asset_name": {
-                    "$ref": "#/definitions/anonymized_string",
+                    "$ref": "#/definitions/anonymized_string"
                 },
             },
             "required": [
@@ -404,14 +366,7 @@ anonymized_batch_request_schema = {
             "type": "array",
             "minItems": 1,
             "maxItems": 1,
-            "items": {
-                "type": "string",
-                "enum": [
-                    "batch_data",
-                    "query",
-                    "path",
-                ],
-            },
+            "items": {"type": "string", "enum": ["batch_data", "query", "path"]},
         },
         "batch_spec_passthrough_keys": {
             "type": "array",
@@ -433,7 +388,6 @@ anonymized_batch_request_schema = {
     },
     "additionalProperties": False,
 }
-
 anonymized_batch_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-batch",
@@ -454,7 +408,7 @@ anonymized_batch_schema = {
                     "$ref": "#/definitions/anonymized_string"
                 },
                 "anonymized_datasource_name": {
-                    "$ref": "#/definitions/anonymized_datasource_name",
+                    "$ref": "#/definitions/anonymized_datasource_name"
                 },
             },
             "additionalProperties": False,
@@ -463,10 +417,9 @@ anonymized_batch_schema = {
                 "anonymized_expectation_suite_name",
                 "anonymized_datasource_name",
             ],
-        },
+        }
     ],
 }
-
 anonymized_run_validation_operator_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-run-validation-operator-payload",
@@ -487,7 +440,6 @@ anonymized_run_validation_operator_payload_schema = {
     "required": ["anonymized_operator_name"],
     "additionalProperties": False,
 }
-
 anonymized_validation_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-validation",
@@ -506,7 +458,6 @@ anonymized_validation_schema = {
     },
     "additionalProperties": False,
 }
-
 anonymized_validations_list_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-validations",
@@ -515,43 +466,34 @@ anonymized_validations_list_schema = {
     "maxItems": 1000,
     "items": {"$ref": "#/definitions/anonymized_validation"},
 }
-
 anonymized_save_or_edit_expectation_suite_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-save-or-edit-expectation-suite-payload",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
-        "anonymized_expectation_suite_name": {
-            "$ref": "#/definitions/anonymized_string"
-        },
+        "anonymized_expectation_suite_name": {"$ref": "#/definitions/anonymized_string"}
     },
     "required": ["anonymized_expectation_suite_name"],
     "additionalProperties": False,
 }
-
 anonymized_cli_suite_expectation_suite_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-cli-suite-expectation-suite-payload",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
-        "interactive_flag": {
-            "type": ["boolean", "null"],
-        },
+        "interactive_flag": {"type": ["boolean", "null"]},
         "interactive_attribution": {
             "enum": [
                 element.value["interactive_attribution"]
                 for element in CLISuiteInteractiveFlagCombinations
-            ],
+            ]
         },
         "api_version": {"type": "string", "maxLength": 256},
-        "cancelled": {
-            "type": ["boolean", "null"],
-        },
+        "cancelled": {"type": ["boolean", "null"]},
     },
 }
-
 anonymized_cli_suite_new_expectation_suite_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-cli-suite-new-expectation-suite-payload",
@@ -564,12 +506,11 @@ anonymized_cli_suite_new_expectation_suite_payload_schema = {
         "properties": {
             "anonymized_expectation_suite_name": {
                 "$ref": "#/definitions/anonymized_string"
-            },
+            }
         },
         "additionalProperties": False,
     },
 }
-
 anonymized_cli_suite_edit_expectation_suite_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-cli-suite-edit-expectation-suite-payload",
@@ -582,29 +523,22 @@ anonymized_cli_suite_edit_expectation_suite_payload_schema = {
         "properties": {
             "anonymized_expectation_suite_name": {
                 "$ref": "#/definitions/anonymized_string"
-            },
+            }
         },
         "required": ["anonymized_expectation_suite_name"],
         "additionalProperties": False,
     },
 }
-
 anonymized_cli_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-cli-payload",
     "type": "object",
     "properties": {
-        "api_version": {
-            "type": "string",
-            "maxLength": 256,
-        },
-        "cancelled": {
-            "type": ["boolean", "null"],
-        },
+        "api_version": {"type": "string", "maxLength": 256},
+        "cancelled": {"type": ["boolean", "null"]},
     },
     "additionalProperties": False,
 }
-
 anonymized_cli_new_ds_choice_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-cli-new-ds-choice-payload",
@@ -617,8 +551,6 @@ anonymized_cli_new_ds_choice_payload_schema = {
     "required": ["type"],
     "additionalProperties": False,
 }
-
-
 anonymized_datasource_sqlalchemy_connect_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-datasource-sqlalchemy-connect-payload",
@@ -630,7 +562,6 @@ anonymized_datasource_sqlalchemy_connect_payload_schema = {
     "required": ["anonymized_name"],
     "additionalProperties": False,
 }
-
 anonymized_test_yaml_config_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-test-yaml-config-payload",
@@ -652,14 +583,11 @@ anonymized_test_yaml_config_payload_schema = {
                     "__yaml_parse_error__",
                     "__custom_subclass_not_core_ge__",
                     "__class_name_not_provided__",
-                ],
+                ]
             },
         },
-        # Store
         "anonymized_store_backend": {"$ref": "#/definitions/anonymized_class_info"},
-        # Datasource v2 (Batch Kwargs) API & v3 (Batch Request) API:
         "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
-        # Datasource v3 (Batch Request) API only:
         "anonymized_execution_engine": {"$ref": "#/definitions/anonymized_class_info"},
         "anonymized_data_connectors": {
             "type": "array",
@@ -669,7 +597,6 @@ anonymized_test_yaml_config_payload_schema = {
     },
     "additionalProperties": False,
 }
-
 anonymized_checkpoint_run_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-checkpoint-run-payload",
@@ -733,34 +660,19 @@ anonymized_checkpoint_run_schema = {
         {"$ref": "#/definitions/empty_payload"},
     ],
 }
-
 anonymized_legacy_profiler_build_suite_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-legacy-profiler-build-suite-payload",
     "type": "object",
     "properties": {
         "profile_dataset_type": {"type": "string", "maxLength": 256},
-        "excluded_expectations_specified": {
-            "type": ["boolean"],
-        },
-        "ignored_columns_specified": {
-            "type": ["boolean"],
-        },
-        "not_null_only": {
-            "type": ["boolean"],
-        },
-        "primary_or_compound_key_specified": {
-            "type": ["boolean"],
-        },
-        "semantic_types_dict_specified": {
-            "type": ["boolean"],
-        },
-        "table_expectations_only": {
-            "type": ["boolean"],
-        },
-        "value_set_threshold_specified": {
-            "type": ["boolean"],
-        },
+        "excluded_expectations_specified": {"type": ["boolean"]},
+        "ignored_columns_specified": {"type": ["boolean"]},
+        "not_null_only": {"type": ["boolean"]},
+        "primary_or_compound_key_specified": {"type": ["boolean"]},
+        "semantic_types_dict_specified": {"type": ["boolean"]},
+        "table_expectations_only": {"type": ["boolean"]},
+        "value_set_threshold_specified": {"type": ["boolean"]},
         "api_version": {"type": "string", "maxLength": 256},
     },
     "required": [
@@ -776,7 +688,6 @@ anonymized_legacy_profiler_build_suite_payload_schema = {
     ],
     "additionalProperties": False,
 }
-
 anonymized_domain_builder_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-domain-builder",
@@ -794,7 +705,6 @@ anonymized_domain_builder_schema = {
     "additionalProperties": False,
     "required": ["parent_class"],
 }
-
 anonymized_parameter_builder_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-parameter-builder",
@@ -813,13 +723,10 @@ anonymized_parameter_builder_schema = {
     "additionalProperties": False,
     "required": ["anonymized_name", "parent_class"],
 }
-
 anonymized_expectation_configuration_builder_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-expectation-configuration-builder",
-    "definitions": {
-        "anonymized_string": anonymized_string_schema,
-    },
+    "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
         "parent_class": {"type": "string", "maxLength": 256},
@@ -831,7 +738,6 @@ anonymized_expectation_configuration_builder_schema = {
     "additionalProperties": False,
     "required": ["parent_class"],
 }
-
 anonymized_rule_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-rules",
@@ -865,7 +771,6 @@ anonymized_rule_schema = {
     "additionalProperties": False,
     "required": ["anonymized_name", "anonymized_expectation_configuration_builders"],
 }
-
 anonymized_rule_based_profiler_run_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-rule-based-profiler-run-payload",
@@ -905,7 +810,6 @@ anonymized_rule_based_profiler_run_schema = {
         {"$ref": "#/definitions/empty_payload"},
     ],
 }
-
 anonymized_usage_statistics_record_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-usage-statistics-record",
@@ -1036,7 +940,7 @@ anonymized_usage_statistics_record_schema = {
                         "expectation_suite.add_expectation",
                         "data_context.run_profiler_with_dynamic_arguments",
                         "data_context.run_profiler_on_data",
-                    ],
+                    ]
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
             },
@@ -1044,9 +948,7 @@ anonymized_usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {
-                    "enum": ["data_context.test_yaml_config"],
-                },
+                "event": {"enum": ["data_context.test_yaml_config"]},
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_test_yaml_config_payload"
                 },
@@ -1060,7 +962,7 @@ anonymized_usage_statistics_record_schema = {
                         "cli.suite.new",
                         "cli.suite.new.begin",
                         "cli.suite.new.end",
-                    ],
+                    ]
                 },
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_cli_suite_new_expectation_suite_payload"
@@ -1075,7 +977,7 @@ anonymized_usage_statistics_record_schema = {
                         "cli.suite.edit",
                         "cli.suite.edit.begin",
                         "cli.suite.edit.end",
-                    ],
+                    ]
                 },
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_cli_suite_edit_expectation_suite_payload"
@@ -1085,18 +987,14 @@ anonymized_usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {
-                    "enum": ["checkpoint.run"],
-                },
+                "event": {"enum": ["checkpoint.run"]},
                 "event_payload": {"$ref": "#/definitions/anonymized_checkpoint_run"},
             },
         },
         {
             "type": "object",
             "properties": {
-                "event": {
-                    "enum": ["legacy_profiler.build_suite"],
-                },
+                "event": {"enum": ["legacy_profiler.build_suite"]},
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_legacy_profiler_build_suite_payload"
                 },
@@ -1105,9 +1003,7 @@ anonymized_usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {
-                    "enum": ["profiler.run"],
-                },
+                "event": {"enum": ["profiler.run"]},
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_rule_based_profiler_run"
                 },
@@ -1171,7 +1067,7 @@ anonymized_usage_statistics_record_schema = {
                         "cli.suite.scaffold",
                         "cli.validation_operator.list",
                         "cli.validation_operator.run",
-                    ],
+                    ]
                 },
                 "event_payload": {"$ref": "#/definitions/anonymized_cli_payload"},
             },
@@ -1191,19 +1087,21 @@ anonymized_usage_statistics_record_schema = {
 
 
 def write_schema_to_file(target_dir: str) -> None:
-    """Utility to write schema to disk.
+    import inspect
 
-    The file name will always be "usage_statistics_record_schema.json" but the target directory can be specified.
-
-    Args:
-        target_dir (str): The dir you wish to write the schema to.
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    'Utility to write schema to disk.\n\n    The file name will always be "usage_statistics_record_schema.json" but the target directory can be specified.\n\n    Args:\n        target_dir (str): The dir you wish to write the schema to.\n    '
     import json
     import os
 
     file: str = "usage_statistics_record_schema.json"
     out: str = os.path.join(target_dir, file)
-
     with open(out, "w") as outfile:
         json.dump(anonymized_usage_statistics_record_schema, outfile, indent=2)
 
@@ -1211,5 +1109,5 @@ def write_schema_to_file(target_dir: str) -> None:
 if __name__ == "__main__":
     import sys
 
-    target_dir = sys.argv[1] if len(sys.argv) >= 2 else "."
+    target_dir = sys.argv[1] if (len(sys.argv) >= 2) else "."
     write_schema_to_file(target_dir)

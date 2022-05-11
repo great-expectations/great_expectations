@@ -26,82 +26,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
-    """Expect the set of distinct column values to be contained by a given set.
-
-            The success value for this expectation will match that of expect_column_values_to_be_in_set. However,
-            expect_column_distinct_values_to_be_in_set is a \
-            :func:`column_aggregate_expectation \
-            <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
-
-            For example:
-            ::
-
-                # my_df.my_col = [1,2,2,3,3,3]
-                >>> my_df.expect_column_distinct_values_to_be_in_set(
-                    "my_col",
-                    [2, 3, 4]
-                )
-                {
-                  "success": false
-                  "result": {
-                    "observed_value": [1,2,3],
-                    "details": {
-                      "value_counts": [
-                        {
-                          "value": 1,
-                          "count": 1
-                        },
-                        {
-                          "value": 2,
-                          "count": 1
-                        },
-                        {
-                          "value": 3,
-                          "count": 1
-                        }
-                      ]
-                    }
-                  }
-                }
-
-            Args:
-                column (str): \
-                    The column name.
-                value_set (set-like): \
-                    A set of objects used for comparison.
-
-            Keyword Args:
-                parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed \
-                as datetimes before making comparisons.
-
-            Other Parameters:
-                result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
-                    For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                catch_exceptions (boolean or None): \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
-
-            Returns:
-                An ExpectationSuiteValidationResult
-
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-            See Also:
-                :func:`expect_column_distinct_values_to_contain_set \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine
-                .expect_column_distinct_values_to_contain_set>`
-
-            """
-
-    # This dictionary contains metadata for display in the public gallery
+    'Expect the set of distinct column values to be contained by a given set.\n\n            The success value for this expectation will match that of expect_column_values_to_be_in_set. However,\n            expect_column_distinct_values_to_be_in_set is a             :func:`column_aggregate_expectation             <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.\n\n            For example:\n            ::\n\n                # my_df.my_col = [1,2,2,3,3,3]\n                >>> my_df.expect_column_distinct_values_to_be_in_set(\n                    "my_col",\n                    [2, 3, 4]\n                )\n                {\n                  "success": false\n                  "result": {\n                    "observed_value": [1,2,3],\n                    "details": {\n                      "value_counts": [\n                        {\n                          "value": 1,\n                          "count": 1\n                        },\n                        {\n                          "value": 2,\n                          "count": 1\n                        },\n                        {\n                          "value": 3,\n                          "count": 1\n                        }\n                      ]\n                    }\n                  }\n                }\n\n            Args:\n                column (str):                     The column name.\n                value_set (set-like):                     A set of objects used for comparison.\n\n            Keyword Args:\n                parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed                 as datetimes before making comparisons.\n\n            Other Parameters:\n                result_format (str or None):                     Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.                     For more detail, see :ref:`result_format <result_format>`.\n                include_config (boolean):                     If True, then include the expectation config as part of the result object.                     For more detail, see :ref:`include_config`.\n                catch_exceptions (boolean or None):                     If True, then catch exceptions and include them as part of the result object.                     For more detail, see :ref:`catch_exceptions`.\n                meta (dict or None):                     A JSON-serializable dictionary (nesting allowed) that will be included in the output without                     modification. For more detail, see :ref:`meta`.\n\n            Returns:\n                An ExpectationSuiteValidationResult\n\n                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n            See Also:\n                :func:`expect_column_distinct_values_to_contain_set                 <great_expectations.execution_engine.execution_engine.ExecutionEngine\n                .expect_column_distinct_values_to_contain_set>`\n\n'
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
@@ -110,15 +35,8 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.value_counts",)
-    success_keys = (
-        "value_set",
-        "parse_strings_as_datetimes",
-    )
-
-    # Default values
+    success_keys = ("value_set", "parse_strings_as_datetimes")
     default_kwarg_values = {
         "value_set": None,
         "parse_strings_as_datetimes": False,
@@ -126,10 +44,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
-    args_keys = (
-        "column",
-        "value_set",
-    )
+    args_keys = ("column", "value_set")
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -140,13 +55,21 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
-
         params = substitute_none_for_missing(
             configuration.kwargs,
             ["column", "value_set", "row_condition", "condition_parser"],
@@ -166,22 +89,17 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-
-        if params["value_set"] is None or len(params["value_set"]) == 0:
-
+        if (params["value_set"] is None) or (len(params["value_set"]) == 0):
             if include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
-
         else:
-
-            for i, v in enumerate(params["value_set"]):
+            for (i, v) in enumerate(params["value_set"]):
                 params[f"v__{str(i)}"] = v
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for (i, v) in enumerate(params["value_set"])]
             )
-
             if include_column_name:
                 template_str = (
                     f"$column distinct values must belong to this set: {values_string}."
@@ -190,7 +108,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 template_str = (
                     f"distinct values must belong to this set: {values_string}."
                 )
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -200,13 +117,11 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
-
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
             params=params,
             params_with_json_schema=params_with_json_schema,
             param_key_with_list="value_set",
         )
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -220,33 +135,36 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
-
         params = substitute_none_for_missing(
             configuration.kwargs,
             ["column", "value_set", "row_condition", "condition_parser"],
         )
-
-        if params["value_set"] is None or len(params["value_set"]) == 0:
-
+        if (params["value_set"] is None) or (len(params["value_set"]) == 0):
             if include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
-
         else:
-
-            for i, v in enumerate(params["value_set"]):
+            for (i, v) in enumerate(params["value_set"]):
                 params[f"v__{str(i)}"] = v
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for (i, v) in enumerate(params["value_set"])]
             )
-
             if include_column_name:
                 template_str = (
                     f"$column distinct values must belong to this set: {values_string}."
@@ -255,7 +173,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 template_str = (
                     f"distinct values must belong to this set: {values_string}."
                 )
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -263,7 +180,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{
@@ -287,6 +203,15 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert result, "Must pass in result."
         value_count_dicts = result.result["details"]["value_counts"]
         if isinstance(value_count_dicts, pd.Series):
@@ -299,14 +224,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             counts = [
                 value_count_dict["count"] for value_count_dict in value_count_dicts
             ]
-
-        df = pd.DataFrame(
-            {
-                "value": values,
-                "count": counts,
-            }
-        )
-
+        df = pd.DataFrame({"value": values, "count": counts})
         if len(values) > 60:
             return None
         else:
@@ -320,20 +238,16 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 chart_container_col_width = 6
             elif chart_container_col_width >= 4:
                 chart_container_col_width = 5
-
         mark_bar_args = {}
         if len(values) == 1:
             mark_bar_args["size"] = 20
-
         bars = (
             alt.Chart(df)
             .mark_bar(**mark_bar_args)
             .encode(y="count:Q", x="value:O", tooltip=["value", "count"])
             .properties(height=400, width=chart_pixel_width, autosize="fit")
         )
-
         chart = bars.to_json()
-
         new_block = RenderedGraphContent(
             **{
                 "content_block_type": "graph",
@@ -351,24 +265,30 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 ),
                 "graph": chart,
                 "styling": {
-                    "classes": [f"col-{str(chart_container_col_width)}", "mt-1"],
+                    "classes": [f"col-{str(chart_container_col_width)}", "mt-1"]
                 },
             }
         )
-
         return new_block
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
-        super().validate_configuration(configuration)
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Validating that user has inputted a value set and that configuration has been initialized"
+        super().validate_configuration(configuration)
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
-            assert (
-                isinstance(configuration.kwargs["value_set"], (list, set, dict))
-                or configuration.kwargs["value_set"] is None
+            assert isinstance(configuration.kwargs["value_set"], (list, set, dict)) or (
+                configuration.kwargs["value_set"] is None
             ), "value_set must be a list, set, or None"
             if isinstance(configuration.kwargs["value_set"], dict):
                 assert (
@@ -384,25 +304,30 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
             "parse_strings_as_datetimes"
         )
         observed_value_counts = metrics.get("column.value_counts")
         observed_value_set = set(observed_value_counts.index)
         value_set = self.get_success_kwargs(configuration).get("value_set") or []
-
         if parse_strings_as_datetimes:
             parsed_value_set = parse_value_set(value_set)
         else:
             parsed_value_set = value_set
-
         expected_value_set = set(parsed_value_set)
-
         if not expected_value_set:
             success = True
         else:
             success = observed_value_set.issubset(expected_value_set)
-
         return {
             "success": success,
             "result": {

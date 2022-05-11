@@ -16,51 +16,15 @@ from great_expectations.render.util import (
 
 
 class ExpectTableRowCountToEqual(TableExpectation):
-    """Expect the number of rows to equal a value.
-
-    expect_table_row_count_to_equal is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
-
-    Args:
-        value (int): \
-            The expected number of rows.
-
-    Other Parameters:
-        result_format (string or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
-        meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
-
-    Returns:
-        An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-    See Also:
-        expect_table_row_count_to_be_between
-    """
-
+    "Expect the number of rows to equal a value.\n\n    expect_table_row_count_to_equal is a :func:`expectation     <great_expectations.validator.validator.Validator.expectation>`, not a\n    ``column_map_expectation`` or ``column_aggregate_expectation``.\n\n    Args:\n        value (int):             The expected number of rows.\n\n    Other Parameters:\n        result_format (string or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    See Also:\n        expect_table_row_count_to_be_between\n"
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
-        "contributors": [
-            "@great_expectations",
-        ],
+        "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
     metric_dependencies = ("table.row_count",)
     success_keys = ("value",)
     default_kwarg_values = {
@@ -75,28 +39,22 @@ class ExpectTableRowCountToEqual(TableExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        import inspect
 
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        # Setting up a configuration
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that\n        necessary configuration arguments have been provided for the validation of the expectation.\n\n        Args:\n            configuration (OPTIONAL[ExpectationConfiguration]):                 An optional Expectation Configuration entry that will be used to configure the expectation\n        Returns:\n            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully\n        "
         super().validate_configuration(configuration)
-
         value = configuration.kwargs.get("value")
-
         try:
             assert value is not None, "An expected row count must be provided"
-
             if not isinstance(value, (int, dict)):
                 raise ValueError("Provided row count must be an integer")
-
             if isinstance(value, dict):
                 assert (
                     "$PARAMETER" in value
@@ -113,21 +71,26 @@ class ExpectTableRowCountToEqual(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["value", "row_condition", "condition_parser"],
+            configuration.kwargs, ["value", "row_condition", "condition_parser"]
         )
         params_with_json_schema = {
-            "value": {
-                "schema": {"type": "number"},
-                "value": params.get("value"),
-            },
+            "value": {"schema": {"type": "number"}, "value": params.get("value")},
             "row_condition": {
                 "schema": {"type": "string"},
                 "value": params.get("row_condition"),
@@ -138,7 +101,6 @@ class ExpectTableRowCountToEqual(TableExpectation):
             },
         }
         template_str = "Must have exactly $value rows."
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -147,13 +109,9 @@ class ExpectTableRowCountToEqual(TableExpectation):
                 params["row_condition"], with_schema=True
             )
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
+                (conditional_template_str + ", then ") + template_str[0].lower()
+            ) + template_str[1:]
             params_with_json_schema.update(conditional_params)
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -167,31 +125,34 @@ class ExpectTableRowCountToEqual(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["value", "row_condition", "condition_parser"],
+            configuration.kwargs, ["value", "row_condition", "condition_parser"]
         )
         template_str = "Must have exactly $value rows."
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
+                (conditional_template_str + ", then ") + template_str[0].lower()
+            ) + template_str[1:]
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{
@@ -212,10 +173,18 @@ class ExpectTableRowCountToEqual(TableExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expected_table_row_count = self.get_success_kwargs().get("value")
         actual_table_row_count = metrics.get("table.row_count")
-
         return {
-            "success": actual_table_row_count == expected_table_row_count,
+            "success": (actual_table_row_count == expected_table_row_count),
             "result": {"observed_value": actual_table_row_count},
         }

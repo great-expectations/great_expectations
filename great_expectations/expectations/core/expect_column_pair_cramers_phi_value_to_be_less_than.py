@@ -9,8 +9,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 
 
 class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
-
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "tags": [
@@ -21,13 +19,8 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         "contributors": ["@great_expectations"],
         "requirements": [],
     }
-
     metric_dependencies = tuple()
-    success_keys = (
-        "column_A",
-        "column_B",
-        "threshold",
-    )
+    success_keys = ("column_A", "column_B", "threshold")
     default_kwarg_values = {
         "column_A": None,
         "column_B": None,
@@ -40,10 +33,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
-    args_keys = (
-        "column_A",
-        "column_B",
-    )
+    args_keys = ("column_A", "column_B")
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -54,10 +44,19 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -67,7 +66,6 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
             template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
         else:
             template_str = "Values in $column_A and $column_B must be independent."
-
         params_with_json_schema = {
             "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
             "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
@@ -85,10 +83,19 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -98,7 +105,6 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
             template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
         else:
             template_str = "Values in $column_A and $column_B must be independent."
-
         rendered_string_template_content = RenderedStringTemplateContent(
             **{
                 "content_block_type": "string_template",
@@ -109,7 +115,6 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
                 },
             }
         )
-
         return [rendered_string_template_content]
 
     @classmethod
@@ -122,23 +127,30 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         observed_value = result.result.get("observed_value")
         column_A = result.expectation_config.kwargs["column_A"]
         column_B = result.expectation_config.kwargs["column_B"]
         crosstab = result.result.get("details", {}).get("crosstab")
-
         if observed_value is not None:
             observed_value = num_to_str(observed_value, precision=3, use_locale=True)
             if crosstab is not None:
-                table = [[""] + list(crosstab.columns)]
+                table = [([""] + list(crosstab.columns))]
                 for col in range(len(crosstab)):
                     table.append([crosstab.index[col]] + list(crosstab.iloc[col, :]))
-
                 return RenderedTableContent(
                     **{
                         "content_block_type": "table",
-                        "header": f"Observed cramers phi of {observed_value}. \n"
-                        f"Crosstab between {column_A} (rows) and {column_B} (columns):",
+                        "header": f"""Observed cramers phi of {observed_value}.
+Crosstab between {column_A} (rows) and {column_B} (columns):""",
                         "table": table,
                         "styling": {
                             "body": {
@@ -148,7 +160,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
                                     "table-unbordered",
                                     "col-4",
                                     "mt-2",
-                                ],
+                                ]
                             }
                         },
                     }

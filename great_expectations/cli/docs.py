@@ -14,21 +14,26 @@ from great_expectations.exceptions import DataContextError
 @click.group()
 @click.pass_context
 def docs(ctx: click.Context) -> None:
-    """Data Docs operations"""
-    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
+    import inspect
 
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Data Docs operations"
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
     cli_event_noun: str = "docs"
     (
         begin_event_name,
         end_event_name,
     ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
-        noun=cli_event_noun,
-        verb=ctx.invoked_subcommand,
+        noun=cli_event_noun, verb=ctx.invoked_subcommand
     )
     send_usage_message(
-        data_context=ctx.obj.data_context,
-        event=begin_event_name,
-        success=True,
+        data_context=ctx.obj.data_context, event=begin_event_name, success=True
     )
     ctx.obj.usage_event_end = end_event_name
 
@@ -51,11 +56,19 @@ def docs(ctx: click.Context) -> None:
 def docs_build(
     ctx: click.Context, site_name: Optional[str] = None, no_view: bool = False
 ) -> None:
-    """Build Data Docs for a project."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Build Data Docs for a project."
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
-
-    if site_name is not None and site_name not in context.get_site_names():
+    if (site_name is not None) and (site_name not in context.get_site_names()):
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,
             usage_event=usage_event_end,
@@ -65,29 +78,32 @@ def docs_build(
         sites_to_build = context.get_site_names()
     else:
         sites_to_build = [site_name]
-
     build_docs(
         context,
         usage_stats_event=usage_event_end,
         site_names=sites_to_build,
-        view=not no_view,
+        view=(not no_view),
         assume_yes=ctx.obj.assume_yes,
     )
-    send_usage_message(
-        data_context=context,
-        event=usage_event_end,
-        success=True,
-    )
+    send_usage_message(data_context=context, event=usage_event_end, success=True)
 
 
 @docs.command(name="list")
 @click.pass_context
 def docs_list(ctx: click.Context):
-    """List known Data Docs sites."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "List known Data Docs sites."
     context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     docs_sites_url_dicts = context.get_docs_sites_urls()
-
     try:
         if len(docs_sites_url_dicts) == 0:
             cli_message("No Data Docs sites found")
@@ -95,25 +111,19 @@ def docs_list(ctx: click.Context):
             docs_sites_strings = [
                 " - <cyan>{}</cyan>: {}".format(
                     docs_site_dict["site_name"],
-                    docs_site_dict.get("site_url")
-                    or f"site configured but does not exist. Run the following command to build site: great_expectations "
-                    f'docs build --site-name {docs_site_dict["site_name"]}',
+                    (
+                        docs_site_dict.get("site_url")
+                        or f"site configured but does not exist. Run the following command to build site: great_expectations docs build --site-name {docs_site_dict['site_name']}"
+                    ),
                 )
                 for docs_site_dict in docs_sites_url_dicts
             ]
             list_intro_string = _build_intro_string(docs_sites_strings)
             cli_message_list(docs_sites_strings, list_intro_string)
-
-        send_usage_message(
-            data_context=context,
-            event=usage_event_end,
-            success=True,
-        )
+        send_usage_message(data_context=context, event=usage_event_end, success=True)
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            data_context=context,
-            usage_event=usage_event_end,
-            message=f"<red>{e}</red>",
+            data_context=context, usage_event=usage_event_end, message=f"<red>{e}</red>"
         )
         return
 
@@ -135,29 +145,27 @@ def docs_list(ctx: click.Context):
 def docs_clean(
     ctx: click.Context, site_name: Optional[str] = None, all_sites: bool = False
 ) -> None:
-    """
-    Remove all files from a Data Docs site.
+    import inspect
 
-    This is a useful first step if you wish to completely re-build a site from scratch.
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Remove all files from a Data Docs site.\n\n    This is a useful first step if you wish to completely re-build a site from scratch.\n    "
     context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
-
-    if (site_name is None and all_sites is False) or (site_name and all_sites):
+    if ((site_name is None) and (all_sites is False)) or (site_name and all_sites):
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,
             usage_event=usage_event_end,
             message="<red>Please specify either --all to clean all sites or a specific site using --site-name</red>",
         )
     try:
-        # if site_name is None, context.clean_data_docs(site_name=site_name)
-        # will clean all sites.
         context.clean_data_docs(site_name=site_name)
-        send_usage_message(
-            data_context=context,
-            event=usage_event_end,
-            success=True,
-        )
+        send_usage_message(data_context=context, event=usage_event_end, success=True)
         cli_message("<green>Cleaned data docs</green>")
     except DataContextError as de:
         toolkit.exit_with_failure_message_and_stats(
@@ -168,6 +176,15 @@ def docs_clean(
 
 
 def _build_intro_string(docs_sites_strings: List[str]) -> str:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     doc_string_count = len(docs_sites_strings)
     if doc_string_count == 1:
         list_intro_string = "1 Data Docs site configured:"

@@ -12,16 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class StoreBackend(metaclass=ABCMeta):
-    """A store backend acts as a key-value store that can accept tuples as keys, to abstract away
-    reading and writing to a persistence layer.
-
-    In general a StoreBackend implementation must provide implementations of:
-      - _get
-      - _set
-      - list_keys
-      - _has_key
-    """
-
+    "A store backend acts as a key-value store that can accept tuples as keys, to abstract away\n    reading and writing to a persistence layer.\n\n    In general a StoreBackend implementation must provide implementations of:\n      - _get\n      - _set\n      - list_keys\n      - _has_key\n"
     IGNORED_FILES = [".ipynb_checkpoints"]
     STORE_BACKEND_ID_KEY = (".ge_store_backend_id",)
     STORE_BACKEND_ID_PREFIX = "store_backend_id = "
@@ -34,14 +25,16 @@ class StoreBackend(metaclass=ABCMeta):
         manually_initialize_store_backend_id: str = "",
         store_name="no_store_name",
     ) -> None:
-        """
-        Initialize a StoreBackend
-        Args:
-            fixed_length_key:
-            suppress_store_backend_id: skip construction of a StoreBackend.store_backend_id
-            manually_initialize_store_backend_id: UUID as a string to use if the store_backend_id is not already set
-            store_name: store name given in the DataContextConfig (via either in-code or yaml configuration)
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Initialize a StoreBackend\n        Args:\n            fixed_length_key:\n            suppress_store_backend_id: skip construction of a StoreBackend.store_backend_id\n            manually_initialize_store_backend_id: UUID as a string to use if the store_backend_id is not already set\n            store_name: store name given in the DataContextConfig (via either in-code or yaml configuration)\n        "
         self._fixed_length_key = fixed_length_key
         self._suppress_store_backend_id = suppress_store_backend_id
         self._manually_initialize_store_backend_id = (
@@ -51,26 +44,43 @@ class StoreBackend(metaclass=ABCMeta):
 
     @property
     def fixed_length_key(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._fixed_length_key
 
     @property
     def store_name(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._store_name
 
     def _construct_store_backend_id(
         self, suppress_warning: bool = False
     ) -> Optional[str]:
-        """
-        Create a store_backend_id if one does not exist, and return it if it exists
-        If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id
-        and there is not already an existing store_backend_id then the store_backend_id
-        from param manually_initialize_store_backend_id is used to create it.
-        Args:
-            suppress_warning: boolean flag for whether warnings are logged
+        import inspect
 
-        Returns:
-            store_backend_id which is a UUID(version=4)
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Create a store_backend_id if one does not exist, and return it if it exists\n        If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id\n        and there is not already an existing store_backend_id then the store_backend_id\n        from param manually_initialize_store_backend_id is used to create it.\n        Args:\n            suppress_warning: boolean flag for whether warnings are logged\n\n        Returns:\n            store_backend_id which is a UUID(version=4)\n        "
         if self._suppress_store_backend_id:
             if not suppress_warning:
                 logger.warning(
@@ -97,7 +107,8 @@ class StoreBackend(metaclass=ABCMeta):
                 )
                 self.set(
                     key=self.STORE_BACKEND_ID_KEY,
-                    value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}\n",
+                    value=f"""{self.STORE_BACKEND_ID_PREFIX}{store_id}
+""",
                 )
                 return store_id
         except Exception:
@@ -107,24 +118,58 @@ class StoreBackend(metaclass=ABCMeta):
                 )
             return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
 
-    # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going through initialization order in DataContext
     @property
     def store_backend_id(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._construct_store_backend_id(suppress_warning=False)
 
     @property
     def store_backend_id_warnings_suppressed(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._construct_store_backend_id(suppress_warning=True)
 
     def get(self, key, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._validate_key(key)
         value = self._get(key, **kwargs)
         return value
 
     def set(self, key, value, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._validate_key(key)
         self._validate_value(value)
-        # Allow the implementing setter to return something (e.g. a path used for its key)
         try:
             return self._set(key, value, **kwargs)
         except ValueError as e:
@@ -132,15 +177,42 @@ class StoreBackend(metaclass=ABCMeta):
             raise StoreBackendError("ValueError while calling _set on store backend.")
 
     def move(self, source_key, dest_key, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._validate_key(source_key)
         self._validate_key(dest_key)
         return self._move(source_key, dest_key, **kwargs)
 
     def has_key(self, key):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._validate_key(key)
         return self._has_key(key)
 
     def get_url_for_key(self, key, protocol=None) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise StoreError(
             "Store backend of type {:s} does not have an implementation of get_url_for_key".format(
                 type(self).__name__
@@ -148,67 +220,151 @@ class StoreBackend(metaclass=ABCMeta):
         )
 
     def _validate_key(self, key) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if isinstance(key, tuple):
             for key_element in key:
                 if not isinstance(key_element, str):
                     raise TypeError(
                         "Elements within tuples passed as keys to {} must be instances of {}, not {}".format(
-                            self.__class__.__name__,
-                            str,
-                            type(key_element),
+                            self.__class__.__name__, str, type(key_element)
                         )
                     )
         else:
             raise TypeError(
                 "Keys in {} must be instances of {}, not {}".format(
-                    self.__class__.__name__,
-                    tuple,
-                    type(key),
+                    self.__class__.__name__, tuple, type(key)
                 )
             )
 
     def _validate_value(self, value) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         pass
 
     @abstractmethod
     def _get(self, key) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     @abstractmethod
     def _set(self, key, value, **kwargs) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     @abstractmethod
     def _move(self, source_key, dest_key, **kwargs) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     @abstractmethod
     def list_keys(self, prefix=()) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     @abstractmethod
     def remove_key(self, key) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     def _has_key(self, key) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     def is_ignored_key(self, key):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for ignored in self.IGNORED_FILES:
             if ignored in key:
                 return True
-
         return False
 
     @property
     def config(self) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
 
 class InMemoryStoreBackend(StoreBackend):
-    """Uses an in-memory dictionary as a store backend."""
+    "Uses an in-memory dictionary as a store backend."
 
-    # noinspection PyUnusedLocal
     def __init__(
         self,
         runtime_environment=None,
@@ -217,6 +373,15 @@ class InMemoryStoreBackend(StoreBackend):
         manually_initialize_store_backend_id: str = "",
         store_name=None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
@@ -224,12 +389,8 @@ class InMemoryStoreBackend(StoreBackend):
             store_name=store_name,
         )
         self._store = {}
-        # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
-
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
         self._config = {
             "runtime_environment": runtime_environment,
             "fixed_length_key": fixed_length_key,
@@ -242,27 +403,90 @@ class InMemoryStoreBackend(StoreBackend):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def _get(self, key):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         try:
             return self._store[key]
         except KeyError as e:
             raise InvalidKeyError(f"{str(e)}")
 
     def _set(self, key, value, **kwargs) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._store[key] = value
 
     def _move(self, source_key, dest_key, **kwargs) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._store[dest_key] = self._store[source_key]
         self._store.pop(source_key)
 
     def list_keys(self, prefix=()):
-        return [key for key in self._store.keys() if key[: len(prefix)] == prefix]
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        return [key for key in self._store.keys() if (key[: len(prefix)] == prefix)]
 
     def _has_key(self, key):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return key in self._store
 
     def remove_key(self, key) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         del self._store[key]
 
     @property
     def config(self) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._config

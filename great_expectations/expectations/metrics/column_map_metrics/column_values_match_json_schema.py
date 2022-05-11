@@ -19,12 +19,29 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, json_schema, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
         def matches_json_schema(val):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             try:
                 val_json = json.loads(val)
                 jsonschema.validate(val_json, json_schema)
-                # jsonschema.validate raises an error if validation fails.
-                # So if we make it this far, we know that the validation succeeded.
                 return True
             except jsonschema.ValidationError:
                 return False
@@ -37,14 +54,31 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, json_schema, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
         def matches_json_schema(val):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             if val is None:
                 return False
             try:
                 val_json = json.loads(val)
                 jsonschema.validate(val_json, json_schema)
-                # jsonschema.validate raises an error if validation fails.
-                # So if we make it this far, we know that the validation succeeded.
                 return True
             except jsonschema.ValidationError:
                 return False
@@ -54,5 +88,4 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
                 raise
 
         matches_json_schema_udf = F.udf(matches_json_schema, sparktypes.BooleanType())
-
         return matches_json_schema_udf(column)

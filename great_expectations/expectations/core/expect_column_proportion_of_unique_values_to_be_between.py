@@ -26,68 +26,7 @@ from great_expectations.rule_based_profiler.types.parameter_container import (
 
 
 class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
-    """Expect the proportion of unique values to be between a minimum value and a maximum value.
-
-    For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
-    values for a proportion of 0.4.
-
-    expect_column_proportion_of_unique_values_to_be_between is a \
-    :func:`column_aggregate_expectation
-    <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
-
-
-    Args:
-        column (str): \
-            The column name.
-        min_value (float or None): \
-            The minimum proportion of unique values. (Proportions are on the range 0 to 1)
-        max_value (float or None): \
-            The maximum proportion of unique values. (Proportions are on the range 0 to 1)
-        strict_min (boolean):
-            If True, the minimum proportion of unique values must be strictly larger than min_value, default=False
-        strict_max (boolean):
-            If True, the maximum proportion of unique values must be strictly smaller than max_value, default=False
-
-    Other Parameters:
-        result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
-            For more detail, see :ref:`result_format <result_format>`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
-        meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
-
-    Returns:
-        An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-    Notes:
-        These fields in the result object are customized for this expectation:
-        ::
-
-            {
-                "observed_value": (float) The proportion of unique values in the column
-            }
-
-        * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
-        * If min_value is None, then max_value is treated as an upper bound
-        * If max_value is None, then min_value is treated as a lower bound
-
-    See Also:
-        :func:`expect_column_unique_value_count_to_be_between \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine
-        .expect_column_unique_value_count_to_be_between>`
-
-    """
-
-    # This dictionary contains metadata for display in the public gallery
+    'Expect the proportion of unique values to be between a minimum value and a maximum value.\n\n    For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total     values for a proportion of 0.4.\n\n    expect_column_proportion_of_unique_values_to_be_between is a     :func:`column_aggregate_expectation\n    <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.\n\n\n    Args:\n        column (str):             The column name.\n        min_value (float or None):             The minimum proportion of unique values. (Proportions are on the range 0 to 1)\n        max_value (float or None):             The maximum proportion of unique values. (Proportions are on the range 0 to 1)\n        strict_min (boolean):\n            If True, the minimum proportion of unique values must be strictly larger than min_value, default=False\n        strict_max (boolean):\n            If True, the maximum proportion of unique values must be strictly smaller than max_value, default=False\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.             For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    Notes:\n        These fields in the result object are customized for this expectation:\n        ::\n\n            {\n                "observed_value": (float) The proportion of unique values in the column\n            }\n\n        * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.\n        * If min_value is None, then max_value is treated as an upper bound\n        * If max_value is None, then min_value is treated as a lower bound\n\n    See Also:\n        :func:`expect_column_unique_value_count_to_be_between         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_unique_value_count_to_be_between>`\n\n'
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
@@ -96,8 +35,6 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.unique_proportion",)
     success_keys = (
         "min_value",
@@ -107,7 +44,6 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         "auto",
         "profiler_config",
     )
-
     column_proportion_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
@@ -133,7 +69,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         column_proportion_range_estimator_parameter_builder_config
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        name="expect_column_proportion_of_unique_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        name="expect_column_proportion_of_unique_values_to_be_between",
         config_version=1.0,
         variables={},
         rules={
@@ -148,10 +84,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,
                     "include_bootstrap_samples_histogram_in_details": False,
-                    "truncate_values": {
-                        "lower_bound": 0.0,
-                        "upper_bound": 1.0,
-                    },
+                    "truncate_values": {"lower_bound": 0.0, "upper_bound": 1.0},
                     "round_decimals": 3,
                 },
                 "domain_builder": {
@@ -170,15 +103,13 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                         "strict_min": f"{VARIABLES_KEY}strict_min",
                         "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{column_proportion_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{column_proportion_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}"
                         },
-                    },
+                    }
                 ],
-            },
+            }
         },
     )
-
-    # Default values
     default_kwarg_values = {
         "min_value": None,
         "max_value": None,
@@ -190,29 +121,22 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         "auto": False,
         "profiler_config": default_profiler_config,
     }
-    args_keys = (
-        "column",
-        "min_value",
-        "max_value",
-        "strict_min",
-        "strict_max",
-    )
-
-    """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
+    args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
+    " A Column Aggregate MetricProvider Decorator for the Unique Proportion"
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        import inspect
 
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that\n        necessary configuration arguments have been provided for the validation of the expectation.\n\n        Args:\n            configuration (OPTIONAL[ExpectationConfiguration]):                 An optional Expectation Configuration entry that will be used to configure the expectation\n        Returns:\n            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully\n        "
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
@@ -225,10 +149,19 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -270,11 +203,10 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                 "value": params.get("strict_max"),
             },
         }
-
-        if params["min_value"] is None and params["max_value"] is None:
+        if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any fraction of unique values."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
+            (at_least_str, at_most_str) = handle_strict_min_max(params)
             if params["min_value"] is None:
                 template_str = (
                     f"fraction of unique values must be {at_most_str} $max_value."
@@ -283,17 +215,12 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                 template_str = (
                     f"fraction of unique values must be {at_least_str} $min_value."
                 )
+            elif params["min_value"] != params["max_value"]:
+                template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
             else:
-                if params["min_value"] != params["max_value"]:
-                    template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
-                else:
-                    template_str = (
-                        "fraction of unique values must be exactly $min_value."
-                    )
-
+                template_str = "fraction of unique values must be exactly $min_value."
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -303,7 +230,6 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -317,10 +243,19 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -335,11 +270,10 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                 "strict_max",
             ],
         )
-
-        if params["min_value"] is None and params["max_value"] is None:
+        if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any fraction of unique values."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
+            (at_least_str, at_most_str) = handle_strict_min_max(params)
             if params["min_value"] is None:
                 template_str = (
                     f"fraction of unique values must be {at_most_str} $max_value."
@@ -348,17 +282,12 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                 template_str = (
                     f"fraction of unique values must be {at_least_str} $min_value."
                 )
+            elif params["min_value"] != params["max_value"]:
+                template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
             else:
-                if params["min_value"] != params["max_value"]:
-                    template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
-                else:
-                    template_str = (
-                        "fraction of unique values must be exactly $min_value."
-                    )
-
+                template_str = "fraction of unique values must be exactly $min_value."
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -366,7 +295,6 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{
@@ -392,6 +320,15 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert result, "Must pass in result."
         observed_value = result.result["observed_value"]
         template_string_object = RenderedStringTemplateContent(
@@ -408,7 +345,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         if not observed_value:
             return [template_string_object, "--"]
         else:
-            return [template_string_object, f"{100 * observed_value:.1f}%"]
+            return [template_string_object, f"{(100 * observed_value):.1f}%"]
 
     def _validate(
         self,
@@ -417,6 +354,15 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._validate_metric_value_between(
             metric_name="column.unique_proportion",
             configuration=configuration,

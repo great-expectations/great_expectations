@@ -8,11 +8,18 @@ from great_expectations.data_context.types.base import DataContextConfigDefaults
 
 
 class YAMLToString(YAML):
-    """
-    Get yaml dump as a string: https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
-    """
+    "\n    Get yaml dump as a string: https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string\n"
 
     def dump(self, data, stream=None, **kw):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         inefficient = False
         if not stream:
             inefficient = True
@@ -25,11 +32,6 @@ class YAMLToString(YAML):
 yaml = YAMLToString()
 yaml.indent(mapping=2, sequence=4, offset=4)
 yaml.default_flow_style = False
-
-# TODO: maybe bring params in via f-strings from base.ConfigDefaults or whatever
-#  I end up using for the base level configs. Specifically PROJECT_OPTIONAL_CONFIG_COMMENT
-#  and PROJECT_HELP_COMMENT
-
 PROJECT_HELP_COMMENT = f"""
 # Welcome to Great Expectations! Always know what to expect from your data.
 #
@@ -48,48 +50,24 @@ config_version: {DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value}
 # add a new datasource. Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
 datasources: {{}}
 """
-
-CONFIG_VARIABLES_INTRO = """
-# This config file supports variable substitution which enables: 1) keeping
-# secrets out of source control & 2) environment-based configuration changes
-# such as staging vs prod.
-#
-# When GE encounters substitution syntax (like `my_key: ${my_value}` or
-# `my_key: $my_value`) in the great_expectations.yml file, it will attempt
-# to replace the value of `my_key` with the value from an environment
-# variable `my_value` or a corresponding key read from this config file,
-# which is defined through the `config_variables_file_path`.
-# Environment variables take precedence over variables defined here.
-#
-# Substitution values defined here can be a simple (non-nested) value,
-# nested value such as a dictionary, or an environment variable (i.e. ${ENV_VAR})
-#
-#
-# https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
-
-"""
-
+CONFIG_VARIABLES_INTRO = "\n# This config file supports variable substitution which enables: 1) keeping\n# secrets out of source control & 2) environment-based configuration changes\n# such as staging vs prod.\n#\n# When GE encounters substitution syntax (like `my_key: ${my_value}` or\n# `my_key: $my_value`) in the great_expectations.yml file, it will attempt\n# to replace the value of `my_key` with the value from an environment\n# variable `my_value` or a corresponding key read from this config file,\n# which is defined through the `config_variables_file_path`.\n# Environment variables take precedence over variables defined here.\n#\n# Substitution values defined here can be a simple (non-nested) value,\n# nested value such as a dictionary, or an environment variable (i.e. ${ENV_VAR})\n#\n#\n# https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials\n\n"
 CONFIG_VARIABLES_TEMPLATE = (
     f"{CONFIG_VARIABLES_INTRO}instance_id: {str(uuid.uuid4())}{os.linesep}"
 )
-
-# Create yaml strings
-# NOTE: .replace("\n", "\n  ")[:-2] is a hack to indent all lines two spaces,
-# and remove the inserted final two spaces.
 EXPECTATIONS_STORE_STRING = yaml.dump(
     {
         "expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
             "expectations_store"
         ]
     }
-).replace("\n", "\n  ")[:-2]
+).replace("\n", "\n  ")[:(-2)]
 VALIDATIONS_STORE_STRING = yaml.dump(
     {
         "validations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
             "validations_store"
         ]
     }
-).replace("\n", "\n  ")[:-2]
+).replace("\n", "\n  ")[:(-2)]
 EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
     DataContextConfigDefaults.DEFAULT_STORES.value["evaluation_parameter_store"]
 )
@@ -99,11 +77,10 @@ CHECKPOINT_STORE_STRING = yaml.dump(
             "checkpoint_store"
         ]
     }
-).replace("\n", "\n  ")[:-2]
+).replace("\n", "\n  ")[:(-2)]
 PROFILER_STORE_STRING = yaml.dump(
     {"profiler_store": DataContextConfigDefaults.DEFAULT_STORES.value["profiler_store"]}
-).replace("\n", "\n  ")[:-2]
-
+).replace("\n", "\n  ")[:(-2)]
 PROJECT_OPTIONAL_CONFIG_COMMENT = (
     CONFIG_VARIABLES_INTRO
     + f"""
@@ -150,24 +127,13 @@ data_docs_sites:
         class_name: DefaultSiteIndexBuilder
 """
 )
-
-ANONYMIZED_USAGE_STATISTICS_ENABLED = """
-anonymous_usage_statistics:
-  enabled: True
-"""
-
-ANONYMIZED_USAGE_STATISTICS_DISABLED = """
-anonymous_usage_statistics:
-  enabled: False
-"""
-
+ANONYMIZED_USAGE_STATISTICS_ENABLED = "\nanonymous_usage_statistics:\n  enabled: True\n"
+ANONYMIZED_USAGE_STATISTICS_DISABLED = (
+    "\nanonymous_usage_statistics:\n  enabled: False\n"
+)
 PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED = (
-    PROJECT_HELP_COMMENT
-    + PROJECT_OPTIONAL_CONFIG_COMMENT
-    + ANONYMIZED_USAGE_STATISTICS_ENABLED
-)
+    PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT
+) + ANONYMIZED_USAGE_STATISTICS_ENABLED
 PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED = (
-    PROJECT_HELP_COMMENT
-    + PROJECT_OPTIONAL_CONFIG_COMMENT
-    + ANONYMIZED_USAGE_STATISTICS_DISABLED
-)
+    PROJECT_HELP_COMMENT + PROJECT_OPTIONAL_CONFIG_COMMENT
+) + ANONYMIZED_USAGE_STATISTICS_DISABLED

@@ -22,16 +22,15 @@ logger = logging.getLogger(__name__)
 
 
 def get_metric_kwargs_id(metric_name, metric_kwargs):
-    ###
-    #
-    # WARNING
-    # WARNING
-    # THIS IS A PLACEHOLDER UNTIL WE HAVE REFACTORED EXPECTATIONS TO HANDLE THIS LOGIC THEMSELVES
-    # WE ARE NO WORSE OFF THAN THE PREVIOUS SYSTEM, BUT NOT FULLY CUSTOMIZABLE
-    # WARNING
-    # WARNING
-    #
-    ###
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if "metric_kwargs_id" in metric_kwargs:
         return metric_kwargs["metric_kwargs_id"]
     if "column" in metric_kwargs:
@@ -48,18 +47,24 @@ class ExpectationValidationResult(SerializableDictDot):
         meta=None,
         exception_info=None,
     ) -> None:
-        if result and not self.validate_result_dict(result):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        if result and (not self.validate_result_dict(result)):
             raise ge_exceptions.InvalidCacheValueError(result)
         self.success = success
         self.expectation_config = expectation_config
-        # TODO: re-add
-        # assert_json_serializable(result, "result")
         if result is None:
             result = {}
         self.result = result
         if meta is None:
             meta = {}
-        # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
         self.exception_info = exception_info or {
@@ -69,16 +74,17 @@ class ExpectationValidationResult(SerializableDictDot):
         }
 
     def __eq__(self, other):
-        """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
-        # NOTE: JPC - 20200213 - need to spend some time thinking about whether we want to
-        # consistently allow dict as a comparison alternative in situations like these...
-        # if isinstance(other, dict):
-        #     try:
-        #         other = ExpectationValidationResult(**other)
-        #     except ValueError:
-        #         return NotImplemented
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "ExpectationValidationResult equality ignores instance identity, relying only on properties."
         if not isinstance(other, self.__class__):
-            # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         try:
             if self.result and other.result:
@@ -86,80 +92,92 @@ class ExpectationValidationResult(SerializableDictDot):
                 result_dict = self.to_json_dict()["result"]
                 other_result_dict = other.to_json_dict()["result"]
                 contents_equal = all(
-                    [result_dict[k] == other_result_dict[k] for k in common_keys]
+                    [(result_dict[k] == other_result_dict[k]) for k in common_keys]
                 )
             else:
                 contents_equal = False
-
             return all(
                 (
-                    self.success == other.success,
+                    (self.success == other.success),
                     (
-                        self.expectation_config is None
-                        and other.expectation_config is None
-                    )
-                    or (
-                        self.expectation_config is not None
-                        and self.expectation_config.isEquivalentTo(
-                            other.expectation_config
+                        (
+                            (self.expectation_config is None)
+                            and (other.expectation_config is None)
+                        )
+                        or (
+                            (self.expectation_config is not None)
+                            and self.expectation_config.isEquivalentTo(
+                                other.expectation_config
+                            )
                         )
                     ),
-                    # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
-                    # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is
-                    # handled appropriately.
-                    not (self.result or other.result) or contents_equal,
-                    self.meta == other.meta,
-                    self.exception_info == other.exception_info,
+                    ((not (self.result or other.result)) or contents_equal),
+                    (self.meta == other.meta),
+                    (self.exception_info == other.exception_info),
                 )
             )
         except (ValueError, TypeError):
-            # if invalid comparisons are attempted, the objects are not equal.
             return False
 
     def __ne__(self, other):
-        # Negated implementation of '__eq__'. TODO the method should be deleted when it will coincide with __eq__.
-        # return not self == other
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not isinstance(other, self.__class__):
-            # Delegate comparison to the other instance's __ne__.
             return NotImplemented
         try:
             return any(
                 (
-                    self.success != other.success,
+                    (self.success != other.success),
                     (
-                        self.expectation_config is None
-                        and other.expectation_config is not None
-                    )
-                    or (
-                        self.expectation_config is not None
-                        and not self.expectation_config.isEquivalentTo(
-                            other.expectation_config
+                        (
+                            (self.expectation_config is None)
+                            and (other.expectation_config is not None)
+                        )
+                        or (
+                            (self.expectation_config is not None)
+                            and (
+                                not self.expectation_config.isEquivalentTo(
+                                    other.expectation_config
+                                )
+                            )
                         )
                     ),
-                    # TODO should it be wrapped in all()/any()? Since it is the only difference to __eq__:
-                    (self.result is None and other.result is not None)
-                    or (self.result != other.result),
-                    self.meta != other.meta,
-                    self.exception_info != other.exception_info,
+                    (
+                        ((self.result is None) and (other.result is not None))
+                        or (self.result != other.result)
+                    ),
+                    (self.meta != other.meta),
+                    (self.exception_info != other.exception_info),
                 )
             )
         except (ValueError, TypeError):
-            # if invalid comparisons are attempted, the objects are not equal.
             return True
 
     def __repr__(self):
-        """
-        # TODO: <Alex>5/9/2022</Alex>
-        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
-        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        '\n        # TODO: <Alex>5/9/2022</Alex>\n        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach\n        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.\n        '
         json_dict: dict = self.to_json_dict()
         if in_jupyter_notebook():
             json_dict: dict = self.to_json_dict()
             if (
-                "expectation_config" in json_dict
-                and "kwargs" in json_dict["expectation_config"]
-                and "auto" in json_dict["expectation_config"]["kwargs"]
+                ("expectation_config" in json_dict)
+                and ("kwargs" in json_dict["expectation_config"])
+                and ("auto" in json_dict["expectation_config"]["kwargs"])
                 and json_dict["expectation_config"]["kwargs"]["auto"]
             ):
                 json_dict["expectation_config"]["meta"] = {
@@ -172,42 +190,62 @@ class ExpectationValidationResult(SerializableDictDot):
                 json_dict["expectation_config"]["kwargs"].pop("batch_id", None)
             else:
                 json_dict.pop("expectation_config", None)
-
         return json.dumps(json_dict, indent=2)
 
     def __str__(self):
-        """
-        # TODO: <Alex>5/9/2022</Alex>
-        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
-        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        '\n        # TODO: <Alex>5/9/2022</Alex>\n        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach\n        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.\n        '
         return json.dumps(self.to_json_dict(), indent=2)
 
     @staticmethod
     def validate_result_dict(result):
-        if result.get("unexpected_count") and result["unexpected_count"] < 0:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        if result.get("unexpected_count") and (result["unexpected_count"] < 0):
             return False
         if result.get("unexpected_percent") and (
-            result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100
+            (result["unexpected_percent"] < 0) or (result["unexpected_percent"] > 100)
         ):
             return False
         if result.get("missing_percent") and (
-            result["missing_percent"] < 0 or result["missing_percent"] > 100
+            (result["missing_percent"] < 0) or (result["missing_percent"] > 100)
         ):
             return False
         if result.get("unexpected_percent_nonmissing") and (
-            result["unexpected_percent_nonmissing"] < 0
-            or result["unexpected_percent_nonmissing"] > 100
+            (result["unexpected_percent_nonmissing"] < 0)
+            or (result["unexpected_percent_nonmissing"] > 100)
         ):
             return False
-        if result.get("missing_count") and result["missing_count"] < 0:
+        if result.get("missing_count") and (result["missing_count"] < 0):
             return False
         return True
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         myself = expectationValidationResultSchema.dump(self)
-        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
-        # schemas to get serialization all-the-way down via dump
         if "expectation_config" in myself:
             myself["expectation_config"] = convert_to_json_serializable(
                 myself["expectation_config"]
@@ -223,24 +261,29 @@ class ExpectationValidationResult(SerializableDictDot):
         return myself
 
     def get_metric(self, metric_name, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not self.expectation_config:
             raise ge_exceptions.UnavailableMetricError(
-                "No ExpectationConfig found in this ExpectationValidationResult. Unable to "
-                "return a metric."
+                "No ExpectationConfig found in this ExpectationValidationResult. Unable to return a metric."
             )
-
         metric_name_parts = metric_name.split(".")
         metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
-
         if metric_name_parts[0] == self.expectation_config.expectation_type:
             curr_metric_kwargs = get_metric_kwargs_id(
                 metric_name, self.expectation_config.kwargs
             )
             if metric_kwargs_id != curr_metric_kwargs:
                 raise ge_exceptions.UnavailableMetricError(
-                    "Requested metric_kwargs_id (%s) does not match the configuration of this "
-                    "ExpectationValidationResult (%s)."
-                    % (metric_kwargs_id or "None", curr_metric_kwargs or "None")
+                    "Requested metric_kwargs_id (%s) does not match the configuration of this ExpectationValidationResult (%s)."
+                    % ((metric_kwargs_id or "None"), (curr_metric_kwargs or "None"))
                 )
             if len(metric_name_parts) < 2:
                 raise ge_exceptions.UnavailableMetricError(
@@ -251,8 +294,7 @@ class ExpectationValidationResult(SerializableDictDot):
                     return self.success
                 else:
                     raise ge_exceptions.UnavailableMetricError(
-                        "Metric name must have more than two parts for keys other than "
-                        "success."
+                        "Metric name must have more than two parts for keys other than success."
                     )
             elif metric_name_parts[1] == "result":
                 try:
@@ -262,8 +304,9 @@ class ExpectationValidationResult(SerializableDictDot):
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
                     raise ge_exceptions.UnavailableMetricError(
-                        "Unable to get metric {} -- KeyError in "
-                        "ExpectationValidationResult.".format(metric_name)
+                        "Unable to get metric {} -- KeyError in ExpectationValidationResult.".format(
+                            metric_name
+                        )
                     )
         raise ge_exceptions.UnavailableMetricError(
             f"Unrecognized metric name {metric_name}"
@@ -277,9 +320,17 @@ class ExpectationValidationResultSchema(Schema):
     meta = fields.Dict()
     exception_info = fields.Dict()
 
-    # noinspection PyUnusedLocal
     @pre_dump
     def convert_result_to_serializable(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data = deepcopy(data)
         if isinstance(data, ExpectationValidationResult):
             data.result = convert_to_json_serializable(data.result)
@@ -287,19 +338,17 @@ class ExpectationValidationResultSchema(Schema):
             data["result"] = convert_to_json_serializable(data.get("result"))
         return data
 
-    # # noinspection PyUnusedLocal
-    # @pre_dump
-    # def clean_empty(self, data, **kwargs):
-    #     # if not hasattr(data, 'meta'):
-    #     #     pass
-    #     # elif len(data.meta) == 0:
-    #     #     del data.meta
-    #     # return data
-    #     pass
-
-    # noinspection PyUnusedLocal
     @post_load
     def make_expectation_validation_result(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return ExpectationValidationResult(**data)
 
 
@@ -313,6 +362,15 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         meta=None,
         ge_cloud_id: Optional[UUID] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.success = success
         if results is None:
             results = []
@@ -325,37 +383,68 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         self.statistics = statistics
         if meta is None:
             meta = {}
-        ensure_json_serializable(
-            meta
-        )  # We require meta information to be serializable.
+        ensure_json_serializable(meta)
         self.meta = meta
         self._metrics = {}
 
     def __eq__(self, other):
-        """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."
         if not isinstance(other, self.__class__):
-            # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         return all(
             (
-                self.success == other.success,
-                self.results == other.results,
-                self.evaluation_parameters == other.evaluation_parameters,
-                self.statistics == other.statistics,
-                self.meta == other.meta,
+                (self.success == other.success),
+                (self.results == other.results),
+                (self.evaluation_parameters == other.evaluation_parameters),
+                (self.statistics == other.statistics),
+                (self.meta == other.meta),
             )
         )
 
     def __repr__(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return json.dumps(self.to_json_dict(), indent=2)
 
     def __str__(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return json.dumps(self.to_json_dict(), indent=2)
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         myself = deepcopy(self)
-        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
-        # schemas to get serialization all-the-way down via dump
         myself["evaluation_parameters"] = convert_to_json_serializable(
             myself["evaluation_parameters"]
         )
@@ -365,11 +454,18 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         return myself
 
     def get_metric(self, metric_name, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         metric_name_parts = metric_name.split(".")
         metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
-
         metric_value = None
-        # Expose overall statistics
         if metric_name_parts[0] == "statistics":
             if len(metric_name_parts) == 2:
                 return self.statistics.get(metric_name_parts[1])
@@ -377,10 +473,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                 raise ge_exceptions.UnavailableMetricError(
                     f"Unrecognized metric {metric_name}"
                 )
-
-        # Expose expectation-defined metrics
         elif metric_name_parts[0].lower().startswith("expect_"):
-            # Check our cache first
             if (metric_name, metric_kwargs_id) in self._metrics:
                 return self._metrics[(metric_name, metric_kwargs_id)]
             else:
@@ -397,7 +490,6 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                 if metric_value is not None:
                     self._metrics[(metric_name, metric_kwargs_id)] = metric_value
                     return metric_value
-
         raise ge_exceptions.UnavailableMetricError(
             "Metric {} with metric_kwargs_id {} is not available.".format(
                 metric_name, metric_kwargs_id
@@ -405,14 +497,22 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         )
 
     def get_failed_validation_results(self) -> "ExpectationSuiteValidationResult":
-        validation_results = [result for result in self.results if not result.success]
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        validation_results = [result for result in self.results if (not result.success)]
         successful_expectations = sum(exp.success for exp in validation_results)
         evaluated_expectations = len(validation_results)
         unsuccessful_expectations = evaluated_expectations - successful_expectations
         success = successful_expectations == evaluated_expectations
         try:
-            success_percent = successful_expectations / evaluated_expectations * 100
+            success_percent = (successful_expectations / evaluated_expectations) * 100
         except ZeroDivisionError:
             success_percent = None
         statistics = {
@@ -422,7 +522,6 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             "success_percent": success_percent,
             "success": success,
         }
-
         return ExpectationSuiteValidationResult(
             success=success,
             results=validation_results,
@@ -440,9 +539,17 @@ class ExpectationSuiteValidationResultSchema(Schema):
     meta = fields.Dict(allow_none=True)
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
 
-    # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data = deepcopy(data)
         if isinstance(data, ExpectationSuiteValidationResult):
             data.meta = convert_to_json_serializable(data.meta)
@@ -450,9 +557,17 @@ class ExpectationSuiteValidationResultSchema(Schema):
             data["meta"] = convert_to_json_serializable(data.get("meta"))
         return data
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_expectation_suite_validation_result(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return ExpectationSuiteValidationResult(**data)
 
 

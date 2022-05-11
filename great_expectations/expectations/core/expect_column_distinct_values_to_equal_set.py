@@ -20,8 +20,6 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
-
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
@@ -30,15 +28,8 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": False,
     }
-
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.value_counts",)
-    success_keys = (
-        "value_set",
-        "parse_strings_as_datetimes",
-    )
-
-    # Default values
+    success_keys = ("value_set", "parse_strings_as_datetimes")
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
@@ -49,15 +40,21 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
-    args_keys = (
-        "column",
-        "value_set",
-    )
+    args_keys = ("column", "value_set")
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Validating that user has inputted a value set and that configuration has been initialized"
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -82,10 +79,19 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -117,25 +123,19 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-
-        if params["value_set"] is None or len(params["value_set"]) == 0:
+        if (params["value_set"] is None) or (len(params["value_set"]) == 0):
             values_string = "[ ]"
         else:
-            for i, v in enumerate(params["value_set"]):
+            for (i, v) in enumerate(params["value_set"]):
                 params[f"v__{str(i)}"] = v
-
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for (i, v) in enumerate(params["value_set"])]
             )
-
         template_str = f"distinct values must match this set: {values_string}."
-
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -145,13 +145,11 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
-
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
             params=params,
             params_with_json_schema=params_with_json_schema,
             param_key_with_list="value_set",
         )
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -165,10 +163,19 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -192,25 +199,19 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
                 "condition_parser",
             ],
         )
-
-        if params["value_set"] is None or len(params["value_set"]) == 0:
+        if (params["value_set"] is None) or (len(params["value_set"]) == 0):
             values_string = "[ ]"
         else:
-            for i, v in enumerate(params["value_set"]):
+            for (i, v) in enumerate(params["value_set"]):
                 params[f"v__{str(i)}"] = v
-
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for (i, v) in enumerate(params["value_set"])]
             )
-
         template_str = f"distinct values must match this set: {values_string}."
-
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -218,25 +219,19 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
-
-        if params["value_set"] is None or len(params["value_set"]) == 0:
+        if (params["value_set"] is None) or (len(params["value_set"]) == 0):
             values_string = "[ ]"
         else:
-            for i, v in enumerate(params["value_set"]):
+            for (i, v) in enumerate(params["value_set"]):
                 params[f"v__{str(i)}"] = v
-
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for (i, v) in enumerate(params["value_set"])]
             )
-
         template_str = f"distinct values must match this set: {values_string}."
-
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -244,7 +239,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{
@@ -265,22 +259,28 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
             "parse_strings_as_datetimes"
         )
         observed_value_counts = metrics.get("column.value_counts")
         observed_value_set = set(observed_value_counts.index)
         value_set = self.get_success_kwargs(configuration).get("value_set")
-
         if parse_strings_as_datetimes:
             parsed_value_set = parse_value_set(value_set)
         else:
             parsed_value_set = value_set
-
         expected_value_set = set(parsed_value_set)
-
         return {
-            "success": observed_value_set == expected_value_set,
+            "success": (observed_value_set == expected_value_set),
             "result": {
                 "observed_value": sorted(list(observed_value_set)),
                 "details": {"value_counts": observed_value_counts},

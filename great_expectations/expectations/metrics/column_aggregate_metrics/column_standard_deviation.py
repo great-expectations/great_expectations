@@ -13,9 +13,8 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 from great_expectations.expectations.metrics.import_manager import F, sa
 
 logger = logging.getLogger(__name__)
-
 try:
-    from pyspark.sql.functions import stddev_samp  # noqa: F401
+    from pyspark.sql.functions import stddev_samp
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(
@@ -24,18 +23,35 @@ except ImportError as e:
 
 
 class ColumnStandardDeviation(ColumnAggregateMetricProvider):
-    """MetricProvider Class for Aggregate Standard Deviation metric"""
-
+    "MetricProvider Class for Aggregate Standard Deviation metric"
     metric_name = "column.standard_deviation"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        """Pandas Standard Deviation implementation"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Pandas Standard Deviation implementation"
         return column.std()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _dialect, **kwargs):
-        """SqlAlchemy Standard Deviation implementation"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "SqlAlchemy Standard Deviation implementation"
         if _dialect.name.lower() == "mssql":
             standard_deviation = sa.func.stdev(column)
         else:
@@ -44,5 +60,14 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
-        """Spark Standard Deviation implementation"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Spark Standard Deviation implementation"
         return F.stddev_samp(column)

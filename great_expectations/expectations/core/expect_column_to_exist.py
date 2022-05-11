@@ -13,42 +13,7 @@ from great_expectations.render.util import ordinal, substitute_none_for_missing
 
 
 class ExpectColumnToExist(TableExpectation):
-    """Expect the specified column to exist.
-
-    expect_column_to_exist is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
-
-    Args:
-        column (str): \
-            The column name.
-
-    Other Parameters:
-        column_index (int or None): \
-            If not None, checks the order of the columns. The expectation will fail if the \
-            column is not in location column_index (zero-indexed).
-        result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
-        meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-            For more detail, see :ref:`meta`.
-
-    Returns:
-        An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-    """
-
-    # This dictionary contains metadata for display in the public gallery
+    "Expect the specified column to exist.\n\n    expect_column_to_exist is a :func:`expectation     <great_expectations.validator.validator.Validator.expectation>`, not a\n    ``column_map_expectation`` or ``column_aggregate_expectation``.\n\n    Args:\n        column (str):             The column name.\n\n    Other Parameters:\n        column_index (int or None):             If not None, checks the order of the columns. The expectation will fail if the             column is not in location column_index (zero-indexed).\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.             For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n"
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
@@ -57,48 +22,35 @@ class ExpectColumnToExist(TableExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
     metric_dependencies = ("table.columns",)
-    success_keys = (
-        "column",
-        "column_index",
-    )
-    domain_keys = (
-        "batch_id",
-        "table",
-    )
-    default_kwarg_values = {
-        "column": None,
-        "column_index": None,
-    }
+    success_keys = ("column", "column_index")
+    domain_keys = ("batch_id", "table")
+    default_kwarg_values = {"column": None, "column_index": None}
     args_keys = ("column", "column_index")
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        import inspect
 
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        # Setting up a configuration
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that\n        necessary configuration arguments have been provided for the validation of the expectation.\n\n        Args:\n            configuration (OPTIONAL[ExpectationConfiguration]):                 An optional Expectation Configuration entry that will be used to configure the expectation\n        Returns:\n            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully\n        "
         super().validate_configuration(configuration)
-
-        # Ensuring that a proper value has been provided
         try:
             assert "column" in configuration.kwargs, "A column name must be provided"
             assert isinstance(
                 configuration.kwargs["column"], str
             ), "Column name must be a string"
-            assert (
-                isinstance(configuration.kwargs.get("column_index"), (int, dict))
-                or configuration.kwargs.get("column_index") is None
+            assert isinstance(
+                configuration.kwargs.get("column_index"), (int, dict)
+            ) or (
+                configuration.kwargs.get("column_index") is None
             ), "column_index must be an integer or None"
             if isinstance(configuration.kwargs.get("column_index"), dict):
                 assert "$PARAMETER" in configuration.kwargs.get(
@@ -116,17 +68,24 @@ class ExpectColumnToExist(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "column_index"],
+            configuration.kwargs, ["column", "column_index"]
         )
-
         if params["column_index"] is None:
             if include_column_name:
                 template_str = "$column is a required field."
@@ -138,7 +97,6 @@ class ExpectColumnToExist(TableExpectation):
                 template_str = "$column must be the $column_indexth field."
             else:
                 template_str = "must be the $column_indexth field."
-
         params_with_json_schema = {
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "column_index": {
@@ -146,7 +104,6 @@ class ExpectColumnToExist(TableExpectation):
                 "value": params.get("column_index"),
             },
         }
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -160,17 +117,24 @@ class ExpectColumnToExist(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "column_index"],
+            configuration.kwargs, ["column", "column_index"]
         )
-
         if params["column_index"] is None:
             if include_column_name:
                 template_str = "$column is a required field."
@@ -182,7 +146,6 @@ class ExpectColumnToExist(TableExpectation):
                 template_str = "$column must be the $column_indexth field."
             else:
                 template_str = "must be the $column_indexth field."
-
         return [
             RenderedStringTemplateContent(
                 **{
@@ -203,10 +166,18 @@ class ExpectColumnToExist(TableExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         actual_columns = metrics.get("table.columns")
         expected_column_name = self.get_success_kwargs().get("column")
         expected_column_index = self.get_success_kwargs().get("column_index")
-
         if expected_column_index:
             try:
                 success = actual_columns[expected_column_index] == expected_column_name
@@ -214,5 +185,4 @@ class ExpectColumnToExist(TableExpectation):
                 success = False
         else:
             success = expected_column_name in actual_columns
-
         return {"success": success}

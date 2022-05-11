@@ -27,80 +27,23 @@ from great_expectations.rule_based_profiler.types.parameter_container import (
 )
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa
 except ImportError:
     pass
 
 
 class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
-    """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
-    any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
-    "fish", "dog", and the following as unexpected: "cat", "hat".
-
-    expect_column_values_to_not_match_regex is a \
-    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
-    .column_map_expectation>`.
-
-    Args:
-        column (str): \
-            The column name.
-        regex (str): \
-            The regular expression the column entries should NOT match.
-
-    Keyword Args:
-        mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
-            For more detail, see :ref:`mostly`.
-
-    Other Parameters:
-        result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
-        meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
-
-    Returns:
-        An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-    See Also:
-        :func:`expect_column_values_to_match_regex \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_values_to_match_regex>`
-
-        :func:`expect_column_values_to_match_regex_list \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine
-        .expect_column_values_to_match_regex_list>`
-
-    """
-
+    'Expect column entries to be strings that do NOT match a given regular expression. The regex must not match     any portion of the provided string. For example, "[at]+" would identify the following strings as expected:     "fish", "dog", and the following as unexpected: "cat", "hat".\n\n    expect_column_values_to_not_match_regex is a     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine\n    .column_map_expectation>`.\n\n    Args:\n        column (str):             The column name.\n        regex (str):             The regular expression the column entries should NOT match.\n\n    Keyword Args:\n        mostly (None or a float between 0 and 1):             Return `"success": True` if at least mostly fraction of values match the expectation.             For more detail, see :ref:`mostly`.\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    See Also:\n        :func:`expect_column_values_to_match_regex         <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_values_to_match_regex>`\n\n        :func:`expect_column_values_to_match_regex_list         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_match_regex_list>`\n\n'
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
-        "contributors": [
-            "@great_expectations",
-        ],
+        "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
     map_metric = "column_values.not_match_regex"
-    success_keys = (
-        "regex",
-        "mostly",
-        "auto",
-        "profiler_config",
-    )
-
+    success_keys = ("regex", "mostly", "auto", "profiler_config")
     regex_pattern_string_parameter_builder_config: ParameterBuilderConfig = (
         ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -116,14 +59,12 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         regex_pattern_string_parameter_builder_config
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        name="expect_column_values_to_not_match_regex",  # Convention: use "expectation_type" as profiler name.
+        name="expect_column_values_to_not_match_regex",
         config_version=1.0,
         variables={},
         rules={
             "default_expect_column_values_to_not_match_regex_rule": {
-                "variables": {
-                    "mostly": 1.0,
-                },
+                "variables": {"mostly": 1.0},
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
@@ -138,17 +79,16 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                         "regex": f"{PARAMETER_KEY}{regex_pattern_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
                         "mostly": f"{VARIABLES_KEY}mostly",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{regex_pattern_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{regex_pattern_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}"
                         },
-                    },
+                    }
                 ],
-            },
+            }
         },
     )
-
     default_kwarg_values = {
         "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "condition_parser": None,
         "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
@@ -156,14 +96,20 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         "auto": False,
         "profiler_config": default_profiler_config,
     }
-    args_keys = (
-        "column",
-        "regex",
-    )
+    args_keys = ("column", "regex")
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -188,10 +134,19 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -201,10 +156,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         params_with_json_schema = {
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "regex": {"schema": {"type": "string"}, "value": params.get("regex")},
-            "mostly": {
-                "schema": {"type": "number"},
-                "value": params.get("mostly"),
-            },
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
                 "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
@@ -218,31 +170,24 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-
         if not params.get("regex"):
             template_str = (
                 "values must not match a regular expression but none was specified."
             )
-        else:
-            if params["mostly"] is not None and params["mostly"] < 1.0:
-                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if include_column_name:
-                    template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
-                else:
-                    template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+        elif (params["mostly"] is not None) and (params["mostly"] < 1.0):
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+                (params["mostly"] * 100), precision=15, no_scientific=True
+            )
+            if include_column_name:
+                template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
             else:
-                if include_column_name:
-                    template_str = (
-                        "$column values must not match this regular expression: $regex."
-                    )
-                else:
-                    template_str = (
-                        "values must not match this regular expression: $regex."
-                    )
-
+                template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+        elif include_column_name:
+            template_str = (
+                "$column values must not match this regular expression: $regex."
+            )
+        else:
+            template_str = "values must not match this regular expression: $regex."
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -252,7 +197,6 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -266,41 +210,43 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
             ["column", "regex", "mostly", "row_condition", "condition_parser"],
         )
-
         if not params.get("regex"):
             template_str = (
                 "values must not match a regular expression but none was specified."
             )
-        else:
-            if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if include_column_name:
-                    template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
-                else:
-                    template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+        elif (params["mostly"] is not None) and (params["mostly"] < 1.0):
+            params["mostly_pct"] = num_to_str(
+                (params["mostly"] * 100), precision=15, no_scientific=True
+            )
+            if include_column_name:
+                template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
             else:
-                if include_column_name:
-                    template_str = (
-                        "$column values must not match this regular expression: $regex."
-                    )
-                else:
-                    template_str = (
-                        "values must not match this regular expression: $regex."
-                    )
-
+                template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
+        elif include_column_name:
+            template_str = (
+                "$column values must not match this regular expression: $regex."
+            )
+        else:
+            template_str = "values must not match this regular expression: $regex."
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -308,7 +254,6 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{
@@ -334,6 +279,15 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert result, "Must pass in result."
         expectation_config = configuration or result.expectation_config
         expectation_kwargs = expectation_config.kwargs

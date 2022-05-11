@@ -34,10 +34,19 @@ class ColumnTypes(TableMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        (df, _, _) = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         return [
@@ -51,17 +60,25 @@ class ColumnTypes(TableMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         batch_id = metric_domain_kwargs.get("batch_id")
         if batch_id is None:
             if execution_engine.active_batch_data_id is not None:
                 batch_id = execution_engine.active_batch_data_id
             else:
                 raise GreatExpectationsError(
-                    "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the "
-                    "execution engine"
+                    "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the execution engine"
                 )
         batch_data = execution_engine.loaded_batch_data_dict.get(batch_id)
         if batch_data is None:
@@ -76,10 +93,19 @@ class ColumnTypes(TableMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        (df, _, _) = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         return _get_spark_column_metadata(
@@ -88,7 +114,15 @@ class ColumnTypes(TableMetricProvider):
 
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
-    # if a custom query was passed
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if isinstance(batch_data.selectable, TextClause):
         table_selectable: TextClause = batch_data.selectable
         schema_name = None
@@ -98,17 +132,23 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
         )
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
     return get_sqlalchemy_column_metadata(
-        engine=engine,
-        table_selectable=table_selectable,
-        schema_name=schema_name,
+        engine=engine, table_selectable=table_selectable, schema_name=schema_name
     )
 
 
 def _get_spark_column_metadata(field, parent_name="", include_nested=True):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     cols = []
     if parent_name != "":
         parent_name = f"{parent_name}."
-
     if isinstance(field, sparktypes.StructType):
         for child in field.fields:
             cols += _get_spark_column_metadata(child, parent_name=parent_name)
@@ -123,10 +163,9 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
             for child in field.dataType.fields:
                 cols += _get_spark_column_metadata(
                     child,
-                    parent_name=parent_name + field.name,
+                    parent_name=(parent_name + field.name),
                     include_nested=include_nested,
                 )
     else:
         raise ValueError("unrecognized field type")
-
     return cols

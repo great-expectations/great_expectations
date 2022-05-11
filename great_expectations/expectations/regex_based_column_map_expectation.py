@@ -37,47 +37,81 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return column.astype(str).str.contains(cls.regex)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _dialect, **kwargs):
-        regex_expression = get_dialect_regex_expression(column, cls.regex, _dialect)
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        regex_expression = get_dialect_regex_expression(column, cls.regex, _dialect)
         if regex_expression is None:
             logger.warning(
                 "Regex is not supported for dialect %s" % str(_dialect.dialect.name)
             )
             raise NotImplementedError
-
         return regex_expression
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return column.rlike(cls.regex)
 
 
 class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     @staticmethod
-    def register_metric(
-        regex_camel_name: str,
-        regex_: str,
-    ):
-        regex_snake_name = camel_to_snake(regex_camel_name)
-        map_metric = "column_values.match_" + regex_snake_name + "_regex"
+    def register_metric(regex_camel_name: str, regex_: str):
+        import inspect
 
-        # Define the class using `type`. This allows us to name it dynamically.
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        regex_snake_name = camel_to_snake(regex_camel_name)
+        map_metric = ("column_values.match_" + regex_snake_name) + "_regex"
         new_column_regex_metric_provider = type(
             f"(ColumnValuesMatch{regex_camel_name}Regex",
             (RegexColumnMapMetricProvider,),
-            {
-                "condition_metric_name": map_metric,
-                "regex": regex_,
-            },
+            {"condition_metric_name": map_metric, "regex": regex_},
         )
-
         return map_metric
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().validate_configuration(configuration)
         try:
             assert (
@@ -96,56 +130,68 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    # question, descriptive, prescriptive, diagnostic
     @classmethod
     @renderer(renderer_type="renderer.question")
     def _question_renderer(
         cls, configuration, result=None, language=None, runtime_configuration=None
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         column = configuration.kwargs.get("column")
         mostly = configuration.kwargs.get("mostly")
         regex = getattr(cls, "regex")
         semantic_type_name_plural = getattr(cls, "semantic_type_name_plural", None)
-
-        if mostly == 1 or mostly is None:
+        if (mostly == 1) or (mostly is None):
             if semantic_type_name_plural is not None:
                 return f'Are all values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'
             else:
                 return f'Do all values in column "{column}" match the regular expression {regex}?'
+        elif semantic_type_name_plural is not None:
+            return f'Are at least {(mostly * 100)}% of values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'
         else:
-            if semantic_type_name_plural is not None:
-                return f'Are at least {mostly * 100}% of values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'
-            else:
-                return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'
+            return f'Do at least {(mostly * 100)}% of values in column "{column}" match the regular expression {regex}?'
 
     @classmethod
     @renderer(renderer_type="renderer.answer")
     def _answer_renderer(
         cls, configuration=None, result=None, language=None, runtime_configuration=None
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
         regex = result.expectation_config.kwargs.get("regex")
         semantic_type_name_plural = configuration.kwargs.get(
             "semantic_type_name_plural"
         )
-
         if result.success:
-            if mostly == 1 or mostly is None:
+            if (mostly == 1) or (mostly is None):
                 if semantic_type_name_plural is not None:
                     return f'All values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
                 else:
                     return f'All values in column "{column}" match the regular expression {regex}.'
+            elif semantic_type_name_plural is not None:
+                return f'At least {(mostly * 100)}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
             else:
-                if semantic_type_name_plural is not None:
-                    return f'At least {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
-                else:
-                    return f'At least {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
+                return f'At least {(mostly * 100)}% of values in column "{column}" match the regular expression {regex}.'
+        elif semantic_type_name_plural is not None:
+            return f' Less than {(mostly * 100)}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
         else:
-            if semantic_type_name_plural is not None:
-                return f' Less than {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
-            else:
-                return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
+            return f'Less than {(mostly * 100)}% of values in column "{column}" match the regular expression {regex}.'
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -156,10 +202,19 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -183,7 +238,6 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 "value": params.get("condition_parser"),
             },
         }
-
         if not params.get("regex"):
             template_str = (
                 "values must match a regular expression but none was specified."
@@ -192,15 +246,13 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             template_str = "values must match this regular expression: $regex"
             if params["mostly"] is not None:
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    (params["mostly"] * 100), precision=15, no_scientific=True
                 )
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
-
         if include_column_name:
             template_str = "$column " + template_str
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -208,9 +260,8 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = (conditional_template_str + ", then ") + template_str
             params_with_json_schema.update(conditional_params)
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -224,17 +275,25 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
             ["column", "regex", "mostly", "row_condition", "condition_parser"],
         )
-
         if not params.get("regex"):
             template_str = (
                 "values must match a regular expression but none was specified."
@@ -243,24 +302,20 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             template_str = "values must match this regular expression: $regex"
             if params["mostly"] is not None:
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    (params["mostly"] * 100), precision=15, no_scientific=True
                 )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."
-
         if include_column_name:
             template_str = "$column " + template_str
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = (conditional_template_str + ", then ") + template_str
             params.update(conditional_params)
-
         params_with_json_schema = {
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
@@ -278,7 +333,6 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 "value": params.get("condition_parser"),
             },
         }
-
         return [
             RenderedStringTemplateContent(
                 **{

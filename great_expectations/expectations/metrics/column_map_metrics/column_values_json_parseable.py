@@ -16,7 +16,26 @@ class ColumnValuesJsonParseable(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
         def is_json(val):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             try:
                 json.loads(val)
                 return True
@@ -27,7 +46,26 @@ class ColumnValuesJsonParseable(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, json_schema, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
         def is_json(val):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             try:
                 json.loads(val)
                 return True
@@ -35,5 +73,4 @@ class ColumnValuesJsonParseable(ColumnMapMetricProvider):
                 return False
 
         is_json_udf = F.udf(is_json, sparktypes.BooleanType())
-
         return is_json_udf(column)

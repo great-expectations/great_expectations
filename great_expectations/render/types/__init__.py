@@ -10,16 +10,42 @@ from great_expectations.types import DictDot
 
 class RenderedContent:
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return {}
 
     def __eq__(self, other):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not isinstance(other, self.__class__):
-            # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         return self.to_json_dict() == other.to_json_dict()
 
     @classmethod
     def rendered_content_list_to_json(cls, list_, check_dicts=False):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         result_list = []
         for item in list_:
             if isinstance(item, RenderedContent):
@@ -38,8 +64,17 @@ class RenderedContent:
 
     @classmethod
     def rendered_content_dict_to_json(cls, dict_, check_list_dicts=True):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         json_dict = deepcopy(dict_)
-        for key, val in json_dict.items():
+        for (key, val) in json_dict.items():
             if not isinstance(val, (RenderedContent, list, dict)):
                 continue
             elif isinstance(val, RenderedContent):
@@ -57,12 +92,30 @@ class RenderedContent:
 
 class RenderedComponentContent(RenderedContent):
     def __init__(self, content_block_type, styling=None) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.content_block_type = content_block_type
         if styling is None:
             styling = {}
         self.styling = styling
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["content_block_type"] = self.content_block_type
         if len(self.styling) > 0:
@@ -79,12 +132,30 @@ class RenderedHeaderContent(RenderedComponentContent):
         styling=None,
         content_block_type="header",
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.header_row = header_row
         self.subheader = subheader
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         if isinstance(self.header, RenderedContent):
             d["header"] = self.header.to_json_dict()
@@ -109,12 +180,30 @@ class RenderedGraphContent(RenderedComponentContent):
         styling=None,
         content_block_type="graph",
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.graph = graph
         self.header = header
         self.subheader = subheader
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["graph"] = self.graph
         if self.header is not None:
@@ -142,6 +231,15 @@ class RenderedTableContent(RenderedComponentContent):
         table_options=None,
         header_row_options=None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
@@ -151,6 +249,15 @@ class RenderedTableContent(RenderedComponentContent):
         self.header_row_options = header_row_options
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -178,12 +285,30 @@ class RenderedTabsContent(RenderedComponentContent):
     def __init__(
         self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.tabs = tabs
         self.header = header
         self.subheader = subheader
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["tabs"] = RenderedContent.rendered_content_list_to_json(
             self.tabs, check_dicts=True
@@ -213,6 +338,15 @@ class RenderedBootstrapTableContent(RenderedComponentContent):
         styling=None,
         content_block_type="bootstrap_table",
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.table_data = table_data
         self.table_columns = table_columns
@@ -222,6 +356,15 @@ class RenderedBootstrapTableContent(RenderedComponentContent):
         self.subheader = subheader
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["table_data"] = RenderedContent.rendered_content_list_to_json(
             self.table_data, check_dicts=True
@@ -253,10 +396,28 @@ class RenderedContentBlockContainer(RenderedComponentContent):
     def __init__(
         self, content_blocks, styling=None, content_block_type="content_block_container"
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.content_blocks = content_blocks
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
@@ -266,10 +427,28 @@ class RenderedContentBlockContainer(RenderedComponentContent):
 
 class RenderedMarkdownContent(RenderedComponentContent):
     def __init__(self, markdown, styling=None, content_block_type="markdown") -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.markdown = markdown
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["markdown"] = self.markdown
         return d
@@ -279,15 +458,42 @@ class RenderedStringTemplateContent(RenderedComponentContent):
     def __init__(
         self, string_template, styling=None, content_block_type="string_template"
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.string_template = string_template
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["string_template"] = self.string_template
         return d
 
     def __str__(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         string = pTemplate(self.string_template["template"]).safe_substitute(
             self.string_template["params"]
         )
@@ -303,12 +509,30 @@ class RenderedBulletListContent(RenderedComponentContent):
         styling=None,
         content_block_type="bullet_list",
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
         self.bullet_list = bullet_list
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["bullet_list"] = RenderedContent.rendered_content_list_to_json(
             self.bullet_list
@@ -335,12 +559,30 @@ class ValueListContent(RenderedComponentContent):
         styling=None,
         content_block_type="value_list",
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
         self.value_list = value_list
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -360,12 +602,30 @@ class TextContent(RenderedComponentContent):
     def __init__(
         self, text, header=None, subheader=None, styling=None, content_block_type="text"
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.text = text
         self.header = header
         self.subheader = subheader
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -378,7 +638,6 @@ class TextContent(RenderedComponentContent):
             else:
                 d["subheader"] = self.subheader
         d["text"] = RenderedContent.rendered_content_list_to_json(self.text)
-
         return d
 
 
@@ -393,6 +652,15 @@ class CollapseContent(RenderedComponentContent):
         content_block_type="collapse",
         inline_link=False,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.collapse_toggle_link = collapse_toggle_link
         self.header = header
@@ -401,6 +669,15 @@ class CollapseContent(RenderedComponentContent):
         self.inline_link = inline_link
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -419,12 +696,10 @@ class CollapseContent(RenderedComponentContent):
                 d["collapse_toggle_link"] = self.collapse_toggle_link
         d["collapse"] = RenderedContent.rendered_content_list_to_json(self.collapse)
         d["inline_link"] = self.inline_link
-
         return d
 
 
 class RenderedDocumentContent(RenderedContent):
-    # NOTE: JPC 20191028 - review these keys to consolidate and group
     def __init__(
         self,
         sections,
@@ -439,12 +714,20 @@ class RenderedDocumentContent(RenderedContent):
         batch_spec=None,
         ge_cloud_id=None,
     ) -> None:
-        if not isinstance(sections, list) and all(
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        if (not isinstance(sections, list)) and all(
             [isinstance(section, RenderedSectionContent) for section in sections]
         ):
             raise InvalidRenderedContentError(
-                "RenderedDocumentContent requires a list of RenderedSectionContent for "
-                "sections."
+                "RenderedDocumentContent requires a list of RenderedSectionContent for sections."
             )
         self.sections = sections
         self.data_asset_name = data_asset_name
@@ -459,6 +742,15 @@ class RenderedDocumentContent(RenderedContent):
         self.ge_cloud_id = ge_cloud_id
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["sections"] = RenderedContent.rendered_content_list_to_json(self.sections)
         d["data_asset_name"] = self.data_asset_name
@@ -476,20 +768,37 @@ class RenderedDocumentContent(RenderedContent):
 
 class RenderedSectionContent(RenderedContent):
     def __init__(self, content_blocks, section_name=None) -> None:
-        if not isinstance(content_blocks, list) and all(
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        if (not isinstance(content_blocks, list)) and all(
             [
                 isinstance(content_block, RenderedComponentContent)
                 for content_block in content_blocks
             ]
         ):
             raise InvalidRenderedContentError(
-                "Rendered section content requires a list of RenderedComponentContent "
-                "for content blocks."
+                "Rendered section content requires a list of RenderedComponentContent for content blocks."
             )
         self.content_blocks = content_blocks
         self.section_name = section_name
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
@@ -509,17 +818,21 @@ class RenderedAtomicValue(DictDot):
         table: Optional[List[List["RenderedAtomicValue"]]] = None,
         graph: Optional[dict] = None,
     ) -> None:
-        # StringValueType
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.template: Optional[str] = template
         self.params: Optional[dict] = params
         self.schema: Optional[dict] = schema
-
-        # TableType
         self.header: Optional[RenderedAtomicValue] = header
         self.header_row: Optional[List[RenderedAtomicValue]] = header_row
         self.table: Optional[List[List[RenderedAtomicValue]]] = table
-
-        # GraphType
         self.graph: Optional[RenderedAtomicValue] = graph
 
 
@@ -527,21 +840,25 @@ class RenderedAtomicValueSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    # for StringType
     template = fields.String(required=False, allow_none=True)
     params = fields.Dict(required=False, allow_none=True)
     schema = fields.Dict(required=False, allow_none=True)
-
-    # for TableType
     header = fields.Dict(required=False, allow_none=True)
     header_row = fields.List(fields.Dict, required=False, allow_none=True)
     table = fields.List(fields.List(fields.Dict, required=False, allow_none=True))
-
-    # for GraphType
     graph = fields.String(required=False, allow_none=True)
 
     @post_load
     def create_value_obj(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return RenderedAtomicValue(**data)
 
 
@@ -552,11 +869,29 @@ class RenderedAtomicContent(RenderedContent):
         value: Optional[RenderedAtomicValue] = None,
         value_type: Optional[str] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.name = name
         self.value = value
         self.value_type = value_type
 
     def to_json_dict(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         d = super().to_json_dict()
         d["name"] = self.name
         d["value"] = self.value.__dict__
@@ -574,6 +909,15 @@ class RenderedAtomicContentSchema(Schema):
 
     @post_load
     def make_rendered_atomic_content(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return RenderedAtomicContent(**data)
 
 

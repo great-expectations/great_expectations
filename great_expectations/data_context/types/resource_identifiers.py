@@ -16,6 +16,15 @@ logger = logging.getLogger(__name__)
 
 class ExpectationSuiteIdentifier(DataContextKey):
     def __init__(self, expectation_suite_name: str) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__()
         if not isinstance(expectation_suite_name, str):
             raise InvalidDataContextKeyError(
@@ -25,63 +34,167 @@ class ExpectationSuiteIdentifier(DataContextKey):
 
     @property
     def expectation_suite_name(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._expectation_suite_name
 
     def to_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return tuple(self.expectation_suite_name.split("."))
 
     def to_fixed_length_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return (self.expectation_suite_name,)
 
     @classmethod
     def from_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls(".".join(tuple_))
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls(expectation_suite_name=tuple_[0])
 
     def __repr__(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return f"{self.__class__.__name__}::{self._expectation_suite_name}"
 
 
 class ExpectationSuiteIdentifierSchema(Schema):
     expectation_suite_name = fields.Str()
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_expectation_suite_identifier(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return ExpectationSuiteIdentifier(**data)
 
 
 class BatchIdentifier(DataContextKey):
-    """A BatchIdentifier tracks"""
+    "A BatchIdentifier tracks"
 
     def __init__(
         self,
-        batch_identifier: Union[BatchKwargs, dict, str],
+        batch_identifier: Union[(BatchKwargs, dict, str)],
         data_asset_name: str = None,
     ) -> None:
-        super().__init__()
-        # if isinstance(batch_identifier, (BatchKwargs, dict)):
-        #     self._batch_identifier = batch_identifier.batch_fingerprint
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        super().__init__()
         self._batch_identifier = batch_identifier
         self._data_asset_name = data_asset_name
 
     @property
     def batch_identifier(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._batch_identifier
 
     @property
     def data_asset_name(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._data_asset_name
 
     def to_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return (self.batch_identifier,)
 
     @classmethod
     def from_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls(batch_identifier=tuple_[0])
 
 
@@ -89,33 +202,39 @@ class BatchIdentifierSchema(Schema):
     batch_identifier = fields.Str()
     data_asset_name = fields.Str()
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_batch_identifier(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return BatchIdentifier(**data)
 
 
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier
-    and run_id.
-    """
+    "A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier\n    and run_id.\n"
 
     def __init__(self, expectation_suite_identifier, run_id, batch_identifier) -> None:
-        """Constructs a ValidationResultIdentifier
+        import inspect
 
-        Args:
-            expectation_suite_identifier (ExpectationSuiteIdentifier, list, tuple, or dict):
-                identifying information for the fully-qualified expectation suite used to validate
-            run_id (RunIdentifier): The run_id for which validation occurred
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Constructs a ValidationResultIdentifier\n\n        Args:\n            expectation_suite_identifier (ExpectationSuiteIdentifier, list, tuple, or dict):\n                identifying information for the fully-qualified expectation suite used to validate\n            run_id (RunIdentifier): The run_id for which validation occurred\n        "
         super().__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
         if isinstance(run_id, str):
-            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional).",
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name and run_time (both optional).",
                 DeprecationWarning,
             )
             try:
@@ -129,46 +248,112 @@ class ValidationResultIdentifier(DataContextKey):
             run_id = RunIdentifier()
         elif not isinstance(run_id, RunIdentifier):
             run_id = RunIdentifier(run_name=str(run_id))
-
         self._run_id = run_id
         self._batch_identifier = batch_identifier
 
     @property
     def expectation_suite_identifier(self) -> ExpectationSuiteIdentifier:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._expectation_suite_identifier
 
     @property
     def run_id(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._run_id
 
     @property
     def batch_identifier(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._batch_identifier
 
     def to_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return tuple(
-            list(self.expectation_suite_identifier.to_tuple())
-            + list(self.run_id.to_tuple())
-            + [self.batch_identifier or "__none__"]
+            (
+                list(self.expectation_suite_identifier.to_tuple())
+                + list(self.run_id.to_tuple())
+            )
+            + [(self.batch_identifier or "__none__")]
         )
 
     def to_fixed_length_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return tuple(
-            [self.expectation_suite_identifier.expectation_suite_name]
-            + list(self.run_id.to_tuple())
-            + [self.batch_identifier or "__none__"]
+            (
+                [self.expectation_suite_identifier.expectation_suite_name]
+                + list(self.run_id.to_tuple())
+            )
+            + [(self.batch_identifier or "__none__")]
         )
 
     @classmethod
     def from_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls(
-            ExpectationSuiteIdentifier.from_tuple(tuple_[0:-3]),
-            RunIdentifier.from_tuple((tuple_[-3], tuple_[-2])),
-            tuple_[-1],
+            ExpectationSuiteIdentifier.from_tuple(tuple_[0:(-3)]),
+            RunIdentifier.from_tuple((tuple_[(-3)], tuple_[(-2)])),
+            tuple_[(-1)],
         )
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls(
             ExpectationSuiteIdentifier(tuple_[0]),
             RunIdentifier.from_tuple((tuple_[1], tuple_[2])),
@@ -177,6 +362,15 @@ class ValidationResultIdentifier(DataContextKey):
 
     @classmethod
     def from_object(cls, validation_result):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         batch_kwargs = validation_result.meta.get("batch_kwargs", {})
         if isinstance(batch_kwargs, IDDict):
             batch_identifier = batch_kwargs.to_id()
@@ -197,42 +391,131 @@ class ValidationResultIdentifier(DataContextKey):
 
 class GeCloudIdentifier(DataContextKey):
     def __init__(self, resource_type: str, ge_cloud_id: Optional[str] = None) -> None:
-        super().__init__()
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        super().__init__()
         self._resource_type = resource_type
-        self._ge_cloud_id = ge_cloud_id if ge_cloud_id is not None else ""
+        self._ge_cloud_id = ge_cloud_id if (ge_cloud_id is not None) else ""
 
     @property
     def resource_type(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._resource_type
 
     @resource_type.setter
     def resource_type(self, value) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._resource_type = value
 
     @property
     def ge_cloud_id(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
     def ge_cloud_id(self, value) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._ge_cloud_id = value
 
     def to_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return (self.resource_type, self.ge_cloud_id)
 
     def to_fixed_length_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self.to_tuple()
 
     @classmethod
     def from_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls(resource_type=tuple_[0], ge_cloud_id=tuple_[1])
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls.from_tuple(tuple_)
 
     def __repr__(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
 
 
@@ -248,19 +531,36 @@ class ValidationResultIdentifierSchema(Schema):
         RunIdentifierSchema,
         required=True,
         error_messages={
-            "required": "run_id is required for a " "ValidationResultIdentifier"
+            "required": "run_id is required for a ValidationResultIdentifier"
         },
     )
     batch_identifier = fields.Nested(BatchIdentifierSchema, required=True)
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_validation_result_identifier(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return ValidationResultIdentifier(**data)
 
 
 class SiteSectionIdentifier(DataContextKey):
     def __init__(self, site_section_name, resource_identifier) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._site_section_name = site_section_name
         if site_section_name in ["validations", "profiling"]:
             if isinstance(resource_identifier, ValidationResultIdentifier):
@@ -291,13 +591,40 @@ class SiteSectionIdentifier(DataContextKey):
 
     @property
     def site_section_name(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._site_section_name
 
     @property
     def resource_identifier(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._resource_identifier
 
     def to_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         site_section_identifier_tuple_list = [self.site_section_name] + list(
             self.resource_identifier.to_tuple()
         )
@@ -305,6 +632,15 @@ class SiteSectionIdentifier(DataContextKey):
 
     @classmethod
     def from_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if tuple_[0] == "validations":
             return cls(
                 site_section_name=tuple_[0],
@@ -322,7 +658,16 @@ class SiteSectionIdentifier(DataContextKey):
 
 
 class ConfigurationIdentifier(DataContextKey):
-    def __init__(self, configuration_key: Union[str, UUID]) -> None:
+    def __init__(self, configuration_key: Union[(str, UUID)]) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__()
         if isinstance(configuration_key, UUID):
             configuration_key = str(configuration_key)
@@ -334,32 +679,94 @@ class ConfigurationIdentifier(DataContextKey):
 
     @property
     def configuration_key(self) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._configuration_key
 
     def to_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return tuple(self.configuration_key.split("."))
 
     def to_fixed_length_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return (self.configuration_key,)
 
     @classmethod
     def from_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls(".".join(tuple_))
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls(configuration_key=tuple_[0])
 
     def __repr__(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return f"{self.__class__.__name__}::{self._configuration_key}"
 
 
 class ConfigurationIdentifierSchema(Schema):
     configuration_key = fields.Str()
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_configuration_identifier(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return ConfigurationIdentifier(**data)
 
 

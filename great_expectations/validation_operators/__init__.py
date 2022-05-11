@@ -20,7 +20,7 @@ from .validation_operators import (
     WarningAndFailureExpectationSuitesValidationOperator,
 )
 
-for module_name, package_name in [
-    (".validation_operators", "great_expectations.validation_operators"),
+for (module_name, package_name) in [
+    (".validation_operators", "great_expectations.validation_operators")
 ]:
     verify_dynamic_loading_support(module_name=module_name, package_name=package_name)

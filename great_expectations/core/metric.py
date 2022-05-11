@@ -12,12 +12,18 @@ from great_expectations.exceptions import GreatExpectationsError
 
 
 class Metric:
-    """A Metric associates a value with some name and configuration. The specific configuration parameters that are
-    relevant for a given metric's identity depend on the metric. For example, the metric `column_mean` depends on a
-    column name.
-    """
+    "A Metric associates a value with some name and configuration. The specific configuration parameters that are\n    relevant for a given metric's identity depend on the metric. For example, the metric `column_mean` depends on a\n    column name.\n"
 
     def __init__(self, metric_name, metric_kwargs, metric_value) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._metric_name = metric_name
         if not isinstance(metric_kwargs, IDDict):
             metric_kwargs = IDDict(metric_kwargs)
@@ -26,75 +32,191 @@ class Metric:
 
     @property
     def metric_name(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._metric_name
 
     @property
     def metric_kwargs(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._metric_kwargs
 
     @property
     def metric_kwargs_id(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._metric_kwargs.to_id()
 
 
 class MetricIdentifier(DataContextKey):
-    """A MetricIdentifier serves as a key to store and retrieve Metrics."""
+    "A MetricIdentifier serves as a key to store and retrieve Metrics."
 
     def __init__(self, metric_name, metric_kwargs_id) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._metric_name = metric_name
         self._metric_kwargs_id = metric_kwargs_id
 
     @property
     def metric_name(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._metric_name
 
     @property
     def metric_kwargs_id(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._metric_kwargs_id
 
     @classmethod
     def from_object(cls, metric):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not isinstance(metric, Metric):
             raise GreatExpectationsError(
-                "Unable to build MetricIdentifier from object of type {} when Metric is "
-                "expected.".format(type(metric))
+                "Unable to build MetricIdentifier from object of type {} when Metric is expected.".format(
+                    type(metric)
+                )
             )
         return cls(metric.metric_name, metric.metric_kwargs_id)
 
     def to_fixed_length_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self.to_tuple()
 
     def to_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self._metric_kwargs_id is None:
             tuple_metric_kwargs_id = "__"
         else:
             tuple_metric_kwargs_id = self._metric_kwargs_id
-        return tuple(
-            (self.metric_name, tuple_metric_kwargs_id)
-        )  # We use the placeholder in to_tuple
+        return tuple((self.metric_name, tuple_metric_kwargs_id))
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls.from_tuple(tuple_)
 
     @classmethod
     def from_tuple(cls, tuple_):
-        if tuple_[-1] == "__":
-            return cls(*tuple_[:-1], None)
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        if tuple_[(-1)] == "__":
+            return cls(*tuple_[:(-1)], None)
         return cls(*tuple_)
 
 
 class BatchMetric(Metric):
-    """A BatchMetric is a metric associated with a particular Batch of data."""
+    "A BatchMetric is a metric associated with a particular Batch of data."
 
     def __init__(
         self, metric_name, metric_kwargs, batch_identifier, metric_value
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(metric_name, metric_kwargs, metric_value)
         self._batch_identifier = batch_identifier
 
     @property
     def batch_identifier(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._batch_identifier
 
 
@@ -108,17 +230,23 @@ class ValidationMetric(Metric):
         metric_kwargs,
         metric_value,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(metric_name, metric_kwargs, metric_value)
         if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_identifier
             )
         if isinstance(run_id, str):
-            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional).",
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name and run_time (both optional).",
                 DeprecationWarning,
             )
             try:
@@ -138,14 +266,41 @@ class ValidationMetric(Metric):
 
     @property
     def run_id(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._run_id
 
     @property
     def data_asset_name(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._data_asset_name
 
     @property
     def expectation_suite_identifier(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._expectation_suite_identifier
 
 
@@ -158,18 +313,23 @@ class ValidationMetricIdentifier(MetricIdentifier):
         metric_name,
         metric_kwargs_id,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(metric_name, metric_kwargs_id)
         if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_identifier
             )
-
         if isinstance(run_id, str):
-            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional).",
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name and run_time (both optional).",
                 DeprecationWarning,
             )
             try:
@@ -183,31 +343,66 @@ class ValidationMetricIdentifier(MetricIdentifier):
             run_id = RunIdentifier()
         elif not isinstance(run_id, RunIdentifier):
             run_id = RunIdentifier(run_name=str(run_id))
-
         self._run_id = run_id
         self._data_asset_name = data_asset_name
         self._expectation_suite_identifier = expectation_suite_identifier
 
     @property
     def run_id(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._run_id
 
     @property
     def data_asset_name(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._data_asset_name
 
     @property
     def expectation_suite_identifier(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._expectation_suite_identifier
 
     @classmethod
     def from_object(cls, validation_metric):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not isinstance(validation_metric, ValidationMetric):
             raise GreatExpectationsError(
-                "Unable to build ValidationMetricIdentifier from object of type {} when "
-                "ValidationMetric is expected.".format(type(validation_metric))
+                "Unable to build ValidationMetricIdentifier from object of type {} when ValidationMetric is expected.".format(
+                    type(validation_metric)
+                )
             )
-
         return cls(
             run_id=validation_metric.run_id,
             data_asset_name=validation_metric.data_asset_name,
@@ -217,30 +412,59 @@ class ValidationMetricIdentifier(MetricIdentifier):
         )
 
     def to_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self.data_asset_name is None:
             tuple_data_asset_name = "__"
         else:
             tuple_data_asset_name = self.data_asset_name
         return tuple(
-            list(self.run_id.to_tuple())
-            + [tuple_data_asset_name]
-            + list(self.expectation_suite_identifier.to_tuple())
-            + [self.metric_name, self.metric_kwargs_id or "__"]
+            (
+                (list(self.run_id.to_tuple()) + [tuple_data_asset_name])
+                + list(self.expectation_suite_identifier.to_tuple())
+            )
+            + [self.metric_name, (self.metric_kwargs_id or "__")]
         )
 
     def to_fixed_length_tuple(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self.data_asset_name is None:
             tuple_data_asset_name = "__"
         else:
             tuple_data_asset_name = self.data_asset_name
         return tuple(
-            list(self.run_id.to_tuple())
-            + [tuple_data_asset_name]
-            + list(self.expectation_suite_identifier.to_fixed_length_tuple())
-            + [self.metric_name, self.metric_kwargs_id or "__"]
+            (
+                (list(self.run_id.to_tuple()) + [tuple_data_asset_name])
+                + list(self.expectation_suite_identifier.to_fixed_length_tuple())
+            )
+            + [self.metric_name, (self.metric_kwargs_id or "__")]
         )
 
     def to_evaluation_parameter_urn(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self._metric_kwargs_id is None:
             return "urn:great_expectations:validations:" + ":".join(
                 list(self.expectation_suite_identifier.to_fixed_length_tuple())
@@ -254,6 +478,15 @@ class ValidationMetricIdentifier(MetricIdentifier):
 
     @classmethod
     def from_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if len(tuple_) < 6:
             raise GreatExpectationsError(
                 "ValidationMetricIdentifier tuple must have at least six components."
@@ -262,12 +495,12 @@ class ValidationMetricIdentifier(MetricIdentifier):
             tuple_data_asset_name = None
         else:
             tuple_data_asset_name = tuple_[2]
-        metric_id = MetricIdentifier.from_tuple(tuple_[-2:])
+        metric_id = MetricIdentifier.from_tuple(tuple_[(-2):])
         return cls(
             run_id=RunIdentifier.from_tuple((tuple_[0], tuple_[1])),
             data_asset_name=tuple_data_asset_name,
             expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(
-                tuple_[3:-2]
+                tuple_[3:(-2)]
             ),
             metric_name=metric_id.metric_name,
             metric_kwargs_id=metric_id.metric_kwargs_id,
@@ -275,16 +508,24 @@ class ValidationMetricIdentifier(MetricIdentifier):
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if len(tuple_) != 6:
             raise GreatExpectationsError(
-                "ValidationMetricIdentifier fixed length tuple must have exactly six "
-                "components."
+                "ValidationMetricIdentifier fixed length tuple must have exactly six components."
             )
         if tuple_[2] == "__":
             tuple_data_asset_name = None
         else:
             tuple_data_asset_name = tuple_[2]
-        metric_id = MetricIdentifier.from_tuple(tuple_[-2:])
+        metric_id = MetricIdentifier.from_tuple(tuple_[(-2):])
         return cls(
             run_id=RunIdentifier.from_fixed_length_tuple((tuple_[0], tuple_[1])),
             data_asset_name=tuple_data_asset_name,

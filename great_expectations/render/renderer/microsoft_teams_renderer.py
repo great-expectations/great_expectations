@@ -4,15 +4,22 @@ from great_expectations.core import RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import BatchIdentifier
 
 logger = logging.getLogger(__name__)
-
 from great_expectations.render.renderer.renderer import Renderer
 
 
 class MicrosoftTeamsRenderer(Renderer):
-
     MICROSOFT_TEAMS_SCHEMA_URL = "http://adaptivecards.io/schemas/adaptive-card.json"
 
     def __init__(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__()
 
     def render(
@@ -21,12 +28,19 @@ class MicrosoftTeamsRenderer(Renderer):
         validation_result_suite_identifier=None,
         data_docs_pages=None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
-
         status = "Failed :("
-
         query = {
             "type": "message",
             "attachments": [
@@ -55,11 +69,11 @@ class MicrosoftTeamsRenderer(Renderer):
                                                         "weight": "bolder",
                                                         "size": "large",
                                                         "wrap": "true",
-                                                    },
+                                                    }
                                                 ],
                                             }
                                         ],
-                                    },
+                                    }
                                 ],
                             },
                             {
@@ -80,19 +94,16 @@ class MicrosoftTeamsRenderer(Renderer):
                 }
             ],
         }
-
         validation_result_elements = []
         if validation_result:
             if validation_result.success:
                 status = "Success !!!"
-
             status_element = self._render_validation_result_element(
                 key="Batch validation status",
                 value=status,
                 validation_result=validation_result,
             )
             validation_result_elements.append(status_element)
-
             if validation_result_suite_identifier:
                 batch_identifier = validation_result_suite_identifier.batch_identifier
                 if isinstance(batch_identifier, BatchIdentifier):
@@ -100,12 +111,10 @@ class MicrosoftTeamsRenderer(Renderer):
                     batch_identifier = batch_identifier.batch_identifier
                 else:
                     data_asset_name = "__no_data_asset_name_"
-
                 data_asset_name_element = self._render_validation_result_element(
                     key="Data asset name", value=data_asset_name
                 )
                 validation_result_elements.append(data_asset_name_element)
-
                 expectation_suite_name = (
                     validation_result_suite_identifier.expectation_suite_identifier.expectation_suite_name
                 )
@@ -113,7 +122,6 @@ class MicrosoftTeamsRenderer(Renderer):
                     key="Expectation suite name", value=expectation_suite_name
                 )
                 validation_result_elements.append(expectation_suite_name_element)
-
                 run_id = validation_result_suite_identifier.run_id
                 if isinstance(run_id, RunIdentifier):
                     run_name = run_id.run_name
@@ -121,17 +129,14 @@ class MicrosoftTeamsRenderer(Renderer):
                 else:
                     run_time = "__no_run_time_"
                     run_name = run_id
-
                 run_name_element = self._render_validation_result_element(
                     key="Run name", value=run_name
                 )
                 validation_result_elements.append(run_name_element)
-
                 batch_id_element = self._render_validation_result_element(
                     key="Batch ID", value=batch_identifier
                 )
                 validation_result_elements.append(batch_id_element)
-
                 query["attachments"][0]["content"]["body"][0]["items"][0]["columns"][0][
                     "items"
                 ].append(
@@ -143,7 +148,6 @@ class MicrosoftTeamsRenderer(Renderer):
                         "wrap": "true",
                     }
                 )
-
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
             check_details_text = "*{}* of *{}* expectations were met".format(
@@ -153,11 +157,9 @@ class MicrosoftTeamsRenderer(Renderer):
                 key="Summary", value=check_details_text
             )
             validation_result_elements.append(check_details_text_element)
-
             query["attachments"][0]["content"]["body"][1][
                 "items"
             ] = validation_result_elements
-
             if data_docs_pages:
                 for docs_link_key in data_docs_pages.keys():
                     if docs_link_key == "class":
@@ -168,11 +170,19 @@ class MicrosoftTeamsRenderer(Renderer):
                         query["attachments"][0]["content"]["actions"].append(
                             report_element
                         )
-
         return query
 
     @staticmethod
     def _get_report_element(docs_link):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         report_element = {
             "type": "Action.OpenUrl",
             "title": "Open data docs",
@@ -182,6 +192,15 @@ class MicrosoftTeamsRenderer(Renderer):
 
     @staticmethod
     def _render_validation_result_element(key, value, validation_result=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         validation_result_element = {
             "type": "TextBlock",
             "text": f"**{key}:** {value}",
@@ -189,6 +208,6 @@ class MicrosoftTeamsRenderer(Renderer):
         }
         if validation_result and validation_result.success:
             validation_result_element["color"] = "good"
-        elif validation_result and not validation_result.success:
+        elif validation_result and (not validation_result.success):
             validation_result_element["color"] = "attention"
         return validation_result_element

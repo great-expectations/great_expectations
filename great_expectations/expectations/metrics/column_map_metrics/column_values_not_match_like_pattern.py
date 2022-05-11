@@ -20,6 +20,15 @@ class ColumnValuesNotMatchLikePattern(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, like_pattern, _dialect, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         like_pattern_expression = get_dialect_like_pattern_expression(
             column, _dialect, like_pattern, positive=False
         )
@@ -28,5 +37,4 @@ class ColumnValuesNotMatchLikePattern(ColumnMapMetricProvider):
                 f"Like patterns are not supported for dialect {str(_dialect.name)}"
             )
             raise NotImplementedError
-
         return like_pattern_expression

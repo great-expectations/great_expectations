@@ -19,69 +19,14 @@ from great_expectations.render.util import (
 )
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa
 except ImportError:
     pass
-
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
-    """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
-
-    This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
-
-    expect_column_value_lengths_to_be_between is a \
-    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
-    .column_map_expectation>`.
-
-    Args:
-        column (str): \
-            The column name.
-        min_value (int or None): \
-            The minimum value for a column entry length.
-        max_value (int or None): \
-            The maximum value for a column entry length.
-
-    Keyword Args:
-        mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
-            For more detail, see :ref:`mostly`.
-
-    Other Parameters:
-        result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
-        meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
-
-    Returns:
-        An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-    Notes:
-        * min_value and max_value are both inclusive.
-        * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has \
-          no minimum.
-        * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has \
-          no maximum.
-
-    See Also:
-        :func:`expect_column_value_lengths_to_equal \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_value_lengths_to_equal>`
-
-    """
-
-    # This dictionary contains metadata for display in the public gallery
+    'Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).\n\n    This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.\n\n    expect_column_value_lengths_to_be_between is a     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine\n    .column_map_expectation>`.\n\n    Args:\n        column (str):             The column name.\n        min_value (int or None):             The minimum value for a column entry length.\n        max_value (int or None):             The maximum value for a column entry length.\n\n    Keyword Args:\n        mostly (None or a float between 0 and 1):             Return `"success": True` if at least mostly fraction of values match the expectation.             For more detail, see :ref:`mostly`.\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    Notes:\n        * min_value and max_value are both inclusive.\n        * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has           no minimum.\n        * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has           no maximum.\n\n    See Also:\n        :func:`expect_column_value_lengths_to_equal         <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_value_lengths_to_equal>`\n\n'
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
@@ -90,15 +35,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
     map_metric = "column_values.value_length.between"
-    success_keys = (
-        "min_value",
-        "max_value",
-        "strict_min",
-        "strict_max",
-        "mostly",
-    )
+    success_keys = ("min_value", "max_value", "strict_min", "strict_max", "mostly")
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
@@ -111,24 +49,26 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
-    args_keys = (
-        "column",
-        "min_value",
-        "max_value",
-    )
+    args_keys = ("column", "min_value", "max_value")
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        super().validate_configuration(configuration)
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
-
         try:
-            assert (
-                configuration.kwargs.get("min_value") is not None
-                or configuration.kwargs.get("max_value") is not None
+            assert (configuration.kwargs.get("min_value") is not None) or (
+                configuration.kwargs.get("max_value") is not None
             ), "min_value and max_value cannot both be None"
             if configuration.kwargs.get("min_value"):
                 assert (
@@ -139,7 +79,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     assert "$PARAMETER" in configuration.kwargs.get(
                         "min_value"
                     ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key.'
-
             if configuration.kwargs.get("max_value"):
                 assert (
                     isinstance(configuration.kwargs["max_value"], dict)
@@ -161,10 +100,19 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -212,38 +160,36 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 "value": params.get("strict_max"),
             },
         }
-
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "values may have any length."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            (at_least_str, at_most_str) = handle_strict_min_max(params)
+            if (params["mostly"] is not None) and (params["mostly"] < 1.0):
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    (params["mostly"] * 100), precision=15, no_scientific=True
                 )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if params["min_value"] is not None and params["max_value"] is not None:
+                if (params["min_value"] is not None) and (
+                    params["max_value"] is not None
+                ):
                     template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
                 elif params["min_value"] is None:
                     template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
                 elif params["max_value"] is None:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
-            else:
-                if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
-
-                elif params["min_value"] is None:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
-
-                elif params["max_value"] is None:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
-
+            elif (params["min_value"] is not None) and (
+                params["max_value"] is not None
+            ):
+                template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+            elif params["min_value"] is None:
+                template_str = (
+                    f"values must always be {at_most_str} $max_value characters long."
+                )
+            elif params["max_value"] is None:
+                template_str = (
+                    f"values must always be {at_least_str} $min_value characters long."
+                )
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -253,7 +199,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -268,19 +213,30 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         **kwargs,
     ) -> List[
         Union[
-            dict,
-            str,
-            RenderedStringTemplateContent,
-            RenderedTableContent,
-            RenderedBulletListContent,
-            RenderedGraphContent,
-            Any,
+            (
+                dict,
+                str,
+                RenderedStringTemplateContent,
+                RenderedTableContent,
+                RenderedBulletListContent,
+                RenderedGraphContent,
+                Any,
+            )
         ]
     ]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -296,38 +252,36 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 "strict_max",
             ],
         )
-
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "values may have any length."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            (at_least_str, at_most_str) = handle_strict_min_max(params)
+            if (params["mostly"] is not None) and (params["mostly"] < 1.0):
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    (params["mostly"] * 100), precision=15, no_scientific=True
                 )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if params["min_value"] is not None and params["max_value"] is not None:
+                if (params["min_value"] is not None) and (
+                    params["max_value"] is not None
+                ):
                     template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
                 elif params["min_value"] is None:
                     template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
                 elif params["max_value"] is None:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
-            else:
-                if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
-
-                elif params["min_value"] is None:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
-
-                elif params["max_value"] is None:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
-
+            elif (params["min_value"] is not None) and (
+                params["max_value"] is not None
+            ):
+                template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+            elif params["min_value"] is None:
+                template_str = (
+                    f"values must always be {at_most_str} $max_value characters long."
+                )
+            elif params["max_value"] is None:
+                template_str = (
+                    f"values must always be {at_least_str} $min_value characters long."
+                )
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -335,7 +289,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{

@@ -21,17 +21,23 @@ class ColumnValuesMatchLikePatternList(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, like_pattern_list, match_on, _dialect, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not match_on:
             match_on = "any"
-
         if match_on not in ["any", "all"]:
             raise ValueError("match_on must be any or all")
-
         if len(like_pattern_list) == 0:
             raise ValueError(
                 "At least one like_pattern must be supplied in the like_pattern_list."
             )
-
         like_pattern_expression = get_dialect_like_pattern_expression(
             column, _dialect, like_pattern_list[0]
         )
@@ -41,7 +47,6 @@ class ColumnValuesMatchLikePatternList(ColumnMapMetricProvider):
                 % str(_dialect.dialect.name)
             )
             raise NotImplementedError
-
         if match_on == "any":
             condition = sa.or_(
                 *(

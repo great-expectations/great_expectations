@@ -48,16 +48,11 @@ try:
     import black
 except ImportError:
     black = None
-
 try:
-    # This library moved in python 3.8
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
-    # Fallback for python < 3.8
     import importlib_metadata
-
 logger = logging.getLogger(__name__)
-
 try:
     import sqlalchemy as sa
     from sqlalchemy import Table
@@ -71,7 +66,6 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
-
 SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "batch": "batches",
     "checkpoint": "checkpoints",
@@ -83,7 +77,6 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "contract": "contracts",
     "rendered_data_doc": "rendered_data_docs",
 }
-
 PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "batches": "batch",
     "checkpoints": "checkpoint",
@@ -95,78 +88,120 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
 }
-
-p1 = re.compile(r"(.)([A-Z][a-z]+)")
-p2 = re.compile(r"([a-z0-9])([A-Z])")
+p1 = re.compile("(.)([A-Z][a-z]+)")
+p2 = re.compile("([a-z0-9])([A-Z])")
 
 
 def pluralize(singular_ge_noun):
-    """
-    Pluralizes a Great Expectations singular noun
-    """
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Pluralizes a Great Expectations singular noun\n    "
     try:
         return SINGULAR_TO_PLURAL_LOOKUP_DICT[singular_ge_noun.lower()]
     except KeyError:
         raise GreatExpectationsError(
-            f"Unable to pluralize '{singular_ge_noun}'. Please update "
-            f"great_expectations.util.SINGULAR_TO_PLURAL_LOOKUP_DICT"
+            f"Unable to pluralize '{singular_ge_noun}'. Please update great_expectations.util.SINGULAR_TO_PLURAL_LOOKUP_DICT"
         )
 
 
 def singularize(plural_ge_noun):
-    """
-    Singularizes a Great Expectations plural noun
-    """
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Singularizes a Great Expectations plural noun\n    "
     try:
         return PLURAL_TO_SINGULAR_LOOKUP_DICT[plural_ge_noun.lower()]
     except KeyError:
         raise GreatExpectationsError(
-            f"Unable to singularize '{plural_ge_noun}'. Please update "
-            f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
+            f"Unable to singularize '{plural_ge_noun}'. Please update great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
         )
 
 
 def camel_to_snake(name):
-    name = p1.sub(r"\1_\2", name)
-    return p2.sub(r"\1_\2", name).lower()
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    name = p1.sub("\\1_\\2", name)
+    return p2.sub("\\1_\\2", name).lower()
 
 
 def underscore(word: str) -> str:
-    """
-    **Borrowed from inflection.underscore**
-    Make an underscored, lowercase form from the expression in the string.
+    import inspect
 
-    Example::
-
-        >>> underscore("DeviceType")
-        'device_type'
-
-    As a rule of thumb you can think of :func:`underscore` as the inverse of
-    :func:`camelize`, though there are cases where that does not hold::
-
-        >>> camelize(underscore("IOError"))
-        'IoError'
-
-    """
-    word = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", word)
-    word = re.sub(r"([a-z\d])([A-Z])", r"\1_\2", word)
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    **Borrowed from inflection.underscore**\n    Make an underscored, lowercase form from the expression in the string.\n\n    Example::\n\n        >>> underscore(\"DeviceType\")\n        'device_type'\n\n    As a rule of thumb you can think of :func:`underscore` as the inverse of\n    :func:`camelize`, though there are cases where that does not hold::\n\n        >>> camelize(underscore(\"IOError\"))\n        'IoError'\n\n    "
+    word = re.sub("([A-Z]+)([A-Z][a-z])", "\\1_\\2", word)
+    word = re.sub("([a-z\\d])([A-Z])", "\\1_\\2", word)
     word = word.replace("-", "_")
     return word.lower()
 
 
 def hyphen(txt: str):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     return txt.replace("_", "-")
 
 
 def profile(func: Callable = None) -> Callable:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
     @wraps(func)
     def profile_function_call(*args, **kwargs) -> Any:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         pr: cProfile.Profile = cProfile.Profile()
         pr.enable()
         retval: Any = func(*args, **kwargs)
         pr.disable()
         s: io.StringIO = io.StringIO()
-        sortby: str = pstats.SortKey.CUMULATIVE  # "cumulative"
+        sortby: str = pstats.SortKey.CUMULATIVE
         ps: pstats.Stats = pstats.Stats(pr, stream=s).sort_stats(sortby)
         ps.print_stats()
         print(s.getvalue())
@@ -180,21 +215,39 @@ def measure_execution_time(
     execution_time_property_name: str = "execution_time",
     pretty_print: bool = True,
 ) -> Callable:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
     def execution_time_decorator(func: Callable) -> Callable:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
         @wraps(func)
         def compute_delta_t(*args, **kwargs) -> Any:
-            """
-            Computes return value of decorated function, calls back "execution_time_holder_object_reference_name", and
-            saves execution time (in seconds) into specified "execution_time_property_name" of passed object reference.
-            Settable "{execution_time_holder_object_reference_name}.{execution_time_property_name}" property must exist.
+            import inspect
 
-            Args:
-                args: Positional arguments of original function being decorated.
-                kwargs: Keyword arguments of original function being decorated.
-
-            Returns:
-                Any (output value of original function being decorated).
-            """
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            '\n            Computes return value of decorated function, calls back "execution_time_holder_object_reference_name", and\n            saves execution time (in seconds) into specified "execution_time_property_name" of passed object reference.\n            Settable "{execution_time_holder_object_reference_name}.{execution_time_property_name}" property must exist.\n\n            Args:\n                args: Positional arguments of original function being decorated.\n                kwargs: Keyword arguments of original function being decorated.\n\n            Returns:\n                Any (output value of original function being decorated).\n            '
             time_begin: float = time.perf_counter()
             try:
                 return func(*args, **kwargs)
@@ -203,17 +256,15 @@ def measure_execution_time(
                 delta_t: float = time_end - time_begin
                 if kwargs is None:
                     kwargs = {}
-
                 execution_time_holder: type = kwargs.get(
                     execution_time_holder_object_reference_name
                 )
-                if execution_time_holder is not None and hasattr(
+                if (execution_time_holder is not None) and hasattr(
                     execution_time_holder, execution_time_property_name
                 ):
                     setattr(
                         execution_time_holder, execution_time_property_name, delta_t
                     )
-
                 if pretty_print:
                     bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
                     call_args: OrderedDict = bound_args.arguments
@@ -226,8 +277,16 @@ def measure_execution_time(
     return execution_time_decorator
 
 
-# noinspection SpellCheckingInspection
 def get_project_distribution() -> Optional[Distribution]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     ditr: Distribution
     for distr in importlib_metadata.distributions():
         relative_path: Path
@@ -241,41 +300,43 @@ def get_project_distribution() -> Optional[Distribution]:
     return None
 
 
-# Returns the object reference to the currently running function (i.e., the immediate function under execution).
 def get_currently_executing_function() -> Callable:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     cf: FrameType = currentframe()
     fb: FrameType = cf.f_back
     fc: CodeType = fb.f_code
     func_obj: Callable = [
         referer
         for referer in get_referrers(fc)
-        if getattr(referer, "__code__", None) is fc
-        and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
+        if (
+            (getattr(referer, "__code__", None) is fc)
+            and (getclosurevars(referer).nonlocals.items() <= fb.f_locals.items())
+        )
     ][0]
     return func_obj
 
 
-# noinspection SpellCheckingInspection
 def get_currently_executing_function_call_arguments(
     include_module_name: bool = False, include_caller_names: bool = False, **kwargs
 ) -> dict:
-    """
-    :param include_module_name: bool If True, module name will be determined and included in output dictionary (default is False)
-    :param include_caller_names: bool If True, arguments, such as "self" and "cls", if present, will be included in output dictionary (default is False)
-    :param kwargs:
-    :return: dict Output dictionary, consisting of call arguments as attribute "name: value" pairs.
+    import inspect
 
-    Example usage:
-    # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-    # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
-    self._config = get_currently_executing_function_call_arguments(
-        include_module_name=True,
-        **{
-            "class_name": self.__class__.__name__,
-        },
-    )
-    filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    '\n    :param include_module_name: bool If True, module name will be determined and included in output dictionary (default is False)\n    :param include_caller_names: bool If True, arguments, such as "self" and "cls", if present, will be included in output dictionary (default is False)\n    :param kwargs:\n    :return: dict Output dictionary, consisting of call arguments as attribute "name: value" pairs.\n\n    Example usage:\n    # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter\n    # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.\n    self._config = get_currently_executing_function_call_arguments(\n        include_module_name=True,\n        **{\n            "class_name": self.__class__.__name__,\n        },\n    )\n    filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)\n    '
     cf: FrameType = currentframe()
     fb: FrameType = cf.f_back
     argvs: ArgInfo = getargvalues(fb)
@@ -283,15 +344,17 @@ def get_currently_executing_function_call_arguments(
     cur_func_obj: Callable = [
         referer
         for referer in get_referrers(fc)
-        if getattr(referer, "__code__", None) is fc
-        and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
+        if (
+            (getattr(referer, "__code__", None) is fc)
+            and (getclosurevars(referer).nonlocals.items() <= fb.f_locals.items())
+        )
     ][0]
     cur_mod = getmodule(cur_func_obj)
     sig: Signature = signature(cur_func_obj)
     params: dict = {}
     var_positional: dict = {}
     var_keyword: dict = {}
-    for key, param in sig.parameters.items():
+    for (key, param) in sig.parameters.items():
         val: Any = argvs.locals[key]
         params[key] = val
         if param.kind == Parameter.VAR_POSITIONAL:
@@ -300,37 +363,35 @@ def get_currently_executing_function_call_arguments(
             var_keyword[key] = val
     bound_args: BoundArguments = sig.bind(**params)
     call_args: OrderedDict = bound_args.arguments
-
     call_args_dict: dict = dict(call_args)
-
-    for key, value in var_positional.items():
+    for (key, value) in var_positional.items():
         call_args_dict[key] = value
-
-    for key, value in var_keyword.items():
+    for (key, value) in var_keyword.items():
         call_args_dict.pop(key)
         call_args_dict.update(value)
-
     if include_module_name:
         call_args_dict.update({"module_name": cur_mod.__name__})
-
     if not include_caller_names:
         if call_args.get("cls"):
             call_args_dict.pop("cls", None)
         if call_args.get("self"):
             call_args_dict.pop("self", None)
-
     call_args_dict.update(**kwargs)
-
     return call_args_dict
 
 
 def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:
-    """
-    :param module_name: a possibly-relative name of a module
-    :param package_name: the name of a package, to which the given module belongs
-    """
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    :param module_name: a possibly-relative name of a module\n    :param package_name: the name of a package, to which the given module belongs\n    "
     try:
-        # noinspection PyUnresolvedReferences
         module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
             module_name, package=package_name
         )
@@ -339,34 +400,54 @@ def verify_dynamic_loading_support(module_name: str, package_name: str = None) -
     if not module_spec:
         if not package_name:
             package_name = ""
-        message: str = f"""No module named "{package_name + module_name}" could be found in the repository. Please \
-make sure that the file, corresponding to this package and module, exists and that dynamic loading of code modules, \
-templates, and assets is supported in your execution environment.  This error is unrecoverable.
+        message: str = f"""No module named "{(package_name + module_name)}" could be found in the repository. Please make sure that the file, corresponding to this package and module, exists and that dynamic loading of code modules, templates, and assets is supported in your execution environment.  This error is unrecoverable.
         """
         raise FileNotFoundError(message)
 
 
 def import_library_module(module_name: str) -> Optional[ModuleType]:
-    """
-    :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
-    :return: raw source code of the module (if can be retrieved)
-    """
-    module_obj: Optional[ModuleType]
+    import inspect
 
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    '\n    :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")\n    :return: raw source code of the module (if can be retrieved)\n    '
+    module_obj: Optional[ModuleType]
     try:
         module_obj = importlib.import_module(module_name)
     except ImportError:
         module_obj = None
-
     return module_obj
 
 
 def is_library_loadable(library_name: str) -> bool:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     module_obj: Optional[ModuleType] = import_library_module(module_name=library_name)
     return module_obj is not None
 
 
 def load_class(class_name: str, module_name: str):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if class_name is None:
         raise TypeError("class_name must not be None")
     if not isinstance(class_name, str):
@@ -379,63 +460,50 @@ def load_class(class_name: str, module_name: str):
         verify_dynamic_loading_support(module_name=module_name)
     except FileNotFoundError:
         raise PluginModuleNotFoundError(module_name)
-
     module_obj: Optional[ModuleType] = import_library_module(module_name=module_name)
-
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
     try:
         klass_ = getattr(module_obj, class_name)
     except AttributeError:
         raise PluginClassNotFoundError(module_name=module_name, class_name=class_name)
-
     return klass_
 
 
 def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profiler=None):
-    """
-    Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
+    import inspect
 
-    Args:
-        df: the DataFrame object to convert
-        dataset_class: the class to which to convert the existing DataFrame
-        expectation_suite: the expectation suite that should be attached to the resulting dataset
-        profiler: the profiler to use to generate baseline expectations, if any
-
-    Returns:
-        A new Dataset object
-    """
-
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite\n\n    Args:\n        df: the DataFrame object to convert\n        dataset_class: the class to which to convert the existing DataFrame\n        expectation_suite: the expectation suite that should be attached to the resulting dataset\n        profiler: the profiler to use to generate baseline expectations, if any\n\n    Returns:\n        A new Dataset object\n    "
     if expectation_suite is not None:
-        # Create a dataset of the new class type, and manually initialize expectations according to
-        # the provided expectation suite
         new_df = dataset_class.from_dataset(df)
         new_df._initialize_expectations(expectation_suite)
     else:
-        # Instantiate the new Dataset with default expectations
         new_df = dataset_class.from_dataset(df)
         if profiler is not None:
             new_df.profile(profiler)
-
     return new_df
 
 
 def _load_and_convert_to_dataset_class(
     df, class_name, module_name, expectation_suite=None, profiler=None
 ):
-    """
-    Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
+    import inspect
 
-    Args:
-        df: the DataFrame object to convert
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        expectation_suite: the expectation suite that should be attached to the resulting dataset
-        profiler: the profiler to use to generate baseline expectations, if any
-
-    Returns:
-        A new Dataset object
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite\n\n    Args:\n        df: the DataFrame object to convert\n        class_name (str): class to which to convert resulting Pandas df\n        module_name (str): dataset module from which to try to dynamically load the relevant module\n        expectation_suite: the expectation suite that should be attached to the resulting dataset\n        profiler: the profiler to use to generate baseline expectations, if any\n\n    Returns:\n        A new Dataset object\n    "
     verify_dynamic_loading_support(module_name=module_name)
     dataset_class = load_class(class_name, module_name)
     return _convert_to_dataset_class(df, dataset_class, expectation_suite, profiler)
@@ -451,20 +519,16 @@ def read_csv(
     *args,
     **kwargs,
 ):
-    """Read a file using Pandas read_csv and return a great_expectations dataset.
+    import inspect
 
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Read a file using Pandas read_csv and return a great_expectations dataset.\n\n    Args:\n        filename (string): path to file to read\n        class_name (str): class to which to convert resulting Pandas df\n        module_name (str): dataset module from which to try to dynamically load the relevant module\n        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;\n            if not specified, try to load the class named via the class_name and module_name parameters\n        expectation_suite (string): path to great_expectations expectation suite file\n        profiler (Profiler class): profiler to use when creating the dataset (default is None)\n\n    Returns:\n        great_expectations dataset\n    "
     import pandas as pd
 
     df = pd.read_csv(filename, *args, **kwargs)
@@ -496,31 +560,24 @@ def read_json(
     *args,
     **kwargs,
 ):
-    """Read a file using Pandas read_json and return a great_expectations dataset.
+    import inspect
 
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        accessor_func (Callable): functions to transform the json object in the file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Read a file using Pandas read_json and return a great_expectations dataset.\n\n    Args:\n        filename (string): path to file to read\n        class_name (str): class to which to convert resulting Pandas df\n        module_name (str): dataset module from which to try to dynamically load the relevant module\n        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;\n            if not specified, try to load the class named via the class_name and module_name parameters\n        expectation_suite (string): path to great_expectations expectation suite file\n        accessor_func (Callable): functions to transform the json object in the file\n        profiler (Profiler class): profiler to use when creating the dataset (default is None)\n\n    Returns:\n        great_expectations dataset\n    "
     import pandas as pd
 
     if accessor_func is not None:
         json_obj = json.load(open(filename, "rb"))
         json_obj = accessor_func(json_obj)
         df = pd.read_json(json.dumps(json_obj), *args, **kwargs)
-
     else:
         df = pd.read_json(filename, *args, **kwargs)
-
     if dataset_class is not None:
         return _convert_to_dataset_class(
             df=df,
@@ -548,21 +605,16 @@ def read_excel(
     *args,
     **kwargs,
 ):
-    """Read a file using Pandas read_excel and return a great_expectations dataset.
+    import inspect
 
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset or ordered dict of great_expectations datasets,
-        if multiple worksheets are imported
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Read a file using Pandas read_excel and return a great_expectations dataset.\n\n    Args:\n        filename (string): path to file to read\n        class_name (str): class to which to convert resulting Pandas df\n        module_name (str): dataset module from which to try to dynamically load the relevant module\n        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;\n            if not specified, try to load the class named via the class_name and module_name parameters\n        expectation_suite (string): path to great_expectations expectation suite file\n        profiler (Profiler class): profiler to use when creating the dataset (default is None)\n\n    Returns:\n        great_expectations dataset or ordered dict of great_expectations datasets,\n        if multiple worksheets are imported\n    "
     import pandas as pd
 
     try:
@@ -571,7 +623,6 @@ def read_excel(
         raise ImportError(
             "Pandas now requires 'openpyxl' as an optional-dependency to read Excel files. Please use pip or conda to install openpyxl and try again"
         )
-
     if dataset_class is None:
         verify_dynamic_loading_support(module_name=module_name)
         dataset_class = load_class(class_name=class_name, module_name=module_name)
@@ -603,20 +654,16 @@ def read_table(
     *args,
     **kwargs,
 ):
-    """Read a file using Pandas read_table and return a great_expectations dataset.
+    import inspect
 
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Read a file using Pandas read_table and return a great_expectations dataset.\n\n    Args:\n        filename (string): path to file to read\n        class_name (str): class to which to convert resulting Pandas df\n        module_name (str): dataset module from which to try to dynamically load the relevant module\n        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;\n            if not specified, try to load the class named via the class_name and module_name parameters\n        expectation_suite (string): path to great_expectations expectation suite file\n        profiler (Profiler class): profiler to use when creating the dataset (default is None)\n\n    Returns:\n        great_expectations dataset\n    "
     import pandas as pd
 
     df = pd.read_table(filename, *args, **kwargs)
@@ -647,20 +694,16 @@ def read_feather(
     *args,
     **kwargs,
 ):
-    """Read a file using Pandas read_feather and return a great_expectations dataset.
+    import inspect
 
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Read a file using Pandas read_feather and return a great_expectations dataset.\n\n    Args:\n        filename (string): path to file to read\n        class_name (str): class to which to convert resulting Pandas df\n        module_name (str): dataset module from which to try to dynamically load the relevant module\n        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;\n            if not specified, try to load the class named via the class_name and module_name parameters\n        expectation_suite (string): path to great_expectations expectation suite file\n        profiler (Profiler class): profiler to use when creating the dataset (default is None)\n\n    Returns:\n        great_expectations dataset\n    "
     import pandas as pd
 
     df = pd.read_feather(filename, *args, **kwargs)
@@ -691,20 +734,16 @@ def read_parquet(
     *args,
     **kwargs,
 ):
-    """Read a file using Pandas read_parquet and return a great_expectations dataset.
+    import inspect
 
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Read a file using Pandas read_parquet and return a great_expectations dataset.\n\n    Args:\n        filename (string): path to file to read\n        class_name (str): class to which to convert resulting Pandas df\n        module_name (str): dataset module from which to try to dynamically load the relevant module\n        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;\n            if not specified, try to load the class named via the class_name and module_name parameters\n        expectation_suite (string): path to great_expectations expectation suite file\n        profiler (Profiler class): profiler to use when creating the dataset (default is None)\n\n    Returns:\n        great_expectations dataset\n    "
     import pandas as pd
 
     df = pd.read_parquet(filename, *args, **kwargs)
@@ -733,21 +772,16 @@ def from_pandas(
     expectation_suite=None,
     profiler=None,
 ):
-    """Read a Pandas data frame and return a great_expectations dataset.
+    import inspect
 
-    Args:
-        pandas_df (Pandas df): Pandas data frame
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string) = None: path to great_expectations expectation suite file
-        profiler (profiler class) = None: The profiler that should
-            be run on the dataset to establish a baseline expectation suite.
-
-    Returns:
-        great_expectations dataset
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Read a Pandas data frame and return a great_expectations dataset.\n\n    Args:\n        pandas_df (Pandas df): Pandas data frame\n        class_name (str): class to which to convert resulting Pandas df\n        module_name (str): dataset module from which to try to dynamically load the relevant module\n        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;\n            if not specified, try to load the class named via the class_name and module_name parameters\n        expectation_suite (string) = None: path to great_expectations expectation suite file\n        profiler (profiler class) = None: The profiler that should\n            be run on the dataset to establish a baseline expectation suite.\n\n    Returns:\n        great_expectations dataset\n    "
     if dataset_class is not None:
         return _convert_to_dataset_class(
             df=pandas_df,
@@ -775,20 +809,16 @@ def read_pickle(
     *args,
     **kwargs,
 ):
-    """Read a file using Pandas read_pickle and return a great_expectations dataset.
+    import inspect
 
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Read a file using Pandas read_pickle and return a great_expectations dataset.\n\n    Args:\n        filename (string): path to file to read\n        class_name (str): class to which to convert resulting Pandas df\n        module_name (str): dataset module from which to try to dynamically load the relevant module\n        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;\n            if not specified, try to load the class named via the class_name and module_name parameters\n        expectation_suite (string): path to great_expectations expectation suite file\n        profiler (Profiler class): profiler to use when creating the dataset (default is None)\n\n    Returns:\n        great_expectations dataset\n    "
     import pandas as pd
 
     df = pd.read_pickle(filename, *args, **kwargs)
@@ -819,20 +849,16 @@ def read_sas(
     *args,
     **kwargs,
 ):
-    """Read a file using Pandas read_sas and return a great_expectations dataset.
+    import inspect
 
-    Args:
-        filename (string): path to file to read
-        class_name (str): class to which to convert resulting Pandas df
-        module_name (str): dataset module from which to try to dynamically load the relevant module
-        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
-            if not specified, try to load the class named via the class_name and module_name parameters
-        expectation_suite (string): path to great_expectations expectation suite file
-        profiler (Profiler class): profiler to use when creating the dataset (default is None)
-
-    Returns:
-        great_expectations dataset
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Read a file using Pandas read_sas and return a great_expectations dataset.\n\n    Args:\n        filename (string): path to file to read\n        class_name (str): class to which to convert resulting Pandas df\n        module_name (str): dataset module from which to try to dynamically load the relevant module\n        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;\n            if not specified, try to load the class named via the class_name and module_name parameters\n        expectation_suite (string): path to great_expectations expectation suite file\n        profiler (Profiler class): profiler to use when creating the dataset (default is None)\n\n    Returns:\n        great_expectations dataset\n    "
     import pandas as pd
 
     df = pd.read_sas(filename, *args, **kwargs)
@@ -865,34 +891,22 @@ def validate(
     *args,
     **kwargs,
 ):
-    """Validate the provided data asset. Validate can accept an optional data_asset_name to apply, data_context to use
-    to fetch an expectation_suite if one is not provided, and data_asset_class_name/data_asset_module_name or
-    data_asset_class to use to provide custom expectations.
+    import inspect
 
-    Args:
-        data_asset: the asset to validate
-        expectation_suite: the suite to use, or None to fetch one using a DataContext
-        data_asset_name: the name of the data asset to use
-        expectation_suite_name: the name of the expectation_suite to use
-        data_context: data context to use to fetch an an expectation suite, or the path from which to obtain one
-        data_asset_class_name: the name of a class to dynamically load a DataAsset class
-        data_asset_module_name: the name of the module to dynamically load a DataAsset class
-        data_asset_class: a class to use. overrides data_asset_class_name/ data_asset_module_name if provided
-        *args:
-        **kwargs:
-
-    Returns:
-
-    """
-    # Get an expectation suite if not provided
-    if expectation_suite is None and data_context is None:
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Validate the provided data asset. Validate can accept an optional data_asset_name to apply, data_context to use\n    to fetch an expectation_suite if one is not provided, and data_asset_class_name/data_asset_module_name or\n    data_asset_class to use to provide custom expectations.\n\n    Args:\n        data_asset: the asset to validate\n        expectation_suite: the suite to use, or None to fetch one using a DataContext\n        data_asset_name: the name of the data asset to use\n        expectation_suite_name: the name of the expectation_suite to use\n        data_context: data context to use to fetch an an expectation suite, or the path from which to obtain one\n        data_asset_class_name: the name of a class to dynamically load a DataAsset class\n        data_asset_module_name: the name of the module to dynamically load a DataAsset class\n        data_asset_class: a class to use. overrides data_asset_class_name/ data_asset_module_name if provided\n        *args:\n        **kwargs:\n\n    Returns:\n\n    "
+    if (expectation_suite is None) and (data_context is None):
         raise ValueError(
             "Either an expectation suite or a DataContext is required for validation."
         )
-
     if expectation_suite is None:
         logger.info("Using expectation suite from DataContext.")
-        # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, str):
             from great_expectations.data_context import DataContext
 
@@ -920,100 +934,85 @@ def validate(
             "Validating data_asset_name %s with expectation_suite_name %s"
             % (data_asset_name, expectation_suite.expectation_suite_name)
         )
-
-    # If the object is already a DataAsset type, then this is purely a convenience method
-    # and no conversion is needed; try to run validate on the given object
-    if data_asset_class_name is None and data_asset_class is None:
+    if (data_asset_class_name is None) and (data_asset_class is None):
         return data_asset.validate(
+            *args,
             expectation_suite=expectation_suite,
             data_context=data_context,
-            *args,
             **kwargs,
         )
-
-    # Otherwise, try to convert and validate the dataset
     if data_asset_class is None:
         verify_dynamic_loading_support(module_name=data_asset_module_name)
         data_asset_class = load_class(data_asset_class_name, data_asset_module_name)
-
     import pandas as pd
 
     from great_expectations.dataset import Dataset, PandasDataset
 
     if data_asset_class is None:
-        # Guess the GE data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
             data_asset_class = PandasDataset
-        # Add other data_asset_type conditions here as needed
-
-    # Otherwise, we will convert for the user to a subclass of the
-    # existing class to enable new expectations, but only for datasets
     if not isinstance(data_asset, (Dataset, pd.DataFrame)):
         raise ValueError(
-            "The validate util method only supports dataset validations, including custom subclasses. For other data "
-            "asset types, use the object's own validate method."
+            "The validate util method only supports dataset validations, including custom subclasses. For other data asset types, use the object's own validate method."
         )
-
     if not issubclass(type(data_asset), data_asset_class):
         if isinstance(data_asset, pd.DataFrame) and issubclass(
             data_asset_class, PandasDataset
         ):
-            pass  # This is a special type of allowed coercion
+            pass
         else:
             raise ValueError(
                 "The validate util method only supports validation for subtypes of the provided data_asset_type."
             )
-
     data_asset_ = _convert_to_dataset_class(
         data_asset, dataset_class=data_asset_class, expectation_suite=expectation_suite
     )
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 
-# https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
 def gen_directory_tree_str(startpath):
-    """Print the structure of directory as a tree:
+    import inspect
 
-    Ex:
-    project_dir0/
-        AAA/
-        BBB/
-            aaa.txt
-            bbb.txt
-
-    #Note: files and directories are sorted alphabetically, so that this method can be used for testing.
-    """
-
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Print the structure of directory as a tree:\n\n    Ex:\n    project_dir0/\n        AAA/\n        BBB/\n            aaa.txt\n            bbb.txt\n\n    #Note: files and directories are sorted alphabetically, so that this method can be used for testing.\n    "
     output_str = ""
-
     tuples = list(os.walk(startpath))
     tuples.sort()
-
-    for root, dirs, files in tuples:
+    for (root, dirs, files) in tuples:
         level = root.replace(startpath, "").count(os.sep)
-        indent = " " * 4 * level
-        output_str += f"{indent}{os.path.basename(root)}/\n"
-        subindent = " " * 4 * (level + 1)
-
+        indent = (" " * 4) * level
+        output_str += f"""{indent}{os.path.basename(root)}/
+"""
+        subindent = (" " * 4) * (level + 1)
         files.sort()
         for f in files:
-            output_str += f"{subindent}{f}\n"
-
+            output_str += f"""{subindent}{f}
+"""
     return output_str
 
 
 def lint_code(code: str) -> str:
-    """Lint strings of code passed in.  Optional dependency "black" must be installed."""
+    import inspect
 
-    # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
-    # While this seems to resolve the issue, the root cause is yet to be determined.
-
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    'Lint strings of code passed in.  Optional dependency "black" must be installed.'
     if black is None:
         logger.warning(
             "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
         )
         return code
-
     black_file_mode = black.FileMode()
     if not isinstance(code, str):
         raise TypeError
@@ -1025,25 +1024,32 @@ def lint_code(code: str) -> str:
 
 
 def convert_json_string_to_be_python_compliant(code: str) -> str:
-    """Cleans JSON-formatted string to adhere to Python syntax
+    import inspect
 
-    Substitute instances of 'null' with 'None' in string representations of Python dictionaries.
-    Additionally, substitutes instances of 'true' or 'false' with their Python equivalents.
-
-    Args:
-        code: JSON string to update
-
-    Returns:
-        Clean, Python-compliant string
-
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Cleans JSON-formatted string to adhere to Python syntax\n\n    Substitute instances of 'null' with 'None' in string representations of Python dictionaries.\n    Additionally, substitutes instances of 'true' or 'false' with their Python equivalents.\n\n    Args:\n        code: JSON string to update\n\n    Returns:\n        Clean, Python-compliant string\n\n    "
     code = _convert_nulls_to_None(code)
     code = _convert_json_bools_to_python_bools(code)
     return code
 
 
 def _convert_nulls_to_None(code: str) -> str:
-    pattern = r'"([a-zA-Z0-9_]+)": null'
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    pattern = '"([a-zA-Z0-9_]+)": null'
     result = re.findall(pattern, code)
     for match in result:
         code = code.replace(f'"{match}": null', f'"{match}": None')
@@ -1054,12 +1060,21 @@ def _convert_nulls_to_None(code: str) -> str:
 
 
 def _convert_json_bools_to_python_bools(code: str) -> str:
-    pattern = r'"([a-zA-Z0-9_]+)": (true|false)'
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    pattern = '"([a-zA-Z0-9_]+)": (true|false)'
     result = re.findall(pattern, code)
     for match in result:
-        identifier, boolean = match
+        (identifier, boolean) = match
         curr = f'"{identifier}": {boolean}'
-        updated = f'"{identifier}": {boolean.title()}'  # true -> True | false -> False
+        updated = f'"{identifier}": {boolean.title()}'
         code = code.replace(curr, updated)
         logger.info(f"Replaced '{curr}' with '{updated}' before writing to file")
     return code
@@ -1074,85 +1089,72 @@ def filter_properties_dict(
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
 ) -> Optional[dict]:
-    """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
+    import inspect
 
-    Args:
-        properties: source dictionary to be filtered according to the supplied filtering directives
-        keep_fields: list of keys that must be retained, with the understanding that all other entries will be deleted
-        delete_fields: list of keys that must be deleted, with the understanding that all other entries will be retained
-        clean_nulls: If True, then in addition to other filtering directives, delete entries, whose values are None
-        clean_falsy: If True, then in addition to other filtering directives, delete entries, whose values are Falsy
-        (If the "clean_falsy" argument is specified at "True", then "clean_nulls" is assumed to be "True" as well.)
-        inplace: If True, then modify the source properties dictionary; otherwise, make a copy for filtering purposes
-        keep_falsy_numerics: If True, then in addition to other filtering directives, do not delete zero-valued numerics
-
-    Returns:
-        The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    'Filter the entries of the source dictionary according to directives concerning the existing keys and values.\n\n    Args:\n        properties: source dictionary to be filtered according to the supplied filtering directives\n        keep_fields: list of keys that must be retained, with the understanding that all other entries will be deleted\n        delete_fields: list of keys that must be deleted, with the understanding that all other entries will be retained\n        clean_nulls: If True, then in addition to other filtering directives, delete entries, whose values are None\n        clean_falsy: If True, then in addition to other filtering directives, delete entries, whose values are Falsy\n        (If the "clean_falsy" argument is specified at "True", then "clean_nulls" is assumed to be "True" as well.)\n        inplace: If True, then modify the source properties dictionary; otherwise, make a copy for filtering purposes\n        keep_falsy_numerics: If True, then in addition to other filtering directives, do not delete zero-valued numerics\n\n    Returns:\n        The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)\n    '
     if keep_fields is None:
         keep_fields = set()
-
     if delete_fields is None:
         delete_fields = set()
-
     if keep_fields & delete_fields:
         raise ValueError(
             "Common keys between sets of keep_fields and delete_fields filtering directives are illegal."
         )
-
     if clean_falsy:
         clean_nulls = True
-
     if properties is None:
         properties = {}
-
     if not isinstance(properties, dict):
         raise ValueError(
             f'Source "properties" must be a dictionary (illegal type "{str(type(properties))}" detected).'
         )
-
     if not inplace:
         properties = copy.deepcopy(properties)
-
     keys_for_deletion: list = []
-
     key: str
     value: Any
-
     if keep_fields:
         keys_for_deletion.extend(
-            [key for key, value in properties.items() if key not in keep_fields]
+            [key for (key, value) in properties.items() if (key not in keep_fields)]
         )
-
     if delete_fields:
         keys_for_deletion.extend(
-            [key for key, value in properties.items() if key in delete_fields]
+            [key for (key, value) in properties.items() if (key in delete_fields)]
         )
-
     if clean_nulls:
         keys_for_deletion.extend(
             [
                 key
-                for key, value in properties.items()
-                if not (
-                    (keep_fields and key in keep_fields)
-                    or (delete_fields and key in delete_fields)
-                    or value is not None
+                for (key, value) in properties.items()
+                if (
+                    not (
+                        (keep_fields and (key in keep_fields))
+                        or (delete_fields and (key in delete_fields))
+                        or (value is not None)
+                    )
                 )
             ]
         )
-
     if clean_falsy:
         if keep_falsy_numerics:
             keys_for_deletion.extend(
                 [
                     key
-                    for key, value in properties.items()
-                    if not (
-                        (keep_fields and key in keep_fields)
-                        or (delete_fields and key in delete_fields)
-                        or is_truthy(value=value)
-                        or is_numeric(value=value)
+                    for (key, value) in properties.items()
+                    if (
+                        not (
+                            (keep_fields and (key in keep_fields))
+                            or (delete_fields and (key in delete_fields))
+                            or is_truthy(value=value)
+                            or is_numeric(value=value)
+                        )
                     )
                 ]
             )
@@ -1160,39 +1162,45 @@ def filter_properties_dict(
             keys_for_deletion.extend(
                 [
                     key
-                    for key, value in properties.items()
-                    if not (
-                        (keep_fields and key in keep_fields)
-                        or (delete_fields and key in delete_fields)
-                        or is_truthy(value=value)
+                    for (key, value) in properties.items()
+                    if (
+                        not (
+                            (keep_fields and (key in keep_fields))
+                            or (delete_fields and (key in delete_fields))
+                            or is_truthy(value=value)
+                        )
                     )
                 ]
             )
-
     keys_for_deletion = list(set(keys_for_deletion))
-
     for key in keys_for_deletion:
         del properties[key]
-
     if inplace:
         return None
-
     return properties
 
 
 def deep_filter_properties_iterable(
-    properties: Optional[Union[dict, list, set, tuple]] = None,
+    properties: Optional[Union[(dict, list, set, tuple)]] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
     clean_falsy: bool = False,
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
-) -> Optional[Union[dict, list, set]]:
+) -> Optional[Union[(dict, list, set)]]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if isinstance(properties, dict):
         if not inplace:
             properties = copy.deepcopy(properties)
-
         filter_properties_dict(
             properties=properties,
             keep_fields=keep_fields,
@@ -1202,10 +1210,9 @@ def deep_filter_properties_iterable(
             keep_falsy_numerics=keep_falsy_numerics,
             inplace=True,
         )
-
         key: str
         value: Any
-        for key, value in properties.items():
+        for (key, value) in properties.items():
             deep_filter_properties_iterable(
                 properties=value,
                 keep_fields=keep_fields,
@@ -1215,26 +1222,24 @@ def deep_filter_properties_iterable(
                 keep_falsy_numerics=keep_falsy_numerics,
                 inplace=True,
             )
-
-        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
         keys_to_delete: List[str] = list(
             filter(
-                lambda k: _is_to_be_removed_from_deep_filter_properties_iterable(
-                    value=properties[k],
-                    clean_nulls=clean_nulls,
-                    clean_falsy=clean_falsy,
-                    keep_falsy_numerics=keep_falsy_numerics,
+                (
+                    lambda k: _is_to_be_removed_from_deep_filter_properties_iterable(
+                        value=properties[k],
+                        clean_nulls=clean_nulls,
+                        clean_falsy=clean_falsy,
+                        keep_falsy_numerics=keep_falsy_numerics,
+                    )
                 ),
                 properties.keys(),
             )
         )
         for key in keys_to_delete:
             properties.pop(key)
-
     elif isinstance(properties, (list, set, tuple)):
         if not inplace:
             properties = copy.deepcopy(properties)
-
         value: Any
         for value in properties:
             deep_filter_properties_iterable(
@@ -1246,38 +1251,56 @@ def deep_filter_properties_iterable(
                 keep_falsy_numerics=keep_falsy_numerics,
                 inplace=True,
             )
-
-        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
         properties = list(
             filter(
-                lambda v: not _is_to_be_removed_from_deep_filter_properties_iterable(
-                    value=v,
-                    clean_nulls=clean_nulls,
-                    clean_falsy=clean_falsy,
-                    keep_falsy_numerics=keep_falsy_numerics,
+                (
+                    lambda v: (
+                        not _is_to_be_removed_from_deep_filter_properties_iterable(
+                            value=v,
+                            clean_nulls=clean_nulls,
+                            clean_falsy=clean_falsy,
+                            keep_falsy_numerics=keep_falsy_numerics,
+                        )
+                    )
                 ),
                 properties,
             )
         )
-
     if inplace:
         return None
-
     return properties
 
 
 def _is_to_be_removed_from_deep_filter_properties_iterable(
     value: Any, clean_nulls: bool, clean_falsy: bool, keep_falsy_numerics: bool
 ) -> bool:
-    conditions: Tuple[bool, ...] = (
-        clean_nulls and value is None,
-        not keep_falsy_numerics and is_numeric(value) and value == 0,
-        clean_falsy and not is_numeric(value) and not value,
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    conditions: Tuple[(bool, ...)] = (
+        (clean_nulls and (value is None)),
+        ((not keep_falsy_numerics) and is_numeric(value) and (value == 0)),
+        (clean_falsy and (not is_numeric(value)) and (not value)),
     )
     return any(condition for condition in conditions)
 
 
 def is_truthy(value: Any) -> bool:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
         if value:
             return True
@@ -1288,12 +1311,29 @@ def is_truthy(value: Any) -> bool:
 
 
 def is_numeric(value: Any) -> bool:
-    return value is not None and (is_int(value=value) or is_float(value=value))
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    return (value is not None) and (is_int(value=value) or is_float(value=value))
 
 
 def is_int(value: Any) -> bool:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
-        # noinspection PyUnusedLocal
         num: int = int(value)
     except (TypeError, ValueError):
         return False
@@ -1301,8 +1341,16 @@ def is_int(value: Any) -> bool:
 
 
 def is_float(value: Any) -> bool:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
-        # noinspection PyUnusedLocal
         num: float = float(value)
     except (TypeError, ValueError):
         return False
@@ -1310,15 +1358,16 @@ def is_float(value: Any) -> bool:
 
 
 def is_nan(value: Any) -> bool:
-    """
-    If value is an array, test element-wise for NaN and return result as a boolean array.
-    If value is a scalar, return boolean.
-    Args:
-        value: The value to test
+    import inspect
 
-    Returns:
-        The results of the test
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    If value is an array, test element-wise for NaN and return result as a boolean array.\n    If value is a scalar, return boolean.\n    Args:\n        value: The value to test\n\n    Returns:\n        The results of the test\n    "
     import numpy as np
 
     try:
@@ -1328,18 +1377,26 @@ def is_nan(value: Any) -> bool:
 
 
 def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
-    """
-    This method checks whether or not candidate object is subset of target object.
-    """
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    This method checks whether or not candidate object is subset of target object.\n    "
     if isinstance(candidate, dict):
-        key: Any  # must be "hashable"
+        key: Any
         value: Any
         return all(
-            key in target
-            and is_candidate_subset_of_target(candidate=val, target=target[key])
-            for key, val in candidate.items()
+            (
+                (key in target)
+                and is_candidate_subset_of_target(candidate=val, target=target[key])
+            )
+            for (key, val) in candidate.items()
         )
-
     if isinstance(candidate, (list, set, tuple)):
         subitem: Any
         superitem: Any
@@ -1350,13 +1407,20 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
             )
             for subitem in candidate
         )
-
     return candidate == target
 
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
-        # noinspection PyUnusedLocal
         parsed_date: datetime = parse(value, fuzzy=fuzzy)
     except (TypeError, ValueError):
         return False
@@ -1364,49 +1428,107 @@ def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
 
 
 def get_context():
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     from great_expectations.data_context.data_context import DataContext
 
     return DataContext()
 
 
 def is_sane_slack_webhook(url: str) -> bool:
-    """Really basic sanity checking."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Really basic sanity checking."
     if url is None:
         return False
-
     return url.strip().startswith("https://hooks.slack.com/")
 
 
 def is_list_of_strings(_list) -> bool:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
 
 
 def generate_library_json_from_registered_expectations():
-    """Generate the JSON object used to populate the public gallery"""
-    library_json = {}
+    import inspect
 
-    for expectation_name, expectation in _registered_expectations.items():
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Generate the JSON object used to populate the public gallery"
+    library_json = {}
+    for (expectation_name, expectation) in _registered_expectations.items():
         report_object = expectation().run_diagnostics()
         library_json[expectation_name] = report_object
-
     return library_json
 
 
 def delete_blank_lines(text: str) -> str:
-    return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    return re.sub("\\n\\s*\\n", "\n", text, flags=re.MULTILINE)
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: str = "ge_temp_",
-    num_digits: int = 8,
+    default_table_name_prefix: str = "ge_temp_", num_digits: int = 8
 ) -> str:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
     return table_name
 
 
 def get_sqlalchemy_inspector(engine):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if version.parse(sa.__version__) < version.parse("1.4"):
-        # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
         insp = reflection.Inspector.from_engine(engine)
     else:
         insp = sa.inspect(engine)
@@ -1414,25 +1536,35 @@ def get_sqlalchemy_inspector(engine):
 
 
 def get_sqlalchemy_url(drivername, **credentials):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if version.parse(sa.__version__) < version.parse("1.4"):
-        # Calling URL() deprecated since 1.4, URL.create() should be used instead
         url = sa.engine.url.URL(drivername, **credentials)
     else:
         url = sa.engine.url.URL.create(drivername, **credentials)
     return url
 
 
-def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
-    """
-    Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
-    without explicitly turning the inner select() into a subquery first. This helper method ensures that this
-    conversion takes place.
+def get_sqlalchemy_selectable(
+    selectable: Union[(Table, Select)]
+) -> Union[(Table, Select)]:
+    import inspect
 
-    For versions of SQLAlchemy < 1.4 the implicit conversion to a subquery may not always work, so that
-    also needs to be handled here, using the old equivalent method.
-
-    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,\n    without explicitly turning the inner select() into a subquery first. This helper method ensures that this\n    conversion takes place.\n\n    For versions of SQLAlchemy < 1.4 the implicit conversion to a subquery may not always work, so that\n    also needs to be handled here, using the old equivalent method.\n\n    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617\n    "
     if isinstance(selectable, Select):
         if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
@@ -1442,20 +1574,31 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
 
 
 def get_sqlalchemy_domain_data(domain_data):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if version.parse(sa.__version__) < version.parse("1.4"):
-        # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
-        # select(query).subquery() should be used instead
         domain_data = sa.select(["*"]).select_from(domain_data)
-    # engine.get_domain_records returns a valid select object;
-    # calling fetchall at execution is equivalent to a SELECT *
     return domain_data
 
 
 def import_make_url():
-    """
-    Beginning from SQLAlchemy 1.4, make_url is accessed from sqlalchemy.engine; earlier versions must
-    still be accessed from sqlalchemy.engine.url to avoid import errors.
-    """
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Beginning from SQLAlchemy 1.4, make_url is accessed from sqlalchemy.engine; earlier versions must\n    still be accessed from sqlalchemy.engine.url to avoid import errors.\n    "
     if version.parse(sa.__version__) < version.parse("1.4"):
         from sqlalchemy.engine.url import make_url
     else:
@@ -1464,28 +1607,40 @@ def import_make_url():
 
 
 def get_pyathena_potential_type(type_module, type_):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if version.parse(type_module.pyathena.__version__) >= version.parse("2.5.0"):
-        # introduction of new column type mapping in 2.5
         potential_type = type_module.AthenaDialect()._get_column_type(type_)
     else:
         if type_ == "string":
             type_ = "varchar"
-        # < 2.5 column type mapping
         potential_type = type_module._TYPE_MAPPINGS.get(type_)
-
     return potential_type
 
 
 def pandas_series_between_inclusive(
     series: pd.Series, min_value: int, max_value: int
 ) -> pd.Series:
-    """
-    As of Pandas 1.3.0, the 'inclusive' arg in between() is an enum: {"left", "right", "neither", "both"}
-    """
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    '\n    As of Pandas 1.3.0, the \'inclusive\' arg in between() is an enum: {"left", "right", "neither", "both"}\n    '
     metric_series: pd.Series
     if version.parse(pd.__version__) >= version.parse("1.3.0"):
         metric_series = series.between(min_value, max_value, inclusive="both")
     else:
         metric_series = series.between(min_value, max_value, inclusive=True)
-
     return metric_series

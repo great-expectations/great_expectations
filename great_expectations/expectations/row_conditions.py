@@ -19,7 +19,6 @@ try:
     import pyspark.sql.functions as F
 except ImportError:
     F = None
-
 try:
     import sqlalchemy as sa
 except ImportError:
@@ -27,12 +26,23 @@ except ImportError:
 
 
 def _set_notnull(s, l, t) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     t["notnull"] = True
 
 
 column_name = Combine(
-    Suppress(Literal('col("'))
-    + Word(alphas, f"{alphanums}_.").setResultsName("column")
+    (
+        Suppress(Literal('col("'))
+        + Word(alphas, f"{alphanums}_.").setResultsName("column")
+    )
     + Suppress(Literal('")'))
 )
 gt = Literal(">")
@@ -40,18 +50,18 @@ lt = Literal("<")
 ge = Literal(">=")
 le = Literal("<=")
 eq = Literal("==")
-ops = (gt ^ lt ^ ge ^ le ^ eq).setResultsName("op")
-fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?").setResultsName("fnumber")
-condition_value = Suppress('"') + Word(f"{alphanums}.").setResultsName(
-    "condition_value"
-) + Suppress('"') ^ Suppress("'") + Word(f"{alphanums}.").setResultsName(
-    "condition_value"
-) + Suppress(
-    "'"
+ops = ((((gt ^ lt) ^ ge) ^ le) ^ eq).setResultsName("op")
+fnumber = Regex("[+-]?\\d+(?:\\.\\d*)?(?:[eE][+-]?\\d+)?").setResultsName("fnumber")
+condition_value = (
+    (Suppress('"') + Word(f"{alphanums}.").setResultsName("condition_value"))
+    + Suppress('"')
+) ^ (
+    (Suppress("'") + Word(f"{alphanums}.").setResultsName("condition_value"))
+    + Suppress("'")
 )
 not_null = CaselessLiteral(".notnull()").setResultsName("notnull")
 condition = (column_name + not_null).setParseAction(_set_notnull) ^ (
-    column_name + ops + (fnumber ^ condition_value)
+    (column_name + ops) + (fnumber ^ condition_value)
 )
 
 
@@ -60,44 +70,48 @@ class ConditionParserError(ge_exceptions.GreatExpectationsError):
 
 
 class RowConditionParserType(enum.Enum):
-    """Type of condition or parser to be used to interpret a RowCondition
-
-    Note that many of these are forward looking and are not yet implemented.
-    In the future `GE` can replace the `great_expectations__experimental__`
-    name for the condition_parser and this enum can be used internally
-    instead of strings for the condition_parser user input.
-    """
-
-    GE = "ge"  # GE intermediate language
-    SPARK = "spark"  # Spark pyspark.sql.Column type
-    SPARK_SQL = "spark_sql"  # String type
-    PANDAS = "pandas"  # pandas parser for pandas DataFrame.query()
-    PYTHON = "python"  # python parser for DataFrame.query()
-    SQL = "sql"  # Selectable type
+    "Type of condition or parser to be used to interpret a RowCondition\n\n    Note that many of these are forward looking and are not yet implemented.\n    In the future `GE` can replace the `great_expectations__experimental__`\n    name for the condition_parser and this enum can be used internally\n    instead of strings for the condition_parser user input.\n"
+    GE = "ge"
+    SPARK = "spark"
+    SPARK_SQL = "spark_sql"
+    PANDAS = "pandas"
+    PYTHON = "python"
+    SQL = "sql"
 
 
 @dataclass
 class RowCondition:
-    """Condition that can be used to filter rows in a data set.
-
-    Attributes:
-        condition: String of the condition
-        condition_type: Format of the condition e.g. for parsing
-    """
-
+    "Condition that can be used to filter rows in a data set.\n\n    Attributes:\n        condition: String of the condition\n        condition_type: Format of the condition e.g. for parsing\n"
     condition: str
     condition_type: RowConditionParserType
 
 
 def _parse_great_expectations_condition(row_condition: str):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
         return condition.parseString(row_condition)
     except ParseException:
         raise ConditionParserError(f"unable to parse condition: {row_condition}")
 
 
-# noinspection PyUnresolvedReferences
 def parse_condition_to_spark(row_condition: str) -> "pyspark.sql.Column":
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
@@ -123,7 +137,7 @@ def parse_condition_to_spark(row_condition: str) -> "pyspark.sql.Column":
             return F.col(column) <= num
         elif op == "==":
             return F.col(column) == num
-    elif "notnull" in parsed and parsed["notnull"] is True:
+    elif ("notnull" in parsed) and (parsed["notnull"] is True):
         return F.col(column).isNotNull()
     else:
         raise ConditionParserError(f"unrecognized column condition: {row_condition}")
@@ -132,6 +146,15 @@ def parse_condition_to_spark(row_condition: str) -> "pyspark.sql.Column":
 def parse_condition_to_sqlalchemy(
     row_condition: str,
 ) -> "sqlalchemy.sql.expression.ColumnElement":
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
@@ -157,7 +180,7 @@ def parse_condition_to_sqlalchemy(
             return sa.column(column) <= num
         elif op == "==":
             return sa.column(column) == num
-    elif "notnull" in parsed and parsed["notnull"] is True:
+    elif ("notnull" in parsed) and (parsed["notnull"] is True):
         return sa.not_(sa.column(column).is_(None))
     else:
         raise ConditionParserError(f"unrecognized column condition: {row_condition}")

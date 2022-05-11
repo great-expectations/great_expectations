@@ -26,66 +26,7 @@ from great_expectations.rule_based_profiler.types import (
 
 
 class ExpectColumnMeanToBeBetween(ColumnExpectation):
-    """Expect the column mean to be between a minimum value and a maximum value (inclusive).
-
-            expect_column_mean_to_be_between is a \
-            :func:`column_aggregate_expectation \
-            <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
-
-            Args:
-                column (str): \
-                    The column name.
-                min_value (float or None): \
-                    The minimum value for the column mean.
-                max_value (float or None): \
-                    The maximum value for the column mean.
-                strict_min (boolean):
-                    If True, the column mean must be strictly larger than min_value, default=False
-                strict_max (boolean):
-                    If True, the column mean must be strictly smaller than max_value, default=False
-
-            Other Parameters:
-                result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                    For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                catch_exceptions (boolean or None): \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
-
-            Returns:
-                An ExpectationSuiteValidationResult
-
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-            Notes:
-                These fields in the result object are customized for this expectation:
-                ::
-
-                    {
-                        "observed_value": (float) The true mean for the column
-                    }
-
-                * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
-                * If min_value is None, then max_value is treated as an upper bound.
-                * If max_value is None, then min_value is treated as a lower bound.
-
-            See Also:
-                :func:`expect_column_median_to_be_between \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_median_to_be_between>`
-
-                :func:`expect_column_stdev_to_be_between \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_stdev_to_be_between>`
-
-            """
-
-    # This dictionary contains metadata for display in the public gallery
+    'Expect the column mean to be between a minimum value and a maximum value (inclusive).\n\n            expect_column_mean_to_be_between is a             :func:`column_aggregate_expectation             <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.\n\n            Args:\n                column (str):                     The column name.\n                min_value (float or None):                     The minimum value for the column mean.\n                max_value (float or None):                     The maximum value for the column mean.\n                strict_min (boolean):\n                    If True, the column mean must be strictly larger than min_value, default=False\n                strict_max (boolean):\n                    If True, the column mean must be strictly smaller than max_value, default=False\n\n            Other Parameters:\n                result_format (str or None):                     Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n                    For more detail, see :ref:`result_format <result_format>`.\n                include_config (boolean):                     If True, then include the expectation config as part of the result object.                     For more detail, see :ref:`include_config`.\n                catch_exceptions (boolean or None):                     If True, then catch exceptions and include them as part of the result object.                     For more detail, see :ref:`catch_exceptions`.\n                meta (dict or None):                     A JSON-serializable dictionary (nesting allowed) that will be included in the output without                     modification. For more detail, see :ref:`meta`.\n\n            Returns:\n                An ExpectationSuiteValidationResult\n\n                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n            Notes:\n                These fields in the result object are customized for this expectation:\n                ::\n\n                    {\n                        "observed_value": (float) The true mean for the column\n                    }\n\n                * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.\n                * If min_value is None, then max_value is treated as an upper bound.\n                * If max_value is None, then min_value is treated as a lower bound.\n\n            See Also:\n                :func:`expect_column_median_to_be_between                 <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_median_to_be_between>`\n\n                :func:`expect_column_stdev_to_be_between                 <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_stdev_to_be_between>`\n\n'
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
@@ -94,8 +35,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.mean",)
     success_keys = (
         "min_value",
@@ -105,7 +44,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         "auto",
         "profiler_config",
     )
-
     mean_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
@@ -128,10 +66,10 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        mean_range_estimator_parameter_builder_config,
+        mean_range_estimator_parameter_builder_config
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        name="expect_column_mean_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        name="expect_column_mean_to_be_between",
         config_version=1.0,
         variables={},
         rules={
@@ -145,10 +83,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,
                     "include_bootstrap_samples_histogram_in_details": False,
-                    "truncate_values": {
-                        "lower_bound": None,
-                        "upper_bound": None,
-                    },
+                    "truncate_values": {"lower_bound": None, "upper_bound": None},
                     "round_decimals": 2,
                 },
                 "domain_builder": {
@@ -167,15 +102,13 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                         "strict_min": f"{VARIABLES_KEY}strict_min",
                         "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{mean_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{mean_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}"
                         },
-                    },
+                    }
                 ],
-            },
+            }
         },
     )
-
-    # Default values
     default_kwarg_values = {
         "min_value": None,
         "max_value": None,
@@ -187,14 +120,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         "auto": False,
         "profiler_config": default_profiler_config,
     }
-    args_keys = (
-        "column",
-        "min_value",
-        "max_value",
-        "strict_min",
-        "strict_max",
-    )
-
+    args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
     kwargs_json_schema_base_properties = {
         "result_format": {
             "oneOf": [
@@ -226,7 +152,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         },
         "meta": {"type": "object"},
     }
-
     kwargs_json_schema = {
         "type": "object",
         "properties": {
@@ -249,16 +174,16 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        import inspect
 
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that\n        necessary configuration arguments have been provided for the validation of the expectation.\n\n        Args:\n            configuration (OPTIONAL[ExpectationConfiguration]):                 An optional Expectation Configuration entry that will be used to configure the expectation\n        Returns:\n            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully\n        "
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
@@ -271,10 +196,19 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -316,22 +250,18 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                 "value": params.get("strict_max"),
             },
         }
-
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "mean may have any numerical value."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
-            if params["min_value"] is not None and params["max_value"] is not None:
+            (at_least_str, at_most_str) = handle_strict_min_max(params)
+            if (params["min_value"] is not None) and (params["max_value"] is not None):
                 template_str = f"mean must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif params["min_value"] is None:
                 template_str = f"mean must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"mean must be {at_least_str} $min_value."
-
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -341,7 +271,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -355,11 +284,19 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -374,22 +311,18 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                 "strict_max",
             ],
         )
-
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "mean may have any numerical value."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
-            if params["min_value"] is not None and params["max_value"] is not None:
+            (at_least_str, at_most_str) = handle_strict_min_max(params)
+            if (params["min_value"] is not None) and (params["max_value"] is not None):
                 template_str = f"mean must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif params["min_value"] is None:
                 template_str = f"mean must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"mean must be {at_least_str} $min_value."
-
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -397,7 +330,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{
@@ -421,6 +353,15 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert result, "Must pass in result."
         return [
             {
@@ -440,6 +381,15 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._validate_metric_value_between(
             metric_name="column.mean",
             configuration=configuration,

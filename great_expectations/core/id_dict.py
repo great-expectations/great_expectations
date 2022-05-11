@@ -6,6 +6,15 @@ class IDDict(dict):
     _id_ignore_keys = set()
 
     def to_id(self, id_keys=None, id_ignore_keys=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if id_keys is None:
             id_keys = self.keys()
         if id_ignore_keys is None:
@@ -16,7 +25,6 @@ class IDDict(dict):
         elif len(id_keys) == 1:
             key = list(id_keys)[0]
             return f"{key}={str(self[key])}"
-
         _id_dict = {k: self[k] for k in id_keys}
         return hashlib.md5(
             json.dumps(_id_dict, sort_keys=True).encode("utf-8")

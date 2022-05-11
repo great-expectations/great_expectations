@@ -7,7 +7,26 @@ logger = logging.getLogger(__name__)
 
 
 def render_evaluation_parameter_string(render_func):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
     def inner_func(*args, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         rendered_string_template = render_func(*args, **kwargs)
         current_expectation_params = list()
         app_template_str = (
@@ -15,22 +34,17 @@ def render_evaluation_parameter_string(render_func):
         )
         configuration = kwargs.get("configuration", None)
         kwargs_dict = configuration.kwargs
-        for key, value in kwargs_dict.items():
-            if isinstance(value, dict) and "$PARAMETER" in value.keys():
+        for (key, value) in kwargs_dict.items():
+            if isinstance(value, dict) and ("$PARAMETER" in value.keys()):
                 current_expectation_params.append(value["$PARAMETER"])
-
-        # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         if len(current_expectation_params) > 0:
             runtime_configuration = kwargs.get("runtime_configuration", None)
             if runtime_configuration:
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
                 styling = runtime_configuration.get("styling")
-                for key, val in eval_params.items():
-                    # this needs to be more complicated?
-                    # the possibility that it is a substring?
+                for (key, val) in eval_params.items():
                     for param in current_expectation_params:
-                        # "key in param" condition allows for eval param values to be rendered if arithmetic is present
-                        if key == param or key in param:
+                        if (key == param) or (key in param):
                             app_params = {}
                             app_params["eval_param"] = key
                             app_params["eval_param_value"] = val
@@ -61,13 +75,19 @@ def add_values_with_json_schema_from_list_in_params(
     param_key_with_list: str,
     list_values_type: str = "string",
 ) -> dict:
-    """
-    Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
-    convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).
-    """
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,\n    convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).\n    "
     target_list = params.get(param_key_with_list)
-    if target_list is not None and len(target_list) > 0:
-        for i, v in enumerate(target_list):
+    if (target_list is not None) and (len(target_list) > 0):
+        for (i, v) in enumerate(target_list):
             params_with_json_schema[f"v__{str(i)}"] = {
                 "schema": {"type": list_values_type},
                 "value": v,

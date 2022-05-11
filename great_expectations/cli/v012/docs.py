@@ -10,7 +10,16 @@ from great_expectations.core.usage_statistics.util import send_usage_message
 
 @click.group()
 def docs() -> None:
-    """Data Docs operations"""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Data Docs operations"
     pass
 
 
@@ -40,14 +49,20 @@ def docs() -> None:
     default=False,
 )
 def docs_build(directory, site_name, view=True, assume_yes=False) -> None:
-    """Build Data Docs for a project."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Build Data Docs for a project."
     context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
     send_usage_message(
-        data_context=context,
-        event="cli.docs.build",
-        api_version="v2",
-        success=True,
+        data_context=context, event="cli.docs.build", api_version="v2", success=True
     )
 
 
@@ -59,31 +74,35 @@ def docs_build(directory, site_name, view=True, assume_yes=False) -> None:
     help="The project's great_expectations directory.",
 )
 def docs_list(directory) -> None:
-    """List known Data Docs Sites."""
-    context = toolkit.load_data_context_with_error_handling(directory)
+    import inspect
 
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "List known Data Docs Sites."
+    context = toolkit.load_data_context_with_error_handling(directory)
     docs_sites_url_dicts = context.get_docs_sites_urls()
     docs_sites_strings = [
         " - <cyan>{}</cyan>: {}".format(
             docs_site_dict["site_name"],
-            docs_site_dict.get("site_url")
-            or f"site configured but does not exist. Run the following command to build site: great_expectations "
-            f'docs build --site-name {docs_site_dict["site_name"]}',
+            (
+                docs_site_dict.get("site_url")
+                or f"site configured but does not exist. Run the following command to build site: great_expectations docs build --site-name {docs_site_dict['site_name']}"
+            ),
         )
         for docs_site_dict in docs_sites_url_dicts
     ]
-
     if len(docs_sites_strings) == 0:
         cli_message("No Data Docs sites found")
     else:
         list_intro_string = _build_intro_string(docs_sites_strings)
         cli_message_list(docs_sites_strings, list_intro_string)
-
     send_usage_message(
-        data_context=context,
-        event="cli.docs.list",
-        api_version="v2",
-        success=True,
+        data_context=context, event="cli.docs.list", api_version="v2", success=True
     )
 
 
@@ -101,29 +120,33 @@ def docs_list(directory) -> None:
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
 def clean_data_docs(directory, site_name=None, all=None) -> None:
-    """Delete data docs"""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Delete data docs"
     context = toolkit.load_data_context_with_error_handling(directory)
     failed = True
-    if site_name is None and all is None:
+    if (site_name is None) and (all is None):
         cli_message(
             "<red>{}</red>".format(
-                "Please specify --all to remove all sites or specify a specific site using "
-                "--site_name"
+                "Please specify --all to remove all sites or specify a specific site using --site_name"
             )
         )
         sys.exit(1)
     context.clean_data_docs(site_name=site_name)
     failed = False
-    if not failed and context is not None:
+    if (not failed) and (context is not None):
         send_usage_message(
-            data_context=context,
-            event="cli.docs.clean",
-            api_version="v2",
-            success=True,
+            data_context=context, event="cli.docs.clean", api_version="v2", success=True
         )
         cli_message("<green>Cleaned data docs</green>")
-
-    if failed and context is not None:
+    if failed and (context is not None):
         send_usage_message(
             data_context=context,
             event="cli.docs.clean",
@@ -133,6 +156,15 @@ def clean_data_docs(directory, site_name=None, all=None) -> None:
 
 
 def _build_intro_string(docs_sites_strings):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     doc_string_count = len(docs_sites_strings)
     if doc_string_count == 1:
         list_intro_string = "1 Data Docs site configured:"
@@ -142,9 +174,17 @@ def _build_intro_string(docs_sites_strings):
 
 
 def build_docs(context, site_name=None, view=True, assume_yes=False) -> None:
-    """Build documentation in a context"""
-    logger.debug("Starting cli.datasource.build_docs")
+    import inspect
 
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Build documentation in a context"
+    logger.debug("Starting cli.datasource.build_docs")
     if site_name is not None:
         site_names = [site_name]
     else:
@@ -152,20 +192,16 @@ def build_docs(context, site_name=None, view=True, assume_yes=False) -> None:
     index_page_locator_infos = context.build_data_docs(
         site_names=site_names, dry_run=True
     )
-
     msg = "\nThe following Data Docs sites will be built:\n\n"
-    for site_name, index_page_locator_info in index_page_locator_infos.items():
+    for (site_name, index_page_locator_info) in index_page_locator_infos.items():
         msg += f" - <cyan>{site_name}:</cyan> "
-        msg += f"{index_page_locator_info}\n"
-
+        msg += f"""{index_page_locator_info}
+"""
     cli_message(msg)
     if not assume_yes:
         toolkit.confirm_proceed_or_exit()
-
     cli_message("\nBuilding Data Docs...\n")
     context.build_data_docs(site_names=site_names)
-
     cli_message("Done building Data Docs")
-
     if view:
         context.open_data_docs(site_name=site_name, only_if_exists=True)

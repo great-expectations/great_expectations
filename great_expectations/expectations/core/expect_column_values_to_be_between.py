@@ -26,66 +26,7 @@ from great_expectations.rule_based_profiler.types import (
 
 
 class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
-    """Expect column entries to be between a minimum value and a maximum value (inclusive).
-
-    expect_column_values_to_be_between is a \
-    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
-    .column_map_expectation>`.
-
-    Args:
-        column (str): \
-            The column name.
-        min_value (comparable type or None): The minimum value for a column entry.
-        max_value (comparable type or None): The maximum value for a column entry.
-        strict_min (boolean):
-            If True, values must be strictly larger than min_value, default=False
-        strict_max (boolean):
-            If True, values must be strictly smaller than max_value, default=False
-
-    Keyword Args:
-        allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
-            string). Otherwise, attempting such comparisons will raise an exception.
-        parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
-            values to datetimes before making comparisons.
-        output_strftime_format (str or None): \
-            A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
-        mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
-            For more detail, see :ref:`mostly`.
-
-    Other Parameters:
-        result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
-        meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
-
-    Returns:
-        An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-    Notes:
-        * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
-        * If min_value is None, then max_value is treated as an upper bound, and there is no minimum value checked.
-        * If max_value is None, then min_value is treated as a lower bound, and there is no maximum value checked.
-
-    See Also:
-        :func:`expect_column_value_lengths_to_be_between \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine
-        .expect_column_value_lengths_to_be_between>`
-
-    """
-
-    # This dictionary contains metadata for display in the public gallery
+    'Expect column entries to be between a minimum value and a maximum value (inclusive).\n\n    expect_column_values_to_be_between is a     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine\n    .column_map_expectation>`.\n\n    Args:\n        column (str):             The column name.\n        min_value (comparable type or None): The minimum value for a column entry.\n        max_value (comparable type or None): The maximum value for a column entry.\n        strict_min (boolean):\n            If True, values must be strictly larger than min_value, default=False\n        strict_max (boolean):\n            If True, values must be strictly smaller than max_value, default=False\n\n    Keyword Args:\n        allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and            string). Otherwise, attempting such comparisons will raise an exception.\n        parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column            values to datetimes before making comparisons.\n        output_strftime_format (str or None):             A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.\n        mostly (None or a float between 0 and 1):             Return `"success": True` if at least mostly fraction of values match the expectation.             For more detail, see :ref:`mostly`.\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    Notes:\n        * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.\n        * If min_value is None, then max_value is treated as an upper bound, and there is no minimum value checked.\n        * If max_value is None, then min_value is treated as a lower bound, and there is no maximum value checked.\n\n    See Also:\n        :func:`expect_column_value_lengths_to_be_between         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_value_lengths_to_be_between>`\n\n'
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
@@ -94,7 +35,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
     map_metric = "column_values.between"
     success_keys = (
         "min_value",
@@ -107,7 +47,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "auto",
         "profiler_config",
     )
-
     column_min_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
@@ -155,7 +94,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         column_max_range_estimator_parameter_builder_config,
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        name="expect_column_values_to_be_between",
         config_version=1.0,
         variables={},
         rules={
@@ -170,10 +109,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,
                     "include_bootstrap_samples_histogram_in_details": False,
-                    "truncate_values": {
-                        "lower_bound": None,
-                        "upper_bound": None,
-                    },
+                    "truncate_values": {"lower_bound": None, "upper_bound": None},
                     "round_decimals": 1,
                 },
                 "domain_builder": {
@@ -196,22 +132,21 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                             "profiler_details": {
                                 "column_min_range_estimator": f"{PARAMETER_KEY}{column_min_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                                 "column_max_range_estimator": f"{PARAMETER_KEY}{column_max_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                            },
+                            }
                         },
-                    },
+                    }
                 ],
-            },
+            }
         },
     )
-
     default_kwarg_values = {
         "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "condition_parser": None,
         "mostly": 1,
         "min_value": None,
         "max_value": None,
         "strict_min": False,
-        "strict_max": False,  # tolerance=1e-9,
+        "strict_max": False,
         "parse_strings_as_datetimes": False,
         "allow_cross_type_comparisons": None,
         "result_format": "BASIC",
@@ -221,41 +156,31 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "auto": False,
         "profiler_config": default_profiler_config,
     }
-    args_keys = (
-        "column",
-        "min_value",
-        "max_value",
-        "strict_min",
-        "strict_max",
-    )
+    args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        import inspect
 
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        # Setting up a configuration
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that\n        necessary configuration arguments have been provided for the validation of the expectation.\n\n        Args:\n            configuration (OPTIONAL[ExpectationConfiguration]):                 An optional Expectation Configuration entry that will be used to configure the expectation\n        Returns:\n            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully\n        "
         super().validate_configuration(configuration)
-
         min_val = None
         max_val = None
         if "min_value" in configuration.kwargs:
             min_val = configuration.kwargs["min_value"]
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
-        assert (
-            min_val is not None or max_val is not None
+        assert (min_val is not None) or (
+            max_val is not None
         ), "min_value and max_value cannot both be None"
-
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
@@ -267,10 +192,19 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -318,33 +252,25 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 "value": params.get("strict_max"),
             },
         }
-
         template_str = ""
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str += "may have any numerical value."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
+            (at_least_str, at_most_str) = handle_strict_min_max(params)
             mostly_str = ""
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if (params["mostly"] is not None) and (params["mostly"] < 1.0):
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    (params["mostly"] * 100), precision=15, no_scientific=True
                 )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 mostly_str = ", at least $mostly_pct % of the time"
-
-            if params["min_value"] is not None and params["max_value"] is not None:
+            if (params["min_value"] is not None) and (params["max_value"] is not None):
                 template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value{mostly_str}."
-
             elif params["min_value"] is None:
                 template_str += f"values must be {at_most_str} $max_value{mostly_str}."
-
             elif params["max_value"] is None:
                 template_str += f"values must be {at_least_str} $min_value{mostly_str}."
-
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -354,10 +280,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
-
         return (template_str, params_with_json_schema, styling)
 
-    # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
@@ -369,10 +293,19 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -388,33 +321,25 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 "strict_max",
             ],
         )
-
         template_str = ""
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str += "may have any numerical value."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
+            (at_least_str, at_most_str) = handle_strict_min_max(params)
             mostly_str = ""
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if (params["mostly"] is not None) and (params["mostly"] < 1.0):
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    (params["mostly"] * 100), precision=15, no_scientific=True
                 )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 mostly_str = ", at least $mostly_pct % of the time"
-
-            if params["min_value"] is not None and params["max_value"] is not None:
+            if (params["min_value"] is not None) and (params["max_value"] is not None):
                 template_str += f"values must be {at_least_str} $min_value and {at_most_str} $max_value{mostly_str}."
-
             elif params["min_value"] is None:
                 template_str += f"values must be {at_most_str} $max_value{mostly_str}."
-
             elif params["max_value"] is None:
                 template_str += f"values must be {at_least_str} $min_value{mostly_str}."
-
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -422,7 +347,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{

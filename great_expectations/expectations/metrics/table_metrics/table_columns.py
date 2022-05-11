@@ -28,9 +28,18 @@ class TableColumns(TableMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
 
@@ -40,9 +49,18 @@ class TableColumns(TableMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
 
@@ -52,9 +70,18 @@ class TableColumns(TableMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
 
@@ -66,6 +93,15 @@ class TableColumns(TableMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
@@ -73,14 +109,12 @@ class TableColumns(TableMetricProvider):
             runtime_configuration=runtime_configuration,
         )
         table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
+            k: v for (k, v) in metric.metric_domain_kwargs.items() if (k != "column")
         }
         dependencies["table.column_types"] = MetricConfiguration(
             metric_name="table.column_types",
             metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs={
-                "include_nested": True,
-            },
+            metric_value_kwargs={"include_nested": True},
             metric_dependencies=None,
         )
         return dependencies

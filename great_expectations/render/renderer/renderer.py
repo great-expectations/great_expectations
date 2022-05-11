@@ -7,9 +7,38 @@ from great_expectations.core.expectation_validation_result import (
 
 
 def renderer(renderer_type, **kwargs):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
     def wrapper(renderer_fn):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
         @wraps(renderer_fn)
         def inner_func(*args, **kwargs):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             return renderer_fn(*args, **kwargs)
 
         inner_func._renderer_type = renderer_type
@@ -21,97 +50,135 @@ def renderer(renderer_type, **kwargs):
 
 class Renderer:
     def __init__(self) -> None:
-        # This is purely a convenience to provide an explicit mechanism to instantiate any Renderer, even ones that
-        # used to be composed exclusively of classmethods
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         pass
 
     @classmethod
     def render(cls, ge_object):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return ge_object
 
     @classmethod
     def _get_expectation_type(cls, ge_object):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if isinstance(ge_object, ExpectationConfiguration):
             return ge_object.expectation_type
-
         elif isinstance(ge_object, ExpectationValidationResult):
-            # This is a validation
             return ge_object.expectation_config.expectation_type
 
-    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _find_evr_by_type(cls, evrs, type_):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for evr in evrs:
             if evr.expectation_config.expectation_type == type_:
                 return evr
 
-    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _find_all_evrs_by_type(cls, evrs, type_, column_=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         ret = []
         for evr in evrs:
-            if evr.expectation_config.expectation_type == type_ and (
-                not column_ or column_ == evr.expectation_config.kwargs.get("column")
+            if (evr.expectation_config.expectation_type == type_) and (
+                (not column_)
+                or (column_ == evr.expectation_config.kwargs.get("column"))
             ):
                 ret.append(evr)
-
         return ret
 
-    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _get_column_list_from_evrs(cls, evrs):
-        """
-        Get list of column names.
+        import inspect
 
-        If expect_table_columns_to_match_ordered_list EVR is present, use it as the list, including the order.
-
-        Otherwise, get the list of all columns mentioned in the expectations and order it alphabetically.
-
-        :param evrs:
-        :return: list of columns with best effort sorting
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Get list of column names.\n\n        If expect_table_columns_to_match_ordered_list EVR is present, use it as the list, including the order.\n\n        Otherwise, get the list of all columns mentioned in the expectations and order it alphabetically.\n\n        :param evrs:\n        :return: list of columns with best effort sorting\n        "
         evrs_ = evrs if isinstance(evrs, list) else evrs.results
-
         expect_table_columns_to_match_ordered_list_evr = cls._find_evr_by_type(
             evrs_, "expect_table_columns_to_match_ordered_list"
         )
-        # Group EVRs by column
         sorted_columns = sorted(
             list(
                 {
                     evr.expectation_config.kwargs["column"]
                     for evr in evrs_
-                    if "column" in evr.expectation_config.kwargs
+                    if ("column" in evr.expectation_config.kwargs)
                 }
             )
         )
-
         if expect_table_columns_to_match_ordered_list_evr:
             ordered_columns = expect_table_columns_to_match_ordered_list_evr.result[
                 "observed_value"
             ]
         else:
             ordered_columns = []
-
-        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column
-        # names from entire evr
         if set(sorted_columns) == set(ordered_columns):
             return ordered_columns
         else:
             return sorted_columns
 
-    # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod
     def _group_evrs_by_column(cls, validation_results):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         columns = {}
         for evr in validation_results.results:
             if "column" in evr.expectation_config.kwargs:
                 column = evr.expectation_config.kwargs["column"]
             else:
                 column = "Table-level Expectations"
-
             if column not in columns:
                 columns[column] = []
             columns[column].append(evr)
-
         return columns

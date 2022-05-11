@@ -18,7 +18,6 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 class ColumnValueCounts(ColumnAggregateMetricProvider):
     metric_name = "column.value_counts"
     value_keys = ("sort", "collate")
-
     default_kwarg_values = {"sort": "value", "collate": None}
 
     @metric_value(engine=PandasExecutionEngine)
@@ -27,31 +26,35 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
         collate = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
         )
-
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
         if collate is not None:
             raise ValueError("collate parameter is not supported in PandasDataset")
-
-        df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+        (df, _, accessor_domain_kwargs) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
-
         counts = df[column].value_counts()
         if sort == "value":
             try:
                 counts.sort_index(inplace=True)
             except TypeError:
-                # Having values of multiple types in a object dtype column (e.g., strings and floats)
-                # raises a TypeError when the sorting method performs comparisons.
                 if df[column].dtype == object:
                     counts.index = counts.index.astype(str)
                     counts.sort_index(inplace=True)
@@ -67,27 +70,32 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
         collate = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
         )
-
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
         if collate is not None:
             raise ValueError("collate parameter is not supported in PandasDataset")
-
-        selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+        (selectable, _, accessor_domain_kwargs) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
-
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
-
         query = (
             sa.select(
                 [
@@ -99,10 +107,6 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             .group_by(sa.column(column))
         )
         if sort == "value":
-            # NOTE: depending on the way the underlying database collates columns,
-            # ordering can vary. postgresql collate "C" matches default sort
-            # for python and most other systems, but is not universally supported,
-            # so we use the default sort for the system, unless specifically overridden
             if collate is not None:
                 query = query.order_by(sa.column(column).collate(collate))
             else:
@@ -125,24 +129,30 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
         collate = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
         )
-
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
         if collate is not None:
             raise ValueError("collate parameter is not supported in SparkDFDataset")
-
-        df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+        (df, _, accessor_domain_kwargs) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
-
         value_counts = (
             df.select(column).where(F.col(column).isNotNull()).groupBy(column).count()
         )

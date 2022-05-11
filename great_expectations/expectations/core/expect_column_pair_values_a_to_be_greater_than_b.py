@@ -16,48 +16,15 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
-    """
-    Expect values in column A to be greater than column B.
-
-    Args:
-        column_A (str): The first column name
-        column_B (str): The second column name
-        or_equal (boolean or None): If True, then values can be equal, not strictly greater
-
-    Keyword Args:
-        allow_cross_type_comparisons (boolean or None): If True, allow comparisons between types (e.g. integer and \
-            string). Otherwise, attempting such comparisons will raise an exception.
-
-    Keyword Args:
-        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
-
-    Other Parameters:
-        result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-        meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
-
-    Returns:
-        An ExpectationSuiteValidationResult
-    """
-
-    # This dictionary contains metadata for display in the public gallery
+    '\n    Expect values in column A to be greater than column B.\n\n    Args:\n        column_A (str): The first column name\n        column_B (str): The second column name\n        or_equal (boolean or None): If True, then values can be equal, not strictly greater\n\n    Keyword Args:\n        allow_cross_type_comparisons (boolean or None): If True, allow comparisons between types (e.g. integer and             string). Otherwise, attempting such comparisons will raise an exception.\n\n    Keyword Args:\n        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.         catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.         meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n'
     library_metadata = {
         "maturity": "production",
-        "tags": [
-            "core expectation",
-            "multi-column expectation",
-        ],
+        "tags": ["core expectation", "multi-column expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
     map_metric = "column_pair_values.a_greater_than_b"
     success_keys = (
         "column_A",
@@ -74,27 +41,31 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "allow_cross_type_comparisons": None,
         "ignore_row_if": "both_values_are_missing",
         "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "condition_parser": None,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
     }
-    args_keys = (
-        "column_A",
-        "column_B",
-        "or_equal",
-    )
+    args_keys = ("column_A", "column_B", "or_equal")
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
         try:
-            assert (
-                "column_A" in configuration.kwargs
-                and "column_B" in configuration.kwargs
+            assert ("column_A" in configuration.kwargs) and (
+                "column_B" in configuration.kwargs
             ), "both columns must be provided"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -108,10 +79,19 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -156,29 +136,24 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
             params["row_condition"] = None
-
-        if params["mostly"] is None or params["mostly"] == 1.0:
+        if (params["mostly"] is None) or (params["mostly"] == 1.0):
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must always be greater than those in $column_B."
             else:
                 template_str = "Values in $column_A must always be greater than or equal to those in $column_B."
         else:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                (params["mostly"] * 100), precision=15, no_scientific=True
             )
-            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
             else:
                 template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
-
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -187,13 +162,9 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
                 params["row_condition"], with_schema=True
             )
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
+                (conditional_template_str + ", then ") + template_str[0].lower()
+            ) + template_str[1:]
             params_with_json_schema.update(conditional_params)
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -207,10 +178,19 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -226,42 +206,33 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
                 "condition_parser",
             ],
         )
-
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
             params["row_condition"] = None
-
-        if params["mostly"] is None or params["mostly"] == 1.0:
+        if (params["mostly"] is None) or (params["mostly"] == 1.0):
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must always be greater than those in $column_B."
             else:
                 template_str = "Values in $column_A must always be greater than or equal to those in $column_B."
         else:
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                (params["mostly"] * 100), precision=15, no_scientific=True
             )
-            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
             else:
                 template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
-
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
+                (conditional_template_str + ", then ") + template_str[0].lower()
+            ) + template_str[1:]
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{

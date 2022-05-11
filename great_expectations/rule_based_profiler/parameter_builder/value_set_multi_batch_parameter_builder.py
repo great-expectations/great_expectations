@@ -22,24 +22,7 @@ from great_expectations.types.attributes import Attributes
 
 
 class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
-    """Build a set of unique values across all specified batches.
-
-    This parameter builder can be used to build a unique value_set for each
-    of the domains specified by the DomainBuilder from all of the batches
-    specified. This value_set can be used to create Expectations.
-
-    This unique value_set is the unique values from ALL batches accessible
-    to the parameter builder. For example, if batch 1 has the unique values
-    {1, 4, 8} and batch 2 {2, 8, 10} the unique values returned by this
-    parameter builder are the set union, or {1, 2, 4, 8, 10}
-
-    Notes:
-        1. The computation of the unique values across batches is done within
-           this ParameterBuilder so please be aware that testing large columns with
-           high cardinality could require a large amount of memory.
-        2. This ParameterBuilder filters null values out from the unique value_set.
-    """
-
+    "Build a set of unique values across all specified batches.\n\n    This parameter builder can be used to build a unique value_set for each\n    of the domains specified by the DomainBuilder from all of the batches\n    specified. This value_set can be used to create Expectations.\n\n    This unique value_set is the unique values from ALL batches accessible\n    to the parameter builder. For example, if batch 1 has the unique values\n    {1, 4, 8} and batch 2 {2, 8, 10} the unique values returned by this\n    parameter builder are the set union, or {1, 2, 4, 8, 10}\n\n    Notes:\n        1. The computation of the unique values across batches is done within\n           this ParameterBuilder so please be aware that testing large columns with\n           high cardinality could require a large amount of memory.\n        2. This ParameterBuilder filters null values out from the unique value_set.\n"
     exclude_field_names: Set[
         str
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
@@ -52,27 +35,24 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     def __init__(
         self,
         name: str,
-        metric_domain_kwargs: Optional[Union[str, dict]] = None,
-        metric_value_kwargs: Optional[Union[str, dict]] = None,
+        metric_domain_kwargs: Optional[Union[(str, dict)]] = None,
+        metric_value_kwargs: Optional[Union[(str, dict)]] = None,
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        json_serialize: Union[(str, bool)] = True,
+        data_context: Optional["BaseDataContext"] = None,
     ) -> None:
-        """
-        Args:
-            name: the name of this parameter -- this is user-specified parameter name (from configuration);
-            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
-            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
-            metric_domain_kwargs: used in MetricConfiguration
-            metric_value_kwargs: used in MetricConfiguration
-            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
-            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
-            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            data_context: BaseDataContext associated with this ParameterBuilder
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        '\n        Args:\n            name: the name of this parameter -- this is user-specified parameter name (from configuration);\n            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."\n            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").\n            metric_domain_kwargs: used in MetricConfiguration\n            metric_value_kwargs: used in MetricConfiguration\n            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective\n            ParameterBuilder objects\' outputs available (as fully-qualified parameter names) is pre-requisite.\n            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".\n            json_serialize: If True (default), convert computed value to JSON prior to saving results.\n            data_context: BaseDataContext associated with this ParameterBuilder\n        '
         super().__init__(
             name=name,
             metric_name="column.distinct_values",
@@ -90,16 +70,19 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        parameters: Optional[Dict[(str, ParameterContainer)]] = None,
         recompute_existing_parameter_values: bool = False,
     ) -> Attributes:
-        """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
+        import inspect
 
-        Returns:
-            Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
-        # Build the list of unique values for each Batch object.
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.\n\n        Returns:\n            Attributes object, containing computed parameter values and parameter computation details metadata.\n        "
         super().build_parameters(
             domain=domain,
             variables=variables,
@@ -107,8 +90,6 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameter_computation_impl=super()._build_parameters,
             recompute_existing_parameter_values=recompute_existing_parameter_values,
         )
-
-        # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.fully_qualified_parameter_name,
@@ -123,7 +104,6 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
                 ]
             )
         )
-
         return Attributes(
             {
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: _get_unique_values_from_nested_collection_of_sets(
@@ -139,30 +119,19 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 def _get_unique_values_from_nested_collection_of_sets(
     collection: Collection[Collection[Set[Any]]],
 ) -> Set[Any]:
-    """Get unique values from a collection of sets e.g. a list of sets.
+    import inspect
 
-    Args:
-        collection: Collection of Sets containing collections of values.
-            can be nested Collections.
-
-    Returns:
-        Single flattened set containing unique values.
-    """
-
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Get unique values from a collection of sets e.g. a list of sets.\n\n    Args:\n        collection: Collection of Sets containing collections of values.\n            can be nested Collections.\n\n    Returns:\n        Single flattened set containing unique values.\n    "
     flattened: List[Set[Any]] = list(itertools.chain.from_iterable(collection))
-
-    """
-    In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to
-    reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
-    resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
-    """
+    '\n    In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to\n    reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,\n    resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.\n    '
     unique_values: Set[Any] = set(
-        sorted(
-            filter(
-                lambda element: element is not None,
-                set().union(*flattened),
-            )
-        )
+        sorted(filter((lambda element: (element is not None)), set().union(*flattened)))
     )
-
     return unique_values

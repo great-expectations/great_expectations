@@ -21,9 +21,6 @@ except ImportError:
     pass
 
 
-# TODO: consider using a specified-order supporting class for help (but wasn't working with python 2)
-
-
 @click.group()
 @click.version_option(version=ge_version)
 @click.option(
@@ -34,26 +31,18 @@ except ImportError:
     help="Set great_expectations to use verbose output.",
 )
 def cli(verbose) -> None:
-    """
-    Welcome to the great_expectations CLI!
+    import inspect
 
-    Most commands follow this format: great_expectations <NOUN> <VERB>
-
-    The nouns are: datasource, docs, project, suite, validation-operator
-
-    Most nouns accept the following verbs: new, list, edit
-
-    In particular, the CLI supports the following special commands:
-
-    - great_expectations init : create a new great_expectations project
-
-    - great_expectations datasource profile : profile a datasource
-
-    - great_expectations docs build : compile documentation from expectations"""
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Welcome to the great_expectations CLI!\n\n    Most commands follow this format: great_expectations <NOUN> <VERB>\n\n    The nouns are: datasource, docs, project, suite, validation-operator\n\n    Most nouns accept the following verbs: new, list, edit\n\n    In particular, the CLI supports the following special commands:\n\n    - great_expectations init : create a new great_expectations project\n\n    - great_expectations datasource profile : profile a datasource\n\n    - great_expectations docs build : compile documentation from expectations"
     logger = _set_up_logger()
     if verbose:
-        # Note we are explicitly not using a logger in all CLI output to have
-        # more control over console UI.
         logger.setLevel(logging.DEBUG)
 
 
@@ -68,6 +57,15 @@ cli.add_command(checkpoint)
 
 
 def main() -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     cli()
 
 

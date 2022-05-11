@@ -24,18 +24,45 @@ class MulticolumnSumEqual(MulticolumnMapMetricProvider):
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         sum_total = kwargs.get("sum_total")
         row_wise_cond = column_list.sum(axis=1, skipna=False) == sum_total
         return row_wise_cond
 
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_list, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         sum_total = kwargs.get("sum_total")
         row_wise_cond = sum(column_list) == sum_total
         return row_wise_cond
 
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_list, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         sum_total = kwargs.get("sum_total")
         expression = "+".join(
             [f"COALESCE({column_name}, 0)" for column_name in column_list.columns]

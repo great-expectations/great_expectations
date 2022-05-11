@@ -25,68 +25,17 @@ from great_expectations.rule_based_profiler.types import (
 
 
 class ExpectTableRowCountToBeBetween(TableExpectation):
-    """Expect the number of rows to be between two values.
-
-    expect_table_row_count_to_be_between is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
-
-    Keyword Args:
-        min_value (int or None): \
-            The minimum number of rows, inclusive.
-        max_value (int or None): \
-            The maximum number of rows, inclusive.
-
-    Other Parameters:
-        result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
-        meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
-
-    Returns:
-        An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-    Notes:
-        * min_value and max_value are both inclusive.
-        * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has \
-          no minimum.
-        * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has \
-          no maximum.
-
-    See Also:
-        expect_table_row_count_to_equal
-    """
-
+    "Expect the number of rows to be between two values.\n\n    expect_table_row_count_to_be_between is a :func:`expectation     <great_expectations.validator.validator.Validator.expectation>`, not a\n    ``column_map_expectation`` or ``column_aggregate_expectation``.\n\n    Keyword Args:\n        min_value (int or None):             The minimum number of rows, inclusive.\n        max_value (int or None):             The maximum number of rows, inclusive.\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    Notes:\n        * min_value and max_value are both inclusive.\n        * If min_value is None, then max_value is treated as an upper bound, and the number of acceptable rows has           no minimum.\n        * If max_value is None, then min_value is treated as a lower bound, and the number of acceptable rows has           no maximum.\n\n    See Also:\n        expect_table_row_count_to_equal\n"
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
-        "contributors": [
-            "@great_expectations",
-        ],
+        "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
     metric_dependencies = ("table.row_count",)
-    success_keys = (
-        "min_value",
-        "max_value",
-        "auto",
-        "profiler_config",
-    )
-
+    success_keys = ("min_value", "max_value", "auto", "profiler_config")
     table_row_count_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
@@ -109,10 +58,10 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        table_row_count_range_estimator_parameter_builder_config,
+        table_row_count_range_estimator_parameter_builder_config
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        name="expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        name="expect_table_row_count_to_be_between",
         config_version=1.0,
         variables={},
         rules={
@@ -124,10 +73,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,
                     "include_bootstrap_samples_histogram_in_details": False,
-                    "truncate_values": {
-                        "lower_bound": 0,
-                        "upper_bound": None,
-                    },
+                    "truncate_values": {"lower_bound": 0, "upper_bound": None},
                     "round_decimals": 0,
                 },
                 "domain_builder": {
@@ -143,14 +89,13 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                         "min_value": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
                         "max_value": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}"
                         },
                     }
                 ],
-            },
+            }
         },
     )
-
     default_kwarg_values = {
         "min_value": None,
         "max_value": None,
@@ -161,26 +106,21 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "auto": False,
         "profiler_config": default_profiler_config,
     }
-    args_keys = (
-        "min_value",
-        "max_value",
-    )
+    args_keys = ("min_value", "max_value")
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        import inspect
 
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        # Setting up a configuration
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that\n        necessary configuration arguments have been provided for the validation of the expectation.\n\n        Args:\n            configuration (OPTIONAL[ExpectationConfiguration]):                 An optional Expectation Configuration entry that will be used to configure the expectation\n        Returns:\n            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully\n        "
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
@@ -193,10 +133,19 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -210,7 +159,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "strict_max",
             ],
         )
-        # format params
         params_with_json_schema = {
             "min_value": {
                 "schema": {"type": "number"},
@@ -233,19 +181,16 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "value": params.get("strict_max"),
             },
         }
-
-        if params["min_value"] is None and params["max_value"] is None:
+        if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "May have any number of rows."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
-            if params["min_value"] is not None and params["max_value"] is not None:
+            (at_least_str, at_most_str) = handle_strict_min_max(params)
+            if (params["min_value"] is not None) and (params["max_value"] is not None):
                 template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
             elif params["min_value"] is None:
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -254,13 +199,9 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 params["row_condition"], with_schema=True
             )
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
+                (conditional_template_str + ", then ") + template_str[0].lower()
+            ) + template_str[1:]
             params_with_json_schema.update(conditional_params)
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -274,10 +215,19 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -291,32 +241,25 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "strict_max",
             ],
         )
-
-        if params["min_value"] is None and params["max_value"] is None:
+        if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "May have any number of rows."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
-            if params["min_value"] is not None and params["max_value"] is not None:
+            (at_least_str, at_most_str) = handle_strict_min_max(params)
+            if (params["min_value"] is not None) and (params["max_value"] is not None):
                 template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
             elif params["min_value"] is None:
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
+                (conditional_template_str + ", then ") + template_str[0].lower()
+            ) + template_str[1:]
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{
@@ -337,6 +280,15 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._validate_metric_value_between(
             metric_name="table.row_count",
             configuration=configuration,

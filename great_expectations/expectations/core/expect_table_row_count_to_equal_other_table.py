@@ -11,49 +11,13 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 
 
 class ExpectTableRowCountToEqualOtherTable(TableExpectation):
-    """Expect the number of rows to equal the number in another table.
-
-    expect_table_row_count_to_equal_other_table is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
-
-    Args:
-        other_table_name (str): \
-            The name of the other table.
-
-    Other Parameters:
-        result_format (string or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
-        meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
-
-    Returns:
-        An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-    See Also:
-        expect_table_row_count_to_be_between
-    """
-
+    "Expect the number of rows to equal the number in another table.\n\n    expect_table_row_count_to_equal_other_table is a :func:`expectation     <great_expectations.validator.validator.Validator.expectation>`, not a\n    ``column_map_expectation`` or ``column_aggregate_expectation``.\n\n    Args:\n        other_table_name (str):             The name of the other table.\n\n    Other Parameters:\n        result_format (string or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    See Also:\n        expect_table_row_count_to_be_between\n"
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation", "multi-table expectation"],
-        "contributors": [
-            "@great_expectations",
-        ],
+        "contributors": ["@great_expectations"],
         "requirements": [],
     }
-
     metric_dependencies = ("table.row_count",)
     success_keys = ("other_table_name",)
     default_kwarg_values = {
@@ -73,20 +37,28 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
         template_str = "Row count must equal the row count of table $other_table_name."
-
         params_with_json_schema = {
             "other_table_name": {
                 "schema": {"type": "string"},
                 "value": params.get("other_table_name"),
-            },
+            }
         }
         return (template_str, params_with_json_schema, styling)
 
@@ -101,15 +73,23 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
         template_str = "Row count must equal the row count of table $other_table_name."
-
         return [
             RenderedStringTemplateContent(
                 **{
@@ -133,12 +113,19 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not result.result.get("observed_value"):
             return "--"
-
         self_table_row_count = num_to_str(result.result["observed_value"]["self"])
         other_table_row_count = num_to_str(result.result["observed_value"]["other"])
-
         return RenderedStringTemplateContent(
             **{
                 "content_block_type": "string_template",
@@ -159,26 +146,31 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
         other_table_name = configuration.kwargs.get("other_table_name")
-        # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
         table_row_count_metric_config_other = deepcopy(
             dependencies["metrics"]["table.row_count"]
         )
         table_row_count_metric_config_other.metric_domain_kwargs[
             "table"
         ] = other_table_name
-        # rename original "table.row_count" metric to "table.row_count.self"
         dependencies["metrics"]["table.row_count.self"] = dependencies["metrics"].pop(
             "table.row_count"
         )
-        # add a new metric dependency named "table.row_count.other" with modified metric config
         dependencies["metrics"][
             "table.row_count.other"
         ] = table_row_count_metric_config_other
-
         return dependencies
 
     def _validate(
@@ -188,11 +180,19 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         table_row_count_self = metrics["table.row_count.self"]
         table_row_count_other = metrics["table.row_count.other"]
-
         return {
-            "success": table_row_count_self == table_row_count_other,
+            "success": (table_row_count_self == table_row_count_other),
             "result": {
                 "observed_value": {
                     "self": table_row_count_self,

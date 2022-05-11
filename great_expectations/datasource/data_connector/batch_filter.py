@@ -13,21 +13,26 @@ logger = logging.getLogger(__name__)
 def build_batch_filter(
     data_connector_query_dict: Optional[
         Dict[
-            str,
-            Optional[
-                Union[
-                    int,
-                    list,
-                    tuple,
-                    slice,
-                    str,
-                    Union[Dict, IDDict],
-                    Callable,
-                ]
-            ],
+            (
+                str,
+                Optional[
+                    Union[
+                        (int, list, tuple, slice, str, Union[(Dict, IDDict)], Callable)
+                    ]
+                ],
+            )
         ]
     ] = None
 ):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if not data_connector_query_dict:
         return BatchFilter(
             custom_filter_function=None,
@@ -36,23 +41,23 @@ def build_batch_filter(
             limit=None,
         )
     data_connector_query_keys: set = set(data_connector_query_dict.keys())
-    if not data_connector_query_keys <= BatchFilter.RECOGNIZED_KEYS:
+    if not (data_connector_query_keys <= BatchFilter.RECOGNIZED_KEYS):
         raise ge_exceptions.BatchFilterError(
             f"""Unrecognized data_connector_query key(s):
-"{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
+"{str((data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS))}" detected.
             """
         )
     custom_filter_function: Callable = data_connector_query_dict.get(
         "custom_filter_function"
     )
-    if custom_filter_function and not isinstance(custom_filter_function, Callable):
+    if custom_filter_function and (not isinstance(custom_filter_function, Callable)):
         raise ge_exceptions.BatchFilterError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )
     batch_filter_parameters: Optional[
-        Union[dict, IDDict]
+        Union[(dict, IDDict)]
     ] = data_connector_query_dict.get("batch_filter_parameters")
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
@@ -67,16 +72,16 @@ def build_batch_filter(
             )
         batch_filter_parameters = IDDict(batch_filter_parameters)
     index: Optional[
-        Union[int, list, tuple, slice, str]
+        Union[(int, list, tuple, slice, str)]
     ] = data_connector_query_dict.get("index")
     limit: Optional[int] = data_connector_query_dict.get("limit")
-    if limit and (not isinstance(limit, int) or limit < 0):
+    if limit and ((not isinstance(limit, int)) or (limit < 0)):
         raise ge_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
 type and value given are "{str(type(limit))}" and "{limit}", respectively, which is illegal.
             """
         )
-    if index is not None and limit is not None:
+    if (index is not None) and (limit is not None):
         raise ge_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
@@ -90,8 +95,17 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
 
 
 def _parse_index(
-    index: Optional[Union[int, list, tuple, slice, str]] = None
-) -> Optional[Union[int, slice]]:
+    index: Optional[Union[(int, list, tuple, slice, str)]] = None
+) -> Optional[Union[(int, slice)]]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if index is None:
         return None
     elif isinstance(index, (int, slice)):
@@ -112,7 +126,7 @@ def _parse_index(
     elif isinstance(index, str):
         if is_int(value=index):
             return _parse_index(index=int(index))
-        index_as_list: List[Optional[str, int]]
+        index_as_list: List[Optional[(str, int)]]
         if index:
             index_as_list = index.split(":")
             if len(index_as_list) == 1:
@@ -120,7 +134,9 @@ def _parse_index(
         else:
             index_as_list = []
         idx_str: str
-        index_as_list = [int(idx_str) if idx_str else None for idx_str in index_as_list]
+        index_as_list = [
+            (int(idx_str) if idx_str else None) for idx_str in index_as_list
+        ]
         return _parse_index(index=index_as_list)
     else:
         raise ge_exceptions.BatchFilterError(
@@ -143,9 +159,18 @@ class BatchFilter:
         self,
         custom_filter_function: Callable = None,
         batch_filter_parameters: Optional[IDDict] = None,
-        index: Optional[Union[int, slice]] = None,
+        index: Optional[Union[(int, slice)]] = None,
         limit: int = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._custom_filter_function = custom_filter_function
         self._batch_filter_parameters = batch_filter_parameters
         self._index = index
@@ -153,21 +178,66 @@ class BatchFilter:
 
     @property
     def custom_filter_function(self) -> Callable:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._custom_filter_function
 
     @property
     def batch_filter_parameters(self) -> Optional[IDDict]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._batch_filter_parameters
 
     @property
-    def index(self) -> Optional[Union[int, slice]]:
+    def index(self) -> Optional[Union[(int, slice)]]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._index
 
     @property
     def limit(self) -> int:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._limit
 
     def __repr__(self) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         doc_fields_dict: dict = {
             "custom_filter_function": self._custom_filter_function,
             "batch_filter_parameters": self.batch_filter_parameters,
@@ -179,6 +249,15 @@ class BatchFilter:
     def select_from_data_connector_query(
         self, batch_definition_list: Optional[List[BatchDefinition]] = None
     ) -> List[BatchDefinition]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if batch_definition_list is None:
             return []
         filter_function: Callable
@@ -189,43 +268,61 @@ class BatchFilter:
         selected_batch_definitions: List[BatchDefinition]
         selected_batch_definitions = list(
             filter(
-                lambda batch_definition: filter_function(
-                    batch_identifiers=batch_definition.batch_identifiers,
+                (
+                    lambda batch_definition: filter_function(
+                        batch_identifiers=batch_definition.batch_identifiers
+                    )
                 ),
                 batch_definition_list,
             )
         )
         if len(selected_batch_definitions) == 0:
             return selected_batch_definitions
-
         if self.index is None:
             selected_batch_definitions = selected_batch_definitions[: self.limit]
+        elif isinstance(self.index, int):
+            selected_batch_definitions = [selected_batch_definitions[self.index]]
         else:
-            if isinstance(self.index, int):
-                selected_batch_definitions = [selected_batch_definitions[self.index]]
-            else:
-                selected_batch_definitions = list(
-                    itertools.chain.from_iterable(
-                        [selected_batch_definitions[self.index]]
-                    )
-                )
+            selected_batch_definitions = list(
+                itertools.chain.from_iterable([selected_batch_definitions[self.index]])
+            )
         return selected_batch_definitions
 
     def best_effort_batch_definition_matcher(self) -> Callable:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
         def match_batch_identifiers_to_batch_filter_params(
             batch_identifiers: dict,
         ) -> bool:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             if self.batch_filter_parameters:
                 if not batch_identifiers:
                     return False
-
-                for batch_filter_parameter, val in self.batch_filter_parameters.items():
+                for (
+                    batch_filter_parameter,
+                    val,
+                ) in self.batch_filter_parameters.items():
                     if not (
-                        batch_filter_parameter in batch_identifiers
-                        and batch_identifiers[batch_filter_parameter] == val
+                        (batch_filter_parameter in batch_identifiers)
+                        and (batch_identifiers[batch_filter_parameter] == val)
                     ):
                         return False
-
             return True
 
         return match_batch_identifiers_to_batch_filter_params

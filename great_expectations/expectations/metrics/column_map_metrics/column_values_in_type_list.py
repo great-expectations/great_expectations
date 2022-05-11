@@ -17,6 +17,15 @@ class ColumnValuesInTypeList(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, type_list, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         comp_types = []
         for type_ in type_list:
             try:
@@ -28,19 +37,15 @@ class ColumnValuesInTypeList(ColumnMapMetricProvider):
                         comp_types.append(pd_type)
                 except AttributeError:
                     pass
-
                 try:
                     pd_type = getattr(pd.core.dtypes.dtypes, type_)
                     if isinstance(pd_type, type):
                         comp_types.append(pd_type)
                 except AttributeError:
                     pass
-
             native_type = _native_type_type_map(type_)
             if native_type is not None:
                 comp_types.extend(native_type)
-
         if len(comp_types) < 1:
             raise ValueError(f"No recognized numpy/python type in list: {type_list}")
-
         return column.map(lambda x: isinstance(x, tuple(comp_types)))

@@ -32,23 +32,7 @@ _epsilon = 1e-12
 
 
 class EvaluationParameterParser:
-    """
-    This Evaluation Parameter Parser uses pyparsing to provide a basic expression language capable of evaluating
-    parameters using values available only at run time.
-
-    expop   :: '^'
-    multop  :: '*' | '/'
-    addop   :: '+' | '-'
-    integer :: ['+' | '-'] '0'..'9'+
-    atom    :: PI | E | real | fn '(' expr ')' | '(' expr ')'
-    factor  :: atom [ expop factor ]*
-    term    :: factor [ multop factor ]*
-    expr    :: term [ addop term ]*
-
-    The parser is modified from: https://github.com/pyparsing/pyparsing/blob/master/examples/fourFn.py
-    """
-
-    # map operator symbols to corresponding arithmetic operations
+    "\n    This Evaluation Parameter Parser uses pyparsing to provide a basic expression language capable of evaluating\n    parameters using values available only at run time.\n\n    expop   :: '^'\n    multop  :: '*' | '/'\n    addop   :: '+' | '-'\n    integer :: ['+' | '-'] '0'..'9'+\n    atom    :: PI | E | real | fn '(' expr ')' | '(' expr ')'\n    factor  :: atom [ expop factor ]*\n    term    :: factor [ multop factor ]*\n    expr    :: term [ addop term ]*\n\n    The parser is modified from: https://github.com/pyparsing/pyparsing/blob/master/examples/fourFn.py\n"
     opn = {
         "+": operator.add,
         "-": operator.sub,
@@ -56,29 +40,57 @@ class EvaluationParameterParser:
         "/": operator.truediv,
         "^": operator.pow,
     }
-
     fn = {
         "sin": math.sin,
         "cos": math.cos,
         "tan": math.tan,
         "exp": math.exp,
         "abs": abs,
-        "trunc": lambda a: int(a),
+        "trunc": (lambda a: int(a)),
         "round": round,
-        "sgn": lambda a: -1 if a < -_epsilon else 1 if a > _epsilon else 0,
+        "sgn": (
+            lambda a: ((-1) if (a < (-_epsilon)) else (1 if (a > _epsilon) else 0))
+        ),
         "now": datetime.datetime.now,
         "datetime": datetime.datetime,
         "timedelta": datetime.timedelta,
     }
 
     def __init__(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.exprStack = []
         self._parser = None
 
     def push_first(self, toks) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.exprStack.append(toks[0])
 
     def push_unary_minus(self, toks) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for t in toks:
             if t == "-":
                 self.exprStack.append("unary -")
@@ -86,70 +98,68 @@ class EvaluationParameterParser:
                 break
 
     def clear_stack(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         del self.exprStack[:]
 
     def get_parser(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.clear_stack()
         if not self._parser:
-            # use CaselessKeyword for e and pi, to avoid accidentally matching
-            # functions that start with 'e' or 'pi' (such as 'exp'); Keyword
-            # and CaselessKeyword only match whole words
             e = CaselessKeyword("E")
             pi = CaselessKeyword("PI")
-            # fnumber = Combine(Word("+-"+nums, nums) +
-            #                    Optional("." + Optional(Word(nums))) +
-            #                    Optional(e + Word("+-"+nums, nums)))
-            # or use provided pyparsing_common.number, but convert back to str:
-            # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
-            fnumber = Regex(r"[+-]?(?:\d+|\.\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?")
+            fnumber = Regex("[+-]?(?:\\d+|\\.\\d+)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?")
             ge_urn = Combine(
                 Literal("urn:great_expectations:")
                 + Word(alphas, f"{alphanums}_$:?=%.&")
             )
             variable = Word(alphas, f"{alphanums}_$")
             ident = ge_urn | variable
-
-            plus, minus, mult, div = map(Literal, "+-*/")
-            lpar, rpar = map(Suppress, "()")
+            (plus, minus, mult, div) = map(Literal, "+-*/")
+            (lpar, rpar) = map(Suppress, "()")
             addop = plus | minus
             multop = mult | div
             expop = Literal("^")
-
             expr = Forward()
             expr_list = delimitedList(Group(expr))
-
-            # We will allow functions either to accept *only* keyword
-            # expressions or *only* non-keyword expressions
-            # define function keyword arguments
             key = Word(f"{alphas}_") + Suppress("=")
-            # value = (fnumber | Word(alphanums))
             value = expr
             keyval = dictOf(key.setParseAction(self.push_first), value)
             kwarglist = delimitedList(keyval)
-
-            # add parse action that replaces the function identifier with a (name, number of args, has_fn_kwargs) tuple
-            # 20211009 - JPC - Note that it's important that we consider kwarglist
-            # first as part of disabling backtracking for the function's arguments
-            fn_call = (ident + lpar + rpar).setParseAction(
+            fn_call = ((ident + lpar) + rpar).setParseAction(
                 lambda t: t.insert(0, (t.pop(0), 0, False))
             ) | (
-                (ident + lpar - Group(expr_list) + rpar).setParseAction(
+                (((ident + lpar) - Group(expr_list)) + rpar).setParseAction(
                     lambda t: t.insert(0, (t.pop(0), len(t[0]), False))
                 )
-                ^ (ident + lpar - Group(kwarglist) + rpar).setParseAction(
+                ^ (((ident + lpar) - Group(kwarglist)) + rpar).setParseAction(
                     lambda t: t.insert(0, (t.pop(0), len(t[0]), True))
                 )
             )
             atom = (
                 addop[...]
                 + (
-                    (fn_call | pi | e | fnumber | ident).setParseAction(self.push_first)
-                    | Group(lpar + expr + rpar)
+                    ((((fn_call | pi) | e) | fnumber) | ident).setParseAction(
+                        self.push_first
+                    )
+                    | Group((lpar + expr) + rpar)
                 )
             ).setParseAction(self.push_unary_minus)
-
-            # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left
-            # exponents, instead of left-to-right that is, 2^3^2 = 2^(3^2), not (2^3)^2.
             factor = Forward()
             factor <<= atom + (expop + factor).setParseAction(self.push_first)[...]
             term = factor + (multop + factor).setParseAction(self.push_first)[...]
@@ -158,22 +168,29 @@ class EvaluationParameterParser:
         return self._parser
 
     def evaluate_stack(self, s):
-        op, num_args, has_fn_kwargs = s.pop(), 0, False
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        (op, num_args, has_fn_kwargs) = (s.pop(), 0, False)
         if isinstance(op, tuple):
-            op, num_args, has_fn_kwargs = op
+            (op, num_args, has_fn_kwargs) = op
         if op == "unary -":
             return -self.evaluate_stack(s)
         if op in "+-*/^":
-            # note: operands are pushed onto the stack in reverse order
             op2 = self.evaluate_stack(s)
             op1 = self.evaluate_stack(s)
             return self.opn[op](op1, op2)
         elif op == "PI":
-            return math.pi  # 3.1415926535
+            return math.pi
         elif op == "E":
-            return math.e  # 2.718281828
+            return math.e
         elif op in self.fn:
-            # note: args are pushed onto the stack in reverse order
             if has_fn_kwargs:
                 kwargs = dict()
                 for _ in range(num_args):
@@ -185,11 +202,6 @@ class EvaluationParameterParser:
                 args = reversed([self.evaluate_stack(s) for _ in range(num_args)])
                 return self.fn[op](*args)
         else:
-            # try to evaluate as int first, then as float if int fails
-            # NOTE: JPC - 20200403 - Originally I considered returning the raw op here if parsing as float also
-            # fails, but I decided against it to instead require that the *entire* expression evaluates
-            # numerically UNLESS there is *exactly one* expression to substitute (see cases where len(L) == 1 in the
-            # parse_evaluation_parameter method.
             try:
                 return int(op)
             except ValueError:
@@ -201,31 +213,27 @@ def build_evaluation_parameters(
     evaluation_parameters: Optional[dict] = None,
     interactive_evaluation: bool = True,
     data_context=None,
-) -> Tuple[dict, dict]:
-    """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
-    AND mutate expectation_args by removing any parameter values passed in as temporary values during
-    exploratory work.
-    """
+) -> Tuple[(dict, dict)]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,\n    AND mutate expectation_args by removing any parameter values passed in as temporary values during\n    exploratory work.\n    "
     evaluation_args = copy.deepcopy(expectation_args)
     substituted_parameters = {}
-
-    # Iterate over arguments, and replace $PARAMETER-defined args with their
-    # specified parameters.
-    for key, value in evaluation_args.items():
-        if isinstance(value, dict) and "$PARAMETER" in value:
-            # We do not even need to search for a value if we are not going to do interactive evaluation
+    for (key, value) in evaluation_args.items():
+        if isinstance(value, dict) and ("$PARAMETER" in value):
             if not interactive_evaluation:
                 continue
-
-            # First, check to see whether an argument was supplied at runtime
-            # If it was, use that one, but remove it from the stored config
             param_key = f"$PARAMETER.{value['$PARAMETER']}"
             if param_key in value:
                 evaluation_args[key] = evaluation_args[key][param_key]
                 del expectation_args[key][param_key]
-
-            # If not, try to parse the evaluation parameter and substitute, which will raise
-            # an exception if we do not have a value
             else:
                 raw_value = value["$PARAMETER"]
                 parameter_value = parse_evaluation_parameter(
@@ -234,31 +242,26 @@ def build_evaluation_parameters(
                     data_context=data_context,
                 )
                 evaluation_args[key] = parameter_value
-                # Once we've substituted, we also track that we did so
                 substituted_parameters[key] = parameter_value
-
-    return evaluation_args, substituted_parameters
+    return (evaluation_args, substituted_parameters)
 
 
 expr = EvaluationParameterParser()
 
 
 def find_evaluation_parameter_dependencies(parameter_expression):
-    """Parse a parameter expression to identify dependencies including GE URNs.
+    import inspect
 
-    Args:
-        parameter_expression: the parameter to parse
-
-    Returns:
-        a dictionary including:
-          - "urns": set of strings that are valid GE URN objects
-          - "other": set of non-GE URN strings that are required to evaluate the parameter expression
-
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    'Parse a parameter expression to identify dependencies including GE URNs.\n\n    Args:\n        parameter_expression: the parameter to parse\n\n    Returns:\n        a dictionary including:\n          - "urns": set of strings that are valid GE URN objects\n          - "other": set of non-GE URN strings that are required to evaluate the parameter expression\n\n    '
     expr = EvaluationParameterParser()
-
     dependencies = {"urns": set(), "other": set()}
-    # Calling get_parser clears the stack
     parser = expr.get_parser()
     try:
         _ = parser.parseString(parameter_expression, parseAll=True)
@@ -270,79 +273,53 @@ def find_evaluation_parameter_dependencies(parameter_expression):
         raise EvaluationParameterError(
             f"Unable to parse evaluation parameter: {str(err)}"
         )
-
     for word in expr.exprStack:
         if isinstance(word, (int, float)):
             continue
-
         if not isinstance(word, str):
-            # If we have a function that itself is a tuple (e.g. (trunc, 1))
             continue
-
-        if word in expr.opn or word in expr.fn or word == "unary -":
-            # operations and functions
+        if (word in expr.opn) or (word in expr.fn) or (word == "unary -"):
             continue
-
-        # if this is parseable as a number, then we do not include it
         try:
             _ = float(word)
             continue
         except ValueError:
             pass
-
         try:
             _ = ge_urn.parseString(word)
             dependencies["urns"].add(word)
             continue
         except ParseException:
-            # This particular evaluation_parameter or operator is not a valid URN
             pass
-
-        # If we got this far, it's a legitimate "other" evaluation parameter
         dependencies["other"].add(word)
-
     return dependencies
 
 
 def parse_evaluation_parameter(
     parameter_expression: str,
-    evaluation_parameters: Optional[Dict[str, Any]] = None,
-    data_context: Optional[Any] = None,  # Cannot type 'DataContext' due to import cycle
+    evaluation_parameters: Optional[Dict[(str, Any)]] = None,
+    data_context: Optional[Any] = None,
 ) -> Any:
-    """Use the provided evaluation_parameters dict to parse a given parameter expression.
+    import inspect
 
-    Args:
-        parameter_expression (str): A string, potentially containing basic arithmetic operations and functions,
-            and variables to be substituted
-        evaluation_parameters (dict): A dictionary of name-value pairs consisting of values to substitute
-        data_context (DataContext): A data context to use to obtain metrics, if necessary
-
-    The parser will allow arithmetic operations +, -, /, *, as well as basic functions, including trunc() and round() to
-    obtain integer values when needed for certain expectations (e.g. expect_column_value_length_to_be_between).
-
-    Valid variables must begin with an alphabetic character and may contain alphanumeric characters plus '_' and '$',
-    EXCEPT if they begin with the string "urn:great_expectations" in which case they may also include additional
-    characters to support inclusion of GE URLs (see :ref:`evaluation_parameters` for more information).
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Use the provided evaluation_parameters dict to parse a given parameter expression.\n\n    Args:\n        parameter_expression (str): A string, potentially containing basic arithmetic operations and functions,\n            and variables to be substituted\n        evaluation_parameters (dict): A dictionary of name-value pairs consisting of values to substitute\n        data_context (DataContext): A data context to use to obtain metrics, if necessary\n\n    The parser will allow arithmetic operations +, -, /, *, as well as basic functions, including trunc() and round() to\n    obtain integer values when needed for certain expectations (e.g. expect_column_value_length_to_be_between).\n\n    Valid variables must begin with an alphabetic character and may contain alphanumeric characters plus '_' and '$',\n    EXCEPT if they begin with the string \"urn:great_expectations\" in which case they may also include additional\n    characters to support inclusion of GE URLs (see :ref:`evaluation_parameters` for more information).\n    "
     if evaluation_parameters is None:
         evaluation_parameters = {}
-
-    # Calling get_parser clears the stack
     parser = expr.get_parser()
     try:
         L = parser.parseString(parameter_expression, parseAll=True)
     except ParseException as err:
         L = ["Parse Failure", parameter_expression, (str(err), err.line, err.column)]
-
-    # Represents a valid parser result of a single function that has no arguments
-    if len(L) == 1 and isinstance(L[0], tuple) and L[0][2] is False:
-        # Necessary to catch `now()` (which only needs to be evaluated with `expr.exprStack`)
-        # NOTE: 20211122 - Chetan - Any future built-ins that are zero arity functions will match this behavior
+    if (len(L) == 1) and isinstance(L[0], tuple) and (L[0][2] is False):
         pass
-
-    elif len(L) == 1 and L[0] not in evaluation_parameters:
-        # In this special case there were no operations to find, so only one value, but we don't have something to
-        # substitute for that value
+    elif (len(L) == 1) and (L[0] not in evaluation_parameters):
         try:
             res = ge_urn.parseString(L[0])
             if res["urn_type"] == "stores":
@@ -365,22 +342,13 @@ def parse_evaluation_parameter(
         except AttributeError:
             logger.warning("Unable to get store for store-type valuation parameter.")
             raise EvaluationParameterError(f"No value found for $PARAMETER {str(L[0])}")
-
     elif len(L) == 1:
-        # In this case, we *do* have a substitution for a single type. We treat this specially because in this
-        # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)
-        # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that
-        # case here; is the evaluation parameter provided here in fact a metric definition?
         return evaluation_parameters[L[0]]
-
-    elif len(L) == 0 or L[0] != "Parse Failure":
-        # we have a stack to evaluate and there was no parse failure.
-        # iterate through values and look for URNs pointing to a store:
-        for i, ob in enumerate(expr.exprStack):
-            if isinstance(ob, str) and ob in evaluation_parameters:
+    elif (len(L) == 0) or (L[0] != "Parse Failure"):
+        for (i, ob) in enumerate(expr.exprStack):
+            if isinstance(ob, str) and (ob in evaluation_parameters):
                 expr.exprStack[i] = str(evaluation_parameters[ob])
-            elif isinstance(ob, str) and ob not in evaluation_parameters:
-                # try to retrieve this value from a store
+            elif isinstance(ob, str) and (ob not in evaluation_parameters):
                 try:
                     res = ge_urn.parseString(ob)
                     if res["urn_type"] == "stores":
@@ -389,22 +357,20 @@ def parse_evaluation_parameter(
                             store.get_query_result(
                                 res["metric_name"], res.get("metric_kwargs", {})
                             )
-                        )  # value placed back in stack must be a string
+                        )
                     else:
-                        # handle other urn_types here, but note that validations URNs are being resolved elsewhere.
                         pass
-                # graceful error handling for cases where the value in the stack isn't a URN:
                 except ParseException:
                     pass
                 except AttributeError:
                     pass
-
     else:
-        err_str, err_line, err_col = L[-1]
+        (err_str, err_line, err_col) = L[(-1)]
         raise EvaluationParameterError(
-            f"Parse Failure: {err_str}\nStatement: {err_line}\nColumn: {err_col}"
+            f"""Parse Failure: {err_str}
+Statement: {err_line}
+Column: {err_col}"""
         )
-
     try:
         result = expr.evaluate_stack(expr.exprStack)
         result = convert_to_json_serializable(result)
@@ -417,13 +383,21 @@ def parse_evaluation_parameter(
         raise EvaluationParameterError(
             f"Error while evaluating evaluation parameter expression: {str(e)}"
         )
-
     return result
 
 
 def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     deduplicated = {}
-    for suite_name, required_metrics in dependencies.items():
+    for (suite_name, required_metrics) in dependencies.items():
         deduplicated[suite_name] = []
         metrics = set()
         metric_kwargs = {}
@@ -431,8 +405,7 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
             if isinstance(metric, str):
                 metrics.add(metric)
             elif isinstance(metric, dict):
-                # There is a single metric_kwargs_id object in this construction
-                for kwargs_id, metric_list in metric["metric_kwargs_id"].items():
+                for (kwargs_id, metric_list) in metric["metric_kwargs_id"].items():
                     if kwargs_id not in metric_kwargs:
                         metric_kwargs[kwargs_id] = set()
                     for metric_name in metric_list:
@@ -447,7 +420,6 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
                     }
                 }
             ]
-
     return deduplicated
 
 

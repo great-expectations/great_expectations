@@ -2,30 +2,43 @@ import logging
 import textwrap
 
 logger = logging.getLogger(__name__)
-
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
 
 
 class EmailRenderer(Renderer):
     def __init__(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__()
 
     def render(self, validation_result=None, data_docs_pages=None, notify_with=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
         status = "Failed ❌"
-
         title = default_text
-
         html = default_text
-
         if validation_result:
             expectation_suite_name = validation_result.meta.get(
                 "expectation_suite_name", "__no_expectation_suite_name__"
             )
-
             if "batch_kwargs" in validation_result.meta:
                 data_asset_name = validation_result.meta["batch_kwargs"].get(
                     "data_asset_name", "__no_data_asset_name__"
@@ -38,7 +51,6 @@ class EmailRenderer(Renderer):
                 )
             else:
                 data_asset_name = "__no_data_asset_name__"
-
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
             run_id = validation_result.meta.get("run_id", "__no_run_id__")
@@ -46,15 +58,11 @@ class EmailRenderer(Renderer):
                 validation_result.meta.get("batch_kwargs", {})
             ).to_id()
             check_details_text = f"<strong>{n_checks_succeeded}</strong> of <strong>{n_checks}</strong> expectations were met"
-
             if validation_result.success:
                 status = "Success 🎉"
-
             title = f"{expectation_suite_name}: {status}"
-
             html = textwrap.dedent(
-                f"""\
-                <p><strong>Batch Validation Status</strong>: {status}</p>
+                f"""                <p><strong>Batch Validation Status</strong>: {status}</p>
                 <p><strong>Expectation suite name</strong>: {expectation_suite_name}</p>
                 <p><strong>Data asset name</strong>: {data_asset_name}</p>
                 <p><strong>Run ID</strong>: {run_id}</p>
@@ -69,9 +77,7 @@ class EmailRenderer(Renderer):
                             report_element = self._get_report_element(docs_link)
                         else:
                             report_element = str(
-                                f"<strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: "
-                                f"`{str(docs_link_key)}`, but it is not configured under data_docs_sites "
-                                "in the great_expectations.yml</br>"
+                                f"<strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under data_docs_sites in the great_expectations.yml</br>"
                             )
                             logger.critical(report_element)
                         if report_element:
@@ -85,33 +91,37 @@ class EmailRenderer(Renderer):
                         report_element = self._get_report_element(docs_link)
                         if report_element:
                             html += report_element
-
             if "result_reference" in validation_result.meta:
                 result_reference = validation_result.meta["result_reference"]
                 report_element = (
                     f"- <strong>Validation Report</strong>: {result_reference}</br>"
                 )
                 html += report_element
-
             if "dataset_reference" in validation_result.meta:
                 dataset_reference = validation_result.meta["dataset_reference"]
                 report_element = f"- <strong>Validation data asset</strong>: {dataset_reference}</br>"
                 html += report_element
-
         documentation_url = "https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html"
         footer_section = f'<p>Learn <a href="{documentation_url}">here</a> how to review validation results in Data Docs</p>'
         html += footer_section
-        return title, html
+        return (title, html)
 
     def _get_report_element(self, docs_link):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         report_element = None
         if docs_link:
             try:
                 if "file://" in docs_link:
-                    # handle special case since the email does not render these links
                     report_element = str(
-                        f'<p><strong>DataDocs</strong> can be found here: <a href="{docs_link}">{docs_link}</a>.</br>'
-                        "(Please copy and paste link into a browser to view)</p>",
+                        f'<p><strong>DataDocs</strong> can be found here: <a href="{docs_link}">{docs_link}</a>.</br>(Please copy and paste link into a browser to view)</p>'
                     )
                 else:
                     report_element = f'<p><strong>DataDocs</strong> can be found here: <a href="{docs_link}">{docs_link}</a>.</p>'

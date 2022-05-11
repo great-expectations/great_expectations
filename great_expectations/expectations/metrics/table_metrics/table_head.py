@@ -28,10 +28,19 @@ class TableHead(TableMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        (df, _, _) = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         if metric_value_kwargs.get("fetch_all", cls.default_kwarg_values["fetch_all"]):
@@ -44,22 +53,27 @@ class TableHead(TableMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
-        selectable, _, _ = execution_engine.get_compute_domain(
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        (selectable, _, _) = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         df = None
         table_name = getattr(selectable, "name", None)
         if table_name is None:
-            # if a custom query was passed
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    df = pd.read_sql_query(
-                        sql=selectable,
-                        con=execution_engine.engine,
-                    )
+                    df = pd.read_sql_query(sql=selectable, con=execution_engine.engine)
                 else:
                     df = next(
                         pd.read_sql_query(
@@ -69,9 +83,6 @@ class TableHead(TableMetricProvider):
                         )
                     )
             except (ValueError, NotImplementedError):
-                # it looks like MetaData that is used by pd.read_sql_query
-                # cannot work on a temp table.
-                # If it fails, we are trying to get the data using read_sql
                 df = None
             except StopIteration:
                 validator = Validator(execution_engine=execution_engine)
@@ -97,9 +108,6 @@ class TableHead(TableMetricProvider):
                         )
                     )
             except (ValueError, NotImplementedError):
-                # it looks like MetaData that is used by pd.read_sql_table
-                # cannot work on a temp table.
-                # If it fails, we are trying to get the data using read_sql
                 df = None
             except StopIteration:
                 validator = Validator(execution_engine=execution_engine)
@@ -107,9 +115,7 @@ class TableHead(TableMetricProvider):
                     MetricConfiguration("table.columns", metric_domain_kwargs)
                 )
                 df = pd.DataFrame(columns=columns)
-
         if df is None:
-            # we want to compile our selectable
             stmt = sa.select(["*"]).select_from(selectable)
             if metric_value_kwargs["fetch_all"]:
                 sql = stmt.compile(
@@ -117,7 +123,6 @@ class TableHead(TableMetricProvider):
                     compile_kwargs={"literal_binds": True},
                 )
             elif execution_engine.engine.dialect.name.lower() == "mssql":
-                # limit doesn't compile properly for mssql
                 sql = str(
                     stmt.compile(
                         dialect=execution_engine.engine.dialect,
@@ -131,9 +136,7 @@ class TableHead(TableMetricProvider):
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
                 )
-
             df = pd.read_sql(sql, con=execution_engine.engine)
-
         return df
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -142,10 +145,19 @@ class TableHead(TableMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        (df, _, _) = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         if metric_value_kwargs["fetch_all"]:

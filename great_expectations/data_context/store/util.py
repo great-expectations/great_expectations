@@ -19,25 +19,31 @@ logger = logging.getLogger(__name__)
 def build_configuration_store(
     class_name: str,
     store_name: str,
-    store_backend: Union[StoreBackend, dict],
+    store_backend: Union[(StoreBackend, dict)],
     *,
     module_name: str = "great_expectations.data_context.store",
     overwrite_existing: bool = False,
     **kwargs,
 ) -> ConfigurationStore:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     logger.debug(
         f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}"
     )
-
-    if store_backend is not None and issubclass(type(store_backend), StoreBackend):
+    if (store_backend is not None) and issubclass(type(store_backend), StoreBackend):
         store_backend = store_backend.config
     elif not isinstance(store_backend, dict):
         raise ge_exceptions.DataContextError(
             "Invalid configuration: A store_backend needs to be a dictionary or inherit from the StoreBackend class."
         )
-
     store_backend.update(**kwargs)
-
     store_config: dict = {
         "store_name": store_name,
         "module_name": module_name,
@@ -46,18 +52,25 @@ def build_configuration_store(
         "store_backend": store_backend,
     }
     configuration_store: ConfigurationStore = build_store_from_config(
-        store_config=store_config,
-        module_name=module_name,
-        runtime_environment=None,
+        store_config=store_config, module_name=module_name, runtime_environment=None
     )
     return configuration_store
 
 
 def build_checkpoint_store_using_store_backend(
     store_name: str,
-    store_backend: Union[StoreBackend, dict],
+    store_backend: Union[(StoreBackend, dict)],
     overwrite_existing: bool = False,
 ) -> CheckpointStore:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     return cast(
         CheckpointStore,
         build_configuration_store(
@@ -74,10 +87,19 @@ def save_config_to_store_backend(
     class_name: str,
     module_name: str,
     store_name: str,
-    store_backend: Union[StoreBackend, dict],
+    store_backend: Union[(StoreBackend, dict)],
     configuration_key: str,
     configuration: BaseYamlConfig,
 ) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     config_store: ConfigurationStore = build_configuration_store(
         class_name=class_name,
         module_name=module_name,
@@ -86,7 +108,7 @@ def save_config_to_store_backend(
         overwrite_existing=True,
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=configuration_key,
+        configuration_key=configuration_key
     )
     config_store.set(key=key, value=configuration)
 
@@ -95,9 +117,18 @@ def load_config_from_store_backend(
     class_name: str,
     module_name: str,
     store_name: str,
-    store_backend: Union[StoreBackend, dict],
+    store_backend: Union[(StoreBackend, dict)],
     configuration_key: str,
 ) -> BaseYamlConfig:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     config_store: ConfigurationStore = build_configuration_store(
         class_name=class_name,
         module_name=module_name,
@@ -106,7 +137,7 @@ def load_config_from_store_backend(
         overwrite_existing=False,
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=configuration_key,
+        configuration_key=configuration_key
     )
     return config_store.get(key=key)
 
@@ -115,9 +146,18 @@ def delete_config_from_store_backend(
     class_name: str,
     module_name: str,
     store_name: str,
-    store_backend: Union[StoreBackend, dict],
+    store_backend: Union[(StoreBackend, dict)],
     configuration_key: str,
 ) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     config_store: ConfigurationStore = build_configuration_store(
         class_name=class_name,
         module_name=module_name,
@@ -126,39 +166,52 @@ def delete_config_from_store_backend(
         overwrite_existing=True,
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=configuration_key,
+        configuration_key=configuration_key
     )
     config_store.remove_key(key=key)
 
 
 def save_checkpoint_config_to_store_backend(
     store_name: str,
-    store_backend: Union[StoreBackend, dict],
+    store_backend: Union[(StoreBackend, dict)],
     checkpoint_name: str,
     checkpoint_configuration: CheckpointConfig,
 ) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend,
-        overwrite_existing=True,
+        store_name=store_name, store_backend=store_backend, overwrite_existing=True
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=checkpoint_name,
+        configuration_key=checkpoint_name
     )
     config_store.set(key=key, value=checkpoint_configuration)
 
 
 def load_checkpoint_config_from_store_backend(
-    store_name: str,
-    store_backend: Union[StoreBackend, dict],
-    checkpoint_name: str,
+    store_name: str, store_backend: Union[(StoreBackend, dict)], checkpoint_name: str
 ) -> CheckpointConfig:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend,
+        store_name=store_name, store_backend=store_backend
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=checkpoint_name,
+        configuration_key=checkpoint_name
     )
     try:
         return config_store.get(key=key)
@@ -170,15 +223,21 @@ def load_checkpoint_config_from_store_backend(
 
 
 def delete_checkpoint_config_from_store_backend(
-    store_name: str,
-    store_backend: Union[StoreBackend, dict],
-    checkpoint_name: str,
+    store_name: str, store_backend: Union[(StoreBackend, dict)], checkpoint_name: str
 ) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend,
+        store_name=store_name, store_backend=store_backend
     )
     key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=checkpoint_name,
+        configuration_key=checkpoint_name
     )
     config_store.remove_key(key=key)

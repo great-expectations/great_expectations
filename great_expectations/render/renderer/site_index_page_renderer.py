@@ -22,11 +22,18 @@ from great_expectations.render.types import (
 logger = logging.getLogger(__name__)
 
 
-# FIXME : This class needs to be rebuilt to accept SiteSectionIdentifiers as input.
-# FIXME : This class needs tests.
 class SiteIndexPageRenderer(Renderer):
     @classmethod
     def _generate_expectation_suites_link_table(cls, index_links_dict):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         table_options = {
             "search": "true",
             "trimOnSearch": "false",
@@ -44,11 +51,10 @@ class SiteIndexPageRenderer(Renderer):
                 "field": "expectation_suite_name",
                 "title": "Expectation Suites",
                 "sortable": "true",
-            },
+            }
         ]
         expectation_suite_link_dicts = index_links_dict.get("expectations_links", [])
         table_data = []
-
         for dict_ in expectation_suite_link_dicts:
             table_data.append(
                 {
@@ -56,7 +62,6 @@ class SiteIndexPageRenderer(Renderer):
                     "_table_row_link_path": dict_.get("filepath"),
                 }
             )
-
         return RenderedBootstrapTableContent(
             **{
                 "table_columns": table_columns,
@@ -74,9 +79,17 @@ class SiteIndexPageRenderer(Renderer):
             }
         )
 
-    # TODO: deprecate dual batch api support in 0.14
     @classmethod
     def _generate_profiling_results_link_table(cls, index_links_dict):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         table_options = {
             "search": "true",
             "trimOnSearch": "false",
@@ -127,7 +140,6 @@ class SiteIndexPageRenderer(Renderer):
         ]
         profiling_link_dicts = index_links_dict.get("profiling_links", [])
         table_data = []
-
         for dict_ in profiling_link_dicts:
             table_data.append(
                 {
@@ -140,11 +152,12 @@ class SiteIndexPageRenderer(Renderer):
                         dict_.get("batch_spec"),
                     ),
                     "_batch_identifier_sort": dict_.get("batch_identifier"),
-                    "profiler_name": dict_.get("expectation_suite_name").split(".")[-1],
+                    "profiler_name": dict_.get("expectation_suite_name").split(".")[
+                        (-1)
+                    ],
                     "_table_row_link_path": dict_.get("filepath"),
                 }
             )
-
         return RenderedBootstrapTableContent(
             **{
                 "table_columns": table_columns,
@@ -159,9 +172,17 @@ class SiteIndexPageRenderer(Renderer):
             }
         )
 
-    # TODO: deprecate dual batch api support in 0.14
     @classmethod
     def _generate_validation_results_link_table(cls, index_links_dict):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         table_options = {
             "search": "true",
             "trimOnSearch": "false",
@@ -176,7 +197,6 @@ class SiteIndexPageRenderer(Renderer):
             "toolbarAlign": "right",
             "showSearchClearButton": "true",
         }
-
         table_columns = [
             {
                 "field": "validation_success",
@@ -230,7 +250,6 @@ class SiteIndexPageRenderer(Renderer):
         ]
         validation_link_dicts = index_links_dict.get("validations_links", [])
         table_data = []
-
         for dict_ in validation_link_dicts:
             table_data.append(
                 {
@@ -252,13 +271,12 @@ class SiteIndexPageRenderer(Renderer):
                     ),
                     "_expectation_suite_name_sort": dict_.get("expectation_suite_name"),
                     "_table_row_link_path": dict_.get("filepath"),
-                    "_validation_success_text": "Success"
-                    if dict_.get("validation_success")
-                    else "Failed",
+                    "_validation_success_text": (
+                        "Success" if dict_.get("validation_success") else "Failed"
+                    ),
                     "asset_name": dict_.get("asset_name"),
                 }
             )
-
         return RenderedBootstrapTableContent(
             **{
                 "table_columns": table_columns,
@@ -280,6 +298,15 @@ class SiteIndexPageRenderer(Renderer):
     def _render_expectation_suite_cell(
         cls, expectation_suite_name, expectation_suite_path
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return RenderedStringTemplateContent(
             **{
                 "content_block_type": "string_template",
@@ -296,9 +323,17 @@ class SiteIndexPageRenderer(Renderer):
             }
         )
 
-    # TODO: deprecate dual batch api support in 0.14
     @classmethod
     def _render_batch_id_cell(cls, batch_id, batch_kwargs=None, batch_spec=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if batch_kwargs:
             content_title = "Batch Kwargs"
             content = json.dumps(batch_kwargs, indent=2)
@@ -311,7 +346,9 @@ class SiteIndexPageRenderer(Renderer):
                 "string_template": {
                     "template": str(batch_id),
                     "tooltip": {
-                        "content": f"{content_title}:\n\n{content}",
+                        "content": f"""{content_title}:
+
+{content}""",
                         "placement": "top",
                     },
                     "styling": {"classes": ["m-0", "p-0"]},
@@ -321,6 +358,15 @@ class SiteIndexPageRenderer(Renderer):
 
     @classmethod
     def _get_formatted_datetime(cls, _datetime):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if isinstance(_datetime, datetime.datetime):
             local_datetime = _datetime.astimezone(tz=tzlocal.get_localzone())
             return local_datetime.strftime("%Y-%m-%d %H:%M:%S %Z")
@@ -333,6 +379,15 @@ class SiteIndexPageRenderer(Renderer):
 
     @classmethod
     def _get_timestamp(cls, _datetime):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if isinstance(_datetime, datetime.datetime):
             return _datetime.timestamp()
         elif isinstance(_datetime, str):
@@ -342,6 +397,15 @@ class SiteIndexPageRenderer(Renderer):
 
     @classmethod
     def _render_validation_success_cell(cls, validation_success):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return RenderedStringTemplateContent(
             **{
                 "content_block_type": "string_template",
@@ -352,19 +416,21 @@ class SiteIndexPageRenderer(Renderer):
                         "params": {
                             "validation_success": {
                                 "tag": "i",
-                                "classes": [
-                                    "fas",
-                                    "fa-check-circle",
-                                    "text-success",
-                                    "ge-success-icon",
-                                ]
-                                if validation_success
-                                else [
-                                    "fas",
-                                    "fa-times",
-                                    "text-danger",
-                                    "ge-failed-icon",
-                                ],
+                                "classes": (
+                                    [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                        "ge-success-icon",
+                                    ]
+                                    if validation_success
+                                    else [
+                                        "fas",
+                                        "fa-times",
+                                        "text-danger",
+                                        "ge-failed-icon",
+                                    ]
+                                ),
                             }
                         },
                         "classes": ["ge-index-page-table-validation-links-item"],
@@ -375,12 +441,19 @@ class SiteIndexPageRenderer(Renderer):
 
     @classmethod
     def render(cls, index_links_dict):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         sections = []
         cta_object = index_links_dict.pop("cta_object", None)
-
         try:
             content_blocks = []
-            # site name header
             site_name_header_block = RenderedHeaderContent(
                 **{
                     "content_block_type": "header",
@@ -406,9 +479,7 @@ class SiteIndexPageRenderer(Renderer):
                 }
             )
             content_blocks.append(site_name_header_block)
-
             tabs = []
-
             if index_links_dict.get("validations_links"):
                 tabs.append(
                     {
@@ -436,18 +507,13 @@ class SiteIndexPageRenderer(Renderer):
                         ),
                     }
                 )
-
             tabs_content_block = RenderedTabsContent(
                 **{
                     "tabs": tabs,
-                    "styling": {
-                        "classes": ["col-12", "ge-index-page-tabs-container"],
-                    },
+                    "styling": {"classes": ["col-12", "ge-index-page-tabs-container"]},
                 }
             )
-
             content_blocks.append(tabs_content_block)
-
             section = RenderedSectionContent(
                 **{
                     "section_name": index_links_dict.get("site_name"),
@@ -455,7 +521,6 @@ class SiteIndexPageRenderer(Renderer):
                 }
             )
             sections.append(section)
-
             index_page_document = RenderedDocumentContent(
                 **{
                     "renderer_type": "SiteIndexPageRenderer",
@@ -463,18 +528,11 @@ class SiteIndexPageRenderer(Renderer):
                     "sections": sections,
                 }
             )
-
             if cta_object:
                 index_page_document.cta_footer = CallToActionRenderer.render(cta_object)
-
             return index_page_document
-
         except Exception as e:
-            exception_message = """\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:
-            """
+            exception_message = "An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to diagnose and repair the underlying issue.  Detailed information follows:\n            "
             exception_traceback = traceback.format_exc()
             exception_message += (
                 f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'

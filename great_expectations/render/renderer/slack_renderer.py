@@ -1,45 +1,46 @@
 import logging
 
 logger = logging.getLogger(__name__)
-
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
 
 
 class SlackRenderer(Renderer):
     def __init__(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__()
 
-    def render(
-        self,
-        validation_result=None,
-        data_docs_pages=None,
-        notify_with=None,
-    ):
+    def render(self, validation_result=None, data_docs_pages=None, notify_with=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
         status = "Failed :x:"
-
         title_block = {
             "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": default_text,
-            },
+            "text": {"type": "mrkdwn", "text": default_text},
         }
-
-        query = {
-            "blocks": [title_block],
-            # this abbreviated root level "text" will show up in the notification and not the message
-            "text": default_text,
-        }
-
+        query = {"blocks": [title_block], "text": default_text}
         if validation_result:
             expectation_suite_name = validation_result.meta.get(
                 "expectation_suite_name", "__no_expectation_suite_name__"
             )
-
             if "batch_kwargs" in validation_result.meta:
                 data_asset_name = validation_result.meta["batch_kwargs"].get(
                     "data_asset_name", "__no_data_asset_name__"
@@ -52,7 +53,6 @@ class SlackRenderer(Renderer):
                 )
             else:
                 data_asset_name = "__no_data_asset_name__"
-
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
             run_id = validation_result.meta.get("run_id", "__no_run_id__")
@@ -62,10 +62,8 @@ class SlackRenderer(Renderer):
             check_details_text = (
                 f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
             )
-
             if validation_result.success:
                 status = "Success :tada:"
-
             summary_text = f"""*Batch Validation Status*: {status}
 *Expectation suite name*: `{expectation_suite_name}`
 *Data asset name*: `{data_asset_name}`
@@ -73,9 +71,7 @@ class SlackRenderer(Renderer):
 *Batch ID*: `{batch_id}`
 *Summary*: {check_details_text}"""
             query["blocks"][0]["text"]["text"] = summary_text
-            # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = f"{expectation_suite_name}: {status}"
-
             if data_docs_pages:
                 if notify_with is not None:
                     for docs_link_key in notify_with:
@@ -84,13 +80,15 @@ class SlackRenderer(Renderer):
                             report_element = self._get_report_element(docs_link)
                         else:
                             logger.critical(
-                                f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n"
+                                f"""*ERROR*: Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`
+"""
                             )
                             report_element = {
                                 "type": "section",
                                 "text": {
                                     "type": "mrkdwn",
-                                    "text": f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n",
+                                    "text": f"""*ERROR*: Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`
+""",
                                 },
                             }
                         if report_element:
@@ -103,7 +101,6 @@ class SlackRenderer(Renderer):
                         report_element = self._get_report_element(docs_link)
                         if report_element:
                             query["blocks"].append(report_element)
-
             if "result_reference" in validation_result.meta:
                 result_reference = validation_result.meta["result_reference"]
                 report_element = {
@@ -114,7 +111,6 @@ class SlackRenderer(Renderer):
                     },
                 }
                 query["blocks"].append(report_element)
-
             if "dataset_reference" in validation_result.meta:
                 dataset_reference = validation_result.meta["dataset_reference"]
                 dataset_element = {
@@ -125,7 +121,6 @@ class SlackRenderer(Renderer):
                     },
                 }
                 query["blocks"].append(dataset_element)
-
         documentation_url = "https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html"
         footer_section = {
             "type": "context",
@@ -136,23 +131,32 @@ class SlackRenderer(Renderer):
                 }
             ],
         }
-
         divider_block = {"type": "divider"}
         query["blocks"].append(divider_block)
         query["blocks"].append(footer_section)
         return query
 
     def _get_report_element(self, docs_link):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         report_element = None
         if docs_link:
             try:
                 if "file://" in docs_link:
-                    # handle special case since Slack does not render these links
                     report_element = {
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into a browser to view)\n",
+                            "text": f"""*DataDocs* can be found here: `{docs_link}`
+ (Please copy and paste link into a browser to view)
+""",
                         },
                     }
                 else:

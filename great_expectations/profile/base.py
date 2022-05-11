@@ -20,21 +20,57 @@ logger = logging.getLogger(__name__)
 
 class OrderedEnum(Enum):
     def __ge__(self, other):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self.__class__ is other.__class__:
             return self.value >= other.value
         return NotImplemented
 
     def __gt__(self, other):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self.__class__ is other.__class__:
             return self.value > other.value
         return NotImplemented
 
     def __le__(self, other):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self.__class__ is other.__class__:
             return self.value <= other.value
         return NotImplemented
 
     def __lt__(self, other):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self.__class__ is other.__class__:
             return self.value < other.value
         return NotImplemented
@@ -53,18 +89,17 @@ class OrderedProfilerCardinality(OrderedEnum):
     @classmethod
     def get_basic_column_cardinality(
         cls, num_unique=0, pct_unique=0
-    ) -> "OrderedProfilerCardinality":  # noqa: F821
-        """
-        Takes the number and percentage of unique values in a column and returns the column cardinality.
-        If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both
-        num_unique and pct_unique.
-        Args:
-            num_unique: The number of unique values in a column
-            pct_unique: The percentage of unique values in a column
+    ) -> "OrderedProfilerCardinality":
+        import inspect
 
-        Returns:
-            The column cardinality
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        '\n        Takes the number and percentage of unique values in a column and returns the column cardinality.\n        If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both\n        num_unique and pct_unique.\n        Args:\n            num_unique: The number of unique values in a column\n            pct_unique: The percentage of unique values in a column\n\n        Returns:\n            The column cardinality\n        '
         if pct_unique == 1.0:
             cardinality = cls.UNIQUE
         elif num_unique == 1:
@@ -75,7 +110,7 @@ class OrderedProfilerCardinality(OrderedEnum):
             cardinality = cls.VERY_FEW
         elif 0 < num_unique < 60:
             cardinality = cls.FEW
-        elif num_unique is None or num_unique == 0 or pct_unique is None:
+        elif (num_unique is None) or (num_unique == 0) or (pct_unique is None):
             cardinality = cls.NONE
         elif pct_unique > 0.1:
             cardinality = cls.VERY_MANY
@@ -85,8 +120,7 @@ class OrderedProfilerCardinality(OrderedEnum):
 
 
 class ProfilerDataType(Enum):
-    """Useful data types for building profilers."""
-
+    "Useful data types for building profilers."
     INT = "int"
     FLOAT = "float"
     NUMERIC = "numeric"
@@ -97,8 +131,7 @@ class ProfilerDataType(Enum):
 
 
 class ProfilerCardinality(Enum):
-    """Useful cardinality categories for building profilers."""
-
+    "Useful cardinality categories for building profilers."
     NONE = "none"
     ONE = "one"
     TWO = "two"
@@ -133,24 +166,42 @@ class ProfilerSemanticTypes(Enum):
 
 
 class Profiler(metaclass=abc.ABCMeta):
-    """
-    Profiler creates suites from various sources of truth.
-
-    These sources of truth can be data or non-data sources such as DDLs.
-
-    When implementing a Profiler ensure that you:
-    - Implement a . _profile() method
-    - Optionally implement .validate() method that verifies you are running on the right
-      kind of object. You should raise an appropriate Exception if the object is not valid.
-    """
+    "\n    Profiler creates suites from various sources of truth.\n\n    These sources of truth can be data or non-data sources such as DDLs.\n\n    When implementing a Profiler ensure that you:\n    - Implement a . _profile() method\n    - Optionally implement .validate() method that verifies you are running on the right\n      kind of object. You should raise an appropriate Exception if the object is not valid.\n"
 
     def __init__(self, configuration: dict = None) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.configuration = configuration
 
     def validate(self, item_to_validate: Any) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         pass
 
     def profile(self, item_to_profile: Any, suite_name: str = None) -> ExpectationSuite:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.validate(item_to_profile)
         expectation_suite = self._profile(item_to_profile, suite_name=suite_name)
         return expectation_suite
@@ -159,49 +210,88 @@ class Profiler(metaclass=abc.ABCMeta):
     def _profile(
         self, item_to_profile: Any, suite_name: str = None
     ) -> ExpectationSuite:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         pass
 
 
 class DataAssetProfiler:
     @classmethod
     def validate(cls, data_asset):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return isinstance(data_asset, DataAsset)
 
 
 class DatasetProfiler(DataAssetProfiler):
     @classmethod
     def validate(cls, dataset):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return isinstance(dataset, (Dataset, Validator))
 
     @classmethod
     def add_expectation_meta(cls, expectation):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectation.meta[str(cls.__name__)] = {"confidence": "very low"}
         return expectation
 
     @classmethod
     def add_meta(cls, expectation_suite, batch_kwargs=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         class_name = str(cls.__name__)
         expectation_suite.meta[class_name] = {
             "created_by": class_name,
             "created_at": time.time(),
         }
-
         if batch_kwargs is not None:
             expectation_suite.meta[class_name]["batch_kwargs"] = batch_kwargs
-
         new_expectations = [
             cls.add_expectation_meta(exp) for exp in expectation_suite.expectations
         ]
         expectation_suite.expectations = new_expectations
-
         if "notes" not in expectation_suite.meta:
             expectation_suite.meta["notes"] = {
                 "format": "markdown",
                 "content": [
                     "_To add additional notes, edit the <code>meta.notes.content</code> field in the appropriate Expectation json file._"
-                    # TODO: be more helpful to the user by piping in the filename.
-                    # This will require a minor refactor to make more DataContext information accessible from this method.
-                    # "_To add additional notes, edit the <code>meta.notes.content</code> field in <code>expectations/mydb/default/movies/BasicDatasetProfiler.json</code>_"
                 ],
             }
         return expectation_suite
@@ -215,16 +305,21 @@ class DatasetProfiler(DataAssetProfiler):
         run_name=None,
         run_time=None,
     ):
-        assert not (run_id and run_name) and not (
-            run_id and run_time
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        assert (not (run_id and run_name)) and (
+            not (run_id and run_time)
         ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
+        if isinstance(run_id, str) and (not run_name):
             warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name and run_time (both optional). Instead of providing a run_id, you may also providerun_name and run_time separately.",
                 DeprecationWarning,
             )
             try:
@@ -237,14 +332,11 @@ class DatasetProfiler(DataAssetProfiler):
         elif not isinstance(run_id, RunIdentifier):
             run_name = run_name or "profiling"
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
-
         if not cls.validate(data_asset):
             raise GreatExpectationsError("Invalid data_asset for profiler; aborting")
-
         expectation_suite = cls._profile(
             data_asset, configuration=profiler_configuration
         )
-
         batch_kwargs = data_asset.batch_kwargs
         expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
         validation_results = data_asset.validate(
@@ -256,8 +348,17 @@ class DatasetProfiler(DataAssetProfiler):
             batch_markers=data_asset.batch_markers,
             batch_parameters=data_asset.batch_parameters,
         )
-        return expectation_suite, validation_results
+        return (expectation_suite, validation_results)
 
     @classmethod
     def _profile(cls, dataset, configuration=None) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError

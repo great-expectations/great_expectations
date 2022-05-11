@@ -77,19 +77,14 @@ from great_expectations.validator.validation_graph import (
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
-
 try:
     import pandas as pd
 except ImportError:
     pd = None
-
     logger.debug(
         "Unable to load pandas; install optional pandas dependency for support."
     )
-
 MAX_METRIC_COMPUTATION_RETRIES: int = 3
-
-
 ValidationStatistics = namedtuple(
     "ValidationStatistics",
     [
@@ -105,21 +100,24 @@ ValidationStatistics = namedtuple(
 def _calc_validation_statistics(
     validation_results: List[ExpectationValidationResult],
 ) -> ValidationStatistics:
-    """
-    Calculate summary statistics for the validation results and
-    return ``ExpectationStatistics``.
-    """
-    # calc stats
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Calculate summary statistics for the validation results and\n    return ``ExpectationStatistics``.\n    "
     successful_expectations = sum(exp.success for exp in validation_results)
     evaluated_expectations = len(validation_results)
     unsuccessful_expectations = evaluated_expectations - successful_expectations
     success = successful_expectations == evaluated_expectations
     try:
-        success_percent = successful_expectations / evaluated_expectations * 100
+        success_percent = (successful_expectations / evaluated_expectations) * 100
     except ZeroDivisionError:
-        # success_percent = float("nan")
         success_percent = None
-
     return ValidationStatistics(
         successful_expectations=successful_expectations,
         evaluated_expectations=evaluated_expectations,
@@ -137,51 +135,38 @@ class Validator:
     }
     RUNTIME_KEYS = DEFAULT_RUNTIME_CONFIGURATION.keys()
 
-    # noinspection PyUnusedLocal
     def __init__(
         self,
         execution_engine: ExecutionEngine,
         interactive_evaluation: bool = True,
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
-        data_context: Optional[
-            Any
-        ] = None,  # Cannot type DataContext due to circular import
+        data_context: Optional[Any] = None,
         batches: Optional[List[Batch]] = None,
         **kwargs,
     ) -> None:
-        """
-        Validator is the key object used to create Expectations, validate Expectations,
-        and get Metrics for Expectations.
+        import inspect
 
-        Additionally, note that Validators are used by Checkpoints under-the-hood.
-
-        :param execution_engine (ExecutionEngine):
-        :param interactive_evaluation (bool):
-        :param expectation_suite (Optional[ExpectationSuite]):
-        :param expectation_suite_name (Optional[str]):
-        :param data_context (Optional[DataContext]):
-        :param batches (Optional[List[Batch]]):
-
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Validator is the key object used to create Expectations, validate Expectations,\n        and get Metrics for Expectations.\n\n        Additionally, note that Validators are used by Checkpoints under-the-hood.\n\n        :param execution_engine (ExecutionEngine):\n        :param interactive_evaluation (bool):\n        :param expectation_suite (Optional[ExpectationSuite]):\n        :param expectation_suite_name (Optional[str]):\n        :param data_context (Optional[DataContext]):\n        :param batches (Optional[List[Batch]]):\n\n        "
         self._data_context = data_context
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
-
         if batches is None:
             batches = []
-
         self._batches = {}
         self._active_batch_id = None
         self.load_batch_list(batches)
-
         if len(batches) > 1:
             logger.debug(
-                f"{len(batches)} batches will be added to this Validator. The batch_identifiers for the active "
-                f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
+                f"{len(batches)} batches will be added to this Validator. The batch_identifiers for the active batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
             )
-
         self.interactive_evaluation = interactive_evaluation
         self._initialize_expectations(
             expectation_suite=expectation_suite,
@@ -190,57 +175,79 @@ class Validator:
         self._default_expectation_args = copy.deepcopy(
             Validator.DEFAULT_RUNTIME_CONFIGURATION
         )
-
-        # This special state variable tracks whether a validation run is going on, which will disable
-        # saving expectation config objects
         self._active_validation = False
         if self._data_context and hasattr(
             self._data_context, "_expectation_explorer_manager"
         ):
-            # TODO: verify flow of default expectation arguments
             self.set_default_expectation_argument("include_config", True)
 
     def __dir__(self):
-        """
-        This custom magic method is used to enable expectation tab completion on Validator objects.
-        It also allows users to call Pandas.DataFrame methods on Validator objects
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        This custom magic method is used to enable expectation tab completion on Validator objects.\n        It also allows users to call Pandas.DataFrame methods on Validator objects\n        "
         validator_attrs = set(super().__dir__())
         class_expectation_impls = set(list_registered_expectation_implementations())
-        # execution_engine_expectation_impls = (
-        #     {
-        #         attr_name
-        #         for attr_name in self.execution_engine.__dir__()
-        #         if attr_name.startswith("expect_")
-        #     }
-        #     if self.execution_engine
-        #     else set()
-        # )
-
-        combined_dir = (
-            validator_attrs
-            | class_expectation_impls
-            # | execution_engine_expectation_impls
-        )
-
+        combined_dir = validator_attrs | class_expectation_impls
         if self._expose_dataframe_methods:
-            combined_dir | set(dir(pd.DataFrame))
-
+            (combined_dir | set(dir(pd.DataFrame)))
         return list(combined_dir)
 
     @property
-    def data_context(self) -> Optional["DataContext"]:  # noqa: F821
+    def data_context(self) -> Optional["DataContext"]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._data_context
 
     @property
     def expose_dataframe_methods(self) -> bool:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._expose_dataframe_methods
 
     @expose_dataframe_methods.setter
     def expose_dataframe_methods(self, value: bool) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._expose_dataframe_methods = value
 
     def __getattr__(self, name):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         name = name.lower()
         if name.startswith("expect_") and get_expectation_impl(name):
             return self.validate_expectation(name)
@@ -256,49 +263,47 @@ class Validator:
             )
 
     def validate_expectation(self, name: str) -> Callable:
-        """
-        Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the
-                expectation's validate method to obtain a validation result. Also adds in the runtime configuration
+        import inspect
 
-                        Args:
-                            name (str): The name of the Expectation being validated
-
-                        Returns:
-                            The Expectation's validation result
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the\n                expectation's validate method to obtain a validation result. Also adds in the runtime configuration\n\n                        Args:\n                            name (str): The name of the Expectation being validated\n\n                        Returns:\n                            The Expectation's validation result\n        "
         expectation_impl = get_expectation_impl(name)
 
         def inst_expectation(*args, **kwargs):
-            # this is used so that exceptions are caught appropriately when they occur in expectation config
+            import inspect
 
-            # TODO: JPC - THIS LOGIC DOES NOT RESPECT DEFAULTS SET BY USERS IN THE VALIDATOR VS IN THE EXPECTATION
-            # DEVREL has action to develop a new plan in coordination with MarioPod
-
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             expectation_kwargs: dict = recursively_convert_to_json_serializable(kwargs)
-
             meta: dict = expectation_kwargs.pop("meta", None)
-
             basic_default_expectation_args: dict = {
                 k: v
-                for k, v in self.default_expectation_args.items()
-                if k in Validator.RUNTIME_KEYS
+                for (k, v) in self.default_expectation_args.items()
+                if (k in Validator.RUNTIME_KEYS)
             }
             basic_runtime_configuration: dict = copy.deepcopy(
                 basic_default_expectation_args
             )
             basic_runtime_configuration.update(
-                {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
+                {k: v for (k, v) in kwargs.items() if (k in Validator.RUNTIME_KEYS)}
             )
-
             allowed_config_keys: Tuple[str] = expectation_impl.get_allowed_config_keys()
-
             args_keys: Tuple[str] = expectation_impl.args_keys or tuple()
-
             arg_name: str
-
             idx: int
             arg: Any
-            for idx, arg in enumerate(args):
+            for (idx, arg) in enumerate(args):
                 try:
                     arg_name = args_keys[idx]
                     if arg_name in allowed_config_keys:
@@ -312,7 +317,6 @@ class Validator:
                     raise InvalidExpectationConfigurationError(
                         f"Invalid positional argument: {arg}"
                     )
-
             configuration: ExpectationConfiguration = (
                 self._build_expectation_configuration(
                     expectation_type=name,
@@ -321,21 +325,17 @@ class Validator:
                     expectation_impl=expectation_impl,
                 )
             )
-
             exception_info: ExceptionInfo
-
             if self.interactive_evaluation:
                 configuration.process_evaluation_parameters(
                     self._expectation_suite.evaluation_parameters,
                     True,
                     self._data_context,
                 )
-
             try:
                 expectation = expectation_impl(configuration)
-                """Given an implementation and a configuration for any Expectation, returns its validation result"""
-
-                if not self.interactive_evaluation and not self._active_validation:
+                "Given an implementation and a configuration for any Expectation, returns its validation result"
+                if (not self.interactive_evaluation) and (not self._active_validation):
                     validation_result = ExpectationValidationResult(
                         expectation_config=copy.deepcopy(expectation.configuration)
                     )
@@ -346,23 +346,15 @@ class Validator:
                         data_context=self._data_context,
                         runtime_configuration=basic_runtime_configuration,
                     )
-
-                # If validate has set active_validation to true, then we do not save the config to avoid
-                # saving updating expectation configs to the same suite during validation runs
                 if self._active_validation is True:
                     stored_config = configuration.get_raw_configuration()
                 else:
-                    # Append the expectation to the config.
                     stored_config = self._expectation_suite._add_expectation(
                         expectation_configuration=configuration.get_raw_configuration(),
                         send_usage_event=False,
                     )
-
-                # If there was no interactive evaluation, success will not have been computed.
                 if validation_result.success is not None:
-                    # Add a "success" object to the config
                     stored_config.success_on_last_run = validation_result.success
-
                 if self._data_context is not None:
                     validation_result = self._data_context.update_return_obj(
                         self, validation_result
@@ -386,7 +378,6 @@ class Validator:
 
         inst_expectation.__name__ = name
         inst_expectation.__doc__ = expectation_impl.__doc__
-
         return inst_expectation
 
     def _build_expectation_configuration(
@@ -394,8 +385,17 @@ class Validator:
         expectation_type: str,
         expectation_kwargs: dict,
         meta: dict,
-        expectation_impl: "Expectation",  # noqa: F821
+        expectation_impl: "Expectation",
     ) -> ExpectationConfiguration:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         auto: bool = expectation_kwargs.get("auto", False)
         profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
             "profiler_config"
@@ -403,14 +403,11 @@ class Validator:
         default_profiler_config: Optional[
             RuleBasedProfilerConfig
         ] = expectation_impl.default_kwarg_values.get("profiler_config")
-
-        if auto and profiler_config is None and default_profiler_config is None:
+        if auto and (profiler_config is None) and (default_profiler_config is None):
             raise ValueError(
                 "Automatic Expectation argument estimation requires a Rule-Based Profiler to be provided."
             )
-
         configuration: ExpectationConfiguration
-
         profiler: Optional[
             BaseRuleBasedProfiler
         ] = self.build_rule_based_profiler_for_expectation(
@@ -431,8 +428,6 @@ class Validator:
                 ExpectationConfiguration
             ] = profiler_result.expectation_configurations
             configuration = expectation_configurations[0]
-
-            # Reconcile explicitly provided "ExpectationConfiguration" success_kwargs as overrides to generated values.
             success_keys: Tuple[str] = (
                 expectation_impl.success_keys
                 if hasattr(expectation_impl, "success_keys")
@@ -448,87 +443,80 @@ class Validator:
                 if hasattr(expectation_impl, "runtime_keys")
                 else None
             ) or tuple()
-            # noinspection PyTypeChecker
-            override_keys: Tuple[str] = success_keys + arg_keys + runtime_keys
-
+            override_keys: Tuple[str] = (success_keys + arg_keys) + runtime_keys
             key: str
             value: Any
             expectation_kwargs_overrides: dict = {
                 key: value
-                for key, value in expectation_kwargs.items()
-                if key in override_keys
+                for (key, value) in expectation_kwargs.items()
+                if (key in override_keys)
             }
             expectation_kwargs_overrides = convert_to_json_serializable(
                 data=expectation_kwargs_overrides
             )
-
             expectation_kwargs = configuration.kwargs
             expectation_kwargs.update(expectation_kwargs_overrides)
-
             if meta is None:
                 meta = {}
-
             meta["profiler_config"] = profiler.to_json_dict()
-
             configuration = ExpectationConfiguration(
-                expectation_type=expectation_type,
-                kwargs=expectation_kwargs,
-                meta=meta,
+                expectation_type=expectation_type, kwargs=expectation_kwargs, meta=meta
             )
         else:
             configuration = ExpectationConfiguration(
-                expectation_type=expectation_type,
-                kwargs=expectation_kwargs,
-                meta=meta,
+                expectation_type=expectation_type, kwargs=expectation_kwargs, meta=meta
             )
-
         return configuration
 
     def build_rule_based_profiler_for_expectation(
         self, expectation_type: str
     ) -> Callable:
-        """
-        Given name of Expectation ("expectation_type"), builds effective RuleBasedProfiler object from configuration.
-        Args:
-            expectation_type (str): Name of Expectation for which Rule-Based Profiler may be configured.
+        import inspect
 
-        Returns:
-            Function that builds effective RuleBasedProfiler object (for specified "expectation_type").
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        '\n        Given name of Expectation ("expectation_type"), builds effective RuleBasedProfiler object from configuration.\n        Args:\n            expectation_type (str): Name of Expectation for which Rule-Based Profiler may be configured.\n\n        Returns:\n            Function that builds effective RuleBasedProfiler object (for specified "expectation_type").\n        '
         expectation_impl = get_expectation_impl(expectation_type)
 
         def inst_rule_based_profiler(
             *args, **kwargs
         ) -> Optional[BaseRuleBasedProfiler]:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             if args is None:
                 args = tuple()
-
             if kwargs is None:
                 kwargs = {}
-
             expectation_kwargs: dict = recursively_convert_to_json_serializable(kwargs)
-
             basic_default_expectation_args: dict = {
                 k: v
-                for k, v in self.default_expectation_args.items()
-                if k in Validator.RUNTIME_KEYS
+                for (k, v) in self.default_expectation_args.items()
+                if (k in Validator.RUNTIME_KEYS)
             }
             basic_runtime_configuration: dict = copy.deepcopy(
                 basic_default_expectation_args
             )
             basic_runtime_configuration.update(
-                {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
+                {k: v for (k, v) in kwargs.items() if (k in Validator.RUNTIME_KEYS)}
             )
-
             allowed_config_keys: Tuple[str] = expectation_impl.get_allowed_config_keys()
-
             args_keys: Tuple[str] = expectation_impl.args_keys or tuple()
-
             arg_name: str
-
             idx: int
             arg: Any
-            for idx, arg in enumerate(args):
+            for (idx, arg) in enumerate(args):
                 try:
                     arg_name = args_keys[idx]
                     if arg_name in allowed_config_keys:
@@ -541,13 +529,11 @@ class Validator:
                     raise InvalidExpectationConfigurationError(
                         f"Invalid positional argument: {arg}"
                     )
-
             success_keys: Tuple[str] = (
                 expectation_impl.success_keys
                 if hasattr(expectation_impl, "success_keys")
                 else tuple()
             )
-
             auto: Optional[bool] = expectation_kwargs.get("auto")
             profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
                 "profiler_config"
@@ -555,29 +541,19 @@ class Validator:
             default_profiler_config: Optional[
                 RuleBasedProfilerConfig
             ] = expectation_impl.default_kwarg_values.get("profiler_config")
-
-            if auto and profiler_config is None and default_profiler_config is None:
+            if auto and (profiler_config is None) and (default_profiler_config is None):
                 raise ValueError(
                     "Automatic Expectation argument estimation requires a Rule-Based Profiler to be provided."
                 )
-
             profiler: Optional[BaseRuleBasedProfiler]
-
             if auto:
-                # Save custom Rule-Based Profiler configuration for reconciling it with optionally-specified default
-                # Rule-Based Profiler configuration as an override argument to "BaseRuleBasedProfiler.run()" method.
                 override_profiler_config: Optional[RuleBasedProfilerConfig]
                 if default_profiler_config:
                     override_profiler_config = copy.deepcopy(profiler_config)
                 else:
                     override_profiler_config = None
-
-                """
-                If default Rule-Based Profiler configuration exists, use it as base with custom Rule-Based Profiler
-                configuration as override; otherwise, use custom Rule-Based Profiler configuration with no override.
-                """
+                "\n                If default Rule-Based Profiler configuration exists, use it as base with custom Rule-Based Profiler\n                configuration as override; otherwise, use custom Rule-Based Profiler configuration with no override.\n                "
                 profiler_config = default_profiler_config or profiler_config
-
                 profiler = self._build_rule_based_profiler_from_config_and_runtime_args(
                     expectation_type=expectation_type,
                     expectation_kwargs=expectation_kwargs,
@@ -587,7 +563,6 @@ class Validator:
                 )
             else:
                 profiler = None
-
             return profiler
 
         return inst_rule_based_profiler
@@ -600,33 +575,33 @@ class Validator:
         profiler_config: RuleBasedProfilerConfig,
         override_profiler_config: Optional[RuleBasedProfilerConfig] = None,
     ) -> BaseRuleBasedProfiler:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert (
             profiler_config.name == expectation_type
         ), "The name of profiler used to build an ExpectationConfiguration must equal to expectation_type of the expectation being invoked."
-
         profiler: BaseRuleBasedProfiler = BaseRuleBasedProfiler(
-            profiler_config=profiler_config,
-            data_context=self.data_context,
+            profiler_config=profiler_config, data_context=self.data_context
         )
-
         rules: List[Rule] = profiler.rules
-
         assert (
             len(rules) == 1
         ), "A Rule-Based Profiler for an Expectation can have exactly one rule."
-
         domain_type: MetricDomainTypes
-
         if override_profiler_config is None:
             override_profiler_config = {}
-
         if isinstance(override_profiler_config, RuleBasedProfilerConfig):
             override_profiler_config = override_profiler_config.to_json_dict()
-
         override_profiler_config.pop("name", None)
         override_profiler_config.pop("config_version", None)
-
-        override_variables: Dict[str, Any] = override_profiler_config.get(
+        override_variables: Dict[(str, Any)] = override_profiler_config.get(
             "variables", {}
         )
         effective_variables: Optional[
@@ -636,15 +611,12 @@ class Validator:
             reconciliation_strategy=ReconciliationStrategy.UPDATE,
         )
         profiler.variables = effective_variables
-
-        override_rules: Dict[str, Dict[str, Any]] = override_profiler_config.get(
+        override_rules: Dict[(str, Dict[(str, Any)])] = override_profiler_config.get(
             "rules", {}
         )
-
         assert (
             len(override_rules) <= 1
         ), "An override Rule-Based Profiler for an Expectation can have exactly one rule."
-
         if override_rules:
             profiler.rules[0].name = list(override_rules.keys())[0]
             effective_rules: List[Rule] = profiler.reconcile_profiler_rules(
@@ -656,14 +628,12 @@ class Validator:
                 ),
             )
             profiler.rules = effective_rules
-
         self._validate_profiler_and_update_rules_properties(
             profiler=profiler,
             expectation_type=expectation_type,
             expectation_kwargs=expectation_kwargs,
             success_keys=success_keys,
         )
-
         return profiler
 
     def _validate_profiler_and_update_rules_properties(
@@ -673,49 +643,50 @@ class Validator:
         expectation_kwargs: dict,
         success_keys: Tuple[str],
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         rule: Rule = profiler.rules[0]
         assert (
             rule.expectation_configuration_builders[0].expectation_type
             == expectation_type
         ), "ExpectationConfigurationBuilder in profiler used to build an ExpectationConfiguration must have the same expectation_type as the expectation being invoked."
-
-        # TODO: <Alex>Add "metric_domain_kwargs_override" when "Expectation" defines "domain_keys" separately.</Alex>
         key: str
         value: Any
         metric_value_kwargs_override: dict = {
             key: value
-            for key, value in expectation_kwargs.items()
-            if key in success_keys
-            and key not in BaseRuleBasedProfiler.EXPECTATION_SUCCESS_KEYS
+            for (key, value) in expectation_kwargs.items()
+            if (
+                (key in success_keys)
+                and (key not in BaseRuleBasedProfiler.EXPECTATION_SUCCESS_KEYS)
+            )
         }
-
         domain_type: MetricDomainTypes = rule.domain_builder.domain_type
         if domain_type not in MetricDomainTypes:
             raise ValueError(
                 f'Domain type declaration "{domain_type}" in "MetricDomainTypes" does not exist.'
             )
-
-        # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
         if domain_type == MetricDomainTypes.COLUMN:
             column_name = expectation_kwargs.get("column")
             rule.domain_builder.include_column_names = (
                 [column_name] if column_name else None
             )
-
         parameter_builders: List[ParameterBuilder] = rule.parameter_builders or []
-
         parameter_builder: ParameterBuilder
-
         for parameter_builder in parameter_builders:
             self._update_metric_value_kwargs_for_success_keys(
                 parameter_builder=parameter_builder,
                 metric_value_kwargs=metric_value_kwargs_override,
             )
-
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
             rule.expectation_configuration_builders or []
         )
-
         expectation_configuration_builder: ExpectationConfigurationBuilder
         for expectation_configuration_builder in expectation_configuration_builders:
             validation_parameter_builders: List[ParameterBuilder] = (
@@ -732,28 +703,33 @@ class Validator:
         parameter_builder: ParameterBuilder,
         metric_value_kwargs: Optional[dict] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if metric_value_kwargs is None:
             metric_value_kwargs = {}
-
         if hasattr(parameter_builder, "metric_name") and hasattr(
             parameter_builder, "metric_value_kwargs"
         ):
             parameter_builder_metric_value_kwargs: dict = (
                 parameter_builder.metric_value_kwargs or {}
             )
-
             parameter_builder_metric_value_kwargs = {
-                key: metric_value_kwargs.get(key) or value
-                for key, value in parameter_builder_metric_value_kwargs.items()
+                key: (metric_value_kwargs.get(key) or value)
+                for (key, value) in parameter_builder_metric_value_kwargs.items()
             }
             parameter_builder.metric_value_kwargs = (
                 parameter_builder_metric_value_kwargs
             )
-
         evaluation_parameter_builders: List[ParameterBuilder] = (
             parameter_builder.evaluation_parameter_builders or []
         )
-
         evaluation_parameter_builder: ParameterBuilder
         for evaluation_parameter_builder in evaluation_parameter_builders:
             self._update_metric_value_kwargs_for_success_keys(
@@ -763,11 +739,29 @@ class Validator:
 
     @property
     def execution_engine(self) -> ExecutionEngine:
-        """Returns the execution engine being used by the validator at the given time"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Returns the execution engine being used by the validator at the given time"
         return self._execution_engine
 
     def list_available_expectation_types(self) -> List[str]:
-        """Returns a list of all expectations available to the validator"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Returns a list of all expectations available to the validator"
         keys = dir(self)
         return [
             expectation for expectation in keys if expectation.startswith("expect_")
@@ -775,19 +769,23 @@ class Validator:
 
     def compute_metrics(
         self, metric_configurations: List[MetricConfiguration]
-    ) -> Dict[Tuple[str, str, str], Any]:
-        """
-        metrics: List of desired MetricConfiguration objects to be resolved.
-        Return Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
-        """
-        graph: ValidationGraph = ValidationGraph()
+    ) -> Dict[(Tuple[(str, str, str)], Any)]:
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        metrics: List of desired MetricConfiguration objects to be resolved.\n        Return Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.\n        "
+        graph: ValidationGraph = ValidationGraph()
         metric_configuration: MetricConfiguration
         for metric_configuration in metric_configurations:
-            provider_cls, _ = get_metric_provider(
+            (provider_cls, _) = get_metric_provider(
                 metric_configuration.metric_name, self.execution_engine
             )
-
             self._get_default_domain_kwargs(
                 metric_provider_cls=provider_cls,
                 metric_configuration=metric_configuration,
@@ -796,40 +794,42 @@ class Validator:
                 metric_provider_cls=provider_cls,
                 metric_configuration=metric_configuration,
             )
-
             self.build_metric_dependency_graph(
                 graph=graph,
                 execution_engine=self._execution_engine,
                 metric_configuration=metric_configuration,
             )
-
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
-
-        # updates graph with aborted metrics
+        resolved_metrics: Dict[(Tuple[(str, str, str)], Any)] = {}
         aborted_metrics_info: Dict[
-            Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = self.resolve_validation_graph(
-            graph=graph,
-            metrics=resolved_metrics,
-        )
-
+            (
+                Tuple[(str, str, str)],
+                Dict[(str, Union[(MetricConfiguration, Set[ExceptionInfo], int)])],
+            )
+        ] = self.resolve_validation_graph(graph=graph, metrics=resolved_metrics)
         if aborted_metrics_info:
             logger.warning(
-                f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
+                f"""Exceptions
+{str(aborted_metrics_info)}
+occurred while resolving metrics."""
             )
-
         return resolved_metrics
 
-    def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
-        """
-        metrics: Dictionary of desired metrics to be resolved, with metric_name as key and MetricConfiguration as value.
-        Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
-        """
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = self.compute_metrics(
+    def get_metrics(
+        self, metrics: Dict[(str, MetricConfiguration)]
+    ) -> Dict[(str, Any)]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        metrics: Dictionary of desired metrics to be resolved, with metric_name as key and MetricConfiguration as value.\n        Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.\n        "
+        resolved_metrics: Dict[(Tuple[(str, str, str)], Any)] = self.compute_metrics(
             metric_configurations=list(metrics.values())
         )
-
         return {
             metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
             for metric_configuration in metrics.values()
@@ -837,13 +837,20 @@ class Validator:
 
     @staticmethod
     def _get_default_domain_kwargs(
-        metric_provider_cls: "MetricProvider",  # noqa: F821
-        metric_configuration: MetricConfiguration,
+        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for key in metric_provider_cls.domain_keys:
-            if (
-                key not in metric_configuration.metric_domain_kwargs
-                and key in metric_provider_cls.default_kwarg_values
+            if (key not in metric_configuration.metric_domain_kwargs) and (
+                key in metric_provider_cls.default_kwarg_values
             ):
                 metric_configuration.metric_domain_kwargs[
                     key
@@ -851,20 +858,36 @@ class Validator:
 
     @staticmethod
     def _get_default_value_kwargs(
-        metric_provider_cls: "MetricProvider",  # noqa: F821
-        metric_configuration: MetricConfiguration,
+        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for key in metric_provider_cls.value_keys:
-            if (
-                key not in metric_configuration.metric_value_kwargs
-                and key in metric_provider_cls.default_kwarg_values
+            if (key not in metric_configuration.metric_value_kwargs) and (
+                key in metric_provider_cls.default_kwarg_values
             ):
                 metric_configuration.metric_value_kwargs[
                     key
                 ] = metric_provider_cls.default_kwarg_values[key]
 
     def get_metric(self, metric: MetricConfiguration) -> Any:
-        """return the value of the requested metric."""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "return the value of the requested metric."
         return self.get_metrics(metrics={metric.metric_name: metric})[
             metric.metric_name
         ]
@@ -872,35 +895,27 @@ class Validator:
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], Any]] = None,
+        metrics: Optional[Dict[(Tuple[(str, str, str)], Any)]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[ExpectationValidationResult]:
-        """Obtains validation dependencies for each metric using the implementation of their associated expectation,
-        then proceeds to add these dependencies to the validation graph, supply readily available metric implementations
-        to fulfill current metric requirements, and validate these metrics.
+        import inspect
 
-                Args:
-                    configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that
-                    will be used to supply domain and values for metrics.
-                    metrics (dict): A list of currently registered metrics in the registry
-                    runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics
-                    such as the result_format.
-
-                Returns:
-                    A list of Validations, validating that all necessary metrics are available.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Obtains validation dependencies for each metric using the implementation of their associated expectation,\n        then proceeds to add these dependencies to the validation graph, supply readily available metric implementations\n        to fulfill current metric requirements, and validate these metrics.\n\n                Args:\n                    configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that\n                    will be used to supply domain and values for metrics.\n                    metrics (dict): A list of currently registered metrics in the registry\n                    runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics\n                    such as the result_format.\n\n                Returns:\n                    A list of Validations, validating that all necessary metrics are available.\n        "
         if runtime_configuration is None:
             runtime_configuration = {}
-
         if runtime_configuration.get("catch_exceptions", True):
             catch_exceptions = True
         else:
             catch_exceptions = False
-
         evrs: List[ExpectationValidationResult]
-
         expectation_validation_graphs: List[ExpectationValidationGraph] = []
-
         processed_configurations: List[ExpectationConfiguration] = []
         (
             evrs,
@@ -912,16 +927,13 @@ class Validator:
             catch_exceptions=catch_exceptions,
             runtime_configuration=runtime_configuration,
         )
-
         if metrics is None:
             metrics = {}
-
         graph: ValidationGraph = (
             self._generate_suite_level_graph_from_expectation_level_sub_graphs(
                 expectation_validation_graphs=expectation_validation_graphs
             )
         )
-
         try:
             (
                 evrs,
@@ -935,8 +947,6 @@ class Validator:
                 processed_configurations=processed_configurations,
             )
         except Exception as err:
-            # If a general Exception occurs during the execution of "Validator.resolve_validation_graph()", then all
-            # expectations in the suite are impacted, because it is impossible to attribute the failure to a metric.
             if catch_exceptions:
                 exception_traceback: str = traceback.format_exc()
                 evrs = self._catch_exceptions_in_failing_expectation_validations(
@@ -948,7 +958,6 @@ class Validator:
                 return evrs
             else:
                 raise err
-
         configuration: ExpectationConfiguration
         result: ExpectationValidationResult
         for configuration in processed_configurations:
@@ -970,7 +979,6 @@ class Validator:
                     )
                 else:
                     raise err
-
         return evrs
 
     def _generate_metric_dependency_subgraphs_for_each_expectation_configuration(
@@ -980,33 +988,36 @@ class Validator:
         processed_configurations: List[ExpectationConfiguration],
         catch_exceptions: bool,
         runtime_configuration: Optional[dict] = None,
-    ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
-        # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
-        # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
+    ) -> Tuple[(List[ExpectationValidationResult], List[ExpectationConfiguration])]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         evrs: List[ExpectationValidationResult] = []
         configuration: ExpectationConfiguration
         evaluated_config: ExpectationConfiguration
         metric_configuration: MetricConfiguration
         graph: ValidationGraph
         for configuration in expectation_configurations:
-            # Validating
             try:
                 assert (
                     configuration.expectation_type is not None
                 ), "Given configuration should include expectation type"
             except AssertionError as e:
                 raise InvalidExpectationConfigurationError(str(e))
-
             evaluated_config = copy.deepcopy(configuration)
             evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
-
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: dict = (
                 expectation_impl().get_validation_dependencies(
                     evaluated_config, self._execution_engine, runtime_configuration
                 )["metrics"]
             )
-
             try:
                 expectation_validation_graph: ExpectationValidationGraph = (
                     ExpectationValidationGraph(configuration=evaluated_config)
@@ -1039,14 +1050,21 @@ class Validator:
                     evrs.append(result)
                 else:
                     raise err
-
-        return evrs, processed_configurations
+        return (evrs, processed_configurations)
 
     @staticmethod
     def _generate_suite_level_graph_from_expectation_level_sub_graphs(
         expectation_validation_graphs: List[ExpectationValidationGraph],
     ) -> ValidationGraph:
-        # Collect edges from all expectation-level sub-graphs and incorporate them under common suite-level graph.
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectation_validation_graph: ExpectationValidationGraph
         edges: List[MetricEdge] = list(
             itertools.chain.from_iterable(
@@ -1062,23 +1080,31 @@ class Validator:
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
         self,
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], Any],
+        metrics: Dict[(Tuple[(str, str, str)], Any)],
         runtime_configuration: dict,
         expectation_validation_graphs: List[ExpectationValidationGraph],
         evrs: List[ExpectationValidationResult],
         processed_configurations: List[ExpectationConfiguration],
-    ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
-        # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
+    ) -> Tuple[(List[ExpectationValidationResult], List[ExpectationConfiguration])]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         aborted_metrics_info: Dict[
-            Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            (
+                Tuple[(str, str, str)],
+                Dict[(str, Union[(MetricConfiguration, Set[ExceptionInfo], int)])],
+            )
         ] = self.resolve_validation_graph(
             graph=validation_graph,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
         )
-
-        # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
         rejected_configurations: List[ExpectationConfiguration] = []
         for expectation_validation_graph in expectation_validation_graphs:
             metric_exception_info: Set[
@@ -1086,7 +1112,6 @@ class Validator:
             ] = expectation_validation_graph.get_exception_info(
                 metric_info=aborted_metrics_info
             )
-            # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
             if len(metric_exception_info) > 0:
                 configuration = expectation_validation_graph.configuration
                 for exception_info in metric_exception_info:
@@ -1096,15 +1121,11 @@ class Validator:
                         expectation_config=configuration,
                     )
                     evrs.append(result)
-
                 if configuration not in rejected_configurations:
                     rejected_configurations.append(configuration)
-
-        # Exclude all rejected expectations from list of expectations cleared for validation.
         for configuration in rejected_configurations:
             processed_configurations.remove(configuration)
-
-        return evrs, processed_configurations
+        return (evrs, processed_configurations)
 
     @staticmethod
     def _catch_exceptions_in_failing_expectation_validations(
@@ -1113,23 +1134,20 @@ class Validator:
         failing_expectation_configurations: List[ExpectationConfiguration],
         evrs: List[ExpectationValidationResult],
     ) -> List[ExpectationValidationResult]:
-        """
-        Catch exceptions in failing Expectation validations and convert to unsuccessful ExpectationValidationResult
-        Args:
-            exception_traceback: Traceback related to raised Exception
-            exception: Exception raised
-            failing_expectation_configurations: ExpectationConfigurations that failed
-            evrs: List of ExpectationValidationResult objects to append failures to
+        import inspect
 
-        Returns:
-            List of ExpectationValidationResult objects with unsuccessful ExpectationValidationResult objects appended
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Catch exceptions in failing Expectation validations and convert to unsuccessful ExpectationValidationResult\n        Args:\n            exception_traceback: Traceback related to raised Exception\n            exception: Exception raised\n            failing_expectation_configurations: ExpectationConfigurations that failed\n            evrs: List of ExpectationValidationResult objects to append failures to\n\n        Returns:\n            List of ExpectationValidationResult objects with unsuccessful ExpectationValidationResult objects appended\n        "
         exception_message: str = str(exception)
         exception_info: ExceptionInfo = ExceptionInfo(
-            exception_traceback=exception_traceback,
-            exception_message=exception_message,
+            exception_traceback=exception_traceback, exception_message=exception_message
         )
-
         configuration: ExpectationConfiguration
         result: ExpectationValidationResult
         for configuration in failing_expectation_configurations:
@@ -1139,7 +1157,6 @@ class Validator:
                 expectation_config=configuration,
             )
             evrs.append(result)
-
         return evrs
 
     def build_metric_dependency_graph(
@@ -1150,9 +1167,16 @@ class Validator:
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> None:
-        """Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
-        until all metrics have been added."""
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph\n        until all metrics have been added."
         metric_impl = get_metric_provider(
             metric_configuration.metric_name, execution_engine=execution_engine
         )[0]
@@ -1162,27 +1186,18 @@ class Validator:
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-
         if len(metric_dependencies) == 0:
-            graph.add(
-                MetricEdge(
-                    left=metric_configuration,
-                )
-            )
+            graph.add(MetricEdge(left=metric_configuration))
         else:
             metric_configuration.metric_dependencies = metric_dependencies
             for metric_dependency in metric_dependencies.values():
-                # TODO: <Alex>In the future, provide a more robust cycle detection mechanism.</Alex>
                 if metric_dependency.id == metric_configuration.id:
                     logger.warning(
                         f"Metric {str(metric_configuration.id)} has created a circular dependency"
                     )
                     continue
                 graph.add(
-                    MetricEdge(
-                        left=metric_configuration,
-                        right=metric_dependency,
-                    )
+                    MetricEdge(left=metric_configuration, right=metric_dependency)
                 )
                 self.build_metric_dependency_graph(
                     graph=graph,
@@ -1195,79 +1210,78 @@ class Validator:
     def resolve_validation_graph(
         self,
         graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], Any],
+        metrics: Dict[(Tuple[(str, str, str)], Any)],
         runtime_configuration: Optional[dict] = None,
-        min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
+        min_graph_edges_pbar_enable: int = 0,
     ) -> Dict[
-        Tuple[str, str, str],
-        Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        (
+            Tuple[(str, str, str)],
+            Dict[(str, Union[(MetricConfiguration, Set[ExceptionInfo], int)])],
+        )
     ]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if runtime_configuration is None:
             runtime_configuration = {}
-
         if runtime_configuration.get("catch_exceptions", True):
             catch_exceptions = True
         else:
             catch_exceptions = False
-
         failed_metric_info: Dict[
-            Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            (
+                Tuple[(str, str, str)],
+                Dict[(str, Union[(MetricConfiguration, Set[ExceptionInfo], int)])],
+            )
         ] = {}
         aborted_metrics_info: Dict[
-            Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            (
+                Tuple[(str, str, str)],
+                Dict[(str, Union[(MetricConfiguration, Set[ExceptionInfo], int)])],
+            )
         ] = {}
-
         ready_metrics: Set[MetricConfiguration]
         needed_metrics: Set[MetricConfiguration]
-
         exception_info: ExceptionInfo
-
         progress_bar: Optional[tqdm] = None
-
         done: bool = False
         while not done:
-            ready_metrics, needed_metrics = self._parse_validation_graph(
+            (ready_metrics, needed_metrics) = self._parse_validation_graph(
                 validation_graph=graph, metrics=metrics
             )
-
-            # Check to see if the user has disabled progress bars
             disable = False
             if self._data_context:
                 progress_bars = self._data_context.progress_bars
-                # If progress_bars are not present, assume we want them enabled
                 if progress_bars is not None:
                     if "globally" in progress_bars:
                         disable = not progress_bars["globally"]
                     if "metric_calculations" in progress_bars:
                         disable = not progress_bars["metric_calculations"]
-
             if len(graph.edges) < min_graph_edges_pbar_enable:
                 disable = True
-
             if progress_bar is None:
-                # noinspection PyProtectedMember,SpellCheckingInspection
                 progress_bar = tqdm(
-                    total=len(ready_metrics) + len(needed_metrics),
+                    total=(len(ready_metrics) + len(needed_metrics)),
                     desc="Calculating Metrics",
                     disable=disable,
                 )
                 progress_bar.update(0)
                 progress_bar.refresh()
-
             computable_metrics = set()
-
             for metric in ready_metrics:
-                if (
-                    metric.id in failed_metric_info
-                    and failed_metric_info[metric.id]["num_failures"]
+                if (metric.id in failed_metric_info) and (
+                    failed_metric_info[metric.id]["num_failures"]
                     >= MAX_METRIC_COMPUTATION_RETRIES
                 ):
                     aborted_metrics_info[metric.id] = failed_metric_info[metric.id]
                 else:
                     computable_metrics.add(metric)
-
             try:
                 metrics.update(
                     self._resolve_metrics(
@@ -1307,29 +1321,35 @@ class Validator:
             except Exception as e:
                 if catch_exceptions:
                     logger.error(
-                        f"""Caught exception {str(e)} while trying to resolve a set of {len(ready_metrics)} metrics; \
-aborting graph resolution.
+                        f"""Caught exception {str(e)} while trying to resolve a set of {len(ready_metrics)} metrics; aborting graph resolution.
 """
                     )
                     done = True
                 else:
                     raise e
-
-            if (len(ready_metrics) + len(needed_metrics) == 0) or (
+            if ((len(ready_metrics) + len(needed_metrics)) == 0) or (
                 len(ready_metrics) == len(aborted_metrics_info)
             ):
                 done = True
-
         progress_bar.close()
-
         return aborted_metrics_info
 
     def append_expectation(self, expectation_config: ExpectationConfiguration) -> None:
-        """This method is a thin wrapper for ExpectationSuite.append_expectation"""
-        # deprecated-v0.13.0
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "This method is a thin wrapper for ExpectationSuite.append_expectation"
         warnings.warn(
-            "append_expectation is deprecated as of v0.13.0 and will be removed in v0.16. "
-            + "Please use ExpectationSuite.add_expectation instead.",
+            (
+                "append_expectation is deprecated as of v0.13.0 and will be removed in v0.16. "
+                + "Please use ExpectationSuite.add_expectation instead."
+            ),
             DeprecationWarning,
         )
         self._expectation_suite.append_expectation(expectation_config)
@@ -1339,11 +1359,21 @@ aborting graph resolution.
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
     ) -> List[int]:
-        """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
-        # deprecated-v0.13.0
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"
         warnings.warn(
-            "find_expectation_indexes is deprecated as of v0.13.0 and will be removed in v0.16. "
-            + "Please use ExpectationSuite.find_expectation_indexes instead.",
+            (
+                "find_expectation_indexes is deprecated as of v0.13.0 and will be removed in v0.16. "
+                + "Please use ExpectationSuite.find_expectation_indexes instead."
+            ),
             DeprecationWarning,
         )
         return self._expectation_suite.find_expectation_indexes(
@@ -1356,11 +1386,21 @@ aborting graph resolution.
         match_type: str = "domain",
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
-        """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
-        # deprecated-v0.13.0
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "This method is a thin wrapper for ExpectationSuite.find_expectations()"
         warnings.warn(
-            "find_expectations is deprecated as of v0.13.0 and will be removed in v0.16. "
-            + "Please use ExpectationSuite.find_expectation_indexes instead.",
+            (
+                "find_expectations is deprecated as of v0.13.0 and will be removed in v0.16. "
+                + "Please use ExpectationSuite.find_expectation_indexes instead."
+            ),
             DeprecationWarning,
         )
         return self._expectation_suite.find_expectations(
@@ -1376,7 +1416,15 @@ aborting graph resolution.
         remove_multiple_matches: bool = False,
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._expectation_suite.remove_expectation(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
@@ -1385,6 +1433,15 @@ aborting graph resolution.
         )
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for batch in batch_list:
             try:
                 assert isinstance(
@@ -1394,22 +1451,47 @@ aborting graph resolution.
                 logger.warning(str(e))
             self._execution_engine.load_batch_data(batch.id, batch.data)
             self._batches[batch.id] = batch
-            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
-            # execution_engine. The final active_batch_id will be that of the final batch loaded.
             self.active_batch_id = batch.id
 
     @property
-    def batches(self) -> Dict[str, Batch]:
-        """Getter for batches"""
+    def batches(self) -> Dict[(str, Batch)]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Getter for batches"
         return self._batches
 
     @property
     def loaded_batch_ids(self) -> List[str]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self.execution_engine.loaded_batch_data_ids
 
     @property
     def active_batch(self) -> Optional[Batch]:
-        """Getter for active batch"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Getter for active batch"
         active_batch_id: Optional[str] = self.active_batch_id
         batch: Optional[Batch] = (
             self.batches.get(active_batch_id) if active_batch_id else None
@@ -1418,7 +1500,16 @@ aborting graph resolution.
 
     @property
     def active_batch_spec(self) -> Optional[BatchSpec]:
-        """Getter for active batch's batch_spec"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Getter for active batch's batch_spec"
         if not self.active_batch:
             return None
         else:
@@ -1426,7 +1517,16 @@ aborting graph resolution.
 
     @property
     def active_batch_id(self) -> Optional[str]:
-        """Getter for active batch id"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Getter for active batch id"
         active_engine_batch_id = self._execution_engine.active_batch_data_id
         if active_engine_batch_id != self._active_batch_id:
             logger.debug(
@@ -1436,14 +1536,22 @@ aborting graph resolution.
 
     @active_batch_id.setter
     def active_batch_id(self, batch_id: str) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert set(self.batches.keys()).issubset(set(self.loaded_batch_ids))
         available_batch_ids: Set[str] = set(self.batches.keys()).union(
             set(self.loaded_batch_ids)
         )
         if batch_id not in available_batch_ids:
             raise ValueError(
-                f"""batch_id {batch_id} not found in loaded batches.  Batches must first be loaded before they can be \
-set as active.
+                f"""batch_id {batch_id} not found in loaded batches.  Batches must first be loaded before they can be set as active.
 """
             )
         else:
@@ -1451,7 +1559,16 @@ set as active.
 
     @property
     def active_batch_markers(self) -> Optional[BatchMarkers]:
-        """Getter for active batch's batch markers"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Getter for active batch's batch markers"
         if not self.active_batch:
             return None
         else:
@@ -1459,14 +1576,32 @@ set as active.
 
     @property
     def active_batch_definition(self) -> Optional[BatchDefinition]:
-        """Getter for the active batch's batch definition"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Getter for the active batch's batch definition"
         if not self.active_batch:
             return None
         else:
             return self.active_batch.batch_definition
 
     def discard_failing_expectations(self) -> None:
-        """Removes any expectations from the validator where the validation has failed"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Removes any expectations from the validator where the validation has failed"
         res = self.validate(only_return_failures=True).results
         if any(res):
             for item in res:
@@ -1477,53 +1612,59 @@ set as active.
             warnings.warn(f"Removed {len(res)} expectations that were 'False'")
 
     def get_default_expectation_arguments(self) -> dict:
-        """Fetch default expectation arguments for this data_asset
+        import inspect
 
-        Returns:
-            A dictionary containing all the current default expectation arguments for a data_asset
-
-            Ex::
-
-                {
-                    "include_config" : True,
-                    "catch_exceptions" : False,
-                    "result_format" : 'BASIC'
-                }
-
-        See also:
-            set_default_expectation_arguments
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        'Fetch default expectation arguments for this data_asset\n\n        Returns:\n            A dictionary containing all the current default expectation arguments for a data_asset\n\n            Ex::\n\n                {\n                    "include_config" : True,\n                    "catch_exceptions" : False,\n                    "result_format" : \'BASIC\'\n                }\n\n        See also:\n            set_default_expectation_arguments\n        '
         return self.default_expectation_args
 
     @property
     def ge_cloud_mode(self) -> bool:
-        """
-        Wrapper around ge_cloud_mode property of associated Data Context
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Wrapper around ge_cloud_mode property of associated Data Context\n        "
         if self._data_context:
             return self._data_context.ge_cloud_mode
         return False
 
     @property
     def default_expectation_args(self) -> dict:
-        """A getter for default Expectation arguments"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "A getter for default Expectation arguments"
         return self._default_expectation_args
 
     def set_default_expectation_argument(self, argument: str, value) -> None:
-        """
-        Set a default expectation argument for this data_asset
+        import inspect
 
-        Args:
-            argument (string): The argument to be replaced
-            value : The New argument to use for replacement
-
-        Returns:
-            None
-
-        See also:
-            get_default_expectation_arguments
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Set a default expectation argument for this data_asset\n\n        Args:\n            argument (string): The argument to be replaced\n            value : The New argument to use for replacement\n\n        Returns:\n            None\n\n        See also:\n            get_default_expectation_arguments\n        "
         self._default_expectation_args[argument] = value
 
     def get_expectations_config(
@@ -1534,14 +1675,21 @@ set as active.
         discard_catch_exceptions_kwargs: bool = True,
         suppress_warnings: bool = False,
     ) -> ExpectationSuite:
-        """
-        Returns an expectation configuration, providing an option to discard failed expectation and discard/ include'
-        different result aspects, such as exceptions and result format.
-        """
-        # deprecated-v0.13.0
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Returns an expectation configuration, providing an option to discard failed expectation and discard/ include'\n        different result aspects, such as exceptions and result format.\n        "
         warnings.warn(
-            "get_expectations_config is deprecated as of v0.13.0 and will be removed in v0.16. "
-            + "Please use get_expectation_suite instead.",
+            (
+                "get_expectations_config is deprecated as of v0.13.0 and will be removed in v0.16. "
+                + "Please use get_expectation_suite instead."
+            ),
             DeprecationWarning,
         )
         return self.get_expectation_suite(
@@ -1561,95 +1709,56 @@ set as active.
         suppress_warnings: bool = False,
         suppress_logging: bool = False,
     ) -> ExpectationSuite:
-        """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
+        import inspect
 
-        Args:
-            discard_failed_expectations (boolean): \
-                Only include expectations with success_on_last_run=True in the exported config.  Defaults to `True`.
-            discard_result_format_kwargs (boolean): \
-                In returned expectation objects, suppress the `result_format` parameter. Defaults to `True`.
-            discard_include_config_kwargs (boolean): \
-                In returned expectation objects, suppress the `include_config` parameter. Defaults to `True`.
-            discard_catch_exceptions_kwargs (boolean): \
-                In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.
-            suppress_warnings (boolean): \
-                If true, do not include warnings in logging information about the operation.
-            suppress_logging (boolean): \
-                If true, do not create a log entry (useful when using get_expectation_suite programmatically)
-
-        Returns:
-            An expectation suite.
-
-        Note:
-            get_expectation_suite does not affect the underlying expectation suite at all. The returned suite is a \
-             copy of _expectation_suite, not the original object.
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Returns _expectation_config as a JSON object, and perform some cleaning along the way.\n\n        Args:\n            discard_failed_expectations (boolean):                 Only include expectations with success_on_last_run=True in the exported config.  Defaults to `True`.\n            discard_result_format_kwargs (boolean):                 In returned expectation objects, suppress the `result_format` parameter. Defaults to `True`.\n            discard_include_config_kwargs (boolean):                 In returned expectation objects, suppress the `include_config` parameter. Defaults to `True`.\n            discard_catch_exceptions_kwargs (boolean):                 In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.\n            suppress_warnings (boolean):                 If true, do not include warnings in logging information about the operation.\n            suppress_logging (boolean):                 If true, do not create a log entry (useful when using get_expectation_suite programmatically)\n\n        Returns:\n            An expectation suite.\n\n        Note:\n            get_expectation_suite does not affect the underlying expectation suite at all. The returned suite is a              copy of _expectation_suite, not the original object.\n        "
         expectation_suite = copy.deepcopy(self.expectation_suite)
         expectations = expectation_suite.expectations
-
         discards = defaultdict(int)
-
         if discard_failed_expectations:
             new_expectations = []
-
             for expectation in expectations:
-                # Note: This is conservative logic.
-                # Instead of retaining expectations IFF success==True, it discard expectations IFF success==False.
-                # In cases where expectation.success is missing or None, expectations are *retained*.
-                # Such a case could occur if expectations were loaded from a config file and never run.
                 if expectation.success_on_last_run is False:
                     discards["failed_expectations"] += 1
                 else:
                     new_expectations.append(expectation)
-
             expectations = new_expectations
-
-        message = f"\t{len(expectations)} expectation(s) included in expectation_suite."
-
-        if discards["failed_expectations"] > 0 and not suppress_warnings:
+        message = f"	{len(expectations)} expectation(s) included in expectation_suite."
+        if (discards["failed_expectations"] > 0) and (not suppress_warnings):
             message += (
-                " Omitting %d expectation(s) that failed when last run; set "
-                "discard_failed_expectations=False to include them."
+                " Omitting %d expectation(s) that failed when last run; set discard_failed_expectations=False to include them."
                 % discards["failed_expectations"]
             )
-
         for expectation in expectations:
-            # FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation,
-            #  which calls _copy_and_clean_up_expectation
             expectation.success_on_last_run = None
-
             if discard_result_format_kwargs:
                 if "result_format" in expectation.kwargs:
                     del expectation.kwargs["result_format"]
                     discards["result_format"] += 1
-
             if discard_include_config_kwargs:
                 if "include_config" in expectation.kwargs:
                     del expectation.kwargs["include_config"]
                     discards["include_config"] += 1
-
             if discard_catch_exceptions_kwargs:
                 if "catch_exceptions" in expectation.kwargs:
                     del expectation.kwargs["catch_exceptions"]
                     discards["catch_exceptions"] += 1
-
         settings_message = ""
-
-        if discards["result_format"] > 0 and not suppress_warnings:
+        if (discards["result_format"] > 0) and (not suppress_warnings):
             settings_message += " result_format"
-
-        if discards["include_config"] > 0 and not suppress_warnings:
+        if (discards["include_config"] > 0) and (not suppress_warnings):
             settings_message += " include_config"
-
-        if discards["catch_exceptions"] > 0 and not suppress_warnings:
+        if (discards["catch_exceptions"] > 0) and (not suppress_warnings):
             settings_message += " catch_exceptions"
-
-        if (
-            len(settings_message) > 1
-        ):  # Only add this if we added one of the settings above.
+        if len(settings_message) > 1:
             settings_message += " settings filtered."
-
         expectation_suite.expectations = expectations
         if not suppress_logging:
             logger.info(message + settings_message)
@@ -1664,33 +1773,16 @@ set as active.
         discard_catch_exceptions_kwargs: bool = True,
         suppress_warnings: bool = False,
     ) -> None:
-        """Writes ``_expectation_config`` to a JSON file.
+        import inspect
 
-           Writes the DataAsset's expectation config to the specified JSON ``filepath``. Failing expectations \
-           can be excluded from the JSON expectations config with ``discard_failed_expectations``. The kwarg key-value \
-           pairs :ref:`result_format`, :ref:`include_config`, and :ref:`catch_exceptions` are optionally excluded from \
-           the JSON expectations config.
-
-           Args:
-               filepath (string): \
-                   The location and name to write the JSON config file to.
-               discard_failed_expectations (boolean): \
-                   If True, excludes expectations that do not return ``success = True``. \
-                   If False, all expectations are written to the JSON config file.
-               discard_result_format_kwargs (boolean): \
-                   If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config \
-                   file.
-               discard_include_config_kwargs (boolean): \
-                   If True, the :ref:`include_config` attribute for each expectation is not written to the JSON config \
-                   file.
-               discard_catch_exceptions_kwargs (boolean): \
-                   If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON \
-                   config file.
-               suppress_warnings (boolean): \
-                    If True, all warnings raised by Great Expectations, as a result of dropped expectations, are \
-                    suppressed.
-
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Writes ``_expectation_config`` to a JSON file.\n\n           Writes the DataAsset's expectation config to the specified JSON ``filepath``. Failing expectations            can be excluded from the JSON expectations config with ``discard_failed_expectations``. The kwarg key-value            pairs :ref:`result_format`, :ref:`include_config`, and :ref:`catch_exceptions` are optionally excluded from            the JSON expectations config.\n\n           Args:\n               filepath (string):                    The location and name to write the JSON config file to.\n               discard_failed_expectations (boolean):                    If True, excludes expectations that do not return ``success = True``.                    If False, all expectations are written to the JSON config file.\n               discard_result_format_kwargs (boolean):                    If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config                    file.\n               discard_include_config_kwargs (boolean):                    If True, the :ref:`include_config` attribute for each expectation is not written to the JSON config                    file.\n               discard_catch_exceptions_kwargs (boolean):                    If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON                    config file.\n               suppress_warnings (boolean):                     If True, all warnings raised by Great Expectations, as a result of dropped expectations, are                     suppressed.\n\n        "
         expectation_suite = self.get_expectation_suite(
             discard_failed_expectations,
             discard_result_format_kwargs,
@@ -1698,7 +1790,7 @@ set as active.
             discard_catch_exceptions_kwargs,
             suppress_warnings,
         )
-        if filepath is None and self._data_context is not None:
+        if (filepath is None) and (self._data_context is not None):
             self._data_context.save_expectation_suite(expectation_suite)
             if self.ge_cloud_mode:
                 updated_suite = self._data_context.get_expectation_suite(
@@ -1718,108 +1810,38 @@ set as active.
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    # TODO: <Alex>Should "include_config" also be an argument of this method?</Alex>
     def validate(
         self,
         expectation_suite=None,
         run_id=None,
-        data_context: Optional[
-            Any
-        ] = None,  # Cannot type DataContext due to circular import
+        data_context: Optional[Any] = None,
         evaluation_parameters: Optional[dict] = None,
         catch_exceptions: bool = True,
         result_format: Optional[str] = None,
         only_return_failures: bool = False,
         run_name: Optional[str] = None,
         run_time: Optional[str] = None,
-    ) -> Union[ExpectationValidationResult, ExpectationSuiteValidationResult]:
-        # noinspection SpellCheckingInspection
-        """Generates a JSON-formatted report describing the outcome of all expectations.
+    ) -> Union[(ExpectationValidationResult, ExpectationSuiteValidationResult)]:
+        import inspect
 
-        Use the default expectation_suite=None to validate the expectations config associated with the DataAsset.
-
-        Args:
-            expectation_suite (json or None): \
-                If None, uses the expectations config generated with the DataAsset during the current session. \
-                If a JSON file, validates those expectations.
-            run_id (str): \
-                Used to identify this validation result as part of a collection of validations. \
-                See DataContext for more information.
-            run_name (str): \
-                Used to identify this validation result as part of a collection of validations. \
-                See DataContext for more information.
-            run_time (str): \
-                Used to identify this validation result as part of a collection of validations. \
-                See DataContext for more information.
-            data_context (DataContext): \
-                A datacontext object to use as part of validation for binding evaluation parameters and \
-                registering validation results.
-            evaluation_parameters (dict or None): \
-                If None, uses the evaluation_paramters from the expectation_suite provided or as part of the \
-                data_asset. If a dict, uses the evaluation parameters in the dictionary.
-            catch_exceptions (boolean): \
-                If True, exceptions raised by tests will not end validation and will be described in the returned \
-                report.
-            result_format (string or None): \
-                If None, uses the default value ('BASIC' or as specified). \
-                If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', \
-                etc.).
-            only_return_failures (boolean): \
-                If True, expectation results are only returned when ``success = False`` \
-
-        Returns:
-            A JSON-formatted dictionary containing a list of the validation results. \
-            An example of the returned format::
-
-            {
-              "results": [
-                {
-                  "unexpected_list": [unexpected_value_1, unexpected_value_2],
-                  "expectation_type": "expect_*",
-                  "kwargs": {
-                    "column": "Column_Name",
-                    "output_format": "SUMMARY"
-                  },
-                  "success": true,
-                  "raised_exception: false.
-                  "exception_traceback": null
-                },
-                {
-                  ... (Second expectation results)
-                },
-                ... (More expectations results)
-              ],
-              "success": true,
-              "statistics": {
-                "evaluated_expectations": n,
-                "successful_expectations": m,
-                "unsuccessful_expectations": n - m,
-                "success_percent": m / n
-              }
-            }
-
-        Notes:
-           If the configuration object was built with a different version of great expectations then the \
-           current environment. If no version was found in the configuration file.
-
-        Raises:
-           AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
-        """
-        # noinspection PyUnusedLocal
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        'Generates a JSON-formatted report describing the outcome of all expectations.\n\n        Use the default expectation_suite=None to validate the expectations config associated with the DataAsset.\n\n        Args:\n            expectation_suite (json or None):                 If None, uses the expectations config generated with the DataAsset during the current session.                 If a JSON file, validates those expectations.\n            run_id (str):                 Used to identify this validation result as part of a collection of validations.                 See DataContext for more information.\n            run_name (str):                 Used to identify this validation result as part of a collection of validations.                 See DataContext for more information.\n            run_time (str):                 Used to identify this validation result as part of a collection of validations.                 See DataContext for more information.\n            data_context (DataContext):                 A datacontext object to use as part of validation for binding evaluation parameters and                 registering validation results.\n            evaluation_parameters (dict or None):                 If None, uses the evaluation_paramters from the expectation_suite provided or as part of the                 data_asset. If a dict, uses the evaluation parameters in the dictionary.\n            catch_exceptions (boolean):                 If True, exceptions raised by tests will not end validation and will be described in the returned                 report.\n            result_format (string or None):                 If None, uses the default value (\'BASIC\' or as specified).                 If string, the returned expectation output follows the specified format (\'BOOLEAN_ONLY\',\'BASIC\',                 etc.).\n            only_return_failures (boolean):                 If True, expectation results are only returned when ``success = False`` \n        Returns:\n            A JSON-formatted dictionary containing a list of the validation results.             An example of the returned format::\n\n            {\n              "results": [\n                {\n                  "unexpected_list": [unexpected_value_1, unexpected_value_2],\n                  "expectation_type": "expect_*",\n                  "kwargs": {\n                    "column": "Column_Name",\n                    "output_format": "SUMMARY"\n                  },\n                  "success": true,\n                  "raised_exception: false.\n                  "exception_traceback": null\n                },\n                {\n                  ... (Second expectation results)\n                },\n                ... (More expectations results)\n              ],\n              "success": true,\n              "statistics": {\n                "evaluated_expectations": n,\n                "successful_expectations": m,\n                "unsuccessful_expectations": n - m,\n                "success_percent": m / n\n              }\n            }\n\n        Notes:\n           If the configuration object was built with a different version of great expectations then the            current environment. If no version was found in the configuration file.\n\n        Raises:\n           AttributeError - if \'catch_exceptions\'=None and an expectation throws an AttributeError\n        '
         try:
             validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-            assert not (run_id and run_name) and not (
-                run_id and run_time
+            assert (not (run_id and run_name)) and (
+                not (run_id and run_time)
             ), "Please provide either a run_id or run_name and/or run_time."
-            if isinstance(run_id, str) and not run_name:
-                # deprecated-v0.13.0
+            if isinstance(run_id, str) and (not run_name):
                 warnings.warn(
-                    "String run_ids are deprecated as of v0.13.0 and support will be removed in v0.16. Please provide a run_id of type "
-                    "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                    "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                    "run_name and run_time separately.",
+                    "String run_ids are deprecated as of v0.13.0 and support will be removed in v0.16. Please provide a run_id of type RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name and run_time (both optional). Instead of providing a run_id, you may also providerun_name and run_time separately.",
                     DeprecationWarning,
                 )
                 try:
@@ -1831,17 +1853,12 @@ set as active.
                 run_id = RunIdentifier(**run_id)
             elif not isinstance(run_id, RunIdentifier):
                 run_id = RunIdentifier(run_name=run_name, run_time=run_time)
-
             self._active_validation = True
-
-            # If a different validation data context was provided, override
             validation_data_context = self._data_context
-            if data_context is None and self._data_context is not None:
+            if (data_context is None) and (self._data_context is not None):
                 data_context = self._data_context
             elif data_context is not None:
-                # temporarily set self._data_context so it is used inside the expectation decorator
                 self._data_context = data_context
-
             if expectation_suite is None:
                 expectation_suite = self.get_expectation_suite(
                     discard_failed_expectations=False,
@@ -1862,96 +1879,68 @@ set as active.
                     )
             elif not isinstance(expectation_suite, ExpectationSuite):
                 logger.error(
-                    "Unable to validate using the provided value for expectation suite; does it need to be "
-                    "loaded from a dictionary?"
+                    "Unable to validate using the provided value for expectation suite; does it need to be loaded from a dictionary?"
                 )
                 if getattr(data_context, "_usage_statistics_handler", None):
-                    # noinspection PyProtectedMember
                     handler = data_context._usage_statistics_handler
-                    # noinspection PyProtectedMember
                     handler.send_usage_message(
                         event="data_asset.validate",
                         event_payload=handler.anonymizer.anonymize(obj=self),
                         success=False,
                     )
                 return ExpectationValidationResult(success=False)
-
-            # Evaluation parameter priority is
-            # 1. from provided parameters
-            # 2. from expectation configuration
-            # 3. from data context
-            # So, we load them in reverse order
-
             if data_context is not None:
                 runtime_evaluation_parameters = (
                     data_context.evaluation_parameter_store.get_bind_params(run_id)
                 )
             else:
                 runtime_evaluation_parameters = {}
-
             if expectation_suite.evaluation_parameters:
                 runtime_evaluation_parameters.update(
                     expectation_suite.evaluation_parameters
                 )
-
             if evaluation_parameters is not None:
                 runtime_evaluation_parameters.update(evaluation_parameters)
-
-            # Convert evaluation parameters to be json-serializable
             runtime_evaluation_parameters = recursively_convert_to_json_serializable(
                 runtime_evaluation_parameters
             )
-
-            # Warn if our version is different from the version in the configuration
-            # TODO: Deprecate "great_expectations.__version__"
-            # noinspection PyUnusedLocal
             suite_ge_version = expectation_suite.meta.get(
                 "great_expectations_version"
             ) or expectation_suite.meta.get("great_expectations.__version__")
-
-            # Group expectations by column
             columns = {}
-
             for expectation in expectation_suite.expectations:
                 expectation.process_evaluation_parameters(
                     evaluation_parameters=runtime_evaluation_parameters,
                     interactive_evaluation=self.interactive_evaluation,
                     data_context=self._data_context,
                 )
-                if "column" in expectation.kwargs and isinstance(
+                if ("column" in expectation.kwargs) and isinstance(
                     expectation.kwargs["column"], Hashable
                 ):
                     column = expectation.kwargs["column"]
                 else:
-                    # noinspection SpellCheckingInspection
                     column = "_nocolumn"
                 if column not in columns:
                     columns[column] = []
                 columns[column].append(expectation)
-
             expectations_to_evaluate = []
             for col in columns:
                 expectations_to_evaluate.extend(columns[col])
-
             runtime_configuration = self._get_runtime_configuration(
                 catch_exceptions=catch_exceptions, result_format=result_format
             )
-
             results = self.graph_validate(
                 configurations=expectations_to_evaluate,
                 runtime_configuration=runtime_configuration,
             )
             statistics = _calc_validation_statistics(results)
-
             if only_return_failures:
                 abbrev_results = []
                 for exp in results:
                     if not exp.success:
                         abbrev_results.append(exp)
                 results = abbrev_results
-
             expectation_suite_name = expectation_suite.expectation_suite_name
-
             result = ExpectationSuiteValidationResult(
                 results=results,
                 success=statistics.success,
@@ -1972,13 +1961,10 @@ set as active.
                     "validation_time": validation_time,
                 },
             )
-
             self._data_context = validation_data_context
         except Exception:
             if getattr(data_context, "_usage_statistics_handler", None):
-                # noinspection PyProtectedMember
                 handler = data_context._usage_statistics_handler
-                # noinspection PyProtectedMember
                 handler.send_usage_message(
                     event="data_asset.validate",
                     event_payload=handler.anonymizer.anonymize(obj=self),
@@ -1987,11 +1973,8 @@ set as active.
             raise
         finally:
             self._active_validation = False
-
         if getattr(data_context, "_usage_statistics_handler", None):
-            # noinspection PyProtectedMember
             handler = data_context._usage_statistics_handler
-            # noinspection PyProtectedMember
             handler.send_usage_message(
                 event="data_asset.validate",
                 event_payload=handler.anonymizer.anonymize(obj=self),
@@ -2000,30 +1983,32 @@ set as active.
         return result
 
     def get_evaluation_parameter(self, parameter_name, default_value=None):
-        """
-        Get an evaluation parameter value that has been stored in meta.
+        import inspect
 
-        Args:
-            parameter_name (string): The name of the parameter to store.
-            default_value (any): The default value to be returned if the parameter is not found.
-
-        Returns:
-            The current value of the evaluation parameter.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Get an evaluation parameter value that has been stored in meta.\n\n        Args:\n            parameter_name (string): The name of the parameter to store.\n            default_value (any): The default value to be returned if the parameter is not found.\n\n        Returns:\n            The current value of the evaluation parameter.\n        "
         if parameter_name in self._expectation_suite.evaluation_parameters:
             return self._expectation_suite.evaluation_parameters[parameter_name]
         else:
             return default_value
 
     def set_evaluation_parameter(self, parameter_name, parameter_value) -> None:
-        """
-        Provide a value to be stored in the data_asset evaluation_parameters object and used to evaluate
-        parameterized expectations.
+        import inspect
 
-        Args:
-            parameter_name (string): The name of the kwarg to be replaced at evaluation time
-            parameter_value (any): The value to be used
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Provide a value to be stored in the data_asset evaluation_parameters object and used to evaluate\n        parameterized expectations.\n\n        Args:\n            parameter_name (string): The name of the kwarg to be replaced at evaluation time\n            parameter_value (any): The value to be used\n        "
         self._expectation_suite.evaluation_parameters.update(
             {parameter_name: parameter_value}
         )
@@ -2036,7 +2021,16 @@ set as active.
         batch_definition: Optional[dict] = None,
         citation_date: Optional[str] = None,
     ) -> None:
-        """Adds a citation to an existing Expectation Suite within the validator"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Adds a citation to an existing Expectation Suite within the validator"
         if batch_spec is None:
             batch_spec = self.batch_spec
         if batch_markers is None:
@@ -2053,132 +2047,165 @@ set as active.
 
     @property
     def expectation_suite(self) -> ExpectationSuite:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._expectation_suite
 
     @property
     def expectation_suite_name(self) -> str:
-        """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."
         return self._expectation_suite.expectation_suite_name
 
     @expectation_suite_name.setter
     def expectation_suite_name(self, expectation_suite_name: str) -> None:
-        """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Sets the expectation_suite name of this data_asset as stored in the expectations configuration."
         self._expectation_suite.expectation_suite_name = expectation_suite_name
 
     def test_expectation_function(
         self, function: Callable, *args, **kwargs
     ) -> Callable:
-        """Test a generic expectation function
+        import inspect
 
-        Args:
-            function (func): The function to be tested. (Must be a valid expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
-
-        Returns:
-            A JSON-serializable expectation result object.
-
-        Notes:
-            This function is a thin layer to allow quick testing of new expectation functions, without having to \
-            define custom classes, etc. To use developed expectations from the command-line tool, you will still need \
-            to define custom classes, etc.
-
-            Check out :ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations` for
-            more information.
-        """
-
-        # noinspection SpellCheckingInspection
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Test a generic expectation function\n\n        Args:\n            function (func): The function to be tested. (Must be a valid expectation function.)\n            *args          : Positional arguments to be passed the the function\n            **kwargs       : Keyword arguments to be passed the the function\n\n        Returns:\n            A JSON-serializable expectation result object.\n\n        Notes:\n            This function is a thin layer to allow quick testing of new expectation functions, without having to             define custom classes, etc. To use developed expectations from the command-line tool, you will still need             to define custom classes, etc.\n\n            Check out :ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations` for\n            more information.\n        "
         argspec = inspect.getfullargspec(function)[0][1:]
-
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
 
-    def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
-        if domain_kwargs is None:
-            domain_kwargs = {
-                "batch_id": self.execution_engine.active_batch_data_id,
-            }
+    def columns(self, domain_kwargs: Optional[Dict[(str, Any)]] = None) -> List[str]:
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        if domain_kwargs is None:
+            domain_kwargs = {"batch_id": self.execution_engine.active_batch_data_id}
         columns: List[str] = self.get_metric(
             metric=MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs=domain_kwargs,
+                metric_name="table.columns", metric_domain_kwargs=domain_kwargs
             )
         )
-
         return columns
 
     def head(
         self,
         n_rows: int = 5,
-        domain_kwargs: Optional[Dict[str, Any]] = None,
+        domain_kwargs: Optional[Dict[(str, Any)]] = None,
         fetch_all: bool = False,
     ) -> pd.DataFrame:
-        if domain_kwargs is None:
-            domain_kwargs = {
-                "batch_id": self.execution_engine.active_batch_data_id,
-            }
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        if domain_kwargs is None:
+            domain_kwargs = {"batch_id": self.execution_engine.active_batch_data_id}
         data: Any = self.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.head",
                 metric_domain_kwargs=domain_kwargs,
-                metric_value_kwargs={
-                    "n_rows": n_rows,
-                    "fetch_all": fetch_all,
-                },
+                metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
             )
         )
-
         df: pd.DataFrame
         if isinstance(
             self.execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
         ):
             df = pd.DataFrame(data=data)
         elif isinstance(self.execution_engine, SparkDFExecutionEngine):
-            rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
+            rows: List[Dict[(str, Any)]] = [datum.asDict() for datum in data]
             df = pd.DataFrame(data=rows)
         else:
             raise GreatExpectationsError(
                 "Unsupported or unknown ExecutionEngine type encountered in Validator class."
             )
-
         return df.reset_index(drop=True, inplace=False)
 
     @staticmethod
     def _parse_validation_graph(
-        validation_graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], Any],
-    ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
-        """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
-        validation graph (a graph structure of metric ids) edges"""
+        validation_graph: ValidationGraph, metrics: Dict[(Tuple[(str, str, str)], Any)]
+    ) -> Tuple[(Set[MetricConfiguration], Set[MetricConfiguration])]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of\n        validation graph (a graph structure of metric ids) edges"
         unmet_dependency_ids = set()
         unmet_dependency = set()
         maybe_ready_ids = set()
         maybe_ready = set()
-
         for edge in validation_graph.edges:
             if edge.left.id not in metrics:
-                if edge.right is None or edge.right.id in metrics:
+                if (edge.right is None) or (edge.right.id in metrics):
                     if edge.left.id not in maybe_ready_ids:
                         maybe_ready_ids.add(edge.left.id)
                         maybe_ready.add(edge.left)
-                else:
-                    if edge.left.id not in unmet_dependency_ids:
-                        unmet_dependency_ids.add(edge.left.id)
-                        unmet_dependency.add(edge.left)
-
-        return maybe_ready - unmet_dependency, unmet_dependency
+                elif edge.left.id not in unmet_dependency_ids:
+                    unmet_dependency_ids.add(edge.left.id)
+                    unmet_dependency.add(edge.left)
+        return ((maybe_ready - unmet_dependency), unmet_dependency)
 
     @staticmethod
     def _resolve_metrics(
         execution_engine: ExecutionEngine,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict[Tuple[str, str, str], Any] = None,
+        metrics: Dict[(Tuple[(str, str, str)], Any)] = None,
         runtime_configuration: dict = None,
-    ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
-        """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
-        resolved"""
+    ) -> Dict[(Tuple[(str, str, str)], MetricConfiguration)]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are\n        resolved"
         return execution_engine.resolve_metrics(
             metrics_to_resolve=metrics_to_resolve,
             metrics=metrics,
@@ -2190,31 +2217,17 @@ set as active.
         expectation_suite: ExpectationSuite = None,
         expectation_suite_name: str = None,
     ) -> None:
-        """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
-        In addition, this always sets the `default_expectation_args` to:
-            `include_config`: False,
-            `catch_exceptions`: False,
-            `output_format`: 'BASIC'
+        import inspect
 
-        By default, initializes data_asset_type to the name of the implementing class, but subclasses
-        that have interoperable semantics (e.g. Dataset) may override that parameter to clarify their
-        interoperability.
-
-        Args:
-            expectation_suite (json): \
-                A json-serializable expectation config. \
-                If None, creates default `_expectation_suite` with an empty list of expectations and \
-                key value `data_asset_name` as `data_asset_name`.
-
-            expectation_suite_name (string): \
-                The name to assign to the `expectation_suite.expectation_suite_name`
-
-        Returns:
-            None
-        """
-        # Checking type of expectation_suite.
-        # Check for expectation_suite_name is already done by ExpectationSuiteIdentifier
-        if expectation_suite and not isinstance(expectation_suite, ExpectationSuite):
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.\n        In addition, this always sets the `default_expectation_args` to:\n            `include_config`: False,\n            `catch_exceptions`: False,\n            `output_format`: 'BASIC'\n\n        By default, initializes data_asset_type to the name of the implementing class, but subclasses\n        that have interoperable semantics (e.g. Dataset) may override that parameter to clarify their\n        interoperability.\n\n        Args:\n            expectation_suite (json):                 A json-serializable expectation config.                 If None, creates default `_expectation_suite` with an empty list of expectations and                 key value `data_asset_name` as `data_asset_name`.\n\n            expectation_suite_name (string):                 The name to assign to the `expectation_suite.expectation_suite_name`\n\n        Returns:\n            None\n        "
+        if expectation_suite and (not isinstance(expectation_suite, ExpectationSuite)):
             raise TypeError(
                 "expectation_suite must be of type ExpectationSuite, not {}".format(
                     type(expectation_suite)
@@ -2231,7 +2244,6 @@ set as active.
             else:
                 expectation_suite: ExpectationSuite = copy.deepcopy(expectation_suite)
             self._expectation_suite = expectation_suite
-
             if expectation_suite_name is not None:
                 if (
                     self._expectation_suite.expectation_suite_name
@@ -2244,7 +2256,6 @@ set as active.
                         )
                     )
                 self._expectation_suite.expectation_suite_name = expectation_suite_name
-
         else:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
@@ -2252,7 +2263,6 @@ set as active.
                 expectation_suite_name=expectation_suite_name,
                 data_context=self._data_context,
             )
-
         self._expectation_suite.execution_engine_type = type(
             self.execution_engine
         ).__name__
@@ -2260,13 +2270,20 @@ set as active.
     def _get_runtime_configuration(
         self,
         catch_exceptions: Optional[bool] = None,
-        result_format: Optional[Union[dict, str]] = None,
+        result_format: Optional[Union[(dict, str)]] = None,
     ) -> dict:
-        runtime_configuration = copy.deepcopy(self.default_expectation_args)
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        runtime_configuration = copy.deepcopy(self.default_expectation_args)
         if catch_exceptions is not None:
             runtime_configuration.update({"catch_exceptions": catch_exceptions})
-
         if (
             self.default_expectation_args["result_format"]
             == Validator.DEFAULT_RUNTIME_CONFIGURATION["result_format"]
@@ -2275,54 +2292,45 @@ set as active.
                 runtime_configuration.pop("result_format")
             else:
                 runtime_configuration.update({"result_format": result_format})
-        else:
-            if result_format is not None:
-                runtime_configuration.update({"result_format": result_format})
-
+        elif result_format is not None:
+            runtime_configuration.update({"result_format": result_format})
         return runtime_configuration
 
 
 class BridgeValidator:
-    """This is currently helping bridge APIs"""
+    "This is currently helping bridge APIs"
 
     def __init__(
         self, batch, expectation_suite, expectation_engine=None, **kwargs
     ) -> None:
-        """Builds an expectation_engine object using an expectation suite and a batch, with the expectation engine being
-        determined either by the user or by the type of batch data (pandas dataframe, SqlAlchemy table, etc.)
+        import inspect
 
-        Args:
-            batch (Batch): A Batch in Pandas, Spark, or SQL format
-            expectation_suite (ExpectationSuite): The Expectation Suite available to the validator within the current
-            Data Context
-            expectation_engine (ExecutionEngine): The current Execution Engine being utilized. If this is not set, it is
-            determined by the type of data within the given batch
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Builds an expectation_engine object using an expectation suite and a batch, with the expectation engine being\n        determined either by the user or by the type of batch data (pandas dataframe, SqlAlchemy table, etc.)\n\n        Args:\n            batch (Batch): A Batch in Pandas, Spark, or SQL format\n            expectation_suite (ExpectationSuite): The Expectation Suite available to the validator within the current\n            Data Context\n            expectation_engine (ExecutionEngine): The current Execution Engine being utilized. If this is not set, it is\n            determined by the type of data within the given batch\n        "
         self.batch = batch
         self._expectation_suite = expectation_suite
-
         if isinstance(expectation_engine, dict):
             expectation_engine = ClassConfig(**expectation_engine)
-
         if isinstance(expectation_engine, ClassConfig):
             module_name = expectation_engine.module_name or "great_expectations.dataset"
             verify_dynamic_loading_support(module_name=module_name)
             expectation_engine = load_class(
                 class_name=expectation_engine.class_name, module_name=module_name
             )
-
         self.expectation_engine = expectation_engine
-
         if self.expectation_engine is None:
-            # Guess the engine
             if pd is not None:
                 if isinstance(batch.data, pd.DataFrame):
                     self.expectation_engine = PandasDataset
-
         if self.expectation_engine is None:
             if isinstance(batch.data, SqlAlchemyBatchReference):
                 self.expectation_engine = SqlAlchemyDataset
-
         if self.expectation_engine is None:
             try:
                 import pyspark
@@ -2330,27 +2338,29 @@ class BridgeValidator:
                 if isinstance(batch.data, pyspark.sql.DataFrame):
                     self.expectation_engine = SparkDFDataset
             except ImportError:
-                # noinspection PyUnusedLocal
                 pyspark = None
-
         if self.expectation_engine is None:
             raise ValueError(
                 "Unable to identify expectation_engine. It must be a subclass of DataAsset."
             )
-
         self.init_kwargs = kwargs
 
     def get_dataset(self):
-        """
-        Bridges between Execution Engines in providing access to the batch data. Validates that Dataset classes
-        contain proper type of data (i.e. a Pandas Dataset does not contain SqlAlchemy data)
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Bridges between Execution Engines in providing access to the batch data. Validates that Dataset classes\n        contain proper type of data (i.e. a Pandas Dataset does not contain SqlAlchemy data)\n        "
         if issubclass(self.expectation_engine, PandasDataset):
             if not isinstance(self.batch["data"], pd.DataFrame):
                 raise ValueError(
                     "PandasDataset expectation_engine requires a Pandas Dataframe for its batch"
                 )
-
             return self.expectation_engine(
                 self.batch.data,
                 expectation_suite=self._expectation_suite,
@@ -2361,13 +2371,11 @@ class BridgeValidator:
                 **self.init_kwargs,
                 **self.batch.batch_kwargs.get("dataset_options", {}),
             )
-
         elif issubclass(self.expectation_engine, SqlAlchemyDataset):
             if not isinstance(self.batch.data, SqlAlchemyBatchReference):
                 raise ValueError(
                     "SqlAlchemyDataset expectation_engine requires a SqlAlchemyBatchReference for its batch"
                 )
-
             init_kwargs = self.batch.data.get_init_kwargs()
             init_kwargs.update(self.init_kwargs)
             return self.expectation_engine(
@@ -2379,7 +2387,6 @@ class BridgeValidator:
                 **init_kwargs,
                 **self.batch.batch_kwargs.get("dataset_options", {}),
             )
-
         elif issubclass(self.expectation_engine, SparkDFDataset):
             import pyspark
 
@@ -2387,7 +2394,6 @@ class BridgeValidator:
                 raise ValueError(
                     "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"
                 )
-
             return self.expectation_engine(
                 spark_df=self.batch.data,
                 expectation_suite=self._expectation_suite,

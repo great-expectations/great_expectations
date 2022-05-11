@@ -14,6 +14,15 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return [
             RenderedStringTemplateContent(
                 **{
@@ -28,7 +37,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                         "styling": {
                             "params": {
                                 "expectation_type": {
-                                    "classes": ["badge", "badge-warning"],
+                                    "classes": ["badge", "badge-warning"]
                                 }
                             }
                         },
@@ -46,6 +55,15 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert result, "Must provide a result object."
         if result.exception_info["raised_exception"]:
             return RenderedStringTemplateContent(
@@ -69,7 +87,6 @@ class ExpectationStringRenderer(ContentBlockRenderer):
                     },
                 }
             )
-
         if result.success:
             return RenderedStringTemplateContent(
                 **{

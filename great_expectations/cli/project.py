@@ -17,45 +17,67 @@ from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
 @click.group()
 def project() -> None:
-    """Project operations"""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Project operations"
     pass
 
 
 @project.command(name="check-config")
 @click.pass_context
 def project_check_config(ctx: click.Context) -> None:
-    """Check a config for validity and help with migrations."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Check a config for validity and help with migrations."
     cli_message("Checking your config files for validity...\n")
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
-
-    is_config_ok, error_message, context = do_config_check(directory)
-
+    (is_config_ok, error_message, context) = do_config_check(directory)
     if not (is_config_ok and context):
         cli_message("Unfortunately, your config appears to be invalid:\n")
         cli_message(f"<red>{error_message}</red>")
         sys.exit(1)
-
     send_usage_message(
         data_context=context,
         event=UsageStatsEvents.CLI_PROJECT_CHECK_CONFIG.value,
         success=True,
     )
-
     cli_message("<green>Your config file appears valid!</green>")
 
 
 @project.command(name="upgrade")
 @click.pass_context
 def project_upgrade(ctx: click.Context) -> None:
-    """Upgrade a project after installing the next Great Expectations major version."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Upgrade a project after installing the next Great Expectations major version."
     cli_message("\nChecking project...")
     cli_message(SECTION_SEPARATOR)
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
-
     if load_data_context_with_error_handling(
         directory=directory, from_cli_upgrade_command=True
     ):
@@ -66,7 +88,16 @@ def project_upgrade(ctx: click.Context) -> None:
         sys.exit(1)
 
 
-def do_config_check(target_directory: str) -> Tuple[bool, str, Optional[DataContext]]:
+def do_config_check(target_directory: str) -> Tuple[(bool, str, Optional[DataContext])]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     is_config_ok: bool = True
     upgrade_message: str = ""
     context: Optional[DataContext]
@@ -82,8 +113,8 @@ upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFI
             context = None
         elif int(ge_config_version) > CURRENT_GE_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
-                f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
-{CURRENT_GE_CONFIG_VERSION}.
+                f"""Invalid config version ({ge_config_version}).
+    The maximum valid version is {CURRENT_GE_CONFIG_VERSION}.
 """
             )
         else:
@@ -103,11 +134,7 @@ upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFI
                     upgrade_overview = cli_colorize_string(upgrade_overview)
                     cli_message(string=upgrade_overview)
                     is_config_ok = False
-                    upgrade_message = """The configuration of your great_expectations.yml is outdated.  Please \
-consult the V3 API migration guide \
-https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your \
-Great Expectations configuration in order to take advantage of the latest capabilities.
-"""
+                    upgrade_message = "The configuration of your great_expectations.yml is outdated.  Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your Great Expectations configuration in order to take advantage of the latest capabilities.\n"
                     context = None
     except (
         ge_exceptions.InvalidConfigurationYamlError,
@@ -123,9 +150,4 @@ Great Expectations configuration in order to take advantage of the latest capabi
         is_config_ok = False
         upgrade_message = err.message
         context = None
-
-    return (
-        is_config_ok,
-        upgrade_message,
-        context,
-    )
+    return (is_config_ok, upgrade_message, context)

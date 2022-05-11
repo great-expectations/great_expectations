@@ -28,38 +28,47 @@ class SelectColumnValuesUniqueWithinRecord(MulticolumnMapMetricProvider):
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         num_columns = len(column_list.columns)
         row_wise_cond = column_list.nunique(dropna=False, axis=1) >= num_columns
         return row_wise_cond
 
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_list, **kwargs):
-        """
-        The present approach relies on an inefficient query condition construction implementation, whose computational
-        cost is O(num_columns^2).  However, until a more efficient implementation compatible with SQLAlchemy is
-        available, this is the only feasible mechanism under the current architecture, where map metric providers must
-        return a condition.  Nevertheless, SQL query length limit is 1GB (sufficient for most practical scenarios).
-        """
-        num_columns = len(column_list)
+        import inspect
 
-        # An arbitrary "num_columns" value used for issuing an explanatory message as a warning.
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        The present approach relies on an inefficient query condition construction implementation, whose computational\n        cost is O(num_columns^2).  However, until a more efficient implementation compatible with SQLAlchemy is\n        available, this is the only feasible mechanism under the current architecture, where map metric providers must\n        return a condition.  Nevertheless, SQL query length limit is 1GB (sufficient for most practical scenarios).\n        "
+        num_columns = len(column_list)
         if num_columns > 100:
             logger.warning(
-                f"""Batch data with {num_columns} columns is detected.  Computing the "{cls.condition_metric_name}" \
-metric for wide tables using SQLAlchemy leads to long WHERE clauses for the underlying database engine to process.
+                f"""Batch data with {num_columns} columns is detected.  Computing the "{cls.condition_metric_name}" metric for wide tables using SQLAlchemy leads to long WHERE clauses for the underlying database engine to process.
 """
             )
-
         conditions = sa.or_(
             *(
                 sa.or_(
-                    column_list[idx_src] == column_list[idx_dest],
+                    (column_list[idx_src] == column_list[idx_dest]),
                     sa.and_(
-                        column_list[idx_src] == None, column_list[idx_dest] == None
+                        (column_list[idx_src] == None), (column_list[idx_dest] == None)
                     ),
                 )
                 for idx_src in range(num_columns - 1)
-                for idx_dest in range(idx_src + 1, num_columns)
+                for idx_dest in range((idx_src + 1), num_columns)
             )
         )
         row_wise_cond = sa.not_(conditions)
@@ -67,17 +76,24 @@ metric for wide tables using SQLAlchemy leads to long WHERE clauses for the unde
 
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_list, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         column_names = column_list.columns
         num_columns = len(column_names)
-
         conditions = []
         for idx_src in range(num_columns - 1):
-            for idx_dest in range(idx_src + 1, num_columns):
+            for idx_dest in range((idx_src + 1), num_columns):
                 conditions.append(
                     F.col(column_names[idx_src]).eqNullSafe(
                         F.col(column_names[idx_dest])
                     )
                 )
-
-        row_wise_cond = ~reduce(lambda a, b: a | b, conditions)
+        row_wise_cond = ~reduce((lambda a, b: (a | b)), conditions)
         return row_wise_cond

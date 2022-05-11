@@ -20,6 +20,15 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return set(column.unique())
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -28,9 +37,18 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         observed_value_counts = metrics["column.value_counts"]
         return set(observed_value_counts.index)
 
@@ -40,9 +58,18 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         observed_value_counts = metrics["column.value_counts"]
         return set(observed_value_counts.index)
 
@@ -54,27 +81,30 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[Dict] = None,
     ):
-        """Returns a dictionary of given metric names and their corresponding configuration,
-        specifying the metric types and their respective domains"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Returns a dictionary of given metric names and their corresponding configuration,\n        specifying the metric types and their respective domains"
         dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-
         if isinstance(
             execution_engine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)
         ):
             dependencies["column.value_counts"] = MetricConfiguration(
                 metric_name="column.value_counts",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs={
-                    "sort": "value",
-                    "collate": None,
-                },
+                metric_value_kwargs={"sort": "value", "collate": None},
             )
-
         return dependencies
 
 
@@ -83,6 +113,15 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return column.nunique()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -91,9 +130,18 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         observed_value_counts = metrics["column.value_counts"]
         return len(observed_value_counts)
 
@@ -103,9 +151,18 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         observed_value_counts = metrics["column.value_counts"]
         return len(observed_value_counts)
 
@@ -117,25 +174,28 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[Dict] = None,
     ):
-        """Returns a dictionary of given metric names and their corresponding configuration,
-        specifying the metric types and their respective domains"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Returns a dictionary of given metric names and their corresponding configuration,\n        specifying the metric types and their respective domains"
         dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-
         if isinstance(
             execution_engine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)
         ):
             dependencies["column.value_counts"] = MetricConfiguration(
                 metric_name="column.value_counts",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs={
-                    "sort": "value",
-                    "collate": None,
-                },
+                metric_value_kwargs={"sort": "value", "collate": None},
             )
-
         return dependencies

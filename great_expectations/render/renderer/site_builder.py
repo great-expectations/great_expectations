@@ -21,93 +21,11 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import resource_key_passes_run_name_filter
 
 logger = logging.getLogger(__name__)
-
-FALSEY_YAML_STRINGS = [
-    "0",
-    "None",
-    "False",
-    "false",
-    "FALSE",
-    "none",
-    "NONE",
-]
+FALSEY_YAML_STRINGS = ["0", "None", "False", "false", "FALSE", "none", "NONE"]
 
 
 class SiteBuilder:
-    """SiteBuilder builds data documentation for the project defined by a
-    DataContext.
-
-    A data documentation site consists of HTML pages for expectation suites,
-    profiling and validation results, and
-    an index.html page that links to all the pages.
-
-    The exact behavior of SiteBuilder is controlled by configuration in the
-    DataContext's great_expectations.yml file.
-
-    Users can specify:
-
-        * which datasources to document (by default, all)
-        * whether to include expectations, validations and profiling results
-        sections (by default, all)
-        * where the expectations and validations should be read from
-        (filesystem or S3)
-        * where the HTML files should be written (filesystem or S3)
-        * which renderer and view class should be used to render each section
-
-    Here is an example of a minimal configuration for a site::
-
-        local_site:
-            class_name: SiteBuilder
-            store_backend:
-                class_name: TupleS3StoreBackend
-                bucket: data_docs.my_company.com
-                prefix: /data_docs/
-
-
-    A more verbose configuration can also control individual sections and
-    override renderers, views, and stores::
-
-        local_site:
-            class_name: SiteBuilder
-            store_backend:
-                class_name: TupleS3StoreBackend
-                bucket: data_docs.my_company.com
-                prefix: /data_docs/
-            site_index_builder:
-                class_name: DefaultSiteIndexBuilder
-
-            # Verbose version:
-            # site_index_builder:
-            #     module_name: great_expectations.render.builder
-            #     class_name: DefaultSiteIndexBuilder
-            #     renderer:
-            #         module_name: great_expectations.render.renderer
-            #         class_name: SiteIndexPageRenderer
-            #     view:
-            #         module_name: great_expectations.render.view
-            #         class_name: DefaultJinjaIndexPageView
-
-            site_section_builders:
-                # Minimal specification
-                expectations:
-                    class_name: DefaultSiteSectionBuilder
-                    source_store_name: expectation_store
-                renderer:
-                    module_name: great_expectations.render.renderer
-                    class_name: ExpectationSuitePageRenderer
-
-                # More verbose specification with optional arguments
-                validations:
-                    module_name: great_expectations.data_context.render
-                    class_name: DefaultSiteSectionBuilder
-                    source_store_name: local_validation_store
-                    renderer:
-                        module_name: great_expectations.render.renderer
-                        class_name: SiteIndexPageRenderer
-                    view:
-                        module_name: great_expectations.render.view
-                        class_name: DefaultJinjaIndexPageView
-    """
+    "SiteBuilder builds data documentation for the project defined by a\n    DataContext.\n\n    A data documentation site consists of HTML pages for expectation suites,\n    profiling and validation results, and\n    an index.html page that links to all the pages.\n\n    The exact behavior of SiteBuilder is controlled by configuration in the\n    DataContext's great_expectations.yml file.\n\n    Users can specify:\n\n        * which datasources to document (by default, all)\n        * whether to include expectations, validations and profiling results\n        sections (by default, all)\n        * where the expectations and validations should be read from\n        (filesystem or S3)\n        * where the HTML files should be written (filesystem or S3)\n        * which renderer and view class should be used to render each section\n\n    Here is an example of a minimal configuration for a site::\n\n        local_site:\n            class_name: SiteBuilder\n            store_backend:\n                class_name: TupleS3StoreBackend\n                bucket: data_docs.my_company.com\n                prefix: /data_docs/\n\n\n    A more verbose configuration can also control individual sections and\n    override renderers, views, and stores::\n\n        local_site:\n            class_name: SiteBuilder\n            store_backend:\n                class_name: TupleS3StoreBackend\n                bucket: data_docs.my_company.com\n                prefix: /data_docs/\n            site_index_builder:\n                class_name: DefaultSiteIndexBuilder\n\n            # Verbose version:\n            # site_index_builder:\n            #     module_name: great_expectations.render.builder\n            #     class_name: DefaultSiteIndexBuilder\n            #     renderer:\n            #         module_name: great_expectations.render.renderer\n            #         class_name: SiteIndexPageRenderer\n            #     view:\n            #         module_name: great_expectations.render.view\n            #         class_name: DefaultJinjaIndexPageView\n\n            site_section_builders:\n                # Minimal specification\n                expectations:\n                    class_name: DefaultSiteSectionBuilder\n                    source_store_name: expectation_store\n                renderer:\n                    module_name: great_expectations.render.renderer\n                    class_name: ExpectationSuitePageRenderer\n\n                # More verbose specification with optional arguments\n                validations:\n                    module_name: great_expectations.data_context.render\n                    class_name: DefaultSiteSectionBuilder\n                    source_store_name: local_validation_store\n                    renderer:\n                        module_name: great_expectations.render.renderer\n                        class_name: SiteIndexPageRenderer\n                    view:\n                        module_name: great_expectations.render.view\n                        class_name: DefaultJinjaIndexPageView\n"
 
     def __init__(
         self,
@@ -121,12 +39,20 @@ class SiteBuilder:
         ge_cloud_mode=False,
         **kwargs,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
         self.show_how_to_buttons = show_how_to_buttons
         self.ge_cloud_mode = ge_cloud_mode
-
         usage_statistics_config = data_context.anonymous_usage_statistics
         data_context_id = None
         if (
@@ -135,10 +61,7 @@ class SiteBuilder:
             and usage_statistics_config.data_context_id
         ):
             data_context_id = usage_statistics_config.data_context_id
-
         self.data_context_id = data_context_id
-
-        # set custom_styles_directory if present
         custom_styles_directory = None
         plugins_directory = data_context.plugins_directory
         if plugins_directory and os.path.isdir(
@@ -147,8 +70,6 @@ class SiteBuilder:
             custom_styles_directory = os.path.join(
                 plugins_directory, "custom_data_docs", "styles"
             )
-
-        # set custom_views_directory if present
         custom_views_directory = None
         if plugins_directory and os.path.isdir(
             os.path.join(plugins_directory, "custom_data_docs", "views")
@@ -156,14 +77,8 @@ class SiteBuilder:
             custom_views_directory = os.path.join(
                 plugins_directory, "custom_data_docs", "views"
             )
-
         if site_index_builder is None:
             site_index_builder = {"class_name": "DefaultSiteIndexBuilder"}
-
-        # The site builder is essentially a frontend store. We'll open up
-        # three types of backends using the base
-        # type of the configuration defined in the store_backend section
-
         if ge_cloud_mode:
             self.target_store = JsonSiteStore(
                 store_backend=store_backend, runtime_environment=runtime_environment
@@ -172,7 +87,6 @@ class SiteBuilder:
             self.target_store = HtmlSiteStore(
                 store_backend=store_backend, runtime_environment=runtime_environment
             )
-
         default_site_section_builders_config = {
             "expectations": {
                 "class_name": "DefaultSiteSectionBuilder",
@@ -193,15 +107,12 @@ class SiteBuilder:
                 "renderer": {"class_name": "ProfilingResultsPageRenderer"},
             },
         }
-
         if site_section_builders is None:
             site_section_builders = default_site_section_builders_config
         else:
             site_section_builders = nested_update(
                 default_site_section_builders_config, site_section_builders
             )
-
-        # set default run_name_filter
         if site_section_builders.get("validations", "None") not in FALSEY_YAML_STRINGS:
             if site_section_builders["validations"].get("run_name_filter") is None:
                 site_section_builders["validations"]["run_name_filter"] = {
@@ -212,10 +123,11 @@ class SiteBuilder:
                 site_section_builders["profiling"]["run_name_filter"] = {
                     "includes": "profiling"
                 }
-
         self.site_section_builders = {}
-        for site_section_name, site_section_config in site_section_builders.items():
-            if not site_section_config or site_section_config in FALSEY_YAML_STRINGS:
+        for (site_section_name, site_section_config) in site_section_builders.items():
+            if (not site_section_config) or (
+                site_section_config in FALSEY_YAML_STRINGS
+            ):
                 continue
             module_name = (
                 site_section_config.get("module_name")
@@ -242,7 +154,6 @@ class SiteBuilder:
                     package_name=None,
                     class_name=site_section_config["class_name"],
                 )
-
         module_name = (
             site_index_builder.get("module_name")
             or "great_expectations.render.renderer.site_builder"
@@ -261,7 +172,7 @@ class SiteBuilder:
                 "source_stores": {
                     section_name: section_config.get("source_store_name")
                     for (section_name, section_config) in site_section_builders.items()
-                    if section_config not in FALSEY_YAML_STRINGS
+                    if (section_config not in FALSEY_YAML_STRINGS)
                 },
                 "site_section_builders_config": site_section_builders,
                 "ge_cloud_mode": self.ge_cloud_mode,
@@ -280,54 +191,47 @@ class SiteBuilder:
             )
 
     def clean_site(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.target_store.clean_site()
 
     def build(self, resource_identifiers=None, build_index: bool = True):
-        """
+        import inspect
 
-        :param resource_identifiers: a list of resource identifiers
-        (ExpectationSuiteIdentifier,
-                            ValidationResultIdentifier). If specified,
-                            rebuild HTML(or other views the data docs
-                            site renders) only for the resources in this list.
-                            This supports incremental build of data docs sites
-                            (e.g., when a new validation result is created)
-                            and avoids full rebuild.
-
-        :param build_index: a flag if False, skips building the index page
-
-        :return:
-        """
-
-        # copy static assets
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n\n        :param resource_identifiers: a list of resource identifiers\n        (ExpectationSuiteIdentifier,\n                            ValidationResultIdentifier). If specified,\n                            rebuild HTML(or other views the data docs\n                            site renders) only for the resources in this list.\n                            This supports incremental build of data docs sites\n                            (e.g., when a new validation result is created)\n                            and avoids full rebuild.\n\n        :param build_index: a flag if False, skips building the index page\n\n        :return:\n        "
         for site_section_builder in self.site_section_builders.values():
             site_section_builder.build(resource_identifiers=resource_identifiers)
-
-        # GE Cloud supports JSON Site Data Docs
-        # Skip static assets, indexing
         if self.ge_cloud_mode:
             return
-
         self.target_store.copy_static_assets()
-
-        _, index_links_dict = self.site_index_builder.build(build_index=build_index)
-        return (
-            self.get_resource_url(only_if_exists=False),
-            index_links_dict,
-        )
+        (_, index_links_dict) = self.site_index_builder.build(build_index=build_index)
+        return (self.get_resource_url(only_if_exists=False), index_links_dict)
 
     def get_resource_url(self, resource_identifier=None, only_if_exists=True):
-        """
-        Return the URL of the HTML document that renders a resource
-        (e.g., an expectation suite or a validation result).
+        import inspect
 
-        :param resource_identifier: ExpectationSuiteIdentifier,
-        ValidationResultIdentifier or any other type's identifier. The
-        argument is optional - when not supplied, the method returns the URL of
-        the index page.
-        :return: URL (string)
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Return the URL of the HTML document that renders a resource\n        (e.g., an expectation suite or a validation result).\n\n        :param resource_identifier: ExpectationSuiteIdentifier,\n        ValidationResultIdentifier or any other type's identifier. The\n        argument is optional - when not supplied, the method returns the URL of\n        the index page.\n        :return: URL (string)\n        "
         return self.target_store.get_url_for_resource(
             resource_identifier=resource_identifier, only_if_exists=only_if_exists
         )
@@ -351,6 +255,15 @@ class DefaultSiteSectionBuilder:
         ge_cloud_mode=False,
         **kwargs,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.name = name
         self.data_context = data_context
         self.source_store = data_context.stores[source_store_name]
@@ -362,8 +275,7 @@ class DefaultSiteSectionBuilder:
         self.ge_cloud_mode = ge_cloud_mode
         if renderer is None:
             raise exceptions.InvalidConfigError(
-                "SiteSectionBuilder requires a renderer configuration "
-                "with a class_name key."
+                "SiteSectionBuilder requires a renderer configuration with a class_name key."
             )
         module_name = (
             renderer.get("module_name") or "great_expectations.render.renderer"
@@ -379,13 +291,9 @@ class DefaultSiteSectionBuilder:
                 package_name=None,
                 class_name=renderer["class_name"],
             )
-
         module_name = "great_expectations.render.view"
         if view is None:
-            view = {
-                "module_name": module_name,
-                "class_name": "DefaultJinjaPageView",
-            }
+            view = {"module_name": module_name, "class_name": "DefaultJinjaPageView"}
         module_name = view.get("module_name") or module_name
         self.view_class = instantiate_class_from_config(
             config=view,
@@ -403,22 +311,26 @@ class DefaultSiteSectionBuilder:
             )
 
     def build(self, resource_identifiers=None) -> None:
-        source_store_keys = self.source_store.list_keys()
-        if self.name == "validations" and self.validation_results_limit:
-            source_store_keys = sorted(
-                source_store_keys, key=lambda x: x.run_id.run_time, reverse=True
-            )[: self.validation_results_limit]
+        import inspect
 
-        for resource_key in source_store_keys:
-            # if no resource_identifiers are passed, the section
-            # builder will build
-            # a page for every keys in its source store.
-            # if the caller did pass resource_identifiers, the section builder
-            # will build pages only for the specified resources
-            if resource_identifiers and resource_key not in resource_identifiers:
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
                 continue
-
-            if self.run_name_filter and not isinstance(resource_key, GeCloudIdentifier):
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        source_store_keys = self.source_store.list_keys()
+        if (self.name == "validations") and self.validation_results_limit:
+            source_store_keys = sorted(
+                source_store_keys, key=(lambda x: x.run_id.run_time), reverse=True
+            )[: self.validation_results_limit]
+        for resource_key in source_store_keys:
+            if resource_identifiers and (resource_key not in resource_identifiers):
+                continue
+            if self.run_name_filter and (
+                not isinstance(resource_key, GeCloudIdentifier)
+            ):
                 if not resource_key_passes_run_name_filter(
                     resource_key, self.run_name_filter
                 ):
@@ -434,7 +346,6 @@ class DefaultSiteSectionBuilder:
                     f"Object with Key: {str(resource_key)} could not be retrieved. Skipping..."
                 )
                 continue
-
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
                 logger.debug(
@@ -452,19 +363,14 @@ class DefaultSiteSectionBuilder:
                         f"        Rendering profiling for batch {resource_key.batch_identifier}"
                     )
                 else:
-
                     logger.debug(
                         f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"
                     )
-
             try:
                 rendered_content = self.renderer_class.render(resource)
-
                 if self.ge_cloud_mode:
                     self.target_store.set(
-                        GeCloudIdentifier(
-                            resource_type="rendered_data_doc",
-                        ),
+                        GeCloudIdentifier(resource_type="rendered_data_doc"),
                         rendered_content,
                         source_type=resource_key.resource_type,
                         source_id=resource_key.ge_cloud_id,
@@ -475,7 +381,6 @@ class DefaultSiteSectionBuilder:
                         data_context_id=self.data_context_id,
                         show_how_to_buttons=self.show_how_to_buttons,
                     )
-                    # Verify type
                     self.target_store.set(
                         SiteSectionIdentifier(
                             site_section_name=self.name,
@@ -484,16 +389,9 @@ class DefaultSiteSectionBuilder:
                         viewable_content,
                     )
             except Exception as e:
-                exception_message = """\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:
-                """
+                exception_message = "An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to diagnose and repair the underlying issue.  Detailed information follows:\n                "
                 exception_traceback = traceback.format_exc()
-                exception_message += (
-                    f'{type(e).__name__}: "{str(e)}".  '
-                    f'Traceback: "{exception_traceback}".'
-                )
+                exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message)
 
 
@@ -515,7 +413,15 @@ class DefaultSiteIndexBuilder:
         source_stores=None,
         **kwargs,
     ) -> None:
-        # NOTE: This method is almost identical to DefaultSiteSectionBuilder
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.name = name
         self.site_name = site_name
         self.data_context = data_context
@@ -525,7 +431,6 @@ class DefaultSiteIndexBuilder:
         self.show_how_to_buttons = show_how_to_buttons
         self.source_stores = source_stores or {}
         self.site_section_builders_config = site_section_builders_config or {}
-
         if renderer is None:
             renderer = {
                 "module_name": "great_expectations.render.renderer",
@@ -545,7 +450,6 @@ class DefaultSiteIndexBuilder:
                 package_name=None,
                 class_name=renderer["class_name"],
             )
-
         module_name = "great_expectations.render.view"
         if view is None:
             view = {
@@ -582,11 +486,19 @@ class DefaultSiteIndexBuilder:
         batch_kwargs=None,
         batch_spec=None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         import os
 
         if f"{section_name}_links" not in index_links_dict:
             index_links_dict[f"{section_name}_links"] = []
-
         if run_id:
             filepath = (
                 os.path.join(
@@ -602,12 +514,10 @@ class DefaultSiteIndexBuilder:
                 os.path.join("expectations", *expectation_suite_name.split("."))
                 + ".html"
             )
-
         expectation_suite_filepath = os.path.join(
             "expectations", *expectation_suite_name.split(".")
         )
         expectation_suite_filepath += ".html"
-
         index_links_dict[f"{section_name}_links"].append(
             {
                 "expectation_suite_name": expectation_suite_name,
@@ -620,57 +530,40 @@ class DefaultSiteIndexBuilder:
                 "asset_name": asset_name,
                 "batch_kwargs": batch_kwargs,
                 "batch_spec": batch_spec,
-                "expectation_suite_filepath": expectation_suite_filepath
-                if run_id
-                else None,
+                "expectation_suite_filepath": (
+                    expectation_suite_filepath if run_id else None
+                ),
             }
         )
-
         return index_links_dict
 
     def get_calls_to_action(self):
-        usage_statistics = None
-        # db_driver = None
-        # datasource_classes_by_name = self.data_context.list_datasources()
-        #
-        # if datasource_classes_by_name:
-        #     last_datasource_class_by_name = datasource_classes_by_name[-1]
-        #     last_datasource_class_name = last_datasource_class_by_name["
-        #     class_name"]
-        #     last_datasource_name = last_datasource_class_by_name["name"]
-        #     last_datasource = self.data_context.get_datasource
-        #     (last_datasource_name)
-        #
-        #     if last_datasource_class_name == "SqlAlchemyDatasource":
-        #         try:
-        #                # NOTE: JPC - 20200327 - I do not believe datasource
-        #                will *ever* have a drivername property
-        #                (it's in credentials). Suspect this isn't working.
-        #             db_driver = last_datasource.drivername
-        #         except AttributeError:
-        #             pass
-        #
-        #     datasource_type = DATASOURCE_TYPE_BY_DATASOURCE_CLASS[
-        #     last_datasource_class_name].value
-        #     usage_statistics = "?utm_source={}&utm_medium={}
-        #     &utm_campaign={}".format(
-        #         "ge-init-datadocs-v2",
-        #         datasource_type,
-        #         db_driver,
-        #     )
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        usage_statistics = None
         return {
             "header": "To continue exploring Great Expectations check out one of these tutorials...",
             "buttons": self._get_call_to_action_buttons(usage_statistics),
         }
 
     def _get_call_to_action_buttons(self, usage_statistics):
-        """
-        Build project and user specific calls to action buttons.
+        import inspect
 
-        This can become progressively smarter about project and user specific
-        calls to action.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Build project and user specific calls to action buttons.\n\n        This can become progressively smarter about project and user specific\n        calls to action.\n        "
         create_expectations = CallToActionButton(
             "How to Create Expectations",
             "https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data",
@@ -691,48 +584,36 @@ class DefaultSiteIndexBuilder:
             "How to Set Up a Team Site",
             "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem",
         )
-        # TODO gallery does not yet exist
-        # gallery = CallToActionButton(
-        #     "Great Expectations Gallery",
-        #     "https://greatexpectations.io/gallery"
-        # )
-
         results = []
         results.append(create_expectations)
-
-        # Show these no matter what
         results.append(validation_playground)
         results.append(team_site)
-
         if usage_statistics:
             for button in results:
                 button.link = button.link + usage_statistics
-
         return results
 
-    # TODO: deprecate dual batch api support
     def build(
         self, skip_and_clean_missing=True, build_index: bool = True
-    ) -> Tuple[Any, Optional[OrderedDict]]:
-        """
-        :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
-        be skipped and removed from the target store
-        :param build_index: a flag if False, skips building the index page
-        :return: tuple(index_page_url, index_links_dict)
-        """
+    ) -> Tuple[(Any, Optional[OrderedDict])]:
+        import inspect
 
-        # Loop over sections in the HtmlStore
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will\n        be skipped and removed from the target store\n        :param build_index: a flag if False, skips building the index page\n        :return: tuple(index_page_url, index_links_dict)\n        "
         logger.debug("DefaultSiteIndexBuilder.build")
         if not build_index:
             logger.debug("Skipping index rendering")
-            return None, None
-
+            return (None, None)
         index_links_dict = OrderedDict()
         index_links_dict["site_name"] = self.site_name
-
         if self.show_how_to_buttons:
             index_links_dict["cta_object"] = self.get_calls_to_action()
-
         self._add_expectations_to_index_links(index_links_dict, skip_and_clean_missing)
         validation_and_profiling_result_site_keys = (
             self._build_validation_and_profiling_result_site_keys(
@@ -745,7 +626,6 @@ class DefaultSiteIndexBuilder:
         self._add_validations_to_index_links(
             index_links_dict, validation_and_profiling_result_site_keys
         )
-
         viewable_content = ""
         try:
             rendered_content = self.renderer_class.render(index_links_dict)
@@ -755,24 +635,28 @@ class DefaultSiteIndexBuilder:
                 show_how_to_buttons=self.show_how_to_buttons,
             )
         except Exception as e:
-            exception_message = """\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:
-            """
+            exception_message = "An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to diagnose and repair the underlying issue.  Detailed information follows:\n            "
             exception_traceback = traceback.format_exc()
             exception_message += (
                 f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
             )
             logger.error(exception_message)
-
-        return self.target_store.write_index_page(viewable_content), index_links_dict
+        return (self.target_store.write_index_page(viewable_content), index_links_dict)
 
     def _add_expectations_to_index_links(
         self, index_links_dict: OrderedDict, skip_and_clean_missing: bool
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectations = self.site_section_builders_config.get("expectations", "None")
-        if expectations and expectations not in FALSEY_YAML_STRINGS:
+        if expectations and (expectations not in FALSEY_YAML_STRINGS):
             expectation_suite_source_keys = self.data_context.stores[
                 self.site_section_builders_config["expectations"].get(
                     "source_store_name"
@@ -794,7 +678,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     else:
                         cleaned_keys.append(expectation_suite_site_key)
                 expectation_suite_site_keys = cleaned_keys
-
             for expectation_suite_key in expectation_suite_site_keys:
                 self.add_resource_info_to_index_links_dict(
                     index_links_dict=index_links_dict,
@@ -805,15 +688,24 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _build_validation_and_profiling_result_site_keys(
         self, skip_and_clean_missing: bool
     ) -> List[ValidationResultIdentifier]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         validation_and_profiling_result_site_keys = []
         validations = self.site_section_builders_config.get("validations", "None")
         profiling = self.site_section_builders_config.get("profiling", "None")
-        if (validations and validations not in FALSEY_YAML_STRINGS) or (
-            profiling and profiling not in FALSEY_YAML_STRINGS
+        if (validations and (validations not in FALSEY_YAML_STRINGS)) or (
+            profiling and (profiling not in FALSEY_YAML_STRINGS)
         ):
             source_store = (
                 "validations"
-                if (validations and validations not in FALSEY_YAML_STRINGS)
+                if (validations and (validations not in FALSEY_YAML_STRINGS))
                 else "profiling"
             )
             validation_and_profiling_result_source_keys = self.data_context.stores[
@@ -840,7 +732,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     else:
                         cleaned_keys.append(validation_result_site_key)
                 validation_and_profiling_result_site_keys = cleaned_keys
-
         return validation_and_profiling_result_site_keys
 
     def _add_profiling_to_index_links(
@@ -848,8 +739,17 @@ diagnose and repair the underlying issue.  Detailed information follows:
         index_links_dict: OrderedDict,
         validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         profiling = self.site_section_builders_config.get("profiling", "None")
-        if profiling and profiling not in FALSEY_YAML_STRINGS:
+        if profiling and (profiling not in FALSEY_YAML_STRINGS):
             profiling_run_name_filter = self.site_section_builders_config["profiling"][
                 "run_name_filter"
             ]
@@ -868,10 +768,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         run_id=profiling_result_key.run_id,
                         validations_store_name=self.source_stores.get("profiling"),
                     )
-
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
                     batch_spec = validation.meta.get("batch_spec", {})
-
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
                         expectation_suite_name=profiling_result_key.expectation_suite_identifier.expectation_suite_name,
@@ -880,8 +778,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         run_id=profiling_result_key.run_id,
                         run_time=profiling_result_key.run_id.run_time,
                         run_name=profiling_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name")
-                        or batch_spec.get("data_asset_name"),
+                        asset_name=(
+                            batch_kwargs.get("data_asset_name")
+                            or batch_spec.get("data_asset_name")
+                        ),
                         batch_kwargs=batch_kwargs,
                         batch_spec=batch_spec,
                     )
@@ -894,8 +794,17 @@ diagnose and repair the underlying issue.  Detailed information follows:
         index_links_dict: OrderedDict,
         validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         validations = self.site_section_builders_config.get("validations", "None")
-        if validations and validations not in FALSEY_YAML_STRINGS:
+        if validations and (validations not in FALSEY_YAML_STRINGS):
             validations_run_name_filter = self.site_section_builders_config[
                 "validations"
             ]["run_name_filter"]
@@ -908,7 +817,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             ]
             validation_result_site_keys = sorted(
                 validation_result_site_keys,
-                key=lambda x: x.run_id.run_time,
+                key=(lambda x: x.run_id.run_time),
                 reverse=True,
             )
             if self.validation_results_limit:
@@ -923,11 +832,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         run_id=validation_result_key.run_id,
                         validations_store_name=self.source_stores.get("validations"),
                     )
-
                     validation_success = validation.success
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
                     batch_spec = validation.meta.get("batch_spec", {})
-
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
                         expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
@@ -937,8 +844,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         validation_success=validation_success,
                         run_time=validation_result_key.run_id.run_time,
                         run_name=validation_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name")
-                        or batch_spec.get("data_asset_name"),
+                        asset_name=(
+                            batch_kwargs.get("data_asset_name")
+                            or batch_spec.get("data_asset_name")
+                        ),
                         batch_kwargs=batch_kwargs,
                         batch_spec=batch_spec,
                     )
@@ -949,5 +858,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
 class CallToActionButton:
     def __init__(self, title, link) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.title = title
         self.link = link

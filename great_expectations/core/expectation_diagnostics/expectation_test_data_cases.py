@@ -6,13 +6,12 @@ from great_expectations.types import SerializableDictDot
 
 
 class TestData(dict):
-    __test__ = False  # Tell pytest not to try to collect this class as a test
+    __test__ = False
     pass
 
 
 class Backend(Enum):
-    """Backends with some level of testing and support"""
-
+    "Backends with some level of testing and support"
     BIGQUERY = "CONCEPT_ONLY"
     MSSQL = "EXPERIMENTAL"
     SQLITE = "BETA"
@@ -23,10 +22,18 @@ class Backend(Enum):
 class TestBackend:
     backend: str
     dialects: Optional[List[str]]
-
-    __test__ = False  # Tell pytest not to try to collect this class as a test
+    __test__ = False
 
     def __post_init__(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         allowed_backend_names = ("pandas", "spark", "sqlalchemy")
         allowed_sql_dialects = ("sqlite", "postgresql", "mysql", "mssql", "bigquery")
         assert (
@@ -37,13 +44,13 @@ class TestBackend:
                 self.dialects is None
             ), f"You may not specify dialects for backend {self.backend}"
         else:
-            assert (
-                type(self.dialects) == list and len(self.dialects) > 0
+            assert (type(self.dialects) == list) and (
+                len(self.dialects) > 0
             ), "dialects must be a list for backend sqlalchemy"
             bad_dialects = [
                 dialect
                 for dialect in self.dialects
-                if dialect not in allowed_sql_dialects
+                if (dialect not in allowed_sql_dialects)
             ]
             assert (
                 bad_dialects == []
@@ -52,11 +59,10 @@ class TestBackend:
 
 @dataclass
 class ExpectationTestCase(SerializableDictDot):
-    """A single test case, with input arguments and output"""
-
+    "A single test case, with input arguments and output"
     title: str
-    input: Dict[str, Any]
-    output: Dict[str, Any]
+    input: Dict[(str, Any)]
+    output: Dict[(str, Any)]
     exact_match_out: bool
     suppress_test_for: List[str] = field(default_factory=list)
     include_in_gallery: bool = False
@@ -64,23 +70,20 @@ class ExpectationTestCase(SerializableDictDot):
 
 
 class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
-    """This class provides an adapter between the test cases developed prior to Great Expectations' 0.14 release and the newer ExpectationTestCase dataclass
-
-    Notes:
-    * Legacy test cases used "in" (a python reserved word). This has been changed to "input".
-    * To maintain parallelism, we've also made the corresponding change from "out" to "output".
-    * To avoid any ambiguity, ExpectationLegacyTestCaseAdapter only accepts keyword arguments. Positional arguments are not allowed.
-    """
+    'This class provides an adapter between the test cases developed prior to Great Expectations\' 0.14 release and the newer ExpectationTestCase dataclass\n\n    Notes:\n    * Legacy test cases used "in" (a python reserved word). This has been changed to "input".\n    * To maintain parallelism, we\'ve also made the corresponding change from "out" to "output".\n    * To avoid any ambiguity, ExpectationLegacyTestCaseAdapter only accepts keyword arguments. Positional arguments are not allowed.\n'
 
     def __init__(
-        self,
-        *,
-        title,
-        exact_match_out,
-        out,
-        suppress_test_for=[],
-        **kwargs,
+        self, *, title, exact_match_out, out, suppress_test_for=[], **kwargs
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(
             title=title,
             input=kwargs["in"],
@@ -94,10 +97,9 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
 
 @dataclass
 class ExpectationTestDataCases(SerializableDictDot):
-    """Pairs a test dataset and a list of test cases to execute against that data."""
-
+    "Pairs a test dataset and a list of test cases to execute against that data."
     data: TestData
     tests: List[ExpectationTestCase]
-    schemas: Dict[Backend, Dict[str, str]] = field(default_factory=dict)
+    schemas: Dict[(Backend, Dict[(str, str)])] = field(default_factory=dict)
     test_backends: Optional[List[TestBackend]] = None
     data_alt: Optional[TestData] = None

@@ -23,9 +23,18 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         columns = metrics.get("table.columns")
         return len(columns)
 
@@ -35,9 +44,18 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         columns = metrics.get("table.columns")
         return len(columns)
 
@@ -47,9 +65,18 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         columns = metrics.get("table.columns")
         return len(columns)
 
@@ -61,6 +88,15 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
@@ -68,7 +104,7 @@ class TableColumnCount(TableMetricProvider):
             runtime_configuration=runtime_configuration,
         )
         table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
+            k: v for (k, v) in metric.metric_domain_kwargs.items() if (k != "column")
         }
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",

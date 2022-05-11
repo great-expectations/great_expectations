@@ -1,12 +1,6 @@
-from .meta_metric_provider import (  # isort:skip
-    MetaMetricProvider,
-    DeprecatedMetaMetricProvider,
-)
-from .column_aggregate_metric_provider import (
-    ColumnMetricProvider,  # This class name is being deprecated (use "ColumnAggregateMetricProvider" going forward).
-)
 from .column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
+    ColumnMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
@@ -19,6 +13,7 @@ from .map_metric_provider import (
     column_condition_partial,
     column_function_partial,
 )
+from .meta_metric_provider import DeprecatedMetaMetricProvider, MetaMetricProvider
 from .metric_provider import (
     MetricDomainTypes,
     MetricFunctionTypes,

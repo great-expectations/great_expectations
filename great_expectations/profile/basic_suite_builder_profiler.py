@@ -15,81 +15,19 @@ from great_expectations.util import is_nan
 
 
 class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
-    """
-    This profiler helps build coarse expectations for columns you care about.
-
-    The goal of this profiler is to expedite the process of authoring an
-    expectation suite by building possibly relevant exceptions for columns that
-    you care about. You can then easily edit the suite and adjust or delete
-    these expectations to hone your new suite.
-
-    Ranges of acceptable values in the expectations created by this profiler
-    (for example, the min/max of the value in
-    expect_column_values_to_be_between) are created only to demonstrate the
-    functionality and should not be taken as the actual ranges. You should
-    definitely edit this coarse suite.
-
-    Configuration is optional, and if not provided, this profiler will create
-    expectations for all columns.
-
-    Configuration is a dictionary with a `columns` key containing a list of the
-    column names you want coarse expectations created for. This dictionary can
-    also contain a `excluded_expectations` key with a list of expectation
-    names you do not want created or a `included_expectations` key with a list
-    of expectation names you want created (if applicable).
-
-    For example, if you had a wide patients table and you want expectations on
-    three columns, you'd do this:
-
-
-    suite, validation_result = BasicSuiteBuilderProfiler().profile(
-        dataset,
-        {"columns": ["id", "username", "address"]}
-    )
-
-    For example, if you had a wide patients table and you want expectations on
-    all columns, excluding three statistical expectations, you'd do this:
-
-
-    suite, validation_result = BasicSuiteBuilderProfiler().profile(
-        dataset,
-        {
-            "excluded_expectations":
-            [
-                "expect_column_mean_to_be_between",
-                "expect_column_median_to_be_between",
-                "expect_column_quantile_values_to_be_between",
-            ],
-        }
-    )
-
-    For example, if you had a wide patients table and you want only two types of
-    expectations on all applicable columns you'd do this:
-
-
-    suite, validation_result = BasicSuiteBuilderProfiler().profile(
-        dataset,
-        {
-            "included_expectations":
-            [
-                "expect_column_to_not_be_null",
-                "expect_column_values_to_be_in_set",
-            ],
-        }
-    )
-
-    It can also be used to generate an expectation suite that contains one
-    instance of every interesting expectation type.
-
-    When used in this "demo" mode, the suite is intended to demonstrate of the
-    expressive power of expectations and provide a service similar to the one
-    expectations glossary documentation page, but on a users' own data.
-
-    suite, validation_result = BasicSuiteBuilderProfiler().profile(dataset, configuration="demo")
-    """
+    '\n    This profiler helps build coarse expectations for columns you care about.\n\n    The goal of this profiler is to expedite the process of authoring an\n    expectation suite by building possibly relevant exceptions for columns that\n    you care about. You can then easily edit the suite and adjust or delete\n    these expectations to hone your new suite.\n\n    Ranges of acceptable values in the expectations created by this profiler\n    (for example, the min/max of the value in\n    expect_column_values_to_be_between) are created only to demonstrate the\n    functionality and should not be taken as the actual ranges. You should\n    definitely edit this coarse suite.\n\n    Configuration is optional, and if not provided, this profiler will create\n    expectations for all columns.\n\n    Configuration is a dictionary with a `columns` key containing a list of the\n    column names you want coarse expectations created for. This dictionary can\n    also contain a `excluded_expectations` key with a list of expectation\n    names you do not want created or a `included_expectations` key with a list\n    of expectation names you want created (if applicable).\n\n    For example, if you had a wide patients table and you want expectations on\n    three columns, you\'d do this:\n\n\n    suite, validation_result = BasicSuiteBuilderProfiler().profile(\n        dataset,\n        {"columns": ["id", "username", "address"]}\n    )\n\n    For example, if you had a wide patients table and you want expectations on\n    all columns, excluding three statistical expectations, you\'d do this:\n\n\n    suite, validation_result = BasicSuiteBuilderProfiler().profile(\n        dataset,\n        {\n            "excluded_expectations":\n            [\n                "expect_column_mean_to_be_between",\n                "expect_column_median_to_be_between",\n                "expect_column_quantile_values_to_be_between",\n            ],\n        }\n    )\n\n    For example, if you had a wide patients table and you want only two types of\n    expectations on all applicable columns you\'d do this:\n\n\n    suite, validation_result = BasicSuiteBuilderProfiler().profile(\n        dataset,\n        {\n            "included_expectations":\n            [\n                "expect_column_to_not_be_null",\n                "expect_column_values_to_be_in_set",\n            ],\n        }\n    )\n\n    It can also be used to generate an expectation suite that contains one\n    instance of every interesting expectation type.\n\n    When used in this "demo" mode, the suite is intended to demonstrate of the\n    expressive power of expectations and provide a service similar to the one\n    expectations glossary documentation page, but on a users\' own data.\n\n    suite, validation_result = BasicSuiteBuilderProfiler().profile(dataset, configuration="demo")\n'
 
     @classmethod
     def _get_column_type_with_caching(cls, dataset, column_name, cache):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         column_cache_entry = cache.get(column_name)
         if not column_cache_entry:
             column_cache_entry = {}
@@ -98,8 +36,6 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         if not column_type:
             column_type = cls._get_column_type(dataset, column_name)
             column_cache_entry["type"] = column_type
-            # remove the expectation
-            # Does this change with different config format?
             dataset.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_values_to_be_in_type_list",
@@ -107,11 +43,19 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 )
             )
             dataset.set_config_value("interactive_evaluation", True)
-
         return column_type
 
     @classmethod
     def _get_column_cardinality_with_caching(cls, dataset, column_name, cache):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         column_cache_entry = cache.get(column_name)
         if not column_cache_entry:
             column_cache_entry = {}
@@ -120,7 +64,6 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         if not column_cardinality:
             column_cardinality = cls._get_column_cardinality(dataset, column_name)
             column_cache_entry["cardinality"] = column_cardinality
-            # remove the expectations
             dataset.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_unique_value_count_to_be_between",
@@ -134,7 +77,6 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 )
             )
             dataset.set_config_value("interactive_evaluation", True)
-
         return column_cardinality
 
     @classmethod
@@ -146,19 +88,30 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         excluded_expectations=None,
         included_expectations=None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         cls._create_non_nullity_expectations(
             dataset,
             column,
             excluded_expectations=excluded_expectations,
             included_expectations=included_expectations,
         )
-
         if (
-            not excluded_expectations
-            or "expect_column_distinct_values_to_be_in_set" not in excluded_expectations
+            (not excluded_expectations)
+            or (
+                "expect_column_distinct_values_to_be_in_set"
+                not in excluded_expectations
+            )
         ) and (
-            not included_expectations
-            or "expect_column_distinct_values_to_be_in_set" in included_expectations
+            (not included_expectations)
+            or ("expect_column_distinct_values_to_be_in_set" in included_expectations)
         ):
             value_set = dataset.expect_column_distinct_values_to_be_in_set(
                 column, value_set=None, result_format="SUMMARY"
@@ -166,21 +119,19 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             dataset.expect_column_distinct_values_to_be_in_set(
                 column, value_set=value_set, result_format="SUMMARY"
             )
-
         if (
-            not excluded_expectations
-            or "expect_column_kl_divergence_to_be_less_than"
-            not in excluded_expectations
+            (not excluded_expectations)
+            or (
+                "expect_column_kl_divergence_to_be_less_than"
+                not in excluded_expectations
+            )
         ) and (
-            not included_expectations
-            or "expect_column_kl_divergence_to_be_less_than" in included_expectations
+            (not included_expectations)
+            or ("expect_column_kl_divergence_to_be_less_than" in included_expectations)
         ):
             if cls._get_column_cardinality_with_caching(
                 dataset, column, column_cache
-            ) in [
-                ProfilerCardinality.TWO,
-                ProfilerCardinality.VERY_FEW,
-            ]:
+            ) in [ProfilerCardinality.TWO, ProfilerCardinality.VERY_FEW]:
                 partition_object = build_categorical_partition_object(dataset, column)
                 dataset.expect_column_kl_divergence_to_be_less_than(
                     column,
@@ -193,17 +144,26 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     def _create_non_nullity_expectations(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if (
-            not excluded_expectations
-            or "expect_column_values_to_not_be_null" not in excluded_expectations
+            (not excluded_expectations)
+            or ("expect_column_values_to_not_be_null" not in excluded_expectations)
         ) and (
-            not included_expectations
-            or "expect_column_values_to_not_be_null" in included_expectations
+            (not included_expectations)
+            or ("expect_column_values_to_not_be_null" in included_expectations)
         ):
             not_null_result = dataset.expect_column_values_to_not_be_null(column)
             if not not_null_result.success:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
-                potential_mostly_value = (100.0 - unexpected_percent - 10) / 100.0
+                potential_mostly_value = ((100.0 - unexpected_percent) - 10) / 100.0
                 safe_mostly_value = round(max(0.001, potential_mostly_value), 3)
                 dataset.expect_column_values_to_not_be_null(
                     column, mostly=safe_mostly_value
@@ -213,98 +173,105 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     def _create_expectations_for_numeric_column(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         cls._create_non_nullity_expectations(
             dataset,
             column,
             excluded_expectations=excluded_expectations,
             included_expectations=included_expectations,
         )
-
         if (
-            not excluded_expectations
-            or "expect_column_min_to_be_between" not in excluded_expectations
+            (not excluded_expectations)
+            or ("expect_column_min_to_be_between" not in excluded_expectations)
         ) and (
-            not included_expectations
-            or "expect_column_min_to_be_between" in included_expectations
+            (not included_expectations)
+            or ("expect_column_min_to_be_between" in included_expectations)
         ):
             observed_min = dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not is_nan(observed_min):
                 dataset.expect_column_min_to_be_between(
-                    column, min_value=observed_min - 1, max_value=observed_min + 1
+                    column, min_value=(observed_min - 1), max_value=(observed_min + 1)
                 )
             else:
                 logger.debug(
                     f"Skipping expect_column_min_to_be_between because observed value is nan: {observed_min}"
                 )
-
         if (
-            not excluded_expectations
-            or "expect_column_max_to_be_between" not in excluded_expectations
+            (not excluded_expectations)
+            or ("expect_column_max_to_be_between" not in excluded_expectations)
         ) and (
-            not included_expectations
-            or "expect_column_max_to_be_between" in included_expectations
+            (not included_expectations)
+            or ("expect_column_max_to_be_between" in included_expectations)
         ):
             observed_max = dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not is_nan(observed_max):
                 dataset.expect_column_max_to_be_between(
-                    column, min_value=observed_max - 1, max_value=observed_max + 1
+                    column, min_value=(observed_max - 1), max_value=(observed_max + 1)
                 )
             else:
                 logger.debug(
                     f"Skipping expect_column_max_to_be_between because observed value is nan: {observed_max}"
                 )
-
         if (
-            not excluded_expectations
-            or "expect_column_mean_to_be_between" not in excluded_expectations
+            (not excluded_expectations)
+            or ("expect_column_mean_to_be_between" not in excluded_expectations)
         ) and (
-            not included_expectations
-            or "expect_column_mean_to_be_between" in included_expectations
+            (not included_expectations)
+            or ("expect_column_mean_to_be_between" in included_expectations)
         ):
             observed_mean = dataset.expect_column_mean_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not is_nan(observed_mean):
                 dataset.expect_column_mean_to_be_between(
-                    column, min_value=observed_mean - 1, max_value=observed_mean + 1
+                    column, min_value=(observed_mean - 1), max_value=(observed_mean + 1)
                 )
             else:
                 logger.debug(
                     f"Skipping expect_column_mean_to_be_between because observed value is nan: {observed_mean}"
                 )
-
         if (
-            not excluded_expectations
-            or "expect_column_median_to_be_between" not in excluded_expectations
+            (not excluded_expectations)
+            or ("expect_column_median_to_be_between" not in excluded_expectations)
         ) and (
-            not included_expectations
-            or "expect_column_median_to_be_between" in included_expectations
+            (not included_expectations)
+            or ("expect_column_median_to_be_between" in included_expectations)
         ):
             observed_median = dataset.expect_column_median_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not is_nan(observed_median):
                 dataset.expect_column_median_to_be_between(
-                    column, min_value=observed_median - 1, max_value=observed_median + 1
+                    column,
+                    min_value=(observed_median - 1),
+                    max_value=(observed_median + 1),
                 )
             else:
                 logger.debug(
                     f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
                 )
-
         allow_relative_error: bool = dataset.attempt_allowing_relative_error()
-
         if (
-            not excluded_expectations
-            or "expect_column_quantile_values_to_be_between"
-            not in excluded_expectations
+            (not excluded_expectations)
+            or (
+                "expect_column_quantile_values_to_be_between"
+                not in excluded_expectations
+            )
         ) and (
-            not included_expectations
-            or "expect_column_quantile_values_to_be_between" in included_expectations
+            (not included_expectations)
+            or ("expect_column_quantile_values_to_be_between" in included_expectations)
         ):
             quantile_result = dataset.expect_column_quantile_values_to_be_between(
                 column,
@@ -326,7 +293,6 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 quantile_result.exception_info["exception_traceback"]
                 or quantile_result.exception_info["exception_message"]
             ):
-                # TODO quantiles are not implemented correctly on sqlite, and likely other sql dialects
                 logger.debug(quantile_result.exception_info["exception_traceback"])
                 logger.debug(quantile_result.exception_info["exception_message"])
             else:
@@ -338,7 +304,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                             "quantiles"
                         ],
                         "value_ranges": [
-                            [v - 1, v + 1]
+                            [(v - 1), (v + 1)]
                             for v in quantile_result.result["observed_value"]["values"]
                         ],
                     },
@@ -351,6 +317,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     def _create_expectations_for_string_column(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -358,11 +333,13 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             included_expectations=included_expectations,
         )
         if (
-            not excluded_expectations
-            or "expect_column_value_lengths_to_be_between" not in excluded_expectations
+            (not excluded_expectations)
+            or (
+                "expect_column_value_lengths_to_be_between" not in excluded_expectations
+            )
         ) and (
-            not included_expectations
-            or "expect_column_value_lengths_to_be_between" in included_expectations
+            (not included_expectations)
+            or ("expect_column_value_lengths_to_be_between" in included_expectations)
         ):
             dataset.expect_column_value_lengths_to_be_between(column, min_value=1)
 
@@ -370,6 +347,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     def _find_next_low_card_column(
         cls, dataset, columns, profiled_columns, column_cache
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for column in columns:
             if column in profiled_columns["low_card"]:
                 continue
@@ -382,100 +368,132 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 ProfilerCardinality.FEW,
             ]:
                 return column
-
         return None
 
     @classmethod
     def _find_next_numeric_column(
         cls, dataset, columns, profiled_columns, column_cache
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for column in columns:
             if column in profiled_columns["numeric"]:
                 continue
-            if (
-                column.lower().strip() == "id"
-                or column.lower().strip().find("_id") > -1
+            if (column.lower().strip() == "id") or (
+                column.lower().strip().find("_id") > (-1)
             ):
                 continue
-
             cardinality = cls._get_column_cardinality_with_caching(
                 dataset, column, column_cache
             )
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
-
-            if cardinality in [
-                ProfilerCardinality.MANY,
-                ProfilerCardinality.VERY_MANY,
-                ProfilerCardinality.UNIQUE,
-            ] and type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]:
+            if (
+                cardinality
+                in [
+                    ProfilerCardinality.MANY,
+                    ProfilerCardinality.VERY_MANY,
+                    ProfilerCardinality.UNIQUE,
+                ]
+            ) and (type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]):
                 return column
-
         return None
 
     @classmethod
     def _find_next_string_column(cls, dataset, columns, profiled_columns, column_cache):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for column in columns:
             if column in profiled_columns["string"]:
                 continue
-
             cardinality = cls._get_column_cardinality_with_caching(
                 dataset, column, column_cache
             )
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
-
-            if cardinality in [
-                ProfilerCardinality.MANY,
-                ProfilerCardinality.VERY_MANY,
-                ProfilerCardinality.UNIQUE,
-            ] and type in [ProfilerDataType.STRING, ProfilerDataType.UNKNOWN]:
+            if (
+                cardinality
+                in [
+                    ProfilerCardinality.MANY,
+                    ProfilerCardinality.VERY_MANY,
+                    ProfilerCardinality.UNIQUE,
+                ]
+            ) and (type in [ProfilerDataType.STRING, ProfilerDataType.UNKNOWN]):
                 return column
-
         return None
 
     @classmethod
     def _find_next_datetime_column(
         cls, dataset, columns, profiled_columns, column_cache
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for column in columns:
             if column in profiled_columns["datetime"]:
                 continue
-
             cardinality = cls._get_column_cardinality_with_caching(
                 dataset, column, column_cache
             )
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
-
-            if cardinality in [
-                ProfilerCardinality.MANY,
-                ProfilerCardinality.VERY_MANY,
-                ProfilerCardinality.UNIQUE,
-            ] and type in [ProfilerDataType.DATETIME]:
+            if (
+                cardinality
+                in [
+                    ProfilerCardinality.MANY,
+                    ProfilerCardinality.VERY_MANY,
+                    ProfilerCardinality.UNIQUE,
+                ]
+            ) and (type in [ProfilerDataType.DATETIME]):
                 return column
-
         return None
 
     @classmethod
     def _create_expectations_for_datetime_column(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         cls._create_non_nullity_expectations(
             dataset,
             column,
             excluded_expectations=excluded_expectations,
             included_expectations=included_expectations,
         )
-
         if (
-            not excluded_expectations
-            or "expect_column_min_to_be_between" not in excluded_expectations
+            (not excluded_expectations)
+            or ("expect_column_min_to_be_between" not in excluded_expectations)
         ) and (
-            not included_expectations
-            or "expect_column_min_to_be_between" in included_expectations
+            (not included_expectations)
+            or ("expect_column_min_to_be_between" in included_expectations)
         ):
             min_value = dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-
             if min_value is not None:
                 dataset.remove_expectation(
                     ExpectationConfiguration(
@@ -488,18 +506,16 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     min_value = parse(min_value)
                 except TypeError:
                     pass
-
                 try:
-                    min_value = min_value + datetime.timedelta(days=-365)
+                    min_value = min_value + datetime.timedelta(days=(-365))
                 except OverflowError:
                     min_value = datetime.datetime.min
-
         if (
-            not excluded_expectations
-            or "expect_column_max_to_be_between" not in excluded_expectations
+            (not excluded_expectations)
+            or ("expect_column_max_to_be_between" not in excluded_expectations)
         ) and (
-            not included_expectations
-            or "expect_column_max_to_be_between" in included_expectations
+            (not included_expectations)
+            or ("expect_column_max_to_be_between" in included_expectations)
         ):
             max_value = dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
@@ -516,39 +532,43 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     max_value = parse(max_value)
                 except TypeError:
                     pass
-
                 try:
                     max_value = max_value + datetime.timedelta(days=365)
                 except OverflowError:
                     max_value = datetime.datetime.max
-
         if (
-            not excluded_expectations
-            or "expect_column_min_to_be_between" not in excluded_expectations
+            (not excluded_expectations)
+            or ("expect_column_min_to_be_between" not in excluded_expectations)
         ) and (
-            not included_expectations
-            or "expect_column_min_to_be_between" in included_expectations
+            (not included_expectations)
+            or ("expect_column_min_to_be_between" in included_expectations)
         ):
-            if min_value is not None or max_value is not None:
+            if (min_value is not None) or (max_value is not None):
                 dataset.expect_column_values_to_be_between(
                     column, min_value, max_value, parse_strings_as_datetimes=True
                 )
 
     @classmethod
     def _profile(cls, dataset, configuration=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         logger.debug(f"Running profiler with configuration: {configuration}")
         if configuration == "demo":
             return cls._demo_profile(dataset)
-
         existing_columns = dataset.get_table_columns()
         selected_columns = existing_columns
         included_expectations = []
         excluded_expectations = []
-
         if configuration:
-            if (
-                "included_expectations" in configuration
-                and "excluded_expectations" in configuration
+            if ("included_expectations" in configuration) and (
+                "excluded_expectations" in configuration
             ):
                 raise ProfilerError(
                     "Please specify either `included_expectations` or `excluded_expectations`."
@@ -563,10 +583,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 if excluded_expectations in [False, None, []]:
                     excluded_expectations = None
                 _check_that_expectations_are_available(dataset, excluded_expectations)
-
-            if (
-                "included_columns" in configuration
-                and "excluded_columns" in configuration
+            if ("included_columns" in configuration) and (
+                "excluded_columns" in configuration
             ):
                 raise ProfilerError(
                     "Please specify either `excluded_columns` or `included_columns`."
@@ -580,14 +598,11 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 if excluded_columns in [False, None, []]:
                     excluded_columns = []
                 selected_columns = set(existing_columns) - set(excluded_columns)
-
         _check_that_columns_exist(dataset, selected_columns)
         if included_expectations is None:
             suite = cls._build_column_description_metadata(dataset)
-            # remove column exist expectations
             suite.expectations = []
             return suite
-
         dataset.set_default_expectation_argument("catch_exceptions", False)
         dataset = cls._build_table_row_count_expectation(
             dataset,
@@ -600,7 +615,6 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             excluded_expectations=excluded_expectations,
             included_expectations=included_expectations,
         )
-
         column_cache = {}
         if selected_columns:
             with tqdm(
@@ -614,7 +628,6 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     column_type = cls._get_column_type_with_caching(
                         dataset, column, column_cache
                     )
-
                     if cardinality in [
                         ProfilerCardinality.TWO,
                         ProfilerCardinality.VERY_FEW,
@@ -628,12 +641,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                         ProfilerCardinality.VERY_MANY,
                         ProfilerCardinality.UNIQUE,
                     ]:
-                        # TODO we will want to finesse the number and types of
-                        #  expectations created here. The simple version is deny/allow list
-                        #  and the more complex version is desired per column type and
-                        #  cardinality. This deserves more thought on configuration.
                         dataset.expect_column_values_to_be_unique(column)
-
                         if column_type in [
                             ProfilerDataType.INT,
                             ProfilerDataType.FLOAT,
@@ -658,17 +666,13 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                                 f"Skipping expectation creation for column {column} of unknown type: {column_type}"
                             )
                     pbar.update()
-
         if excluded_expectations:
-            # NOTE: we reach into a private member here because of an expected future
-            # refactor that will make the suite directly accessible
             dataset._expectation_suite.remove_all_expectations_of_type(
                 excluded_expectations
             )
         if included_expectations:
             for expectation in dataset.get_expectation_suite(
-                discard_failed_expectations=False,
-                suppress_logging=True,
+                discard_failed_expectations=False, suppress_logging=True
             ).expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:
@@ -684,69 +688,60 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                         logger.debug(
                             f"Attempted to remove {expectation}, which was not found."
                         )
-
         expectation_suite = cls._build_column_description_metadata(dataset)
-
         return expectation_suite
 
     @classmethod
     def _demo_profile(cls, dataset):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         dataset.set_default_expectation_argument("catch_exceptions", False)
         dataset = cls._build_table_row_count_expectation(dataset)
         dataset.set_config_value("interactive_evaluation", True)
         dataset = cls._build_table_column_expectations(dataset)
-
         columns = dataset.get_table_columns()
-
         column_cache = {}
         profiled_columns = {"numeric": [], "low_card": [], "string": [], "datetime": []}
-
         column = cls._find_next_low_card_column(
             dataset, columns, profiled_columns, column_cache
         )
         if column:
             cls._create_expectations_for_low_card_column(dataset, column, column_cache)
             profiled_columns["low_card"].append(column)
-
         column = cls._find_next_numeric_column(
             dataset, columns, profiled_columns, column_cache
         )
         if column:
             cls._create_expectations_for_numeric_column(dataset, column)
             profiled_columns["numeric"].append(column)
-
         column = cls._find_next_string_column(
             dataset, columns, profiled_columns, column_cache
         )
         if column:
             cls._create_expectations_for_string_column(dataset, column)
             profiled_columns["string"].append(column)
-
         column = cls._find_next_datetime_column(
             dataset, columns, profiled_columns, column_cache
         )
         if column:
             cls._create_expectations_for_datetime_column(dataset, column)
             profiled_columns["datetime"].append(column)
-
         expectation_suite = cls._build_column_description_metadata(dataset)
-
         expectation_suite.meta["notes"] = {
             "format": "markdown",
             "content": [
-                """#### This is an _example_ suite
-
-- This suite was made by quickly glancing at 1000 rows of your data.
-- This is **not a production suite**. It is meant to show examples of expectations.
-- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.
-"""
+                "#### This is an _example_ suite\n\n- This suite was made by quickly glancing at 1000 rows of your data.\n- This is **not a production suite**. It is meant to show examples of expectations.\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\n"
             ],
         }
-
         return expectation_suite
 
-    # TODO: MIGRATE TO CLASS-FIRST STRUCTURE
-    # Question: do Domain and Success kwargs need to be passed here as well?
     @classmethod
     def _build_table_row_count_expectation(
         cls,
@@ -755,13 +750,22 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         excluded_expectations=None,
         included_expectations=None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert tolerance >= 0, "Tolerance must be greater than zero"
         if (
-            not excluded_expectations
-            or "expect_table_row_count_to_be_between" not in excluded_expectations
+            (not excluded_expectations)
+            or ("expect_table_row_count_to_be_between" not in excluded_expectations)
         ) and (
-            not included_expectations
-            or "expect_table_row_count_to_be_between" in included_expectations
+            (not included_expectations)
+            or ("expect_table_row_count_to_be_between" in included_expectations)
         ):
             value = dataset.expect_table_row_count_to_be_between(
                 min_value=0, max_value=None
@@ -777,32 +781,52 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     def _build_table_column_expectations(
         cls, dataset, excluded_expectations=None, included_expectations=None
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         columns = dataset.get_table_columns()
         if (
-            not excluded_expectations
-            or "expect_table_column_count_to_equal" not in excluded_expectations
+            (not excluded_expectations)
+            or ("expect_table_column_count_to_equal" not in excluded_expectations)
         ) and (
-            not included_expectations
-            or "expect_table_column_count_to_equal" in included_expectations
+            (not included_expectations)
+            or ("expect_table_column_count_to_equal" in included_expectations)
         ):
             dataset.expect_table_column_count_to_equal(len(columns))
         if (
-            not excluded_expectations
-            or "expect_table_columns_to_match_ordered_list" not in excluded_expectations
+            (not excluded_expectations)
+            or (
+                "expect_table_columns_to_match_ordered_list"
+                not in excluded_expectations
+            )
         ) and (
-            not included_expectations
-            or "expect_table_columns_to_match_ordered_list" in included_expectations
+            (not included_expectations)
+            or ("expect_table_columns_to_match_ordered_list" in included_expectations)
         ):
             dataset.expect_table_columns_to_match_ordered_list(columns)
         return dataset
 
     @classmethod
     def _build_column_description_metadata(cls, dataset):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         columns = dataset.get_table_columns()
         expectation_suite = dataset.get_expectation_suite(
             suppress_warnings=True, discard_failed_expectations=False
         )
-
         meta_columns = {}
         for column in columns:
             meta_columns[column] = {"description": ""}
@@ -810,11 +834,19 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             expectation_suite.meta = {"columns": meta_columns, "notes": {""}}
         else:
             expectation_suite.meta["columns"] = meta_columns
-
         return expectation_suite
 
 
 def _check_that_expectations_are_available(dataset, expectations) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if expectations:
         for expectation in expectations:
             if expectation not in dataset.list_available_expectation_types():
@@ -822,6 +854,15 @@ def _check_that_expectations_are_available(dataset, expectations) -> None:
 
 
 def _check_that_columns_exist(dataset, columns) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if columns:
         for column in columns:
             if column not in dataset.get_table_columns():

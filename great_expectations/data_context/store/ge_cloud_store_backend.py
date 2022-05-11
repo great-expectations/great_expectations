@@ -27,7 +27,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         "expectation_suite": "suite",
         "rendered_data_doc": "rendered_data_doc",
     }
-
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {
         "expectation_suite": {"clause_id"},
         "rendered_data_doc": {"source_type", "source_id"},
@@ -44,15 +43,24 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         manually_initialize_store_backend_id: str = "",
         store_name: Optional[str] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(
             fixed_length_key=True,
             suppress_store_backend_id=suppress_store_backend_id,
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
-        assert ge_cloud_resource_type or ge_cloud_resource_name, (
-            "Must provide either ge_cloud_resource_type or " "ge_cloud_resource_name"
-        )
+        assert (
+            ge_cloud_resource_type or ge_cloud_resource_name
+        ), "Must provide either ge_cloud_resource_type or ge_cloud_resource_name"
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_resource_name = ge_cloud_resource_name or pluralize(
             ge_cloud_resource_type
@@ -60,23 +68,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self._ge_cloud_resource_type = ge_cloud_resource_type or singularize(
             ge_cloud_resource_name
         )
-
-        # TOTO: remove when account_id is deprecated
         if ge_cloud_credentials.get("account_id"):
             logger.warning(
-                'The "account_id" ge_cloud_credentials key has been renamed to "organization_id" and will '
-                "be deprecated in the next major release."
+                'The "account_id" ge_cloud_credentials key has been renamed to "organization_id" and will be deprecated in the next major release.'
             )
             ge_cloud_credentials["organization_id"] = ge_cloud_credentials["account_id"]
             ge_cloud_credentials.pop("account_id")
         self._ge_cloud_credentials = ge_cloud_credentials
-
-        # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
-
-        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
-        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
         self._config = {
             "ge_cloud_base_url": ge_cloud_base_url,
             "ge_cloud_resource_name": ge_cloud_resource_name,
@@ -92,12 +92,30 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     @property
     def auth_headers(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return {
             "Content-Type": "application/vnd.api+json",
-            "Authorization": f'Bearer {self.ge_cloud_credentials.get("access_token")}',
+            "Authorization": f"Bearer {self.ge_cloud_credentials.get('access_token')}",
         }
 
     def _get(self, key):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         ge_cloud_url = self.get_url_for_key(key=key)
         try:
             response = requests.get(ge_cloud_url, headers=self.auth_headers)
@@ -113,13 +131,30 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def _move(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         pass
 
     def _update(self, ge_cloud_id, value, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
-
         data = {
             "data": {
                 "type": resource_type,
@@ -130,18 +165,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 },
             }
         }
-
         url = urljoin(
             self.ge_cloud_base_url,
-            f"organizations/"
-            f"{organization_id}/"
-            f"{hyphen(self.ge_cloud_resource_name)}/"
-            f"{ge_cloud_id}",
+            f"organizations/{organization_id}/{hyphen(self.ge_cloud_resource_name)}/{ge_cloud_id}",
         )
         try:
             response = requests.patch(url, json=data, headers=self.auth_headers)
             response_status_code = response.status_code
-
             if response_status_code < 300:
                 return True
             return False
@@ -153,11 +183,29 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     @property
     def allowed_set_kwargs(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(
             self.ge_cloud_resource_type, set()
         )
 
     def validate_set_kwargs(self, kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         kwarg_names = set(kwargs.keys())
         if len(kwarg_names) == 0:
             return True
@@ -165,22 +213,25 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return True
         if not (kwarg_names <= self.allowed_set_kwargs):
             extra_kwargs = kwarg_names - self.allowed_set_kwargs
-            raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')
+            raise ValueError(f"Invalid kwargs: {', '.join(extra_kwargs)}")
 
     def _set(self, key, value, **kwargs):
-        # Each resource type has corresponding attribute key to include in POST body
-        ge_cloud_id = key[1]
+        import inspect
 
-        # if key has ge_cloud_id, perform _update instead
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        ge_cloud_id = key[1]
         if ge_cloud_id:
             return self._update(ge_cloud_id=ge_cloud_id, value=value, **kwargs)
-
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
         organization_id = self.ge_cloud_credentials["organization_id"]
-
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
-
         data = {
             "data": {
                 "type": resource_type,
@@ -191,23 +242,18 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 },
             }
         }
-
         url = urljoin(
             self.ge_cloud_base_url,
-            f"organizations/" f"{organization_id}/" f"{hyphen(resource_name)}",
+            f"organizations/{organization_id}/{hyphen(resource_name)}",
         )
         try:
             response = requests.post(url, json=data, headers=self.auth_headers)
             response_json = response.json()
-
             object_id = response_json["data"]["id"]
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
             return GeCloudResourceRef(
-                resource_type=resource_type,
-                ge_cloud_id=object_id,
-                url=object_url,
+                resource_type=resource_type, ge_cloud_id=object_id, url=object_url
             )
-        # TODO Show more detailed error messages
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
@@ -216,35 +262,75 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     @property
     def ge_cloud_base_url(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._ge_cloud_base_url
 
     @property
     def ge_cloud_resource_name(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._ge_cloud_resource_name
 
     @property
     def ge_cloud_resource_type(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._ge_cloud_resource_type
 
     @property
     def ge_cloud_credentials(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._ge_cloud_credentials
 
     def list_keys(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         url = urljoin(
             self.ge_cloud_base_url,
-            f"organizations/"
-            f"{self.ge_cloud_credentials['organization_id']}/"
-            f"{hyphen(self.ge_cloud_resource_name)}",
+            f"organizations/{self.ge_cloud_credentials['organization_id']}/{hyphen(self.ge_cloud_resource_name)}",
         )
         try:
             response = requests.get(url, headers=self.auth_headers)
             response_json = response.json()
             keys = [
-                (
-                    self.ge_cloud_resource_type,
-                    resource["id"],
-                )
+                (self.ge_cloud_resource_type, resource["id"])
                 for resource in response_json.get("data")
             ]
             return keys
@@ -255,6 +341,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def get_url_for_key(self, key, protocol=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         ge_cloud_id = key[1]
         url = urljoin(
             self.ge_cloud_base_url,
@@ -263,32 +358,32 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return url
 
     def remove_key(self, key):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not isinstance(key, tuple):
             key = key.to_tuple()
-
         ge_cloud_id = key[1]
-
         data = {
             "data": {
                 "type": self.ge_cloud_resource_type,
                 "id": ge_cloud_id,
-                "attributes": {
-                    "deleted": True,
-                },
+                "attributes": {"deleted": True},
             }
         }
-
         url = urljoin(
             self.ge_cloud_base_url,
-            f"organizations/"
-            f"{self.ge_cloud_credentials['organization_id']}/"
-            f"{hyphen(self.ge_cloud_resource_name)}/"
-            f"{ge_cloud_id}",
+            f"organizations/{self.ge_cloud_credentials['organization_id']}/{hyphen(self.ge_cloud_resource_name)}/{ge_cloud_id}",
         )
         try:
             response = requests.patch(url, json=data, headers=self.auth_headers)
             response_status_code = response.status_code
-
             if response_status_code < 300:
                 return True
             return False
@@ -299,9 +394,27 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def _has_key(self, key):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         all_keys = self.list_keys()
         return key in all_keys
 
     @property
     def config(self) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._config

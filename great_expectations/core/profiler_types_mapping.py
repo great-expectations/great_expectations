@@ -1,6 +1,5 @@
 class ProfilerTypeMapping:
-    """Useful backend type mapping for building profilers."""
-
+    "Useful backend type mapping for building profilers."
     INT_TYPE_NAMES = [
         "INTEGER",
         "integer",
@@ -91,29 +90,8 @@ class ProfilerTypeMapping:
         "timedelta[ns]",
         "<M8[ns]",
     ]
-    BINARY_TYPE_NAMES = [
-        "BINARY",
-        "binary",
-        "VARBINARY",
-        "varbinary",
-        "IMAGE",
-        "image",
-    ]
-    CURRENCY_TYPE_NAMES = [
-        "MONEY",
-        "money",
-        "SMALLMONEY",
-        "smallmoney",
-    ]
-    IDENTIFIER_TYPE_NAMES = [
-        "UNIQUEIDENTIFIER",
-        "uniqueidentifier",
-    ]
-    MISCELLANEOUS_TYPE_NAMES = [
-        "SQL_VARIANT",
-        "sql_variant",
-    ]
-    RECORD_TYPE_NAMES = [
-        "JSON",
-        "json",
-    ]
+    BINARY_TYPE_NAMES = ["BINARY", "binary", "VARBINARY", "varbinary", "IMAGE", "image"]
+    CURRENCY_TYPE_NAMES = ["MONEY", "money", "SMALLMONEY", "smallmoney"]
+    IDENTIFIER_TYPE_NAMES = ["UNIQUEIDENTIFIER", "uniqueidentifier"]
+    MISCELLANEOUS_TYPE_NAMES = ["SQL_VARIANT", "sql_variant"]
+    RECORD_TYPE_NAMES = ["JSON", "json"]

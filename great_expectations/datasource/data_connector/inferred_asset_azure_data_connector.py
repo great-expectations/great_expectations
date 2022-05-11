@@ -14,7 +14,6 @@ from great_expectations.datasource.data_connector.util import list_azure_keys
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
-
 try:
     from azure.storage.blob import BlobServiceClient
 except ImportError:
@@ -25,17 +24,7 @@ except ImportError:
 
 
 class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
-    """
-    Extension of InferredAssetFilePathDataConnector used to connect to Azure Blob Storage
-
-    The InferredAssetAzureDataConnector is one of two classes (ConfiguredAssetAzureDataConnector being the
-    other one) designed for connecting to filesystem-like data, more specifically files on Azure Blob Storage. It
-    connects to assets inferred from container, name_starts_with, and file name by default_regex.
-
-    As much of the interaction with the SDK is done through a BlobServiceClient, please refer to the official
-    docs if a greater understanding of the supported authentication methods and general functionality is desired.
-    Source: https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python
-    """
+    "\n    Extension of InferredAssetFilePathDataConnector used to connect to Azure Blob Storage\n\n    The InferredAssetAzureDataConnector is one of two classes (ConfiguredAssetAzureDataConnector being the\n    other one) designed for connecting to filesystem-like data, more specifically files on Azure Blob Storage. It\n    connects to assets inferred from container, name_starts_with, and file name by default_regex.\n\n    As much of the interaction with the SDK is done through a BlobServiceClient, please refer to the official\n    docs if a greater understanding of the supported authentication methods and general functionality is desired.\n    Source: https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python\n"
 
     def __init__(
         self,
@@ -50,23 +39,17 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         azure_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ) -> None:
-        """
-        InferredAssetAzureDataConnector for connecting to Azure Blob Storage.
+        import inspect
 
-        Args:
-            name (str): required name for data_connector
-            datasource_name (str): required name for datasource
-            container (str): container for Azure Blob Storage
-            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
-            default_regex (dict): optional regex configuration for filtering data_references
-            sorters (list): optional list of sorters for sorting data_references
-            name_starts_with (str): Azure prefix
-            delimiter (str): Azure delimiter
-            azure_options (dict): wrapper object for **kwargs
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        InferredAssetAzureDataConnector for connecting to Azure Blob Storage.\n\n        Args:\n            name (str): required name for data_connector\n            datasource_name (str): required name for datasource\n            container (str): container for Azure Blob Storage\n            execution_engine (ExecutionEngine): optional reference to ExecutionEngine\n            default_regex (dict): optional regex configuration for filtering data_references\n            sorters (list): optional list of sorters for sorting data_references\n            name_starts_with (str): Azure prefix\n            delimiter (str): Azure delimiter\n            azure_options (dict): wrapper object for **kwargs\n            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec\n        "
         logger.debug(f'Constructing InferredAssetAzureDataConnector "{name}".')
-
         super().__init__(
             name=name,
             datasource_name=datasource_name,
@@ -75,50 +58,43 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
             sorters=sorters,
             batch_spec_passthrough=batch_spec_passthrough,
         )
-
         self._container = container
         self._name_starts_with = FilePathDataConnector.sanitize_prefix(name_starts_with)
         self._delimiter = delimiter
-
         if azure_options is None:
             azure_options = {}
-
-        # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
-        # use in authentication (but not both). If the format or content of the provided keys is invalid,
-        # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
         conn_str: Optional[str] = azure_options.get("conn_str")
         account_url: Optional[str] = azure_options.get("account_url")
         assert bool(conn_str) ^ bool(
             account_url
         ), "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
-
         try:
             if conn_str is not None:
                 self._account_name = re.search(
-                    r".*?AccountName=(.+?);.*?", conn_str
+                    ".*?AccountName=(.+?);.*?", conn_str
                 ).group(1)
                 self._azure = BlobServiceClient.from_connection_string(**azure_options)
             elif account_url is not None:
                 self._account_name = re.search(
-                    r"(?:https?://)?(.+?).blob.core.windows.net", account_url
+                    "(?:https?://)?(.+?).blob.core.windows.net", account_url
                 ).group(1)
                 self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
             raise ImportError(
-                "Unable to load Azure BlobServiceClient (it is required for InferredAssetAzureDataConnector). \
-                Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
+                "Unable to load Azure BlobServiceClient (it is required for InferredAssetAzureDataConnector).                 Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
             )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
-        """
-        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+        import inspect
 
-        Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
-
-        Returns:
-            BatchSpec built from batch_definition
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.\n\n        Args:\n            batch_definition (BatchDefinition): to be used to build batch_spec\n\n        Returns:\n            BatchSpec built from batch_definition\n        "
         batch_spec: PathBatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
@@ -127,31 +103,38 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
-        """
-        List objects in the underlying data store to create a list of data_references.
+        import inspect
 
-        This method is used to refresh the cache.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        List objects in the underlying data store to create a list of data_references.\n\n        This method is used to refresh the cache.\n        "
         query_options: dict = {
             "container": self._container,
             "name_starts_with": self._name_starts_with,
             "delimiter": self._delimiter,
         }
-
         path_list: List[str] = list_azure_keys(
-            azure=self._azure,
-            query_options=query_options,
-            recursive=True,
+            azure=self._azure, query_options=query_options, recursive=True
         )
         return path_list
 
     def _get_full_file_path(
-        self,
-        path: str,
-        data_asset_name: Optional[str] = None,
+        self, path: str, data_asset_name: Optional[str] = None
     ) -> str:
-        # data_asset_name isn't used in this method.
-        # It's only kept for compatibility with parent methods.
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         template_arguments: dict = {
             "account_name": self._account_name,
             "container": self._container,

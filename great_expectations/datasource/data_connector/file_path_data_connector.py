@@ -28,14 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class FilePathDataConnector(DataConnector):
-    """
-    Base-class for DataConnector that are designed for connecting to filesystem-like data, which can include
-    files on disk, but also S3 and GCS.
-
-    *Note*: FilePathDataConnector is not meant to be used on its own, but extended. Currently
-    ConfiguredAssetFilePathDataConnector and InferredAssetFilePathDataConnector are subclasses of
-    FilePathDataConnector.
-    """
+    "\n    Base-class for DataConnector that are designed for connecting to filesystem-like data, which can include\n    files on disk, but also S3 and GCS.\n\n    *Note*: FilePathDataConnector is not meant to be used on its own, but extended. Currently\n    ConfiguredAssetFilePathDataConnector and InferredAssetFilePathDataConnector are subclasses of\n    FilePathDataConnector.\n"
 
     def __init__(
         self,
@@ -46,48 +39,58 @@ class FilePathDataConnector(DataConnector):
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ) -> None:
-        """
-        Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
-        and sorters for filtering and sorting data_references.
+        import inspect
 
-        Args:
-            name (str): name of FilePathDataConnector
-            datasource_name (str): Name of datasource that this DataConnector is connected to
-            execution_engine (ExecutionEngine): Execution Engine object to actually read the data
-            default_regex (dict): Optional dict the filter and organize the data_references.
-            sorters (list): Optional list if you want to sort the data_references
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex\n        and sorters for filtering and sorting data_references.\n\n        Args:\n            name (str): name of FilePathDataConnector\n            datasource_name (str): Name of datasource that this DataConnector is connected to\n            execution_engine (ExecutionEngine): Execution Engine object to actually read the data\n            default_regex (dict): Optional dict the filter and organize the data_references.\n            sorters (list): Optional list if you want to sort the data_references\n            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec\n        "
         logger.debug(f'Constructing FilePathDataConnector "{name}".')
-
         super().__init__(
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
         )
-
         if default_regex is None:
             default_regex = {}
         self._default_regex = default_regex
-
         self._sorters = build_sorters_from_config(config_list=sorters)
         self._validate_sorters_configuration()
 
     @property
     def sorters(self) -> Optional[dict]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._sorters
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
     ) -> List[str]:
-        """
-        Fetch data_references corresponding to data_asset_name from the cache.
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Fetch data_references corresponding to data_asset_name from the cache.\n        "
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
-
         batch_definition_list = self._get_batch_definition_list_from_batch_request(
             batch_request=BatchRequestBase(
                 datasource_name=self.datasource_name,
@@ -95,12 +98,10 @@ class FilePathDataConnector(DataConnector):
                 data_asset_name=data_asset_name,
             )
         )
-
         if len(self.sorters) > 0:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list
             )
-
         path_list: List[str] = [
             map_batch_definition_to_data_reference_string_using_regex(
                 batch_definition=batch_definition,
@@ -109,99 +110,83 @@ class FilePathDataConnector(DataConnector):
             )
             for batch_definition in batch_definition_list
         ]
-
         return path_list
 
     def get_batch_definition_list_from_batch_request(
-        self,
-        batch_request: BatchRequest,
+        self, batch_request: BatchRequest
     ) -> List[BatchDefinition]:
-        """
-        Retrieve batch_definitions and that match batch_request.
+        import inspect
 
-        First retrieves all batch_definitions that match batch_request
-            - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.
-            - if data_connector has sorters configured, then sort the batch_definition list before returning.
-
-        Args:
-            batch_request (BatchRequest): BatchRequest (containing previously validated attributes) to process
-
-        Returns:
-            A list of BatchDefinition objects that match BatchRequest
-
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Retrieve batch_definitions and that match batch_request.\n\n        First retrieves all batch_definitions that match batch_request\n            - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.\n            - if data_connector has sorters configured, then sort the batch_definition list before returning.\n\n        Args:\n            batch_request (BatchRequest): BatchRequest (containing previously validated attributes) to process\n\n        Returns:\n            A list of BatchDefinition objects that match BatchRequest\n\n        "
         batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request_base
         )
 
     def _get_batch_definition_list_from_batch_request(
-        self,
-        batch_request: BatchRequestBase,
+        self, batch_request: BatchRequestBase
     ) -> List[BatchDefinition]:
-        """
-        Retrieve batch_definitions that match batch_request.
+        import inspect
 
-        First retrieves all batch_definitions that match batch_request
-            - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.
-            - if data_connector has sorters configured, then sort the batch_definition list before returning.
-
-        Args:
-            batch_request (BatchRequestBase): BatchRequestBase (BatchRequest without attribute validation) to process
-
-        Returns:
-            A list of BatchDefinition objects that match BatchRequest
-
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Retrieve batch_definitions that match batch_request.\n\n        First retrieves all batch_definitions that match batch_request\n            - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.\n            - if data_connector has sorters configured, then sort the batch_definition list before returning.\n\n        Args:\n            batch_request (BatchRequestBase): BatchRequestBase (BatchRequest without attribute validation) to process\n\n        Returns:\n            A list of BatchDefinition objects that match BatchRequest\n\n        "
         self._validate_batch_request(batch_request=batch_request)
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
-
         batch_definition_list: List[BatchDefinition] = list(
             filter(
-                lambda batch_definition: batch_definition_matches_batch_request(
-                    batch_definition=batch_definition, batch_request=batch_request
+                (
+                    lambda batch_definition: batch_definition_matches_batch_request(
+                        batch_definition=batch_definition, batch_request=batch_request
+                    )
                 ),
                 self._get_batch_definition_list_from_cache(),
             )
         )
-
         if len(self.sorters) > 0:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list
             )
-
         if batch_request.data_connector_query is not None:
-
             data_connector_query_dict = batch_request.data_connector_query.copy()
-            if (
-                batch_request.limit is not None
-                and data_connector_query_dict.get("limit") is None
+            if (batch_request.limit is not None) and (
+                data_connector_query_dict.get("limit") is None
             ):
                 data_connector_query_dict["limit"] = batch_request.limit
-
             batch_filter_obj: BatchFilter = build_batch_filter(
                 data_connector_query_dict=data_connector_query_dict
             )
             batch_definition_list = batch_filter_obj.select_from_data_connector_query(
                 batch_definition_list=batch_definition_list
             )
-
         return batch_definition_list
 
     def _sort_batch_definition_list(
         self, batch_definition_list: List[BatchDefinition]
     ) -> List[BatchDefinition]:
-        """
-        Use configured sorters to sort batch_definition
+        import inspect
 
-        Args:
-            batch_definition_list (list): list of batch_definitions to sort
-
-        Returns:
-            sorted list of batch_definitions
-
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Use configured sorters to sort batch_definition\n\n        Args:\n            batch_definition_list (list): list of batch_definitions to sort\n\n        Returns:\n            sorted list of batch_definitions\n\n        "
         sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(
@@ -212,6 +197,15 @@ class FilePathDataConnector(DataConnector):
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: str, data_asset_name: str = None
     ) -> Optional[List[BatchDefinition]]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
@@ -227,6 +221,15 @@ class FilePathDataConnector(DataConnector):
     def _map_batch_definition_to_data_reference(
         self, batch_definition: BatchDefinition
     ) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name: str = batch_definition.data_asset_name
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]
@@ -238,15 +241,16 @@ class FilePathDataConnector(DataConnector):
         )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
-        """
-        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+        import inspect
 
-        Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
-
-        Returns:
-            BatchSpec built from batch_definition
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.\n\n        Args:\n            batch_definition (BatchDefinition): to be used to build batch_spec\n\n        Returns:\n            BatchSpec built from batch_definition\n        "
         batch_spec: BatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
@@ -254,20 +258,33 @@ class FilePathDataConnector(DataConnector):
 
     @staticmethod
     def sanitize_prefix(text: str) -> str:
-        """
-        Takes in a given user-prefix and cleans it to work with file-system traversal methods
-        (i.e. add '/' to the end of a string meant to represent a directory)
-        """
-        _, ext = os.path.splitext(text)
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Takes in a given user-prefix and cleans it to work with file-system traversal methods\n        (i.e. add '/' to the end of a string meant to represent a directory)\n        "
+        (_, ext) = os.path.splitext(text)
         if ext:
-            # Provided prefix is a filename so no adjustment is necessary
             return text
-        # Provided prefix is a directory (so we want to ensure we append it with '/')
         return os.path.join(text, "")
 
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         path: str = self._map_batch_definition_to_data_reference(
             batch_definition=batch_definition
         )
@@ -283,6 +300,15 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         return {"path": path}
 
     def _validate_batch_request(self, batch_request: BatchRequestBase) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super()._validate_batch_request(batch_request=batch_request)
         self._validate_sorters_configuration(
             data_asset_name=batch_request.data_asset_name
@@ -291,12 +317,23 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     def _validate_sorters_configuration(
         self, data_asset_name: Optional[str] = None
     ) -> None:
-        if self.sorters is not None and len(self.sorters) > 0:
-            # data_asset_name: str = batch_request.data_asset_name
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        if (self.sorters is not None) and (len(self.sorters) > 0):
             regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
             group_names: List[str] = regex_config["group_names"]
             if any(
-                [sorter_name not in group_names for sorter_name in self.sorters.keys()]
+                [
+                    (sorter_name not in group_names)
+                    for sorter_name in self.sorters.keys()
+                ]
             ):
                 raise ge_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
@@ -311,12 +348,39 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
                 )
 
     def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError
 
     def _get_full_file_path(
         self, path: str, data_asset_name: Optional[str] = None
     ) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raise NotImplementedError

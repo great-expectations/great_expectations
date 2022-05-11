@@ -24,42 +24,49 @@ logger = logging.getLogger(__name__)
 class ContentBlockRenderer(Renderer):
     _rendered_component_type = TextContent
     _default_header = ""
-
     _default_content_block_styling = {"classes": ["col-12"]}
-
     _default_element_styling = {}
 
     @classmethod
     def validate_input(cls, render_object: Any) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         pass
 
     @classmethod
     def render(
         cls, render_object: Any, **kwargs
-    ) -> Union[_rendered_component_type, Any, None]:
+    ) -> Union[(_rendered_component_type, Any, None)]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         cls.validate_input(render_object)
         exception_list_content_block: bool = kwargs.get(
             "exception_list_content_block", False
         )
-
-        data_docs_exception_message = """\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:
-        """
-
+        data_docs_exception_message = "An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to diagnose and repair the underlying issue.  Detailed information follows:\n        "
         runtime_configuration = {
             "styling": cls._get_element_styling(),
             "include_column_name": kwargs.pop("include_column_name", None),
         }
-
-        # The specific way we render the render_object is contingent on the type of the object
         render_fn: Callable
         if isinstance(render_object, list):
             render_fn = cls._render_list
         else:
             render_fn = cls._render_other
-
         result = render_fn(
             render_object,
             exception_list_content_block,
@@ -78,21 +85,26 @@ diagnose and repair the underlying issue.  Detailed information follows:
         data_docs_exception_message: str,
         kwargs: dict,
     ) -> Optional[_rendered_component_type]:
-        """Helper method to render list render_objects - refer to `render` for more context"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Helper method to render list render_objects - refer to `render` for more context"
         blocks = []
         has_failed_evr = (
             False if isinstance(render_object[0], ExpectationValidationResult) else None
         )
         for obj_ in render_object:
-
             expectation_type = cls._get_expectation_type(obj_)
-
             content_block_fn = cls._get_content_block_fn(expectation_type)
-
-            if isinstance(obj_, ExpectationValidationResult) and not obj_.success:
+            if isinstance(obj_, ExpectationValidationResult) and (not obj_.success):
                 has_failed_evr = True
-
-            if content_block_fn is not None and not exception_list_content_block:
+            if (content_block_fn is not None) and (not exception_list_content_block):
                 try:
                     if isinstance(obj_, ExpectationValidationResult):
                         expectation_config = obj_.expectation_config
@@ -115,7 +127,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                     )
                     logger.error(exception_message)
-
                     if isinstance(obj_, ExpectationValidationResult):
                         content_block_fn = cls._get_content_block_fn(
                             "_missing_content_block_fn"
@@ -134,44 +145,38 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             runtime_configuration=runtime_configuration,
                             **kwargs,
                         )
+            elif isinstance(obj_, ExpectationValidationResult):
+                content_block_fn = (
+                    cls._missing_content_block_fn
+                    if exception_list_content_block
+                    else cls._get_content_block_fn("_missing_content_block_fn")
+                )
+                expectation_config = obj_.expectation_config
+                result = content_block_fn(
+                    configuration=expectation_config,
+                    result=obj_,
+                    runtime_configuration=runtime_configuration,
+                    **kwargs,
+                )
             else:
-                if isinstance(obj_, ExpectationValidationResult):
-                    content_block_fn = (
-                        cls._missing_content_block_fn
-                        if exception_list_content_block
-                        else cls._get_content_block_fn("_missing_content_block_fn")
-                    )
-                    expectation_config = obj_.expectation_config
-                    result = content_block_fn(
-                        configuration=expectation_config,
-                        result=obj_,
-                        runtime_configuration=runtime_configuration,
-                        **kwargs,
-                    )
-                else:
-                    content_block_fn = cls._missing_content_block_fn
-                    result = content_block_fn(
-                        configuration=obj_,
-                        runtime_configuration=runtime_configuration,
-                        **kwargs,
-                    )
-
+                content_block_fn = cls._missing_content_block_fn
+                result = content_block_fn(
+                    configuration=obj_,
+                    runtime_configuration=runtime_configuration,
+                    **kwargs,
+                )
             if result is not None:
                 if isinstance(obj_, ExpectationConfiguration):
                     expectation_meta_notes = cls._render_expectation_meta_notes(obj_)
                     if expectation_meta_notes:
-                        # this adds collapse content block to expectation string
                         result[0] = [result[0], expectation_meta_notes]
-
                     horizontal_rule = RenderedStringTemplateContent(
                         **{
                             "content_block_type": "string_template",
                             "string_template": {
                                 "template": "",
                                 "tag": "hr",
-                                "styling": {
-                                    "classes": ["mt-1", "mb-1"],
-                                },
+                                "styling": {"classes": ["mt-1", "mb-1"]},
                             },
                             "styling": {
                                 "parent": {"styles": {"list-style-type": "none"}}
@@ -179,9 +184,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         }
                     )
                     result.append(horizontal_rule)
-
                 blocks += result
-
         if len(blocks) > 0:
             rendered_component_type_init_kwargs = {
                 cls._content_block_type: blocks,
@@ -201,7 +204,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 has_failed_evr=has_failed_evr,
                 render_object=render_object,
             )
-
             return content_block
         else:
             return None
@@ -215,14 +217,22 @@ diagnose and repair the underlying issue.  Detailed information follows:
         data_docs_exception_message: str,
         kwargs: dict,
     ) -> Any:
-        """Helper method to render non-list render_objects - refer to `render` for more context"""
-        expectation_type = cls._get_expectation_type(render_object)
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Helper method to render non-list render_objects - refer to `render` for more context"
+        expectation_type = cls._get_expectation_type(render_object)
         content_block_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type="renderer.prescriptive"
         )
         content_block_fn = content_block_fn[1] if content_block_fn else None
-        if content_block_fn is not None and not exception_list_content_block:
+        if (content_block_fn is not None) and (not exception_list_content_block):
             try:
                 if isinstance(render_object, ExpectationValidationResult):
                     result = content_block_fn(
@@ -243,7 +253,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
-
                 if isinstance(render_object, ExpectationValidationResult):
                     content_block_fn = cls._get_content_block_fn(
                         "_missing_content_block_fn"
@@ -260,25 +269,24 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         runtime_configuration=runtime_configuration,
                         **kwargs,
                     )
+        elif isinstance(render_object, ExpectationValidationResult):
+            content_block_fn = (
+                cls._missing_content_block_fn
+                if exception_list_content_block
+                else cls._get_content_block_fn("_missing_content_block_fn")
+            )
+            result = content_block_fn(
+                result=render_object,
+                runtime_configuration=runtime_configuration,
+                **kwargs,
+            )
         else:
-            if isinstance(render_object, ExpectationValidationResult):
-                content_block_fn = (
-                    cls._missing_content_block_fn
-                    if exception_list_content_block
-                    else cls._get_content_block_fn("_missing_content_block_fn")
-                )
-                result = content_block_fn(
-                    result=render_object,
-                    runtime_configuration=runtime_configuration,
-                    **kwargs,
-                )
-            else:
-                content_block_fn = cls._missing_content_block_fn
-                result = content_block_fn(
-                    configuration=render_object,
-                    runtime_configuration=runtime_configuration,
-                    **kwargs,
-                )
+            content_block_fn = cls._missing_content_block_fn
+            result = content_block_fn(
+                configuration=render_object,
+                runtime_configuration=runtime_configuration,
+                **kwargs,
+            )
         if result is not None:
             if isinstance(render_object, ExpectationConfiguration):
                 expectation_meta_notes = cls._render_expectation_meta_notes(
@@ -290,6 +298,15 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def _render_expectation_meta_notes(cls, expectation):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not expectation.meta.get("notes"):
             return None
         else:
@@ -312,13 +329,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
             notes = expectation.meta["notes"]
             note_content = None
-
             if isinstance(notes, str):
                 note_content = [notes]
-
             elif isinstance(notes, list):
                 note_content = notes
-
             elif isinstance(notes, dict):
                 if "format" in notes:
                     if notes["format"] == "string":
@@ -330,7 +344,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             logger.warning(
                                 "Unrecognized Expectation suite notes format. Skipping rendering."
                             )
-
                     elif notes["format"] == "markdown":
                         if isinstance(notes["content"], str):
                             note_content = [
@@ -363,7 +376,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     logger.warning(
                         "Unrecognized Expectation suite notes format. Skipping rendering."
                     )
-
             notes_block = TextContent(
                 **{
                     "content_block_type": "text",
@@ -375,7 +387,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     },
                 }
             )
-
             return CollapseContent(
                 **{
                     "collapse_toggle_link": collapse_link,
@@ -392,12 +403,30 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _process_content_block(
         cls, content_block, has_failed_evr, render_object=None
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         header = cls._get_header()
         if header != "":
             content_block.header = header
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         content_block_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type="renderer.prescriptive"
         )
@@ -405,6 +434,15 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
     @classmethod
     def list_available_expectations(cls):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectations = [
             object_name
             for object_name in _registered_renderers
@@ -421,16 +459,52 @@ diagnose and repair the underlying issue.  Detailed information follows:
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return []
 
     @classmethod
     def _get_content_block_styling(cls):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls._default_content_block_styling
 
     @classmethod
     def _get_element_styling(cls):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls._default_element_styling
 
     @classmethod
     def _get_header(cls):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return cls._default_header

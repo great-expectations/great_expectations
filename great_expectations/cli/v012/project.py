@@ -13,7 +13,16 @@ from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
 @click.group()
 def project() -> None:
-    """Project operations"""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Project operations"
     pass
 
 
@@ -25,9 +34,18 @@ def project() -> None:
     help="The project's great_expectations directory.",
 )
 def project_check_config(directory) -> None:
-    """Check a config for validity and help with migrations."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Check a config for validity and help with migrations."
     cli_message("Checking your config files for validity...\n")
-    is_config_ok, error_message, context = do_config_check(directory)
+    (is_config_ok, error_message, context) = do_config_check(directory)
     if context:
         send_usage_message(
             data_context=context,
@@ -39,7 +57,6 @@ def project_check_config(directory) -> None:
         cli_message("Unfortunately, your config appears to be invalid:\n")
         cli_message(f"<red>{error_message}</red>")
         sys.exit(1)
-
     cli_message("<green>Your config file appears valid!</green>")
 
 
@@ -51,7 +68,16 @@ def project_check_config(directory) -> None:
     help="The project's great_expectations directory.",
 )
 def project_upgrade(directory) -> None:
-    """Upgrade a project after installing the next Great Expectations major version."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Upgrade a project after installing the next Great Expectations major version."
     cli_message("\nChecking project...")
     cli_message(SECTION_SEPARATOR)
     if load_data_context_with_error_handling(
@@ -65,6 +91,15 @@ def project_upgrade(directory) -> None:
 
 
 def do_config_check(target_directory):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
         context: DataContext = DataContext(context_root_dir=target_directory)
         ge_config_version: int = context.get_config().config_version
@@ -73,12 +108,8 @@ def do_config_check(target_directory):
 Please consult the V3 API migration guide https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
 upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
             """
-            return (
-                False,
-                upgrade_message,
-                None,
-            )
-        return True, None, context
+            return (False, upgrade_message, None)
+        return (True, None, context)
     except (
         ge_exceptions.InvalidConfigurationYamlError,
         ge_exceptions.InvalidTopLevelConfigKeyError,
@@ -90,4 +121,4 @@ upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFI
         ge_exceptions.PluginModuleNotFoundError,
         ge_exceptions.GreatExpectationsError,
     ) as err:
-        return False, err.message, None
+        return (False, err.message, None)

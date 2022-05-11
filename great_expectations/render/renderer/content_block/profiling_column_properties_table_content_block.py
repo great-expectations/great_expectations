@@ -24,12 +24,19 @@ class ProfilingColumnPropertiesTableContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def render(cls, ge_object, header_row=None):
-        """Each expectation method should return a list of rows"""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Each expectation method should return a list of rows"
         if header_row is None:
             header_row = []
-
         table_rows = []
-
         if isinstance(ge_object, list):
             for sub_object in ge_object:
                 expectation_type = cls._get_expectation_type(sub_object)
@@ -53,7 +60,6 @@ class ProfilingColumnPropertiesTableContentBlockRenderer(ContentBlockRenderer):
                     for renderer_type in cls.expectation_renderers.get(expectation_type)
                 ]
                 table_rows.extend(new_rows)
-
         return RenderedTableContent(
             **{
                 "content_block_type": "table",

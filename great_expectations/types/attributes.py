@@ -8,12 +8,28 @@ logger = logging.getLogger(__name__)
 
 
 class Attributes(SerializableDotDict, IDDict):
-    """
-    This class generalizes dictionary in order to hold generic attributes with unique ID.
-    """
+    "\n    This class generalizes dictionary in order to hold generic attributes with unique ID.\n"
 
     def to_dict(self) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return dict(self)
 
     def to_json_dict(self) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return convert_to_json_serializable(data=self.to_dict())

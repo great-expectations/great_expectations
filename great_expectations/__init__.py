@@ -1,9 +1,7 @@
-# Set up version information immediately
-from ._version import get_versions  # isort:skip
+from ._version import get_versions
 
-__version__ = get_versions()["version"]  # isort:skip
-del get_versions  # isort:skip
-
+__version__ = get_versions()["version"]
+del get_versions
 from great_expectations.data_context import DataContext
 
 from .util import (
@@ -19,9 +17,5 @@ from .util import (
     read_table,
     validate,
 )
-
-# from great_expectations.expectations.core import *
-# from great_expectations.expectations.metrics import *
-
 
 rtd_url_ge_version = __version__.replace(".", "_")

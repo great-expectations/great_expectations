@@ -9,6 +9,15 @@ logger = logging.getLogger(__name__)
 
 class ExpectationExplorer:
     def __init__(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.state = {"data_assets": {}}
         self.expectation_kwarg_field_names = {
             "expect_column_values_to_be_unique": ["mostly"],
@@ -111,7 +120,6 @@ class ExpectationExplorer:
             ],
             "expect_table_columns_to_match_ordered_list": ["column_list"],
             "expect_table_columns_to_match_set": ["column_set", "exact_match"],
-            ####
             "expect_column_pair_values_to_be_equal": ["ignore_row_if"],
             "expect_column_pair_values_A_to_be_greater_than_B": [
                 "or_equal",
@@ -184,6 +192,15 @@ class ExpectationExplorer:
         self.styles = {"description_width": {"description_width": "150px"}}
 
     def update_result(self, data_asset_name, new_result, column=None) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         new_success_value = new_result.get("success")
         expectation_type = new_result.expectation_config.expectation_type
         new_result_widgets = self.generate_expectation_result_detail_widgets(
@@ -193,7 +210,6 @@ class ExpectationExplorer:
         data_asset_expectations = self.state["data_assets"][data_asset_name][
             "expectations"
         ]
-
         if column:
             data_asset_expectations[column][expectation_type][
                 "success"
@@ -216,9 +232,17 @@ class ExpectationExplorer:
             ].layout.border = f"2px solid {new_border_color}"
 
     def get_expectation_state(self, data_asset_name, expectation_type, column=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_state = self.state["data_assets"].get(data_asset_name, {})
         data_asset_expectations = data_asset_state.get("expectations", {})
-
         if column:
             column_expectations = data_asset_expectations.get(column)
             if not column_expectations:
@@ -233,20 +257,35 @@ class ExpectationExplorer:
             return non_column_expectations.get(expectation_type)
 
     def initialize_data_asset_state(self, data_asset) -> None:
-        data_asset_name = data_asset.data_asset_name
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        data_asset_name = data_asset.data_asset_name
         self.state["data_assets"][data_asset_name] = {
             "data_asset": data_asset,
             "expectations": {},
         }
 
     def set_expectation_state(self, data_asset, expectation_state, column=None) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = data_asset.data_asset_name
         expectation_type = expectation_state.get("expectation_type")
         data_asset_state = self.state["data_assets"].get(data_asset_name)
-
         data_asset_expectations = data_asset_state.get("expectations")
-
         if column:
             column_expectations = data_asset_expectations.get(column, {})
             column_expectations[expectation_type] = expectation_state
@@ -258,14 +297,19 @@ class ExpectationExplorer:
             non_column_expectations[expectation_type] = expectation_state
             data_asset_expectations["non_column_expectations"] = non_column_expectations
 
-    # interconvert expectation kwargs
     def expectation_kwarg_dict_to_ge_kwargs(self, kwarg_dict):
-        # kwarg_exclusions are non-ge keys which contain ancillary widgets required for proper parsing
-        # for e.g., a widget for setting the date type of min/max
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         ancillary_kwargs = ["min_max_type"]
         expectation_kwargs = {}
-
-        for kwarg_name, widget_dict in kwarg_dict.items():
+        for (kwarg_name, widget_dict) in kwarg_dict.items():
             if kwarg_name == "column":
                 expectation_kwargs["column"] = widget_dict
                 continue
@@ -276,16 +320,34 @@ class ExpectationExplorer:
             else:
                 expectation_kwargs[kwarg_name] = (
                     widget_dict.get("ge_kwarg_value")
-                    if "ge_kwarg_value" in widget_dict
+                    if ("ge_kwarg_value" in widget_dict)
                     else widget_dict["kwarg_widget"].value
                 )
-
         return expectation_kwargs
 
     def update_kwarg_widget_dict(
         self, expectation_state, current_widget_dict, ge_kwarg_name, new_ge_kwarg_value
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
         def update_tag_list_widget_dict(widget_dict, new_list) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             widget_dict["ge_kwarg_value"] = new_list
             widget_display = widget_dict["widget_display"]
             widget_display.children = self.generate_tag_button_list(
@@ -295,23 +357,39 @@ class ExpectationExplorer:
             )
 
         def ge_number_to_widget_string(widget_dict, number_kwarg) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             if hasattr(widget_dict["kwarg_widget"], "value"):
                 widget_dict["kwarg_widget"].value = (
-                    str(number_kwarg) if number_kwarg or number_kwarg == 0 else ""
+                    str(number_kwarg) if (number_kwarg or (number_kwarg == 0)) else ""
                 )
             if widget_dict.get("ge_kwarg_value"):
                 widget_dict["ge_kwarg_value"] = (
-                    str(number_kwarg) if number_kwarg or number_kwarg == 0 else ""
+                    str(number_kwarg) if (number_kwarg or (number_kwarg == 0)) else ""
                 )
 
         def min_max_value_to_string(widget_dict, number_kwarg) -> None:
-            # expectations with min/max kwargs where widget expects a string
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             number_to_string_expectations = [
                 "expect_column_values_to_be_between",
                 "expect_column_max_to_be_between",
                 "expect_column_min_to_be_between",
             ]
-
             if (
                 expectation_state.get("expectation_type")
                 in number_to_string_expectations
@@ -328,14 +406,25 @@ class ExpectationExplorer:
         }
         updater_functions.get(
             ge_kwarg_name,
-            lambda current_widget_dict, ge_kwarg_value: setattr(
-                current_widget_dict["kwarg_widget"], "value", ge_kwarg_value
+            (
+                lambda current_widget_dict, ge_kwarg_value: setattr(
+                    current_widget_dict["kwarg_widget"], "value", ge_kwarg_value
+                )
             ),
         )(current_widget_dict, new_ge_kwarg_value)
 
     def update_expectation_state(
         self, existing_expectation_state, expectation_validation_result, validation_time
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectation_editor_widget = existing_expectation_state.get("editor_widget")
         new_ge_expectation_kwargs = expectation_validation_result.expectation_config[
             "kwargs"
@@ -343,18 +432,12 @@ class ExpectationExplorer:
         current_expectation_kwarg_dict = existing_expectation_state["kwargs"]
         column = current_expectation_kwarg_dict.get("column")
         data_asset_name = existing_expectation_state.get("data_asset_name")
-
-        for ge_kwarg_name, ge_kwarg_value in new_ge_expectation_kwargs.items():
+        for (ge_kwarg_name, ge_kwarg_value) in new_ge_expectation_kwargs.items():
             if ge_kwarg_name in self.kwarg_widget_exclusions:
                 continue
-
             current_widget_dict = current_expectation_kwarg_dict.get(ge_kwarg_name)
-
             if current_widget_dict:
-                if not hasattr(
-                    self,
-                    f"generate_{ge_kwarg_name}_widget_dict",
-                ):
+                if not hasattr(self, f"generate_{ge_kwarg_name}_widget_dict"):
                     current_expectation_kwarg_dict[
                         ge_kwarg_name
                     ] = self.generate_expectation_kwarg_fallback_widget_dict(
@@ -370,9 +453,7 @@ class ExpectationExplorer:
                     )
             else:
                 widget_dict_generator = getattr(
-                    self,
-                    f"generate_{ge_kwarg_name}_widget_dict",
-                    None,
+                    self, f"generate_{ge_kwarg_name}_widget_dict", None
                 )
                 widget_dict = (
                     widget_dict_generator(
@@ -389,25 +470,31 @@ class ExpectationExplorer:
                 expectation_editor_widget.children[0].children[1].children += (
                     widget_dict["kwarg_widget"],
                 )
-
         self.update_result(
             data_asset_name=data_asset_name,
             new_result=expectation_validation_result,
             column=column,
         )
-        # TODO: This is messy. Figure out better way of storing/accessing UI elements
         validation_time_widget = (
-            expectation_editor_widget.children[0].children[0].children[0].children[-1]
+            expectation_editor_widget.children[0].children[0].children[0].children[(-1)]
         )
         validation_time_widget.value = "<div><strong>Date/Time Validated (UTC): </strong>{validation_time}</div>".format(
             validation_time=validation_time
         )
         return expectation_editor_widget
 
-    # widget generators for general input fields
     def generate_boolean_checkbox_widget(
         self, value, description="", description_tooltip="", disabled=False
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return widgets.Checkbox(
             value=value,
             description=description,
@@ -425,6 +512,15 @@ class ExpectationExplorer:
         continuous_update=False,
         placeholder="",
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return widgets.Textarea(
             value=value,
             placeholder=placeholder,
@@ -444,6 +540,15 @@ class ExpectationExplorer:
         placeholder="",
         disabled=False,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return widgets.Text(
             value=value,
             placeholder=placeholder,
@@ -458,9 +563,17 @@ class ExpectationExplorer:
     def generate_radio_buttons_widget(
         self, value, options=None, description="", description_tooltip=""
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if options is None:
             options = []
-
         return widgets.RadioButtons(
             options=options,
             value=value,
@@ -471,13 +584,20 @@ class ExpectationExplorer:
         )
 
     def generate_remove_expectation_button(self, expectation_state):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
-
         column = expectation_state["kwargs"].get("column")
-
         remove_expectation_button = widgets.Button(
             description="Remove Expectation",
             button_style="danger",
@@ -488,13 +608,21 @@ class ExpectationExplorer:
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_click(button) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             editor_widget = expectation_state.get("editor_widget")
             expectation = data_asset.remove_expectation(
                 expectation_type=expectation_type, column=column
             )
             data_asset_state = self.state["data_assets"].get(data_asset_name, {})
             data_asset_expectations = data_asset_state.get("expectations")
-
             if column:
                 column_expectations = data_asset_expectations.get(column)
                 column_expectations.pop(expectation_type)
@@ -503,14 +631,21 @@ class ExpectationExplorer:
                     "non_column_expectations"
                 )
                 non_column_expectations.pop(expectation_type)
-
             editor_widget.close()
 
         remove_expectation_button.on_click(on_click)
-
         return remove_expectation_button
 
     def generate_tag_button(self, expectation_state, tag, tag_list, widget_display):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
@@ -525,29 +660,43 @@ class ExpectationExplorer:
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_click(button):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             if len(tag_list) == 1:
                 with expectation_feedback_widget:
                     print("Warning: cannot remove - set must have at least one member")
                 return
             tag_list.remove(tag)
-
             display_children = list(widget_display.children)
             display_children.remove(tag_button)
             widget_display.children = display_children
-
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         tag_button.on_click(on_click)
-
         return tag_button
 
     def generate_tag_button_list(self, expectation_state, tag_list, widget_display):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return (
             [
                 self.generate_tag_button(
@@ -565,6 +714,15 @@ class ExpectationExplorer:
     def generate_zero_or_positive_integer_widget(
         self, value, max=int(9e300), description="", continuous_update=False
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return widgets.BoundedIntText(
             value=value,
             min=0,
@@ -575,7 +733,6 @@ class ExpectationExplorer:
             continuous_update=continuous_update,
         )
 
-    # widget dict generators for kwarg input fields
     def generate_output_strftime_format_widget_dict(
         self,
         expectation_state,
@@ -583,105 +740,154 @@ class ExpectationExplorer:
         column=None,
         **expectation_kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
-
         parse_strings_as_datetimes = expectation_kwargs.get(
             "parse_strings_as_datetimes", False
         )
-
         output_strftime_format_widget = self.generate_text_widget(
             value=output_strftime_format,
             description="output strftime format",
             placeholder="press enter to confirm...",
             description_tooltip="Enter a valid strfime format for datetime output.",
-            disabled=not parse_strings_as_datetimes,
+            disabled=(not parse_strings_as_datetimes),
         )
-
         widget_dict = {"kwarg_widget": output_strftime_format_widget}
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_output_strftime_format_submit(widget) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         output_strftime_format_widget.on_submit(on_output_strftime_format_submit)
-
         return widget_dict
 
     def generate_strftime_format_widget_dict(
         self, expectation_state, strftime_format="", column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
-
         strftime_format_widget = self.generate_text_widget(
             value=strftime_format,
             description="strftime format",
             placeholder="press enter to confirm...",
         )
-
         widget_dict = {"kwarg_widget": strftime_format_widget}
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_strftime_format_submit(widget) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         strftime_format_widget.on_submit(on_strftime_format_submit)
-
         return widget_dict
 
     def generate_value_widget_dict(
         self, expectation_state, value=None, column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
-
         value_widget = self.generate_zero_or_positive_integer_widget(
             value=value, description="value"
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_value_change(change) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         value_widget.observe(on_value_change, names="value")
-
         widget_dict = {"kwarg_widget": value_widget}
-
         return widget_dict
 
     def generate_json_schema_widget_dict(
         self, expectation_state, json_schema="", column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
-
         json_schema_widget = self.generate_text_area_widget(
             value=json_schema,
             description="json schema",
@@ -690,23 +896,38 @@ class ExpectationExplorer:
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_json_schema_change(change) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         json_schema_widget.observe(on_json_schema_change, names="value")
-
         widget_dict = {"kwarg_widget": json_schema_widget}
-
         return widget_dict
 
     def generate_ties_okay_widget_dict(
         self, expectation_state, ties_okay=None, column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
@@ -719,23 +940,38 @@ class ExpectationExplorer:
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_ties_okay_change(change) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         ties_okay_widget.observe(on_ties_okay_change, names="value")
-
         widget_dict = {"kwarg_widget": ties_okay_widget}
-
         return widget_dict
 
     def generate_match_on_widget_dict(
         self, expectation_state, match_on="any", column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
@@ -749,26 +985,40 @@ class ExpectationExplorer:
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_match_on_change(change) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         match_on_widget.observe(on_match_on_change, names="value")
-
         widget_dict = {"kwarg_widget": match_on_widget}
-
         return widget_dict
 
     def generate_regex_list_widget_dict(
         self, expectation_state, regex_list=None, column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if regex_list is None:
             regex_list = []
-
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
@@ -792,14 +1042,12 @@ class ExpectationExplorer:
                 regex_list_widget_input,
             ]
         )
-
         widget_dict = {
             "kwarg_widget": regex_list_widget,
             "ge_kwarg_value": regex_list,
             "widget_display": regex_list_widget_display,
             "widget_input": regex_list_widget_input,
         }
-
         regex_list_widget_display.children = self.generate_tag_button_list(
             expectation_state=expectation_state,
             tag_list=regex_list,
@@ -808,15 +1056,22 @@ class ExpectationExplorer:
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_regex_list_input_submit(widget):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             widget_display = expectation_state["kwargs"]["regex_list"]["widget_display"]
             regex_list = expectation_state["kwargs"]["regex_list"]["ge_kwarg_value"]
             new_regex = widget.value
-
             if new_regex in regex_list:
                 with expectation_feedback_widget:
                     print("Warning: regex already exists in set")
                 return
-
             regex_list.append(new_regex)
             widget_display.children += (
                 self.generate_tag_button(
@@ -827,25 +1082,30 @@ class ExpectationExplorer:
                 ),
             )
             widget.value = ""
-
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         regex_list_widget_input.on_submit(on_regex_list_input_submit)
-
         return widget_dict
 
     def generate_column_list_widget_dict(
         self, expectation_state, column_list=None, column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if column_list is None:
             column_list = []
-
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
@@ -869,14 +1129,12 @@ class ExpectationExplorer:
                 column_list_widget_input,
             ]
         )
-
         widget_dict = {
             "kwarg_widget": column_list_widget,
             "ge_kwarg_value": column_list,
             "widget_display": column_list_widget_display,
             "widget_input": column_list_widget_input,
         }
-
         column_list_widget_display.children = self.generate_tag_button_list(
             expectation_state=expectation_state,
             tag_list=column_list,
@@ -885,17 +1143,24 @@ class ExpectationExplorer:
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_column_list_input_submit(widget):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             widget_display = expectation_state["kwargs"]["column_list"][
                 "widget_display"
             ]
             column_list = expectation_state["kwargs"]["column_list"]["ge_kwarg_value"]
             new_column = widget.value
-
             if new_column in column_list:
                 with expectation_feedback_widget:
                     print("Warning: column already exists in list")
                 return
-
             column_list.append(new_column)
             widget_display.children += (
                 self.generate_tag_button(
@@ -906,34 +1171,38 @@ class ExpectationExplorer:
                 ),
             )
             widget.value = ""
-
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         column_list_widget_input.on_submit(on_column_list_input_submit)
-
         return widget_dict
 
     def generate_column_index_widget_dict(
         self, expectation_state, column, column_index="", **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
-
         column_index_widget = self.generate_text_widget(
             value=str(column_index),
             description="column_index",
             continuous_update=True,
             placeholder="press enter to confirm...",
         )
-
         widget_dict = {
             "kwarg_widget": column_index_widget,
             "ge_kwarg_value": column_index,
@@ -941,9 +1210,18 @@ class ExpectationExplorer:
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_column_index_submit(widget):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             new_column_index = widget.value if widget.value else None
             if new_column_index:
-                if "." in new_column_index or "-" in new_column_index:
+                if ("." in new_column_index) or ("-" in new_column_index):
                     with expectation_feedback_widget:
                         print("Warning: column_index must be an integer >= 0")
                     return
@@ -953,46 +1231,57 @@ class ExpectationExplorer:
                     with expectation_feedback_widget:
                         print("Warning: column_index must be an integer >= 0")
                     return
-
             widget_dict["ge_kwarg_value"] = new_column_index
-
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         column_index_widget.on_submit(on_column_index_submit)
-
         return widget_dict
 
     def generate_regex_widget_dict(
         self, expectation_state, regex="", column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
         regex_widget = self.generate_text_area_widget(
-            value=regex, description="regex", placeholder=r"e.g. ([A-Z])\w+"
+            value=regex, description="regex", placeholder="e.g. ([A-Z])\\w+"
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_regex_change(change) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         regex_widget.observe(on_regex_change, names="value")
-
         widget_dict = {"kwarg_widget": regex_widget}
-
         return widget_dict
 
     def generate_parse_strings_as_datetimes_widget_dict(
@@ -1002,6 +1291,15 @@ class ExpectationExplorer:
         column=None,
         **expectation_kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
@@ -1012,11 +1310,22 @@ class ExpectationExplorer:
         parse_strings_as_datetimes_widget = self.generate_boolean_checkbox_widget(
             value=parse_strings_as_datetimes,
             description="parse strings as datetimes",
-            disabled=False if min_max_type == "string" or not min_max_type else True,
+            disabled=(
+                False if ((min_max_type == "string") or (not min_max_type)) else True
+            ),
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_parse_strings_as_datetimes_change(change) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             output_strftime_format_widget_dict = expectation_state["kwargs"].get(
                 "output_strftime_format", {}
             )
@@ -1025,11 +1334,9 @@ class ExpectationExplorer:
             )
             if output_strftime_format_widget:
                 output_strftime_format_widget.disabled = not change["new"]
-
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
@@ -1037,42 +1344,64 @@ class ExpectationExplorer:
         parse_strings_as_datetimes_widget.observe(
             on_parse_strings_as_datetimes_change, names="value"
         )
-
         widget_dict = {"kwarg_widget": parse_strings_as_datetimes_widget}
-
         return widget_dict
 
     def generate_strictly_widget_dict(
         self, expectation_state, strictly=None, column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
-        inc_dec = expectation_type.split("_")[-1]
+        inc_dec = expectation_type.split("_")[(-1)]
         strictly_widget = self.generate_boolean_checkbox_widget(
             value=strictly, description=f"strictly {inc_dec}"
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_strictly_change(change) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         strictly_widget.observe(on_strictly_change, names="value")
-
         widget_dict = {"kwarg_widget": strictly_widget}
-
         return widget_dict
 
     def generate_mostly_widget_dict(
         self, expectation_state, mostly=1, column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
@@ -1093,60 +1422,78 @@ class ExpectationExplorer:
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_mostly_change(change) -> None:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         mostly_widget.observe(on_mostly_change, names="value")
         widget_dict = {"kwarg_widget": mostly_widget}
-
         return widget_dict
 
     def generate_min_max_type_widget_dict(
         self, expectation_state, type_option=None, column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
-
         min_value = expectation_kwargs.get("min_value")
         min_value_type = type(min_value)
-
         max_value = expectation_kwargs.get("max_value")
         max_value_type = type(max_value)
-
         number_types = [int, float]
-        if min_value_type in number_types or max_value_type in number_types:
+        if (min_value_type in number_types) or (max_value_type in number_types):
             type_option = "number"
-        elif min_value_type is str or max_value_type is str:
+        elif (min_value_type is str) or (max_value_type is str):
             type_option = "string"
-
         min_max_type_widget = self.generate_radio_buttons_widget(
             value=type_option, options=["string", "number"], description="min/max type"
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_min_max_type_change(change) -> None:
-            new_type_selection = change.get("new")
+            import inspect
 
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+            new_type_selection = change.get("new")
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
             min_value = ge_expectation_kwargs.get("min_value")
             max_value = ge_expectation_kwargs.get("max_value")
-
             parse_strings_as_datetimes_widget_dict = expectation_state["kwargs"].get(
                 "parse_strings_as_datetimes", {}
             )
             parse_strings_as_datetimes_widget = (
                 parse_strings_as_datetimes_widget_dict.get("kwarg_widget")
             )
-
             if new_type_selection == "string":
                 ge_expectation_kwargs["min_value"] = (
                     str(min_value) if min_value else None
@@ -1154,7 +1501,6 @@ class ExpectationExplorer:
                 ge_expectation_kwargs["max_value"] = (
                     str(max_value) if max_value else None
                 )
-
                 if parse_strings_as_datetimes_widget:
                     parse_strings_as_datetimes_widget.disabled = False
             elif new_type_selection == "number":
@@ -1164,22 +1510,28 @@ class ExpectationExplorer:
                 ge_expectation_kwargs["max_value"] = (
                     float(max_value) if max_value else None
                 )
-
                 if parse_strings_as_datetimes_widget:
                     parse_strings_as_datetimes_widget.value = False
                     parse_strings_as_datetimes_widget.disabled = True
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         min_max_type_widget.observe(on_min_max_type_change, names="value")
-
         return {"kwarg_widget": min_max_type_widget}
 
     def generate_min_value_widget_dict(
         self, expectation_state, min_value=None, column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
@@ -1192,8 +1544,6 @@ class ExpectationExplorer:
         max_value_widget = (
             max_value_widget_dict.get("kwarg_widget") if max_value_widget_dict else None
         )
-
-        # integer
         if expectation_type in list(
             chain.from_iterable(self.min_max_subtypes["integer"].values())
         ):
@@ -1203,12 +1553,11 @@ class ExpectationExplorer:
             elif expectation_type in self.min_max_subtypes["integer"]["unbounded"]:
                 default_min_value = -int(9e300)
                 default_max_value = int(9e300)
-
             if min_value_widget:
                 min_value_widget.value = min_value if min_value else default_min_value
             else:
                 min_value_widget = widgets.BoundedIntText(
-                    value=min_value or default_min_value,
+                    value=(min_value or default_min_value),
                     min=default_min_value,
                     description="min_value: ",
                     disabled=False,
@@ -1220,7 +1569,6 @@ class ExpectationExplorer:
                     max=default_max_value,
                     disabled=False,
                 )
-        # float
         elif expectation_type in list(
             chain.from_iterable(self.min_max_subtypes["float"].values())
         ):
@@ -1230,12 +1578,11 @@ class ExpectationExplorer:
             elif expectation_type in self.min_max_subtypes["float"]["unbounded"]:
                 default_min_value = -int(9e300)
                 default_max_value = int(9e300)
-
             if min_value_widget:
                 min_value_widget.value = min_value if min_value else default_min_value
             else:
                 min_value_widget = widgets.BoundedFloatText(
-                    value=min_value or default_min_value,
+                    value=(min_value or default_min_value),
                     min=default_min_value,
                     step=0.01,
                     description="min_value: ",
@@ -1249,11 +1596,10 @@ class ExpectationExplorer:
                     step=0.01,
                     disabled=False,
                 )
-        # number or string
         elif expectation_type in list(
             chain.from_iterable(self.min_max_subtypes["mixed"].values())
         ):
-            min_value_str = str(min_value) if min_value or min_value == 0 else ""
+            min_value_str = str(min_value) if (min_value or (min_value == 0)) else ""
             if min_value_widget:
                 min_value_widget.value = min_value
             else:
@@ -1265,6 +1611,17 @@ class ExpectationExplorer:
 
             @expectation_feedback_widget.capture(clear_output=True)
             def on_min_value_change(change):
+                import inspect
+
+                __frame = inspect.currentframe()
+                __file = __frame.f_code.co_filename
+                __func = __frame.f_code.co_name
+                for (k, v) in __frame.f_locals.items():
+                    if any((var in k) for var in ("__frame", "__file", "__func")):
+                        continue
+                    print(
+                        f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}"
+                    )
                 min_max_type = expectation_state["kwargs"]["min_max_type"][
                     "kwarg_widget"
                 ].value
@@ -1273,39 +1630,49 @@ class ExpectationExplorer:
                 )
                 min_value = ge_expectation_kwargs.get("min_value")
                 max_value = ge_expectation_kwargs.get("max_value")
-
                 if min_max_type == "string":
                     min_value = str(min_value) if min_value else None
                     max_value = str(max_value) if max_value else None
                 elif min_max_type == "number":
                     min_value = float(min_value) if min_value else None
                     max_value = float(max_value) if max_value else None
-
-                if min_value and max_value and min_value > max_value:
+                if min_value and max_value and (min_value > max_value):
                     with expectation_feedback_widget:
                         print(
                             "Error: min_value must be less than or equal to max_value."
                         )
                     return
-
                 ge_expectation_kwargs["min_value"] = min_value
                 ge_expectation_kwargs["max_value"] = max_value
-
                 getattr(data_asset, expectation_type)(
                     include_config=True, **ge_expectation_kwargs
                 )
 
             min_value_widget.observe(on_min_value_change, names="value")
-
         if (
             min_value_widget
             and max_value_widget
-            and expectation_type
-            not in list(chain.from_iterable(self.min_max_subtypes["mixed"].values()))
+            and (
+                expectation_type
+                not in list(
+                    chain.from_iterable(self.min_max_subtypes["mixed"].values())
+                )
+            )
         ):
 
             @expectation_feedback_widget.capture(clear_output=True)
             def on_min_value_change(change) -> None:
+                import inspect
+
+                __frame = inspect.currentframe()
+                __file = __frame.f_code.co_filename
+                __func = __frame.f_code.co_name
+                for (k, v) in __frame.f_locals.items():
+                    if any((var in k) for var in ("__frame", "__file", "__func")):
+                        continue
+                    print(
+                        f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}"
+                    )
                 ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                     expectation_state["kwargs"]
                 )
@@ -1320,7 +1687,6 @@ class ExpectationExplorer:
             expectation_state["kwargs"]["max_value"] = {
                 "kwarg_widget": max_value_widget
             }
-
         if min_value_widget:
             min_value_widget_dict["kwarg_widget"] = min_value_widget
         else:
@@ -1329,14 +1695,21 @@ class ExpectationExplorer:
                     expectation_kwarg_name="min_value", **{"min_value": min_value}
                 )
             )
-
         expectation_state["kwargs"]["min_value"] = min_value_widget_dict
-
         return min_value_widget_dict
 
     def generate_max_value_widget_dict(
         self, expectation_state, max_value=None, column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
@@ -1349,8 +1722,6 @@ class ExpectationExplorer:
         max_value_widget = (
             max_value_widget_dict.get("kwarg_widget") if max_value_widget_dict else None
         )
-
-        # integer
         if expectation_type in list(
             chain.from_iterable(self.min_max_subtypes["integer"].values())
         ):
@@ -1360,12 +1731,11 @@ class ExpectationExplorer:
             elif expectation_type in self.min_max_subtypes["integer"]["unbounded"]:
                 default_min_value = -int(9e300)
                 default_max_value = int(9e300)
-
             if max_value_widget:
                 max_value_widget.value = max_value if max_value else default_max_value
             else:
                 max_value_widget = widgets.BoundedIntText(
-                    value=max_value or default_max_value,
+                    value=(max_value or default_max_value),
                     max=default_max_value,
                     description="max_value: ",
                     disabled=False,
@@ -1377,7 +1747,6 @@ class ExpectationExplorer:
                     description="min_value: ",
                     disabled=False,
                 )
-        # float
         elif expectation_type in list(
             chain.from_iterable(self.min_max_subtypes["float"].values())
         ):
@@ -1387,12 +1756,11 @@ class ExpectationExplorer:
             elif expectation_type in self.min_max_subtypes["float"]["unbounded"]:
                 default_min_value = -int(9e300)
                 default_max_value = int(9e300)
-
             if max_value_widget:
                 max_value_widget.value = max_value if max_value else default_max_value
             else:
                 max_value_widget = widgets.BoundedFloatText(
-                    value=max_value or default_max_value,
+                    value=(max_value or default_max_value),
                     max=default_max_value,
                     step=0.01,
                     description="max_value: ",
@@ -1406,11 +1774,10 @@ class ExpectationExplorer:
                     description="min_value: ",
                     disabled=False,
                 )
-        # number or string
         elif expectation_type in list(
             chain.from_iterable(self.min_max_subtypes["mixed"].values())
         ):
-            max_value_str = str(max_value) if max_value or max_value == 0 else ""
+            max_value_str = str(max_value) if (max_value or (max_value == 0)) else ""
             if max_value_widget:
                 max_value_widget.value = max_value
             else:
@@ -1422,6 +1789,17 @@ class ExpectationExplorer:
 
             @expectation_feedback_widget.capture(clear_output=True)
             def on_max_value_change(change):
+                import inspect
+
+                __frame = inspect.currentframe()
+                __file = __frame.f_code.co_filename
+                __func = __frame.f_code.co_name
+                for (k, v) in __frame.f_locals.items():
+                    if any((var in k) for var in ("__frame", "__file", "__func")):
+                        continue
+                    print(
+                        f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}"
+                    )
                 min_max_type = expectation_state["kwargs"]["min_max_type"][
                     "kwarg_widget"
                 ].value
@@ -1430,39 +1808,49 @@ class ExpectationExplorer:
                 )
                 min_value = ge_expectation_kwargs.get("min_value")
                 max_value = ge_expectation_kwargs.get("max_value")
-
                 if min_max_type == "string":
                     min_value = str(min_value) if min_value else None
                     max_value = str(max_value) if max_value else None
                 elif min_max_type == "number":
                     min_value = float(min_value) if min_value else None
                     max_value = float(max_value) if max_value else None
-
-                if min_value and max_value and min_value > max_value:
+                if min_value and max_value and (min_value > max_value):
                     with expectation_feedback_widget:
                         print(
                             "Error: min_value must be less than or equal to max_value."
                         )
                     return
-
                 ge_expectation_kwargs["min_value"] = min_value
                 ge_expectation_kwargs["max_value"] = max_value
-
                 getattr(data_asset, expectation_type)(
                     include_config=True, **ge_expectation_kwargs
                 )
 
             max_value_widget.observe(on_max_value_change, names="value")
-
         if (
             min_value_widget
             and max_value_widget
-            and expectation_type
-            not in list(chain.from_iterable(self.min_max_subtypes["mixed"].values()))
+            and (
+                expectation_type
+                not in list(
+                    chain.from_iterable(self.min_max_subtypes["mixed"].values())
+                )
+            )
         ):
 
             @expectation_feedback_widget.capture(clear_output=True)
             def on_max_value_change(change) -> None:
+                import inspect
+
+                __frame = inspect.currentframe()
+                __file = __frame.f_code.co_filename
+                __func = __frame.f_code.co_name
+                for (k, v) in __frame.f_locals.items():
+                    if any((var in k) for var in ("__frame", "__file", "__func")):
+                        continue
+                    print(
+                        f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}"
+                    )
                 ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                     expectation_state["kwargs"]
                 )
@@ -1477,7 +1865,6 @@ class ExpectationExplorer:
             expectation_state["kwargs"]["min_value"] = {
                 "kwarg_widget": min_value_widget
             }
-
         max_value_widget_dict = (
             {"kwarg_widget": max_value_widget}
             if max_value_widget
@@ -1486,22 +1873,27 @@ class ExpectationExplorer:
             )
         )
         expectation_state["kwargs"]["max_value"] = max_value_widget_dict
-
         return max_value_widget_dict
 
     def generate_value_set_widget_dict(
         self, expectation_state, value_set=None, column=None, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if value_set is None:
             value_set = []
-
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
-
         value_set_widget_display = widgets.Box()
-
         value_set_widget_number_input = self.generate_text_widget(
             value=None,
             description="add number",
@@ -1527,14 +1919,12 @@ class ExpectationExplorer:
                 value_set_widget_input,
             ]
         )
-
         widget_dict = {
             "kwarg_widget": value_set_widget,
             "ge_kwarg_value": value_set,
             "widget_display": value_set_widget_display,
             "widget_input": value_set_widget_input,
         }
-
         value_set_widget_display.children = self.generate_tag_button_list(
             expectation_state=expectation_state,
             tag_list=value_set,
@@ -1543,17 +1933,23 @@ class ExpectationExplorer:
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_value_set_number_input_submit(widget):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             widget_display = expectation_state["kwargs"]["value_set"]["widget_display"]
             value_set = expectation_state["kwargs"]["value_set"]["ge_kwarg_value"]
             new_value = widget.value
-
-            new_value = float(new_value) if "." in new_value else int(new_value)
-
+            new_value = float(new_value) if ("." in new_value) else int(new_value)
             if new_value in value_set:
                 with expectation_feedback_widget:
                     print("Warning: value already exists in set")
                 return
-
             value_set.append(new_value)
             widget_display.children += (
                 self.generate_tag_button(
@@ -1564,26 +1960,31 @@ class ExpectationExplorer:
                 ),
             )
             widget.value = ""
-
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         @expectation_feedback_widget.capture(clear_output=True)
         def on_value_set_string_input_submit(widget):
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             widget_display = expectation_state["kwargs"]["value_set"]["widget_display"]
             value_set = expectation_state["kwargs"]["value_set"]["ge_kwarg_value"]
             new_value = widget.value
-
             if new_value in value_set:
                 with expectation_feedback_widget:
                     print("Warning: value already exists in set")
                 return
-
             value_set.append(new_value)
             widget_display.children += (
                 self.generate_tag_button(
@@ -1594,23 +1995,29 @@ class ExpectationExplorer:
                 ),
             )
             widget.value = ""
-
             ge_expectation_kwargs = self.expectation_kwarg_dict_to_ge_kwargs(
                 expectation_state["kwargs"]
             )
-
             getattr(data_asset, expectation_type)(
                 include_config=True, **ge_expectation_kwargs
             )
 
         value_set_widget_number_input.on_submit(on_value_set_number_input_submit)
         value_set_widget_string_input.on_submit(on_value_set_string_input_submit)
-
         return widget_dict
 
     def generate_expectation_kwarg_fallback_widget_dict(
         self, expectation_kwarg_name, **expectation_kwargs
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         ge_kwarg_value = expectation_kwargs.get(expectation_kwarg_name)
         warning_message = widgets.HTML(
             value='<div><strong>Warning: </strong>No input widget for kwarg "{expectation_kwarg_name}". To change value, call expectation again with the modified value.</div>'.format(
@@ -1629,11 +2036,18 @@ class ExpectationExplorer:
             "kwarg_widget": widgets.HBox([static_widget, warning_message]),
             "ge_kwarg_value": ge_kwarg_value,
         }
-
         return widget_dict
 
-    # widget generators for general info shared between all expectations
     def generate_column_widget(self, column=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return (
             widgets.HTML(value=f"<div><strong>Column: </strong>{column}</div>")
             if column
@@ -1641,6 +2055,15 @@ class ExpectationExplorer:
         )
 
     def generate_expectation_type_widget(self, expectation_type):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return widgets.HTML(
             value=f"<span><strong>Expectation Type: </strong>{expectation_type}</span>"
         )
@@ -1653,6 +2076,15 @@ class ExpectationExplorer:
         validation_time,
         column=None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if column:
             return widgets.VBox(
                 [
@@ -1692,29 +2124,44 @@ class ExpectationExplorer:
             )
 
     def generate_expectation_result_detail_widgets(self, result=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if result is None:
             result = {}
-
         result_detail_widgets = []
-
-        for result_title, result_value in result.items():
+        for (result_title, result_value) in result.items():
             result_detail_widgets.append(
                 widgets.HTML(
-                    value="<span><strong>{}: </strong>{:.2f}</span>".format(
-                        result_title, result_value
+                    value=(
+                        "<span><strong>{}: </strong>{:.2f}</span>".format(
+                            result_title, result_value
+                        )
+                        if (type(result_value) is float)
+                        else f"<span><strong>{result_title}: </strong>{result_value}</span>"
                     )
-                    if type(result_value) is float
-                    else f"<span><strong>{result_title}: </strong>{result_value}</span>"
                 )
             )
-
         return result_detail_widgets
-
-    # widget generator for complete expectation widget
 
     def create_expectation_widget(
         self, data_asset, expectation_validation_result, collapsed=False
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y-%m-%d %H:%M"
         )
@@ -1725,7 +2172,6 @@ class ExpectationExplorer:
         )
         expectation_kwargs = expectation_validation_result.expectation_config["kwargs"]
         column = expectation_kwargs.get("column")
-
         if data_asset_state:
             existing_expectation_state = self.get_expectation_state(
                 data_asset_name=data_asset_name,
@@ -1740,31 +2186,21 @@ class ExpectationExplorer:
                 )
         else:
             self.initialize_data_asset_state(data_asset)
-
-        # success_widget
         success = expectation_validation_result.success
         success_widget = widgets.HTML(
             value=f"<span><strong>Success: </strong>{str(success)}</span>"
         )
-
-        # widget with result details
         result_detail_widget = widgets.VBox(
             children=self.generate_expectation_result_detail_widgets(
                 result=expectation_validation_result.result
             )
         )
-
-        # accordion container for result_detail_widget
         result_detail_accordion = widgets.Accordion(children=[result_detail_widget])
         result_detail_accordion.set_title(0, "Validation Result Details")
         result_detail_accordion.selected_index = None
-
-        # widget for displaying kwarg widget exceptions
         expectation_feedback_widget = widgets.Output()
         exception_accordion = widgets.Accordion(children=[expectation_feedback_widget])
         exception_accordion.set_title(0, "Exceptions/Warnings")
-
-        # create scaffold dict for expectation state
         expectation_state = {
             "success": success_widget,
             "expectation_type": expectation_type,
@@ -1773,28 +2209,20 @@ class ExpectationExplorer:
             "result_detail_widget": result_detail_widget,
             "kwargs": {},
         }
-
         if column:
             expectation_state["kwargs"]["column"] = column
-
         remove_expectation_button = self.generate_remove_expectation_button(
             expectation_state=expectation_state
         )
-
-        # widget with basic info (column, expectation_type)
         basic_expectation_info_box = self.generate_basic_expectation_info_box(
             data_asset_name, expectation_type, success_widget, validation_time, column
         )
-
-        # collect widget dicts for kwarg inputs
         expectation_kwarg_input_widget_dicts = []
         for expectation_kwarg_name in self.expectation_kwarg_field_names.get(
             expectation_type
         ):
             widget_dict_generator = getattr(
-                self,
-                f"generate_{expectation_kwarg_name}_widget_dict",
-                None,
+                self, f"generate_{expectation_kwarg_name}_widget_dict", None
             )
             widget_dict = (
                 widget_dict_generator(
@@ -1807,16 +2235,12 @@ class ExpectationExplorer:
             )
             expectation_state["kwargs"][expectation_kwarg_name] = widget_dict
             expectation_kwarg_input_widget_dicts.append(widget_dict)
-
-        # container for kwarg input widgets
         kwarg_widgets = [
             dict["kwarg_widget"] for dict in expectation_kwarg_input_widget_dicts
         ]
         expectation_kwarg_input_box = widgets.VBox(
             children=kwarg_widgets, layout=widgets.Layout(margin="10px", width="60%")
         )
-
-        # top-level widget container
         expectation_editor_widget_content = widgets.VBox(
             [
                 widgets.HBox([basic_expectation_info_box, expectation_kwarg_input_box]),
@@ -1828,8 +2252,7 @@ class ExpectationExplorer:
         expectation_editor_widget = widgets.Accordion(
             children=[expectation_editor_widget_content],
             layout=widgets.Layout(
-                border=f"2px solid {'green' if success else 'red'}",
-                margin="5px",
+                border=f"2px solid {('green' if success else 'red')}", margin="5px"
             ),
         )
         expectation_editor_title = (
@@ -1838,17 +2261,10 @@ class ExpectationExplorer:
             else f"non_column_expectation | {expectation_type}"
         )
         expectation_editor_widget.set_title(0, expectation_editor_title)
-
         if collapsed:
             expectation_editor_widget.selected_index = None
-
-        # complete expectation state scaffold
         expectation_state["editor_widget"] = expectation_editor_widget
-
-        # set expectation state
         self.set_expectation_state(data_asset, expectation_state, column)
-
-        # update expectation_suite_editor
         expectation_suite_editor = self.state["data_assets"][data_asset_name].get(
             "expectation_suite_editor"
         )
@@ -1861,82 +2277,82 @@ class ExpectationExplorer:
                     data_asset, expectation_suite
                 )
             )
-
         return expectation_editor_widget
 
-    # expectation_suite_editing
     def get_column_names(self, data_asset_name):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_state = self.state["data_assets"].get(data_asset_name)
         if not data_asset_state:
             return []
         data_asset_expectations = data_asset_state.get("expectations")
         if not data_asset_expectations:
             return []
-
         column_names = [
             column_name
             for column_name in data_asset_expectations.keys()
-            if column_name != "non_column_expectations"
+            if (column_name != "non_column_expectations")
         ]
         column_names.sort()
         if "non_column_expectations" in data_asset_expectations.keys():
             column_names.insert(0, "non_column_expectations")
-
         return column_names
 
     def get_expectation_types(self, data_asset_name):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_state = self.state["data_assets"].get(data_asset_name)
         data_asset_expectations = data_asset_state.get("expectations")
-        if not data_asset_state or not data_asset_expectations:
+        if (not data_asset_state) or (not data_asset_expectations):
             return []
-
         expectation_types = []
-
         for expectation_group in data_asset_expectations.values():
             expectation_types += list(expectation_group.keys())
-
         return list(set(expectation_types))
 
     def generate_expectation_suite_editor_widgets(self, data_asset, expectation_suite):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = data_asset.data_asset_name
         column_names = self.get_column_names(data_asset_name)
         column_accordions = []
         data_asset_state = self.state["data_assets"].get(data_asset_name, {})
         data_asset_expectations = data_asset_state.get("expectations", {})
-
-        # TODO: Deprecate "great_expectations.__version__"
         ge_version = expectation_suite.get("meta").get(
             "great_expectations_version"
         ) or expectation_suite.get("meta").get("great_expectations.__version__")
         column_count = len(column_names)
         expectation_count = len(expectation_suite["expectations"])
-
-        summary_widget_content = """\
-            <div>
-                <h1>Expectation Suite Editor</h1>
-                <hr>
-                <ul>
-                    <li><strong>Data Asset Name</strong>: {data_asset_name}</li>
-                    <li><strong>Great Expectations Version</strong>: {ge_version}</li>
-                    <li><strong>Column Count</strong>: {column_count}</li>
-                    <li><strong>Expectation Count</strong>: {expectation_count}</li>
-                </ul>
-                <hr>
-                <h2>Columns:</h2>
-            </div>\
-        """.format(
+        summary_widget_content = "            <div>\n                <h1>Expectation Suite Editor</h1>\n                <hr>\n                <ul>\n                    <li><strong>Data Asset Name</strong>: {data_asset_name}</li>\n                    <li><strong>Great Expectations Version</strong>: {ge_version}</li>\n                    <li><strong>Column Count</strong>: {column_count}</li>\n                    <li><strong>Expectation Count</strong>: {expectation_count}</li>\n                </ul>\n                <hr>\n                <h2>Columns:</h2>\n            </div>        ".format(
             data_asset_name=data_asset_name,
             ge_version=ge_version,
             column_count=column_count,
             expectation_count=expectation_count,
         )
         summary_widget = widgets.HTML(
-            value=summary_widget_content,
-            layout=widgets.Layout(
-                margin="10px",
-            ),
+            value=summary_widget_content, layout=widgets.Layout(margin="10px")
         )
-
         for column_name in column_names:
             expectation_editor_widgets = []
             column_expectations = data_asset_expectations[column_name]
@@ -1951,39 +2367,39 @@ class ExpectationExplorer:
             column_accordion.set_title(0, column_name)
             column_accordion.selected_index = None
             column_accordions.append(column_accordion)
-
         return [summary_widget] + column_accordions
 
     def edit_expectation_suite(self, data_asset):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data_asset_name = data_asset.data_asset_name
         expectation_suite = data_asset.get_expectation_suite(
             discard_failed_expectations=False
         )
         expectations = expectation_suite.get("expectations")
-
-        ################### editor widgets
         for expectation in expectations:
             expectation_type = expectation.get("expectation_type")
             expectation_kwargs = expectation.get("kwargs")
             editor_widget = getattr(data_asset, expectation_type)(
                 include_config=True, **expectation_kwargs
             )
-
         expectation_suite_editor_widgets = (
             self.generate_expectation_suite_editor_widgets(
                 data_asset, expectation_suite
             )
         )
-        ###################
         expectation_suite_editor = widgets.VBox(
             children=expectation_suite_editor_widgets,
-            layout=widgets.Layout(
-                border="2px solid black",
-            ),
+            layout=widgets.Layout(border="2px solid black"),
         )
-
         self.state["data_assets"][data_asset_name][
             "expectation_suite_editor"
         ] = expectation_suite_editor
-
         return expectation_suite_editor

@@ -27,60 +27,7 @@ from great_expectations.rule_based_profiler.types.parameter_container import (
 
 
 class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
-    """Expect the number of unique values to be between a minimum value and a maximum value.
-
-            expect_column_unique_value_count_to_be_between is a \
-            :func:`column_aggregate_expectation
-            <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
-
-            Args:
-                column (str): \
-                    The column name.
-                min_value (int or None): \
-                    The minimum number of unique values allowed.
-                max_value (int or None): \
-                    The maximum number of unique values allowed.
-
-            Other Parameters:
-                result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                    For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                catch_exceptions (boolean or None): \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
-
-            Returns:
-                An ExpectationSuiteValidationResult
-
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-            Notes:
-                These fields in the result object are customized for this expectation:
-                ::
-
-                    {
-                        "observed_value": (int) The number of unique values in the column
-                    }
-
-                * min_value and max_value are both inclusive.
-                * If min_value is None, then max_value is treated as an upper bound
-                * If max_value is None, then min_value is treated as a lower bound
-
-            See Also:
-                :func:`expect_column_proportion_of_unique_values_to_be_between \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine
-                .expect_column_proportion_of_unique_values_to_be_between>`
-
-            """
-
-    # This dictionary contains metadata for display in the public gallery
+    'Expect the number of unique values to be between a minimum value and a maximum value.\n\n            expect_column_unique_value_count_to_be_between is a             :func:`column_aggregate_expectation\n            <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.\n\n            Args:\n                column (str):                     The column name.\n                min_value (int or None):                     The minimum number of unique values allowed.\n                max_value (int or None):                     The maximum number of unique values allowed.\n\n            Other Parameters:\n                result_format (str or None):                     Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n                    For more detail, see :ref:`result_format <result_format>`.\n                include_config (boolean):                     If True, then include the expectation config as part of the result object.                     For more detail, see :ref:`include_config`.\n                catch_exceptions (boolean or None):                     If True, then catch exceptions and include them as part of the result object.                     For more detail, see :ref:`catch_exceptions`.\n                meta (dict or None):                     A JSON-serializable dictionary (nesting allowed) that will be included in the output without                     modification. For more detail, see :ref:`meta`.\n\n            Returns:\n                An ExpectationSuiteValidationResult\n\n                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n            Notes:\n                These fields in the result object are customized for this expectation:\n                ::\n\n                    {\n                        "observed_value": (int) The number of unique values in the column\n                    }\n\n                * min_value and max_value are both inclusive.\n                * If min_value is None, then max_value is treated as an upper bound\n                * If max_value is None, then min_value is treated as a lower bound\n\n            See Also:\n                :func:`expect_column_proportion_of_unique_values_to_be_between                 <great_expectations.execution_engine.execution_engine.ExecutionEngine\n                .expect_column_proportion_of_unique_values_to_be_between>`\n\n'
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
@@ -89,16 +36,8 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
-
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.distinct_values.count",)
-    success_keys = (
-        "min_value",
-        "max_value",
-        "auto",
-        "profiler_config",
-    )
-
+    success_keys = ("min_value", "max_value", "auto", "profiler_config")
     column_unique_values_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
@@ -121,10 +60,10 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        column_unique_values_range_estimator_parameter_builder_config,
+        column_unique_values_range_estimator_parameter_builder_config
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        name="expect_column_unique_value_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        name="expect_column_unique_value_count_to_be_between",
         config_version=1.0,
         variables={},
         rules={
@@ -139,10 +78,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,
                     "include_bootstrap_samples_histogram_in_details": False,
-                    "truncate_values": {
-                        "lower_bound": 0,
-                        "upper_bound": None,
-                    },
+                    "truncate_values": {"lower_bound": 0, "upper_bound": None},
                     "round_decimals": 0,
                 },
                 "domain_builder": {
@@ -161,15 +97,13 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
                         "strict_min": f"{VARIABLES_KEY}strict_min",
                         "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{column_unique_values_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{column_unique_values_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}"
                         },
-                    },
+                    }
                 ],
-            },
+            }
         },
     )
-
-    # Default values
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
@@ -181,27 +115,22 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         "auto": False,
         "profiler_config": default_profiler_config,
     }
-    args_keys = (
-        "column",
-        "min_value",
-        "max_value",
-    )
-
-    """ A Column Aggregate Metric Decorator for the Unique Value Count"""
+    args_keys = ("column", "min_value", "max_value")
+    " A Column Aggregate Metric Decorator for the Unique Value Count"
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        import inspect
 
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that\n        necessary configuration arguments have been provided for the validation of the expectation.\n\n        Args:\n            configuration (OPTIONAL[ExpectationConfiguration]):                 An optional Expectation Configuration entry that will be used to configure the expectation\n        Returns:\n            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully\n        "
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
@@ -214,10 +143,19 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -265,34 +203,27 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
                 "value": params.get("strict_max"),
             },
         }
-
-        at_least_str, at_most_str = handle_strict_min_max(params)
-
+        (at_least_str, at_most_str) = handle_strict_min_max(params)
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
-        else:
-            if params["mostly"] is not None and params["mostly"] < 1.0:
-                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if params["min_value"] is None:
-                    template_str = f"must have {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
-                elif params["max_value"] is None:
-                    template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."
-                else:
-                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
+        elif (params["mostly"] is not None) and (params["mostly"] < 1.0):
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+                (params["mostly"] * 100), precision=15, no_scientific=True
+            )
+            if params["min_value"] is None:
+                template_str = f"must have {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
+            elif params["max_value"] is None:
+                template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."
             else:
-                if params["min_value"] is None:
-                    template_str = f"must have {at_most_str} $max_value unique values."
-                elif params["max_value"] is None:
-                    template_str = f"must have {at_least_str} $min_value unique values."
-                else:
-                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."
-
+                template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
+        elif params["min_value"] is None:
+            template_str = f"must have {at_most_str} $max_value unique values."
+        elif params["max_value"] is None:
+            template_str = f"must have {at_least_str} $min_value unique values."
+        else:
+            template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -302,7 +233,6 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
             )
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
-
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -316,10 +246,19 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -335,34 +274,27 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
                 "strict_max",
             ],
         )
-
-        at_least_str, at_most_str = handle_strict_min_max(params)
-
+        (at_least_str, at_most_str) = handle_strict_min_max(params)
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
-        else:
-            if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if params["min_value"] is None:
-                    template_str = f"must have {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
-                elif params["max_value"] is None:
-                    template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."
-                else:
-                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
+        elif (params["mostly"] is not None) and (params["mostly"] < 1.0):
+            params["mostly_pct"] = num_to_str(
+                (params["mostly"] * 100), precision=15, no_scientific=True
+            )
+            if params["min_value"] is None:
+                template_str = f"must have {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
+            elif params["max_value"] is None:
+                template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."
             else:
-                if params["min_value"] is None:
-                    template_str = f"must have {at_most_str} $max_value unique values."
-                elif params["max_value"] is None:
-                    template_str = f"must have {at_least_str} $min_value unique values."
-                else:
-                    template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."
-
+                template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
+        elif params["min_value"] is None:
+            template_str = f"must have {at_most_str} $max_value unique values."
+        elif params["max_value"] is None:
+            template_str = f"must have {at_least_str} $min_value unique values."
+        else:
+            template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."
         if include_column_name:
             template_str = f"$column {template_str}"
-
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
@@ -370,7 +302,6 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
-
         return [
             RenderedStringTemplateContent(
                 **{
@@ -396,6 +327,15 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert result, "Must pass in result."
         observed_value = result.result["observed_value"]
         template_string_object = RenderedStringTemplateContent(
@@ -421,6 +361,15 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._validate_metric_value_between(
             metric_name="column.distinct_values.count",
             configuration=configuration,

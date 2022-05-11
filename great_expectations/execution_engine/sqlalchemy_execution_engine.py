@@ -8,10 +8,9 @@ import warnings
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-from great_expectations._version import get_versions  # isort:skip
+from great_expectations._version import get_versions
 
-__version__ = get_versions()["version"]  # isort:skip
-
+__version__ = get_versions()["version"]
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
@@ -20,9 +19,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
     SqlAlchemyDataSplitter,
 )
 
-del get_versions  # isort:skip
-
-
+del get_versions
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
@@ -62,14 +59,12 @@ from great_expectations.util import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
-
 try:
     import sqlalchemy as sa
 
     make_url = import_make_url()
 except ImportError:
     sa = None
-
 try:
     from sqlalchemy.engine import LegacyRow
     from sqlalchemy.exc import OperationalError
@@ -90,19 +85,15 @@ except ImportError:
     quoted_name = None
     OperationalError = None
     Label = None
-
-
 try:
-    import psycopg2  # noqa: F401
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401
+    import psycopg2
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
-
 try:
     import sqlalchemy_redshift.dialect
 except ImportError:
     sqlalchemy_redshift = None
-
 try:
     import sqlalchemy_dremio.pyodbc
 
@@ -110,17 +101,13 @@ try:
         sa.dialects.registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
 except ImportError:
     sqlalchemy_dremio = None
-
 try:
     import snowflake.sqlalchemy.snowdialect
 
     if sa:
-        # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
-        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
 except (ImportError, KeyError, AttributeError):
     snowflake = None
-
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
     import sqlalchemy_bigquery as sqla_bigquery
@@ -131,21 +118,16 @@ except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
-        # deprecated-v0.14.7
         warnings.warn(
-            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
-            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
         try:
             getattr(sqla_bigquery, "INTEGER")
             bigquery_types_tuple = None
         except AttributeError:
-            # In older versions of the pybigquery driver, types were not exported, so we use a hack
             logger.warning(
                 "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
             )
@@ -157,7 +139,6 @@ except ImportError:
         sqla_bigquery = None
         bigquery_types_tuple = None
         pybigquery = None
-
 try:
     import teradatasqlalchemy.dialect
     import teradatasqlalchemy.types as teradatatypes
@@ -166,46 +147,40 @@ except ImportError:
 
 
 def _get_dialect_type_module(dialect):
-    """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
-    with the database/database implementation. Currently checks for RedShift/BigQuery dialects"""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates\n    with the database/database implementation. Currently checks for RedShift/BigQuery dialects"
     if dialect is None:
         logger.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
         return sa
     try:
-        # Redshift does not (yet) export types to top level; only recognize base SA types
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             return dialect.sa
     except (TypeError, AttributeError):
         pass
-
-    # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
-        if (
-            isinstance(
-                dialect,
-                sqla_bigquery.BigQueryDialect,
-            )
-            and bigquery_types_tuple is not None
+        if isinstance(dialect, sqla_bigquery.BigQueryDialect) and (
+            bigquery_types_tuple is not None
         ):
             return bigquery_types_tuple
     except (TypeError, AttributeError):
         pass
-
-    # Teradata types module
     try:
-        if (
-            issubclass(
-                dialect,
-                teradatasqlalchemy.dialect.TeradataDialect,
-            )
-            and teradatatypes is not None
+        if issubclass(dialect, teradatasqlalchemy.dialect.TeradataDialect) and (
+            teradatatypes is not None
         ):
             return teradatatypes
     except (TypeError, AttributeError):
         pass
-
     return dialect
 
 
@@ -221,58 +196,37 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_data_dict: Optional[dict] = None,
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
-        **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
+        **kwargs,
     ) -> None:
-        """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
-        desired database. Also initializes the dialect to be used and configures usage statistics.
+        import inspect
 
-            Args:
-                name (str): \
-                    The name of the SqlAlchemyExecutionEngine
-                credentials: \
-                    If the Execution Engine is not provided, the credentials can be used to build the Execution
-                    Engine. If the Engine is provided, it will be used instead
-                data_context (DataContext): \
-                    An object representing a Great Expectations project that can be used to access Expectation
-                    Suites and the Project Data itself
-                engine (Engine): \
-                    A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
-                    Engine has already been configured and should be reused. Will override Credentials
-                    if provided.
-                connection_string (string): \
-                    If neither the engines nor the credentials have been provided, a connection string can be used
-                    to access the data. This will be overridden by both the engine and credentials if those are
-                    provided.
-                url (string): \
-                    If neither the engines, the credentials, nor the connection_string have been provided,
-                    a url can be used to access the data. This will be overridden by all other configuration
-                    options if any are provided.
-                concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the\n        desired database. Also initializes the dialect to be used and configures usage statistics.\n\n            Args:\n                name (str):                     The name of the SqlAlchemyExecutionEngine\n                credentials:                     If the Execution Engine is not provided, the credentials can be used to build the Execution\n                    Engine. If the Engine is provided, it will be used instead\n                data_context (DataContext):                     An object representing a Great Expectations project that can be used to access Expectation\n                    Suites and the Project Data itself\n                engine (Engine):                     A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an\n                    Engine has already been configured and should be reused. Will override Credentials\n                    if provided.\n                connection_string (string):                     If neither the engines nor the credentials have been provided, a connection string can be used\n                    to access the data. This will be overridden by both the engine and credentials if those are\n                    provided.\n                url (string):                     If neither the engines, the credentials, nor the connection_string have been provided,\n                    a url can be used to access the data. This will be overridden by all other configuration\n                    options if any are provided.\n                concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.\n        "
         super().__init__(name=name, batch_data_dict=batch_data_dict)
         self._name = name
-
         self._credentials = credentials
         self._connection_string = connection_string
         self._url = url
         self._create_temp_table = create_temp_table
-
         if engine is not None:
             if credentials is not None:
                 logger.warning(
-                    "Both credentials and engine were provided during initialization of SqlAlchemyExecutionEngine. "
-                    "Ignoring credentials."
+                    "Both credentials and engine were provided during initialization of SqlAlchemyExecutionEngine. Ignoring credentials."
                 )
             self.engine = engine
         else:
             concurrency: ConcurrencyConfig
-            if data_context is None or data_context.concurrency is None:
+            if (data_context is None) or (data_context.concurrency is None):
                 concurrency = ConcurrencyConfig()
             else:
                 concurrency = data_context.concurrency
-
             concurrency.add_sqlalchemy_create_engine_parameters(kwargs)
-
             if credentials is not None:
                 self.engine = self._build_engine(credentials=credentials, **kwargs)
             elif connection_string is not None:
@@ -285,15 +239,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 raise InvalidConfigError(
                     "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
                 )
-
-        # these are two backends where temp_table_creation is not supported we set the default value to False.
-        if self.engine.dialect.name.lower() in [
-            "trino",
-            "awsathena",  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
-        ]:
+        if self.engine.dialect.name.lower() in ["trino", "awsathena"]:
             self._create_temp_table = False
-
-        # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
             "postgresql",
             "mysql",
@@ -301,17 +248,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "oracle",
             "mssql",
         ]:
-            # These are the officially included and supported dialects by sqlalchemy
             self.dialect_module = import_library_module(
                 module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
-
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect_module = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
         elif self.engine.dialect.name.lower() == "dremio":
-            # WARNING: Dremio Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_dremio.pyodbc"
             )
@@ -324,30 +268,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 module_name=_BIGQUERY_MODULE_NAME
             )
         elif self.engine.dialect.name.lower() == "teradatasql":
-            # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
             )
         else:
             self.dialect_module = None
-
-        # <WILL> 20210726 - engine_backup is used by the snowflake connector, which requires connection and engine
-        # to be closed and disposed separately. Currently self.engine can refer to either a Connection or Engine,
-        # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
-        # Connection can be handled separately.
         self._engine_backup = None
-        if self.engine and self.engine.dialect.name.lower() in [
-            "sqlite",
-            "mssql",
-            "snowflake",
-            "mysql",
-        ]:
+        if self.engine and (
+            self.engine.dialect.name.lower()
+            in ["sqlite", "mssql", "snowflake", "mysql"]
+        ):
             self._engine_backup = self.engine
-            # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
-
-        # Send a connect event to provide dialect type
-        if data_context is not None and getattr(
+        if (data_context is not None) and getattr(
             data_context, "_usage_statistics_handler", None
         ):
             handler = data_context._usage_statistics_handler
@@ -359,9 +292,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 },
                 success=True,
             )
-
-        # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values,
-        # and set the instance "_config" variable equal to the resulting dictionary.
         self._config = {
             "name": name,
             "credentials": credentials,
@@ -375,79 +305,106 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         }
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
-
         self._data_splitter = SqlAlchemyDataSplitter()
         self._data_sampler = SqlAlchemyDataSampler()
 
     @property
     def credentials(self) -> Optional[dict]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._credentials
 
     @property
     def connection_string(self) -> Optional[str]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._connection_string
 
     @property
     def url(self) -> Optional[str]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._url
 
     def _build_engine(self, credentials: dict, **kwargs) -> "sa.engine.Engine":
-        """
-        Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
-        private key path.
-        """
-        # Update credentials with anything passed during connection time
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a\n        private key path.\n        "
         drivername = credentials.pop("drivername")
         schema_name = credentials.pop("schema_name", None)
         if schema_name is not None:
             logger.warning(
-                "schema_name specified creating a URL with schema is not supported. Set a default "
-                "schema on the user connecting to your database."
+                "schema_name specified creating a URL with schema is not supported. Set a default schema on the user connecting to your database."
             )
-
         create_engine_kwargs = kwargs
         connect_args = credentials.pop("connect_args", None)
         if connect_args:
             create_engine_kwargs["connect_args"] = connect_args
-
         if "private_key_path" in credentials:
-            options, create_engine_kwargs = self._get_sqlalchemy_key_pair_auth_url(
+            (options, create_engine_kwargs) = self._get_sqlalchemy_key_pair_auth_url(
                 drivername, credentials
             )
         else:
             options = get_sqlalchemy_url(drivername, **credentials)
-
         self.drivername = drivername
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
     def _get_sqlalchemy_key_pair_auth_url(
         self, drivername: str, credentials: dict
-    ) -> Tuple["sa.engine.url.URL", Dict]:
-        """
-        Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
-        values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
+    ) -> Tuple[("sa.engine.url.URL", Dict)]:
+        import inspect
 
-        Args:
-            drivername(str) - The name of the driver class
-            credentials(dict) - A dictionary of database credentials used to access the database
-
-        Returns:
-            a tuple consisting of a url with the serialized key-pair authentication, and a dictionary of engine kwargs.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided\n        values into a private key. If passphrase is incorrect, this will fail and an exception is raised.\n\n        Args:\n            drivername(str) - The name of the driver class\n            credentials(dict) - A dictionary of database credentials used to access the database\n\n        Returns:\n            a tuple consisting of a url with the serialized key-pair authentication, and a dictionary of engine kwargs.\n        "
         from cryptography.hazmat.backends import default_backend
         from cryptography.hazmat.primitives import serialization
 
         private_key_path = credentials.pop("private_key_path")
         private_key_passphrase = credentials.pop("private_key_passphrase")
-
         with Path(private_key_path).expanduser().resolve().open(mode="rb") as key:
             try:
                 p_key = serialization.load_pem_private_key(
                     key.read(),
-                    password=private_key_passphrase.encode()
-                    if private_key_passphrase
-                    else None,
+                    password=(
+                        private_key_passphrase.encode()
+                        if private_key_passphrase
+                        else None
+                    ),
                     backend=default_backend(),
                 )
             except ValueError as e:
@@ -463,49 +420,40 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=serialization.NoEncryption(),
         )
-
         credentials_driver_name = credentials.pop("drivername", None)
         create_engine_kwargs = {"connect_args": {"private_key": pkb}}
         return (
-            get_sqlalchemy_url(drivername or credentials_driver_name, **credentials),
+            get_sqlalchemy_url((drivername or credentials_driver_name), **credentials),
             create_engine_kwargs,
         )
 
-    def get_domain_records(
-        self,
-        domain_kwargs: Dict,
-    ) -> Selectable:
-        """
-        Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
-        obtain and/or query a batch. Returns in the format of an SqlAlchemy table/column(s) object.
+    def get_domain_records(self, domain_kwargs: Dict) -> Selectable:
+        import inspect
 
-        Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-
-        Returns:
-            An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute)
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to\n        obtain and/or query a batch. Returns in the format of an SqlAlchemy table/column(s) object.\n\n        Args:\n            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain\n\n        Returns:\n            An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute)\n        "
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
-            # We allow no batch id specified if there is only one batch
             if self.active_batch_data:
                 data_object = self.active_batch_data
             else:
                 raise GreatExpectationsError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
+        elif batch_id in self.loaded_batch_data_dict:
+            data_object = self.loaded_batch_data_dict[batch_id]
         else:
-            if batch_id in self.loaded_batch_data_dict:
-                data_object = self.loaded_batch_data_dict[batch_id]
-            else:
-                raise GreatExpectationsError(
-                    f"Unable to find batch with batch_id {batch_id}"
-                )
-
+            raise GreatExpectationsError(
+                f"Unable to find batch with batch_id {batch_id}"
+            )
         selectable: Selectable
-        if "table" in domain_kwargs and domain_kwargs["table"] is not None:
-            # TODO: Add logic to handle record_set_name once implemented
-            # (i.e. multiple record sets (tables) in one batch
+        if ("table" in domain_kwargs) and (domain_kwargs["table"] is not None):
             if domain_kwargs["table"] != data_object.selectable.name:
                 selectable = sa.Table(
                     domain_kwargs["table"],
@@ -520,19 +468,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         else:
             selectable = data_object.selectable
-
-        """
-        If a custom query is passed, selectable will be TextClause and not formatted
-        as a subquery wrapped in "(subquery) alias". TextClause must first be converted
-        to TextualSelect using sa.columns() before it can be converted to type Subquery
-        """
+        '\n        If a custom query is passed, selectable will be TextClause and not formatted\n        as a subquery wrapped in "(subquery) alias". TextClause must first be converted\n        to TextualSelect using sa.columns() before it can be converted to type Subquery\n        '
         if TextClause and isinstance(selectable, TextClause):
             selectable = selectable.columns().subquery()
-
-        # Filtering by row condition.
-        if (
-            "row_condition" in domain_kwargs
-            and domain_kwargs["row_condition"] is not None
+        if ("row_condition" in domain_kwargs) and (
+            domain_kwargs["row_condition"] is not None
         ):
             condition_parser = domain_kwargs["condition_parser"]
             if condition_parser == "great_expectations__experimental__":
@@ -548,18 +488,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 raise GreatExpectationsError(
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
                 )
-
-        # Filtering by filter_conditions
         filter_conditions: List[RowCondition] = domain_kwargs.get(
             "filter_conditions", []
         )
-        # For SqlAlchemyExecutionEngine only one filter condition is allowed
         if len(filter_conditions) == 1:
             filter_condition = filter_conditions[0]
             assert (
                 filter_condition.condition_type == RowConditionParserType.GE
             ), "filter_condition must be of type GE for SqlAlchemyExecutionEngine"
-
             selectable = (
                 sa.select([sa.text("*")])
                 .select_from(selectable)
@@ -569,28 +505,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             raise GreatExpectationsError(
                 "SqlAlchemyExecutionEngine currently only supports a single filter condition."
             )
-
         if "column" in domain_kwargs:
             return selectable
-
-        # Filtering by ignore_row_if directive
         if (
-            "column_A" in domain_kwargs
-            and "column_B" in domain_kwargs
-            and "ignore_row_if" in domain_kwargs
+            ("column_A" in domain_kwargs)
+            and ("column_B" in domain_kwargs)
+            and ("ignore_row_if" in domain_kwargs)
         ):
             if self.active_batch_data.use_quoted_name:
-                # Checking if case-sensitive and using appropriate name
-                # noinspection PyPep8Naming
                 column_A_name = quoted_name(domain_kwargs["column_A"], quote=True)
-                # noinspection PyPep8Naming
                 column_B_name = quoted_name(domain_kwargs["column_B"], quote=True)
             else:
-                # noinspection PyPep8Naming
                 column_A_name = domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
                 column_B_name = domain_kwargs["column_B"]
-
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "both_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
@@ -599,8 +526,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.not_(
                             sa.and_(
-                                sa.column(column_A_name) == None,
-                                sa.column(column_B_name) == None,
+                                (sa.column(column_A_name) == None),
+                                (sa.column(column_B_name) == None),
                             )
                         )
                     )
@@ -612,8 +539,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.not_(
                             sa.or_(
-                                sa.column(column_A_name) == None,
-                                sa.column(column_B_name) == None,
+                                (sa.column(column_A_name) == None),
+                                (sa.column(column_B_name) == None),
                             )
                         )
                     )
@@ -623,28 +550,21 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
-
                 if ignore_row_if == "never":
-                    # deprecated-v0.13.29
                     warnings.warn(
-                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
+                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is "neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
 """,
                         DeprecationWarning,
                     )
-
             return selectable
-
-        if "column_list" in domain_kwargs and "ignore_row_if" in domain_kwargs:
+        if ("column_list" in domain_kwargs) and ("ignore_row_if" in domain_kwargs):
             if self.active_batch_data.use_quoted_name:
-                # Checking if case-sensitive and using appropriate name
                 column_list = [
                     quoted_name(domain_kwargs[column_name], quote=True)
                     for column_name in domain_kwargs["column_list"]
                 ]
             else:
                 column_list = domain_kwargs["column_list"]
-
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
@@ -654,7 +574,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.not_(
                             sa.and_(
                                 *(
-                                    sa.column(column_name) == None
+                                    (sa.column(column_name) == None)
                                     for column_name in column_list
                                 )
                             )
@@ -669,120 +589,97 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.not_(
                             sa.or_(
                                 *(
-                                    sa.column(column_name) == None
+                                    (sa.column(column_name) == None)
                                     for column_name in column_list
                                 )
                             )
                         )
                     )
                 )
-            else:
-                if ignore_row_if != "never":
-                    raise ValueError(
-                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
-
+            elif ignore_row_if != "never":
+                raise ValueError(
+                    f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                )
             return selectable
-
         return selectable
 
     def get_compute_domain(
         self,
         domain_kwargs: Dict,
-        domain_type: Union[str, MetricDomainTypes],
+        domain_type: Union[(str, MetricDomainTypes)],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[Selectable, dict, dict]:
-        """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
+    ) -> Tuple[(Selectable, dict, dict)]:
+        import inspect
 
-        Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
-
-        Returns:
-            SqlAlchemy column
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        'Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.\n\n        Args:\n            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain\n            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would\n            like to be using, or a corresponding string value representing it. String types include "identity",\n            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the\n            class MetricDomainTypes.\n            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when\n            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.\n\n        Returns:\n            SqlAlchemy column\n        '
         selectable = self.get_domain_records(domain_kwargs)
-
         split_domain_kwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
-
-        return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
+        return (selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor)
 
     def _split_column_metric_domain_kwargs(
-        self,
-        domain_kwargs: Dict,
-        domain_type: MetricDomainTypes,
+        self, domain_kwargs: Dict, domain_type: MetricDomainTypes
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
+        import inspect
 
-        Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
-            like to be using.
-
-        Returns:
-            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
-            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Split domain_kwargs for column domain types into compute and accessor domain kwargs.\n\n        Args:\n            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain\n            domain_type: an Enum value indicating which metric domain the user would\n            like to be using.\n\n        Returns:\n            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs\n            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs\n        "
         assert (
             domain_type == MetricDomainTypes.COLUMN
         ), "This method only supports MetricDomainTypes.COLUMN"
-
         compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs: Dict = {}
-
         if "column" not in compute_domain_kwargs:
             raise ge_exceptions.GreatExpectationsError(
                 "Column not provided in compute_domain_kwargs"
             )
-
-        # Checking if case-sensitive and using appropriate name
         if self.active_batch_data.use_quoted_name:
             accessor_domain_kwargs["column"] = quoted_name(
                 compute_domain_kwargs.pop("column"), quote=True
             )
         else:
             accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
-
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     def _split_column_pair_metric_domain_kwargs(
-        self,
-        domain_kwargs: Dict,
-        domain_type: MetricDomainTypes,
+        self, domain_kwargs: Dict, domain_type: MetricDomainTypes
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
+        import inspect
 
-        Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
-            like to be using.
-
-        Returns:
-            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
-            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.\n\n        Args:\n            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain\n            domain_type: an Enum value indicating which metric domain the user would\n            like to be using.\n\n        Returns:\n            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs\n            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs\n        "
         assert (
             domain_type == MetricDomainTypes.COLUMN_PAIR
         ), "This method only supports MetricDomainTypes.COLUMN_PAIR"
-
         compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs: Dict = {}
-
         if not (
-            "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs
+            ("column_A" in compute_domain_kwargs)
+            and ("column_B" in compute_domain_kwargs)
         ):
             raise ge_exceptions.GreatExpectationsError(
                 "column_A or column_B not found within compute_domain_kwargs"
             )
-
-        # Checking if case-sensitive and using appropriate name
         if self.active_batch_data.use_quoted_name:
             accessor_domain_kwargs["column_A"] = quoted_name(
                 compute_domain_kwargs.pop("column_A"), quote=True
@@ -793,71 +690,54 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
             accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
-
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     def _split_multi_column_metric_domain_kwargs(
-        self,
-        domain_kwargs: Dict,
-        domain_type: MetricDomainTypes,
+        self, domain_kwargs: Dict, domain_type: MetricDomainTypes
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
+        import inspect
 
-        Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
-            like to be using.
-
-        Returns:
-            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
-            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.\n\n        Args:\n            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain\n            domain_type: an Enum value indicating which metric domain the user would\n            like to be using.\n\n        Returns:\n            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs\n            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs\n        "
         assert (
             domain_type == MetricDomainTypes.MULTICOLUMN
         ), "This method only supports MetricDomainTypes.MULTICOLUMN"
-
         compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs: Dict = {}
-
         if "column_list" not in domain_kwargs:
             raise GreatExpectationsError("column_list not found within domain_kwargs")
-
         column_list = compute_domain_kwargs.pop("column_list")
-
         if len(column_list) < 2:
             raise GreatExpectationsError("column_list must contain at least 2 columns")
-
-        # Checking if case-sensitive and using appropriate name
         if self.active_batch_data.use_quoted_name:
             accessor_domain_kwargs["column_list"] = [
                 quoted_name(column_name, quote=True) for column_name in column_list
             ]
         else:
             accessor_domain_kwargs["column_list"] = column_list
-
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     def resolve_metric_bundle(
-        self,
-        metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
-    ) -> Dict[Tuple[str, str, str], Any]:
-        """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
-        bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
-        if bundling the metrics together is not possible.
+        self, metric_fn_bundle: Iterable[Tuple[(MetricConfiguration, Any, dict, dict)]]
+    ) -> Dict[(Tuple[(str, str, str)], Any)]:
+        import inspect
 
-            Args:
-                metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]): \
-                    A Dictionary containing a MetricProvider's MetricConfiguration (its unique identifier), its metric provider function
-                    (the function that actually executes the metric), and the arguments to pass to the metric provider function.
-                    A dictionary of metrics defined in the registry and corresponding arguments
-
-            Returns:
-                A dictionary of metric names and their corresponding now-queried values.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds\n        bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail\n        if bundling the metrics together is not possible.\n\n            Args:\n                metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]):                     A Dictionary containing a MetricProvider's MetricConfiguration (its unique identifier), its metric provider function\n                    (the function that actually executes the metric), and the arguments to pass to the metric provider function.\n                    A dictionary of metrics defined in the registry and corresponding arguments\n\n            Returns:\n                A dictionary of metric names and their corresponding now-queried values.\n        "
         resolved_metrics = {}
-
-        # We need a different query for each domain (where clause).
-        queries: Dict[Tuple, dict] = {}
+        queries: Dict[(Tuple, dict)] = {}
         for (
             metric_to_resolve,
             engine_fn,
@@ -889,16 +769,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             domain_kwargs = query["domain_kwargs"]
-            selectable = self.get_domain_records(
-                domain_kwargs=domain_kwargs,
-            )
+            selectable = self.get_domain_records(domain_kwargs=domain_kwargs)
             assert len(query["select"]) == len(query["ids"])
             try:
-                """
-                If a custom query is passed, selectable will be TextClause and not formatted
-                as a subquery wrapped in "(subquery) alias". TextClause must first be converted
-                to TextualSelect using sa.columns() before it can be converted to type Subquery
-                """
+                '\n                If a custom query is passed, selectable will be TextClause and not formatted\n                as a subquery wrapped in "(subquery) alias". TextClause must first be converted\n                to TextualSelect using sa.columns() before it can be converted to type Subquery\n'
                 if TextClause and isinstance(selectable, TextClause):
                     res = self.engine.execute(
                         sa.select(query["select"]).select_from(
@@ -924,29 +798,21 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             assert len(query["ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
-            for idx, id in enumerate(query["ids"]):
+            for (idx, id) in enumerate(query["ids"]):
                 resolved_metrics[id] = convert_to_json_serializable(res[0][idx])
-
         return resolved_metrics
 
     def close(self) -> None:
-        """
-        Note: Will 20210729
+        import inspect
 
-        This is a helper function that will close and dispose Sqlalchemy objects that are used to connect to a database.
-        Databases like Snowflake require the connection and engine to be instantiated and closed separately, and not
-        doing so has caused problems with hanging connections.
-
-        Currently the ExecutionEngine does not support handling connections and engine separately, and will actually
-        override the engine with a connection in some cases, obfuscating what object is used to actually used by the
-        ExecutionEngine to connect to the external database. This will be handled in an upcoming refactor, which will
-        allow this function to eventually become:
-
-        self.connection.close()
-        self.engine.dispose()
-
-        More background can be found here: https://github.com/great-expectations/great_expectations/pull/3104/
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        Note: Will 20210729\n\n        This is a helper function that will close and dispose Sqlalchemy objects that are used to connect to a database.\n        Databases like Snowflake require the connection and engine to be instantiated and closed separately, and not\n        doing so has caused problems with hanging connections.\n\n        Currently the ExecutionEngine does not support handling connections and engine separately, and will actually\n        override the engine with a connection in some cases, obfuscating what object is used to actually used by the\n        ExecutionEngine to connect to the external database. This will be handled in an upcoming refactor, which will\n        allow this function to eventually become:\n\n        self.connection.close()\n        self.engine.dispose()\n\n        More background can be found here: https://github.com/great-expectations/great_expectations/pull/3104/\n        "
         if self._engine_backup:
             self.engine.close()
             self._engine_backup.dispose()
@@ -954,42 +820,44 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.engine.dispose()
 
     def _get_splitter_method(self, splitter_method_name: str) -> Callable:
-        """Get the appropriate splitter method from the method name.
+        import inspect
 
-        Args:
-            splitter_method_name: name of the splitter to retrieve.
-
-        Returns:
-            splitter method.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Get the appropriate splitter method from the method name.\n\n        Args:\n            splitter_method_name: name of the splitter to retrieve.\n\n        Returns:\n            splitter method.\n        "
         return self._data_splitter.get_splitter_method(splitter_method_name)
 
     def execute_split_query(self, split_query: Selectable) -> List[LegacyRow]:
-        """Use the execution engine to run the split query and fetch all of the results.
+        import inspect
 
-        Args:
-            split_query: Query to be executed as a sqlalchemy Selectable.
-
-        Returns:
-            List of row results.
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "Use the execution engine to run the split query and fetch all of the results.\n\n        Args:\n            split_query: Query to be executed as a sqlalchemy Selectable.\n\n        Returns:\n            List of row results.\n        "
         return self.engine.execute(split_query).fetchall()
 
     def get_data_for_batch_identifiers(
         self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
     ) -> List[dict]:
-        """Build data used to construct batch identifiers for the input table using the provided splitter config.
+        import inspect
 
-        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
-
-        Args:
-            table_name: Table to split.
-            splitter_method_name: Desired splitter method to use.
-            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
-
-        Returns:
-            List of dicts of the form [{column_name: {"key": value}}]
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        'Build data used to construct batch identifiers for the input table using the provided splitter config.\n\n        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.\n\n        Args:\n            table_name: Table to split.\n            splitter_method_name: Desired splitter method to use.\n            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.\n\n        Returns:\n            List of dicts of the form [{column_name: {"key": value}}]\n        '
         return self._data_splitter.get_data_for_batch_identifiers(
             execution_engine=self,
             table_name=table_name,
@@ -999,7 +867,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
-    ) -> Union[Selectable, str]:
+    ) -> Union[(Selectable, str)]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if "splitter_method" in batch_spec:
             splitter_fn: Callable = self._get_splitter_method(
                 splitter_method_name=batch_spec["splitter_method"]
@@ -1008,10 +885,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 batch_identifiers=batch_spec["batch_identifiers"],
                 **batch_spec["splitter_kwargs"],
             )
-
         else:
             split_clause = True
-
         table_name: str = batch_spec["table_name"]
         if "sampling_method" in batch_spec:
             if batch_spec["sampling_method"] in [
@@ -1046,8 +921,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                     .where(
                         sa.and_(
-                            split_clause,
-                            sampler_fn(**batch_spec["sampling_kwargs"]),
+                            split_clause, sampler_fn(**batch_spec["sampling_kwargs"])
                         )
                     )
                 )
@@ -1061,7 +935,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
-    ) -> Tuple[Any, BatchMarkers]:
+    ) -> Tuple[(Any, BatchMarkers)]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not isinstance(
             batch_spec, (SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec)
         ):
@@ -1070,7 +953,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         RuntimeQueryBatchSpec (illegal type "{str(type(batch_spec))}" was received).
                         """
             )
-
         batch_data: Optional[SqlAlchemyBatchData] = None
         batch_markers: BatchMarkers = BatchMarkers(
             {
@@ -1079,30 +961,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             }
         )
-
         source_schema_name: str = batch_spec.get("schema_name", None)
         source_table_name: str = batch_spec.get("table_name", None)
-
         temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
-
         if batch_spec.get("bigquery_temp_table"):
-            # deprecated-v0.15.3
             warnings.warn(
-                "BigQuery tables that are created as the result of a query are no longer created as "
-                "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
-                "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
-                "v0.15.3 and will be removed in v0.18.",
+                "BigQuery tables that are created as the result of a query are no longer created as permanent tables. Thus, a named permanent table through the `bigquery_temp_table`parameter is not required. The `bigquery_temp_table` parameter is deprecated as ofv0.15.3 and will be removed in v0.18.",
                 DeprecationWarning,
             )
-
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
-
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
-            # query != None is already checked when RuntimeQueryBatchSpec is instantiated
             query: str = batch_spec.query
-
             batch_spec.query = "SQLQuery"
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
@@ -1121,7 +992,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 selectable: Selectable = self._build_selectable_from_batch_spec(
                     batch_spec=batch_spec
                 )
-
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,
@@ -1129,5 +999,4 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,
             )
-
-        return batch_data, batch_markers
+        return (batch_data, batch_markers)

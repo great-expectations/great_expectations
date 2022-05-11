@@ -29,30 +29,23 @@ from great_expectations.datasource import BaseDatasource
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-EXIT_UPGRADE_CONTINUATION_MESSAGE = (
-    "\nOk, exiting now. To upgrade at a later time, use the following command: "
-    "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
-    "process, visit "
-    "<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
-    "</cyan>.\n"
-)
+EXIT_UPGRADE_CONTINUATION_MESSAGE = "\nOk, exiting now. To upgrade at a later time, use the following command: <cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>.\n"
 
 
 def prompt_profile_to_create_a_suite(
-    data_context: DataContext,
-    expectation_suite_name: str,
+    data_context: DataContext, expectation_suite_name: str
 ) -> None:
+    import inspect
 
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     cli_message(
-        string="""
-Great Expectations will create a notebook, containing code cells that select from available columns in your dataset and
-generate expectations about them to demonstrate some examples of assertions you can make about your data.
-
-When you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "{:s}" here:
-
-  {:s}
-""".format(
+        string='\nGreat Expectations will create a notebook, containing code cells that select from available columns in your dataset and\ngenerate expectations about them to demonstrate some examples of assertions you can make about your data.\n\nWhen you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "{:s}" here:\n\n  {:s}\n'.format(
             expectation_suite_name,
             data_context.stores[
                 data_context.expectations_store_name
@@ -63,7 +56,6 @@ When you run this notebook, Great Expectations will store these expectations in 
             ),
         )
     )
-
     confirm_proceed_or_exit()
 
 
@@ -74,14 +66,22 @@ def get_or_create_expectation_suite(
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
     batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
     ] = None,
     create_if_not_exist: bool = True,
 ) -> ExpectationSuite:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if expectation_suite_name is None:
         default_expectation_suite_name: str = get_default_expectation_suite_name(
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
+            data_asset_name=data_asset_name, batch_request=batch_request
         )
         while True:
             expectation_suite_name = click.prompt(
@@ -106,7 +106,6 @@ def get_or_create_expectation_suite(
             usage_event=usage_event,
             suppress_usage_message=suppress_usage_message,
         )
-
     suite: ExpectationSuite = load_expectation_suite(
         data_context=data_context,
         expectation_suite_name=expectation_suite_name,
@@ -114,16 +113,24 @@ def get_or_create_expectation_suite(
         suppress_usage_message=suppress_usage_message,
         create_if_not_exist=create_if_not_exist,
     )
-
     return suite
 
 
 def get_default_expectation_suite_name(
     data_asset_name: str,
     batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
     ] = None,
 ) -> str:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     suite_name: str
     if data_asset_name:
         suite_name = f"{data_asset_name}.warning"
@@ -140,6 +147,15 @@ def tell_user_suite_exists(
     usage_event: str,
     suppress_usage_message: bool = False,
 ) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     exit_with_failure_message_and_stats(
         data_context=data_context,
         usage_event=usage_event,
@@ -150,6 +166,15 @@ def tell_user_suite_exists(
 
 
 def launch_jupyter_notebook(notebook_path: str) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     jupyter_command_override: Optional[str] = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
         subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
@@ -159,16 +184,23 @@ def launch_jupyter_notebook(notebook_path: str) -> None:
 
 def get_validator(
     context: DataContext,
-    batch_request: Union[dict, BatchRequest],
-    suite: Union[str, ExpectationSuite],
+    batch_request: Union[(dict, BatchRequest)],
+    suite: Union[(str, ExpectationSuite)],
 ) -> Validator:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     assert isinstance(
         suite, (str, ExpectationSuite)
     ), "Invalid suite type (must be ExpectationSuite) or a string."
-
     if isinstance(batch_request, dict):
         batch_request = BatchRequest(**batch_request)
-
     validator: Validator
     if isinstance(suite, str):
         validator = context.get_validator(
@@ -188,19 +220,18 @@ def load_expectation_suite(
     suppress_usage_message: bool = False,
     create_if_not_exist: bool = True,
 ) -> Optional[ExpectationSuite]:
-    """
-    Load an expectation suite from a given context.
+    import inspect
 
-    Handles a suite name with or without `.json`
-    :param data_context:
-    :param expectation_suite_name:
-    :param usage_event:
-    :param suppress_usage_message:
-    :param create_if_not_exist:
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Load an expectation suite from a given context.\n\n    Handles a suite name with or without `.json`\n    :param data_context:\n    :param expectation_suite_name:\n    :param usage_event:\n    :param suppress_usage_message:\n    :param create_if_not_exist:\n    "
     if expectation_suite_name.endswith(".json"):
-        expectation_suite_name = expectation_suite_name[:-5]
-
+        expectation_suite_name = expectation_suite_name[:(-5)]
     suite: Optional[ExpectationSuite]
     try:
         suite = data_context.get_expectation_suite(
@@ -219,8 +250,7 @@ def load_expectation_suite(
                 data_context=data_context,
                 usage_event=usage_event,
                 suppress_usage_message=suppress_usage_message,
-                message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check "
-                "the name by running `great_expectations suite list` and try again.",
+                message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check the name by running `great_expectations suite list` and try again.",
             )
 
 
@@ -230,30 +260,40 @@ def exit_with_failure_message_and_stats(
     suppress_usage_message: bool = False,
     message: Optional[str] = None,
 ) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if message:
         cli_message(string=message)
     if not suppress_usage_message:
-        send_usage_message(
-            data_context=data_context,
-            event=usage_event,
-            success=False,
-        )
+        send_usage_message(data_context=data_context, event=usage_event, success=False)
     sys.exit(1)
 
 
 def delete_checkpoint(
-    context: DataContext,
-    checkpoint_name: str,
-    usage_event: str,
-    assume_yes: bool,
+    context: DataContext, checkpoint_name: str, usage_event: str, assume_yes: bool
 ) -> None:
-    """Delete a Checkpoint or raise helpful errors."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Delete a Checkpoint or raise helpful errors."
     validate_checkpoint(
-        context=context,
-        checkpoint_name=checkpoint_name,
-        usage_event=usage_event,
+        context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
     )
-    confirm_prompt: str = f"""\nAre you sure you want to delete the Checkpoint "{checkpoint_name}" (this action is irreversible)?"
+    confirm_prompt: str = f"""
+Are you sure you want to delete the Checkpoint "{checkpoint_name}" (this action is irreversible)?"
 """
     continuation_message: str = (
         f'The Checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
@@ -269,11 +309,18 @@ def delete_checkpoint(
 
 
 def run_checkpoint(
-    context: DataContext,
-    checkpoint_name: str,
-    usage_event: str,
+    context: DataContext, checkpoint_name: str, usage_event: str
 ) -> CheckpointResult:
-    """Run a Checkpoint or raise helpful errors."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Run a Checkpoint or raise helpful errors."
     failure_message: str = "Exception occurred while running Checkpoint."
     validate_checkpoint(
         context=context,
@@ -289,9 +336,7 @@ def run_checkpoint(
     except ge_exceptions.CheckpointError as e:
         cli_message(string=failure_message)
         exit_with_failure_message_and_stats(
-            data_context=context,
-            usage_event=usage_event,
-            message=f"<red>{e}.</red>",
+            data_context=context, usage_event=usage_event, message=f"<red>{e}.</red>"
         )
 
 
@@ -301,29 +346,42 @@ def validate_checkpoint(
     usage_event: str,
     failure_message: Optional[str] = None,
 ) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
-        # noinspection PyUnusedLocal
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = load_checkpoint(
+        checkpoint: Union[(Checkpoint, LegacyCheckpoint)] = load_checkpoint(
             context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
         )
     except ge_exceptions.CheckpointError as e:
         if failure_message:
             cli_message(string=failure_message)
         exit_with_failure_message_and_stats(
-            data_context=context,
-            usage_event=usage_event,
-            message=f"<red>{e}.</red>",
+            data_context=context, usage_event=usage_event, message=f"<red>{e}.</red>"
         )
 
 
 def load_checkpoint(
-    context: DataContext,
-    checkpoint_name: str,
-    usage_event: str,
-) -> Union[Checkpoint, LegacyCheckpoint]:
-    """Load a Checkpoint or raise helpful errors."""
+    context: DataContext, checkpoint_name: str, usage_event: str
+) -> Union[(Checkpoint, LegacyCheckpoint)]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Load a Checkpoint or raise helpful errors."
     try:
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+        checkpoint: Union[(Checkpoint, LegacyCheckpoint)] = context.get_checkpoint(
             name=checkpoint_name
         )
         return checkpoint
@@ -334,8 +392,7 @@ def load_checkpoint(
         exit_with_failure_message_and_stats(
             data_context=context,
             usage_event=usage_event,
-            message=f"""\
-<red>Could not find Checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
+            message=f"""<red>Could not find Checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
   - `<green>great_expectations checkpoint list</green>` to verify your Checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new Checkpoint""",
         )
@@ -344,17 +401,24 @@ def load_checkpoint(
 def select_datasource(
     context: DataContext, datasource_name: str = None
 ) -> BaseDatasource:
-    """Select a datasource interactively."""
-    # TODO consolidate all the myriad CLI tests into this
-    data_source: Optional[BaseDatasource] = None
+    import inspect
 
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Select a datasource interactively."
+    data_source: Optional[BaseDatasource] = None
     if datasource_name is None:
         data_sources: List[BaseDatasource] = cast(
             List[BaseDatasource],
             list(
                 sorted(
-                    context.datasources.values(), key=lambda x: (len(x.name), x.name)
-                ),
+                    context.datasources.values(), key=(lambda x: (len(x.name), x.name))
+                )
             ),
         )
         if len(data_sources) == 0:
@@ -367,35 +431,43 @@ def select_datasource(
             choices: str = "\n".join(
                 [
                     f"    {i}. {data_source.name}"
-                    for i, data_source in enumerate(data_sources, 1)
+                    for (i, data_source) in enumerate(data_sources, 1)
                 ]
             )
             option_selection: str = click.prompt(
-                f"Select a datasource\n{choices}\n",
+                f"""Select a datasource
+{choices}
+""",
                 type=click.Choice(
-                    [str(i) for i, data_source in enumerate(data_sources, 1)]
+                    [str(i) for (i, data_source) in enumerate(data_sources, 1)]
                 ),
                 show_choices=False,
             )
-            datasource_name = data_sources[int(option_selection) - 1].name
-
+            datasource_name = data_sources[(int(option_selection) - 1)].name
     if datasource_name is not None:
         data_source = context.get_datasource(datasource_name=datasource_name)
-
     return data_source
 
 
 def load_data_context_with_error_handling(
     directory: str, from_cli_upgrade_command: bool = False
 ) -> Optional[DataContext]:
-    """Return a DataContext with good error handling and exit codes."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Return a DataContext with good error handling and exit codes."
     context: Optional[DataContext]
     ge_config_version: float
     try:
         directory = directory or DataContext.find_context_root_dir()
         context = DataContext(context_root_dir=directory)
         ge_config_version = context.get_config().config_version
-
         if from_cli_upgrade_command:
             if ge_config_version < CURRENT_GE_CONFIG_VERSION:
                 context = upgrade_project_one_or_multiple_versions_increment(
@@ -406,8 +478,8 @@ def load_data_context_with_error_handling(
                 )
             elif ge_config_version > CURRENT_GE_CONFIG_VERSION:
                 raise ge_exceptions.UnsupportedConfigVersionError(
-                    f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
-{CURRENT_GE_CONFIG_VERSION}.
+                    f"""Invalid config version ({ge_config_version}).
+    The maximum valid version is {CURRENT_GE_CONFIG_VERSION}.
 """
                 )
             else:
@@ -417,7 +489,6 @@ def load_data_context_with_error_handling(
                     ge_config_version=ge_config_version,
                     from_cli_upgrade_command=from_cli_upgrade_command,
                 )
-
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or DataContext.find_context_root_dir()
@@ -434,10 +505,7 @@ def load_data_context_with_error_handling(
         else:
             cli_message(string=f"<red>{err.message}</red>")
             sys.exit(1)
-    except (
-        ge_exceptions.ConfigNotFoundError,
-        ge_exceptions.InvalidConfigError,
-    ) as err:
+    except (ge_exceptions.ConfigNotFoundError, ge_exceptions.InvalidConfigError) as err:
         cli_message(string=f"<red>{err.message}</red>")
         sys.exit(1)
     except ge_exceptions.PluginModuleNotFoundError as err:
@@ -454,20 +522,28 @@ def load_data_context_with_error_handling(
 def upgrade_project_strictly_multiple_versions_increment(
     directory: str, ge_config_version: float, from_cli_upgrade_command: bool = False
 ) -> Optional[DataContext]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     upgrade_helper_class = (
         GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
         if ge_config_version
         else None
     )
     context: Optional[DataContext]
-    if upgrade_helper_class and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+    if upgrade_helper_class and (int(ge_config_version) < CURRENT_GE_CONFIG_VERSION):
         upgrade_project(
             context_root_dir=directory,
             ge_config_version=ge_config_version,
             from_cli_upgrade_command=from_cli_upgrade_command,
         )
         context = DataContext(context_root_dir=directory)
-        # noinspection PyBroadException
         try:
             send_usage_message(
                 data_context=context,
@@ -475,11 +551,9 @@ def upgrade_project_strictly_multiple_versions_increment(
                 success=True,
             )
         except Exception:
-            # Don't fail for usage stats
             pass
     else:
         context = None
-
     return context
 
 
@@ -488,32 +562,30 @@ def upgrade_project(
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
 ) -> None:
-    if from_cli_upgrade_command:
-        message = (
-            f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
-            f"the version "
-            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>"
-        )
-    else:
-        message = (
-            f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
-            f"the version "
-            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.\nIn order to proceed, "
-            f"your project must be upgraded.</red>"
-        )
+    import inspect
 
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    if from_cli_upgrade_command:
+        message = f"""<red>
+Your project appears to have an out-of-date config version ({ge_config_version}) - the version number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>"""
+    else:
+        message = f"""<red>
+Your project appears to have an out-of-date config version ({ge_config_version}) - the version number must be at least {CURRENT_GE_CONFIG_VERSION}.
+In order to proceed, your project must be upgraded.</red>"""
     cli_message(string=message)
     upgrade_prompt = (
         "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
     )
-    # This loading of DataContext is optional and just to track if someone exits here.
-    # noinspection PyBroadException
     try:
         data_context = DataContext(context_root_dir)
     except Exception:
-        # Do not raise error for usage stats
         data_context = None
-
     confirm_proceed_or_exit(
         confirm_prompt=upgrade_prompt,
         continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
@@ -521,8 +593,6 @@ def upgrade_project(
         usage_stats_event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
     )
     cli_message(string=SECTION_SEPARATOR)
-
-    # use loop in case multiple upgrades need to take place
     while int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
         (
             increment_version,
@@ -534,28 +604,22 @@ def upgrade_project(
             update_version=True,
             from_cli_upgrade_command=from_cli_upgrade_command,
         )
-        if exception_occurred or not increment_version:
+        if exception_occurred or (not increment_version):
             break
-
         ge_config_version += 1.0
-
     cli_message(string=SECTION_SEPARATOR)
     upgrade_success_message = "<green>Upgrade complete. Exiting...</green>\n"
-    upgrade_incomplete_message = f"""\
-<red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
+    upgrade_incomplete_message = f"""<red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
 
     - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
-    - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{ge_config_version + 1.0}</cyan>\n
-To learn more about the upgrade process, visit \
-<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>
-"""
+    - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{(ge_config_version + 1.0)}</cyan>
 
+To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>
+"""
     if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
         cli_message(string=upgrade_incomplete_message)
     else:
         cli_message(upgrade_success_message)
-
-    # noinspection PyBroadException
     try:
         data_context: DataContext = DataContext(context_root_dir=context_root_dir)
         send_usage_message(
@@ -564,9 +628,7 @@ To learn more about the upgrade process, visit \
             success=True,
         )
     except Exception:
-        # Do not raise error for usage stats
         pass
-
     sys.exit(0)
 
 
@@ -576,7 +638,15 @@ def upgrade_project_one_or_multiple_versions_increment(
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
 ) -> Optional[DataContext]:
-    # noinspection PyBroadException
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
         send_usage_message(
             data_context=context,
@@ -584,11 +654,8 @@ def upgrade_project_one_or_multiple_versions_increment(
             success=True,
         )
     except Exception:
-        # Don't fail for usage stats
         pass
-
     upgrade_successful: bool = False
-
     if (CURRENT_GE_CONFIG_VERSION - int(ge_config_version)) == 1:
         (
             increment_version,
@@ -600,7 +667,7 @@ def upgrade_project_one_or_multiple_versions_increment(
             update_version=True,
             from_cli_upgrade_command=from_cli_upgrade_command,
         )
-        if not exception_occurred and increment_version:
+        if (not exception_occurred) and increment_version:
             upgrade_successful = True
     else:
         upgrade_project(
@@ -609,7 +676,6 @@ def upgrade_project_one_or_multiple_versions_increment(
             from_cli_upgrade_command=from_cli_upgrade_command,
         )
         upgrade_successful = True
-
     if upgrade_successful:
         upgrade_helper_class = (
             GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
@@ -624,7 +690,6 @@ def upgrade_project_one_or_multiple_versions_increment(
             error_message: str = f"The upgrade utility for version {ge_config_version} could not be found."
             cli_message(string=f"<red>{error_message}</red>")
             sys.exit(1)
-
         manual_steps_required = upgrade_helper.manual_steps_required()
         if manual_steps_required:
             upgrade_message = "Your project requires manual upgrade steps in order to be up-to-date.\n"
@@ -634,10 +699,7 @@ def upgrade_project_one_or_multiple_versions_increment(
                 "Your project is up-to-date - no further upgrade is necessary.\n"
             )
             cli_message(f"<green>{upgrade_message}</green>")
-
         context = DataContext(context_root_dir=directory)
-
-        # noinspection PyBroadException
         try:
             send_usage_message(
                 data_context=context,
@@ -645,11 +707,9 @@ def upgrade_project_one_or_multiple_versions_increment(
                 success=True,
             )
         except Exception:
-            # Don't fail for usage stats
             pass
     else:
         context = None
-
     return context
 
 
@@ -659,6 +719,15 @@ def upgrade_project_zero_versions_increment(
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
 ) -> Optional[DataContext]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     upgrade_helper_class = (
         GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
         if ge_config_version
@@ -674,11 +743,8 @@ def upgrade_project_zero_versions_increment(
         )
         cli_message(string=f"<red>{error_message}</red>")
         sys.exit(1)
-
     manual_steps_required = upgrade_helper.manual_steps_required()
-
     if manual_steps_required:
-        # noinspection PyBroadException
         try:
             send_usage_message(
                 data_context=context,
@@ -686,9 +752,7 @@ def upgrade_project_zero_versions_increment(
                 success=True,
             )
         except Exception:
-            # Don't fail for usage stats
             pass
-
     (
         increment_version,
         exception_occurred,
@@ -710,10 +774,7 @@ def upgrade_project_zero_versions_increment(
                 "Your project is up-to-date - no further upgrade is necessary.\n"
             )
             cli_message(f"<green>{upgrade_message}</green>")
-
         context = DataContext(context_root_dir=directory)
-
-        # noinspection PyBroadException
         try:
             send_usage_message(
                 data_context=context,
@@ -721,9 +782,7 @@ def upgrade_project_zero_versions_increment(
                 success=True,
             )
         except Exception:
-            # Don't fail for usage stats
             pass
-
     return context
 
 
@@ -733,28 +792,29 @@ def upgrade_project_up_to_one_version_increment(
     continuation_message: str,
     update_version: bool,
     from_cli_upgrade_command: bool = False,
-) -> Tuple[bool, bool]:  # Returns increment_version, exception_occurred
+) -> Tuple[(bool, bool)]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
     if not upgrade_helper_class:
-        return False, False
-
-    # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
+        return (False, False)
     DataContext.set_ge_config_version(
-        config_version=CURRENT_GE_CONFIG_VERSION,
-        context_root_dir=context_root_dir,
+        config_version=CURRENT_GE_CONFIG_VERSION, context_root_dir=context_root_dir
     )
-
     upgrade_helper = upgrade_helper_class(
         context_root_dir=context_root_dir, update_version=update_version
     )
-
     manual_steps_required = upgrade_helper.manual_steps_required()
-
     if not (update_version or manual_steps_required):
-        return False, False
-
-    upgrade_overview, confirmation_required = upgrade_helper.get_upgrade_overview()
-
+        return (False, False)
+    (upgrade_overview, confirmation_required) = upgrade_helper.get_upgrade_overview()
     if from_cli_upgrade_command and confirmation_required:
         upgrade_confirmed = confirm_proceed_or_exit(
             confirm_prompt=upgrade_overview,
@@ -763,42 +823,32 @@ def upgrade_project_up_to_one_version_increment(
         )
     else:
         upgrade_confirmed = True
-
     if upgrade_confirmed:
         if confirmation_required:
             cli_message(string="\nUpgrading project...")
             cli_message(string=SECTION_SEPARATOR)
-
-        # run upgrade and get report of what was done, if version number should be incremented
         (
             upgrade_report,
             increment_version,
             exception_occurred,
         ) = upgrade_helper.upgrade_project()
-        # display report to user
         cli_message(string=upgrade_report)
         if exception_occurred:
-            # restore version number to current number
             DataContext.set_ge_config_version(
                 ge_config_version, context_root_dir, validate_config_version=False
             )
-            # display report to user
-            return False, True
-        # set config version to target version
+            return (False, True)
         if increment_version:
             DataContext.set_ge_config_version(
-                int(ge_config_version) + 1,
+                (int(ge_config_version) + 1),
                 context_root_dir,
                 validate_config_version=False,
             )
-            return True, False
-        # restore version number to current number
+            return (True, False)
         DataContext.set_ge_config_version(
             ge_config_version, context_root_dir, validate_config_version=False
         )
-        return False, False
-
-    # restore version number to current number
+        return (False, False)
     DataContext.set_ge_config_version(
         ge_config_version, context_root_dir, validate_config_version=False
     )
@@ -814,19 +864,16 @@ def confirm_proceed_or_exit(
     data_context: Optional[DataContext] = None,
     usage_stats_event: Optional[str] = None,
 ) -> bool:
-    """
-    Every CLI command that starts a potentially lengthy (>1 sec) computation
-    or modifies some resources (e.g., edits the config file, adds objects
-    to the stores) must follow this pattern:
-    1. Explain which resources will be created/modified/deleted
-    2. Use this method to ask for user's confirmation
+    import inspect
 
-    The goal of this standardization is for the users to expect consistency -
-    if you saw one command, you know what to expect from all others.
-
-    If the user does not confirm, the program should exit. The purpose of the exit_on_no parameter is to provide
-    the option to perform cleanup actions before exiting outside of the function.
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Every CLI command that starts a potentially lengthy (>1 sec) computation\n    or modifies some resources (e.g., edits the config file, adds objects\n    to the stores) must follow this pattern:\n    1. Explain which resources will be created/modified/deleted\n    2. Use this method to ask for user's confirmation\n\n    The goal of this standardization is for the users to expect consistency -\n    if you saw one command, you know what to expect from all others.\n\n    If the user does not confirm, the program should exit. The purpose of the exit_on_no parameter is to provide\n    the option to perform cleanup actions before exiting outside of the function.\n    "
     confirm_prompt_colorized = cli_colorize_string(confirm_prompt)
     continuation_message_colorized = cli_colorize_string(continuation_message)
     if not click.confirm(confirm_prompt_colorized, default=True):
@@ -834,7 +881,6 @@ def confirm_proceed_or_exit(
             cli_message(string=continuation_message_colorized)
             cli_message(string=continuation_message_colorized)
             if (usage_stats_event is not None) and (data_context is not None):
-                # noinspection PyBroadException
                 try:
                     send_usage_message(
                         data_context=data_context,
@@ -843,7 +889,6 @@ def confirm_proceed_or_exit(
                         success=True,
                     )
                 except Exception as e:
-                    # Don't fail on usage stats
                     logger.debug(f"Something went wrong when sending usage stats: {e}")
                     pass
             sys.exit(exit_code)
@@ -853,55 +898,53 @@ def confirm_proceed_or_exit(
 
 
 def parse_cli_config_file_location(config_file_location: str) -> dict:
-    """
-    Parse CLI yaml config file or directory location into directory and filename.
-    Uses pathlib to handle windows paths.
-    Args:
-        config_file_location: string of config_file_location
+    import inspect
 
-    Returns:
-        {
-            "directory": "directory/where/config/file/is/located",
-            "filename": "great_expectations.yml"
-        }
-    """
-
-    if config_file_location is not None and config_file_location != "":
-
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    '\n    Parse CLI yaml config file or directory location into directory and filename.\n    Uses pathlib to handle windows paths.\n    Args:\n        config_file_location: string of config_file_location\n\n    Returns:\n        {\n            "directory": "directory/where/config/file/is/located",\n            "filename": "great_expectations.yml"\n        }\n    '
+    if (config_file_location is not None) and (config_file_location != ""):
         config_file_location_path = Path(config_file_location)
-
-        # If the file or directory exists, treat it appropriately
-        # This handles files without extensions
         filename: Optional[str]
         directory: Optional[str]
         if config_file_location_path.is_file():
-            filename = rf"{str(config_file_location_path.name)}"
-            directory = rf"{str(config_file_location_path.parent)}"
+            filename = f"{str(config_file_location_path.name)}"
+            directory = f"{str(config_file_location_path.parent)}"
         elif config_file_location_path.is_dir():
             filename = None
             directory = config_file_location
-
         else:
             raise ge_exceptions.ConfigNotFoundError()
-
     else:
-        # Return None if config_file_location is empty rather than default output of ""
         directory = None
         filename = None
-
     return {"directory": directory, "filename": filename}
 
 
 def is_cloud_file_url(file_path: str) -> bool:
-    """Check for commonly used cloud urls."""
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "Check for commonly used cloud urls."
     sanitized = file_path.strip()
     if sanitized[0:7] == "file://":
         return False
     if (
-        sanitized[0:5] in ["s3://", "gs://"]
-        or sanitized[0:6] == "ftp://"
-        or sanitized[0:7] in ["http://", "wasb://"]
-        or sanitized[0:8] == "https://"
+        (sanitized[0:5] in ["s3://", "gs://"])
+        or (sanitized[0:6] == "ftp://")
+        or (sanitized[0:7] in ["http://", "wasb://"])
+        or (sanitized[0:8] == "https://")
     ):
         return True
     return False
@@ -910,29 +953,35 @@ def is_cloud_file_url(file_path: str) -> bool:
 def get_relative_path_from_config_file_to_base_path(
     context_root_directory: str, data_path: str
 ) -> str:
-    """
-    This function determines the relative path from a given data path relative
-    to the great_expectations.yml file independent of the current working
-    directory.
+    import inspect
 
-    This allows a user to use the CLI from any directory, type a relative path
-    from their current working directory and have the correct relative path be
-    put in the great_expectations.yml file.
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    This function determines the relative path from a given data path relative\n    to the great_expectations.yml file independent of the current working\n    directory.\n\n    This allows a user to use the CLI from any directory, type a relative path\n    from their current working directory and have the correct relative path be\n    put in the great_expectations.yml file.\n    "
     data_from_working_dir = os.path.relpath(data_path)
     context_dir_from_working_dir = os.path.relpath(context_root_directory)
     return os.path.relpath(data_from_working_dir, context_dir_from_working_dir)
 
 
 def load_json_file_into_dict(
-    filepath: str,
-    data_context: DataContext,
-    usage_event: Optional[str] = None,
-) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
+    filepath: str, data_context: DataContext, usage_event: Optional[str] = None
+) -> Optional[Dict[(str, Union[(str, int, Dict[(str, Any)])])]]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     suppress_usage_message: bool = (usage_event is None) or (data_context is None)
-
     error_message: str
-
     if not filepath:
         error_message = "The path to a JSON file was not specified."
         exit_with_failure_message_and_stats(
@@ -941,7 +990,6 @@ def load_json_file_into_dict(
             suppress_usage_message=suppress_usage_message,
             message=f"<red>{error_message}</red>",
         )
-
     if not filepath.endswith(".json"):
         error_message = f'The JSON file path "{filepath}" does not have the ".json" extension in the file name.'
         exit_with_failure_message_and_stats(
@@ -950,7 +998,6 @@ def load_json_file_into_dict(
             suppress_usage_message=suppress_usage_message,
             message=f"<red>{error_message}</red>",
         )
-
     contents: Optional[str] = None
     try:
         with open(filepath) as json_file:
@@ -963,8 +1010,7 @@ def load_json_file_into_dict(
             suppress_usage_message=suppress_usage_message,
             message=f"<red>{error_message}</red>",
         )
-
-    batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None
+    batch_request: Optional[Dict[(str, Union[(str, int, Dict[(str, Any)])])]] = None
     if contents:
         try:
             batch_request = json.loads(contents)
@@ -986,42 +1032,56 @@ def load_json_file_into_dict(
             suppress_usage_message=suppress_usage_message,
             message=f"<red>{error_message}</red>",
         )
-
     return batch_request
 
 
 def get_batch_request_from_citations(
     expectation_suite: Optional[ExpectationSuite] = None,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
-    batch_request_from_citation: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-    ] = None
+) -> Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]:
+    import inspect
 
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    batch_request_from_citation: Optional[
+        Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
+    ] = None
     if expectation_suite is not None:
-        citations: List[Dict[str, Any]] = expectation_suite.get_citations(
+        citations: List[Dict[(str, Any)]] = expectation_suite.get_citations(
             require_batch_request=True
         )
         if citations:
-            citation: Dict[str, Any] = citations[-1]
+            citation: Dict[(str, Any)] = citations[(-1)]
             batch_request_from_citation = citation.get("batch_request")
-
     return batch_request_from_citation
 
 
 def add_citation_with_batch_request(
     data_context: DataContext,
     expectation_suite: ExpectationSuite,
-    batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None,
+    batch_request: Optional[Dict[(str, Union[(str, int, Dict[(str, Any)])])]] = None,
 ) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if (
-        expectation_suite is not None
+        (expectation_suite is not None)
         and batch_request
         and isinstance(batch_request, dict)
         and BatchRequest(**batch_request)
     ):
         expectation_suite.add_citation(
-            comment="Created suite added via CLI",
-            batch_request=batch_request,
+            comment="Created suite added via CLI", batch_request=batch_request
         )
         data_context.save_expectation_suite(expectation_suite=expectation_suite)
 
@@ -1031,9 +1091,18 @@ def get_batch_request_from_json_file(
     data_context: DataContext,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+) -> Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
     ] = load_json_file_into_dict(
         filepath=batch_request_json_file_path,
         data_context=data_context,
@@ -1048,12 +1117,9 @@ def get_batch_request_from_json_file(
         cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
             send_usage_message(
-                data_context=data_context,
-                event=usage_event,
-                success=False,
+                data_context=data_context, event=usage_event, success=False
             )
         sys.exit(1)
-
     return batch_request
 
 
@@ -1063,32 +1129,35 @@ def get_batch_request_using_datasource_name(
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
     additional_batch_request_args: Optional[
-        Dict[str, Union[str, int, Dict[str, Any]]]
+        Dict[(str, Union[(str, int, Dict[(str, Any)])])]
     ] = None,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+) -> Optional[Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     cli_message(
         string="\nA batch of data is required to edit the suite - let's help you to specify it.\n"
     )
-
     datasource: BaseDatasource = select_datasource(
         context=data_context, datasource_name=datasource_name
     )
-
     if not datasource:
         cli_message(string="<red>No datasources found in the context.</red>")
         if not suppress_usage_message:
             send_usage_message(
-                data_context=data_context,
-                event=usage_event,
-                success=False,
+                data_context=data_context, event=usage_event, success=False
             )
         sys.exit(1)
-
     batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        Union[(str, Dict[(str, Union[(str, int, Dict[(str, Any)])])])]
     ] = get_batch_request(
         datasource=datasource,
         additional_batch_request_args=additional_batch_request_args,
     )
-
     return batch_request

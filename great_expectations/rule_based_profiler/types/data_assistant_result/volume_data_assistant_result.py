@@ -20,46 +20,35 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def plot(
         self,
         prescriptive: bool = False,
-        theme: Optional[Dict[str, Any]] = None,
+        theme: Optional[Dict[(str, Any)]] = None,
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
-        """
-        VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
-        Display Charts are condensed and interactive while Return Charts are separated into an individual chart for
-        each metric-domain/expectation-domain combination.
+        import inspect
 
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: A list of columns to chart
-            exclude_column_names: A list of columns not to chart
-
-        Returns:
-            A PlotResult object consisting of an individual chart for each metric-domain/expectation-domain
-        """
-        if include_column_names is not None and exclude_column_names is not None:
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        '\n        VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.\n        Display Charts are condensed and interactive while Return Charts are separated into an individual chart for\n        each metric-domain/expectation-domain combination.\n\n        Altair theme configuration reference:\n            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration\n\n        Args:\n            prescriptive: Type of plot to generate, prescriptive if True, descriptive if False\n            theme: Altair top-level chart configuration dictionary\n            include_column_names: A list of columns to chart\n            exclude_column_names: A list of columns not to chart\n\n        Returns:\n            A PlotResult object consisting of an individual chart for each metric-domain/expectation-domain\n        '
+        if (include_column_names is not None) and (exclude_column_names is not None):
             raise ValueError(
                 "You may either use `include_column_names` or `exclude_column_names` (but not both)."
             )
-
         display_charts: List[alt.Chart] = []
         return_charts: List[alt.Chart] = []
-
         expectation_configurations: List[
             ExpectationConfiguration
         ] = self.expectation_configurations
-
         table_domain_chart: List[alt.Chart] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
             prescriptive=prescriptive,
         )
         display_charts.extend(table_domain_chart)
         return_charts.extend(table_domain_chart)
-
         column_domain_display_chart: alt.VConcatChart
         column_domain_return_charts: List[alt.Chart]
         (
@@ -73,9 +62,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         )
         display_charts.extend(column_domain_display_charts)
         return_charts.extend(column_domain_return_charts)
-
         self.display(charts=display_charts, theme=theme)
-
         return_charts = self.apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
 
@@ -84,19 +71,29 @@ class VolumeDataAssistantResult(DataAssistantResult):
         expectation_configurations: List[ExpectationConfiguration],
         prescriptive: bool,
     ) -> List[alt.Chart]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         table_based_expectations: List[ExpectationConfiguration] = list(
             filter(
-                lambda e: e.expectation_type == "expect_table_row_count_to_be_between",
+                (
+                    lambda e: (
+                        e.expectation_type == "expect_table_row_count_to_be_between"
+                    )
+                ),
                 expectation_configurations,
             )
         )
-
         attributed_metrics_by_table_domain: Dict[
-            Domain, Dict[str, ParameterNode]
+            (Domain, Dict[(str, ParameterNode)])
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.TABLE)
-
         charts: List[alt.Chart] = []
-
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in table_based_expectations:
             table_domain_chart: alt.Chart = (
@@ -107,7 +104,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 )
             )
             charts.append(table_domain_chart)
-
         return charts
 
     def _plot_column_domain_charts(
@@ -116,28 +112,42 @@ class VolumeDataAssistantResult(DataAssistantResult):
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
         prescriptive: bool,
-    ) -> Tuple[alt.VConcatChart, List[alt.Chart]]:
+    ) -> Tuple[(alt.VConcatChart, List[alt.Chart])]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+
         def _filter(e: ExpectationConfiguration) -> bool:
+            import inspect
+
+            __frame = inspect.currentframe()
+            __file = __frame.f_code.co_filename
+            __func = __frame.f_code.co_name
+            for (k, v) in __frame.f_locals.items():
+                if any((var in k) for var in ("__frame", "__file", "__func")):
+                    continue
+                print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
             if e.expectation_type != "expect_column_unique_value_count_to_be_between":
                 return False
             column_name: str = e.kwargs["column"]
-            if exclude_column_names and column_name in exclude_column_names:
+            if exclude_column_names and (column_name in exclude_column_names):
                 return False
-            if include_column_names and column_name not in include_column_names:
+            if include_column_names and (column_name not in include_column_names):
                 return False
             return True
 
         column_based_expectation_configurations: List[ExpectationConfiguration] = list(
-            filter(
-                lambda e: _filter(e),
-                expectation_configurations,
-            )
+            filter((lambda e: _filter(e)), expectation_configurations)
         )
-
         attributed_metrics_by_column_domain: Dict[
-            Domain, Dict[str, ParameterNode]
+            (Domain, Dict[(str, ParameterNode)])
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
-
         display_chart: List[
             alt.VConcatChart
         ] = self._create_display_chart_for_column_domain_expectation(
@@ -145,7 +155,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             attributed_metrics=attributed_metrics_by_column_domain,
             prescriptive=prescriptive,
         )
-
         return_charts: List[alt.Chart] = []
         for expectation_configuration in column_based_expectation_configurations:
             return_chart: alt.Chart = (
@@ -156,27 +165,32 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 )
             )
             return_charts.extend([return_chart])
-
-        return display_chart, return_charts
+        return (display_chart, return_charts)
 
     def _create_chart_for_table_domain_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        attributed_metrics: Dict[(Domain, Dict[(str, ParameterNode)])],
         prescriptive: bool,
     ) -> alt.Chart:
-        attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        attributed_values_by_metric_name: Dict[(str, ParameterNode)] = list(
             attributed_metrics.values()
         )[0]
-
-        # Altair does not accept periods.
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
         domain_name: str = "batch"
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
-
         df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
             metric_name=metric_name,
             domain_name=domain_name,
@@ -184,7 +198,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             expectation_configuration=expectation_configuration,
             prescriptive=prescriptive,
         )
-
         return self._chart_domain_values(
             df=df,
             metric_name=metric_name,
@@ -205,22 +218,32 @@ class VolumeDataAssistantResult(DataAssistantResult):
         prescriptive: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         plot_impl: Callable[
-            [
-                pd.DataFrame,
-                str,
-                alt.StandardType,
-                str,
-                alt.StandardType,
-                Optional[str],
-            ],
-            alt.Chart,
+            (
+                [
+                    pd.DataFrame,
+                    str,
+                    alt.StandardType,
+                    str,
+                    alt.StandardType,
+                    Optional[str],
+                ],
+                alt.Chart,
+            )
         ]
         if prescriptive:
             return_impl = self.get_expect_domain_values_to_be_between_chart
         else:
             return_impl = self.get_line_chart
-
         chart: alt.Chart = return_impl(
             df=df,
             metric_name=metric_name,
@@ -234,9 +257,18 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def _create_display_chart_for_column_domain_expectation(
         self,
         expectation_configurations: List[ExpectationConfiguration],
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        attributed_metrics: Dict[(Domain, Dict[(str, ParameterNode)])],
         prescriptive: bool,
     ) -> alt.Chart:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         column_dfs: List[
             pd.DataFrame
         ] = VolumeDataAssistantResult._create_column_dfs_for_charting(
@@ -244,20 +276,15 @@ class VolumeDataAssistantResult(DataAssistantResult):
             expectation_configurations=expectation_configurations,
             prescriptive=prescriptive,
         )
-
         domain_name: str = "batch"
         domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
-
-        attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
+        attributed_values_by_metric_name: Dict[(str, ParameterNode)] = list(
             attributed_metrics.values()
         )[0]
-
-        # Altair does not accept periods.
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-
         return self._chart_column_values(
             column_dfs=column_dfs,
             metric_name=metric_name,
@@ -270,35 +297,37 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def _create_return_chart_for_column_domain_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        attributed_metrics: Dict[(Domain, Dict[(str, ParameterNode)])],
         prescriptive: bool,
     ) -> alt.Chart:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         domain_name: str = "batch"
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
-
         domain: Domain
-        domains_by_column_name: Dict[str, Domain] = {
+        domains_by_column_name: Dict[(str, Domain)] = {
             domain.domain_kwargs["column"]: domain
             for domain in list(attributed_metrics.keys())
         }
-
         metric_configuration: dict = expectation_configuration.meta["profiler_details"][
             "metric_configuration"
         ]
         domain_kwargs: dict = metric_configuration["domain_kwargs"]
-
         domain = domains_by_column_name[domain_kwargs["column"]]
-
-        attributed_values_by_metric_name: Dict[str, ParameterNode] = attributed_metrics[
-            domain
-        ]
-
-        # Altair does not accept periods.
+        attributed_values_by_metric_name: Dict[
+            (str, ParameterNode)
+        ] = attributed_metrics[domain]
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
-
         df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
             metric_name=metric_name,
             domain_name=domain_name,
@@ -306,10 +335,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             expectation_configuration=expectation_configuration,
             prescriptive=prescriptive,
         )
-
         column_name: str = expectation_configuration.kwargs["column"]
         subtitle = f"Column: {column_name}"
-
         return self._chart_domain_values(
             df=df,
             metric_name=metric_name,
@@ -329,16 +356,27 @@ class VolumeDataAssistantResult(DataAssistantResult):
         domain_type: alt.StandardType,
         prescriptive: bool,
     ) -> Tuple[alt.VConcatChart]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         plot_impl: Callable[
-            [
-                pd.DataFrame,
-                str,
-                alt.StandardType,
-                str,
-                alt.StandardType,
-                Optional[str],
-            ],
-            alt.Chart,
+            (
+                [
+                    pd.DataFrame,
+                    str,
+                    alt.StandardType,
+                    str,
+                    alt.StandardType,
+                    Optional[str],
+                ],
+                alt.Chart,
+            )
         ]
         if prescriptive:
             display_impl = (
@@ -346,7 +384,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             )
         else:
             display_impl = self.get_interactive_detail_multi_line_chart
-
         display_chart: alt.Chart = display_impl(
             column_dfs=column_dfs,
             metric_name=metric_name,
@@ -354,42 +391,56 @@ class VolumeDataAssistantResult(DataAssistantResult):
             domain_name=domain_name,
             domain_type=domain_type,
         )
-
         return [display_chart]
 
     @staticmethod
     def _create_df_for_charting(
         metric_name: str,
         domain_name: str,
-        attributed_values_by_metric_name: Dict[str, ParameterNode],
+        attributed_values_by_metric_name: Dict[(str, ParameterNode)],
         expectation_configuration: ExpectationConfiguration,
         prescriptive: bool,
     ) -> pd.DataFrame:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         batch_ids: KeysView[str]
         metric_values: MetricValues
-        batch_ids, metric_values = list(attributed_values_by_metric_name.values())[
-            0
-        ].keys(), sum(list(attributed_values_by_metric_name.values())[0].values(), [])
-
+        (batch_ids, metric_values) = (
+            list(attributed_values_by_metric_name.values())[0].keys(),
+            sum(list(attributed_values_by_metric_name.values())[0].values(), []),
+        )
         idx: int
-        batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_ids))]
-
+        batch_numbers: List[int] = [(idx + 1) for idx in range(len(batch_ids))]
         df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[domain_name])
         df["batch_id"] = batch_ids
         df[metric_name] = metric_values
-
         if prescriptive:
             for kwarg_name in expectation_configuration.kwargs:
                 df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
-
         return df
 
     def _determine_attributed_metrics_by_domain_type(
         self, metric_domain_type: MetricDomainTypes
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
+    ) -> Dict[(Domain, Dict[(str, ParameterNode)])]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        attributed_metrics_by_domain: Dict[(Domain, Dict[(str, ParameterNode)])] = dict(
             filter(
-                lambda element: element[0].domain_type == metric_domain_type,
+                (lambda element: (element[0].domain_type == metric_domain_type)),
                 self.get_attributed_metrics_by_domain().items(),
             )
         )
@@ -397,35 +448,38 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
     @staticmethod
     def _create_column_dfs_for_charting(
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        attributed_metrics: Dict[(Domain, Dict[(str, ParameterNode)])],
         expectation_configurations: List[ExpectationConfiguration],
         prescriptive: bool,
     ) -> List[pd.DataFrame]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         domain_name: str = "batch"
         domain: Domain
-        domains_by_column_name: Dict[str, Domain] = {
+        domains_by_column_name: Dict[(str, Domain)] = {
             domain.domain_kwargs["column"]: domain
             for domain in list(attributed_metrics.keys())
         }
-
-        column_dfs: List[Tuple[str, pd.DataFrame]] = []
+        column_dfs: List[Tuple[(str, pd.DataFrame)]] = []
         for expectation_configuration in expectation_configurations:
             metric_configuration: dict = expectation_configuration.meta[
                 "profiler_details"
             ]["metric_configuration"]
             domain_kwargs: dict = metric_configuration["domain_kwargs"]
-
             domain = domains_by_column_name[domain_kwargs["column"]]
-
             attributed_values_by_metric_name: Dict[
-                str, ParameterNode
+                (str, ParameterNode)
             ] = attributed_metrics[domain]
-
-            # Altair does not accept periods.
             metric_name = list(attributed_values_by_metric_name.keys())[0].replace(
                 ".", "_"
             )
-
             df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
                 metric_name,
                 domain_name,
@@ -433,8 +487,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 expectation_configuration,
                 prescriptive,
             )
-
             column_name: str = expectation_configuration.kwargs["column"]
             column_dfs.append((column_name, df))
-
         return column_dfs

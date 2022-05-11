@@ -8,13 +8,10 @@ from great_expectations.render.types import (
 
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
-    """Render a bullet list of exception messages raised for provided EVRs"""
-
+    "Render a bullet list of exception messages raised for provided EVRs"
     _rendered_component_type = RenderedBulletListContent
     _content_block_type = "bullet_list"
-
     _default_header = 'Failed expectations <span class="mr-3 triangle"></span>'
-
     _default_content_block_styling = {
         "classes": ["col-12"],
         "styles": {"margin-top": "20px"},
@@ -27,19 +24,12 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                 "aria-expanded": "true",
                 "aria-controls": "collapseExample",
             },
-            "styles": {
-                "cursor": "pointer",
-            },
+            "styles": {"cursor": "pointer"},
         },
-        "body": {
-            "classes": ["list-group", "collapse"],
-        },
+        "body": {"classes": ["list-group", "collapse"]},
     }
-
     _default_element_styling = {
-        "classes": [
-            "list-group-item"
-        ],  # "d-flex", "justify-content-between", "align-items-center"],
+        "classes": ["list-group-item"],
         "params": {
             "column": {"classes": ["badge", "badge-primary"]},
             "expectation_type": {"classes": ["text-monospace"]},
@@ -49,6 +39,15 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
 
     @classmethod
     def render(cls, render_object, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return super().render(
             render_object=render_object, exception_list_content_block=True
         )
@@ -62,18 +61,25 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
         runtime_configuration=None,
         **kwargs,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            include_column_name if (include_column_name is not None) else True
         )
         styling = runtime_configuration.get("styling")
-        # Only render EVR objects for which an exception was raised
         if result.exception_info["raised_exception"] is True:
             template_str = "$expectation_type raised an exception: $exception_message"
             if include_column_name:
                 template_str = f"$column: {template_str}"
-
             try:
                 column = result.expectation_config.kwargs["column"]
             except KeyError:

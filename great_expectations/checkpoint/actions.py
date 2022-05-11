@@ -1,9 +1,4 @@
-"""
-An action is a way to take an arbitrary method and make it configurable and runnable within a Data Context.
-
-The only requirement from an action is for it to have a take_action method.
-"""
-
+"\nAn action is a way to take an arbitrary method and make it configurable and runnable within a Data Context.\n\nThe only requirement from an action is for it to have a take_action method.\n"
 import logging
 import warnings
 from typing import Dict, Optional, Union
@@ -16,7 +11,6 @@ try:
     import pypd
 except ImportError:
     pypd = None
-
 from great_expectations.checkpoint.util import (
     send_cloud_notification,
     send_email,
@@ -38,37 +32,41 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationAction:
-    """
-    This is the base class for all actions that act on validation results
-    and are aware of a Data Context namespace structure.
-
-    The Data Context is passed to this class in its constructor.
-    """
+    "\n    This is the base class for all actions that act on validation results\n    and are aware of a Data Context namespace structure.\n\n    The Data Context is passed to this class in its constructor.\n"
 
     def __init__(self, data_context) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self.data_context = data_context
 
     def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset,
         expectation_suite_identifier: ExpectationSuiteIdentifier = None,
         checkpoint_identifier=None,
         **kwargs,
     ):
-        """
+        import inspect
 
-        :param validation_result_suite:
-        :param validation_result_suite_identifier:
-        :param data_asset:
-        :param expectation_suite_identifier:  The ExpectationSuiteIdentifier to use
-        :param checkpoint_identifier:  The Checkpoint to use
-        :param: kwargs - any additional arguments the child might use
-        :return:
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n\n        :param validation_result_suite:\n        :param validation_result_suite_identifier:\n        :param data_asset:\n        :param expectation_suite_identifier:  The ExpectationSuiteIdentifier to use\n        :param checkpoint_identifier:  The Checkpoint to use\n        :param: kwargs - any additional arguments the child might use\n        :return:\n        "
         return self._run(
             validation_result_suite=validation_result_suite,
             validation_result_suite_identifier=validation_result_suite_identifier,
@@ -82,63 +80,61 @@ class ValidationAction:
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return NotImplementedError
 
 
 class NoOpAction(ValidationAction):
-    def __init__(
-        self,
-        data_context,
-    ) -> None:
+    def __init__(self, data_context) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(data_context)
 
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         print("Happily doing nothing")
 
 
 class SlackNotificationAction(ValidationAction):
-    """
-    SlackNotificationAction sends a Slack notification to a given webhook.
-
-    **Configuration**
-
-    .. code-block:: yaml
-
-        - name: send_slack_notification_on_validation_result
-        action:
-          class_name: SlackNotificationAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          # use slack_webhook when not using slack bot token
-          slack_webhook: ${validation_notification_slack_webhook}
-          # pass slack token and slack channel when not using slack_webhook
-          slack_token: # token from slack app
-          slack_channel: # slack channel that messages should go to
-          notify_on: all # possible values: "all", "failure", "success"
-          notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
-          renderer:
-            # the class that implements the message to be sent
-            # this is the default implementation, but you can
-            # implement a custom one
-            module_name: great_expectations.render.renderer.slack_renderer
-            class_name: SlackRenderer
-
-    """
+    '\n    SlackNotificationAction sends a Slack notification to a given webhook.\n\n    **Configuration**\n\n    .. code-block:: yaml\n\n        - name: send_slack_notification_on_validation_result\n        action:\n          class_name: SlackNotificationAction\n          # put the actual webhook URL in the uncommitted/config_variables.yml file\n          # or pass in as environment variable\n          # use slack_webhook when not using slack bot token\n          slack_webhook: ${validation_notification_slack_webhook}\n          # pass slack token and slack channel when not using slack_webhook\n          slack_token: # token from slack app\n          slack_channel: # slack channel that messages should go to\n          notify_on: all # possible values: "all", "failure", "success"\n          notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all\n          renderer:\n            # the class that implements the message to be sent\n            # this is the default implementation, but you can\n            # implement a custom one\n            module_name: great_expectations.render.renderer.slack_renderer\n            class_name: SlackRenderer\n\n'
 
     def __init__(
         self,
@@ -150,24 +146,19 @@ class SlackNotificationAction(ValidationAction):
         notify_on="all",
         notify_with=None,
     ) -> None:
-        """Construct a SlackNotificationAction
+        import inspect
 
-        Args:
-            data_context:
-            renderer: dictionary specifying the renderer used to generate a query consumable by Slack API, for example:
-                {
-                   "module_name": "great_expectations.render.renderer.slack_renderer",
-                   "class_name": "SlackRenderer",
-               }
-            slack_webhook: incoming Slack webhook to which to send notification
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            payload: *Optional* payload from other ValidationActions
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        'Construct a SlackNotificationAction\n\n        Args:\n            data_context:\n            renderer: dictionary specifying the renderer used to generate a query consumable by Slack API, for example:\n                {\n                   "module_name": "great_expectations.render.renderer.slack_renderer",\n                   "class_name": "SlackRenderer",\n               }\n            slack_webhook: incoming Slack webhook to which to send notification\n            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification\n            payload: *Optional* payload from other ValidationActions\n        '
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
+            config=renderer, runtime_environment={}, config_defaults={}
         )
         module_name = renderer["module_name"]
         if not self.renderer:
@@ -176,12 +167,11 @@ class SlackNotificationAction(ValidationAction):
                 package_name=None,
                 class_name=renderer["class_name"],
             )
-        if not slack_token and slack_channel:
+        if (not slack_token) and slack_channel:
             assert slack_webhook
         if not slack_webhook:
             assert slack_token and slack_channel
         assert not (slack_webhook and slack_channel and slack_token)
-
         self.slack_webhook = slack_webhook
         self.slack_token = slack_token
         self.slack_channel = slack_channel
@@ -192,51 +182,51 @@ class SlackNotificationAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("SlackNotificationAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("SlackNotificationAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
-
         if not isinstance(
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GeCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
             )
-
         validation_success = validation_result_suite.success
         data_docs_pages = None
-
         if payload:
-            # process the payload
             for action_names in payload.keys():
                 if payload[action_names]["class"] == "UpdateDataDocsAction":
                     data_docs_pages = payload[action_names]
-
         if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
+            (self.notify_on == "all")
+            or ((self.notify_on == "success") and validation_success)
+            or ((self.notify_on == "failure") and (not validation_success))
         ):
             query: Dict = self.renderer.render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
-
-            # this will actually send the POST request to the Slack webapp server
             slack_notif_result = send_slack_notification(
                 query,
                 slack_webhook=self.slack_webhook,
@@ -244,43 +234,24 @@ class SlackNotificationAction(ValidationAction):
                 slack_channel=self.slack_channel,
             )
             return {"slack_notification_result": slack_notif_result}
-
         else:
             return {"slack_notification_result": "none required"}
 
 
 class PagerdutyAlertAction(ValidationAction):
-    """
-    PagerdutyAlertAction sends a pagerduty event
+    '\n    PagerdutyAlertAction sends a pagerduty event\n\n    **Configuration**\n\n    .. code-block:: yaml\n\n        - name: send_pagerduty_alert_on_validation_result\n        action:\n          class_name: PagerdutyAlertAction\n          api_key: ${pagerduty_api_key} # Events API v2 key\n          routing_key: # The 32 character Integration Key for an integration on a service or on a global ruleset.\n          notify_on: failure # possible values: "all", "failure", "success"\n\n'
 
-    **Configuration**
+    def __init__(self, data_context, api_key, routing_key, notify_on="failure") -> None:
+        import inspect
 
-    .. code-block:: yaml
-
-        - name: send_pagerduty_alert_on_validation_result
-        action:
-          class_name: PagerdutyAlertAction
-          api_key: ${pagerduty_api_key} # Events API v2 key
-          routing_key: # The 32 character Integration Key for an integration on a service or on a global ruleset.
-          notify_on: failure # possible values: "all", "failure", "success"
-
-    """
-
-    def __init__(
-        self,
-        data_context,
-        api_key,
-        routing_key,
-        notify_on="failure",
-    ) -> None:
-        """Construct a PagerdutyAlertAction
-
-        Args:
-            data_context:
-            api_key: Events API v2 key for pagerduty.
-            routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        'Construct a PagerdutyAlertAction\n\n        Args:\n            data_context:\n            api_key: Events API v2 key for pagerduty.\n            routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.\n            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification\n        '
         super().__init__(data_context)
         if not pypd:
             raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
@@ -294,38 +265,42 @@ class PagerdutyAlertAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("PagerdutyAlertAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("PagerdutyAlertAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
-
         if not isinstance(
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GeCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
             )
-
         validation_success = validation_result_suite.success
-
         if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
+            (self.notify_on == "all")
+            or ((self.notify_on == "success") and validation_success)
+            or ((self.notify_on == "failure") and (not validation_success))
         ):
             expectation_suite_name = validation_result_suite.meta.get(
                 "expectation_suite_name", "__no_expectation_suite_name__"
@@ -343,60 +318,29 @@ class PagerdutyAlertAction(ValidationAction):
                     },
                 }
             )
-
             return {"pagerduty_alert_result": "success"}
         return {"pagerduty_alert_result": "none sent"}
 
 
 class MicrosoftTeamsNotificationAction(ValidationAction):
-    """
-    MicrosoftTeamsNotificationAction sends a Microsoft Teams notification to a given webhook.
-
-    **Configuration**
-
-    .. code-block:: yaml
-
-        - name: send_microsoft_teams_notification_on_validation_result
-        action:
-          class_name: MicrosoftTeamsNotificationAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}
-          notify_on: all # possible values: "all", "failure", "success"
-          renderer:
-            # the class that implements the message to be sent
-            # this is the default implementation, but you can
-            # implement a custom one
-            module_name: great_expectations.render.renderer.microsoft_teams_renderer
-            class_name: MicrosoftTeamsRenderer
-
-    """
+    '\n    MicrosoftTeamsNotificationAction sends a Microsoft Teams notification to a given webhook.\n\n    **Configuration**\n\n    .. code-block:: yaml\n\n        - name: send_microsoft_teams_notification_on_validation_result\n        action:\n          class_name: MicrosoftTeamsNotificationAction\n          # put the actual webhook URL in the uncommitted/config_variables.yml file\n          # or pass in as environment variable\n          microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}\n          notify_on: all # possible values: "all", "failure", "success"\n          renderer:\n            # the class that implements the message to be sent\n            # this is the default implementation, but you can\n            # implement a custom one\n            module_name: great_expectations.render.renderer.microsoft_teams_renderer\n            class_name: MicrosoftTeamsRenderer\n\n'
 
     def __init__(
-        self,
-        data_context,
-        renderer,
-        microsoft_teams_webhook,
-        notify_on="all",
+        self, data_context, renderer, microsoft_teams_webhook, notify_on="all"
     ) -> None:
-        """Construct a MicrosoftTeamsNotificationAction
+        import inspect
 
-        Args:
-            data_context:
-            renderer: dictionary specifying the renderer used to generate a query consumable by teams API, for example:
-                {
-                   "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
-                   "class_name": "MicrosoftTeamsRenderer",
-               }
-            microsoft_teams_webhook: incoming Microsoft Teams webhook to which to send notifications
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            payload: *Optional* payload from other ValidationActions
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        'Construct a MicrosoftTeamsNotificationAction\n\n        Args:\n            data_context:\n            renderer: dictionary specifying the renderer used to generate a query consumable by teams API, for example:\n                {\n                   "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",\n                   "class_name": "MicrosoftTeamsRenderer",\n               }\n            microsoft_teams_webhook: incoming Microsoft Teams webhook to which to send notifications\n            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification\n            payload: *Optional* payload from other ValidationActions\n        '
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
+            config=renderer, runtime_environment={}, config_defaults={}
         )
         module_name = renderer["module_name"]
         if not self.renderer:
@@ -415,51 +359,53 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("MicrosoftTeamsNotificationAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("MicrosoftTeamsNotificationAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
-
         if not isinstance(
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GeCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
             )
         validation_success = validation_result_suite.success
         data_docs_pages = None
-
         if payload:
-            # process the payload
             for action_names in payload.keys():
                 if payload[action_names]["class"] == "UpdateDataDocsAction":
                     data_docs_pages = payload[action_names]
-
         if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
+            (self.notify_on == "all")
+            or ((self.notify_on == "success") and validation_success)
+            or ((self.notify_on == "failure") and (not validation_success))
         ):
             query = self.renderer.render(
                 validation_result_suite,
                 validation_result_suite_identifier,
                 data_docs_pages,
             )
-            # this will actually sent the POST request to the Microsoft Teams webapp server
             teams_notif_result = send_microsoft_teams_notifications(
                 query, microsoft_teams_webhook=self.teams_webhook
             )
@@ -469,24 +415,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
 
 class OpsgenieAlertAction(ValidationAction):
-    """
-    OpsgenieAlertAction creates and sends an Opsgenie alert
-
-    **Configuration**
-
-    .. code-block:: yaml
-
-        - name: send_opsgenie_alert_on_validation_result
-        action:
-          class_name: OpsgenieAlertAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          api_key: ${opsgenie_api_key} # Opsgenie API key
-          region: specifies the Opsgenie region. Populate 'EU' for Europe otherwise leave empty
-          priority: specify the priority of the alert (P1 - P5) defaults to P3
-          notify_on: failure # possible values: "all", "failure", "success"
-
-    """
+    '\n    OpsgenieAlertAction creates and sends an Opsgenie alert\n\n    **Configuration**\n\n    .. code-block:: yaml\n\n        - name: send_opsgenie_alert_on_validation_result\n        action:\n          class_name: OpsgenieAlertAction\n          # put the actual webhook URL in the uncommitted/config_variables.yml file\n          # or pass in as environment variable\n          api_key: ${opsgenie_api_key} # Opsgenie API key\n          region: specifies the Opsgenie region. Populate \'EU\' for Europe otherwise leave empty\n          priority: specify the priority of the alert (P1 - P5) defaults to P3\n          notify_on: failure # possible values: "all", "failure", "success"\n\n'
 
     def __init__(
         self,
@@ -497,20 +426,19 @@ class OpsgenieAlertAction(ValidationAction):
         priority="P3",
         notify_on="failure",
     ) -> None:
-        """Construct a OpsgenieAlertAction
+        import inspect
 
-        Args:
-            data_context:
-            api_key: Opsgenie API key
-            region: specifies the Opsgenie region. Populate 'EU' for Europe otherwise do not set
-            priority: specify the priority of the alert (P1 - P5) defaults to P3
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        'Construct a OpsgenieAlertAction\n\n        Args:\n            data_context:\n            api_key: Opsgenie API key\n            region: specifies the Opsgenie region. Populate \'EU\' for Europe otherwise do not set\n            priority: specify the priority of the alert (P1 - P5) defaults to P3\n            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification\n        '
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
+            config=renderer, runtime_environment={}, config_defaults={}
         )
         module_name = renderer["module_name"]
         if not self.renderer:
@@ -519,7 +447,6 @@ class OpsgenieAlertAction(ValidationAction):
                 package_name=None,
                 class_name=renderer["class_name"],
             )
-
         self.api_key = api_key
         assert api_key, "opsgenie_api_key missing in config_variables.yml"
         self.region = region
@@ -530,87 +457,62 @@ class OpsgenieAlertAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("OpsgenieAlertAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("OpsgenieAlertAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
-
         if not isinstance(
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GeCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
             )
-
         validation_success = validation_result_suite.success
-
         if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
+            (self.notify_on == "all")
+            or ((self.notify_on == "success") and validation_success)
+            or ((self.notify_on == "failure") and (not validation_success))
         ):
             expectation_suite_name = validation_result_suite.meta.get(
                 "expectation_suite_name", "__no_expectation_suite_name__"
             )
-
             settings = {
                 "api_key": self.api_key,
                 "region": self.region,
                 "priority": self.priority,
             }
-
             description = self.renderer.render(validation_result_suite, None, None)
-
             alert_result = send_opsgenie_alert(
                 description, expectation_suite_name, settings
             )
-
             return {"opsgenie_alert_result": alert_result}
         else:
             return {"opsgenie_alert_result": ""}
 
 
 class EmailAction(ValidationAction):
-    """
-    EmailAction sends an email to a given list of email addresses.
-    **Configuration**
-    .. code-block:: yaml
-        - name: send_email_on_validation_result
-        action:
-          class_name: EmailAction
-          notify_on: all # possible values: "all", "failure", "success"
-          notify_with: # optional list of DataDocs site names to display in the email message. Defaults to showing all
-          renderer:
-            # the class that implements the message to be sent
-            # this is the default implementation, but you can
-            # implement a custom one
-            module_name: great_expectations.render.renderer.email_renderer
-            class_name: EmailRenderer
-          # put the actual following information in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          smtp_address: ${smtp_address}
-          smtp_port: ${smtp_port}
-          sender_login: ${email_address}
-          sender_password: ${sender_password}
-          sender_alias: ${sender_alias} # useful to send an email as an alias (default = sender_login)
-          receiver_emails: ${receiver_emails} # string containing email addresses separated by commas
-          use_tls: False
-          use_ssl: True
-    """
+    '\n    EmailAction sends an email to a given list of email addresses.\n    **Configuration**\n    .. code-block:: yaml\n        - name: send_email_on_validation_result\n        action:\n          class_name: EmailAction\n          notify_on: all # possible values: "all", "failure", "success"\n          notify_with: # optional list of DataDocs site names to display in the email message. Defaults to showing all\n          renderer:\n            # the class that implements the message to be sent\n            # this is the default implementation, but you can\n            # implement a custom one\n            module_name: great_expectations.render.renderer.email_renderer\n            class_name: EmailRenderer\n          # put the actual following information in the uncommitted/config_variables.yml file\n          # or pass in as environment variable\n          smtp_address: ${smtp_address}\n          smtp_port: ${smtp_port}\n          sender_login: ${email_address}\n          sender_password: ${sender_password}\n          sender_alias: ${sender_alias} # useful to send an email as an alias (default = sender_login)\n          receiver_emails: ${receiver_emails} # string containing email addresses separated by commas\n          use_tls: False\n          use_ssl: True\n'
 
     def __init__(
         self,
@@ -627,30 +529,19 @@ class EmailAction(ValidationAction):
         notify_on="all",
         notify_with=None,
     ) -> None:
-        """Construct an EmailAction
-        Args:
-            data_context:
-            renderer: dictionary specifying the renderer used to generate an email, for example:
-                {
-                   "module_name": "great_expectations.render.renderer.email_renderer",
-                   "class_name": "EmailRenderer",
-               }
-            smtp_address: address of the SMTP server used to send the email
-            smtp_address: port of the SMTP server used to send the email
-            sender_login: login used send the email
-            sender_password: password used to send the email
-            sender_alias: optional alias used to send the email (default = sender_login)
-            receiver_emails: email addresses that will be receive the email (separated by commas)
-            use_tls: optional use of TLS to send the email (using either TLS or SSL is highly recommended)
-            use_ssl: optional use of SSL to send the email (using either TLS or SSL is highly recommended)
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            notify_with: optional list of DataDocs site names to display in the email message
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        'Construct an EmailAction\n        Args:\n            data_context:\n            renderer: dictionary specifying the renderer used to generate an email, for example:\n                {\n                   "module_name": "great_expectations.render.renderer.email_renderer",\n                   "class_name": "EmailRenderer",\n               }\n            smtp_address: address of the SMTP server used to send the email\n            smtp_address: port of the SMTP server used to send the email\n            sender_login: login used send the email\n            sender_password: password used to send the email\n            sender_alias: optional alias used to send the email (default = sender_login)\n            receiver_emails: email addresses that will be receive the email (separated by commas)\n            use_tls: optional use of TLS to send the email (using either TLS or SSL is highly recommended)\n            use_ssl: optional use of SSL to send the email (using either TLS or SSL is highly recommended)\n            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification\n            notify_with: optional list of DataDocs site names to display in the email message\n        '
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
-            config=renderer,
-            runtime_environment={},
-            config_defaults={},
+            config=renderer, runtime_environment={}, config_defaults={}
         )
         module_name = renderer["module_name"]
         if not self.renderer:
@@ -668,7 +559,7 @@ class EmailAction(ValidationAction):
         else:
             self.sender_alias = sender_alias
         self.receiver_emails_list = list(
-            map(lambda x: x.strip(), receiver_emails.split(","))
+            map((lambda x: x.strip()), receiver_emails.split(","))
         )
         self.use_tls = use_tls
         self.use_ssl = use_ssl
@@ -688,48 +579,51 @@ class EmailAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("EmailAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("EmailAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
-
         if not isinstance(
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GeCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
             )
-
         validation_success = validation_result_suite.success
         data_docs_pages = None
-
         if payload:
-            # process the payload
             for action_names in payload.keys():
                 if payload[action_names]["class"] == "UpdateDataDocsAction":
                     data_docs_pages = payload[action_names]
-
         if (
             (self.notify_on == "all")
-            or (self.notify_on == "success" and validation_success)
-            or (self.notify_on == "failure" and not validation_success)
+            or ((self.notify_on == "success") and validation_success)
+            or ((self.notify_on == "failure") and (not validation_success))
         ):
-            title, html = self.renderer.render(
+            (title, html) = self.renderer.render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
-            # this will actually send the email
             email_result = send_email(
                 title,
                 html,
@@ -742,42 +636,25 @@ class EmailAction(ValidationAction):
                 self.use_tls,
                 self.use_ssl,
             )
-
-            # sending payload back as dictionary
             return {"email_result": email_result}
         else:
             return {"email_result": ""}
 
 
 class StoreValidationResultAction(ValidationAction):
-    """
-        StoreValidationResultAction stores a validation result in the ValidationsStore.
+    "\n        StoreValidationResultAction stores a validation result in the ValidationsStore.\n\n    **Configuration**\n\n    .. code-block:: yaml\n\n        - name: store_validation_result\n        action:\n          class_name: StoreValidationResultAction\n          # name of the store where the actions will store validation results\n          # the name must refer to a store that is configured in the great_expectations.yml file\n          target_store_name: validations_store\n\n"
 
-    **Configuration**
+    def __init__(self, data_context, target_store_name=None) -> None:
+        import inspect
 
-    .. code-block:: yaml
-
-        - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-          # name of the store where the actions will store validation results
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: validations_store
-
-    """
-
-    def __init__(
-        self,
-        data_context,
-        target_store_name=None,
-    ) -> None:
-        """
-
-        :param data_context: Data Context
-        :param target_store_name: the name of the param_store in the Data Context which
-                should be used to param_store the validation result
-        """
-
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n\n        :param data_context: Data Context\n        :param target_store_name: the name of the param_store in the Data Context which\n                should be used to param_store the validation result\n        "
         super().__init__(data_context)
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
@@ -788,21 +665,28 @@ class StoreValidationResultAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("StoreValidationResultAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("StoreValidationResultAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
-
         if not isinstance(
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GeCloudIdentifier),
@@ -812,17 +696,14 @@ class StoreValidationResultAction(ValidationAction):
                     type(validation_result_suite_identifier)
                 )
             )
-
         contract_ge_cloud_id = None
         if self.data_context.ge_cloud_mode and checkpoint_identifier:
             contract_ge_cloud_id = checkpoint_identifier.ge_cloud_id
-
         expectation_suite_ge_cloud_id = None
         if self.data_context.ge_cloud_mode and expectation_suite_identifier:
             expectation_suite_ge_cloud_id = str(
                 expectation_suite_identifier.ge_cloud_id
             )
-
         return_val = self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
@@ -836,36 +717,20 @@ class StoreValidationResultAction(ValidationAction):
 
 
 class StoreEvaluationParametersAction(ValidationAction):
-    """
-    StoreEvaluationParametersAction extracts evaluation parameters from a validation result and stores them in the store
-    configured for this action.
-
-    Evaluation parameters allow expectations to refer to statistics/metrics computed
-    in the process of validating other prior expectations.
-
-    **Configuration**
-
-    .. code-block:: yaml
-
-        - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-          # name of the store where the action will store the parameters
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: evaluation_parameter_store
-
-    """
+    "\n    StoreEvaluationParametersAction extracts evaluation parameters from a validation result and stores them in the store\n    configured for this action.\n\n    Evaluation parameters allow expectations to refer to statistics/metrics computed\n    in the process of validating other prior expectations.\n\n    **Configuration**\n\n    .. code-block:: yaml\n\n        - name: store_evaluation_params\n        action:\n          class_name: StoreEvaluationParametersAction\n          # name of the store where the action will store the parameters\n          # the name must refer to a store that is configured in the great_expectations.yml file\n          target_store_name: evaluation_parameter_store\n\n"
 
     def __init__(self, data_context, target_store_name=None) -> None:
-        """
+        import inspect
 
-        Args:
-            data_context: Data Context
-            target_store_name: the name of the store in the Data Context which
-                should be used to store the evaluation parameters
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n\n        Args:\n            data_context: Data Context\n            target_store_name: the name of the store in the Data Context which\n                should be used to store the evaluation parameters\n        "
         super().__init__(data_context)
-
         if target_store_name is None:
             self.target_store = data_context.evaluation_parameter_store
         else:
@@ -875,21 +740,28 @@ class StoreEvaluationParametersAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("StoreEvaluationParametersAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("StoreEvaluationParametersAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
-
         if not isinstance(
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GeCloudIdentifier),
@@ -899,45 +771,25 @@ class StoreEvaluationParametersAction(ValidationAction):
                     type(validation_result_suite_identifier)
                 )
             )
-
         self.data_context.store_evaluation_parameters(validation_result_suite)
 
 
 class StoreMetricsAction(ValidationAction):
-    """
-    StoreMetricsAction extracts metrics from a Validation Result and stores them
-    in a metrics store.
-
-    **Configuration**
-
-    .. code-block:: yaml
-
-        - name: store_evaluation_params
-        action:
-          class_name: StoreMetricsAction
-          # name of the store where the action will store the metrics
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: my_metrics_store
-
-    """
+    "\n    StoreMetricsAction extracts metrics from a Validation Result and stores them\n    in a metrics store.\n\n    **Configuration**\n\n    .. code-block:: yaml\n\n        - name: store_evaluation_params\n        action:\n          class_name: StoreMetricsAction\n          # name of the store where the action will store the metrics\n          # the name must refer to a store that is configured in the great_expectations.yml file\n          target_store_name: my_metrics_store\n\n"
 
     def __init__(
         self, data_context, requested_metrics, target_store_name="metrics_store"
     ) -> None:
-        """
+        import inspect
 
-        Args:
-            data_context: Data Context
-            requested_metrics: dictionary of metrics to store. Dictionary should have the following structure:
-
-                expectation_suite_name:
-                    metric_name:
-                        - metric_kwargs_id
-
-                You may use "*" to denote that any expectation suite should match.
-            target_store_name: the name of the store in the Data Context which
-                should be used to store the metrics
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        '\n\n        Args:\n            data_context: Data Context\n            requested_metrics: dictionary of metrics to store. Dictionary should have the following structure:\n\n                expectation_suite_name:\n                    metric_name:\n                        - metric_kwargs_id\n\n                You may use "*" to denote that any expectation suite should match.\n            target_store_name: the name of the store in the Data Context which\n                should be used to store the metrics\n        '
         super().__init__(data_context)
         self._requested_metrics = requested_metrics
         self._target_store_name = target_store_name
@@ -958,21 +810,28 @@ class StoreMetricsAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("StoreMetricsAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("StoreMetricsAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
-
         if not isinstance(
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GeCloudIdentifier),
@@ -982,53 +841,34 @@ class StoreMetricsAction(ValidationAction):
                     type(validation_result_suite_identifier)
                 )
             )
-
         self.data_context.store_validation_result_metrics(
             self._requested_metrics, validation_result_suite, self._target_store_name
         )
 
 
 class UpdateDataDocsAction(ValidationAction):
-    """
-    UpdateDataDocsAction is a validation action that
-    notifies the site builders of all the data docs sites of the Data Context
-    that a validation result should be added to the data docs.
-
-    **Configuration**
-
-    .. code-block:: yaml
-
-        - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-
-    You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
-    list of sites to update:
-
-        - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-          site_names:
-            - production_site
-
-    """
+    "\n    UpdateDataDocsAction is a validation action that\n    notifies the site builders of all the data docs sites of the Data Context\n    that a validation result should be added to the data docs.\n\n    **Configuration**\n\n    .. code-block:: yaml\n\n        - name: update_data_docs\n        action:\n          class_name: UpdateDataDocsAction\n\n    You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a\n    list of sites to update:\n\n        - name: update_data_docs\n        action:\n          class_name: UpdateDataDocsAction\n          site_names:\n            - production_site\n\n"
 
     def __init__(self, data_context, site_names=None, target_site_names=None) -> None:
-        """
-        :param data_context: Data Context
-        :param site_names: *optional* List of site names for building data docs
-        """
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n        :param data_context: Data Context\n        :param site_names: *optional* List of site names for building data docs\n        "
         super().__init__(data_context)
         if target_site_names:
-            # deprecated-v0.10.10
             warnings.warn(
                 "target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
                 DeprecationWarning,
             )
             if site_names:
                 raise DataContextError(
-                    "Invalid configuration: legacy key target_site_names and site_names key are "
-                    "both present in UpdateDataDocsAction configuration"
+                    "Invalid configuration: legacy key target_site_names and site_names key are both present in UpdateDataDocsAction configuration"
                 )
             site_names = target_site_names
         self._site_names = site_names
@@ -1037,21 +877,28 @@ class UpdateDataDocsAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
+            (ValidationResultIdentifier, GeCloudIdentifier)
         ],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("UpdateDataDocsAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("UpdateDataDocsAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
-
         if not isinstance(
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GeCloudIdentifier),
@@ -1061,9 +908,6 @@ class UpdateDataDocsAction(ValidationAction):
                     type(validation_result_suite_identifier)
                 )
             )
-
-        # TODO Update for RenderedDataDocs
-        # build_data_docs will return the index page for the validation results, but we want to return the url for the valiation result using the code below
         self.data_context.build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[
@@ -1071,34 +915,33 @@ class UpdateDataDocsAction(ValidationAction):
                 expectation_suite_identifier,
             ],
         )
-
         data_docs_validation_results = {}
         if self.data_context.ge_cloud_mode:
             return data_docs_validation_results
-
-        # get the URL for the validation result
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
             site_names=self._site_names,
         )
-        # process payload
         for sites in docs_site_urls_list:
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
-
         return data_docs_validation_results
 
 
 class CloudNotificationAction(ValidationAction):
-    """
-    CloudNotificationAction is an action which utilizes the Cloud store backend
-    to deliver user-specified Notification Actions.
-    """
+    "\n    CloudNotificationAction is an action which utilizes the Cloud store backend\n    to deliver user-specified Notification Actions.\n"
 
     def __init__(
-        self,
-        data_context: "DataContext",
-        checkpoint_ge_cloud_id: str,
+        self, data_context: "DataContext", checkpoint_ge_cloud_id: str
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(data_context)
         self.checkpoint_ge_cloud_id = checkpoint_ge_cloud_id
 
@@ -1111,13 +954,20 @@ class CloudNotificationAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        logger.debug("CloudNotificationAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("CloudNotificationAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
             )
-
         if not self.data_context.ge_cloud_mode:
             return Exception(
                 "CloudNotificationActions can only be used in GE Cloud Mode."
@@ -1128,11 +978,9 @@ class CloudNotificationAction(ValidationAction):
                     type(validation_result_suite_identifier)
                 )
             )
-
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
-            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/contracts/"
-            f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
+            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/contracts/{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
         )
         auth_headers = {
             "Content-Type": "application/vnd.api+json",
@@ -1142,13 +990,20 @@ class CloudNotificationAction(ValidationAction):
 
 
 class SNSNotificationAction(ValidationAction):
-    """
-    Action that pushes validations results to an SNS topic with a subject of passed or failed.
-    """
+    "\n    Action that pushes validations results to an SNS topic with a subject of passed or failed.\n"
 
     def __init__(
         self, data_context: "DataContext", sns_topic_arn: str, sns_message_subject
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
@@ -1162,13 +1017,20 @@ class SNSNotificationAction(ValidationAction):
         data_asset=None,
         **kwargs,
     ) -> str:
-        logger.debug("SNSNotificationAction.run")
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        logger.debug("SNSNotificationAction.run")
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
             )
-
         if self.sns_message_subject is None:
             logger.warning(
                 f"No message subject was passed checking for expectation_suite_name"
@@ -1183,7 +1045,6 @@ class SNSNotificationAction(ValidationAction):
                 logger.info(f"Using expectation_suite_name: {subject}")
         else:
             subject = self.sns_message_subject
-
         return send_sns_notification(
             self.sns_topic_arn, subject, validation_result_suite.__str__(), **kwargs
         )

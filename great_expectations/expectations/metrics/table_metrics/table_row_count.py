@@ -28,10 +28,19 @@ class TableRowCount(TableMetricProvider):
         execution_engine: "PandasExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        (df, _, _) = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         return df.shape[0]
@@ -46,10 +55,19 @@ class TableRowCount(TableMetricProvider):
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
-        return sa.func.count(), metric_domain_kwargs, {}
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        return (sa.func.count(), metric_domain_kwargs, {})
 
     @metric_partial(
         engine=SparkDFExecutionEngine,
@@ -61,7 +79,16 @@ class TableRowCount(TableMetricProvider):
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metrics: Dict[(str, Any)],
         runtime_configuration: Dict,
     ):
-        return F.count(F.lit(1)), metric_domain_kwargs, {}
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        return (F.count(F.lit(1)), metric_domain_kwargs, {})

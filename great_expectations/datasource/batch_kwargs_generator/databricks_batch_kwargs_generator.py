@@ -6,9 +6,8 @@ from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator
 )
 
 logger = logging.getLogger(__name__)
-
 try:
-    from pyspark.sql import SparkSession  # noqa: F401
+    from pyspark.sql import SparkSession
 except ImportError:
     logger.debug(
         "Unable to load spark context; install optional spark dependency for support."
@@ -16,9 +15,18 @@ except ImportError:
 
 
 class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
-    """Meant to be used in a Databricks notebook"""
+    "Meant to be used in a Databricks notebook"
 
     def __init__(self, name="default", datasource=None, database="default") -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         super().__init__(name, datasource=datasource)
         self.database = database
         try:
@@ -30,14 +38,31 @@ class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
             self.spark = None
 
     def get_available_data_asset_names(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self.spark is None:
             logger.warning("No sparkSession available to query for tables.")
             return {"names": []}
-
         tables = self.spark.sql(f"show tables in {self.database}")
         return {"names": [(row.tableName, "table") for row in tables.collect()]}
 
     def _get_iterator(self, data_asset_name, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         query = f"select * from {self.database}.{data_asset_name}"
         if kwargs.get("partition"):
             if not kwargs.get("date_field"):

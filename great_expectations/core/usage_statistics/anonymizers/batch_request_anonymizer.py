@@ -21,18 +21,33 @@ logger = logging.getLogger(__name__)
 
 class BatchRequestAnonymizer(BaseAnonymizer):
     def __init__(
-        self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
-        salt: Optional[str] = None,
+        self, aggregate_anonymizer: "Anonymizer", salt: Optional[str] = None
     ) -> None:
-        super().__init__(salt=salt)
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        super().__init__(salt=salt)
         self._aggregate_anonymizer = aggregate_anonymizer
 
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
-        anonymized_batch_request_properties_dict: Optional[Dict[str, List[str]]] = None
+        import inspect
 
-        # noinspection PyBroadException
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        anonymized_batch_request_properties_dict: Optional[
+            Dict[(str, List[str])]
+        ] = None
         try:
             from great_expectations.core.batch import (
                 BatchRequest,
@@ -44,29 +59,22 @@ class BatchRequestAnonymizer(BaseAnonymizer):
                 **kwargs
             )
             batch_request_dict: dict = batch_request.to_json_dict()
-
             anonymized_batch_request_dict: Optional[
-                Union[str, dict]
+                Union[(str, dict)]
             ] = self._anonymize_batch_request_properties(source=batch_request_dict)
             anonymized_batch_request_dict = standardize_batch_request_display_ordering(
                 batch_request=anonymized_batch_request_dict
             )
             deep_filter_properties_iterable(
-                properties=anonymized_batch_request_dict,
-                clean_falsy=True,
-                inplace=True,
+                properties=anonymized_batch_request_dict, clean_falsy=True, inplace=True
             )
-
             anonymized_batch_request_required_top_level_properties: dict = {}
             batch_request_optional_top_level_keys: List[str] = []
             batch_spec_passthrough_keys: List[str] = []
             data_connector_query_keys: List[str] = []
             runtime_parameters_keys: List[str] = []
-
             anonymized_batch_request_properties_dict = {
-                "anonymized_batch_request_required_top_level_properties": (
-                    anonymized_batch_request_required_top_level_properties
-                ),
+                "anonymized_batch_request_required_top_level_properties": anonymized_batch_request_required_top_level_properties,
                 "batch_request_optional_top_level_keys": batch_request_optional_top_level_keys,
                 "batch_spec_passthrough_keys": batch_spec_passthrough_keys,
                 "runtime_parameters_keys": runtime_parameters_keys,
@@ -85,30 +93,34 @@ class BatchRequestAnonymizer(BaseAnonymizer):
             batch_spec_passthrough_keys.sort()
             data_connector_query_keys.sort()
             runtime_parameters_keys.sort()
-
         except Exception:
             logger.debug(
                 "anonymize_batch_request: Unable to create anonymized_batch_request payload field"
             )
-
         return anonymized_batch_request_properties_dict
 
     def _anonymize_batch_request_properties(
         self, source: Optional[Any] = None
-    ) -> Optional[Union[str, dict]]:
+    ) -> Optional[Union[(str, dict)]]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if source is None:
             return None
-
-        if isinstance(source, str) and source in BATCH_REQUEST_FLATTENED_KEYS:
+        if isinstance(source, str) and (source in BATCH_REQUEST_FLATTENED_KEYS):
             return source
-
         if isinstance(source, dict):
             source_copy: dict = copy.deepcopy(source)
             anonymized_keys: Set[str] = set()
-
             key: str
             value: Any
-            for key, value in source.items():
+            for (key, value) in source.items():
                 if key in BATCH_REQUEST_FLATTENED_KEYS:
                     if self._is_getting_started_keyword(value=value):
                         source_copy[key] = value
@@ -122,23 +134,29 @@ class BatchRequestAnonymizer(BaseAnonymizer):
                         anonymized_key
                     ] = self._anonymize_batch_request_properties(source=value)
                     anonymized_keys.add(key)
-
             for key in anonymized_keys:
                 source_copy.pop(key)
-
             return source_copy
-
         return self._anonymize_string(str(source))
 
     def _build_anonymized_batch_request(
         self,
-        destination: Optional[Dict[str, Union[Dict[str, str], List[str]]]],
+        destination: Optional[Dict[(str, Union[(Dict[(str, str)], List[str])])]],
         source: Optional[Any] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if isinstance(source, dict):
             key: str
             value: Any
-            for key, value in source.items():
+            for (key, value) in source.items():
                 if key in BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS:
                     destination[
                         "anonymized_batch_request_required_top_level_properties"
@@ -153,13 +171,21 @@ class BatchRequestAnonymizer(BaseAnonymizer):
                     destination["runtime_parameters_keys"].append(key)
                 else:
                     pass
-
                 self._build_anonymized_batch_request(
                     destination=destination, source=value
                 )
 
     @staticmethod
     def _is_getting_started_keyword(value: str) -> bool:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return value in [
             GETTING_STARTED_DATASOURCE_NAME,
             GETTING_STARTED_EXPECTATION_SUITE_NAME,
@@ -167,12 +193,21 @@ class BatchRequestAnonymizer(BaseAnonymizer):
         ]
 
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
         attrs: Set[str] = BatchRequest.include_field_names.union(
             RuntimeBatchRequest.include_field_names
         )
         for kwarg in kwargs:
-            if kwarg in attrs or kwarg == "batch_request":
+            if (kwarg in attrs) or (kwarg == "batch_request"):
                 return True
         return False

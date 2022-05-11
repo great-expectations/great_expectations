@@ -5,19 +5,32 @@ from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonym
 
 class BatchAnonymizer(BaseAnonymizer):
     def __init__(
-        self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
-        salt: Optional[str] = None,
+        self, aggregate_anonymizer: "Anonymizer", salt: Optional[str] = None
     ) -> None:
-        super().__init__(salt=salt)
+        import inspect
 
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        super().__init__(salt=salt)
         self._aggregate_anonymizer = aggregate_anonymizer
 
     def anonymize(
-        self,
-        obj: Union[Tuple[dict, str], "DataAsset", "Validator"],  # noqa: F821
-        **kwargs,
+        self, obj: Union[(Tuple[(dict, str)], "DataAsset", "Validator")], **kwargs
     ) -> Any:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         from great_expectations.data_asset import DataAsset
         from great_expectations.validator.validator import Validator
 
@@ -36,9 +49,7 @@ class BatchAnonymizer(BaseAnonymizer):
         if isinstance(batch, Validator):
             expectation_suite_name = batch.expectation_suite_name
             datasource_name = batch.active_batch_definition.datasource_name
-
         anonymized_info_dict = {}
-
         if batch_kwargs:
             anonymized_info_dict[
                 "anonymized_batch_kwarg_keys"
@@ -57,10 +68,18 @@ class BatchAnonymizer(BaseAnonymizer):
             )
         else:
             anonymized_info_dict["anonymized_datasource_name"] = "__not_found__"
-
         return anonymized_info_dict
 
     def _anonymize_batch_kwargs(self, batch_kwargs: dict) -> List[str]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         ge_batch_kwarg_keys = [
             "datasource",
             "reader_method",
@@ -79,7 +98,6 @@ class BatchAnonymizer(BaseAnonymizer):
             "snowflake_transient_table",
             "data_asset_name",
         ]
-
         anonymized_batch_kwarg_keys = []
         for batch_kwarg_key in batch_kwargs.keys():
             if batch_kwarg_key in ge_batch_kwarg_keys:
@@ -88,16 +106,23 @@ class BatchAnonymizer(BaseAnonymizer):
                 anonymized_batch_kwarg_keys.append(
                     self._anonymize_string(batch_kwarg_key)
                 )
-
         return anonymized_batch_kwarg_keys
 
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         from great_expectations.data_asset.data_asset import DataAsset
         from great_expectations.validator.validator import Validator
 
         if obj is None:
             return False
-
         return isinstance(obj, (Validator, DataAsset)) or (
-            isinstance(obj, tuple) and len(obj) == 2
+            isinstance(obj, tuple) and (len(obj) == 2)
         )

@@ -7,29 +7,26 @@ from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
 
 logger = logging.getLogger(__name__)
-
 _registered_expectations = {}
 _registered_metrics = {}
 _registered_renderers = {}
-
-"""
-{
-  "metric_name"
-    metric_domain_keys
-    metric_value_keys
-    metric_dependencies
-    providers:
-      engine: provider
-}
-"""
+'\n{\n  "metric_name"\n    metric_domain_keys\n    metric_value_keys\n    metric_dependencies\n    providers:\n      engine: provider\n}\n'
 
 
 def register_renderer(
     object_name: str,
-    parent_class: Type[Union["Expectation", "Metric"]],  # noqa: F821
+    parent_class: Type[Union[("Expectation", "Metric")]],
     renderer_fn: Callable,
 ):
-    # noinspection PyUnresolvedReferences
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     renderer_name = renderer_fn._renderer_type
     if object_name not in _registered_renderers:
         logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
@@ -37,21 +34,18 @@ def register_renderer(
             renderer_name: (parent_class, renderer_fn)
         }
         return
-
     if renderer_name in _registered_renderers[object_name]:
         if _registered_renderers[object_name][renderer_name] == (
             parent_class,
             renderer_fn,
         ):
             logger.info(
-                f"Multiple declarations of {renderer_name} renderer for expectation_type {object_name} "
-                f"found."
+                f"Multiple declarations of {renderer_name} renderer for expectation_type {object_name} found."
             )
             return
         else:
             logger.warning(
-                f"Overwriting declaration of {renderer_name} renderer for expectation_type "
-                f"{object_name}."
+                f"Overwriting declaration of {renderer_name} renderer for expectation_type {object_name}."
             )
             _registered_renderers[object_name][renderer_name] = (
                 parent_class,
@@ -65,20 +59,55 @@ def register_renderer(
 
 
 def get_renderer_names(object_name: str) -> List[str]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     return list(_registered_renderers.get(object_name, {}).keys())
 
 
 def get_renderer_impls(object_name: str) -> List[str]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     return list(_registered_renderers.get(object_name, {}).values())
 
 
 def get_renderer_impl(object_name, renderer_type):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     return _registered_renderers.get(object_name, {}).get(renderer_type)
 
 
-def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F821
+def register_expectation(expectation: Type["Expectation"]) -> None:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     expectation_type = expectation.expectation_type
-    # TODO: add version to key
     if expectation_type in _registered_expectations:
         if _registered_expectations[expectation_type] == expectation:
             logger.info(
@@ -89,12 +118,20 @@ def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F82
             logger.warning(
                 f"Overwriting declaration of expectation {expectation_type}."
             )
-
     logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
 
 
 def _add_response_key(res, key, value):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     if key in res:
         res[key].append(value)
     else:
@@ -104,19 +141,28 @@ def _add_response_key(res, key, value):
 
 def register_metric(
     metric_name: str,
-    metric_domain_keys: Tuple[str, ...],
-    metric_value_keys: Tuple[str, ...],
-    execution_engine: Type["ExecutionEngine"],  # noqa: F821
-    metric_class: Type["MetricProvider"],  # noqa: F821
+    metric_domain_keys: Tuple[(str, ...)],
+    metric_value_keys: Tuple[(str, ...)],
+    execution_engine: Type["ExecutionEngine"],
+    metric_class: Type["MetricProvider"],
     metric_provider: Optional[Callable],
     metric_fn_type: Optional[
-        Union["MetricFunctionTypes", "MetricPartialFunctionTypes"]  # noqa: F821
+        Union[("MetricFunctionTypes", "MetricPartialFunctionTypes")]
     ] = None,
 ) -> dict:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     res = {}
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
-    if metric_provider is not None and metric_fn_type is not None:
+    if (metric_provider is not None) and (metric_fn_type is not None):
         metric_provider.metric_fn_type = metric_fn_type
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
@@ -130,7 +176,6 @@ def register_metric(
                 "warning",
                 f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys",
             )
-
         current_value_keys = metric_definition.get("metric_value_keys", set())
         if set(current_value_keys) != set(metric_value_keys):
             logger.warning(
@@ -141,10 +186,11 @@ def register_metric(
                 "warning",
                 f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys",
             )
-
         providers = metric_definition.get("providers", {})
         if execution_engine_name in providers:
-            current_provider_cls, current_provider_fn = providers[execution_engine_name]
+            (current_provider_cls, current_provider_fn) = providers[
+                execution_engine_name
+            ]
             if current_provider_fn != metric_provider:
                 logger.warning(
                     f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider"
@@ -154,7 +200,7 @@ def register_metric(
                     "warning",
                     f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider",
                 )
-                providers[execution_engine_name] = metric_class, metric_provider
+                providers[execution_engine_name] = (metric_class, metric_provider)
             else:
                 logger.info(
                     f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}."
@@ -165,7 +211,7 @@ def register_metric(
                     f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}.",
                 )
         else:
-            providers[execution_engine_name] = metric_class, metric_provider
+            providers[execution_engine_name] = (metric_class, metric_provider)
     else:
         metric_definition = {
             "metric_domain_keys": metric_domain_keys,
@@ -174,15 +220,22 @@ def register_metric(
             "providers": {execution_engine_name: (metric_class, metric_provider)},
         }
         _registered_metrics[metric_name] = metric_definition
-
     res["success"] = True
-
     return res
 
 
 def get_metric_provider(
-    metric_name: str, execution_engine: "ExecutionEngine"  # noqa: F821
-) -> Tuple["MetricProvider", Callable]:  # noqa: F821
+    metric_name: str, execution_engine: "ExecutionEngine"
+) -> Tuple[("MetricProvider", Callable)]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
         metric_definition = _registered_metrics[metric_name]
         return metric_definition["providers"][type(execution_engine).__name__]
@@ -193,11 +246,20 @@ def get_metric_provider(
 
 
 def get_metric_function_type(
-    metric_name: str, execution_engine: "ExecutionEngine"  # noqa: F821
-) -> Optional[Union["MetricPartialFunctionTypes", "MetricFunctionTypes"]]:  # noqa: F821
+    metric_name: str, execution_engine: "ExecutionEngine"
+) -> Optional[Union[("MetricPartialFunctionTypes", "MetricFunctionTypes")]]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
         metric_definition = _registered_metrics[metric_name]
-        provider_fn, provider_class = metric_definition["providers"][
+        (provider_fn, provider_class) = metric_definition["providers"][
             type(execution_engine).__name__
         ]
         return getattr(provider_fn, "metric_fn_type", None)
@@ -209,9 +271,18 @@ def get_metric_function_type(
 
 def get_metric_kwargs(
     metric_name: str,
-    configuration: Optional["ExpectationConfiguration"] = None,  # noqa: F821
+    configuration: Optional["ExpectationConfiguration"] = None,
     runtime_configuration: Optional[dict] = None,
 ) -> Dict:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     try:
         metric_definition = _registered_metrics.get(metric_name)
         if metric_definition is None:
@@ -231,7 +302,7 @@ def get_metric_kwargs(
             if len(metric_kwargs["metric_domain_keys"]) > 0:
                 metric_domain_kwargs = IDDict(
                     {
-                        k: configuration_kwargs.get(k) or default_kwarg_values.get(k)
+                        k: (configuration_kwargs.get(k) or default_kwarg_values.get(k))
                         for k in metric_kwargs["metric_domain_keys"]
                     }
                 )
@@ -240,9 +311,11 @@ def get_metric_kwargs(
             if len(metric_kwargs["metric_value_keys"]) > 0:
                 metric_value_kwargs = IDDict(
                     {
-                        k: configuration_kwargs.get(k)
-                        if configuration_kwargs.get(k) is not None
-                        else default_kwarg_values.get(k)
+                        k: (
+                            configuration_kwargs.get(k)
+                            if (configuration_kwargs.get(k) is not None)
+                            else default_kwarg_values.get(k)
+                        )
                         for k in metric_kwargs["metric_value_keys"]
                     }
                 )
@@ -258,26 +331,42 @@ def get_metric_kwargs(
 
 
 def get_domain_metrics_dict_by_name(
-    metrics: Dict[Tuple[str, str, str], Any], metric_domain_kwargs: IDDict
+    metrics: Dict[(Tuple[(str, str, str)], Any)], metric_domain_kwargs: IDDict
 ):
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     return {
         metric_edge_key_id_tuple[0]: metric_value
-        for metric_edge_key_id_tuple, metric_value in metrics.items()
-        if metric_edge_key_id_tuple[1] == metric_domain_kwargs.to_id()
+        for (metric_edge_key_id_tuple, metric_value) in metrics.items()
+        if (metric_edge_key_id_tuple[1] == metric_domain_kwargs.to_id())
     }
 
 
 def get_expectation_impl(expectation_name: str):
-    renamed: Dict[str, str] = {
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    renamed: Dict[(str, str)] = {
         "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
         "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
         "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",
     }
     if expectation_name in renamed:
-        # deprecated-v0.14.12
         warnings.warn(
-            f"Expectation {expectation_name} was renamed to {renamed['expectation_name']} as of v0.14.12 "
-            "Please update usage in your pipeline(s) before the v0.17 release",
+            f"Expectation {expectation_name} was renamed to {renamed['expectation_name']} as of v0.14.12 Please update usage in your pipeline(s) before the v0.17 release",
             DeprecationWarning,
         )
         expectation_name = renamed[expectation_name]
@@ -285,8 +374,17 @@ def get_expectation_impl(expectation_name: str):
 
 
 def list_registered_expectation_implementations(
-    expectation_root: Type["Expectation"] = None,  # noqa: F821
+    expectation_root: Type["Expectation"] = None,
 ) -> List[str]:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
     registered_expectation_implementations = []
     for (
         expectation_name,
@@ -298,5 +396,4 @@ def list_registered_expectation_implementations(
             expectation_implementation, expectation_root
         ):
             registered_expectation_implementations.append(expectation_name)
-
     return registered_expectation_implementations

@@ -23,28 +23,26 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 
-"""
-NOTE (Shinnnyshinshin): This is not the UpgradeHelperV11 that is normally used by the CLI.
-
-As of 2022-01, it is only triggered by running the CLI-command:
-
-great_expectations --v2-api upgrade project
-
-on a great_expectations/ directory, and cannot be used to fully migrate a v1.0 or v2.0 configuration to a v3.0 config. A
-task for the full deprecation of this path has been placed in the backlog.
-"""
+"\nNOTE (Shinnnyshinshin): This is not the UpgradeHelperV11 that is normally used by the CLI.\n\nAs of 2022-01, it is only triggered by running the CLI-command:\n\ngreat_expectations --v2-api upgrade project\n\non a great_expectations/ directory, and cannot be used to fully migrate a v1.0 or v2.0 configuration to a v3.0 config. A\ntask for the full deprecation of this path has been placed in the backlog.\n"
 
 
 class UpgradeHelperV11(BaseUpgradeHelper):
     def __init__(self, data_context=None, context_root_dir=None) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert (
             data_context or context_root_dir
         ), "Please provide a data_context object or a context_root_dir."
-
         self.data_context = data_context or DataContext(
             context_root_dir=context_root_dir
         )
-
         self.upgrade_log = {
             "skipped_validations_stores": {
                 "database_store_backends": [],
@@ -55,56 +53,32 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 "database_store_backends": [],
                 "unsupported": [],
             },
-            "exceptions": [
-                # {
-                #     "validation_store_name": store_name
-                #     "src": src_url,
-                #     "dest": dest_url,
-                #     "exception_message": exception_message,
-                # },
-                # {
-                #     "site_name": site_name,
-                #     "src": src_url,
-                #     "dest": dest_url,
-                #     "exception_message": exception_message,
-                # }
-            ],
-            "upgraded_validations_stores": {
-                # STORE_NAME: {
-                #     "validations_updated": [{
-                #         "src": src_url,
-                #         "dest": dest_url
-                #     }],
-                #     "exceptions": BOOL
-                # }
-            },
-            "upgraded_docs_site_validations_stores": {
-                # SITE_NAME: {
-                #     "validation_result_pages_updated": [{
-                #         src: src_url,
-                #         dest: dest_url
-                #     }],
-                #     "exceptions": BOOL
-                # }
-            },
+            "exceptions": [],
+            "upgraded_validations_stores": {},
+            "upgraded_docs_site_validations_stores": {},
         }
-
         self.upgrade_checklist = {
             "validations_store_backends": {},
             "docs_validations_store_backends": {},
         }
-
         self.validation_run_times = {}
-
         self.run_time_setters_by_backend_type = {
             TupleFilesystemStoreBackend: self._get_tuple_filesystem_store_backend_run_time,
             TupleS3StoreBackend: self._get_tuple_s3_store_backend_run_time,
             TupleGCSStoreBackend: self._get_tuple_gcs_store_backend_run_time,
         }
-
         self._generate_upgrade_checklist()
 
     def _generate_upgrade_checklist(self) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         for (store_name, store) in self.data_context.stores.items():
             if not isinstance(store, (ValidationsStore, MetricStore)):
                 continue
@@ -112,16 +86,23 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 self._process_validations_store_for_checklist(store_name, store)
             elif isinstance(store, MetricStore):
                 self._process_metrics_store_for_checklist(store_name, store)
-
         sites = (
             self.data_context.project_config_with_variables_substituted.data_docs_sites
         )
-
         if sites:
-            for site_name, site_config in sites.items():
+            for (site_name, site_config) in sites.items():
                 self._process_docs_site_for_checklist(site_name, site_config)
 
     def _process_docs_site_for_checklist(self, site_name, site_config) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         site_html_store = HtmlSiteStore(
             store_backend=site_config.get("store_backend"),
             runtime_environment={
@@ -133,7 +114,6 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         site_validations_store_backend = site_html_store.store_backends[
             ValidationResultIdentifier
         ]
-
         if isinstance(
             site_validations_store_backend,
             tuple(list(self.run_time_setters_by_backend_type.keys())),
@@ -152,6 +132,15 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             )
 
     def _process_validations_store_for_checklist(self, store_name, store) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         store_backend = store.store_backend
         if isinstance(store_backend, DatabaseStoreBackend):
             self.upgrade_log["skipped_validations_stores"][
@@ -177,6 +166,15 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             )
 
     def _process_metrics_store_for_checklist(self, store_name, store) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         store_backend = store.store_backend
         if isinstance(store_backend, DatabaseStoreBackend):
             self.upgrade_log["skipped_metrics_stores"][
@@ -200,18 +198,25 @@ class UpgradeHelperV11(BaseUpgradeHelper):
     def _upgrade_store_backend(
         self, store_backend, store_name=None, site_name=None
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert store_name or site_name, "Must pass either store_name or site_name."
         assert not (
             store_name and site_name
         ), "Must pass either store_name or site_name, not both."
-
         try:
             validation_source_keys = store_backend.list_keys()
         except Exception as e:
             exception_traceback = traceback.format_exc()
             exception_message = (
-                f'{type(e).__name__}: "{str(e)}".  '
-                f'Traceback: "{exception_traceback}".'
+                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
             )
             self._update_upgrade_log(
                 store_backend=store_backend,
@@ -219,24 +224,20 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 site_name=site_name,
                 exception_message=exception_message,
             )
-
         for source_key in validation_source_keys:
             try:
-                run_name = source_key[-2]
+                run_name = source_key[(-2)]
                 dest_key = None
                 if run_name not in self.validation_run_times:
                     self.run_time_setters_by_backend_type.get(type(store_backend))(
                         source_key, store_backend
                     )
                 dest_key_list = list(source_key)
-                dest_key_list.insert(-1, self.validation_run_times[run_name])
+                dest_key_list.insert((-1), self.validation_run_times[run_name])
                 dest_key = tuple(dest_key_list)
             except Exception as e:
                 exception_traceback = traceback.format_exc()
-                exception_message = (
-                    f'{type(e).__name__}: "{str(e)}".  '
-                    f'Traceback: "{exception_traceback}".'
-                )
+                exception_message = f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 self._update_upgrade_log(
                     store_backend=store_backend,
                     source_key=source_key,
@@ -245,7 +246,6 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                     site_name=site_name,
                     exception_message=exception_message,
                 )
-
             try:
                 if store_name:
                     self._update_validation_result_json(
@@ -265,10 +265,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 )
             except Exception as e:
                 exception_traceback = traceback.format_exc()
-                exception_message = (
-                    f'{type(e).__name__}: "{str(e)}".  '
-                    f'Traceback: "{exception_traceback}".'
-                )
+                exception_message = f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 self._update_upgrade_log(
                     store_backend=store_backend,
                     source_key=source_key,
@@ -287,11 +284,19 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         site_name=None,
         exception_message=None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         assert store_name or site_name, "Must pass either store_name or site_name."
         assert not (
             store_name and site_name
         ), "Must pass either store_name or site_name, not both."
-
         try:
             src_url = store_backend.get_url_for_key(source_key) if source_key else "N/A"
         except Exception:
@@ -300,19 +305,17 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             dest_url = store_backend.get_url_for_key(dest_key) if dest_key else "N/A"
         except Exception:
             dest_url = f"Unable to generate URL for key: {dest_key}"
-
         if not exception_message:
             log_dict = {"src": src_url, "dest": dest_url}
         else:
             key_name = "validation_store_name" if store_name else "site_name"
             log_dict = {
-                key_name: store_name if store_name else site_name,
+                key_name: (store_name if store_name else site_name),
                 "src": src_url,
                 "dest": dest_url,
                 "exception_message": exception_message,
             }
             self.upgrade_log["exceptions"].append(log_dict)
-
         if store_name:
             if exception_message:
                 self.upgrade_log["upgraded_validations_stores"][store_name][
@@ -322,19 +325,27 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 self.upgrade_log["upgraded_validations_stores"][store_name][
                     "validations_updated"
                 ].append(log_dict)
+        elif exception_message:
+            self.upgrade_log["upgraded_docs_site_validations_stores"][site_name][
+                "exceptions"
+            ] = True
         else:
-            if exception_message:
-                self.upgrade_log["upgraded_docs_site_validations_stores"][site_name][
-                    "exceptions"
-                ] = True
-            else:
-                self.upgrade_log["upgraded_docs_site_validations_stores"][site_name][
-                    "validation_result_pages_updated"
-                ].append(log_dict)
+            self.upgrade_log["upgraded_docs_site_validations_stores"][site_name][
+                "validation_result_pages_updated"
+            ].append(log_dict)
 
     def _update_validation_result_json(
         self, source_key, dest_key, run_name, store_backend
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         new_run_id_dict = {
             "run_name": run_name,
             "run_time": self.validation_run_times[run_name],
@@ -347,7 +358,16 @@ class UpgradeHelperV11(BaseUpgradeHelper):
     def _get_tuple_filesystem_store_backend_run_time(
         self, source_key, store_backend
     ) -> None:
-        run_name = source_key[-2]
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        run_name = source_key[(-2)]
         try:
             self.validation_run_times[run_name] = parse(run_name).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
@@ -364,11 +384,19 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             self.validation_run_times[run_name] = path_mod_iso_str
 
     def _get_tuple_s3_store_backend_run_time(self, source_key, store_backend) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         import boto3
 
         s3 = boto3.resource("s3")
-        run_name = source_key[-2]
-
+        run_name = source_key[(-2)]
         try:
             self.validation_run_times[run_name] = parse(run_name).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
@@ -381,16 +409,23 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             source_object_last_mod = source_object.last_modified.strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-
             self.validation_run_times[run_name] = source_object_last_mod
 
     def _get_tuple_gcs_store_backend_run_time(self, source_key, store_backend) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         from google.cloud import storage
 
         gcs = storage.Client(project=store_backend.project)
         bucket = gcs.get_bucket(store_backend.bucket)
-        run_name = source_key[-2]
-
+        run_name = source_key[(-2)]
         try:
             self.validation_run_times[run_name] = parse(run_name).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
@@ -402,10 +437,18 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             source_blob_created_time = bucket.get_blob(
                 source_path
             ).time_created.strftime("%Y%m%dT%H%M%S.%fZ")
-
             self.validation_run_times[run_name] = source_blob_created_time
 
     def _get_skipped_store_and_site_names(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         validations_stores_with_database_backends = [
             store_dict.get("store_name")
             for store_dict in self.upgrade_log["skipped_validations_stores"][
@@ -418,7 +461,6 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 "database_store_backends"
             ]
         ]
-
         unsupported_validations_stores = [
             store_dict.get("store_name")
             for store_dict in self.upgrade_log["skipped_validations_stores"][
@@ -429,7 +471,6 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             store_dict.get("store_name")
             for store_dict in self.upgrade_log["skipped_metrics_stores"]["unsupported"]
         ]
-
         stores_with_database_backends = (
             validations_stores_with_database_backends
             + metrics_stores_with_database_backends
@@ -450,6 +491,15 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         )
 
     def get_upgrade_overview(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         (
             skip_with_database_backends,
             skip_with_unsupported_backends,
@@ -467,21 +517,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 "docs_validations_store_backends"
             ].keys()
         ]
-
-        upgrade_overview = """\
-<cyan>\
-++=====================================================++
-|| UpgradeHelperV11: Upgrade Overview (V2-API Version) ||
-++=====================================================++\
-</cyan>
-
-**WARNING**
-You have run the 'great_expectations project upgrade' command using the --v2-api flag, which is not able to perform the full upgrade to the configuration (3.0) that is fully compatible with the V3-API
-
-Please re-run the 'great_expectations project upgrade' command without the --v2-api flag.
-
-UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
-"""
+        upgrade_overview = "<cyan>++=====================================================++\n|| UpgradeHelperV11: Upgrade Overview (V2-API Version) ||\n++=====================================================++</cyan>\n\n**WARNING**\nYou have run the 'great_expectations project upgrade' command using the --v2-api flag, which is not able to perform the full upgrade to the configuration (3.0) that is fully compatible with the V3-API\n\nPlease re-run the 'great_expectations project upgrade' command without the --v2-api flag.\n\nUpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.\n"
         if not any(
             [
                 validations_store_name_checklist,
@@ -491,41 +527,23 @@ UpgradeHelperV11 will upgrade your project to be compatible with Great Expectati
                 skip_doc_sites_with_unsupported_backends,
             ]
         ):
-            upgrade_overview += """
-<green>\
-Good news! No special upgrade steps are required to bring your project up to date.
-The Upgrade Helper will simply increment the config_version of your great_expectations.yml for you.
-</green>
-Would you like to proceed?
-"""
+            upgrade_overview += "\n<green>Good news! No special upgrade steps are required to bring your project up to date.\nThe Upgrade Helper will simply increment the config_version of your great_expectations.yml for you.\n</green>\nWould you like to proceed?\n"
         else:
-            upgrade_overview += """
-<red>**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.</red>
-"""
+            upgrade_overview += "\n<red>**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.</red>\n"
             if validations_store_name_checklist or site_name_checklist:
-                upgrade_overview += """
-<cyan>\
-Automated Steps
-================
-</cyan>
-The following Stores and/or Data Docs sites will be upgraded:
-
-"""
+                upgrade_overview += "\n<cyan>Automated Steps\n================\n</cyan>\nThe following Stores and/or Data Docs sites will be upgraded:\n\n"
                 upgrade_overview += (
-                    f"""\
-    - Validation Stores: {", ".join(validations_store_name_checklist)}
+                    f"""    - Validation Stores: {', '.join(validations_store_name_checklist)}
 """
                     if validations_store_name_checklist
                     else ""
                 )
                 upgrade_overview += (
-                    f"""\
-    - Data Docs Sites: {", ".join(site_name_checklist)}
+                    f"""    - Data Docs Sites: {', '.join(site_name_checklist)}
 """
                     if site_name_checklist
                     else ""
                 )
-
             if any(
                 [
                     skip_with_database_backends,
@@ -533,60 +551,40 @@ The following Stores and/or Data Docs sites will be upgraded:
                     skip_doc_sites_with_unsupported_backends,
                 ]
             ):
-                upgrade_overview += """
-<cyan>\
-Manual Steps
-=============
-</cyan>
-The following Stores and/or Data Docs sites must be upgraded manually, due to having a database backend, or backend
-type that is unsupported or unrecognized:
-
-"""
+                upgrade_overview += "\n<cyan>Manual Steps\n=============\n</cyan>\nThe following Stores and/or Data Docs sites must be upgraded manually, due to having a database backend, or backend\ntype that is unsupported or unrecognized:\n\n"
                 upgrade_overview += (
-                    f"""\
-    - Stores with database backends: {", ".join(skip_with_database_backends)}
+                    f"""    - Stores with database backends: {', '.join(skip_with_database_backends)}
 """
                     if skip_with_database_backends
                     else ""
                 )
                 upgrade_overview += (
-                    f"""\
-    - Stores with unsupported/unrecognized backends: {", ".join(skip_with_unsupported_backends)}
+                    f"""    - Stores with unsupported/unrecognized backends: {', '.join(skip_with_unsupported_backends)}
 """
                     if skip_with_unsupported_backends
                     else ""
                 )
                 upgrade_overview += (
-                    f"""\
-    - Data Docs sites with unsupported/unrecognized backends: {", ".join(skip_doc_sites_with_unsupported_backends)}
+                    f"""    - Data Docs sites with unsupported/unrecognized backends: {', '.join(skip_doc_sites_with_unsupported_backends)}
 """
                     if skip_doc_sites_with_unsupported_backends
                     else ""
                 )
             else:
-                upgrade_overview += """
-<cyan>\
-Manual Steps
-=============
-</cyan>
-No manual upgrade steps are required.
-"""
-
-            upgrade_overview += """
-<cyan>\
-Upgrade Confirmation
-=====================
-</cyan>
-Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
-to learn more about the automated upgrade process:
-
-    <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1</cyan>
-
-Would you like to proceed with the project upgrade?\
-"""
-        return upgrade_overview, True
+                upgrade_overview += "\n<cyan>Manual Steps\n=============\n</cyan>\nNo manual upgrade steps are required.\n"
+            upgrade_overview += "\n<cyan>Upgrade Confirmation\n=====================\n</cyan>\nPlease consult the 0.11.x migration guide for instructions on how to complete any required manual steps or\nto learn more about the automated upgrade process:\n\n    <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1</cyan>\n\nWould you like to proceed with the project upgrade?"
+        return (upgrade_overview, True)
 
     def _save_upgrade_log(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         current_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y%m%dT%H%M%S.%fZ"
         )
@@ -597,15 +595,22 @@ Would you like to proceed with the project upgrade?\
             "project_upgrades",
             f"UpgradeHelperV11_{current_time}.json",
         )
-        dest_dir, dest_filename = os.path.split(dest_path)
+        (dest_dir, dest_filename) = os.path.split(dest_path)
         os.makedirs(dest_dir, exist_ok=True)
-
         with open(dest_path, "w") as outfile:
             json.dump(self.upgrade_log, outfile, indent=2)
-
         return dest_path
 
     def _generate_upgrade_report(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         upgrade_log_path = self._save_upgrade_log()
         skipped_stores_or_sites = any(self._get_skipped_store_and_site_names())
         exception_occurred = False
@@ -614,50 +619,43 @@ Would you like to proceed with the project upgrade?\
             increment_version = False
         else:
             increment_version = True
-        upgrade_report = """\
-<cyan>\
-++================++
-|| Upgrade Report ||
-++================++\
-</cyan>
-"""
+        upgrade_report = "<cyan>++================++\n|| Upgrade Report ||\n++================++</cyan>\n"
         if increment_version:
             upgrade_report += f"""
-<green>\
-Your project was successfully upgraded to be compatible with Great Expectations 0.11.x.
+<green>Your project was successfully upgraded to be compatible with Great Expectations 0.11.x.
 The config_version of your great_expectations.yml has been automatically incremented to 2.0.
 
 A log detailing the upgrade can be found here:
 
-    - {upgrade_log_path}\
-</green>\
-"""
-        else:
-            if exceptions:
-                exception_occurred = True
-                upgrade_report += f"""
-<red>\
-The Upgrade Helper encountered some exceptions during the upgrade process.
+    - {upgrade_log_path}</green>"""
+        elif exceptions:
+            exception_occurred = True
+            upgrade_report += f"""
+<red>The Upgrade Helper encountered some exceptions during the upgrade process.
 Please review the exceptions section of the upgrade log and migrate the affected files manually,
 as detailed in the 0.11.x migration guide.
 
 The upgrade log can be found here:
 
-    - {upgrade_log_path}\
-</red>\
-"""
-            else:
-                upgrade_report += f"""
-<yellow>\
-The Upgrade Helper has completed the automated upgrade steps.
+    - {upgrade_log_path}</red>"""
+        else:
+            upgrade_report += f"""
+<yellow>The Upgrade Helper has completed the automated upgrade steps.
 A log detailing the upgrade can be found here:
 
-    - {upgrade_log_path}\
-</yellow>\
-"""
-        return upgrade_report, increment_version, exception_occurred
+    - {upgrade_log_path}</yellow>"""
+        return (upgrade_report, increment_version, exception_occurred)
 
     def upgrade_project(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         try:
             for (store_name, store_backend) in self.upgrade_checklist[
                 "validations_store_backends"
@@ -669,7 +667,6 @@ A log detailing the upgrade can be found here:
                 self._upgrade_store_backend(store_backend, store_name=store_name)
         except Exception:
             pass
-
         try:
             for (site_name, store_backend) in self.upgrade_checklist[
                 "docs_validations_store_backends"
@@ -681,13 +678,9 @@ A log detailing the upgrade can be found here:
                 self._upgrade_store_backend(store_backend, site_name=site_name)
         except Exception:
             pass
-
-        # return a report of what happened, boolean indicating whether version should be incremented
-        # if the version should not be incremented, the report should include instructions for steps to
-        # be performed manually
         (
             upgrade_report,
             increment_version,
             exception_occurred,
         ) = self._generate_upgrade_report()
-        return upgrade_report, increment_version, exception_occurred
+        return (upgrade_report, increment_version, exception_occurred)

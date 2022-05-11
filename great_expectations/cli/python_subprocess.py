@@ -11,20 +11,19 @@ from great_expectations.core import logger
 
 
 def execute_shell_command(command: str) -> int:
-    """
-    Execute a shell (bash in the present case) command from inside Python program.
+    import inspect
 
-    While developed independently, this function is very similar to the one, offered in this StackOverflow article:
-    https://stackoverflow.com/questions/30993411/environment-variables-using-subprocess-check-output-python
-
-    :param command: bash command -- as if typed in a shell/Terminal window
-    :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Execute a shell (bash in the present case) command from inside Python program.\n\n    While developed independently, this function is very similar to the one, offered in this StackOverflow article:\n    https://stackoverflow.com/questions/30993411/environment-variables-using-subprocess-check-output-python\n\n    :param command: bash command -- as if typed in a shell/Terminal window\n    :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error\n    "
     cwd: str = os.getcwd()
-
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)
-
     status_code: int = 0
     try:
         res: CompletedProcess = run(
@@ -56,37 +55,34 @@ def execute_shell_command(command: str) -> int:
             f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
-
     return status_code
 
 
 def execute_shell_command_with_progress_polling(command: str) -> int:
-    """
-    Execute a shell (bash in the present case) command from inside Python program with polling (to enable progress bar).
+    import inspect
 
-    :param command: bash command -- as if typed in a shell/Terminal window
-    :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
-    """
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "\n    Execute a shell (bash in the present case) command from inside Python program with polling (to enable progress bar).\n\n    :param command: bash command -- as if typed in a shell/Terminal window\n    :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error\n    "
     cwd: str = os.getcwd()
-
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)
-
     status_code: int
-
     bar_length_100_percent: int = 100
-
     max_work_amount: int = bar_length_100_percent
-
     poll_period_seconds: int = 1
-
     gathered: int = 0
     progress: float
     with click.progressbar(length=bar_length_100_percent, label=command) as bar:
         try:
             with Popen(
                 args=["bash", "-c", command],
-                bufsize=-1,
+                bufsize=(-1),
                 executable=None,
                 stdin=None,
                 stdout=PIPE,
@@ -113,13 +109,13 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                     excess: float = progress - 1.0
                     if excess > 0:
                         if 0.0 < excess <= 1.0:
-                            max_work_amount += 2.0 * excess * max_work_amount
+                            max_work_amount += (2.0 * excess) * max_work_amount
                         elif 1.0 < excess <= 2.0:
-                            max_work_amount += 5.0 * excess * max_work_amount
-                        elif 2.0 < excess <= 1.0e1:
-                            max_work_amount += 1.0e1 * excess * max_work_amount
+                            max_work_amount += (5.0 * excess) * max_work_amount
+                        elif 2.0 < excess <= 10.0:
+                            max_work_amount += (10.0 * excess) * max_work_amount
                         else:
-                            max_work_amount += 1.0e2 * excess * max_work_amount
+                            max_work_amount += (100.0 * excess) * max_work_amount
                         progress = float(gathered) / max_work_amount
                     bar.pos = int(progress * (bar_length_100_percent - 1)) + 1
                     bar.update(0)
@@ -140,5 +136,4 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
             exception_traceback: str = traceback.format_exc()
             exception_message += f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
             logger.error(exception_message)
-
     return status_code

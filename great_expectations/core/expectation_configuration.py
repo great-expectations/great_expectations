@@ -36,10 +36,17 @@ from great_expectations.types import SerializableDictDot
 logger = logging.getLogger(__name__)
 
 
-def parse_result_format(result_format: Union[str, dict]) -> dict:
-    """This is a simple helper utility that can be used to parse a string result_format into the dict format used
-    internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
-    there is no need to specify a custom partial_unexpected_count."""
+def parse_result_format(result_format: Union[(str, dict)]) -> dict:
+    import inspect
+
+    __frame = inspect.currentframe()
+    __file = __frame.f_code.co_filename
+    __func = __frame.f_code.co_name
+    for (k, v) in __frame.f_locals.items():
+        if any((var in k) for var in ("__frame", "__file", "__func")):
+            continue
+        print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+    "This is a simple helper utility that can be used to parse a string result_format into the dict format used\n    internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where\n    there is no need to specify a custom partial_unexpected_count."
     if isinstance(result_format, str):
         result_format = {
             "result_format": result_format,
@@ -47,33 +54,56 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
             "include_unexpected_rows": False,
         }
     else:
-        if (
-            "include_unexpected_rows" in result_format
-            and "result_format" not in result_format
+        if ("include_unexpected_rows" in result_format) and (
+            "result_format" not in result_format
         ):
             raise ValueError(
                 "When using `include_unexpected_rows`, `result_format` must be explicitly specified"
             )
-
         if "partial_unexpected_count" not in result_format:
             result_format["partial_unexpected_count"] = 20
-
         if "include_unexpected_rows" not in result_format:
             result_format["include_unexpected_rows"] = False
-
     return result_format
 
 
 class ExpectationContext(SerializableDictDot):
     def __init__(self, description: Optional[str] = None) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._description = description
 
     @property
     def description(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._description
 
     @description.setter
     def description(self, value) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._description = value
 
 
@@ -82,12 +112,20 @@ class ExpectationContextSchema(Schema):
 
     @post_load
     def make_expectation_context(self, data, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return ExpectationContext(**data)
 
 
 class ExpectationConfiguration(SerializableDictDot):
-    """ExpectationConfiguration defines the parameters and name of a specific expectation."""
-
+    "ExpectationConfiguration defines the parameters and name of a specific expectation."
     kwarg_lookup_dict = {
         "expect_column_to_exist": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -859,7 +897,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 "expected_max_count": None,
                 "skip": None,
                 "mostly": 1,
-                "nonnull_lines_regex": r"^\s*$",
+                "nonnull_lines_regex": "^\\s*$",
                 "result_format": "BASIC",
                 "include_config": True,
                 "catch_exceptions": False,
@@ -874,7 +912,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 "expected_count": 0,
                 "skip": None,
                 "mostly": 1,
-                "nonnull_lines_regex": r"^\s*$",
+                "nonnull_lines_regex": "^\\s*$",
                 "result_format": "BASIC",
                 "include_config": True,
                 "catch_exceptions": False,
@@ -939,7 +977,6 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
     }
-
     runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
 
     def __init__(
@@ -951,6 +988,15 @@ class ExpectationConfiguration(SerializableDictDot):
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
                 "expectation_type must be a string"
@@ -961,10 +1007,9 @@ class ExpectationConfiguration(SerializableDictDot):
                 "expectation configuration kwargs must be a dict."
             )
         self._kwargs = kwargs
-        self._raw_kwargs = None  # the kwargs before evaluation parameters are evaluated
+        self._raw_kwargs = None
         if meta is None:
             meta = {}
-        # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
@@ -975,94 +1020,158 @@ class ExpectationConfiguration(SerializableDictDot):
         self,
         evaluation_parameters,
         interactive_evaluation: bool = True,
-        data_context: Optional[
-            Any
-        ] = None,  # Can't type as DataContext due to import cycle
+        data_context: Optional[Any] = None,
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self._raw_kwargs is not None:
             logger.debug(
                 "evaluation_parameters have already been built on this expectation"
             )
-
-        (evaluation_args, substituted_parameters,) = build_evaluation_parameters(
-            self._kwargs,
-            evaluation_parameters,
-            interactive_evaluation,
-            data_context,
+        (evaluation_args, substituted_parameters) = build_evaluation_parameters(
+            self._kwargs, evaluation_parameters, interactive_evaluation, data_context
         )
-
         self._raw_kwargs = self._kwargs
         self._kwargs = evaluation_args
         if len(substituted_parameters) > 0:
             self.meta["substituted_parameters"] = substituted_parameters
 
     def get_raw_configuration(self) -> "ExpectationConfiguration":
-        # return configuration without substituted evaluation parameters
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         raw_config = deepcopy(self)
         if raw_config._raw_kwargs is not None:
             raw_config._kwargs = raw_config._raw_kwargs
             raw_config._raw_kwargs = None
-
         return raw_config
 
     def patch(self, op: str, path: str, value: Any) -> "ExpectationConfiguration":
-        """
+        import inspect
 
-        Args:
-            op: A jsonpatch operation. One of 'add', 'replace', or 'remove'
-            path: A jsonpatch path for the patch operation
-            value: The value to patch
-
-        Returns:
-            The patched ExpectationConfiguration object
-        """
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "\n\n        Args:\n            op: A jsonpatch operation. One of 'add', 'replace', or 'remove'\n            path: A jsonpatch path for the patch operation\n            value: The value to patch\n\n        Returns:\n            The patched ExpectationConfiguration object\n        "
         if op not in ["add", "replace", "remove"]:
             raise ValueError("Op must be either 'add', 'replace', or 'remove'")
-
         try:
             valid_path = path.split("/")[1]
         except IndexError:
             raise IndexError(
-                "Ensure you have a valid jsonpatch path of the form '/path/foo' "
-                "(see http://jsonpatch.com/)"
+                "Ensure you have a valid jsonpatch path of the form '/path/foo' (see http://jsonpatch.com/)"
             )
-
         if valid_path not in self.get_runtime_kwargs().keys():
             raise ValueError("Path not available in kwargs (see http://jsonpatch.com/)")
-
-        # TODO: Call validate_kwargs when implemented
         patch = jsonpatch.JsonPatch([{"op": op, "path": path, "value": value}])
-
         patch.apply(self.kwargs, in_place=True)
         return self
 
     @property
     def ge_cloud_id(self) -> Optional[str]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
     def ge_cloud_id(self, value: str) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._ge_cloud_id = value
 
     @property
     def expectation_context(self) -> Optional[ExpectationContext]:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._expectation_context
 
     @expectation_context.setter
     def expectation_context(self, value: ExpectationContext) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         self._expectation_context = value
 
     @property
     def expectation_type(self) -> str:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._expectation_type
 
     @property
     def kwargs(self) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return self._kwargs
 
     def _get_default_custom_kwargs(self) -> dict:
-        # NOTE: this is a holdover until class-first expectations control their
-        # defaults, and so defaults are inherited.
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if self.expectation_type.startswith("expect_column_pair"):
             return {
                 "domain_kwargs": [
@@ -1071,7 +1180,6 @@ class ExpectationConfiguration(SerializableDictDot):
                     "row_condition",
                     "condition_parser",
                 ],
-                # NOTE: this is almost certainly incomplete; subclasses should override
                 "success_kwargs": [],
                 "default_kwarg_values": {
                     "column_A": None,
@@ -1083,7 +1191,6 @@ class ExpectationConfiguration(SerializableDictDot):
         elif self.expectation_type.startswith("expect_column"):
             return {
                 "domain_kwargs": ["column", "row_condition", "condition_parser"],
-                # NOTE: this is almost certainly incomplete; subclasses should override
                 "success_kwargs": [],
                 "default_kwarg_values": {
                     "column": None,
@@ -1091,16 +1198,19 @@ class ExpectationConfiguration(SerializableDictDot):
                     "condition_parser": None,
                 },
             }
-
         logger.warning("Requested kwargs for an unrecognized expectation.")
-        return {
-            "domain_kwargs": [],
-            # NOTE: this is almost certainly incomplete; subclasses should override
-            "success_kwargs": [],
-            "default_kwarg_values": {},
-        }
+        return {"domain_kwargs": [], "success_kwargs": [], "default_kwarg_values": {}}
 
     def get_domain_kwargs(self) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
@@ -1132,6 +1242,15 @@ class ExpectationConfiguration(SerializableDictDot):
         return domain_kwargs
 
     def get_success_kwargs(self) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
@@ -1160,6 +1279,15 @@ class ExpectationConfiguration(SerializableDictDot):
         return success_kwargs
 
     def get_runtime_kwargs(self, runtime_configuration: Optional[dict] = None) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
@@ -1179,7 +1307,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "default_kwarg_values", {}
             )
             runtime_keys = self.runtime_kwargs
-
         success_kwargs = self.get_success_kwargs()
         lookup_kwargs = deepcopy(self.kwargs)
         if runtime_configuration:
@@ -1197,9 +1324,17 @@ class ExpectationConfiguration(SerializableDictDot):
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"
     ) -> bool:
-        if (
-            not self.expectation_type
-            == other_expectation_configuration.expectation_type
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        if not (
+            self.expectation_type == other_expectation_configuration.expectation_type
         ):
             return False
         return (
@@ -1209,52 +1344,65 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def isEquivalentTo(
         self,
-        other: Union[dict, "ExpectationConfiguration"],
+        other: Union[(dict, "ExpectationConfiguration")],
         match_type: str = "success",
     ) -> bool:
-        """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
                     other = expectationConfigurationSchema.load(other)
                 except ValidationError:
                     logger.debug(
-                        "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
-                        "dict other could not be instantiated as an ExpectationConfiguration"
+                        "Unable to evaluate equivalence of ExpectationConfiguration object with dict because dict other could not be instantiated as an ExpectationConfiguration"
                     )
                     return NotImplemented
             else:
-                # Delegate comparison to the other instance
                 return NotImplemented
         if match_type == "domain":
             return all(
                 (
-                    self.expectation_type == other.expectation_type,
-                    self.get_domain_kwargs() == other.get_domain_kwargs(),
+                    (self.expectation_type == other.expectation_type),
+                    (self.get_domain_kwargs() == other.get_domain_kwargs()),
                 )
             )
-
         elif match_type == "success":
             return all(
                 (
-                    self.expectation_type == other.expectation_type,
-                    self.get_success_kwargs() == other.get_success_kwargs(),
+                    (self.expectation_type == other.expectation_type),
+                    (self.get_success_kwargs() == other.get_success_kwargs()),
                 )
             )
-
         elif match_type == "runtime":
             return all(
                 (
-                    self.expectation_type == other.expectation_type,
-                    self.kwargs == other.kwargs,
+                    (self.expectation_type == other.expectation_type),
+                    (self.kwargs == other.kwargs),
                 )
             )
         return False
 
     def __eq__(self, other):
-        """ExpectationConfiguration equality does include meta, but ignores instance identity."""
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        "ExpectationConfiguration equality does include meta, but ignores instance identity."
         if not isinstance(other, self.__class__):
-            # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         this_kwargs: dict = convert_to_json_serializable(self.kwargs)
         other_kwargs: dict = convert_to_json_serializable(other.kwargs)
@@ -1262,29 +1410,60 @@ class ExpectationConfiguration(SerializableDictDot):
         other_meta: dict = convert_to_json_serializable(other.meta)
         return all(
             (
-                self.expectation_type == other.expectation_type,
-                this_kwargs == other_kwargs,
-                this_meta == other_meta,
+                (self.expectation_type == other.expectation_type),
+                (this_kwargs == other_kwargs),
+                (this_meta == other_meta),
             )
         )
 
     def __ne__(self, other):
-        # By using the == operator, the returned NotImplemented is handled correctly.
-        return not self == other
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        return not (self == other)
 
     def __repr__(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return json.dumps(self.to_json_dict())
 
     def __str__(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return json.dumps(self.to_json_dict(), indent=2)
 
     def to_json_dict(self) -> dict:
-        myself = expectationConfigurationSchema.dump(self)
-        # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
-        # schemas to get serialization all-the-way down via dump
-        myself["kwargs"] = convert_to_json_serializable(myself["kwargs"])
+        import inspect
 
-        # Post dump hook removes this value if null so we need to ensure applicability before conversion
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
+        myself = expectationConfigurationSchema.dump(self)
+        myself["kwargs"] = convert_to_json_serializable(myself["kwargs"])
         if "expectation_context" in myself:
             myself["expectation_context"] = convert_to_json_serializable(
                 myself["expectation_context"]
@@ -1292,14 +1471,22 @@ class ExpectationConfiguration(SerializableDictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self) -> dict:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         parsed_dependencies = {}
         for value in self.kwargs.values():
-            if isinstance(value, dict) and "$PARAMETER" in value:
+            if isinstance(value, dict) and ("$PARAMETER" in value):
                 param_string_dependencies = find_evaluation_parameter_dependencies(
                     value["$PARAMETER"]
                 )
                 nested_update(parsed_dependencies, param_string_dependencies)
-
         dependencies = {}
         urns = parsed_dependencies.get("urns", [])
         for string_urn in urns:
@@ -1310,13 +1497,10 @@ class ExpectationConfiguration(SerializableDictDot):
                     f"Unable to parse great_expectations urn {value['$PARAMETER']}"
                 )
                 continue
-
-            # Query stores do not have "expectation_suite_name"
-            if urn["urn_type"] == "stores" and "expectation_suite_name" not in urn:
+            if (urn["urn_type"] == "stores") and ("expectation_suite_name" not in urn):
                 pass
             else:
                 self._update_dependencies_with_expectation_suite_urn(dependencies, urn)
-
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
@@ -1324,10 +1508,18 @@ class ExpectationConfiguration(SerializableDictDot):
     def _update_dependencies_with_expectation_suite_urn(
         dependencies: dict, urn: ParseResults
     ) -> None:
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         if not urn.get("metric_kwargs"):
             nested_update(
-                dependencies,
-                {urn["expectation_suite_name"]: [urn["metric_name"]]},
+                dependencies, {urn["expectation_suite_name"]: [urn["metric_name"]]}
             )
         else:
             nested_update(
@@ -1344,25 +1536,44 @@ class ExpectationConfiguration(SerializableDictDot):
             )
 
     def _get_expectation_impl(self):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return get_expectation_impl(self.expectation_type)
 
-    def validate(
-        self,
-        validator: Any,  # Can't type as Validator due to import cycle
-        runtime_configuration=None,
-    ):
+    def validate(self, validator: Any, runtime_configuration=None):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).validate(
-            validator=validator,
-            runtime_configuration=runtime_configuration,
+            validator=validator, runtime_configuration=runtime_configuration
         )
 
     def metrics_validate(
-        self,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine=None,
+        self, metrics: Dict, runtime_configuration: dict = None, execution_engine=None
     ):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).metrics_validate(
             metrics,
@@ -1378,32 +1589,42 @@ class ExpectationConfigurationSchema(Schema):
             "required": "expectation_type missing in expectation configuration"
         },
     )
-    kwargs = fields.Dict(
-        required=False,
-        allow_none=True,
-    )
-    meta = fields.Dict(
-        required=False,
-        allow_none=True,
-    )
+    kwargs = fields.Dict(required=False, allow_none=True)
+    meta = fields.Dict(required=False, allow_none=True)
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
-        lambda: ExpectationContextSchema, required=False, allow_none=True
+        (lambda: ExpectationContextSchema), required=False, allow_none=True
     )
-
     REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context"]
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         data = copy.deepcopy(data)
         for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
-            if key in data and data[key] is None:
+            if (key in data) and (data[key] is None):
                 data.pop(key)
         return data
 
-    # noinspection PyUnusedLocal
     @post_load
     def make_expectation_configuration(self, data: dict, **kwargs):
+        import inspect
+
+        __frame = inspect.currentframe()
+        __file = __frame.f_code.co_filename
+        __func = __frame.f_code.co_name
+        for (k, v) in __frame.f_locals.items():
+            if any((var in k) for var in ("__frame", "__file", "__func")):
+                continue
+            print(f"<INTROSPECT> {__file}:{__func} - {k}:{v.__class__.__name__}")
         return ExpectationConfiguration(**data)
 
 
