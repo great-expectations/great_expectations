@@ -44,11 +44,24 @@ def test_get_sampler_method(underscore_prefix: str, sampler_method_name: str):
     )
 
 
+def clean_query_for_comparison(query_string: str) -> str:
+    """Remove whitespace and case from query for easy comparison.
+
+    Args:
+        query_string: query string to convert.
+
+    Returns:
+        String with removed whitespace and converted to lowercase.
+    """
+    """Remove """
+    return query_string.replace("\n", "").replace("\t", "").replace(" ", "").lower()
+
+
 @pytest.mark.parametrize(
     "dialect",
     [
         pytest.param(dialect, id=dialect)
-        for dialect in GESqlDialect.get_all_dialect_names()
+        for dialect in ["postgresql"]  # GESqlDialect.get_all_dialect_names()
     ],
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
@@ -58,8 +71,9 @@ def test_sample_using_limit(mock_execution_engine: mock.MagicMock, dialect: str)
     split_on_limit should build the appropriate query based on input parameters.
     """
 
+    table_name: str = "test_table"
     batch_spec: BatchSpec = BatchSpec(
-        table_name="test_table",
+        table_name=table_name,
         schema_name="test_schema_name",
         sampling_method="sample_using_limit",
         sampling_kwargs={"n": 10},
@@ -80,11 +94,15 @@ def test_sample_using_limit(mock_execution_engine: mock.MagicMock, dialect: str)
 
     print("result:", result)
     if not isinstance(result, str):
-        query_str: str = (
+        query_str: str = clean_query_for_comparison(
             str(result.compile(compile_kwargs={"literal_binds": True}))
-            .replace("\n", "")
-            .replace(" ", "")
-            .lower()
         )
         print("query_str:", query_str)
-    raise NotImplementedError
+    else:
+        query_str: str = result
+
+    expected: str = clean_query_for_comparison(
+        "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10"
+    )
+
+    assert query_str == expected
