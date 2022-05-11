@@ -13,7 +13,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
 
         For example:
         ::
-            >>>d = {'fruit': ['appple','apple','apple','banana','banana'],
+            >>>d = {'fruit': ['appple','apple','apple','banana','banana'], 
                     'color': ['red','green','yellow','yellow','red']}
             >>>my_df = pd.DataFrame(data=d)
             >>> my_df.expect_column_pair_values_to_be_in_set('fruit',
