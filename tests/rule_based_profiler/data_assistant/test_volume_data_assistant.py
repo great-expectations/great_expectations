@@ -1,5 +1,5 @@
 import os
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 
 import altair as alt
 import nbconvert
@@ -18,9 +18,14 @@ from great_expectations.rule_based_profiler.data_assistant import (
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricValue,
+)
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
+    ParameterNode,
     SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
@@ -1951,6 +1956,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
+                        "include_bootstrap_samples_histogram_in_details": False,
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
                     },
@@ -1973,11 +1979,11 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     ],
                     "expectation_configuration_builders": [
                         {
-                            "max_value": "$parameter.row_count_range_estimator.value[1]",
+                            "max_value": "$parameter.table_row_count_range_estimator.value[1]",
                             "validation_parameter_builder_configs": [
                                 {
                                     "replace_nan_with_zero": True,
-                                    "name": "row_count_range_estimator",
+                                    "name": "table_row_count_range_estimator",
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                                     "truncate_values": "$variables.truncate_values",
                                     "enforce_numeric_metric": True,
@@ -1990,16 +1996,17 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                                    "include_bootstrap_samples_histogram_in_details": "$variables.include_bootstrap_samples_histogram_in_details",
                                     "round_decimals": "$variables.round_decimals",
                                 }
                             ],
                             "expectation_type": "expect_table_row_count_to_be_between",
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                             "meta": {
-                                "profiler_details": "$parameter.row_count_range_estimator.details"
+                                "profiler_details": "$parameter.table_row_count_range_estimator.details"
                             },
                             "class_name": "DefaultExpectationConfigurationBuilder",
-                            "min_value": "$parameter.row_count_range_estimator.value[0]",
+                            "min_value": "$parameter.table_row_count_range_estimator.value[0]",
                         }
                     ],
                 },
@@ -2012,6 +2019,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
+                        "include_bootstrap_samples_histogram_in_details": False,
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
                     },
@@ -2052,6 +2060,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                                    "include_bootstrap_samples_histogram_in_details": "$variables.include_bootstrap_samples_histogram_in_details",
                                     "round_decimals": "$variables.round_decimals",
                                 }
                             ],
@@ -2679,11 +2688,34 @@ def test_volume_data_assistant_result_serialization(
     volume_data_assistant_result_as_dict: dict = volume_data_assistant_result.to_dict()
     assert (
         volume_data_assistant_result_as_dict is not None
-        and len(volume_data_assistant_result_as_dict) == 4
+        and len(volume_data_assistant_result_as_dict) == 5
     )
     assert (
         volume_data_assistant_result.to_json_dict()
         == volume_data_assistant_result_as_dict
+    )
+
+
+def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+):
+    metrics_by_domain: Optional[
+        Dict[Domain, Dict[str, ParameterNode]]
+    ] = volume_data_assistant_result.metrics_by_domain
+
+    parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+    parameter_node: ParameterNode
+    batch_id: str
+    assert all(
+        volume_data_assistant_result.batch_id_to_batch_identifier_display_name_map[
+            batch_id
+        ]
+        is not None
+        for parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.values()
+        for parameter_node in parameter_values_for_fully_qualified_parameter_names.values()
+        for batch_id in parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+        ].keys()
     )
 
 
