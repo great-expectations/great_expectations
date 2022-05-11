@@ -132,7 +132,7 @@ results = context.run_checkpoint(
 )
 # </snippet>
 # Note to users: code below this line is only for integration testing -- ignore!
-
+print(results)
 assert results["success"] is True
 statistics = results["run_results"][list(results["run_results"].keys())[0]][
     "validation_result"
