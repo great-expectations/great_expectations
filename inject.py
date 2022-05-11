@@ -2,7 +2,7 @@
 1. Run this script to modify great_expectations/
 2. Run `black` to check for any bad injections
   - Resolve as needed (should be very minimal)
-3. Run `pytest`
+3. Run `pytest` (with `-s` if required)
 """
 
 
