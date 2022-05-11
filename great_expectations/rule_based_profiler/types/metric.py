@@ -1,0 +1,99 @@
+from collections import OrderedDict
+from dataclasses import asdict, dataclass, make_dataclass
+from typing import Any, Dict, List, Optional, Union
+
+import numpy as np
+import pandas as pd
+
+# circular import!?!?!
+from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.types import SerializableDictDot
+from great_expectations.types.attributes import Attributes
+
+# MetricValue = Union[Any, List[Any], pd.DataFrame, pd.Series, np.ndarray]
+# MetricValues = Union[MetricValue, pd.DataFrame, pd.Series, np.ndarray]
+# MetricComputationDetails = Dict[str, Any]
+# MetricComputationResult = make_dataclass(
+#     "MetricComputationResult", ["attributed_resolved_metrics", "details"]
+# )
+
+
+# TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
+# what does it mean to ahve a formal metric computation state?
+MetricValue = Union[Any, List[Any], pd.DataFrame, pd.Series, np.ndarray]
+MetricValues = Union[MetricValue, pd.DataFrame, pd.Series, np.ndarray]
+MetricComputationDetails = Dict[str, Any]
+# MetricComputationResult = make_dataclass(
+#    "MetricComputationResult", ["attributed_resolved_metrics", "details"]
+# )
+
+
+@dataclass
+class AttributedResolvedMetrics(SerializableDictDot):
+    """
+    This class facilitates computing multiple metrics as one operation.
+
+    In order to gather results pertaining to diverse MetricConfiguration directives, computed metrics are augmented
+    with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
+    """
+
+    metric_attributes: Optional[Attributes] = None
+    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
+
+    @staticmethod
+    def get_metric_values_from_attributed_metric_values(
+        attributed_metric_values: Dict[str, MetricValue]
+    ) -> MetricValues:
+        if attributed_metric_values is None:
+            return None
+
+        values: MetricValues = list(attributed_metric_values.values())[0]
+        if values is not None and isinstance(values, (pd.DataFrame, pd.Series)):
+            return list(attributed_metric_values.values())
+
+        return np.array(list(attributed_metric_values.values()))
+
+    def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
+        if self.metric_values_by_batch_id is None:
+            self.metric_values_by_batch_id = {}
+
+        if not isinstance(self.metric_values_by_batch_id, OrderedDict):
+            self.metric_values_by_batch_id = OrderedDict(self.metric_values_by_batch_id)
+
+        self.metric_values_by_batch_id[batch_id] = value
+
+    @property
+    def id(self) -> str:
+        return self.metric_attributes.to_id()
+
+    @property
+    def attributed_metric_values(self) -> Optional[Dict[str, MetricValue]]:
+        return self.metric_values_by_batch_id
+
+    @property
+    def metric_values(self) -> MetricValues:
+        return (
+            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
+                attributed_metric_values=self.attributed_metric_values
+            )
+        )
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    def to_json_dict(self) -> dict:
+        return convert_to_json_serializable(data=self.to_dict())
+
+
+@dataclass
+class MetricComputationResult(SerializableDictDot):
+    """
+    This class facilitates computing multiple metrics as one operation.
+
+    In order to gather results pertaining to diverse MetricConfiguration directives, computed metrics are augmented
+    with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
+    """
+
+    attributed_resolved_metrics: Optional[AttributedResolvedMetrics] = None
+    # details: Optional[MetricComputationDetails] = None
+    details: Optional[Dict[str, Any]] = None
