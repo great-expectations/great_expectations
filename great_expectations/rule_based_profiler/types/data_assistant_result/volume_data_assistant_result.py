@@ -1,7 +1,6 @@
 from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple
 
 import altair as alt
-import numpy as np
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
