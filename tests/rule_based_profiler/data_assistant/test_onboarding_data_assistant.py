@@ -36,4 +36,4 @@ def test_onboarding_data_assistant_result_serialization(
         onboarding_data_assistant_result.to_json_dict()
         == onboarding_data_assistant_result_as_dict
     )
-    assert len(onboarding_data_assistant_result.profiler_config.rules) == 2
+    assert len(onboarding_data_assistant_result.profiler_config.rules) == 4
