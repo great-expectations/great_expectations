@@ -201,6 +201,10 @@ class ParameterBuilder(ABC, Builder):
     def json_serialize(self) -> Union[str, bool]:
         return self._json_serialize
 
+    @json_serialize.setter
+    def json_serialize(self, value: Union[str, bool]) -> None:
+        self._json_serialize = value
+
     @property
     def fully_qualified_parameter_name(self) -> str:
         return f"{PARAMETER_KEY}{self.name}"
