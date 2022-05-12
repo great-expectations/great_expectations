@@ -1,7 +1,7 @@
 import copy
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import altair as alt
 import pandas as pd
@@ -390,7 +390,7 @@ class DataAssistantResult(SerializableDictDot):
 
         # encode point color based on anomalies
         metric_name: str = metric_component.name
-        predicate: alt.expr.core.BinaryExpression = (
+        predicate: Union[bool, int] = (
             (alt.datum.min_value > alt.datum[metric_name])
             & (alt.datum.max_value > alt.datum[metric_name])
         ) | (
@@ -722,7 +722,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
-    ) -> alt.Chart:
+    ) -> alt.VConcatChart:
         """
         Args:
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
@@ -817,7 +817,7 @@ class DataAssistantResult(SerializableDictDot):
             df = pd.concat([df, column_df], axis=0)
 
         # encode point color based on anomalies
-        predicate: alt.expr.core.BinaryExpression
+        predicate: Union[bool, int]
         if strict_min and strict_max:
             predicate = (
                 (alt.datum.min_value > alt.datum[metric_component.name])
@@ -843,7 +843,7 @@ class DataAssistantResult(SerializableDictDot):
                 & (alt.datum.max_value < alt.datum[metric_component.name])
             )
         else:
-            predicate: alt.expr.core.BinaryExpression = (
+            predicate = (
                 (alt.datum.min_value >= alt.datum[metric_component.name])
                 & (alt.datum.max_value >= alt.datum[metric_component.name])
             ) | (
@@ -866,7 +866,7 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _get_interactive_detail_expect_column_values_to_be_between_chart(
-        df: List[Tuple[str, pd.DataFrame]],
+        df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         domain_component: DomainPlotComponent,
         batch_component: BatchPlotComponent,
@@ -875,8 +875,8 @@ class DataAssistantResult(SerializableDictDot):
         max_value_component: PlotComponent,
         strict_min_component: PlotComponent,
         strict_max_component: PlotComponent,
-        predicate: alt.expr.core.BinaryExpression,
-    ) -> alt.Chart:
+        predicate: Union[bool, int],
+    ) -> alt.VConcatChart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
         tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
