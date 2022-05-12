@@ -71,7 +71,7 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import LegacyRow
+    from sqlalchemy.engine import Row
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import (
@@ -81,7 +81,7 @@ try:
         quoted_name,
     )
 except ImportError:
-    LegacyRow = None
+    Row = None
     reflection = None
     DefaultDialect = None
     Selectable = None
@@ -964,7 +964,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self._data_splitter.get_splitter_method(splitter_method_name)
 
-    def execute_split_query(self, split_query: Selectable) -> List[LegacyRow]:
+    def execute_split_query(self, split_query: Selectable) -> List[Row]:
         """Use the execution engine to run the split query and fetch all of the results.
 
         Args:
