@@ -4,7 +4,7 @@ import logging
 import re
 import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import scipy.stats as stats
@@ -496,7 +496,7 @@ def compute_kde_quantiles_point_estimate(
     false_positive_rate: np.float64,
     quantile_statistic_interpolation_method: str,
     n_resamples: int,
-    bw_method: Any,
+    bw_method: Union[str, float, Callable],
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
     """

@@ -68,7 +68,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
     DEFAULT_KDE_NUM_RESAMPLES: int = 9999
 
-    DEFAULT_KDE_BW_METHOD: Any = "scott"
+    DEFAULT_KDE_BW_METHOD: Union[str, float, Callable] = "scott"
 
     RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
         "lower_bound",
@@ -94,7 +94,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         quantile_statistic_interpolation_method: str = "auto",
         estimator: str = "bootstrap",
         n_resamples: Optional[Union[str, int]] = None,
-        bw_method: Optional[Any] = None,
+        bw_method: Optional[Union[str, float, Callable]] = None,
         random_seed: Optional[Union[str, int]] = None,
         include_estimator_samples_histogram_in_details: Union[str, bool] = False,
         truncate_values: Optional[
@@ -221,7 +221,7 @@ detected.
         return self._n_resamples
 
     @property
-    def bw_method(self) -> Optional[Union[str, int]]:
+    def bw_method(self) -> Optional[Union[str, float, Callable]]:
         return self._bw_method
 
     @property
