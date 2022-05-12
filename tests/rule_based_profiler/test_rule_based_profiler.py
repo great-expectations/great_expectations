@@ -7,7 +7,6 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -17,6 +16,7 @@ from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
+    RuleBasedProfilerResult,
 )
 from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
@@ -128,6 +128,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "json_serialize": True,
                 },
             ],
@@ -192,6 +193,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "truncate_values": {},
                     "json_serialize": True,
                 },
@@ -374,6 +376,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
                     "quantile_statistic_interpolation_method": "auto",
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "json_serialize": True,
                 },
             ],
@@ -409,6 +412,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
                     "quantile_statistic_interpolation_method": "auto",
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "truncate_values": {},
                     "json_serialize": True,
                 },
@@ -571,6 +575,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "json_serialize": True,
                 },
             ],
@@ -635,6 +640,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "truncate_values": {},
                     "json_serialize": True,
                 },
@@ -710,6 +716,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "json_serialize": True,
                 },
             ],
@@ -750,6 +757,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "truncate_values": {},
                     "json_serialize": True,
                 },
@@ -816,6 +824,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "json_serialize": True,
                 },
             ],
@@ -880,6 +889,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "include_bootstrap_samples_histogram_in_details": False,
                     "truncate_values": {},
                     "json_serialize": True,
                 },
@@ -970,17 +980,16 @@ def test_run_profiler_with_dynamic_args(
     # Dynamic arguments used to override the profiler's attributes
     variables = {"foo": "bar"}
     rules = {"baz": "qux"}
-    expectation_suite_name = "my_expectation_suite_name"
-    include_citation = False
 
-    RuleBasedProfiler.run_profiler(
-        data_context=mock_data_context,
-        profiler_store=populated_profiler_store,
-        name=profiler_name,
-        variables=variables,
-        rules=rules,
-        expectation_suite_name=expectation_suite_name,
-        include_citation=include_citation,
+    # noinspection PyUnusedLocal
+    rule_based_profiler_result: RuleBasedProfilerResult = (
+        RuleBasedProfiler.run_profiler(
+            data_context=mock_data_context,
+            profiler_store=populated_profiler_store,
+            name=profiler_name,
+            variables=variables,
+            rules=rules,
+        )
     )
 
     assert mock_profiler_run.called
@@ -1443,40 +1452,3 @@ def test_add_rule_bad_rule(
         # noinspection PyTypeChecker
         profiler.add_rule(rule=not_a_rule)
     assert "'dict' object has no attribute 'name'" in str(e.value)
-
-
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
-def test_run_with_expectation_suite_arg(mock_data_context: mock.MagicMock):
-    profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rbp", data_context=mock_data_context, config_version=1.0
-    )
-    suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="my_expectation_suite"
-    )
-    profiler.run()
-    result_suite: ExpectationSuite = profiler.get_expectation_suite(
-        expectation_suite=suite
-    )
-
-    assert id(suite) == id(result_suite)
-
-
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
-def test_run_with_conflicting_expectation_suite_args_raises_error(
-    mock_data_context: mock.MagicMock,
-):
-    profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rbp", data_context=mock_data_context, config_version=1.0
-    )
-    suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="my_expectation_suite"
-    )
-
-    with pytest.raises(AssertionError) as e:
-        profiler.run()
-        # noinspection PyUnusedLocal
-        suite = profiler.get_expectation_suite(
-            expectation_suite=suite, expectation_suite_name="my_expectation_suite"
-        )
-
-    assert "Ambiguous arguments provided" in str(e.value)
