@@ -16,4 +16,7 @@ class OnboardingDataAssistantResult(DataAssistantResult):
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
+        """
+        Displays relevant charts for usecases reperesented by "OnboardingDataAssistantResult" object.
+        """
         pass
