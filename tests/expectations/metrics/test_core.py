@@ -111,11 +111,76 @@ def test_stdev_metric_pd():
 
 
 def test_column_value_lengths_min_metric_pd():
-    pass
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "names": [
+                    "Ada Lovelace",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                ]
+            }
+        )
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.length.min",
+        metric_domain_kwargs={"column": "names"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: 12}
 
 
-def test_column_value_lengths_min_metric_sa():
-    pass
+def test_column_value_lengths_min_metric_sa(sa):
+    engine = build_sa_engine(
+        pd.DataFrame(
+            {
+                "names": [
+                    "Ada Lovelace",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                ]
+            }
+        ),
+        sa,
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.length.min",
+        metric_domain_kwargs={"column": "names"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: 12}
 
 
 def test_column_value_lengths_min_metric_spark():
@@ -123,7 +188,39 @@ def test_column_value_lengths_min_metric_spark():
 
 
 def test_column_value_lengths_max_metric_pd():
-    pass
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "names": [
+                    "Ada Lovelace",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                ]
+            }
+        )
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.length.max",
+        metric_domain_kwargs={"column": "names"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: 16}
 
 
 def test_column_value_lengths_max_metric_sa():
