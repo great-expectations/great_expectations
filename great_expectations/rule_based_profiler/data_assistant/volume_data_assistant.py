@@ -58,7 +58,7 @@ class VolumeDataAssistant(DataAssistant):
         self,
     ) -> Dict[Domain, List[ParameterBuilder]]:
         table_row_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
-            name="table_row_count",
+            name="table.row_count",
             metric_name="table.row_count",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
@@ -70,7 +70,7 @@ class VolumeDataAssistant(DataAssistant):
             data_context=None,
         )
         column_distinct_values_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
-            name="column_distinct_values.count",
+            name="column.distinct_values.count",
             metric_name="column.distinct_values.count",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
