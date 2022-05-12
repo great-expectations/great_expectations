@@ -107,35 +107,6 @@ class DataAssistantResult(SerializableDictDot):
         return metrics_attributed_values_by_domain
 
     @staticmethod
-    def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-        default_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
-        if theme:
-            return nested_update(default_theme, theme)
-        else:
-            return default_theme
-
-    @staticmethod
-    def apply_theme(
-        charts: List[alt.Chart],
-        theme: Optional[Dict[str, Any]],
-    ) -> List[alt.Chart]:
-        """
-        Apply the Great Expectations default theme and any user-provided theme overrides to each chart
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            charts: A list of Altair chart objects to apply a theme to
-            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
-
-        Returns:
-            A list of Altair charts with the theme applied
-        """
-        theme: Dict[str, Any] = DataAssistantResult._get_theme(theme=theme)
-        return [chart.configure(**theme) for chart in charts]
-
-    @staticmethod
     def display(
         charts: List[alt.Chart],
         theme: Optional[Dict[str, Any]],
@@ -182,6 +153,35 @@ class DataAssistantResult(SerializableDictDot):
         chart: alt.Chart
         for chart in themed_charts:
             chart.display()
+
+    @staticmethod
+    def apply_theme(
+        charts: List[alt.Chart],
+        theme: Optional[Dict[str, Any]],
+    ) -> List[alt.Chart]:
+        """
+        Apply the Great Expectations default theme and any user-provided theme overrides to each chart
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            charts: A list of Altair chart objects to apply a theme to
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
+
+        Returns:
+            A list of Altair charts with the theme applied
+        """
+        theme: Dict[str, Any] = DataAssistantResult._get_theme(theme=theme)
+        return [chart.configure(**theme) for chart in charts]
+
+    @staticmethod
+    def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        default_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
+        if theme:
+            return nested_update(default_theme, theme)
+        else:
+            return default_theme
 
     @staticmethod
     def get_line_chart(
@@ -401,6 +401,63 @@ class DataAssistantResult(SerializableDictDot):
         anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
 
         return band + lower_limit + upper_limit + anomaly_coded_line
+
+    @staticmethod
+    def get_interactive_detail_multi_line_chart(
+        column_dfs: List[Tuple[str, pd.DataFrame]],
+        metric_name: str,
+        metric_type: alt.StandardType,
+        domain_name: str,
+        domain_type: alt.StandardType,
+    ) -> alt.VConcatChart:
+        """
+        Args:
+            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
+            metric_name: The name of the metric as it exists in the pandas dataframe
+            metric_type: The altair data type for the metric being plotted
+            domain_name: The name of the domain as it exists in the pandas dataframe
+            domain_type: The altair data type for the domain being plotted
+
+        Returns:
+            A interactive detail altair multi-line chart
+        """
+        column_name: str = "column"
+        column_name_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+
+        batch_identifiers: List[str] = [
+            column
+            for column in column_dfs[0][1].columns
+            if column not in [metric_name, domain_name]
+        ]
+        batch_component: BatchPlotComponent = BatchPlotComponent(
+            batch_identifiers=batch_identifiers, alt_type=AltairDataTypes.NOMINAL.value
+        )
+        metric_component: MetricPlotComponent = MetricPlotComponent(
+            name=metric_name, alt_type=metric_type
+        )
+        domain_component: DomainPlotComponent = DomainPlotComponent(
+            name=domain_name, alt_type=domain_type
+        )
+        column_component: ExpectationKwargPlotComponent = ExpectationKwargPlotComponent(
+            name=column_name,
+            alt_type=column_name_type,
+            metric_plot_component=metric_component,
+        )
+
+        df: pd.DataFrame = pd.DataFrame(
+            columns=[domain_name, metric_name] + batch_identifiers
+        )
+        for column, column_df in column_dfs:
+            column_df[column_name] = column
+            df = pd.concat([df, column_df], axis=0)
+
+        return DataAssistantResult._get_interactive_detail_multi_line_chart(
+            df=df,
+            metric_component=metric_component,
+            domain_component=domain_component,
+            batch_component=batch_component,
+            column_component=column_component,
+        )
 
     @staticmethod
     def _get_interactive_detail_multi_line_chart(
@@ -648,63 +705,6 @@ class DataAssistantResult(SerializableDictDot):
             )
             .properties(title=y_axis_title)
             .add_selection(selection)
-        )
-
-    @staticmethod
-    def get_interactive_detail_multi_line_chart(
-        column_dfs: List[Tuple[str, pd.DataFrame]],
-        metric_name: str,
-        metric_type: alt.StandardType,
-        domain_name: str,
-        domain_type: alt.StandardType,
-    ) -> alt.VConcatChart:
-        """
-        Args:
-            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
-            metric_type: The altair data type for the metric being plotted
-            domain_name: The name of the domain as it exists in the pandas dataframe
-            domain_type: The altair data type for the domain being plotted
-
-        Returns:
-            A interactive detail altair multi-line chart
-        """
-        column_name: str = "column"
-        column_name_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-
-        batch_identifiers: List[str] = [
-            column
-            for column in column_dfs[0][1].columns
-            if column not in [metric_name, domain_name]
-        ]
-        batch_component: BatchPlotComponent = BatchPlotComponent(
-            batch_identifiers=batch_identifiers, alt_type=AltairDataTypes.NOMINAL.value
-        )
-        metric_component: MetricPlotComponent = MetricPlotComponent(
-            name=metric_name, alt_type=metric_type
-        )
-        domain_component: DomainPlotComponent = DomainPlotComponent(
-            name=domain_name, alt_type=domain_type
-        )
-        column_component: ExpectationKwargPlotComponent = ExpectationKwargPlotComponent(
-            name=column_name,
-            alt_type=column_name_type,
-            metric_plot_component=metric_component,
-        )
-
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[domain_name, metric_name] + batch_identifiers
-        )
-        for column, column_df in column_dfs:
-            column_df[column_name] = column
-            df = pd.concat([df, column_df], axis=0)
-
-        return DataAssistantResult._get_interactive_detail_multi_line_chart(
-            df=df,
-            metric_component=metric_component,
-            domain_component=domain_component,
-            batch_component=batch_component,
-            column_component=column_component,
         )
 
     @staticmethod
