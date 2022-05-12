@@ -2,12 +2,6 @@ from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 
-from great_expectations.rule_based_profiler import (
-    MetricComputationDetails,
-    MetricComputationResult,
-    MetricValue,
-    MetricValues,
-)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -18,6 +12,10 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     Domain,
+    MetricComputationDetails,
+    MetricComputationResult,
+    MetricValue,
+    MetricValues,
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
@@ -169,7 +167,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                             0
                         ].attributed_metric_values,
-                        FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: metric_computation_result.details,
+                        FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
                     }
                 )
 
@@ -181,7 +179,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                         0
                     ].attributed_metric_values,
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: metric_computation_result.details,
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
                 }
             )
 
@@ -189,6 +187,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             {
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics,
                 FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics,
-                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: metric_computation_result.details,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
             }
         )

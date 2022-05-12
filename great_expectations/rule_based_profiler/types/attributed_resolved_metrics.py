@@ -2,10 +2,11 @@ from collections import OrderedDict
 from dataclasses import asdict, dataclass
 from typing import Dict, Optional
 
+import numpy as np
 import pandas as pd
 
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler import MetricValue, MetricValues
+from great_expectations.rule_based_profiler.types import MetricValue, MetricValues
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
 

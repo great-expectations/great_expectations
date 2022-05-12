@@ -10,11 +10,13 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.rule_based_profiler import (
-    MetricComputationDetails,
-    MetricValue,
-    MetricValues,
-)
+
+# from great_expectations.rule_based_profiler import (
+#    MetricComputationDetails,
+#    MetricComputationResult,
+#    MetricValue,
+#    MetricValues,
+# )
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
@@ -44,6 +46,18 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+from dataclasses import make_dataclass
+
+import numpy as np
+import pandas as pd
+
+MetricValue = Union[Any, List[Any], pd.DataFrame, pd.Series, np.ndarray]
+MetricValues = Union[MetricValue, pd.DataFrame, pd.Series, np.ndarray]
+MetricComputationDetails = Dict[str, Any]
+MetricComputationResult = make_dataclass(
+    "MetricComputationResult", ["attributed_resolved_metrics", "details"]
+)
 
 
 class ParameterBuilder(ABC, Builder):
@@ -467,7 +481,6 @@ specified (empty "metric_name" value detected)."""
                     batch_id: [resolved_metric_value]
                     for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
                 }
-                print("hello stop me here")
                 attributed_resolved_metrics_map[
                     metric_attributes_id
                 ] = attributed_resolved_metrics
@@ -489,8 +502,6 @@ specified (empty "metric_name" value detected)."""
             )
 
         # Step-10: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
-        # is this where we need to do a bit of clean up?
-        # how deep do we go?
         return MetricComputationResult(
             attributed_resolved_metrics=list(attributed_resolved_metrics_map.values()),
             details={
