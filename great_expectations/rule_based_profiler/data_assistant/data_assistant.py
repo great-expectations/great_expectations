@@ -1,11 +1,17 @@
 from abc import ABCMeta, abstractmethod
 from inspect import isabstract
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
-from great_expectations.core import ExpectationSuite
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain_builder import (
+    DomainBuilder,
+    MapMetricColumnDomainBuilder,
+)
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    DefaultExpectationConfigurationBuilder,
     ExpectationConfigurationBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
@@ -14,13 +20,25 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_builder import (
+    MeanUnexpectedMapMetricMultiBatchParameterBuilder,
+    MetricMultiBatchParameterBuilder,
+    ParameterBuilder,
+)
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    Domain,
+    ParameterContainer,
+    ParameterNode,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
@@ -69,19 +87,106 @@ class DataAssistant(metaclass=MetaDataAssistant):
         validator=validator,
     )
     result: DataAssistantResult = data_assistant.run(
-        expectation_suite=None,
-        expectation_suite_name="my_suite",
-        include_citation=True,
-        save_updated_expectation_suite=False,
+        variables=None,
+        rules=None,
     )
 
     Then:
-        metrics: Dict[Domain, Dict[str, ParameterNode]] = result.metrics
-        expectation_suite: ExpectationSuite = result.expectation_suite
-        expectation_configurations: List[ExpectationConfiguration] = result.expectation_suite.expectations
-        expectation_suite_meta: Dict[str, Any] = expectation_suite.meta
+        metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = result.metrics_by_domain
+        expectation_configurations: List[ExpectationConfiguration] = result.expectation_configurations
         profiler_config: RuleBasedProfilerConfig = result.profiler_config
+        ...
     """
+
+    class CommonlyUsedParameterBuilders:
+        @property
+        def table_row_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="table.row_count",
+                metric_name="table.row_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=True,
+                replace_nan_with_zero=True,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+        @property
+        def column_distinct_values_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column.distinct_values.count",
+                metric_name="column.distinct_values.count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=True,
+                replace_nan_with_zero=True,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+        @property
+        def column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column_values.unique.unexpected_count",
+                metric_name="column_values.unique.unexpected_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=True,
+                replace_nan_with_zero=True,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+        @property
+        def column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column_values.nonnull.unexpected_count",
+                metric_name="column_values.nonnull.unexpected_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+        @property
+        def column_values_null_unexpected_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column_values.null.unexpected_count",
+                metric_name="column_values.null.unexpected_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+    COMMONLY_USED_PARAMETER_BUILDERS: CommonlyUsedParameterBuilders = (
+        CommonlyUsedParameterBuilders()
+    )
 
     __alias__: Optional[str] = None
 
@@ -93,14 +198,16 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
         corresponding to indended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
-        "RuleBasedProfilerResult" object, containing metrics by "Domain", list of "ExpectationConfiguration" objects,
-        and overall "ExpectationSuite" object, immediately available for validating underlying data "Batch" objects.
+        "RuleBasedProfilerResult" object, containing "fully_qualified_parameter_names_by_domain",
+        "parameter_values_for_fully_qualified_parameter_names_by_domain", "expectation_configurations", and "citation",
+        immediately available for composing "ExpectationSuite" and validating underlying data "Batch" objects.
 
         Args:
             name: the name of this DataAssistant object
             validator: Validator object, containing loaded Batch objects as well as Expectation and Metric operations
         """
         self._name = name
+
         self._validator = validator
 
         self._profiler = RuleBasedProfiler(
@@ -110,6 +217,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
             data_context=self._validator.data_context,
         )
         self._build_profiler()
+
+        self._batches = self._validator.batches
 
     def _build_profiler(self) -> None:
         """
@@ -125,7 +234,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         rules: List[Rule]
         rule: Rule
         domain_builder: DomainBuilder
-        parameter_builders: List[ParameterBuilder]
+        rule_parameter_builders: List[ParameterBuilder]
+        metric_parameter_builders: List[ParameterBuilder]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder]
 
         """
@@ -146,28 +256,17 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )(**expectation_kwargs)
             variables.update(convert_variables_to_dict(variables=profiler.variables))
             rules = profiler.rules
-            for rule in rules:
-                domain_builder = rule.domain_builder
-                parameter_builders = rule.parameter_builders or []
-                parameter_builders.extend(
-                    self.metrics_parameter_builders_by_domain[
-                        Domain(
-                            domain_builder.domain_type,
-                        )
-                    ]
-                )
-                expectation_configuration_builders = (
-                    rule.expectation_configuration_builders or []
-                )
-                self.profiler.add_rule(
-                    rule=Rule(
-                        name=rule.name,
-                        variables=rule.variables,
-                        domain_builder=domain_builder,
-                        parameter_builders=parameter_builders,
-                        expectation_configuration_builders=expectation_configuration_builders,
-                    )
-                )
+            self._add_rules_to_profiler(rules=rules)
+
+        self._validate_profiler_rule_name_uniqueness()
+
+        self._add_rules_to_profiler(rules=self.rules)
+
+        custom_variables: Optional[Dict[str, Any]] = self.variables
+        if custom_variables is None:
+            custom_variables = {}
+
+        variables.update(custom_variables)
 
         self.profiler.variables = self.profiler.reconcile_profiler_variables(
             variables=variables,
@@ -176,39 +275,31 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
     def run(
         self,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-        save_updated_expectation_suite: bool = False,
+        variables: Optional[Dict[str, Any]] = None,
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
     ) -> DataAssistantResult:
         """
         Run the DataAssistant as it is currently configured.
 
         Args:
-            expectation_suite: An existing "ExpectationSuite" to update
-            expectation_suite_name: A name for returned "ExpectationSuite"
-            include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
-            as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
-            save_updated_expectation_suite: Flag, constrolling whether or not updated "ExpectationSuite" must be saved
+            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
+            rules: name/(configuration-dictionary) (overrides)
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
         """
         data_assistant_result: DataAssistantResult = DataAssistantResult(
-            execution_time=0.0
+            batch_id_to_batch_identifier_display_name_map=self.batch_id_to_batch_identifier_display_name_map(),
+            execution_time=0.0,
         )
         run_profiler_on_data(
             data_assistant=self,
             data_assistant_result=data_assistant_result,
             profiler=self.profiler,
-            variables=self.variables,
-            rules=self.rules,
-            batch_list=list(self._validator.batches.values()),
+            variables=variables,
+            rules=rules,
+            batch_list=list(self._batches.values()),
             batch_request=None,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-            save_updated_expectation_suite=save_updated_expectation_suite,
         )
         return self._build_data_assistant_result(
             data_assistant_result=data_assistant_result
@@ -352,6 +443,113 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         return parameter_values_for_fully_qualified_parameter_names_by_domain
 
+    def batch_id_to_batch_identifier_display_name_map(
+        self,
+    ) -> Dict[str, Set[Tuple[str, Any]]]:
+        """
+        This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
+        """
+        batch_id: str
+        batch: Batch
+        return {
+            batch_id: set(batch.batch_definition.batch_identifiers.items())
+            for batch_id, batch in self._batches.items()
+        }
+
+    def get_rule_variables_and_validation_parameter_builders_from_self_initializing_expectation(
+        self,
+        expectation_type: str,
+        expectation_kwargs: Optional[Dict[str, Any]],
+    ) -> Tuple[Optional[ParameterContainer], Optional[List[ParameterBuilder]]]:
+        """
+        This method obtains "variables" and "validation_parameter_builder" (from "expectation_configuration_builder")
+        from "Rule" implementing self-initialization logic in optional "RuleBasedProfilerConfig" of "Expectation".
+        """
+        profiler: Optional[
+            BaseRuleBasedProfiler
+        ] = self._validator.build_rule_based_profiler_for_expectation(
+            expectation_type=expectation_type
+        )(
+            **expectation_kwargs
+        )
+        if profiler is None:
+            return None, None
+
+        rules: List[Rule] = profiler.rules
+        rule: Rule = rules[0]
+        variables: ParameterContainer = rule.variables
+        validation_parameter_builders: Optional[
+            List[ParameterBuilder]
+        ] = rule.expectation_configuration_builders[0].validation_parameter_builders
+        return variables, validation_parameter_builders
+
+    def _validate_profiler_rule_name_uniqueness(self) -> None:
+        """
+        This private utility method insures that all "Rule" objects in underlying "BaseRuleBasedProfiler" are unique.
+        """
+        rule: Rule
+
+        profiler_rules: List[Rule] = self.profiler.rules
+        if profiler_rules is None:
+            profiler_rules = []
+
+        profiler_rule_names: Set[str] = {rule.name for rule in profiler_rules}
+
+        custom_rules: List[Rule] = self.rules
+        if custom_rules is None:
+            custom_rules = []
+
+        custom_rule_names: Set[str] = {rule.name for rule in custom_rules}
+
+        common_rule_names: Set[str] = profiler_rule_names & custom_rule_names
+        if common_rule_names:
+            raise ge_exceptions.ProfilerConfigurationError(
+                message=f"""Rule names in {self.__class__.__name__} must be unique; duplicate(s) found \
+({common_rule_names}).
+"""
+            )
+
+    def _add_rules_to_profiler(
+        self,
+        rules: Optional[List[Rule]] = None,
+    ) -> None:
+        """
+        This private utility method adds supplied "Rule" objects to underlying "BaseRuleBasedProfiler" object.
+
+        Args:
+            rules: List of "Rule" objects to be added to given "BaseRuleBasedProfiler" object
+        """
+        rule: Rule
+        domain_builder: DomainBuilder
+        rule_parameter_builders: List[ParameterBuilder]
+        metric_parameter_builders: Optional[List[ParameterBuilder]]
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder]
+
+        rules = rules or []
+        for rule in rules:
+            domain_builder = rule.domain_builder
+            rule_parameter_builders = rule.parameter_builders or []
+            metric_parameter_builders = self.metrics_parameter_builders_by_domain.get(
+                Domain(
+                    domain_builder.domain_type,
+                )
+            )
+            if metric_parameter_builders:
+                rule_parameter_builders.extend(metric_parameter_builders)
+
+            expectation_configuration_builders = (
+                rule.expectation_configuration_builders or []
+            )
+            self.profiler.add_rule(
+                rule=Rule(
+                    name=rule.name,
+                    variables=rule.variables,
+                    domain_builder=domain_builder,
+                    parameter_builders=rule_parameter_builders,
+                    expectation_configuration_builders=expectation_configuration_builders,
+                )
+            )
+
 
 @measure_execution_time(
     execution_time_holder_object_reference_name="data_assistant_result",
@@ -366,10 +564,6 @@ def run_profiler_on_data(
     rules: Optional[Dict[str, Dict[str, Any]]] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-    expectation_suite: Optional[ExpectationSuite] = None,
-    expectation_suite_name: Optional[str] = None,
-    include_citation: bool = True,
-    save_updated_expectation_suite: bool = False,
 ) -> None:
     """
     This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
@@ -377,16 +571,11 @@ def run_profiler_on_data(
     Args:
         data_assistant: Containing "DataAssistant" object, which defines interfaces for computing "DataAssistantResult"
         data_assistant_result: Destination "DataAssistantResult" object to hold outputs of executing "RuleBasedProfiler"
-        profiler: Effective "RuleBasedProfiler", representing containing "DataAssistant" object
+        profiler: Effective "BaseRuleBasedProfiler", representing containing "DataAssistant" object
         variables: attribute name/value pairs (overrides), commonly-used in Builder objects
         rules: name/(configuration-dictionary) (overrides)
         batch_list: Explicit list of Batch objects to supply data at runtime
         batch_request: Explicit batch_request used to supply data at runtime
-        expectation_suite: An existing "ExpectationSuite" to update
-        expectation_suite_name: A name for returned "ExpectationSuite"
-        include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
-        as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
-        save_updated_expectation_suite: Flag, constrolling whether or not updated "ExpectationSuite" must be saved
     """
     if rules is None:
         rules = []
@@ -395,7 +584,7 @@ def run_profiler_on_data(
     rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
         rule.name: rule.to_json_dict() for rule in rules
     }
-    profiler.run(
+    rule_based_profiler_result: RuleBasedProfilerResult = profiler.run(
         variables=variables,
         rules=rules_configs,
         batch_list=batch_list,
@@ -406,9 +595,123 @@ def run_profiler_on_data(
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
-    result.expectation_suite = profiler.get_expectation_suite(
-        expectation_suite=expectation_suite,
-        expectation_suite_name=expectation_suite_name,
-        include_citation=include_citation,
-        save_updated_expectation_suite=save_updated_expectation_suite,
+    result.expectation_configurations = (
+        rule_based_profiler_result.expectation_configurations
     )
+    result.citation = rule_based_profiler_result.citation
+
+
+def build_map_metric_rule(
+    rule_name: str,
+    expectation_type: str,
+    map_metric_name: str,
+    include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+    exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+    include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+    exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+    semantic_type_filter_module_name: Optional[str] = None,
+    semantic_type_filter_class_name: Optional[str] = None,
+    include_semantic_types: Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ] = None,
+    exclude_semantic_types: Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ] = None,
+    max_unexpected_values: Union[str, int] = 0,
+    max_unexpected_ratio: Optional[Union[str, float]] = None,
+    min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
+) -> Rule:
+    """
+    This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for any "map" style metric.
+    """
+    map_metric_column_domain_builder: MapMetricColumnDomainBuilder = (
+        MapMetricColumnDomainBuilder(
+            map_metric_name=map_metric_name,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+            include_column_name_suffixes=include_column_name_suffixes,
+            exclude_column_name_suffixes=exclude_column_name_suffixes,
+            semantic_type_filter_module_name=semantic_type_filter_module_name,
+            semantic_type_filter_class_name=semantic_type_filter_class_name,
+            include_semantic_types=include_semantic_types,
+            exclude_semantic_types=exclude_semantic_types,
+            max_unexpected_values=max_unexpected_values,
+            max_unexpected_ratio=max_unexpected_ratio,
+            min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
+            data_context=None,
+        )
+    )
+    total_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
+        DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.table_row_count_metric_multi_batch_parameter_builder
+    )
+    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
+        DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder
+    )
+
+    set_parameter_builders_json_serialize(
+        parameter_builders=[
+            total_count_metric_multi_batch_parameter_builder,
+            column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder,
+        ],
+        json_serialize=False,
+    )
+
+    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        ParameterBuilderConfig(
+            **total_count_metric_multi_batch_parameter_builder.to_json_dict()
+        ),
+        ParameterBuilderConfig(
+            **column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder.to_json_dict()
+        ),
+    ]
+    column_values_unique_mean_unexpected_value_multi_batch_parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
+        name=f"{map_metric_name}.unexpected_value",
+        map_metric_name=map_metric_name,
+        total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder.name,
+        null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder.name,
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        json_serialize=True,
+        data_context=None,
+    )
+
+    validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        ParameterBuilderConfig(
+            **column_values_unique_mean_unexpected_value_multi_batch_parameter_builder.to_json_dict()
+        ),
+    ]
+    max_column_values_unique_mean_unexpected_value_ratio: float = 1.0e-2
+    expect_column_values_to_be_unique_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expectation_type=expectation_type,
+        condition=f"{column_values_unique_mean_unexpected_value_multi_batch_parameter_builder.fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {max_column_values_unique_mean_unexpected_value_ratio}",
+        validation_parameter_builder_configs=validation_parameter_builder_configs,
+        meta={
+            "profiler_details": f"{column_values_unique_mean_unexpected_value_multi_batch_parameter_builder.fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+        },
+    )
+
+    parameter_builders = []
+    expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
+        expect_column_values_to_be_unique_expectation_configuration_builder,
+    ]
+    rule: Rule = Rule(
+        name=rule_name,
+        variables=None,
+        domain_builder=map_metric_column_domain_builder,
+        parameter_builders=parameter_builders,
+        expectation_configuration_builders=expectation_configuration_builders,
+    )
+
+    return rule
+
+
+def set_parameter_builders_json_serialize(
+    parameter_builders: List[ParameterBuilder], json_serialize: Union[str, bool]
+) -> None:
+    """
+    This method sets "json_serialize" property according to specified directive on all "ParameterBuilder" objects given.
+    """
+    parameter_builder: ParameterBuilder
+    for parameter_builder in parameter_builders:
+        parameter_builder.json_serialize = json_serialize
