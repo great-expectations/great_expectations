@@ -28,9 +28,6 @@ def test_onboarding_data_assistant_result_serialization(
     onboarding_data_assistant_result_as_dict: dict = (
         onboarding_data_assistant_result.to_dict()
     )
-    onboarding_data_assistant_result_as_dict: dict = (
-        onboarding_data_assistant_result.to_dict()
-    )
     assert (
         set(onboarding_data_assistant_result_as_dict.keys())
         == DataAssistantResult.ALLOWED_KEYS

@@ -47,7 +47,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             domain_type=MetricDomainTypes.TABLE,
             rule_name="default_expect_table_row_count_to_be_between_rule",
         ): {
-            "$parameter.table_row_count": {
+            "$parameter.table.row_count": {
                 "value": [
                     10000,
                     10000,
@@ -147,7 +147,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     3,
                     3,
@@ -247,7 +247,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     9973,
                     9968,
@@ -347,7 +347,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     9972,
                     9976,
@@ -447,7 +447,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     6,
                     7,
@@ -547,7 +547,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     1184,
                     1192,
@@ -647,7 +647,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     7,
                     6,
@@ -747,7 +747,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     2,
                     2,
@@ -847,7 +847,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     151,
                     146,
@@ -947,7 +947,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     199,
                     192,
@@ -1047,7 +1047,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     4,
                     4,
@@ -1147,7 +1147,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     187,
                     170,
@@ -1247,7 +1247,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     8,
                     7,
@@ -1347,7 +1347,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     4,
                     3,
@@ -1447,7 +1447,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     535,
                     555,
@@ -1547,7 +1547,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     22,
                     19,
@@ -1647,7 +1647,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     3,
                     3,
@@ -1747,7 +1747,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     942,
                     972,
@@ -1847,7 +1847,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="default_expect_column_unique_values_to_be_between_rule",
         ): {
-            "$parameter.column_distinct_values.count": {
+            "$parameter.column.distinct_values.count": {
                 "value": [
                     1,
                     0,
@@ -1965,7 +1965,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         {
                             "metric_domain_kwargs": "$domain.domain_kwargs",
                             "replace_nan_with_zero": True,
-                            "name": "table_row_count",
+                            "name": "table.row_count",
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
@@ -2028,7 +2028,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         {
                             "metric_domain_kwargs": "$domain.domain_kwargs",
                             "replace_nan_with_zero": True,
-                            "name": "column_distinct_values.count",
+                            "name": "column.distinct_values.count",
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",

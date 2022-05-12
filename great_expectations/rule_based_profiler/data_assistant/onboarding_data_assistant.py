@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -21,7 +21,6 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     Domain,
-    ParameterContainer,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
@@ -61,8 +60,20 @@ class OnboardingDataAssistant(DataAssistant):
         self,
     ) -> Dict[Domain, List[ParameterBuilder]]:
         table_row_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
-            name="table_row_count",
+            name="table.row_count",
             metric_name="table.row_count",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+            data_context=None,
+        )
+        column_values_unique_unexpected_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+            name="column_values.unique.unexpected_count",
+            metric_name="column_values.unique.unexpected_count",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
             enforce_numeric_metric=True,
@@ -75,6 +86,9 @@ class OnboardingDataAssistant(DataAssistant):
         return {
             Domain(domain_type=MetricDomainTypes.TABLE,): [
                 table_row_count_metric_multi_batch_parameter_builder,
+            ],
+            Domain(domain_type=MetricDomainTypes.COLUMN,): [
+                column_values_unique_unexpected_count_metric_multi_batch_parameter_builder,
             ],
         }
 
@@ -123,22 +137,13 @@ class OnboardingDataAssistant(DataAssistant):
                 data_context=self._validator.data_context,
             )
         )
-
-        expectation_type: str = "expect_table_row_count_to_be_between"
-
-        variables: Optional[ParameterContainer]
-        parameter_builders: Optional[List[ParameterBuilder]]
-        (
-            variables,
-            parameter_builders,
-        ) = self.get_rule_variables_and_validation_parameter_builders_from_self_initializing_expectation(
-            expectation_type=expectation_type,
-            expectation_kwargs=self.expectation_kwargs_by_expectation_type[
-                expectation_type
-            ],
-        )
-        total_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-            parameter_builders[0]
+        total_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = cast(
+            MetricMultiBatchParameterBuilder,
+            self.metrics_parameter_builders_by_domain[
+                Domain(
+                    domain_type=MetricDomainTypes.TABLE,
+                )
+            ][0],
         )
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
             name="column_null_count",
@@ -173,7 +178,7 @@ class OnboardingDataAssistant(DataAssistant):
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=False,
+            json_serialize=True,
             data_context=self._validator.data_context,
         )
 
@@ -198,7 +203,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         uniqueness_rule: Rule = Rule(
             name="uniqueness_rule",
-            variables=variables,
+            variables=None,
             domain_builder=column_values_unique_domain_builder,
             parameter_builders=parameter_builders,
             expectation_configuration_builders=expectation_configuration_builders,
