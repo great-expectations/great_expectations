@@ -443,7 +443,7 @@ class DataAssistantResult(SerializableDictDot):
 
         batch_identifiers: List[str] = [
             column
-            for column in column_dfs[0].columns
+            for column in column_dfs[0][1].columns
             if column not in [metric_name, domain_name]
         ]
         batch_component: BatchPlotComponent = BatchPlotComponent(
@@ -463,11 +463,10 @@ class DataAssistantResult(SerializableDictDot):
         selected_opacity: float = 1.0
         unselected_opacity: float = 0.4
 
-        tooltip: List[alt.Tooltip] = [
+        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
             alt.Tooltip(
                 field=column_name, type=column_name_type, title=column_name_title
             ),
-            batch_component.generate_tooltip(),
             metric_component.generate_tooltip(format=","),
         ]
 
@@ -715,9 +714,6 @@ class DataAssistantResult(SerializableDictDot):
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
 
-        batch_id: str = "batch_id"
-        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
-        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
         min_value_title: str = min_value.replace("_", " ").title()
         min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
@@ -731,8 +727,16 @@ class DataAssistantResult(SerializableDictDot):
         strict_max_title: str = strict_max.replace("_", " ").title()
         strict_max_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
-        tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
+        batch_identifiers: List[str] = [
+            column
+            for column in column_dfs[0][1].columns
+            if column not in [metric_name, domain_name]
+        ]
+        batch_component: BatchPlotComponent = BatchPlotComponent(
+            batch_identifiers=batch_identifiers, alt_type=AltairDataTypes.NOMINAL.value
+        )
+
+        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
             alt.Tooltip(
                 field=metric_name, type=metric_type, title=metric_title, format=","
             ),
@@ -753,7 +757,7 @@ class DataAssistantResult(SerializableDictDot):
             columns=[
                 column_name,
                 batch,
-                batch_id,
+                batch_identifiers,
                 metric_name,
                 min_value,
                 max_value,
