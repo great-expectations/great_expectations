@@ -2674,7 +2674,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 
     # Run notebook
     ep: nbconvert.preprocessors.ExecutePreprocessor = (
-        nbconvert.preprocessors.ExecutePreprocessor(timeout=60, kernel_name="python3")
+        nbconvert.preprocessors.ExecutePreprocessor(timeout=180, kernel_name="python3")
     )
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
