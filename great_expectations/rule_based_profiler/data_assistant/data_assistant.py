@@ -1,12 +1,17 @@
 from abc import ABCMeta, abstractmethod
 from inspect import isabstract
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain_builder import (
+    DomainBuilder,
+    MapMetricColumnDomainBuilder,
+)
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    DefaultExpectationConfigurationBuilder,
     ExpectationConfigurationBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
@@ -16,6 +21,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
+    MeanUnexpectedMapMetricMultiBatchParameterBuilder,
     MetricMultiBatchParameterBuilder,
     ParameterBuilder,
 )
@@ -26,9 +32,12 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 )
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     Domain,
     ParameterContainer,
     ParameterNode,
+    SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
@@ -573,6 +582,111 @@ def run_profiler_on_data(
         rule_based_profiler_result.expectation_configurations
     )
     result.citation = rule_based_profiler_result.citation
+
+
+def build_map_metric_rule(
+    rule_name: str,
+    expectation_type: str,
+    map_metric_name: str,
+    include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+    exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+    include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+    exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+    semantic_type_filter_module_name: Optional[str] = None,
+    semantic_type_filter_class_name: Optional[str] = None,
+    include_semantic_types: Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ] = None,
+    exclude_semantic_types: Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ] = None,
+    max_unexpected_values: Union[str, int] = 0,
+    max_unexpected_ratio: Optional[Union[str, float]] = None,
+    min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
+) -> Rule:
+    """
+    This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for any "map" style metric.
+    """
+    map_metric_column_domain_builder: MapMetricColumnDomainBuilder = (
+        MapMetricColumnDomainBuilder(
+            map_metric_name=map_metric_name,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+            include_column_name_suffixes=include_column_name_suffixes,
+            exclude_column_name_suffixes=exclude_column_name_suffixes,
+            semantic_type_filter_module_name=semantic_type_filter_module_name,
+            semantic_type_filter_class_name=semantic_type_filter_class_name,
+            include_semantic_types=include_semantic_types,
+            exclude_semantic_types=exclude_semantic_types,
+            max_unexpected_values=max_unexpected_values,
+            max_unexpected_ratio=max_unexpected_ratio,
+            min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
+            data_context=None,
+        )
+    )
+    total_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
+        DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.table_row_count_metric_multi_batch_parameter_builder
+    )
+    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
+        DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder
+    )
+
+    set_parameter_builders_json_serialize(
+        parameter_builders=[
+            total_count_metric_multi_batch_parameter_builder,
+            column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder,
+        ],
+        json_serialize=False,
+    )
+
+    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        ParameterBuilderConfig(
+            **total_count_metric_multi_batch_parameter_builder.to_json_dict()
+        ),
+        ParameterBuilderConfig(
+            **column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder.to_json_dict()
+        ),
+    ]
+    column_values_unique_mean_unexpected_value_multi_batch_parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
+        name=f"{map_metric_name}.unexpected_value",
+        map_metric_name=map_metric_name,
+        total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder.name,
+        null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder.name,
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        json_serialize=True,
+        data_context=None,
+    )
+
+    validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        ParameterBuilderConfig(
+            **column_values_unique_mean_unexpected_value_multi_batch_parameter_builder.to_json_dict()
+        ),
+    ]
+    max_column_values_unique_mean_unexpected_value_ratio: float = 1.0e-2
+    expect_column_values_to_be_unique_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expectation_type=expectation_type,
+        condition=f"{column_values_unique_mean_unexpected_value_multi_batch_parameter_builder.fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {max_column_values_unique_mean_unexpected_value_ratio}",
+        validation_parameter_builder_configs=validation_parameter_builder_configs,
+        meta={
+            "profiler_details": f"{column_values_unique_mean_unexpected_value_multi_batch_parameter_builder.fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+        },
+    )
+
+    parameter_builders = []
+    expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
+        expect_column_values_to_be_unique_expectation_configuration_builder,
+    ]
+    rule: Rule = Rule(
+        name=rule_name,
+        variables=None,
+        domain_builder=map_metric_column_domain_builder,
+        parameter_builders=parameter_builders,
+        expectation_configuration_builders=expectation_configuration_builders,
+    )
+
+    return rule
 
 
 def set_parameter_builders_json_serialize(
