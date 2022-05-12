@@ -4,6 +4,44 @@
 Changelog
 #########
 
+0.15.5
+-----------------
+* [FEATURE] Add subset operation to Domain class (#5049)
+* [FEATURE] In DataAssistant: Use Domain instead of domain_type as key for Metrics Parameter Builders (#5057)
+* [FEATURE] Self-initializing `ExpectColumnStddevToBeBetween` (#5065)
+* [FEATURE] Enum used by DateSplitter able to be represented as YAML (#5073)
+* [FEATURE] Implementation of auto-complete for DataAssistant class names in Jupyter notebooks (#5077)
+* [FEATURE] Provide display ("friendly") names for batch identifiers (#5086)
+* [FEATURE] Onboarding DataAssistant -- Initial Rule Implementations (Data Aspects) (#5101)
+* [FEATURE] OnboardingDataAssistant: Implement Nullity/Non-nullity Rules and Associated Metrics (#5104)
+* [BUGFIX] `self_check()` now also checks for `aws_config_file` (#5040)
+* [BUGFIX] `multi_batch_rule_based_profiler` test up to date with RBP changes (#5066)
+* [BUGFIX] Splitting Support at Asset level (#5026)
+* [BUGFIX] Make self-initialization in expect_column_values_to_be_between truly multi batch (#5068)
+* [BUGFIX] databricks engine create temporary view (#4994) (thanks @gvillafanetapia)
+* [BUGFIX] Patch broken Expectation gallery script (#5090)
+* [BUGFIX] Sampling support at asset level (#5092)
+* [DOCS] Update process and configurations in OpenLineage Action guide. (#5039)
+* [DOCS] Update process and config examples in Opsgenie guide (#5037)
+* [DOCS] Correct name of `openlineage-integration-common` package (#5041) (thanks @mobuchowski)
+* [DOCS] Remove reference to validation operator process from how to trigger slack notifications guide (#5034)
+* [DOCS] Update process and configuration examples in email Action guide. (#5036)
+* [DOCS] Update Docusaurus version (#5063)
+* [MAINTENANCE] Saved output of usage stats schema script in repo (#5053)
+* [MAINTENANCE] Apply Altair custom themes to return objects (#5044)
+* [MAINTENANCE] Introducing RuleBasedProfilerResult -- neither expectation suite name nor expectation suite must be passed to RuleBasedProfiler.run() (#5061)
+* [MAINTENANCE] Refactor `DataAssistant` plotting to leverage utility dataclasses (#5022)
+* [MAINTENANCE] Check that a passed string is parseable as an integer (mssql limit param) (#5071)
+* [MAINTENANCE] Clean up mssql limit sampling code path and comments (#5074)
+* [MAINTENANCE] Make saving bootstraps histogram for NumericMetricRangeMultiBatchParameterBuilder  optional (absent by default) (#5075)
+* [MAINTENANCE] Make self-initializing expectations return estimated kwargs with auto-generation timestamp and Great Expectation version (#5076)
+* [MAINTENANCE] Adding a unit test for batch_id mapping to batch display names (#5087)
+* [MAINTENANCE] `pypandoc` version constraint added (`< 1.8`) (#5093)
+* [MAINTENANCE] Utilize Rule objects in Profiler construction in DataAssistant (#5089)
+* [MAINTENANCE] Turn off metric calculation progress bars in `RuleBasedProfiler` and `DataAssistant` workflows (#5080)
+* [MAINTENANCE] A small refactor of ParamerBuilder management used in DataAssistant classes (#5102)
+* [MAINTENANCE] Convenience method refactor for Onboarding DataAssistant (#5103)
+
 0.15.4
 -----------------
 * [FEATURE] Enable self-initializing `ExpectColumnMeanToBeBetween` (#4986)
