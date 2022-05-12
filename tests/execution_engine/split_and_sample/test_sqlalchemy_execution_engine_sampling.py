@@ -5,6 +5,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
     SqlAlchemyDataSampler,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.util import import_library_module
 
 
 @pytest.mark.parametrize(
@@ -55,19 +56,117 @@ def clean_query_for_comparison(query_string: str) -> str:
     return query_string.replace("\n", "").replace("\t", "").replace(" ", "").lower()
 
 
+@pytest.fixture
+def dialect_name_to_sql_statement():
+    def _dialect_name_to_sql_statement(dialect_name: GESqlDialect) -> str:
+        DIALECT_NAME_TO_SQL_STATEMENT: dict = {
+            GESqlDialect.POSTGRESQL: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
+            GESqlDialect.MYSQL: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE = 1 LIMIT 10",
+            GESqlDialect.ORACLE: "SELECT * FROM test_schema_name.test_table WHERE 1 = 1 AND ROWNUM <= 10",
+            GESqlDialect.MSSQL: "SELECT TOP 10 * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1",
+            GESqlDialect.SQLITE: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1 LIMIT 10 OFFSET 0",
+            GESqlDialect.BIGQUERY: "SELECT * FROM `TEST_SCHEMA_NAME`.`TEST_TABLE` WHERE TRUE LIMIT 10",
+            GESqlDialect.SNOWFLAKE: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
+            GESqlDialect.REDSHIFT: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
+            GESqlDialect.AWSATHENA: 'SELECT * FROM "TEST_SCHEMA_NAME"."TEST_TABLE" WHERE TRUE LIMIT 10',
+            GESqlDialect.DREMIO: 'SELECT * FROM "TEST_SCHEMA_NAME"."TEST_TABLE" WHERE 1 = 1 LIMIT 10',
+            GESqlDialect.TERADATASQL: "SELECT TOP 10 * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1",
+        }
+        return DIALECT_NAME_TO_SQL_STATEMENT[dialect_name]
+
+    return _dialect_name_to_sql_statement
+
+
 @pytest.mark.parametrize(
     "dialect_name",
     [
         pytest.param(dialect_name, id=dialect_name)
-        for dialect_name in ["postgresql"]  # GESqlDialect.get_all_dialect_names()
+        for dialect_name in GESqlDialect.get_all_dialect_names()
     ],
 )
-def test_sample_using_limit(dialect_name: str, sa):
+def test_sample_using_limit_builds_correct_query_where_clause_none(
+    dialect_name: str, dialect_name_to_sql_statement, sa
+):
     """What does this test and why?
 
     split_on_limit should build the appropriate query based on input parameters.
+    This tests dialects that differ from the standard dialect, not each dialect exhaustively.
     """
 
+    # 1. Setup
+    class MockSqlAlchemyExecutionEngine:
+        def __init__(self, dialect_name: str):
+            self._dialect_name = dialect_name
+            self._connection_string = self.dialect_name_to_connection_string(
+                dialect_name
+            )
+
+        DIALECT_TO_CONNECTION_STRING_STUB: dict = {
+            GESqlDialect.POSTGRESQL: "postgresql://",
+            GESqlDialect.MYSQL: "mysql+pymysql://",
+            GESqlDialect.ORACLE: "oracle+cx_oracle://",
+            GESqlDialect.MSSQL: "mssql+pyodbc://",
+            GESqlDialect.SQLITE: "sqlite:///",
+            GESqlDialect.BIGQUERY: "bigquery://",
+            GESqlDialect.SNOWFLAKE: "snowflake://",
+            GESqlDialect.REDSHIFT: "redshift+psycopg2://",
+            GESqlDialect.AWSATHENA: f"awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
+            GESqlDialect.DREMIO: "dremio://",
+            GESqlDialect.TERADATASQL: "teradatasql://",
+        }
+
+        @property
+        def dialect_name(self):
+            return self._dialect_name
+
+        def dialect_name_to_connection_string(self, dialect_name: str):
+            return self.DIALECT_TO_CONNECTION_STRING_STUB.get(
+                GESqlDialect(dialect_name)
+            )
+
+        _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
+
+        @property
+        def dialect(self) -> sa.engine.Dialect:
+            dialect_name: str = self._dialect_name
+            if dialect_name == "oracle":
+                return import_library_module(
+                    module_name="sqlalchemy.dialects.oracle"
+                ).dialect()
+            elif dialect_name == "snowflake":
+                return import_library_module(
+                    module_name="snowflake.sqlalchemy.snowdialect"
+                ).dialect()
+            elif dialect_name == "dremio":
+                # WARNING: Dremio Support is experimental, functionality is not fully under test
+                return import_library_module(
+                    module_name="sqlalchemy_dremio.pyodbc"
+                ).dialect()
+            # NOTE: AJB 20220512 Redshift dialect is not yet fully supported.
+            # The below throws an `AttributeError: type object 'RedshiftDialect_psycopg2' has no attribute 'positional'`
+            # elif dialect_name == "redshift":
+            #     return import_library_module(
+            #         module_name="sqlalchemy_redshift.dialect"
+            #     ).RedshiftDialect
+            elif dialect_name == "bigquery":
+                return import_library_module(
+                    module_name=self._BIGQUERY_MODULE_NAME
+                ).dialect()
+            elif dialect_name == "teradatasql":
+                # WARNING: Teradata Support is experimental, functionality is not fully under test
+                return import_library_module(
+                    module_name="teradatasqlalchemy.dialect"
+                ).dialect()
+            else:
+                return sa.create_engine(self._connection_string).dialect
+
+    mock_execution_engine: MockSqlAlchemyExecutionEngine = (
+        MockSqlAlchemyExecutionEngine(dialect_name=dialect_name)
+    )
+
+    data_sampler: SqlAlchemyDataSampler = SqlAlchemyDataSampler()
+
+    # 2. Create query using sampler
     table_name: str = "test_table"
     batch_spec: BatchSpec = BatchSpec(
         table_name=table_name,
@@ -75,46 +174,24 @@ def test_sample_using_limit(dialect_name: str, sa):
         sampling_method="sample_using_limit",
         sampling_kwargs={"n": 10},
     )
-
-    class MockSqlAlchemyExecutionEngine:
-        def __init__(self, dialect_name: str):
-            self._dialect_name = dialect_name
-            self._dialect = sa.create_engine(self.dialect_name_to_connection_string())
-
-        def dialect_name_to_connection_string(self):
-            if self._dialect_name == GESqlDialect.POSTGRESQL.value:
-                return "postgresql://"
-
-        def dialect(self):
-            return self._dialect
-
-        def dialect_name(self):
-            return self._dialect_name
-
-    mock_execution_engine: MockSqlAlchemyExecutionEngine = (
-        MockSqlAlchemyExecutionEngine(dialect_name=dialect_name)
-    )
-
-    # TODO: AJB 20220510 get dialect based on dialect name tested
-    from sqlalchemy.dialects import postgresql
-
-    data_sampler: SqlAlchemyDataSampler = SqlAlchemyDataSampler()
-
-    result = data_sampler.sample_using_limit(
+    query = data_sampler.sample_using_limit(
         execution_engine=mock_execution_engine, batch_spec=batch_spec, where_clause=None
     )
 
-    print("result:", result)
-    if not isinstance(result, str):
+    if not isinstance(query, str):
         query_str: str = clean_query_for_comparison(
-            str(result.compile(compile_kwargs={"literal_binds": True}))
+            str(
+                query.compile(
+                    dialect=mock_execution_engine.dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
+            )
         )
-        print("query_str:", query_str)
     else:
-        query_str: str = result
+        query_str: str = clean_query_for_comparison(query)
 
     expected: str = clean_query_for_comparison(
-        "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10"
+        dialect_name_to_sql_statement(GESqlDialect(dialect_name))
     )
 
     assert query_str == expected
