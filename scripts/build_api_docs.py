@@ -20,8 +20,8 @@ from typing import Any, Dict
 from typing import Generator as typeGenerator
 from typing import List, Set, Tuple
 
-WHITELISTED_TAG = "# Public API"
-DOCUMENTATION_TAG = "# Documentation"
+WHITELISTED_TAG = "--Public API--"
+DOCUMENTATION_TAG = "--Documentation--"
 ARGS_TAG = "Args:"
 RETURNS_TAG = "Returns:"
 YIELDS_TAG = "Yields:"
@@ -430,14 +430,14 @@ def get_title(file_path: Path) -> str:
 
 
 def build_relevant_documentation_block(docstring: str) -> List[str]:
-    """Builds a list of links to documentation listed in the '# Documentation' block of a docstring.
+    """Builds a list of links to documentation listed in the '--Documentation--' block of a docstring.
 
     Args:
         docstring: The docstring to parse documentation links out of.
 
     Returns:
         A list of strings, each of which is formatted as a Markdown unordered list entry consisting of a link to
-        the corresponding document in the '# Documentation' block.
+        the corresponding document in the '--Documentation--' block.
     """
     relevant_documentation_block = []
     for path in get_document_paths(docstring):

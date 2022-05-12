@@ -72,10 +72,10 @@ class DataContext(BaseDataContext):
 
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
 
-    # Public API
+    --Public API--
 
-    # Documentation
-        /docs/terms/data_context
+    --Documentation--
+        https://docs.greatexpectations.io/docs/terms/data_context
     """
 
     @classmethod
@@ -91,10 +91,10 @@ class DataContext(BaseDataContext):
         `create` will not create a new "great_expectations" directory in the provided folder, provided one does not
         already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
 
-        # Public API
+        --Public API--
 
-        # Documentation
-            /docs/terms/data_context
+        --Documentation--
+            https://docs.greatexpectations.io/docs/terms/data_context
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
