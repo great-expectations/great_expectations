@@ -24,24 +24,7 @@ except ImportError:
 
 
 class SqlAlchemyDataSampler(DataSampler):
-    """Sampling methods for data stores with SQL interfaces.
-
-    Args:
-        dialect: dialect of sql used in sampling.
-        dialect_name: name of the dialect of sql used in sampling.
-    """
-
-    def __init__(self, dialect: Dialect, dialect_name: GESqlDialect):
-        self._dialect = dialect
-        self._dialect_name = dialect_name
-
-    @property
-    def dialect_name(self) -> GESqlDialect:
-        return self._dialect_name
-
-    @property
-    def dialect(self) -> Dialect:
-        return self._dialect
+    """Sampling methods for data stores with SQL interfaces."""
 
     def sample_using_limit(
         self,
@@ -74,8 +57,8 @@ class SqlAlchemyDataSampler(DataSampler):
 
         # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
         # so the business logic for building the query needs to be different.
-        dialect: GESqlDialect = self.dialect_name
-        if dialect == GESqlDialect.ORACLE:
+        dialect_name: str = execution_engine.dialect_name
+        if dialect_name == GESqlDialect.ORACLE.value:
             # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
             # limit doesn't compile properly for oracle so we will append rownum to query string later
             raw_query: Selectable = (
@@ -87,12 +70,13 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             query: str = str(
                 raw_query.compile(
-                    dialect=self.dialect, compile_kwargs={"literal_binds": True}
+                    dialect=execution_engine.dialect,
+                    compile_kwargs={"literal_binds": True},
                 )
             )
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
-        elif dialect == GESqlDialect.MSSQL:
+        elif dialect_name == GESqlDialect.MSSQL.value:
             # TODO: AJB 20220429 WARNING THIS mssql dialect METHOD IS NOT COVERED BY TESTS
             # Note that this code path exists because the limit parameter is not getting rendered
             # successfully in the resulting mssql query.
@@ -106,7 +90,8 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             string_of_query: str = str(
                 selectable_query.compile(
-                    self.dialect, compile_kwargs={"literal_binds": True}
+                    dialect=execution_engine.dialect,
+                    compile_kwargs={"literal_binds": True},
                 )
             )
             n: Union[str, int] = batch_spec["sampling_kwargs"]["n"]

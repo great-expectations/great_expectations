@@ -11,6 +11,7 @@ class GESqlDialect(enum.Enum):
     AWSATHENA = "awsathena"
     TERADATASQL = "teradatasql"
     SNOWFLAKE = "snowflake"
+    SQLITE = "sqlite"
 
     @classmethod
     def get_all_dialect_names(cls):

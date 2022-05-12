@@ -1,5 +1,3 @@
-from unittest import mock
-
 import pytest
 
 from great_expectations.core.id_dict import BatchSpec
@@ -58,14 +56,13 @@ def clean_query_for_comparison(query_string: str) -> str:
 
 
 @pytest.mark.parametrize(
-    "dialect",
+    "dialect_name",
     [
-        pytest.param(dialect, id=dialect)
-        for dialect in ["postgresql"]  # GESqlDialect.get_all_dialect_names()
+        pytest.param(dialect_name, id=dialect_name)
+        for dialect_name in ["postgresql"]  # GESqlDialect.get_all_dialect_names()
     ],
 )
-@mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
-def test_sample_using_limit(mock_execution_engine: mock.MagicMock, dialect: str):
+def test_sample_using_limit(dialect_name: str, sa):
     """What does this test and why?
 
     split_on_limit should build the appropriate query based on input parameters.
@@ -79,14 +76,29 @@ def test_sample_using_limit(mock_execution_engine: mock.MagicMock, dialect: str)
         sampling_kwargs={"n": 10},
     )
 
+    class MockSqlAlchemyExecutionEngine:
+        def __init__(self, dialect_name: str):
+            self._dialect_name = dialect_name
+            self._dialect = sa.create_engine(self.dialect_name_to_connection_string())
+
+        def dialect_name_to_connection_string(self):
+            if self._dialect_name == GESqlDialect.POSTGRESQL.value:
+                return "postgresql://"
+
+        def dialect(self):
+            return self._dialect
+
+        def dialect_name(self):
+            return self._dialect_name
+
+    mock_execution_engine: MockSqlAlchemyExecutionEngine = (
+        MockSqlAlchemyExecutionEngine(dialect_name=dialect_name)
+    )
+
     # TODO: AJB 20220510 get dialect based on dialect name tested
     from sqlalchemy.dialects import postgresql
 
-    data_sampler: SqlAlchemyDataSampler = SqlAlchemyDataSampler(
-        # dialect=sqlalchemy_psycopg2,
-        dialect=postgresql.dialect(),
-        dialect_name=GESqlDialect(dialect),
-    )
+    data_sampler: SqlAlchemyDataSampler = SqlAlchemyDataSampler()
 
     result = data_sampler.sample_using_limit(
         execution_engine=mock_execution_engine, batch_spec=batch_spec, where_clause=None
