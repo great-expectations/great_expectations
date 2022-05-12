@@ -2,15 +2,12 @@ from typing import Any, Dict, List, Optional
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
-from great_expectations.rule_based_profiler.parameter_builder import (
-    MetricMultiBatchParameterBuilder,
-    ParameterBuilder,
+from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
+    set_parameter_builders_json_serialize,
 )
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.types import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    Domain,
-)
+from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
     VolumeDataAssistantResult,
@@ -57,36 +54,29 @@ class VolumeDataAssistant(DataAssistant):
     def metrics_parameter_builders_by_domain(
         self,
     ) -> Dict[Domain, List[ParameterBuilder]]:
-        table_row_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
-            name="table.row_count",
-            metric_name="table.row_count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            json_serialize=True,
-            data_context=None,
+        table_row_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
+            DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS[
+                "table_row_count_metric_multi_batch_parameter_builder"
+            ]
         )
-        column_distinct_values_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
-            name="column.distinct_values.count",
-            metric_name="column.distinct_values.count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
+        column_distinct_values_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS[
+            "column_distinct_values_count_metric_multi_batch_parameter_builder"
+        ]
+
+        set_parameter_builders_json_serialize(
+            parameter_builders=[
+                table_row_count_metric_multi_batch_parameter_builder,
+                column_distinct_values_count_metric_multi_batch_parameter_builder,
+            ],
             json_serialize=True,
-            data_context=None,
         )
+
         return {
             Domain(domain_type=MetricDomainTypes.TABLE,): [
                 table_row_count_metric_multi_batch_parameter_builder,
             ],
             Domain(domain_type=MetricDomainTypes.COLUMN,): [
-                column_distinct_values_metric_multi_batch_parameter_builder,
+                column_distinct_values_count_metric_multi_batch_parameter_builder,
             ],
         }
 
