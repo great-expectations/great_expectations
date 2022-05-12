@@ -1,13 +1,24 @@
+import datetime
+import os
 from typing import List
 from unittest import mock
 
+import pandas as pd
 import pytest
+from dateutil.parser import parse
 from mock_alchemy.comparison import ExpressionMatcher
 
+from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     DatePart,
     SqlAlchemyDataSplitter,
 )
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
+)
+from great_expectations.self_check.util import build_sa_engine
 from tests.execution_engine.split_and_sample.split_and_sample_test_cases import (
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
     MULTIPLE_DATE_PART_DATE_PARTS,
@@ -366,3 +377,44 @@ def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
     assert data_splitter.get_splitter_method(
         splitter_method_name_with_prefix
     ) == getattr(data_splitter, splitter_method_name)
+
+
+@pytest.mark.integration
+def test_sqlite_sample_using_limit(sa):
+
+    csv_path: str = file_relative_path(
+        os.path.dirname(os.path.dirname(__file__)),
+        os.path.join(
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "ten_trips_from_each_month",
+            "yellow_tripdata_sample_10_trips_from_each_month.csv",
+        ),
+    )
+    df: pd.DataFrame = pd.read_csv(csv_path)
+    engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
+
+    n: int = 10
+    batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
+        table_name="test",
+        schema_name="main",
+        sampling_method="sample_using_limit",
+        sampling_kwargs={"n": n},
+    )
+    batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
+
+    # Right number of rows?
+    num_rows: int = batch_data.execution_engine.engine.execute(
+        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == n
+
+    # Right rows?
+    rows: sa.Row = batch_data.execution_engine.engine.execute(
+        sa.select([sa.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
+    for row_date in row_dates:
+        assert row_date.month == 1
+        assert row_date.year == 2018
