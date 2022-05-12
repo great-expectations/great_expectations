@@ -25,6 +25,7 @@ def get_extras_require():
         "redshift",
         "snowflake",
         "teradata",
+        "trino",
     )
     ignore_keys = ("contrib", "sqlalchemy", "test")
     rx_fname_part = re.compile(r"requirements-dev-(.*).txt")
@@ -53,10 +54,6 @@ def get_extras_require():
 with open("requirements.txt") as f:
     required = f.read().splitlines()
 
-# try:
-#    import pypandoc
-#    long_description = pypandoc.convert_file('README.md', 'rst')
-# except (IOError, ImportError):
 long_description = "Always know what to expect from your data. (See https://github.com/great-expectations/great_expectations for full description)."
 
 config = {

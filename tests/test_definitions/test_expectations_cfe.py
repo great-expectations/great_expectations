@@ -22,6 +22,7 @@ from great_expectations.self_check.util import (
     mysqlDialect,
     postgresqlDialect,
     sqliteDialect,
+    trinoDialect,
 )
 from tests.conftest import build_test_backends_list_cfe
 
@@ -154,6 +155,17 @@ def pytest_generate_tests(metafunc):
                                     == "bigquery"
                                 ):
                                     generate_test = True
+                                elif (
+                                    "trino" in test["only_for"]
+                                    and BigQueryDialect is not None
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "trino"
+                                ):
+                                    generate_test = True
 
                             elif validator_with_data and isinstance(
                                 validator_with_data.execution_engine.active_batch_data,
@@ -266,6 +278,21 @@ def pytest_generate_tests(metafunc):
                                     )
                                     and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
                                     == "bigquery"
+                                )
+                                or (
+                                    "trino" in suppress_test_for
+                                    and trinoDialect is not None
+                                    and validator_with_data
+                                    and isinstance(
+                                        validator_with_data.execution_engine.active_batch_data,
+                                        SqlAlchemyBatchData,
+                                    )
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "trino"
                                 )
                                 or (
                                     "pandas" in suppress_test_for

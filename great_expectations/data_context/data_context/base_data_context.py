@@ -106,7 +106,10 @@ from great_expectations.datasource.new_datasource import BaseDatasource, Datasou
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler import (
+    RuleBasedProfiler,
+    RuleBasedProfilerResult,
+)
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import (
     filter_properties_dict,
@@ -3383,10 +3386,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> RuleBasedProfilerResult:
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
 
         Args:
@@ -3394,12 +3394,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
             variables: Attribute name/value pairs (overrides)
             rules: Key-value pairs of name/configuration-dictionary (overrides)
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
 
         Returns:
-            Set of rule evaluation results in the form of an ExpectationSuite.
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
 
         Raises:
             AssertionError if both a `name` and `ge_cloud_id` are provided.
@@ -3412,9 +3409,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id=ge_cloud_id,
             variables=variables,
             rules=rules,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
         )
 
     @usage_statistics_enabled_method(
@@ -3426,10 +3420,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         batch_request: Optional[BatchRequestBase] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> RuleBasedProfilerResult:
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
         Args:
@@ -3437,12 +3428,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             batch_request: Explicit batch_request used to supply data at runtime.
             name: Identifier used to retrieve the profiler from a store.
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
 
         Returns:
-            Set of rule evaluation results in the form of an ExpectationSuite.
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
 
         Raises:
             ProfilerConfigurationError is both "batch_list" and "batch_request" arguments are specified.
@@ -3456,9 +3444,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             batch_request=batch_request,
             name=name,
             ge_cloud_id=ge_cloud_id,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
         )
 
     def test_yaml_config(

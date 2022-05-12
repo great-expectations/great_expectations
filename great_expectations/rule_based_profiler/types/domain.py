@@ -9,7 +9,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.types import SerializableDictDot, SerializableDotDict
 from great_expectations.util import (
     deep_filter_properties_iterable,
-    filter_properties_dict,
+    is_candidate_subset_of_target,
 )
 
 INFERRED_SEMANTIC_TYPE_KEY: str = "inferred_semantic_domain_type"
@@ -51,25 +51,25 @@ class Domain(SerializableDotDict):
     # Adding an explicit constructor to highlight the specific properties that will be used.
     def __init__(
         self,
-        rule_name: str,
         domain_type: Union[str, MetricDomainTypes],
         domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
         details: Optional[Dict[str, Any]] = None,
+        rule_name: Optional[str] = None,
     ) -> None:
         if isinstance(domain_type, str):
             try:
                 domain_type = MetricDomainTypes(domain_type)
             except (TypeError, KeyError) as e:
                 raise ValueError(
-                    f""" \
-{e}: Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(domain_type))}" is not supported).
-                    """
+                    f""" {e}: Cannot instantiate Domain (domain_type "{str(domain_type)}" of type \
+"{str(type(domain_type))}" is not supported).
+"""
                 )
         elif not isinstance(domain_type, MetricDomainTypes):
             raise ValueError(
-                f""" \
-Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(domain_type))}" is not supported).
-                """
+                f"""Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(domain_type))}" is \
+not supported).
+"""
             )
 
         if domain_kwargs is None:
@@ -84,11 +84,40 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         if details is None:
             details = {}
 
+        inferred_semantic_domain_type: Dict[
+            str, Union[str, SemanticDomainTypes]
+        ] = details.get(INFERRED_SEMANTIC_TYPE_KEY)
+        if inferred_semantic_domain_type:
+            semantic_domain_key: str
+            metric_domain_key: str
+            metric_domain_value: Any
+            is_consistent: bool
+            for semantic_domain_key in inferred_semantic_domain_type:
+                is_consistent = False
+                for (
+                    metric_domain_key,
+                    metric_domain_value,
+                ) in domain_kwargs_dot_dict.items():
+                    if (
+                        isinstance(metric_domain_value, (list, set, tuple))
+                        and semantic_domain_key in metric_domain_value
+                    ) or (semantic_domain_key == metric_domain_value):
+                        is_consistent = True
+                        break
+
+                if not is_consistent:
+                    raise ValueError(
+                        f"""Cannot instantiate Domain (domain_type "{str(domain_type)}" of type \
+"{str(type(domain_type))}" -- key "{semantic_domain_key}", detected in "{INFERRED_SEMANTIC_TYPE_KEY}" dictionary, does \
+not exist as value of appropriate key in "domain_kwargs" dictionary.
+"""
+                    )
+
         super().__init__(
-            rule_name=rule_name,
             domain_type=domain_type,
             domain_kwargs=domain_kwargs_dot_dict,
             details=details,
+            rule_name=rule_name,
         )
 
     def __repr__(self):
@@ -105,10 +134,10 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
             )
             or (
                 isinstance(other, dict)
-                and filter_properties_dict(
+                and deep_filter_properties_iterable(
                     properties=self.to_json_dict(), clean_falsy=True
                 )
-                == filter_properties_dict(properties=other, clean_falsy=True)
+                == deep_filter_properties_iterable(properties=other, clean_falsy=True)
             )
             or (self.__str__() == str(other))
         )
@@ -120,6 +149,25 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         """Overrides the default implementation"""
         _result_hash: int = hash(self.id)
         return _result_hash
+
+    def is_superset(self, other: "Domain") -> bool:  # noqa: F821
+        """Determines if other "Domain" object (provided as argument) is contained within this "Domain" object."""
+        if other is None:
+            return True
+
+        return other.is_subset(other=self)
+
+    def is_subset(self, other: "Domain") -> bool:  # noqa: F821
+        """Determines if this "Domain" object is contained within other "Domain" object (provided as argument)."""
+        if other is None:
+            return False
+
+        this_json_dict: dict = self.to_json_dict()
+        other_json_dict: dict = other.to_json_dict()
+
+        return is_candidate_subset_of_target(
+            candidate=this_json_dict, target=other_json_dict
+        )
 
     # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).
     @property
@@ -146,14 +194,14 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
             details[key] = convert_to_json_serializable(data=value)
 
         json_dict: dict = {
-            "rule_name": self["rule_name"],
             "domain_type": self["domain_type"].value,
             "domain_kwargs": self["domain_kwargs"].to_json_dict(),
             "details": details,
+            "rule_name": self["rule_name"],
         }
         json_dict = convert_to_json_serializable(data=json_dict)
 
-        return filter_properties_dict(properties=json_dict, clean_falsy=True)
+        return deep_filter_properties_iterable(properties=json_dict, clean_falsy=True)
 
     def _convert_dictionaries_to_domain_kwargs(
         self, source: Optional[Any] = None
