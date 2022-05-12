@@ -2,9 +2,6 @@ from typing import Any, Dict, List, Optional
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
-from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
-    set_parameter_builders_json_serialize,
-)
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import Domain
@@ -54,19 +51,11 @@ class VolumeDataAssistant(DataAssistant):
     def metrics_parameter_builders_by_domain(
         self,
     ) -> Dict[Domain, List[ParameterBuilder]]:
-        table_row_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-            DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.table_row_count_metric_multi_batch_parameter_builder
+        table_row_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_table_row_count_metric_multi_batch_parameter_builder(
+            json_serialize=True
         )
-        column_distinct_values_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-            DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.column_distinct_values_count_metric_multi_batch_parameter_builder
-        )
-
-        set_parameter_builders_json_serialize(
-            parameter_builders=[
-                table_row_count_metric_multi_batch_parameter_builder,
-                column_distinct_values_count_metric_multi_batch_parameter_builder,
-            ],
-            json_serialize=True,
+        column_distinct_values_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_distinct_values_count_metric_multi_batch_parameter_builder(
+            json_serialize=True
         )
 
         return {
