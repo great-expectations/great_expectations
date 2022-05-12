@@ -110,6 +110,30 @@ def test_stdev_metric_pd():
     assert results == {desired_metric.id: 1}
 
 
+def test_column_value_lengths_min_metric_pd():
+    pass
+
+
+def test_column_value_lengths_min_metric_sa():
+    pass
+
+
+def test_column_value_lengths_min_metric_spark():
+    pass
+
+
+def test_column_value_lengths_max_metric_pd():
+    pass
+
+
+def test_column_value_lengths_max_metric_sa():
+    pass
+
+
+def test_column_value_lengths_max_metric_spark():
+    pass
+
+
 def test_quantiles_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 4]}))
 
