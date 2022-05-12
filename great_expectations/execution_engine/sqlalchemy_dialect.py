@@ -16,6 +16,12 @@ class GESqlDialect(enum.Enum):
     AWSATHENA = "awsathena"
     DREMIO = "dremio"
     TERADATASQL = "teradatasql"
+    TRINO = "trino"
+
+    @classmethod
+    def get_all_dialect_names(cls) -> List[str]:
+        """Get dialect names for all SQL dialects."""
+        return [dialect_name.value for dialect_name in cls]
 
     @classmethod
     def get_all_dialects(cls) -> List[GESqlDialect]:

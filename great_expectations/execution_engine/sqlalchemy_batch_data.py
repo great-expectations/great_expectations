@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 from great_expectations.execution_engine.execution_engine import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
@@ -194,7 +195,11 @@ class SqlAlchemyBatchData(BatchData):
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param query:
         """
-        dialect: GESqlDialect = GESqlDialect(self.sql_engine_dialect.name.lower())
+        dialect_name: str = self.sql_engine_dialect.name.lower()
+        if dialect_name in GESqlDialect.get_all_dialect_names():
+            dialect: Union[GESqlDialect, str] = GESqlDialect(dialect_name)
+        else:
+            dialect: Union[GESqlDialect, str] = dialect_name
 
         if dialect == GESqlDialect.BIGQUERY:
             # BigQuery Table is created using with an expiration of 24 hours using Google's Data Definition Language
