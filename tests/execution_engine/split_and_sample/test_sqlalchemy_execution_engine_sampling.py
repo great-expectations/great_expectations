@@ -80,12 +80,12 @@ def dialect_name_to_sql_statement():
 @pytest.mark.parametrize(
     "dialect_name",
     [
-        pytest.param(dialect_name, id=dialect_name)
-        for dialect_name in GESqlDialect.get_all_dialect_names()
+        pytest.param(dialect_name, id=dialect_name.value)
+        for dialect_name in GESqlDialect.get_all_dialects()
     ],
 )
 def test_sample_using_limit_builds_correct_query_where_clause_none(
-    dialect_name: str, dialect_name_to_sql_statement, sa
+    dialect_name: GESqlDialect, dialect_name_to_sql_statement, sa
 ):
     """What does this test and why?
 
@@ -95,7 +95,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
 
     # 1. Setup
     class MockSqlAlchemyExecutionEngine:
-        def __init__(self, dialect_name: str):
+        def __init__(self, dialect_name: GESqlDialect):
             self._dialect_name = dialect_name
             self._connection_string = self.dialect_name_to_connection_string(
                 dialect_name
@@ -116,28 +116,28 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
         }
 
         @property
-        def dialect_name(self):
-            return self._dialect_name
+        def dialect_name(self) -> str:
+            return self._dialect_name.value
 
-        def dialect_name_to_connection_string(self, dialect_name: str):
-            return self.DIALECT_TO_CONNECTION_STRING_STUB.get(
-                GESqlDialect(dialect_name)
-            )
+        def dialect_name_to_connection_string(self, dialect_name: GESqlDialect) -> str:
+            return self.DIALECT_TO_CONNECTION_STRING_STUB.get(dialect_name)
 
         _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
         @property
         def dialect(self) -> sa.engine.Dialect:
-            dialect_name: str = self._dialect_name
-            if dialect_name == "oracle":
+            # TODO: AJB 20220512 move this dialect retrieval to a separate class from the SqlAlchemyExecutionEngine
+            #  and then use it here.
+            dialect_name: GESqlDialect = self._dialect_name
+            if dialect_name == GESqlDialect.ORACLE:
                 return import_library_module(
                     module_name="sqlalchemy.dialects.oracle"
                 ).dialect()
-            elif dialect_name == "snowflake":
+            elif dialect_name == GESqlDialect.SNOWFLAKE:
                 return import_library_module(
                     module_name="snowflake.sqlalchemy.snowdialect"
                 ).dialect()
-            elif dialect_name == "dremio":
+            elif dialect_name == GESqlDialect.DREMIO:
                 # WARNING: Dremio Support is experimental, functionality is not fully under test
                 return import_library_module(
                     module_name="sqlalchemy_dremio.pyodbc"
@@ -148,11 +148,11 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             #     return import_library_module(
             #         module_name="sqlalchemy_redshift.dialect"
             #     ).RedshiftDialect
-            elif dialect_name == "bigquery":
+            elif dialect_name == GESqlDialect.BIGQUERY:
                 return import_library_module(
                     module_name=self._BIGQUERY_MODULE_NAME
                 ).dialect()
-            elif dialect_name == "teradatasql":
+            elif dialect_name == GESqlDialect.TERADATASQL:
                 # WARNING: Teradata Support is experimental, functionality is not fully under test
                 return import_library_module(
                     module_name="teradatasqlalchemy.dialect"
@@ -191,7 +191,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
         query_str: str = clean_query_for_comparison(query)
 
     expected: str = clean_query_for_comparison(
-        dialect_name_to_sql_statement(GESqlDialect(dialect_name))
+        dialect_name_to_sql_statement(dialect_name)
     )
 
     assert query_str == expected

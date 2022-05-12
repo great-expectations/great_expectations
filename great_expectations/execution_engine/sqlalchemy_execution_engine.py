@@ -379,10 +379,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
         self._data_splitter = SqlAlchemyDataSplitter()
-        self._data_sampler = SqlAlchemyDataSampler(
-            dialect=self.engine.dialect,
-            dialect_name=GESqlDialect(self.engine.dialect.name.lower()),
-        )
+        self._data_sampler = SqlAlchemyDataSampler()
 
     @property
     def credentials(self) -> Optional[dict]:
