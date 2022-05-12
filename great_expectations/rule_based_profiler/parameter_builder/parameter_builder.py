@@ -2,7 +2,6 @@ import copy
 import itertools
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import make_dataclass
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
@@ -29,7 +28,6 @@ from great_expectations.rule_based_profiler.types import (
     Builder,
     Domain,
     MetricComputationResult,
-    MetricValue,
     MetricValues,
     ParameterContainer,
     build_parameter_container,

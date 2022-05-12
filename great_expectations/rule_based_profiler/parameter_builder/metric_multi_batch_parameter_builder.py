@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 
@@ -14,8 +14,6 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     MetricComputationDetails,
     MetricComputationResult,
-    MetricValue,
-    MetricValues,
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
