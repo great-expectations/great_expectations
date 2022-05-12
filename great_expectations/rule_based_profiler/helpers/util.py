@@ -4,9 +4,10 @@ import logging
 import re
 import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import scipy.stats as stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -487,6 +488,76 @@ def compute_quantiles(
     return NumericRangeEstimationResult(
         estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
         value_range=np.array([lower_quantile, upper_quantile]),
+    )
+
+
+def compute_kde_quantiles_point_estimate(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    quantile_statistic_interpolation_method: str,
+    n_resamples: int,
+    bw_method: Union[str, float, Callable],
+    random_seed: Optional[int] = None,
+) -> NumericRangeEstimationResult:
+    """
+    ML Flow Experiment: parameter_builders_bootstrap/kde_quantiles
+    ML Flow Experiment ID: 721280826919117
+
+    An internal implementation of the "kernel density estimation" estimator method, returning a point estimate for a
+    population parameter of interest (lower and upper quantiles in this case).
+
+    Overview: https://en.wikipedia.org/wiki/Kernel_density_estimation
+    Bandwidth Effect: https://en.wikipedia.org/wiki/Kernel_density_estimation#Bandwidth_selection
+    Bandwidth Method: https://stats.stackexchange.com/questions/90656/kernel-bandwidth-scotts-vs-silvermans-rules
+
+    Args:
+        false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
+            identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
+        quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
+            statistic, used for confidence intervals.
+        n_resamples: A positive integer indicating the sample size resulting from the sampling with replacement
+            procedure.
+        bw_method: The estimator bandwidth as described in:
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
+        random_seed: An optional random_seed to pass to "np.random.Generator(np.random.PCG64(random_seed))"
+            for making probabilistic sampling deterministic.
+    """
+    lower_quantile_pct: float = false_positive_rate / 2.0
+    upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
+
+    metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
+        metric_values, bw_method=bw_method
+    )
+    metric_values_gaussian_sample: float
+    if random_seed:
+        metric_values_gaussian_sample = metric_values_density_estimate.resample(
+            n_resamples,
+            seed=random_seed,
+        )
+    else:
+        metric_values_gaussian_sample = metric_values_density_estimate.resample(
+            n_resamples,
+        )
+
+    lower_quantile_point_estimate: float = np.quantile(
+        metric_values_gaussian_sample,
+        q=lower_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
+    upper_quantile_point_estimate: float = np.quantile(
+        metric_values_gaussian_sample,
+        q=upper_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
+
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(
+            a=metric_values_gaussian_sample, bins=NUM_HISTOGRAM_BINS
+        )[0],
+        value_range=[
+            lower_quantile_point_estimate,
+            upper_quantile_point_estimate,
+        ],
     )
 
 

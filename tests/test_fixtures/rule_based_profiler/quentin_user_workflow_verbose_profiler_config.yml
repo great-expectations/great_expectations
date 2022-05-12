@@ -10,14 +10,14 @@ variables:
     - 5.0e-1
     - 7.5e-1
 
-  num_bootstrap_samples: 9139
-  bootstrap_random_seed: 43792
+  n_resamples: 9139
+  random_seed: 43792
 
   allow_relative_error: linear
 
   false_positive_rate: 5.0e-2
   quantile_statistic_interpolation_method: auto
-  include_bootstrap_samples_histogram_in_details: False
+  include_estimator_samples_histogram_in_details: False
 
 rules:
   column_quantiles_rule:
@@ -35,8 +35,8 @@ rules:
           allow_relative_error: $variables.allow_relative_error
         false_positive_rate: $variables.false_positive_rate
         quantile_statistic_interpolation_method: $variables.quantile_statistic_interpolation_method
-        num_bootstrap_samples: $variables.num_bootstrap_samples
-        bootstrap_random_seed: $variables.bootstrap_random_seed
+        n_resamples: $variables.n_resamples
+        random_seed: $variables.random_seed
     expectation_configuration_builders:
       - expectation_type: expect_column_quantile_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
