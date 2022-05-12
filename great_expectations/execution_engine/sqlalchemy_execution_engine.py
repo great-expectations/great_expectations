@@ -2,6 +2,7 @@ import copy
 import datetime
 import logging
 import random
+import re
 import string
 import traceback
 import warnings
@@ -980,9 +981,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             split_query: str = str(
                 split_query.compile(self.engine, compile_kwargs={"literal_binds": True})
             )
-            split_query = split_query.replace("AS STRING", "AS VARCHAR").replace(
-                "as string", "AS VARCHAR"
-            )
+
+            pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
+            split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
         return self.engine.execute(split_query).fetchall()
 
