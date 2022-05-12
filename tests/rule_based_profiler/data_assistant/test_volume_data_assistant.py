@@ -2568,7 +2568,7 @@ def quentin_expected_expectation_suite(
 @pytest.fixture
 def volume_data_assistant_result(
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
-):
+) -> VolumeDataAssistantResult:
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
@@ -2684,8 +2684,8 @@ def test_volume_data_assistant_result_serialization(
 ) -> None:
     volume_data_assistant_result_as_dict: dict = volume_data_assistant_result.to_dict()
     assert (
-        volume_data_assistant_result_as_dict is not None
-        and len(volume_data_assistant_result_as_dict) == 5
+        set(volume_data_assistant_result_as_dict.keys())
+        == DataAssistantResult.ALLOWED_KEYS
     )
     assert (
         volume_data_assistant_result.to_json_dict()
