@@ -1,0 +1,24 @@
+## Docker Compose file for running e2e tests
+version: "3"
+
+services:
+  db:
+    image: postgres:13.2
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    # Reduce noise in integration test logs
+    logging:
+      driver: none
+  mercury-e2e-tests:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: python -c "print('hello world')"
+    environment:
+      COOL_EXAMPLE: opa
+    depends_on:
+      - db
