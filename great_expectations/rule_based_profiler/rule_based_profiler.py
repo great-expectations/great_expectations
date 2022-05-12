@@ -292,7 +292,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return RuleBasedProfilerResult(
             fully_qualified_parameter_names_by_domain=self.get_fully_qualified_parameter_names_by_domain(),
             parameter_values_for_fully_qualified_parameter_names_by_domain=self.get_parameter_values_for_fully_qualified_parameter_names_by_domain(),
-            expectation_configurations=self.get_expectation_configurations(),
+            expectation_configurations=list(
+                filter(None, self.get_expectation_configurations())
+            ),
             citation={
                 "citation_date": convert_to_json_serializable(
                     data=datetime.datetime.now(datetime.timezone.utc)

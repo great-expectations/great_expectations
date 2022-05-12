@@ -42,6 +42,14 @@ class DataAssistantResult(SerializableDictDot):
     Use "batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
     """
 
+    ALLOWED_KEYS = {
+        "batch_id_to_batch_identifier_display_name_map",
+        "profiler_config",
+        "metrics_by_domain",
+        "expectation_configurations",
+        "execution_time",
+    }
+
     batch_id_to_batch_identifier_display_name_map: Optional[
         Dict[str, Set[Tuple[str, Any]]]
     ] = None
