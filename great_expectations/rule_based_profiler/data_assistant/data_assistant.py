@@ -15,13 +15,17 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
+    ParameterBuilder,
+)
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
 )
 from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -84,6 +88,79 @@ class DataAssistant(metaclass=MetaDataAssistant):
         profiler_config: RuleBasedProfilerConfig = result.profiler_config
         ...
     """
+
+    class CommonlyUsedParameterBuilders:
+        @property
+        def table_row_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="table.row_count",
+                metric_name="table.row_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=True,
+                replace_nan_with_zero=True,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+        @property
+        def column_distinct_values_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column.distinct_values.count",
+                metric_name="column.distinct_values.count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=True,
+                replace_nan_with_zero=True,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+        @property
+        def column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column_values.unique.unexpected_count",
+                metric_name="column_values.unique.unexpected_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=True,
+                replace_nan_with_zero=True,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+        @property
+        def column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column_values.nonnull.unexpected_count",
+                metric_name="column_values.nonnull.unexpected_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+    COMMONLY_USED_PARAMETER_BUILDERS: CommonlyUsedParameterBuilders = (
+        CommonlyUsedParameterBuilders()
+    )
 
     __alias__: Optional[str] = None
 
@@ -496,3 +573,14 @@ def run_profiler_on_data(
         rule_based_profiler_result.expectation_configurations
     )
     result.citation = rule_based_profiler_result.citation
+
+
+def set_parameter_builders_json_serialize(
+    parameter_builders: List[ParameterBuilder], json_serialize: Union[str, bool]
+) -> None:
+    """
+    This method sets "json_serialize" property according to specified directive on all "ParameterBuilder" objects given.
+    """
+    parameter_builder: ParameterBuilder
+    for parameter_builder in parameter_builders:
+        parameter_builder.json_serialize = json_serialize
