@@ -21,7 +21,11 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
+    ParameterNode,
+)
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
@@ -348,6 +352,33 @@ class DataAssistant(metaclass=MetaDataAssistant):
             batch_id: set(batch.batch_definition.batch_identifiers.items())
             for batch_id, batch in self._batches.items()
         }
+
+    def get_rule_variables_and_validation_parameter_builders_from_self_initializing_expectation(
+        self,
+        expectation_type: str,
+        expectation_kwargs: Optional[Dict[str, Any]],
+    ) -> Tuple[Optional[ParameterContainer], Optional[List[ParameterBuilder]]]:
+        """
+        This method obtains "variables" and "validation_parameter_builder" (from "expectation_configuration_builder")
+        from "Rule" implementing self-initialization logic in optional "RuleBasedProfilerConfig" of "Expectation".
+        """
+        profiler: Optional[
+            BaseRuleBasedProfiler
+        ] = self._validator.build_rule_based_profiler_for_expectation(
+            expectation_type=expectation_type
+        )(
+            **expectation_kwargs
+        )
+        if profiler is None:
+            return None, None
+
+        rules: List[Rule] = profiler.rules
+        rule: Rule = rules[0]
+        variables: ParameterContainer = rule.variables
+        validation_parameter_builders: Optional[
+            List[ParameterBuilder]
+        ] = rule.expectation_configuration_builders[0].validation_parameter_builders
+        return variables, validation_parameter_builders
 
     def _validate_profiler_rule_name_uniqueness(self) -> None:
         """
