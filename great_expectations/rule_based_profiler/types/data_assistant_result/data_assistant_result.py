@@ -753,7 +753,7 @@ class DataAssistantResult(SerializableDictDot):
         )
         for column, column_df in column_dfs:
             column_df[column_name] = column
-            df = pd.concat([df, column_df], axis=0)
+            df = pd.concat([df, column_df], axis=0, sort=False)
 
         df = df.drop(columns=["column"])
 

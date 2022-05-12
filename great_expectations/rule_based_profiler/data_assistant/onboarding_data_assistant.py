@@ -4,7 +4,6 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
     build_map_metric_rule,
-    set_parameter_builders_json_serialize,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
@@ -46,19 +45,17 @@ class OnboardingDataAssistant(DataAssistant):
     def metrics_parameter_builders_by_domain(
         self,
     ) -> Dict[Domain, List[ParameterBuilder]]:
-        table_row_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-            DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.table_row_count_metric_multi_batch_parameter_builder
+        table_row_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_table_row_count_metric_multi_batch_parameter_builder(
+            json_serialize=True
         )
-        column_values_unique_unexpected_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-            DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.column_values_unique_unexpected_count_metric_multi_batch_parameter_builder
+        column_values_unique_unexpected_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
+            json_serialize=True
         )
-
-        set_parameter_builders_json_serialize(
-            parameter_builders=[
-                table_row_count_metric_multi_batch_parameter_builder,
-                column_values_unique_unexpected_count_metric_multi_batch_parameter_builder,
-            ],
-            json_serialize=True,
+        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
+        column_values_null_unexpected_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder(
+            json_serialize=True
         )
 
         return {
@@ -67,6 +64,8 @@ class OnboardingDataAssistant(DataAssistant):
             ],
             Domain(domain_type=MetricDomainTypes.COLUMN,): [
                 column_values_unique_unexpected_count_metric_multi_batch_parameter_builder,
+                column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder,
+                column_values_null_unexpected_count_metric_multi_batch_parameter_builder,
             ],
         }
 
@@ -92,9 +91,43 @@ class OnboardingDataAssistant(DataAssistant):
             max_unexpected_ratio=None,
             min_max_unexpected_values_proportion=9.75e-1,
         )
+        column_value_nullity_rule: Rule = build_map_metric_rule(
+            rule_name="column_value_nullity_rule",
+            expectation_type="expect_column_values_to_be_null",
+            map_metric_name="column_values.null",
+            include_column_names=None,
+            exclude_column_names=None,
+            include_column_name_suffixes=None,
+            exclude_column_name_suffixes=None,
+            semantic_type_filter_module_name=None,
+            semantic_type_filter_class_name=None,
+            include_semantic_types=None,
+            exclude_semantic_types=None,
+            max_unexpected_values=0,
+            max_unexpected_ratio=None,
+            min_max_unexpected_values_proportion=9.75e-1,
+        )
+        column_value_nonnullity_rule: Rule = build_map_metric_rule(
+            rule_name="column_value_nonnullity_rule",
+            expectation_type="expect_column_values_to_not_be_null",
+            map_metric_name="column_values.nonnull",
+            include_column_names=None,
+            exclude_column_names=None,
+            include_column_name_suffixes=None,
+            exclude_column_name_suffixes=None,
+            semantic_type_filter_module_name=None,
+            semantic_type_filter_class_name=None,
+            include_semantic_types=None,
+            exclude_semantic_types=None,
+            max_unexpected_values=0,
+            max_unexpected_ratio=None,
+            min_max_unexpected_values_proportion=9.75e-1,
+        )
 
         return [
             column_value_uniqueness_rule,
+            column_value_nullity_rule,
+            column_value_nonnullity_rule,
         ]
 
     def _build_data_assistant_result(

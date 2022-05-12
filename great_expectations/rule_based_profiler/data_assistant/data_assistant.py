@@ -34,6 +34,7 @@ from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    VARIABLES_KEY,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -99,71 +100,171 @@ class DataAssistant(metaclass=MetaDataAssistant):
     """
 
     class CommonlyUsedParameterBuilders:
-        @property
-        def table_row_count_metric_multi_batch_parameter_builder(
+        def get_table_row_count_metric_multi_batch_parameter_builder(
             self,
+            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
-            return MetricMultiBatchParameterBuilder(
-                name="table.row_count",
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
                 metric_name="table.row_count",
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
-                enforce_numeric_metric=True,
-                replace_nan_with_zero=True,
-                reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
-                json_serialize=False,
-                data_context=None,
+                json_serialize=json_serialize,
             )
 
-        @property
-        def column_distinct_values_count_metric_multi_batch_parameter_builder(
+        def get_column_distinct_values_count_metric_multi_batch_parameter_builder(
             self,
+            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
-            return MetricMultiBatchParameterBuilder(
-                name="column.distinct_values.count",
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column.distinct_values.count",
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
-                enforce_numeric_metric=True,
-                replace_nan_with_zero=True,
-                reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
-                json_serialize=False,
-                data_context=None,
+                json_serialize=json_serialize,
             )
 
-        @property
-        def column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
+        def get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
             self,
+            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
-            return MetricMultiBatchParameterBuilder(
-                name="column_values.unique.unexpected_count",
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column_values.unique.unexpected_count",
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
+                metric_name="column_values.nonnull.unexpected_count",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
+                metric_name="column_values.null.unexpected_count",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_min_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
+                metric_name="column.min",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_max_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
+                metric_name="column.max",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_mean_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
+                metric_name="column.mean",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_median_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
+                metric_name="column.median",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_standard_deviation_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
+                metric_name="column.standard_deviation",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_quantile_values_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_metric_multi_batch_parameter_builder(
+                metric_name="column.quantile_values",
+                metric_value_kwargs={
+                    "quantiles": f"{VARIABLES_KEY}quantiles",
+                    "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
+                },
+                json_serialize=json_serialize,
+            )
+
+        @staticmethod
+        def build_metric_multi_batch_parameter_builder(
+            metric_name: str,
+            metric_value_kwargs: Optional[Union[str, dict]] = None,
+            json_serialize: Union[str, bool] = True,
+        ) -> MetricMultiBatchParameterBuilder:
+            """
+            This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
+            """
+            return MetricMultiBatchParameterBuilder(
+                name=metric_name,
+                metric_name=metric_name,
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=metric_value_kwargs,
                 enforce_numeric_metric=True,
                 replace_nan_with_zero=True,
                 reduce_scalar_metric=True,
                 evaluation_parameter_builder_configs=None,
-                json_serialize=False,
-                data_context=None,
-            )
-
-        @property
-        def column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
-            self,
-        ) -> ParameterBuilder:
-            return MetricMultiBatchParameterBuilder(
-                name="column_values.nonnull.unexpected_count",
-                metric_name="column_values.nonnull.unexpected_count",
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs=None,
-                enforce_numeric_metric=False,
-                replace_nan_with_zero=False,
-                reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
-                json_serialize=False,
+                json_serialize=json_serialize,
                 data_context=None,
             )
 
@@ -624,19 +725,11 @@ def build_map_metric_rule(
             data_context=None,
         )
     )
-    total_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-        DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.table_row_count_metric_multi_batch_parameter_builder
+    total_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_table_row_count_metric_multi_batch_parameter_builder(
+        json_serialize=False
     )
-    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-        DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder
-    )
-
-    set_parameter_builders_json_serialize(
-        parameter_builders=[
-            total_count_metric_multi_batch_parameter_builder,
-            column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder,
-        ],
-        json_serialize=False,
+    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
+        json_serialize=False
     )
 
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
@@ -687,14 +780,3 @@ def build_map_metric_rule(
     )
 
     return rule
-
-
-def set_parameter_builders_json_serialize(
-    parameter_builders: List[ParameterBuilder], json_serialize: Union[str, bool]
-) -> None:
-    """
-    This method sets "json_serialize" property according to specified directive on all "ParameterBuilder" objects given.
-    """
-    parameter_builder: ParameterBuilder
-    for parameter_builder in parameter_builders:
-        parameter_builder.json_serialize = json_serialize
