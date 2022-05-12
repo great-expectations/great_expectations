@@ -514,6 +514,8 @@ def compute_kde_quantiles_point_estimate(
             statistic, used for confidence intervals.
         n_resamples: A positive integer indicating the sample size resulting from the sampling with replacement
             procedure.
+        bw_method: The estimator bandwidth as described in:
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
         random_seed: An optional random_seed to pass to "np.random.Generator(np.random.PCG64(bootstrap_random_seed))"
             for making probabilistic sampling deterministic.
     """

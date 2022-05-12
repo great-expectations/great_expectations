@@ -68,6 +68,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
     DEFAULT_KDE_NUM_RESAMPLES: int = 9999
 
+    DEFAULT_KDE_BW_METHOD: Any = "scott"
+
     RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
         "lower_bound",
         "upper_bound",
@@ -126,7 +128,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             n_resamples: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 9999 is used (default in
                 "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
-            bw_method: Applicable only for the "kde" sampling method -- if omitted (default), then 0.5 is used.
+            bw_method: Applicable only for the "kde" sampling method -- if omitted (default), then "scott" is used.
+                Possible values for the estimator bandwidth method are described at:
+                https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
             random_seed: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 uses "np.random.choice"; otherwise, utilizes "np.random.Generator(np.random.PCG64(bootstrap_random_seed))".
             include_estimator_samples_histogram_in_details: Applicable only for the "bootstrap" sampling method -- if
@@ -722,6 +726,11 @@ positive integer, or must be omitted (or set to None).
             variables=variables,
             parameters=parameters,
         )
+
+        if bw_method is None:
+            bw_method = (
+                NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_KDE_BW_METHOD
+            )
 
         # Obtain random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
