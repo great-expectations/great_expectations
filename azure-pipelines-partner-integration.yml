@@ -47,14 +47,6 @@ stages:
         steps:
           - task: ChangedFiles@1
             name: CheckDocsChanges
-            inputs:
-              verbose: true
-              rules: |
-                [DocsChanged]
-                docs/**
-                tests/integration/docusaurus/**
-                tests/integration/fixtures/**
-                tests/test_sets/**
 
           - bash: assets/partners/rubenshift; docker compose up;
             name: RunDockerComposeUp
