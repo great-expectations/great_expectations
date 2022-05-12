@@ -2,6 +2,7 @@ import copy
 import itertools
 import logging
 from abc import ABC, abstractmethod
+from dataclasses import make_dataclass
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
@@ -10,13 +11,6 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
-
-# from great_expectations.rule_based_profiler import (
-#    MetricComputationDetails,
-#    MetricComputationResult,
-#    MetricValue,
-#    MetricValues,
-# )
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
@@ -34,6 +28,9 @@ from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
     Builder,
     Domain,
+    MetricComputationResult,
+    MetricValue,
+    MetricValues,
     ParameterContainer,
     build_parameter_container,
     get_fully_qualified_parameter_names,
@@ -46,18 +43,6 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-from dataclasses import make_dataclass
-
-import numpy as np
-import pandas as pd
-
-MetricValue = Union[Any, List[Any], pd.DataFrame, pd.Series, np.ndarray]
-MetricValues = Union[MetricValue, pd.DataFrame, pd.Series, np.ndarray]
-MetricComputationDetails = Dict[str, Any]
-MetricComputationResult = make_dataclass(
-    "MetricComputationResult", ["attributed_resolved_metrics", "details"]
-)
 
 
 class ParameterBuilder(ABC, Builder):
