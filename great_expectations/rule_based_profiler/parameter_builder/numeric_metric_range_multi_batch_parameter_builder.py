@@ -393,8 +393,8 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
                 "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
-                "bw_method": self.bw_method,
                 "n_resamples": self.n_resamples,
+                "bw_method": self.bw_method,
                 "random_seed": self.random_seed,
             }
         else:
