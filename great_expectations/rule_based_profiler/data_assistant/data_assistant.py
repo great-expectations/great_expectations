@@ -89,56 +89,78 @@ class DataAssistant(metaclass=MetaDataAssistant):
         ...
     """
 
-    COMMONLY_USED_PARAMETER_BUILDERS: Dict[str, ParameterBuilder] = {
-        "table_row_count_metric_multi_batch_parameter_builder": MetricMultiBatchParameterBuilder(
-            name="table.row_count",
-            metric_name="table.row_count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            json_serialize=False,
-            data_context=None,
-        ),
-        "column_distinct_values_count_metric_multi_batch_parameter_builder": MetricMultiBatchParameterBuilder(
-            name="column.distinct_values.count",
-            metric_name="column.distinct_values.count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            json_serialize=False,
-            data_context=None,
-        ),
-        "column_values_unique_unexpected_count_metric_multi_batch_parameter_builder": MetricMultiBatchParameterBuilder(
-            name="column_values.unique.unexpected_count",
-            metric_name="column_values.unique.unexpected_count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            json_serialize=False,
-            data_context=None,
-        ),
-        "column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder": MetricMultiBatchParameterBuilder(
-            name="column_values.nonnull.unexpected_count",
-            metric_name="column_values.nonnull.unexpected_count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            json_serialize=False,
-            data_context=None,
-        ),
-    }
+    class CommonlyUsedParameterBuilders:
+        @property
+        def table_row_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="table.row_count",
+                metric_name="table.row_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=True,
+                replace_nan_with_zero=True,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+        @property
+        def column_distinct_values_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column.distinct_values.count",
+                metric_name="column.distinct_values.count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=True,
+                replace_nan_with_zero=True,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+        @property
+        def column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column_values.unique.unexpected_count",
+                metric_name="column_values.unique.unexpected_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=True,
+                replace_nan_with_zero=True,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+        @property
+        def column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column_values.nonnull.unexpected_count",
+                metric_name="column_values.nonnull.unexpected_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
+    COMMONLY_USED_PARAMETER_BUILDERS: CommonlyUsedParameterBuilders = (
+        CommonlyUsedParameterBuilders()
+    )
 
     __alias__: Optional[str] = None
 
