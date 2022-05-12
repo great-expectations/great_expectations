@@ -1,5 +1,5 @@
 import os
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 import altair as alt
 import nbconvert
@@ -9,6 +9,7 @@ from freezegun import freeze_time
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.batch import Batch
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import (
@@ -2566,7 +2567,7 @@ def quentin_expected_expectation_suite(
 
 
 @pytest.fixture
-def volume_data_assistant_result(
+def bobby_volume_data_assistant_result(
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> VolumeDataAssistantResult:
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -2578,6 +2579,116 @@ def volume_data_assistant_result(
     }
 
     return context.assistants.volume.run(batch_request=batch_request)
+
+
+@pytest.fixture
+def quentin_explicit_instantiation_result_actual_time(
+    quentin_columnar_table_multi_batch_data_context,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+) -> Tuple[Validator, VolumeDataAssistantResult]:
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="volume_data_assistant",
+    )
+    assert len(validator.batches) == 36
+
+    data_assistant_name: str = "test_volume_data_assistant"
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name=data_assistant_name,
+        validator=validator,
+    )
+
+    data_assistant_result: DataAssistantResult = data_assistant.run()
+
+    return validator, cast(VolumeDataAssistantResult, data_assistant_result)
+
+
+@pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
+def quentin_explicit_instantiation_result_frozen_time(
+    quentin_columnar_table_multi_batch_data_context,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+) -> Tuple[Validator, VolumeDataAssistantResult]:
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="volume_data_assistant",
+    )
+    assert len(validator.batches) == 36
+
+    data_assistant_name: str = "test_volume_data_assistant"
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name=data_assistant_name,
+        validator=validator,
+    )
+
+    data_assistant_result: DataAssistantResult = data_assistant.run()
+
+    return validator, cast(VolumeDataAssistantResult, data_assistant_result)
+
+
+@pytest.fixture
+def quentin_implicit_invocation_result_actual_time(
+    quentin_columnar_table_multi_batch_data_context,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request
+    )
+
+    return cast(VolumeDataAssistantResult, data_assistant_result)
+
+
+@pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
+def quentin_implicit_invocation_result_frozen_time(
+    quentin_columnar_table_multi_batch_data_context,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request
+    )
+
+    return cast(VolumeDataAssistantResult, data_assistant_result)
 
 
 def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
@@ -2680,31 +2791,33 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 
 
 def test_volume_data_assistant_result_serialization(
-    volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    volume_data_assistant_result_as_dict: dict = volume_data_assistant_result.to_dict()
+    volume_data_assistant_result_as_dict: dict = (
+        bobby_volume_data_assistant_result.to_dict()
+    )
     assert (
         set(volume_data_assistant_result_as_dict.keys())
         == DataAssistantResult.ALLOWED_KEYS
     )
     assert (
-        volume_data_assistant_result.to_json_dict()
+        bobby_volume_data_assistant_result.to_json_dict()
         == volume_data_assistant_result_as_dict
     )
 
 
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
-    volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
     metrics_by_domain: Optional[
         Dict[Domain, Dict[str, ParameterNode]]
-    ] = volume_data_assistant_result.metrics_by_domain
+    ] = bobby_volume_data_assistant_result.metrics_by_domain
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        volume_data_assistant_result.batch_id_to_batch_identifier_display_name_map[
+        bobby_volume_data_assistant_result.batch_id_to_batch_identifier_display_name_map[
             batch_id
         ]
         is not None
@@ -2716,43 +2829,21 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     )
 
 
-@freeze_time("09/26/2019 13:42:41")
 def test_get_metrics_and_expectations_using_explicit_instantiation(
-    quentin_columnar_table_multi_batch_data_context,
+    quentin_explicit_instantiation_result_frozen_time,
     quentin_expected_metrics_by_domain,
     quentin_expected_expectation_suite,
     quentin_expected_rule_based_profiler_configuration,
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="volume_data_assistant",
-    )
-    assert len(validator.batches) == 36
+    validator: Validator
+    data_assistant_result: DataAssistantResult
+    validator, data_assistant_result = quentin_explicit_instantiation_result_frozen_time
 
     data_assistant_name: str = "test_volume_data_assistant"
 
     expected_expectation_suite: ExpectationSuite = quentin_expected_expectation_suite(
         name=data_assistant_name
     )
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name=data_assistant_name,
-        validator=validator,
-    )
-
-    data_assistant_result: DataAssistantResult = data_assistant.run()
 
     assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
 
@@ -2789,28 +2880,19 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
 
 @freeze_time("09/26/2019 13:42:41")
 def test_get_metrics_and_expectations_using_implicit_invocation(
-    quentin_columnar_table_multi_batch_data_context,
+    quentin_implicit_invocation_result_frozen_time,
     quentin_expected_metrics_by_domain,
     quentin_expected_expectation_suite,
     quentin_expected_rule_based_profiler_configuration,
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
+    data_assistant_result: DataAssistantResult = (
+        quentin_implicit_invocation_result_frozen_time
+    )
 
     registered_data_assistant_name: str = "volume_data_assistant"
 
     expected_expectation_suite: ExpectationSuite = quentin_expected_expectation_suite(
         name=registered_data_assistant_name
-    )
-
-    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
     )
 
     assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
@@ -2847,52 +2929,49 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
 
 
 def test_execution_time_within_proper_bounds_using_explicit_instantiation(
-    quentin_columnar_table_multi_batch_data_context,
+    quentin_explicit_instantiation_result_actual_time,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="volume_data_assistant",
-    )
-    assert len(validator.batches) == 36
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        validator=validator,
-    )
-    data_assistant_result: DataAssistantResult = data_assistant.run()
+    validator: Validator
+    data_assistant_result: DataAssistantResult
+    validator, data_assistant_result = quentin_explicit_instantiation_result_actual_time
 
     # Execution time (in seconds) must have non-trivial value.
     assert data_assistant_result.execution_time > 0.0
 
 
 def test_execution_time_within_proper_bounds_using_implicit_invocation(
-    quentin_columnar_table_multi_batch_data_context,
+    quentin_implicit_invocation_result_actual_time,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+    data_assistant_result: DataAssistantResult = (
+        quentin_implicit_invocation_result_actual_time
     )
 
     # Execution time (in seconds) must have non-trivial value.
     assert data_assistant_result.execution_time > 0.0
+
+
+def test_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
+    quentin_explicit_instantiation_result_actual_time,
+):
+    validator: Validator
+    data_assistant_result: DataAssistantResult
+    validator, data_assistant_result = quentin_explicit_instantiation_result_actual_time
+    metrics_by_domain: Optional[
+        Dict[Domain, Dict[str, ParameterNode]]
+    ] = data_assistant_result.metrics_by_domain
+
+    batch: Batch
+    expected_batch_ids: List[str] = [batch.id for batch in validator.batches.values()]
+
+    parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+    fully_qualified_parameter_name: str
+    parameter_node: ParameterNode
+    assert all(
+        list(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY].keys())
+        == expected_batch_ids
+        for parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.values()
+        for fully_qualified_parameter_name, parameter_node in parameter_values_for_fully_qualified_parameter_names.items()
+    )
 
 
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
@@ -3002,18 +3081,18 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
 
 
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
-    volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    plot_result: PlotResult = volume_data_assistant_result.plot()
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot()
 
     table_domain_chart: dict = plot_result.charts[0].to_dict()
     assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
 
 
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
-    volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    plot_result: PlotResult = volume_data_assistant_result.plot()
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot()
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
     assert len(column_domain_charts) == 18  # One for each column present
@@ -3042,10 +3121,10 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_ch
 
 
 def test_volume_data_assistant_plot_include_column_names_filters_output(
-    volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     include_column_names: List[str] = ["VendorID", "pickup_datetime"]
-    plot_result: PlotResult = volume_data_assistant_result.plot(
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot(
         include_column_names=include_column_names
     )
 
@@ -3055,10 +3134,10 @@ def test_volume_data_assistant_plot_include_column_names_filters_output(
 
 
 def test_volume_data_assistant_plot_exclude_column_names_filters_output(
-    volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     exclude_column_names: List[str] = ["VendorID", "pickup_datetime"]
-    plot_result: PlotResult = volume_data_assistant_result.plot(
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot(
         exclude_column_names=exclude_column_names
     )
 
@@ -3068,10 +3147,10 @@ def test_volume_data_assistant_plot_exclude_column_names_filters_output(
 
 
 def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_error(
-    volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     with pytest.raises(ValueError) as e:
-        volume_data_assistant_result.plot(
+        bobby_volume_data_assistant_result.plot(
             include_column_names=["VendorID"], exclude_column_names=["pickup_datetime"]
         )
 
@@ -3079,7 +3158,7 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
 
 
 def test_volume_data_assistant_plot_custom_theme_overrides(
-    volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     font: str = "Comic Sans MS"
     title_color: str = "#FFA500"
@@ -3102,7 +3181,7 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
         },
         "axisX": {"titleColor": x_axis_title_color},
     }
-    plot_result: PlotResult = volume_data_assistant_result.plot(
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot(
         prescriptive=True, theme=theme
     )
 
