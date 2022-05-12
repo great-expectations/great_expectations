@@ -167,6 +167,23 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 data_context=None,
             )
 
+        @property
+        def column_values_null_unexpected_count_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return MetricMultiBatchParameterBuilder(
+                name="column_values.null.unexpected_count",
+                metric_name="column_values.null.unexpected_count",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=False,
+                data_context=None,
+            )
+
     COMMONLY_USED_PARAMETER_BUILDERS: CommonlyUsedParameterBuilders = (
         CommonlyUsedParameterBuilders()
     )
