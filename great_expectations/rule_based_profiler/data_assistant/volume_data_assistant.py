@@ -55,13 +55,11 @@ class VolumeDataAssistant(DataAssistant):
         self,
     ) -> Dict[Domain, List[ParameterBuilder]]:
         table_row_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-            DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS[
-                "table_row_count_metric_multi_batch_parameter_builder"
-            ]
+            DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.table_row_count_metric_multi_batch_parameter_builder
         )
-        column_distinct_values_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS[
-            "column_distinct_values_count_metric_multi_batch_parameter_builder"
-        ]
+        column_distinct_values_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
+            DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.column_distinct_values_count_metric_multi_batch_parameter_builder
+        )
 
         set_parameter_builders_json_serialize(
             parameter_builders=[
