@@ -25,6 +25,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
+    AttributedResolvedMetrics,
     Builder,
     Domain,
     MetricComputationResult,
@@ -32,9 +33,6 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container,
     get_fully_qualified_parameter_names,
-)
-from great_expectations.rule_based_profiler.types.attributed_resolved_metrics import (
-    AttributedResolvedMetrics,
 )
 from great_expectations.types.attributes import Attributes
 from great_expectations.validator.metric_configuration import MetricConfiguration

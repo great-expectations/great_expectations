@@ -12,13 +12,11 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    AttributedResolvedMetrics,
     Domain,
     MetricValues,
     ParameterContainer,
     ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.attributed_resolved_metrics import (
-    AttributedResolvedMetrics,
 )
 from great_expectations.types.attributes import Attributes
 

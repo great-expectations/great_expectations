@@ -22,14 +22,12 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    AttributedResolvedMetrics,
     Domain,
     MetricValues,
     NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.attributed_resolved_metrics import (
-    AttributedResolvedMetrics,
 )
 from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
