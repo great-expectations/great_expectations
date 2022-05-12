@@ -1945,15 +1945,15 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
         expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
             config_version=1.0,
             name=name,
-            variables={"bootstrap_random_seed": None},
+            variables={"random_seed": None},
             rules={
                 "default_expect_table_row_count_to_be_between_rule": {
                     "variables": {
                         "false_positive_rate": 0.05,
                         "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
-                        "num_bootstrap_samples": 9999,
-                        "include_bootstrap_samples_histogram_in_details": False,
+                        "n_resamples": 9999,
+                        "include_estimator_samples_histogram_in_details": False,
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
                     },
@@ -1984,7 +1984,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                                     "truncate_values": "$variables.truncate_values",
                                     "enforce_numeric_metric": True,
-                                    "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                                    "n_resamples": "$variables.n_resamples",
                                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                                     "json_serialize": True,
                                     "estimator": "$variables.estimator",
@@ -1992,8 +1992,8 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "metric_name": "table.row_count",
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
-                                    "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                                    "include_bootstrap_samples_histogram_in_details": "$variables.include_bootstrap_samples_histogram_in_details",
+                                    "random_seed": "$variables.random_seed",
+                                    "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
                                     "round_decimals": "$variables.round_decimals",
                                 }
                             ],
@@ -2015,8 +2015,8 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "false_positive_rate": 0.05,
                         "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
-                        "num_bootstrap_samples": 9999,
-                        "include_bootstrap_samples_histogram_in_details": False,
+                        "n_resamples": 9999,
+                        "include_estimator_samples_histogram_in_details": False,
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
                     },
@@ -2048,7 +2048,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                                     "truncate_values": "$variables.truncate_values",
                                     "enforce_numeric_metric": True,
-                                    "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                                    "n_resamples": "$variables.n_resamples",
                                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                                     "json_serialize": True,
                                     "estimator": "$variables.estimator",
@@ -2056,8 +2056,8 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "metric_name": "column.distinct_values.count",
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
-                                    "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                                    "include_bootstrap_samples_histogram_in_details": "$variables.include_bootstrap_samples_histogram_in_details",
+                                    "random_seed": "$variables.random_seed",
+                                    "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
                                     "round_decimals": "$variables.round_decimals",
                                 }
                             ],
@@ -2770,12 +2770,12 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
 
     assert deep_filter_properties_iterable(
         properties=data_assistant_result.profiler_config.to_json_dict(),
-        delete_fields={"bootstrap_random_seed"},
+        delete_fields={"random_seed"},
     ) == deep_filter_properties_iterable(
         properties=quentin_expected_rule_based_profiler_configuration(
             name=data_assistant_name
         ).to_json_dict(),
-        delete_fields={"bootstrap_random_seed"},
+        delete_fields={"random_seed"},
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
@@ -2829,12 +2829,12 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
 
     assert deep_filter_properties_iterable(
         properties=data_assistant_result.profiler_config.to_json_dict(),
-        delete_fields={"bootstrap_random_seed"},
+        delete_fields={"random_seed"},
     ) == deep_filter_properties_iterable(
         properties=quentin_expected_rule_based_profiler_configuration(
             name=registered_data_assistant_name
         ).to_json_dict(),
-        delete_fields={"bootstrap_random_seed"},
+        delete_fields={"random_seed"},
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
