@@ -358,6 +358,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
         expectation_type: str,
         expectation_kwargs: Optional[Dict[str, Any]],
     ) -> Tuple[Optional[ParameterContainer], Optional[List[ParameterBuilder]]]:
+        """
+        This method obtains "variables" and "validation_parameter_builder" (from "expectation_configuration_builder")
+        from "Rule" implementing self-initialization logic in optional "RuleBasedProfilerConfig" of "Expectation".
+        """
         profiler: Optional[
             BaseRuleBasedProfiler
         ] = self._validator.build_rule_based_profiler_for_expectation(
