@@ -132,7 +132,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 Possible values for the estimator bandwidth method are described at:
                 https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
             random_seed: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
-                uses "np.random.choice"; otherwise, utilizes "np.random.Generator(np.random.PCG64(bootstrap_random_seed))".
+                uses "np.random.choice"; otherwise, utilizes "np.random.Generator(np.random.PCG64(random_seed))".
             include_estimator_samples_histogram_in_details: Applicable only for the "bootstrap" sampling method -- if
                 True, then add 10-bin histogram of bootstraps to "details"; otherwise, omit this information (default).
             truncate_values: user-configured directive for whether or not to allow the computed parameter values

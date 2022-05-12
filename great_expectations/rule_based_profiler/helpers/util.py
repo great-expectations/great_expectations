@@ -516,7 +516,7 @@ def compute_kde_quantiles_point_estimate(
             procedure.
         bw_method: The estimator bandwidth as described in:
             https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
-        random_seed: An optional random_seed to pass to "np.random.Generator(np.random.PCG64(bootstrap_random_seed))"
+        random_seed: An optional random_seed to pass to "np.random.Generator(np.random.PCG64(random_seed))"
             for making probabilistic sampling deterministic.
     """
     lower_quantile_pct: float = false_positive_rate / 2.0

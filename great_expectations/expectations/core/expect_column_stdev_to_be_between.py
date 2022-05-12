@@ -118,7 +118,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
         quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
         estimator=f"{VARIABLES_KEY}estimator",
         num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
-        bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
+        random_seed=f"{VARIABLES_KEY}random_seed",
         include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
@@ -141,7 +141,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
                     "quantile_statistic_interpolation_method": "auto",
                     "estimator": "bootstrap",
                     "num_bootstrap_samples": 9999,
-                    "bootstrap_random_seed": None,
+                    "random_seed": None,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": 0,
