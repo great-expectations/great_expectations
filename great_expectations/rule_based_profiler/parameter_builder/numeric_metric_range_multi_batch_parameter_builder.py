@@ -719,7 +719,9 @@ positive integer, or must be omitted (or set to None).
             )
 
         # Obtain bw_method override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        bw_method: Optional[Any] = get_parameter_value_and_validate_return_type(
+        bw_method: Optional[
+            Union[str, float, Callable]
+        ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=kwargs.get("bw_method"),
             expected_return_type=None,
