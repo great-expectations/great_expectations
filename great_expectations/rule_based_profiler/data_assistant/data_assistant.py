@@ -104,6 +104,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="table.row_count",
                 metric_value_kwargs=None,
@@ -114,6 +117,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column.distinct_values.count",
                 metric_value_kwargs=None,
@@ -124,6 +130,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column_values.unique.unexpected_count",
                 metric_value_kwargs=None,
@@ -134,6 +143,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column_values.nonnull.unexpected_count",
                 metric_value_kwargs=None,
@@ -144,6 +156,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column_values.null.unexpected_count",
                 metric_value_kwargs=None,
@@ -154,6 +169,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column.min",
                 metric_value_kwargs=None,
@@ -164,6 +182,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column.max",
                 metric_value_kwargs=None,
@@ -174,6 +195,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column.mean",
                 metric_value_kwargs=None,
@@ -184,6 +208,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column.median",
                 metric_value_kwargs=None,
@@ -194,6 +221,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column.standard_deviation",
                 metric_value_kwargs=None,
@@ -204,6 +234,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self,
             json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name="column.quantile_values",
                 metric_value_kwargs={
@@ -219,6 +252,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             metric_value_kwargs: Optional[Union[str, dict]] = None,
             json_serialize: Union[str, bool] = True,
         ) -> MetricMultiBatchParameterBuilder:
+            """
+            This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
+            """
             return MetricMultiBatchParameterBuilder(
                 name=metric_name,
                 metric_name=metric_name,
