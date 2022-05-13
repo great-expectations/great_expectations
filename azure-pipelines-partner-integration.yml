@@ -10,7 +10,7 @@ stages:
     jobs:
       - job: partner_integration_rubenshift
         steps:
-          - bash: cd assets/partners/rubenshift; docker compose -f ../common/docker-compose-int-type1.yml up --exit-code-from integration_test;
+          - bash: cd assets/partners/rubenshift; docker compose up --exit-code-from integration_test;
             name: RunDockerComposeUp
             env:
               DB_URL: $(REDSHIFT_URL)
