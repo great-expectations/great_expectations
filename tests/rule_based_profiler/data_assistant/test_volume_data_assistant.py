@@ -26,6 +26,7 @@ from great_expectations.rule_based_profiler.types import (
     ParameterNode,
     SemanticDomainTypes,
 )
+from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
@@ -2785,7 +2786,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 
     # Run notebook
     ep: nbconvert.preprocessors.ExecutePreprocessor = (
-        nbconvert.preprocessors.ExecutePreprocessor(timeout=60, kernel_name="python3")
+        nbconvert.preprocessors.ExecutePreprocessor(timeout=180, kernel_name="python3")
     )
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
@@ -3217,3 +3218,90 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
         chart.config.axisX["titleColor"] == x_axis_title_color
         for chart in plot_result.charts
     )
+
+
+def test_volume_data_assistant_plot_return_tooltip(
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot(prescriptive=True)
+
+    expected_tooltip: List[alt.Tooltip] = [
+        alt.Tooltip(
+            **{
+                "field": "column",
+                "format": "",
+                "title": "Column",
+                "type": AltairDataTypes.NOMINAL.value,
+            }
+        ),
+        alt.Tooltip(
+            **{
+                "field": "month",
+                "format": "",
+                "title": "Month",
+                "type": AltairDataTypes.NOMINAL.value,
+            }
+        ),
+        alt.Tooltip(
+            **{
+                "field": "name",
+                "format": "",
+                "title": "Name",
+                "type": AltairDataTypes.NOMINAL.value,
+            }
+        ),
+        alt.Tooltip(
+            **{
+                "field": "year",
+                "format": "",
+                "title": "Year",
+                "type": AltairDataTypes.NOMINAL.value,
+            }
+        ),
+        alt.Tooltip(
+            **{
+                "field": "min_value",
+                "format": ",",
+                "title": "Min Value",
+                "type": AltairDataTypes.QUANTITATIVE.value,
+            }
+        ),
+        alt.Tooltip(
+            **{
+                "field": "max_value",
+                "format": ",",
+                "title": "Max Value",
+                "type": AltairDataTypes.QUANTITATIVE.value,
+            }
+        ),
+        alt.Tooltip(
+            **{
+                "field": "strict_min",
+                "format": "",
+                "title": "Strict Min",
+                "type": AltairDataTypes.NOMINAL.value,
+            }
+        ),
+        alt.Tooltip(
+            **{
+                "field": "strict_max",
+                "format": "",
+                "title": "Strict Max",
+                "type": AltairDataTypes.NOMINAL.value,
+            }
+        ),
+        alt.Tooltip(
+            **{
+                "field": "column_distinct_values_count",
+                "format": ",",
+                "title": "Column Distinct Values Count",
+                "type": AltairDataTypes.QUANTITATIVE.value,
+            }
+        ),
+    ]
+
+    single_column_return_chart: alt.LayerChart = plot_result.charts[2]
+    layer_1: alt.Chart = single_column_return_chart.layer[1]
+    actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
+
+    assert actual_tooltip == expected_tooltip

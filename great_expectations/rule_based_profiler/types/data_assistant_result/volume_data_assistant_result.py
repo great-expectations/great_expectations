@@ -1,15 +1,11 @@
-from typing import Any, Callable, Dict, KeysView, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import altair as alt
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    MetricValues,
-    ParameterNode,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
@@ -76,21 +72,23 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 "You may either use `include_column_names` or `exclude_column_names` (but not both)."
             )
 
-        display_charts: List[alt.Chart] = []
-        return_charts: List[alt.Chart] = []
+        display_charts: Union[List[alt.VConcatChart], List[alt.LayerChart]] = []
+        return_charts: Union[List[alt.Chart], List[alt.LayerChart]] = []
 
         expectation_configurations: List[
             ExpectationConfiguration
         ] = self.expectation_configurations
 
-        table_domain_chart: List[alt.Chart] = self._plot_table_domain_charts(
+        table_domain_chart: Union[
+            List[alt.Chart], List[alt.LayerChart]
+        ] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
         )
         display_charts.extend(table_domain_chart)
         return_charts.extend(table_domain_chart)
 
-        column_domain_display_chart: alt.VConcatChart
+        column_domain_display_chart: List[alt.VConcatChart]
         column_domain_return_charts: List[alt.Chart]
         (
             column_domain_display_charts,
@@ -168,7 +166,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             Domain, Dict[str, ParameterNode]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
 
-        display_chart: List[
+        display_charts: List[
             alt.VConcatChart
         ] = self._create_display_chart_for_column_domain_expectation(
             expectation_configurations=column_based_expectation_configurations,
@@ -185,9 +183,9 @@ class VolumeDataAssistantResult(DataAssistantResult):
                     plot_mode=plot_mode,
                 )
             )
-            return_charts.extend([return_chart])
+            return_charts.append(return_chart)
 
-        return display_chart, return_charts
+        return display_charts, return_charts
 
     def _create_chart_for_table_domain_expectation(
         self,
@@ -203,13 +201,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
-        domain_name: str = "batch"
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
 
-        df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
+        df: pd.DataFrame = self._create_df_for_charting(
             metric_name=metric_name,
-            domain_name=domain_name,
             attributed_values_by_metric_name=attributed_values_by_metric_name,
             expectation_configuration=expectation_configuration,
             plot_mode=plot_mode,
@@ -249,14 +244,12 @@ class VolumeDataAssistantResult(DataAssistantResult):
         if plot_mode is PlotMode.PRESCRIPTIVE:
             return_impl = self.get_expect_domain_values_to_be_between_chart
         else:
-            return_impl = self.get_line_chart
+            plot_impl = self.get_line_chart
 
-        chart: alt.Chart = return_impl(
+        chart: alt.Chart = plot_impl(
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
             subtitle=subtitle,
         )
         return chart
@@ -274,9 +267,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
         )
-
-        domain_name: str = "batch"
-        domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
 
         attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
             attributed_metrics.values()
@@ -303,10 +293,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
     ) -> alt.Chart:
-        domain_name: str = "batch"
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
-
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
             domain.domain_kwargs["column"]: domain
@@ -328,10 +314,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
-        df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
+        df: pd.DataFrame = self._create_df_for_charting(
             metric_name=metric_name,
-            domain_name=domain_name,
             attributed_values_by_metric_name=attributed_values_by_metric_name,
             expectation_configuration=expectation_configuration,
             plot_mode=plot_mode,
@@ -352,7 +338,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
     def _chart_column_values(
         self,
-        column_dfs: List[pd.DataFrame],
+        column_dfs: List[Tuple[str, pd.DataFrame]],
         metric_name: str,
         metric_type: alt.StandardType,
         domain_name: str,
@@ -361,28 +347,23 @@ class VolumeDataAssistantResult(DataAssistantResult):
     ) -> Tuple[alt.VConcatChart]:
         plot_impl: Callable[
             [
-                pd.DataFrame,
+                List[Tuple[str, pd.DataFrame]],
                 str,
                 alt.StandardType,
-                str,
-                alt.StandardType,
-                Optional[str],
             ],
-            alt.Chart,
+            alt.VConcatChart,
         ]
         if plot_mode is PlotMode.PRESCRIPTIVE:
             display_impl = (
                 self.get_interactive_detail_expect_column_values_to_be_between_chart
             )
         else:
-            display_impl = self.get_interactive_detail_multi_line_chart
+            plot_impl = self.get_interactive_detail_multi_line_chart
 
-        display_chart: alt.Chart = display_impl(
+        display_chart: alt.VConcatChart = plot_impl(
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
         )
 
         return [display_chart]
