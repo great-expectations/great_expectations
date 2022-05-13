@@ -436,6 +436,9 @@ TAXI_SPLITTING_TEST_CASES: TaxiSplittingTestCases = TaxiSplittingTestCases(
 def test_sqlite_split(
     test_case, sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
 ):
+    """What does this test and why?
+    splitters should work with sqlite.
+    """
 
     engine: SqlAlchemyExecutionEngine = (
         in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
@@ -461,6 +464,9 @@ def test_sqlite_split(
 def test_sqlite_split_on_year(
     sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
 ):
+    """What does this test and why?
+    splitters should work with sqlite and return the correct rows.
+    """
 
     engine: SqlAlchemyExecutionEngine = (
         in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
@@ -498,6 +504,9 @@ def test_sqlite_split_on_year(
 def test_sqlite_split_and_sample_using_limit(
     sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
 ):
+    """What does this test and why?
+    splitters and samplers should work together in sqlite.
+    """
 
     engine: SqlAlchemyExecutionEngine = (
         in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
