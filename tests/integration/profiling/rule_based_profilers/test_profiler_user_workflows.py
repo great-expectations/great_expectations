@@ -1783,7 +1783,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         auto=True,
         profiler_config=custom_profiler_config,
     )
-    assert not result.success
+    assert result.success
 
     value_ranges_expected = [
         [
@@ -1791,7 +1791,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             6.5,
         ],
         [
-            8.52,
+            8.44,
             9.56,
         ],
         [
