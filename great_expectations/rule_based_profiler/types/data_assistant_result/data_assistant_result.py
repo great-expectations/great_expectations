@@ -912,12 +912,3 @@ class DataAssistantResult(SerializableDictDot):
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
         pass
-
-    @abstractmethod
-    def plot_expectation_validations(
-        self,
-        theme: Optional[Dict[str, Any]] = None,
-        include_column_names: Optional[List[str]] = None,
-        exclude_column_names: Optional[List[str]] = None,
-    ) -> PlotResult:
-        pass
