@@ -896,22 +896,28 @@ class DataAssistantResult(SerializableDictDot):
         return interactive_detail_multi_line_chart
 
     @abstractmethod
-    def plot(
+    def plot_metrics(
         self,
-        prescriptive: bool = False,
         theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
-        """
-        Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
+        pass
 
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+    @abstractmethod
+    def plot_expectations_and_metrics(
+        self,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        pass
 
-        Args:
-            prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
-            theme: Altair top-level chart configuration dictionary
-
-        Returns:
-            PlotResult wrapper object around Altair charts.
-        """
+    @abstractmethod
+    def plot_expectation_validations(
+        self,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
         pass

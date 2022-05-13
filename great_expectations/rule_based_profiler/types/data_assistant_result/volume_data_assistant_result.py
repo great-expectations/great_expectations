@@ -20,6 +20,40 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_res
 
 
 class VolumeDataAssistantResult(DataAssistantResult):
+    def plot_metrics(
+        self,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        return self.plot(
+            prescriptive=False,
+            theme=theme,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+        )
+
+    def plot_expectations_and_metrics(
+        self,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        return self.plot(
+            prescriptive=True,
+            theme=theme,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+        )
+
+    def plot_expectation_validations(
+        self,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        pass
+
     def plot(
         self,
         prescriptive: bool = False,
