@@ -435,6 +435,7 @@ specified (empty "metric_name" value detected)."""
             )
             if attributed_resolved_metrics is None:
                 attributed_resolved_metrics = AttributedResolvedMetrics(
+                    batch_ids=batch_ids,
                     metric_attributes=metric_configuration.metric_value_kwargs,
                     metric_values_by_batch_id=None,
                 )
