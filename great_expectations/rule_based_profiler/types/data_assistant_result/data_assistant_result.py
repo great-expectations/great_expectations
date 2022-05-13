@@ -30,6 +30,7 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_com
     determine_plot_title,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
+    PlotMode,
     PlotResult,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
@@ -1046,7 +1047,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_name: str,
         attributed_values_by_metric_name: Dict[str, ParameterNode],
         expectation_configuration: ExpectationConfiguration,
-        prescriptive: bool,
+        plot_mode: PlotMode,
     ) -> pd.DataFrame:
         batch_ids: KeysView[str]
         metric_values: MetricValues
@@ -1097,7 +1098,7 @@ class DataAssistantResult(SerializableDictDot):
 
         df = pd.concat([df, batch_identifiers], axis=1)
 
-        if prescriptive:
+        if plot_mode is PlotMode.PRESCRIPTIVE:
             for kwarg_name in expectation_configuration.kwargs:
                 df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
 
@@ -1118,7 +1119,7 @@ class DataAssistantResult(SerializableDictDot):
         self,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         expectation_configurations: List[ExpectationConfiguration],
-        prescriptive: bool,
+        plot_mode: PlotMode,
     ) -> List[pd.DataFrame]:
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
@@ -1148,7 +1149,7 @@ class DataAssistantResult(SerializableDictDot):
                 metric_name,
                 attributed_values_by_metric_name,
                 expectation_configuration,
-                prescriptive,
+                plot_mode,
             )
 
             column_name: str = expectation_configuration.kwargs["column"]
@@ -1157,19 +1158,40 @@ class DataAssistantResult(SerializableDictDot):
         return column_dfs
 
     @abstractmethod
-    def plot(
+    def plot_metrics(
         self,
-        prescriptive: bool = False,
         theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
         """
-        Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
+        Use contents of "DataAssistantResult" object to display metrics for visualization purposes.
 
         Altair theme configuration reference:
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
+            theme: Altair top-level chart configuration dictionary
+
+        Returns:
+            PlotResult wrapper object around Altair charts.
+        """
+        pass
+
+    @abstractmethod
+    def plot_expectations_and_metrics(
+        self,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        """
+        Use contents of "DataAssistantResult" object to display metrics and expectations for visualization purposes.
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
             theme: Altair top-level chart configuration dictionary
 
         Returns:

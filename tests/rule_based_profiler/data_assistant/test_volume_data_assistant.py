@@ -2980,7 +2980,9 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    new_cell: str = "data_assistant_result.plot(this_is_not_a_real_parameter=True)"
+    new_cell: str = (
+        "data_assistant_result.plot_metrics(this_is_not_a_real_parameter=True)"
+    )
 
     with pytest.raises(nbconvert.preprocessors.CellExecutionError):
         run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
@@ -3002,7 +3004,7 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution(
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    new_cell: str = "data_assistant_result.plot()"
+    new_cell: str = "data_assistant_result.plot_metrics()"
 
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         context=context,
@@ -3022,7 +3024,7 @@ def test_volume_data_assistant_plot_prescriptive_notebook_execution(
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    new_cell: str = "data_assistant_result.plot(prescriptive=True)"
+    new_cell: str = "data_assistant_result.plot_expectations_and_metrics()"
 
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         context=context,
@@ -3044,7 +3046,7 @@ def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
 
     theme = {"font": "Comic Sans MS"}
 
-    new_cell: str = f"data_assistant_result.plot(theme={theme})"
+    new_cell: str = f"data_assistant_result.plot_metrics(theme={theme})"
 
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         context=context,
@@ -3066,7 +3068,9 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
 
     theme = {"font": "Comic Sans MS"}
 
-    new_cell: str = f"data_assistant_result.plot(prescriptive=True, theme={theme})"
+    new_cell: str = (
+        f"data_assistant_result.plot_expectations_and_metrics(theme={theme})"
+    )
 
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         context=context,
@@ -3084,7 +3088,7 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    plot_result: PlotResult = bobby_volume_data_assistant_result.plot()
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics()
 
     table_domain_chart: dict = plot_result.charts[0].to_dict()
     assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
@@ -3093,7 +3097,7 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_cha
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    plot_result: PlotResult = bobby_volume_data_assistant_result.plot()
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics()
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
     assert len(column_domain_charts) == 18  # One for each column present
@@ -3125,7 +3129,7 @@ def test_volume_data_assistant_plot_include_column_names_filters_output(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     include_column_names: List[str] = ["VendorID", "pickup_datetime"]
-    plot_result: PlotResult = bobby_volume_data_assistant_result.plot(
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics(
         include_column_names=include_column_names
     )
 
@@ -3138,7 +3142,7 @@ def test_volume_data_assistant_plot_exclude_column_names_filters_output(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     exclude_column_names: List[str] = ["VendorID", "pickup_datetime"]
-    plot_result: PlotResult = bobby_volume_data_assistant_result.plot(
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics(
         exclude_column_names=exclude_column_names
     )
 
@@ -3151,7 +3155,7 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     with pytest.raises(ValueError) as e:
-        bobby_volume_data_assistant_result.plot(
+        bobby_volume_data_assistant_result.plot_metrics(
             include_column_names=["VendorID"], exclude_column_names=["pickup_datetime"]
         )
 
@@ -3163,7 +3167,7 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
 ) -> None:
     font: str = "Comic Sans MS"
     title_color: str = "#FFA500"
-    title_font_size: str = 48
+    title_font_size: int = 48
     point_size: int = 1000
     y_axis_label_color: str = "red"
     y_axis_label_angle: int = 180
@@ -3182,8 +3186,8 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
         },
         "axisX": {"titleColor": x_axis_title_color},
     }
-    plot_result: PlotResult = bobby_volume_data_assistant_result.plot(
-        prescriptive=True, theme=theme
+    plot_result: PlotResult = (
+        bobby_volume_data_assistant_result.plot_expectations_and_metrics(theme=theme)
     )
 
     # ensure a config has been added to each chart
@@ -3219,7 +3223,9 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
 def test_volume_data_assistant_plot_return_tooltip(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    plot_result: PlotResult = bobby_volume_data_assistant_result.plot(prescriptive=True)
+    plot_result: PlotResult = (
+        bobby_volume_data_assistant_result.plot_expectations_and_metrics()
+    )
 
     expected_tooltip: List[alt.Tooltip] = [
         alt.Tooltip(
