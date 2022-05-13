@@ -5,4 +5,5 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+RUN yes | great_expectations init
 COPY . /app/
