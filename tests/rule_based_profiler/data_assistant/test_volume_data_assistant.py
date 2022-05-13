@@ -3145,81 +3145,98 @@ def test_volume_data_assistant_plot_return_tooltip(
     expected_tooltip: List[alt.Tooltip] = [
         alt.Tooltip(
             {
-                "field": "column",
-                "format": "",
-                "title": "Column",
-                "type": AltairDataTypes.NOMINAL.value,
+                "shorthand": {
+                    "field": "column",
+                    "format": "",
+                    "title": "Column",
+                    "type": AltairDataTypes.NOMINAL.value,
+                }
             }
         ),
         alt.Tooltip(
             {
-                "field": "month",
-                "format": "",
-                "title": "Month",
-                "type": AltairDataTypes.ORDINAL.value,
+                "shorthand": {
+                    "field": "month",
+                    "format": "",
+                    "title": "Month",
+                    "type": AltairDataTypes.ORDINAL.value,
+                }
             }
         ),
         alt.Tooltip(
             {
-                "field": "name",
-                "format": "",
-                "title": "Name",
-                "type": AltairDataTypes.NOMINAL.value,
+                "shorthand": {
+                    "field": "name",
+                    "format": "",
+                    "title": "Name",
+                    "type": AltairDataTypes.NOMINAL.value,
+                }
             }
         ),
         alt.Tooltip(
             {
-                "field": "year",
-                "format": "",
-                "title": "Year",
-                "type": AltairDataTypes.ORDINAL.value,
+                "shorthand": {
+                    "field": "year",
+                    "format": "",
+                    "title": "Year",
+                    "type": AltairDataTypes.ORDINAL.value,
+                }
             }
         ),
         alt.Tooltip(
             {
-                "field": "min_value",
-                "format": ",",
-                "title": "Min Value",
-                "type": AltairDataTypes.QUANTITATIVE.value,
+                "shorthand": {
+                    "field": "min_value",
+                    "format": ",",
+                    "title": "Min Value",
+                    "type": AltairDataTypes.QUANTITATIVE.value,
+                }
             }
         ),
         alt.Tooltip(
             {
-                "field": "max_value",
-                "format": ",",
-                "title": "Max Value",
-                "type": AltairDataTypes.QUANTITATIVE.value,
+                "shorthand": {
+                    "field": "max_value",
+                    "format": ",",
+                    "title": "Max Value",
+                    "type": AltairDataTypes.QUANTITATIVE.value,
+                }
             }
         ),
         alt.Tooltip(
             {
-                "field": "strict_min",
-                "format": "",
-                "title": "Strict Min",
-                "type": AltairDataTypes.NOMINAL.value,
+                "shorthand": {
+                    "field": "strict_min",
+                    "format": "",
+                    "title": "Strict Min",
+                    "type": AltairDataTypes.NOMINAL.value,
+                }
             }
         ),
         alt.Tooltip(
             {
-                "field": "strict_max",
-                "format": "",
-                "title": "Strict Max",
-                "type": AltairDataTypes.NOMINAL.value,
+                "shorthand": {
+                    "field": "strict_max",
+                    "format": "",
+                    "title": "Strict Max",
+                    "type": AltairDataTypes.NOMINAL.value,
+                }
             }
         ),
         alt.Tooltip(
             {
-                "field": "column_distinct_values_count",
-                "format": ",",
-                "title": "Column Distinct Values Count",
-                "type": AltairDataTypes.QUANTITATIVE.value,
+                "shorthand": {
+                    "field": "column_distinct_values_count",
+                    "format": ",",
+                    "title": "Column Distinct Values Count",
+                    "type": AltairDataTypes.QUANTITATIVE.value,
+                }
             }
         ),
     ]
 
     single_column_return_chart: alt.LayerChart = plot_result.charts[2]
-    actual_tooltip: List[alt.Tooltip] = single_column_return_chart.layer[
-        0
-    ].encoding.tooltip
+    layer_1: alt.Chart = single_column_return_chart.layer[1]
+    actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
     assert expected_tooltip == actual_tooltip
