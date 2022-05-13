@@ -154,12 +154,12 @@ def determine_plot_title(
     """
     contents: str = f"{metric_plot_component.title} per {batch_plot_component.title}"
     subtitle: Optional[str] = domain_plot_component.subtitle
-    domain_name: Optional[str] = domain_plot_component.name
+    domain_selector: Optional[bool] = bool(domain_plot_component.name)
 
     title: alt.TitleParams
     if subtitle:
         title = alt.TitleParams(contents, subtitle=[subtitle])
-    elif domain_name:
+    elif domain_selector:
         title = alt.TitleParams(contents, dy=-35)
     else:
         title = alt.TitleParams(contents)
