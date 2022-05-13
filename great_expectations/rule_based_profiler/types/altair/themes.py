@@ -24,9 +24,8 @@ title_color: str = Colors.GREEN.value
 title_dy: int = -10
 subtitle_color: str = Colors.PURPLE.value
 subtitle_font: str = font
-subtitle_font_size: int = 12
+subtitle_font_size: int = 14
 subtitle_font_weight: str = "bold"
-subtitle_padding: int = 5
 
 # Both Axes
 axis_title_color: str = Colors.PURPLE.value
@@ -93,7 +92,6 @@ class AltairThemes(Enum):
             "subtitleFontSize": subtitle_font_size,
             "subtitleColor": subtitle_color,
             "subtitleFontWeight": subtitle_font_weight,
-            "subtitlePadding": subtitle_padding,
         },
         "axis": {
             "titleFontSize": axis_title_font_size,

@@ -201,7 +201,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         prescriptive: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
-        plot_impl: Callable[
+        return_impl: Callable[
             [
                 pd.DataFrame,
                 str,
@@ -230,7 +230,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         expectation_configurations: List[ExpectationConfiguration],
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         prescriptive: bool,
-    ) -> alt.Chart:
+    ) -> List[alt.VConcatChart]:
         column_dfs: List[pd.DataFrame] = self._create_column_dfs_for_charting(
             attributed_metrics=attributed_metrics,
             expectation_configurations=expectation_configurations,
@@ -303,21 +303,18 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
     def _chart_column_values(
         self,
-        column_dfs: List[pd.DataFrame],
+        column_dfs: List[Tuple[str, pd.DataFrame]],
         metric_name: str,
         metric_type: alt.StandardType,
         prescriptive: bool,
-    ) -> Tuple[alt.VConcatChart]:
-        plot_impl: Callable[
+    ) -> List[alt.VConcatChart]:
+        display_impl: Callable[
             [
-                pd.DataFrame,
+                List[Tuple[str, pd.DataFrame]],
                 str,
                 alt.StandardType,
-                str,
-                alt.StandardType,
-                Optional[str],
             ],
-            alt.Chart,
+            alt.VConcatChart,
         ]
         if prescriptive:
             display_impl = (
@@ -326,7 +323,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         else:
             display_impl = self.get_interactive_detail_multi_line_chart
 
-        display_chart: alt.Chart = display_impl(
+        display_chart: alt.VConcatChart = display_impl(
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
