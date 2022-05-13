@@ -6,6 +6,6 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-      command: pytest -vvv test_ge.py; echo Done
+    command: pytest -vvv test_ge.py; echo Done
     environment:
       REDSHIFT_URL: ${REDSHIFT_URL}
