@@ -29,12 +29,10 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
+    VolumeDataAssistantResult,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
     PlotResult,
-)
-from great_expectations.rule_based_profiler.types.data_assistant_result.volume_data_assistant_result import (
-    VolumeDataAssistantResult,
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
