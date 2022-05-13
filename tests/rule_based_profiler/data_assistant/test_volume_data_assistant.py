@@ -3156,7 +3156,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "month",
                 "format": "",
                 "title": "Month",
-                "type": AltairDataTypes.ORDINAL.value,
+                "type": AltairDataTypes.NOMINAL.value,
             }
         ),
         alt.Tooltip(
@@ -3172,7 +3172,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "year",
                 "format": "",
                 "title": "Year",
-                "type": AltairDataTypes.ORDINAL.value,
+                "type": AltairDataTypes.NOMINAL.value,
             }
         ),
         alt.Tooltip(
