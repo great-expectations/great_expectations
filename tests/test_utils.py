@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import (
     CheckpointStore,
@@ -615,10 +616,11 @@ def load_data_into_test_database(
             )
             return return_value
         except SQLAlchemyError as e:
-            logger.error(
-                """Docs integration tests encountered an error while loading test-data into test-database."""
-            )
-            raise
+            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+            logger.error(error_message)
+            raise ge_exceptions.DatabaseConnectionError(error_message)
+            # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+            # sensitive information does not make it into our CI logs.
         finally:
             connection.close()
             engine.dispose()
@@ -637,10 +639,11 @@ def load_data_into_test_database(
             )
             return return_value
         except SQLAlchemyError as e:
-            logger.error(
-                """Docs integration tests encountered an error while loading test-data into test-database."""
-            )
-            raise
+            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+            logger.error(error_message)
+            raise ge_exceptions.DatabaseConnectionError(error_message)
+            # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+            # sensitive information does not make it into our CI logs.
         finally:
             connection.close()
             engine.dispose()
@@ -798,10 +801,11 @@ def check_athena_table_count(
         result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         return len(result) == expected_table_count
     except SQLAlchemyError as e:
-        logger.error(
-            """Docs integration tests encountered an error while loading test-data into test-database."""
-        )
-        raise
+        error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+        logger.error(error_message)
+        raise ge_exceptions.DatabaseConnectionError(error_message)
+        # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+        # sensitive information does not make it into our CI logs.
     finally:
         connection.close()
         engine.dispose()
