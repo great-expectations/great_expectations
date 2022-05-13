@@ -292,8 +292,12 @@ class DataAssistantResult(SerializableDictDot):
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
         batch_name: str = "batch"
+        min_value_name: str = "min_value"
+        max_value_name: str = "max_value"
         batch_identifiers: List[str] = [
-            column for column in df.columns if column not in [metric_name, batch_name]
+            column
+            for column in df.columns
+            if column not in [metric_name, batch_name, min_value_name, max_value_name]
         ]
         batch_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
@@ -310,14 +314,14 @@ class DataAssistantResult(SerializableDictDot):
         )
         min_value_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
-                name="min_value",
+                name=min_value_name,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
                 metric_plot_component=metric_component,
             )
         )
         max_value_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
-                name="max_value",
+                name=max_value_name,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
                 metric_plot_component=metric_component,
             )
