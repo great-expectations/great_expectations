@@ -2,6 +2,7 @@ import copy
 import datetime
 import logging
 import random
+import re
 import string
 import traceback
 import warnings
@@ -71,7 +72,7 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import LegacyRow
+    from sqlalchemy.engine import Row
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import (
@@ -81,7 +82,7 @@ try:
         quoted_name,
     )
 except ImportError:
-    LegacyRow = None
+    Row = None
     reflection = None
     DefaultDialect = None
     Selectable = None
@@ -964,7 +965,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self._data_splitter.get_splitter_method(splitter_method_name)
 
-    def execute_split_query(self, split_query: Selectable) -> List[LegacyRow]:
+    def execute_split_query(self, split_query: Selectable) -> List[Row]:
         """Use the execution engine to run the split query and fetch all of the results.
 
         Args:
@@ -973,6 +974,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             List of row results.
         """
+        if self.engine.dialect.name.lower() == "awsathena":
+            # Note: Athena does not support casting to string, only to varchar
+            # but sqlalchemy currently generates a query as `CAST(colname AS STRING)` instead
+            # of `CAST(colname AS VARCHAR)` with other dialects.
+            split_query: str = str(
+                split_query.compile(self.engine, compile_kwargs={"literal_binds": True})
+            )
+
+            pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
+            split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
+
         return self.engine.execute(split_query).fetchall()
 
     def get_data_for_batch_identifiers(
