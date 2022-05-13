@@ -6,8 +6,8 @@ import altair as alt
 
 @dataclass(frozen=True)
 class PlotComponent:
-    name: Optional[str]
-    alt_type: Optional[alt.StandardType]
+    name: Optional[str] = None
+    alt_type: Optional[alt.StandardType] = None
 
     @property
     def title(self) -> Optional[str]:
@@ -78,7 +78,7 @@ class DomainPlotComponent(PlotComponent):
 
 @dataclass(frozen=True)
 class BatchPlotComponent(PlotComponent):
-    batch_identifiers: List[str]
+    batch_identifiers: Optional[List[str]] = None
 
     @property
     def titles(self) -> List[str]:
@@ -121,7 +121,7 @@ class BatchPlotComponent(PlotComponent):
 
 @dataclass(frozen=True)
 class ExpectationKwargPlotComponent(PlotComponent):
-    metric_plot_component: MetricPlotComponent
+    metric_plot_component: Optional[MetricPlotComponent] = None
 
     def plot_on_axis(self) -> alt.Y:
         """
