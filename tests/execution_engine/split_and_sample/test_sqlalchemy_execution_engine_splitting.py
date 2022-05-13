@@ -389,8 +389,8 @@ def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
     ) == getattr(data_splitter, splitter_method_name)
 
 
-@pytest.mark.integration
-def test_sqlite_split_and_sample_using_limit(sa):
+@pytest.fixture
+def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
     csv_path: str = file_relative_path(
         os.path.dirname(os.path.dirname(__file__)),
         os.path.join(
@@ -402,10 +402,57 @@ def test_sqlite_split_and_sample_using_limit(sa):
     )
     # Convert pickup_datetime to a datetime type column
     df: pd.DataFrame = pd.read_csv(csv_path)
-    column_name_to_convert: str = "pickup_datetime"
-    df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+    column_names_to_convert: List[str] = ["pickup_datetime", "dropoff_datetime"]
+    for column_name_to_convert in column_names_to_convert:
+        df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
 
     engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
+    return engine
+
+
+@pytest.mark.integration
+def test_sqlite_split(sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine):
+
+    engine: SqlAlchemyExecutionEngine = (
+        in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
+    )
+
+    n: int = 120
+    batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
+        table_name="test",
+        schema_name="main",
+        splitter_method="split_on_year",
+        splitter_kwargs={"column_name": "pickup_datetime"},
+        batch_identifiers={"pickup_datetime": "2018"},
+    )
+    batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
+
+    # Right number of rows?
+    num_rows: int = batch_data.execution_engine.engine.execute(
+        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == n
+
+    # Right rows?
+    rows: sa.Row = batch_data.execution_engine.engine.execute(
+        sa.select([sa.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
+    for row_date in row_dates:
+        assert row_date.month >= 1
+        assert row_date.month <= 12
+        assert row_date.year == 2018
+
+
+@pytest.mark.integration
+def test_sqlite_split_and_sample_using_limit(
+    sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
+):
+
+    engine: SqlAlchemyExecutionEngine = (
+        in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
+    )
 
     n: int = 3
     batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
