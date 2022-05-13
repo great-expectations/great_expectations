@@ -17,4 +17,11 @@ services:
     environment:
       DB_URL: ${DB_URL}
     depends_on:
+      - provision
+  provision:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: cat provision.mssql | /opt/mssql-tools/bin/sqlcmd -S db -U "complete_mssql" -P "$DB_PASS" -i /dev/stdin
+    depends_on:
       - db

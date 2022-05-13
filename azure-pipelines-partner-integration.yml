@@ -19,4 +19,5 @@ stages:
           - bash: cd assets/partners/anthonydb; ../common/run-2.sh;
             name: RunDockerComposeUp
             env:
-              DB_URL: $(ANTHONYDB_URL)
+              DB_URL: $(ANTHONY_DB_URL)
+              DB_PASS: $(ANTHONY_DB_PASS)
