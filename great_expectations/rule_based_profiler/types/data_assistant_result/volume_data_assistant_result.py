@@ -5,8 +5,11 @@ import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.parameter_builder import MetricValues
-from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    MetricValues,
+    ParameterNode,
+)
 from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,

@@ -163,6 +163,8 @@ stages:
             AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
             ATHENA_DB_NAME: $(ATHENA_DB_NAME)
             ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
+            ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
+            ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
             # GCP credentials
             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
             GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)

@@ -98,7 +98,6 @@ def valid_usage_statistics_message() -> dict:
                     },
                     "anonymized_site_index_builder": {
                         "parent_class": "DefaultSiteIndexBuilder",
-                        "show_cta_footer": True,
                     },
                 }
             ],

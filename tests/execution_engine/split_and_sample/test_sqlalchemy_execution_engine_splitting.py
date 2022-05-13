@@ -332,7 +332,9 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     assert (
         query_str
         == (
-            "SELECT distinct(concat(EXTRACT(year FROM column_name), EXTRACT(month FROM column_name))) AS concat_distinct_values,"
+            "SELECT distinct(concat("
+            "CAST(EXTRACT(year FROM column_name) AS VARCHAR), CAST(EXTRACT(month FROM column_name) AS VARCHAR)"
+            ")) AS concat_distinct_values,"
             "CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year,"
             "CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month"
             "FROM table_name"
