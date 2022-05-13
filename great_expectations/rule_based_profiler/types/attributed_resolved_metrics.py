@@ -1,6 +1,5 @@
-from collections import OrderedDict
 from dataclasses import asdict, dataclass
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -20,6 +19,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
     with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
     """
 
+    batch_ids: Optional[List[str]] = None
     metric_attributes: Optional[Attributes] = None
     metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
 
@@ -40,9 +40,6 @@ class AttributedResolvedMetrics(SerializableDictDot):
         if self.metric_values_by_batch_id is None:
             self.metric_values_by_batch_id = {}
 
-        if not isinstance(self.metric_values_by_batch_id, OrderedDict):
-            self.metric_values_by_batch_id = OrderedDict(self.metric_values_by_batch_id)
-
         self.metric_values_by_batch_id[batch_id] = value
 
     @property
@@ -51,7 +48,15 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     @property
     def attributed_metric_values(self) -> Optional[Dict[str, MetricValue]]:
-        return self.metric_values_by_batch_id
+        if self.metric_values_by_batch_id is None:
+            return None
+
+        batch_id: str
+        return {
+            batch_id: self.metric_values_by_batch_id.get(batch_id)
+            for batch_id in self.batch_ids
+            if batch_id in self.metric_values_by_batch_id
+        }
 
     @property
     def metric_values(self) -> MetricValues:
