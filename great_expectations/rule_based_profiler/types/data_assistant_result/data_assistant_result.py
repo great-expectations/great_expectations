@@ -116,7 +116,7 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def display(
-        charts: List[alt.Chart],
+        charts: Union[List[alt.Chart], List[alt.VConcatChart]],
         theme: Optional[Dict[str, Any]],
     ) -> None:
         """

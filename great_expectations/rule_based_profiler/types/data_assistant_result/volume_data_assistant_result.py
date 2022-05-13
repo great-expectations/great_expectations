@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple
+from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
 
 import altair as alt
 import pandas as pd
@@ -49,21 +49,23 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 "You may either use `include_column_names` or `exclude_column_names` (but not both)."
             )
 
-        display_charts: List[alt.Chart] = []
-        return_charts: List[alt.Chart] = []
+        display_charts: Union[List[alt.VConcatChart], List[alt.LayerChart]] = []
+        return_charts: Union[List[alt.Chart], List[alt.LayerChart]] = []
 
         expectation_configurations: List[
             ExpectationConfiguration
         ] = self.expectation_configurations
 
-        table_domain_chart: List[alt.Chart] = self._plot_table_domain_charts(
+        table_domain_chart: Union[
+            List[alt.Chart], List[alt.LayerChart]
+        ] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
             prescriptive=prescriptive,
         )
         display_charts.extend(table_domain_chart)
         return_charts.extend(table_domain_chart)
 
-        column_domain_display_chart: alt.VConcatChart
+        column_domain_display_chart: List[alt.VConcatChart]
         column_domain_return_charts: List[alt.Chart]
         (
             column_domain_display_charts,
@@ -119,7 +121,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
         prescriptive: bool,
-    ) -> Tuple[alt.VConcatChart, List[alt.Chart]]:
+    ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
         def _filter(e: ExpectationConfiguration) -> bool:
             if e.expectation_type != "expect_column_unique_value_count_to_be_between":
                 return False
@@ -141,7 +143,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             Domain, Dict[str, ParameterNode]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
 
-        display_chart: List[
+        display_charts: List[
             alt.VConcatChart
         ] = self._create_display_chart_for_column_domain_expectation(
             expectation_configurations=column_based_expectation_configurations,
@@ -158,9 +160,9 @@ class VolumeDataAssistantResult(DataAssistantResult):
                     prescriptive=prescriptive,
                 )
             )
-            return_charts.extend([return_chart])
+            return_charts.append(return_chart)
 
-        return display_chart, return_charts
+        return display_charts, return_charts
 
     def _create_chart_for_table_domain_expectation(
         self,
@@ -201,7 +203,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         prescriptive: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
-        return_impl: Callable[
+        plot_impl: Callable[
             [
                 pd.DataFrame,
                 str,
@@ -213,11 +215,11 @@ class VolumeDataAssistantResult(DataAssistantResult):
             alt.Chart,
         ]
         if prescriptive:
-            return_impl = self.get_expect_domain_values_to_be_between_chart
+            plot_impl = self.get_expect_domain_values_to_be_between_chart
         else:
-            return_impl = self.get_line_chart
+            plot_impl = self.get_line_chart
 
-        chart: alt.Chart = return_impl(
+        chart: alt.Chart = plot_impl(
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
@@ -308,7 +310,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_type: alt.StandardType,
         prescriptive: bool,
     ) -> List[alt.VConcatChart]:
-        display_impl: Callable[
+        plot_impl: Callable[
             [
                 List[Tuple[str, pd.DataFrame]],
                 str,
@@ -317,13 +319,13 @@ class VolumeDataAssistantResult(DataAssistantResult):
             alt.VConcatChart,
         ]
         if prescriptive:
-            display_impl = (
+            plot_impl = (
                 self.get_interactive_detail_expect_column_values_to_be_between_chart
             )
         else:
-            display_impl = self.get_interactive_detail_multi_line_chart
+            plot_impl = self.get_interactive_detail_multi_line_chart
 
-        display_chart: alt.VConcatChart = display_impl(
+        display_chart: alt.VConcatChart = plot_impl(
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
