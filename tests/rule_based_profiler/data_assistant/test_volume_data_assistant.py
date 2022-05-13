@@ -3217,9 +3217,9 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
 
 
 def test_volume_data_assistant_plot_return_tooltip(
-    volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    plot_result: PlotResult = volume_data_assistant_result.plot(prescriptive=True)
+    plot_result: PlotResult = bobby_volume_data_assistant_result.plot(prescriptive=True)
 
     expected_tooltip: List[alt.Tooltip] = [
         alt.Tooltip(

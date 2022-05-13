@@ -107,12 +107,12 @@ class BatchPlotComponent(PlotComponent):
             A list of instances of alt.Tooltip containing relevant information from the BatchPlotComponent class.
         """
         tooltip: List = []
-        for idx, batch_identifier in enumerate(self.batch_identifiers):
+        for batch_identifier, title in zip(self.batch_identifiers, self.titles):
             tooltip.append(
                 alt.Tooltip(
                     field=batch_identifier,
                     type=self.alt_type,
-                    title=self.titles[idx],
+                    title=title,
                     format=format,
                 )
             )
