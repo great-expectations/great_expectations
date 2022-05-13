@@ -618,7 +618,8 @@ def load_data_into_test_database(
             logger.error(
                 """Docs integration tests encountered an error while loading test-data into test-database."""
             )
-            raise
+            # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+            # sensitive information does not make it into our CI logs.
         finally:
             connection.close()
             engine.dispose()
@@ -640,7 +641,8 @@ def load_data_into_test_database(
             logger.error(
                 """Docs integration tests encountered an error while loading test-data into test-database."""
             )
-            raise
+            # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+            # sensitive information does not make it into our CI logs.
         finally:
             connection.close()
             engine.dispose()
@@ -801,7 +803,8 @@ def check_athena_table_count(
         logger.error(
             """Docs integration tests encountered an error while loading test-data into test-database."""
         )
-        raise
+        # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+        # sensitive information does not make it into our CI logs.
     finally:
         connection.close()
         engine.dispose()
