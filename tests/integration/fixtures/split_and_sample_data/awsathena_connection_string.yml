@@ -1,0 +1,2 @@
+connection_string: unsupported_see_get_awsathena_connection_url
+dialect: awsathena
