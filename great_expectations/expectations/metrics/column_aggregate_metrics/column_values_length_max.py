@@ -22,7 +22,6 @@ class ColumnValuesLengthMax(ColumnAggregateMetricProvider):
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column: "ColumnClause", **kwargs: dict) -> int:  # noqa: F821
-        breakpoint()
         return sa.func.max(sa.func.length(column))
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
