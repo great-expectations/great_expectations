@@ -9,7 +9,7 @@ def test_ge():
 
 
     CONNECTION_STRING = os.environ.get("DB_URL")
-    
+
     context = ge.get_context()
 
     datasource_config = {
