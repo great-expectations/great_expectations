@@ -8,8 +8,12 @@ import pytest
 from dateutil.parser import parse
 from mock_alchemy.comparison import ExpressionMatcher
 
+from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource import BaseDatasource
+from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     DatePart,
@@ -382,10 +386,15 @@ def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
 
 
 @pytest.mark.integration
-def test_sqlite_split_and_sample_using_limit(sa):
+def test_sqlite_split_and_sample_using_limit(sa, in_memory_runtime_context):
 
     # TODO: AJB 20220513 this test is a WIP that needs splitting added to it.
-    raise NotImplementedError
+
+    # 1. Setup
+    context: BaseDataContext = in_memory_runtime_context
+    datasource_name: str = "test_datasource"
+    data_connector_name: str = "test_data_connector"
+    table_name: str = "test"
 
     csv_path: str = file_relative_path(
         os.path.dirname(os.path.dirname(__file__)),
@@ -403,20 +412,95 @@ def test_sqlite_split_and_sample_using_limit(sa):
 
     engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
 
-    n: int = 3
-    batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
-        table_name="test",
-        schema_name="main",
-        sampling_method="sample_using_limit",
-        sampling_kwargs={"n": n},
-    )
-    batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
+    data_asset_name: str = table_name
+    column_name: str = "pickup_datetime"
+    num_rows_to_sample: int = 3
+    # 2. Set splitter in DataConnector config
+    data_connector_config: dict = {
+        "class_name": "ConfiguredAssetSqlDataConnector",
+        "assets": {
+            data_asset_name: {
+                "splitter_method": "split_on_date_parts",
+                "splitter_kwargs": {
+                    "column_name": column_name,
+                    "date_parts": [DatePart.YEAR],
+                },
+                "sampling_method": "sample_using_limit",
+                "sampling_kwargs": {"n": num_rows_to_sample},
+            }
+        },
+    }
 
-    # Right number of rows?
+    context.add_datasource(
+        name=datasource_name,
+        class_name="Datasource",
+        execution_engine=engine,
+        data_connectors={data_connector_name: data_connector_config},
+    )
+
+    datasource: BaseDatasource = context.get_datasource(datasource_name=datasource_name)
+
+    data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
+        data_connector_name
+    ]
+
+    # 3. Check if resulting batches are as expected
+    # using data_connector.get_batch_definition_list_from_batch_request()
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name=datasource_name,
+        data_connector_name=data_connector_name,
+        data_asset_name=data_asset_name,
+    )
+    batch_definition_list: List[
+        BatchDefinition
+    ] = data_connector.get_batch_definition_list_from_batch_request(batch_request)
+
+    assert len(batch_definition_list) == 3
+
+    # expected_batch_definition_list: List[BatchDefinition] = [
+    #     BatchDefinition(
+    #         datasource_name=datasource_name,
+    #         data_connector_name=data_connector_name,
+    #         data_asset_name=data_asset_name,
+    #         batch_identifiers=IDDict({column_name: pickup_datetime}),
+    #     )
+    #     for pickup_datetime in test_case.expected_pickup_datetimes
+    # ]
+    #
+    # assert set(batch_definition_list) == set(
+    #     expected_batch_definition_list
+    # ), f"BatchDefinition lists don't match\n\nbatch_definition_list:\n{batch_definition_list}\n\nexpected_batch_definition_list:\n{expected_batch_definition_list}"
+
+    # 4. Check that loaded data is as expected
+
+    # Use expected_batch_definition_list since it is sorted, and we already
+    # asserted that it contains the same items as batch_definition_list
+    batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(
+        batch_definition_list[0]
+    )
+
+    batch_data: SqlAlchemyBatchData = context.datasources[
+        datasource_name
+    ].execution_engine.get_batch_data(batch_spec=batch_spec)
+
     num_rows: int = batch_data.execution_engine.engine.execute(
         sa.select([sa.func.count()]).select_from(batch_data.selectable)
     ).scalar()
-    assert num_rows == n
+    assert num_rows == 3
+
+    # batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
+    #     table_name="test",
+    #     schema_name="main",
+    #     sampling_method="sample_using_limit",
+    #     sampling_kwargs={"n": n},
+    # )
+    # batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
+    #
+    # # Right number of rows?
+    # num_rows: int = batch_data.execution_engine.engine.execute(
+    #     sa.select([sa.func.count()]).select_from(batch_data.selectable)
+    # ).scalar()
+    # assert num_rows == n
 
     # Right rows?
     rows: sa.Row = batch_data.execution_engine.engine.execute(
