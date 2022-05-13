@@ -382,7 +382,10 @@ def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
 
 
 @pytest.mark.integration
-def test_sqlite_sample_using_limit(sa):
+def test_sqlite_split_and_sample_using_limit(sa):
+
+    # TODO: AJB 20220513 this test is a WIP that needs splitting added to it.
+    raise NotImplementedError
 
     csv_path: str = file_relative_path(
         os.path.dirname(os.path.dirname(__file__)),
@@ -393,10 +396,14 @@ def test_sqlite_sample_using_limit(sa):
             "yellow_tripdata_sample_10_trips_from_each_month.csv",
         ),
     )
+    # Convert pickup_datetime to a datetime type column
     df: pd.DataFrame = pd.read_csv(csv_path)
+    column_name_to_convert: str = "pickup_datetime"
+    df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+
     engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
 
-    n: int = 10
+    n: int = 3
     batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
         table_name="test",
         schema_name="main",
