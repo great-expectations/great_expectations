@@ -1,15 +1,11 @@
-from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import altair as alt
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    MetricValues,
-    ParameterNode,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
@@ -332,118 +328,3 @@ class VolumeDataAssistantResult(DataAssistantResult):
         )
 
         return [display_chart]
-
-    def _create_df_for_charting(
-        self,
-        metric_name: str,
-        attributed_values_by_metric_name: Dict[str, ParameterNode],
-        expectation_configuration: ExpectationConfiguration,
-        prescriptive: bool,
-    ) -> pd.DataFrame:
-        batch_ids: KeysView[str]
-        metric_values: MetricValues
-        batch_ids, metric_values = list(attributed_values_by_metric_name.values())[
-            0
-        ].keys(), sum(list(attributed_values_by_metric_name.values())[0].values(), [])
-
-        df: pd.DataFrame = pd.DataFrame({metric_name: metric_values})
-
-        batch_identifier_list: List[Set[Tuple[str, str]]] = [
-            self.batch_id_to_batch_identifier_display_name_map[batch_id]
-            for batch_id in batch_ids
-        ]
-
-        # make sure batch_identifier keys are sorted the same from batch to batch
-        # e.g. prevent batch 1 from having keys "month", "year" and batch 2 from having keys "year", "month"
-        batch_identifier_set: Set
-        batch_identifier_list_sorted: List
-        batch_identifier_tuple: Tuple
-        batch_identifier_key: str
-        batch_identifier_value: str
-        batch_identifier_keys: Set[str] = set()
-        batch_identifier_record: List
-        batch_identifier_records: List[List] = []
-        for batch_identifier_set in batch_identifier_list:
-            batch_identifier_list_sorted = sorted(
-                batch_identifier_set,
-                key=lambda batch_identifier_tuple: batch_identifier_tuple[0].casefold(),
-            )
-            batch_identifier_record = []
-            for (
-                batch_identifier_key,
-                batch_identifier_value,
-            ) in batch_identifier_list_sorted:
-                batch_identifier_keys.add(batch_identifier_key)
-                batch_identifier_record.append(batch_identifier_value)
-
-            batch_identifier_records.append(batch_identifier_record)
-
-        batch_identifier_keys_sorted: List[str] = sorted(batch_identifier_keys)
-        batch_identifiers: pd.DataFrame = pd.DataFrame(
-            batch_identifier_records, columns=batch_identifier_keys_sorted
-        )
-
-        idx: int
-        batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_identifiers))]
-        df["batch"] = batch_numbers
-
-        df = pd.concat([df, batch_identifiers], axis=1)
-
-        if prescriptive:
-            for kwarg_name in expectation_configuration.kwargs:
-                df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
-
-        return df
-
-    def _determine_attributed_metrics_by_domain_type(
-        self, metric_domain_type: MetricDomainTypes
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
-            filter(
-                lambda element: element[0].domain_type == metric_domain_type,
-                self.get_attributed_metrics_by_domain().items(),
-            )
-        )
-        return attributed_metrics_by_domain
-
-    def _create_column_dfs_for_charting(
-        self,
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
-        expectation_configurations: List[ExpectationConfiguration],
-        prescriptive: bool,
-    ) -> List[pd.DataFrame]:
-        domain: Domain
-        domains_by_column_name: Dict[str, Domain] = {
-            domain.domain_kwargs["column"]: domain
-            for domain in list(attributed_metrics.keys())
-        }
-
-        column_dfs: List[Tuple[str, pd.DataFrame]] = []
-        for expectation_configuration in expectation_configurations:
-            metric_configuration: dict = expectation_configuration.meta[
-                "profiler_details"
-            ]["metric_configuration"]
-            domain_kwargs: dict = metric_configuration["domain_kwargs"]
-
-            domain = domains_by_column_name[domain_kwargs["column"]]
-
-            attributed_values_by_metric_name: Dict[
-                str, ParameterNode
-            ] = attributed_metrics[domain]
-
-            # Altair does not accept periods.
-            metric_name = list(attributed_values_by_metric_name.keys())[0].replace(
-                ".", "_"
-            )
-
-            df: pd.DataFrame = self._create_df_for_charting(
-                metric_name,
-                attributed_values_by_metric_name,
-                expectation_configuration,
-                prescriptive,
-            )
-
-            column_name: str = expectation_configuration.kwargs["column"]
-            column_dfs.append((column_name, df))
-
-        return column_dfs
