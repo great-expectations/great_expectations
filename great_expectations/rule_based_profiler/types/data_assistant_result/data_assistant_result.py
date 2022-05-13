@@ -1157,6 +1157,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return column_dfs
 
+    @abstractmethod
     def plot_metrics(
         self,
         theme: Optional[Dict[str, Any]] = None,
@@ -1164,13 +1165,12 @@ class DataAssistantResult(SerializableDictDot):
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
         """
-        Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
+        Use contents of "DataAssistantResult" object to display metrics for visualization purposes.
 
         Altair theme configuration reference:
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
             theme: Altair top-level chart configuration dictionary
 
         Returns:
@@ -1178,6 +1178,7 @@ class DataAssistantResult(SerializableDictDot):
         """
         pass
 
+    @abstractmethod
     def plot_expectations_and_metrics(
         self,
         theme: Optional[Dict[str, Any]] = None,
@@ -1185,13 +1186,12 @@ class DataAssistantResult(SerializableDictDot):
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
         """
-        Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
+        Use contents of "DataAssistantResult" object to display metrics and expectations for visualization purposes.
 
         Altair theme configuration reference:
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
             theme: Altair top-level chart configuration dictionary
 
         Returns:
