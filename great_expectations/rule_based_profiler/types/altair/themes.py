@@ -39,10 +39,6 @@ axis_label_font_size: int = 12
 x_axis_label_angle: int = 0
 x_axis_label_flush: bool = True
 x_axis_grid: bool = True
-# Known vega-lite bug: https://github.com/vega/vega-lite/issues/5732
-# forces us to choose between features "interactive scaling" (below) and "tooltips"
-# x_axis_selection_type: str = "interval"
-# x_axis_selection_bind: str = "scales"
 
 # Y-Axis Only
 
@@ -71,16 +67,12 @@ fill_color: str = ColorPalettes.HEATMAP_6.value[5]
 line_color: str = Colors.BLUE_2.value
 line_stroke_width: int = 3
 line_opacity: float = 0.9
-# Known vega-lite bug: https://github.com/vega/vega-lite/issues/5732
-# forces us to choose between features "interactive scaling" and "tooltips" (below)
-line_tooltip_content: str = "data"
 
 # Point
 point_size: int = 70
 point_color: str = Colors.GREEN.value
 point_filled: bool = True
 point_opacity: float = 1.0
-point_tooltip_content: str = "data"
 
 
 class AltairThemes(Enum):
@@ -132,13 +124,11 @@ class AltairThemes(Enum):
         "line": {
             "color": line_color,
             "strokeWidth": line_stroke_width,
-            "tooltip": {"content": line_tooltip_content},
         },
         "point": {
             "size": point_size,
             "color": point_color,
             "filled": point_filled,
             "opacity": point_opacity,
-            "tooltip": {"content": point_tooltip_content},
         },
     }

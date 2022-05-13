@@ -10,8 +10,11 @@ class PlotComponent:
     alt_type: Optional[alt.StandardType]
 
     @property
-    def title(self) -> str:
-        return self.name.replace("_", " ").title()
+    def title(self) -> Optional[str]:
+        if self.name is not None:
+            return self.name.replace("_", " ").title()
+        else:
+            return None
 
     def generate_tooltip(self, format: str = "") -> alt.Tooltip:
         """Wrapper around alt.Tooltip creation.
@@ -56,8 +59,11 @@ class DomainPlotComponent(PlotComponent):
     subtitle: Optional[str] = None
 
     @property
-    def title(self) -> str:
-        return self.name.title()
+    def title(self) -> Optional[str]:
+        if self.name is not None:
+            return self.name.title()
+        else:
+            return None
 
     def plot_on_axis(self) -> alt.X:
         """
@@ -119,11 +125,11 @@ class ExpectationKwargPlotComponent(PlotComponent):
 
     def plot_on_axis(self) -> alt.Y:
         """
-        Plots domain on Y axis - see parent `PlotComponent` for more details.
+        Plots metric on Y axis - see parent `PlotComponent` for more details.
         """
         return alt.Y(
             self.name,
-            type=self.metric_plot_component.alt_type,
+            type=self.alt_type,
             title=self.metric_plot_component.title,
         )
 

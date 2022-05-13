@@ -213,13 +213,12 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         batch_name: str = "batch"
-        batch_type: alt.StandardType = AltairDataTypes.ORDINAL.value
         batch_identifiers: List[str] = [
             column for column in df.columns if column not in [metric_name, batch_name]
         ]
         batch_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
-            alt_type=batch_type,
+            alt_type=AltairDataTypes.ORDINAL.value,
             batch_identifiers=batch_identifiers,
         )
 
@@ -296,10 +295,9 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column for column in df.columns if column not in [metric_name, batch_name]
         ]
-        batch_type: alt.StandardType = AltairDataTypes.ORDINAL.value
         batch_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
-            alt_type=batch_type,
+            alt_type=AltairDataTypes.ORDINAL.value,
             batch_identifiers=batch_identifiers,
         )
         metric_component: MetricPlotComponent = MetricPlotComponent(
@@ -352,9 +350,9 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            metric_component.generate_tooltip(format=","),
             min_value_component.generate_tooltip(format=","),
             max_value_component.generate_tooltip(format=","),
+            metric_component.generate_tooltip(format=","),
         ]
 
         lower_limit: alt.Chart = (
@@ -413,9 +411,12 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         anomaly_coded_points = line.layer[1].encode(
-            color=point_color_condition, tooltip=tooltip
+            color=point_color_condition,
+            tooltip=tooltip,
         )
-        anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
+        anomaly_coded_line = alt.layer(
+            line.layer[0].encode(tooltip=tooltip), anomaly_coded_points
+        )
 
         return band + lower_limit + upper_limit + anomaly_coded_line
 
@@ -440,10 +441,9 @@ class DataAssistantResult(SerializableDictDot):
             for column in column_dfs[0][1].columns
             if column not in [metric_name, batch_name]
         ]
-        batch_type: alt.StandardType = AltairDataTypes.ORDINAL.value
         batch_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
-            alt_type=batch_type,
+            alt_type=AltairDataTypes.ORDINAL.value,
             batch_identifiers=batch_identifiers,
         )
         metric_component: MetricPlotComponent = MetricPlotComponent(
@@ -451,10 +451,9 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         domain_name: str = "column"
-        domain_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         domain_component: DomainPlotComponent = DomainPlotComponent(
             name=domain_name,
-            alt_type=domain_type,
+            alt_type=AltairDataTypes.NOMINAL.value,
         )
 
         df: pd.DataFrame = pd.DataFrame(
@@ -497,10 +496,13 @@ class DataAssistantResult(SerializableDictDot):
             domain_plot_component=domain_component,
         )
 
-        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            domain_component.generate_tooltip(),
-            metric_component.generate_tooltip(format=","),
-        ]
+        tooltip: List[alt.Tooltip] = (
+            [domain_component.generate_tooltip()]
+            + batch_component.generate_tooltip()
+            + [
+                metric_component.generate_tooltip(format=","),
+            ]
+        )
 
         columns: List[str] = [" "] + pd.unique(df[domain_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
@@ -763,11 +765,9 @@ class DataAssistantResult(SerializableDictDot):
             name=metric_name, alt_type=metric_type
         )
 
-        column_name: str = "column"
-        column_name_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         domain_component: DomainPlotComponent = DomainPlotComponent(
-            name=column_name,
-            alt_type=column_name_type,
+            name="column",
+            alt_type=AltairDataTypes.NOMINAL.value,
         )
 
         min_value_component: ExpectationKwargPlotComponent = (
@@ -877,13 +877,17 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.VConcatChart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
-        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            metric_component.generate_tooltip(format=","),
-            min_value_component.generate_tooltip(format=","),
-            max_value_component.generate_tooltip(format=","),
-            strict_min_component.generate_tooltip(),
-            strict_max_component.generate_tooltip(),
-        ]
+        tooltip: List[alt.Tooltip] = (
+            [domain_component.generate_tooltip()]
+            + batch_component.generate_tooltip()
+            + [
+                min_value_component.generate_tooltip(format=","),
+                max_value_component.generate_tooltip(format=","),
+                strict_min_component.generate_tooltip(),
+                strict_max_component.generate_tooltip(),
+                metric_component.generate_tooltip(format=","),
+            ]
+        )
         detail_line_chart_height: int = 75
 
         interactive_detail_multi_line_chart: alt.VConcatChart = (
