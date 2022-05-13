@@ -1,3 +1,4 @@
+import ast
 import itertools
 import logging
 import traceback
@@ -5,6 +6,7 @@ from collections.abc import Iterable
 from typing import Any, Dict, List
 
 import numpy as np
+from sqlalchemy import text
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -141,6 +143,15 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
                 table_row_count=table_row_count,
+            )
+        elif dialect.name.lower() == "awsathena":
+            return _get_column_quantiles_athena(
+                column=column,
+                quantiles=quantiles,
+                allow_relative_error=allow_relative_error,
+                dialect=dialect,
+                selectable=selectable,
+                sqlalchemy_engine=sqlalchemy_engine,
             )
         else:
             return _get_column_quantiles_generic_sqlalchemy(
@@ -327,6 +338,25 @@ def _get_column_quantiles_sqlite(
         )
         logger.error(exception_message)
         raise pe
+
+
+def _get_column_quantiles_athena(
+    column,
+    quantiles: Iterable,
+    allow_relative_error: bool,
+    dialect,
+    selectable,
+    sqlalchemy_engine,
+) -> list:
+
+    approx_percentiles = f"approx_percentile({column}, ARRAY{list(quantiles)})"
+    selects_approx: List[TextClause] = [sa.text(approx_percentiles)]
+    quantiles_query_approx: Select = sa.select(selects_approx).select_from(selectable)
+    quantiles_results: Row = sqlalchemy_engine.execute(
+        quantiles_query_approx
+    ).fetchone()
+    results = ast.literal_eval(quantiles_results[0])
+    return results
 
 
 # Support for computing the quantiles column for PostGreSQL and Redshift is included in the same method as that for
