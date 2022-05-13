@@ -2,6 +2,7 @@ import copy
 import datetime
 import logging
 import random
+import re
 import string
 import traceback
 import warnings
@@ -987,6 +988,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             List of row results.
         """
+        if self.engine.dialect.name.lower() == "awsathena":
+            # Note: Athena does not support casting to string, only to varchar
+            # but sqlalchemy currently generates a query as `CAST(colname AS STRING)` instead
+            # of `CAST(colname AS VARCHAR)` with other dialects.
+            split_query: str = str(
+                split_query.compile(self.engine, compile_kwargs={"literal_binds": True})
+            )
+
+            pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
+            split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
+
         return self.engine.execute(split_query).fetchall()
 
     def get_data_for_batch_identifiers(
