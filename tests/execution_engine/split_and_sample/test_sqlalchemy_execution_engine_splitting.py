@@ -35,6 +35,11 @@ from tests.execution_engine.split_and_sample.split_and_sample_test_cases import 
 )
 
 # Here we add SqlAlchemyDataSplitter specific test cases to the generic test cases:
+from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
+    TaxiSplittingTestCases,
+    TaxiTestData,
+)
+
 SINGLE_DATE_PART_DATE_PARTS += [
     pytest.param(
         [SqlAlchemyDataSplitter.date_part.MONTH],
@@ -389,8 +394,7 @@ def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
     ) == getattr(data_splitter, splitter_method_name)
 
 
-@pytest.fixture
-def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
+def ten_trips_per_month_df() -> pd.DataFrame:
     csv_path: str = file_relative_path(
         os.path.dirname(os.path.dirname(__file__)),
         os.path.join(
@@ -405,13 +409,58 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
     column_names_to_convert: List[str] = ["pickup_datetime", "dropoff_datetime"]
     for column_name_to_convert in column_names_to_convert:
         df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+    return df
 
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
+
+@pytest.fixture
+def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
+    engine: SqlAlchemyExecutionEngine = build_sa_engine(ten_trips_per_month_df(), sa)
     return engine
 
 
+TAXI_SPLITTING_TEST_CASES: TaxiSplittingTestCases = TaxiSplittingTestCases(
+    taxi_test_data=TaxiTestData(
+        test_df=ten_trips_per_month_df(), test_column_name="pickup_datetime"
+    )
+)
+
+
 @pytest.mark.integration
-def test_sqlite_split(sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine):
+@pytest.mark.parametrize(
+    "test_case",
+    [
+        pytest.param(test_case, id=test_case.splitter_method_name)
+        for test_case in TAXI_SPLITTING_TEST_CASES.test_cases()
+    ],
+)
+def test_sqlite_split(
+    test_case, sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
+):
+
+    engine: SqlAlchemyExecutionEngine = (
+        in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
+    )
+
+    batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
+        table_name="test",
+        schema_name="main",
+        splitter_method=test_case.splitter_method_name,
+        splitter_kwargs=test_case.splitter_kwargs,
+        batch_identifiers={"pickup_datetime": test_case.expected_pickup_datetimes[0]},
+    )
+    batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
+
+    # Right number of rows?
+    num_rows: int = batch_data.execution_engine.engine.execute(
+        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == test_case.num_expected_rows_in_first_batch_definition
+
+
+@pytest.mark.integration
+def test_sqlite_split_on_year(
+    sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
+):
 
     engine: SqlAlchemyExecutionEngine = (
         in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
