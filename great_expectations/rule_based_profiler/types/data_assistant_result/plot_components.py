@@ -6,8 +6,8 @@ import altair as alt
 
 @dataclass(frozen=True)
 class PlotComponent:
-    name: str
-    alt_type: alt.StandardType
+    name: Optional[str]
+    alt_type: Optional[alt.StandardType]
 
     @property
     def title(self) -> str:
@@ -71,9 +71,8 @@ class DomainPlotComponent(PlotComponent):
 
 
 @dataclass(frozen=True)
-class BatchPlotComponent:
+class BatchPlotComponent(PlotComponent):
     batch_identifiers: List[str]
-    alt_type: alt.StandardType
 
     @property
     def titles(self) -> List[str]:
@@ -81,6 +80,16 @@ class BatchPlotComponent:
             batch_identifier.replace("_", " ").title().replace("Id", "ID")
             for batch_identifier in self.batch_identifiers
         ]
+
+    def plot_on_axis(self) -> alt.X:
+        """
+        Plots domain on X axis - see parent `PlotComponent` for more details.
+        """
+        return alt.X(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
+        )
 
     def generate_tooltip(self, format: str = "") -> List[alt.Tooltip]:
         """Wrapper around alt.Tooltip creation.
@@ -121,6 +130,7 @@ class ExpectationKwargPlotComponent(PlotComponent):
 
 def determine_plot_title(
     metric_plot_component: MetricPlotComponent,
+    batch_plot_component: BatchPlotComponent,
     domain_plot_component: DomainPlotComponent,
 ) -> alt.TitleParams:
     """Determines the appropriate title for a chart based on input componentsself.
@@ -129,13 +139,14 @@ def determine_plot_title(
 
     Args:
         metric_plot_component: Plot utility corresponding to a given metric.
-        domain_plot_component: Plot utility corresponding to a given domain.
+        batch_plot_component: Plot utility corresponding to a given batch.
+        domain_plot_component: Plot utillity corresponding to a given domain.
 
     Returns:
         An Altair TitleParam object
 
     """
-    contents: str = f"{metric_plot_component.title} per {domain_plot_component.title}"
+    contents: str = f"{metric_plot_component.title} per {batch_plot_component.title}"
     subtitle: Optional[str] = domain_plot_component.subtitle
 
     title: alt.TitleParams

@@ -176,13 +176,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
-        domain_name: str = "batch"
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
 
         df: pd.DataFrame = self._create_df_for_charting(
             metric_name=metric_name,
-            domain_name=domain_name,
             attributed_values_by_metric_name=attributed_values_by_metric_name,
             expectation_configuration=expectation_configuration,
             prescriptive=prescriptive,
@@ -192,8 +189,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
             prescriptive=prescriptive,
             subtitle=None,
         )
@@ -203,8 +198,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
         df: pd.DataFrame,
         metric_name: str,
         metric_type: alt.StandardType,
-        domain_name: str,
-        domain_type: alt.StandardType,
         prescriptive: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
@@ -228,8 +221,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
             subtitle=subtitle,
         )
         return chart
@@ -246,9 +237,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             prescriptive=prescriptive,
         )
 
-        domain_name: str = "batch"
-        domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
-
         attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
             attributed_metrics.values()
         )[0]
@@ -263,8 +251,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
             prescriptive=prescriptive,
         )
 
@@ -274,10 +260,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         prescriptive: bool,
     ) -> alt.Chart:
-        domain_name: str = "batch"
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        domain_type: alt.StandardType = AltairDataTypes.ORDINAL.value
-
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
             domain.domain_kwargs["column"]: domain
@@ -299,10 +281,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
         df: pd.DataFrame = self._create_df_for_charting(
             metric_name=metric_name,
-            domain_name=domain_name,
             attributed_values_by_metric_name=attributed_values_by_metric_name,
             expectation_configuration=expectation_configuration,
             prescriptive=prescriptive,
@@ -315,8 +297,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
             prescriptive=prescriptive,
             subtitle=subtitle,
         )
@@ -326,8 +306,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
         column_dfs: List[pd.DataFrame],
         metric_name: str,
         metric_type: alt.StandardType,
-        domain_name: str,
-        domain_type: alt.StandardType,
         prescriptive: bool,
     ) -> Tuple[alt.VConcatChart]:
         plot_impl: Callable[
@@ -352,8 +330,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
         )
 
         return [display_chart]
@@ -361,7 +337,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def _create_df_for_charting(
         self,
         metric_name: str,
-        domain_name: str,
         attributed_values_by_metric_name: Dict[str, ParameterNode],
         expectation_configuration: ExpectationConfiguration,
         prescriptive: bool,
@@ -382,7 +357,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         # make sure batch_identifier keys are sorted the same from batch to batch
         # e.g. prevent batch 1 from having keys "month", "year" and batch 2 from having keys "year", "month"
         batch_identifier_set: Set
-        batch_identifier_set_sorted: Set
+        batch_identifier_list_sorted: List
         batch_identifier_tuple: Tuple
         batch_identifier_key: str
         batch_identifier_value: str
@@ -390,7 +365,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         batch_identifier_record: List
         batch_identifier_records: List[List] = []
         for batch_identifier_set in batch_identifier_list:
-            batch_identifier_set_sorted = sorted(
+            batch_identifier_list_sorted = sorted(
                 batch_identifier_set,
                 key=lambda batch_identifier_tuple: batch_identifier_tuple[0].casefold(),
             )
@@ -398,20 +373,20 @@ class VolumeDataAssistantResult(DataAssistantResult):
             for (
                 batch_identifier_key,
                 batch_identifier_value,
-            ) in batch_identifier_set_sorted:
+            ) in batch_identifier_list_sorted:
                 batch_identifier_keys.add(batch_identifier_key)
                 batch_identifier_record.append(batch_identifier_value)
 
             batch_identifier_records.append(batch_identifier_record)
 
-        batch_identifier_keys_sorted: Set[str] = sorted(batch_identifier_keys)
+        batch_identifier_keys_sorted: List[str] = sorted(batch_identifier_keys)
         batch_identifiers: pd.DataFrame = pd.DataFrame(
             batch_identifier_records, columns=batch_identifier_keys_sorted
         )
 
         idx: int
         batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_identifiers))]
-        df[domain_name] = batch_numbers
+        df["batch"] = batch_numbers
 
         df = pd.concat([df, batch_identifiers], axis=1)
 
@@ -438,7 +413,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
         expectation_configurations: List[ExpectationConfiguration],
         prescriptive: bool,
     ) -> List[pd.DataFrame]:
-        domain_name: str = "batch"
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
             domain.domain_kwargs["column"]: domain
@@ -465,7 +439,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
             df: pd.DataFrame = self._create_df_for_charting(
                 metric_name,
-                domain_name,
                 attributed_values_by_metric_name,
                 expectation_configuration,
                 prescriptive,
