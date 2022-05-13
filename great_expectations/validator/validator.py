@@ -49,6 +49,7 @@ from great_expectations.expectations.registry import (
     list_registered_expectation_implementations,
 )
 from great_expectations.marshmallow__shade import ValidationError
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -168,6 +169,8 @@ class Validator:
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
 
+        self._show_progress_bars = self._determine_progress_bars()
+
         if batches is None:
             batches = []
 
@@ -226,6 +229,27 @@ class Validator:
             combined_dir | set(dir(pd.DataFrame))
 
         return list(combined_dir)
+
+    def _determine_progress_bars(self) -> bool:
+        enable: bool = True
+        if self._data_context:
+            progress_bars = self._data_context.progress_bars
+            # If progress_bars are not present, assume we want them enabled
+            if progress_bars is not None:
+                if "globally" in progress_bars:
+                    enable = progress_bars["globally"]
+                if "metric_calculations" in progress_bars:
+                    enable = progress_bars["metric_calculations"]
+
+        return enable
+
+    @property
+    def show_progress_bars(self) -> bool:
+        return self._show_progress_bars
+
+    @show_progress_bars.setter
+    def show_progress_bars(self, enable: bool) -> None:
+        self._show_progress_bars = enable
 
     @property
     def data_context(self) -> Optional["DataContext"]:  # noqa: F821
@@ -418,7 +442,7 @@ class Validator:
             *(), **expectation_kwargs
         )
         if profiler is not None:
-            profiler.run(
+            profiler_result: RuleBasedProfilerResult = profiler.run(
                 variables=None,
                 rules=None,
                 batch_list=list(self.batches.values()),
@@ -428,13 +452,7 @@ class Validator:
             )
             expectation_configurations: List[
                 ExpectationConfiguration
-            ] = profiler.get_expectation_suite(
-                expectation_suite=None,
-                expectation_suite_name=None,
-                include_citation=True,
-                save_updated_expectation_suite=False,
-            ).expectations
-
+            ] = profiler_result.expectation_configurations
             configuration = expectation_configurations[0]
 
             # Reconcile explicitly provided "ExpectationConfiguration" success_kwargs as overrides to generated values.
@@ -811,10 +829,18 @@ class Validator:
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
         # updates graph with aborted metrics
-        self.resolve_validation_graph(
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ] = self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
         )
+
+        if aborted_metrics_info:
+            logger.warning(
+                f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
+            )
 
         return resolved_metrics
 
@@ -1230,16 +1256,7 @@ class Validator:
             )
 
             # Check to see if the user has disabled progress bars
-            disable = False
-            if self._data_context:
-                progress_bars = self._data_context.progress_bars
-                # If progress_bars are not present, assume we want them enabled
-                if progress_bars is not None:
-                    if "globally" in progress_bars:
-                        disable = not progress_bars["globally"]
-                    if "metric_calculations" in progress_bars:
-                        disable = not progress_bars["metric_calculations"]
-
+            disable = not self._show_progress_bars
             if len(graph.edges) < min_graph_edges_pbar_enable:
                 disable = True
 

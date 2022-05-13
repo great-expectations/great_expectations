@@ -1,10 +1,12 @@
-from typing import Dict, Optional, Type
+import logging
+from typing import Dict, Optional, Set, Type
 
-from great_expectations.expectations.registry import get_data_assistant_impl
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
     DataAssistantRunner,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class DataAssistantDispatcher:
@@ -13,9 +15,7 @@ class DataAssistantDispatcher:
     associated "DataAssistantRunner" objects, which process invocations of calls to "DataAssistant" "run()" methods.
     """
 
-    DATA_ASSISTANT_TYPE_ALIASES: Dict[str, str] = {
-        "volume": "volume_data_assistant",
-    }
+    _registered_data_assistants: Dict[str, Type[DataAssistant]] = {}
 
     def __init__(self, data_context: "BaseDataContext") -> None:  # noqa: F821
         """
@@ -26,20 +26,13 @@ class DataAssistantDispatcher:
 
         self._data_assistant_runner_cache = {}
 
-    def __getattr__(self, name) -> DataAssistantRunner:
+    def __getattr__(self, name: str) -> DataAssistantRunner:
         # Both, registered data_assistant_type and alias name are supported for invocation.
 
-        # Attempt to utilize alias name for invocation first.
-        data_assistant_cls: Optional[Type["DataAssistant"]] = get_data_assistant_impl(
-            data_assistant_type=name.lower()
-        )
-        # If no friendly alias exists, use registered data_assistant_type for invocation.
-        if data_assistant_cls is None:
-            data_assistant_cls = get_data_assistant_impl(
-                data_assistant_type=DataAssistantDispatcher.DATA_ASSISTANT_TYPE_ALIASES.get(
-                    name.lower()
-                )
-            )
+        # _registered_data_assistants has both aliases and full names
+        data_assistant_cls: Optional[
+            Type[DataAssistant]
+        ] = DataAssistantDispatcher.get_data_assistant_impl(name=name)
 
         # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".
         if data_assistant_cls is None:
@@ -61,3 +54,74 @@ class DataAssistantDispatcher:
             ] = data_assistant_runner
 
         return data_assistant_runner
+
+    @classmethod
+    def register_data_assistant(
+        cls,
+        data_assistant: Type[DataAssistant],  # noqa: F821
+    ) -> None:
+        """
+        This method registers "DataAssistant" subclass for future instantiation and execution of its "run()" method.
+
+        Args:
+            data_assistant: "DataAssistant" class to be registered
+        """
+        data_assistant_type = data_assistant.data_assistant_type
+        cls._register(data_assistant_type, data_assistant)
+
+        alias: Optional[str] = data_assistant.__alias__
+        if alias is not None:
+            cls._register(alias, data_assistant)
+
+    @classmethod
+    def _register(cls, name: str, data_assistant: Type[DataAssistant]) -> None:
+        registered_data_assistants = cls._registered_data_assistants
+
+        if name in registered_data_assistants:
+            raise ValueError(f'Existing declarations of DataAssistant "{name}" found.')
+
+        logger.debug(
+            f'Registering the declaration of DataAssistant "{name}" took place.'
+        )
+        registered_data_assistants[name] = data_assistant
+
+    @classmethod
+    def get_data_assistant_impl(
+        cls,
+        name: Optional[str],
+    ) -> Optional[Type[DataAssistant]]:
+        """
+        This method obtains (previously registered) "DataAssistant" class from DataAssistant Registry.
+
+        Note that it will clean the input string before checking against registered assistants.
+
+        Args:
+            name: String representing "snake case" version of "DataAssistant" class type
+
+        Returns:
+            Class inheriting "DataAssistant" if found; otherwise, None
+        """
+        if name is None:
+            return None
+        name = name.lower()
+        return cls._registered_data_assistants.get(name)
+
+    def __dir__(self):
+        """
+        This custom magic method is used to enable tab completion on "DataAssistantDispatcher" objects.
+        """
+        data_assistant_dispatcher_attrs: Set[str] = set(super().__dir__())
+        data_assistant_registered_names: Set[
+            str
+        ] = get_registered_data_assistant_names()
+        combined_dir_attrs: Set[str] = (
+            data_assistant_dispatcher_attrs | data_assistant_registered_names
+        )
+        return list(combined_dir_attrs)
+
+
+def get_registered_data_assistant_names() -> Set[str]:
+    """
+    This method returns names (registered data_assistant_type and alias name) of registered "DataAssistant" classes.
+    """
+    return set(DataAssistantDispatcher._registered_data_assistants.keys())

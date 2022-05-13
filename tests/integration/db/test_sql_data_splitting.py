@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 
 import pandas as pd
 import sqlalchemy as sa
@@ -8,12 +8,12 @@ from great_expectations import DataContext
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.datasource import BaseDatasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from tests.integration.fixtures.split_data.splitter_test_cases_and_fixtures import (
+from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
     TaxiSplittingTestCase,
     TaxiSplittingTestCases,
     TaxiTestData,
@@ -21,35 +21,20 @@ from tests.integration.fixtures.split_data.splitter_test_cases_and_fixtures impo
 from tests.test_utils import (
     LoadedTable,
     clean_up_tables_with_prefix,
-    get_bigquery_connection_url,
-    get_snowflake_connection_url,
+    get_awsathena_db_name,
+    get_connection_string_and_dialect,
+    load_and_concatenate_csvs,
     load_data_into_test_database,
 )
-
-yaml_handler: YAMLHandler = YAMLHandler()
-
-
-def _get_connection_string_and_dialect() -> Tuple[str, str]:
-
-    with open("./connection_string.yml") as f:
-        db_config: dict = yaml_handler.load(f)
-
-    dialect: str = db_config["dialect"]
-    if dialect == "snowflake":
-        connection_string: str = get_snowflake_connection_url()
-    elif dialect == "bigquery":
-        connection_string: str = get_bigquery_connection_url()
-    else:
-        connection_string: str = db_config["connection_string"]
-
-    return dialect, connection_string
-
 
 TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
 
 
 def _load_data(
-    connection_string: str, dialect: str, table_name: str = TAXI_DATA_TABLE_NAME
+    connection_string: str,
+    dialect: str,
+    table_name: str = TAXI_DATA_TABLE_NAME,
+    random_table_suffix: bool = True,
 ) -> LoadedTable:
 
     dialects_supporting_multiple_values_in_single_insert_clause: List[str] = [
@@ -70,26 +55,48 @@ def _load_data(
         connection_string=connection_string,
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
         load_full_dataset=True,
-        random_table_suffix=True,
+        random_table_suffix=random_table_suffix,
         to_sql_method=to_sql_method,
     )
 
 
+def _is_dialect_athena(dialect: str) -> bool:
+    """Is the dialect awsathena?"""
+    return dialect == "awsathena"
+
+
 if __name__ == "test_script_module":
 
-    dialect, connection_string = _get_connection_string_and_dialect()
+    dialect, connection_string = get_connection_string_and_dialect(
+        athena_db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
+    )
     print(f"Testing dialect: {dialect}")
 
-    print("Preemptively cleaning old tables")
-    clean_up_tables_with_prefix(
-        connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
-    )
+    if _is_dialect_athena(dialect):
+        athena_db_name: str = get_awsathena_db_name(
+            db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
+        )
+        table_name: str = "ten_trips_from_each_month"
+        test_df: pd.DataFrame = load_and_concatenate_csvs(
+            csv_paths=[
+                f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
+            ],
+            convert_column_names_to_datetime=["pickup_datetime", "dropoff_datetime"],
+            load_full_dataset=True,
+        )
 
-    loaded_table: LoadedTable = _load_data(
-        connection_string=connection_string, dialect=dialect
-    )
-    test_df: pd.DataFrame = loaded_table.inserted_dataframe
-    table_name: str = loaded_table.table_name
+    else:
+        print("Preemptively cleaning old tables")
+        clean_up_tables_with_prefix(
+            connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
+        )
+
+        loaded_table: LoadedTable = _load_data(
+            connection_string=connection_string, dialect=dialect
+        )
+
+        test_df: pd.DataFrame = loaded_table.inserted_dataframe
+        table_name: str = loaded_table.table_name
 
     taxi_test_data: TaxiTestData = TaxiTestData(
         test_df, test_column_name="pickup_datetime"
@@ -109,6 +116,21 @@ if __name__ == "test_script_module":
         context: DataContext = ge.get_context()
 
         datasource_name: str = "test_datasource"
+        data_connector_name: str = "test_data_connector"
+        data_asset_name: str = table_name  # Read from generated table name
+        column_name: str = taxi_splitting_test_cases.test_column_name
+
+        # 2. Set splitter in DataConnector config
+        data_connector_config: dict = {
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "assets": {
+                data_asset_name: {
+                    "splitter_method": test_case.splitter_method_name,
+                    "splitter_kwargs": test_case.splitter_kwargs,
+                }
+            },
+        }
+
         context.add_datasource(
             name=datasource_name,
             class_name="Datasource",
@@ -116,25 +138,16 @@ if __name__ == "test_script_module":
                 "class_name": "SqlAlchemyExecutionEngine",
                 "connection_string": connection_string,
             },
+            data_connectors={data_connector_name: data_connector_config},
         )
 
-        # 2. Set splitter in data connector config
-        data_connector_name: str = "test_data_connector"
-        data_asset_name: str = table_name  # Read from generated table name
-        column_name: str = taxi_splitting_test_cases.test_column_name
-        data_connector: ConfiguredAssetSqlDataConnector = (
-            ConfiguredAssetSqlDataConnector(
-                name=data_connector_name,
-                datasource_name=datasource_name,
-                execution_engine=context.datasources[datasource_name].execution_engine,
-                assets={
-                    data_asset_name: {
-                        "splitter_method": test_case.splitter_method_name,
-                        "splitter_kwargs": test_case.splitter_kwargs,
-                    }
-                },
-            )
+        datasource: BaseDatasource = context.get_datasource(
+            datasource_name=datasource_name
         )
+
+        data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
+            data_connector_name
+        ]
 
         # 3. Check if resulting batches are as expected
         # using data_connector.get_batch_definition_list_from_batch_request()
@@ -180,7 +193,8 @@ if __name__ == "test_script_module":
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
 
-    print("Clean up tables used in this test")
-    clean_up_tables_with_prefix(
-        connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
-    )
+    if not _is_dialect_athena(dialect):
+        print("Clean up tables used in this test")
+        clean_up_tables_with_prefix(
+            connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
+        )

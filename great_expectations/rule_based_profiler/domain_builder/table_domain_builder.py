@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -34,8 +34,8 @@ class TableDomainBuilder(DomainBuilder):
     ) -> List[Domain]:
         domains: List[Domain] = [
             Domain(
-                rule_name=rule_name,
                 domain_type=self.domain_type,
+                rule_name=rule_name,
             ),
         ]
 

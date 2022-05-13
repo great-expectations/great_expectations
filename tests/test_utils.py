@@ -5,12 +5,13 @@ import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, List, Optional, Union, cast
+from typing import Any, Generator, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import (
     CheckpointStore,
     ProfilerStore,
@@ -49,8 +50,9 @@ except ImportError:
     Select = None
     SQLAlchemyError = None
 
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
+yaml_handler: YAMLHandler = YAMLHandler()
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -603,6 +605,23 @@ def load_data_into_test_database(
             dataframe=all_dfs_concatenated, table_name=table_name
         )
         return return_value
+    elif engine.dialect.name.lower() == "awsathena":
+        try:
+            connection = engine.connect()
+            load_dataframe_into_test_athena_database_as_table(
+                df=all_dfs_concatenated,
+                table_name=table_name,
+                connection=connection,
+            )
+            return return_value
+        except SQLAlchemyError as e:
+            logger.error(
+                """Docs integration tests encountered an error while loading test-data into test-database."""
+            )
+            raise
+        finally:
+            connection.close()
+            engine.dispose()
     else:
         try:
             connection = engine.connect()
@@ -652,6 +671,43 @@ def load_data_into_test_bigquery_database_with_bigquery_client(
         dataframe, table_id
     )  # Make an API request.
     job.result()  # Wait for the job to complete
+
+
+def load_dataframe_into_test_athena_database_as_table(
+    df: pd.DataFrame,
+    table_name: str,
+    connection,
+    data_location_bucket: Optional[str] = None,
+    data_location: Optional[str] = None,
+) -> None:
+    """
+
+    Args:
+        df: dataframe containing data.
+        table_name: name of table to write.
+        connection: connection to database.
+        data_location_bucket: name of bucket where data is located.
+        data_location: path to data from bucket without leading / e.g.
+            "data/stuff/" in path "s3://my-bucket/data/stuff/"
+
+    Returns:
+        None
+    """
+
+    from pyathena.pandas.util import to_sql
+
+    if not data_location_bucket:
+        data_location_bucket = os.getenv("ATHENA_DATA_BUCKET")
+    if not data_location:
+        data_location = "data/ten_trips_from_each_month/"
+    location: str = f"s3://{data_location_bucket}/{data_location}"
+    to_sql(
+        df=df,
+        name=table_name,
+        conn=connection,
+        location=location,
+        if_exists="replace",
+    )
 
 
 def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:
@@ -775,3 +831,93 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     finally:
         connection.close()
         engine.dispose()
+
+
+def get_awsathena_db_name(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
+    """Get awsathena database name from environment variables.
+
+    Returns:
+        String of the awsathena database name.
+    """
+    athena_db_name: str = os.getenv(db_name_env_var)
+    if not athena_db_name:
+        raise ValueError(
+            f"Environment Variable {db_name_env_var} is required to run integration tests against AWS Athena"
+        )
+    return athena_db_name
+
+
+def get_awsathena_connection_url(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
+    """Get awsathena connection url from environment variables.
+
+    Returns:
+        String of the awsathena connection url.
+    """
+    ATHENA_DB_NAME: str = get_awsathena_db_name(db_name_env_var)
+    ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
+    if not ATHENA_STAGING_S3:
+        raise ValueError(
+            "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
+        )
+
+    return f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
+
+
+def get_connection_string_and_dialect(
+    athena_db_name_env_var: str = "ATHENA_DB_NAME",
+) -> Tuple[str, str]:
+
+    with open("./connection_string.yml") as f:
+        db_config: dict = yaml_handler.load(f)
+
+    dialect: str = db_config["dialect"]
+    if dialect == "snowflake":
+        connection_string: str = get_snowflake_connection_url()
+    elif dialect == "bigquery":
+        connection_string: str = get_bigquery_connection_url()
+    elif dialect == "awsathena":
+        connection_string: str = get_awsathena_connection_url(athena_db_name_env_var)
+    else:
+        connection_string: str = db_config["connection_string"]
+
+    return dialect, connection_string
+
+
+def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
+    """Recursively traverse a nested structure to find all strings in an input string.
+
+    Args:
+        obj (Any): The object to traverse (generally a dict to start with)
+        target_strings (List[str]): The collection of strings to find.
+
+    Returns:
+        True if ALL target strings are found. Otherwise, will return False.
+    """
+
+    strings: Set[str] = set(target_strings)
+
+    def _find_string(data: Any) -> bool:
+        if isinstance(data, list):
+            for val in data:
+                if _find_string(val):
+                    return True
+        elif isinstance(data, dict):
+            for key, val in data.items():
+                if _find_string(key) or _find_string(val):
+                    return True
+        elif isinstance(data, str):
+            string_to_remove: Optional[str] = None
+            for string in strings:
+                if string in data:
+                    string_to_remove = string
+                    break
+            if string_to_remove:
+                strings.remove(string_to_remove)
+                if not strings:
+                    return True
+        return False
+
+    success: bool = _find_string(obj)
+    if not success:
+        logger.info(f"Could not find the following target strings: {strings}")
+    return success

@@ -45,7 +45,7 @@ results in:
 ```python
 {
     "bins": [ 0, 1, 2, 10],
-    "weights": [0.3, 0.3, 0.4],
+    "weights": [0.2, 0.3, 0.3],
     "tail_weights": [0.1, 0.1]
 }
 ```

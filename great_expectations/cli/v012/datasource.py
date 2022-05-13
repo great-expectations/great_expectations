@@ -5,7 +5,6 @@ import os
 import platform
 import sys
 import textwrap
-import uuid
 
 import click
 
