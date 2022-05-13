@@ -5,7 +5,7 @@ services:
   integration_test:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ../common/int-type1.Dockerfile
     command: pytest -vvv test_ge.py; echo Done
     environment:
       DB_URL: ${DB_URL}
