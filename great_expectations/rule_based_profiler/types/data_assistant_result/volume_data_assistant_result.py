@@ -11,14 +11,47 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
+    PlotMode,
     PlotResult,
 )
 
 
 class VolumeDataAssistantResult(DataAssistantResult):
-    def plot(
+    def plot_metrics(
         self,
-        prescriptive: bool = False,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        """
+        See parent `DataAssistantResult.plot_metrics()`.
+        """
+        return self._plot(
+            plot_mode=PlotMode.DESCRIPTIVE,
+            theme=theme,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+        )
+
+    def plot_expectations_and_metrics(
+        self,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        """
+        See parent `DataAssistantResult.plot_expectations_metrics()`.
+        """
+        return self._plot(
+            plot_mode=PlotMode.PRESCRIPTIVE,
+            theme=theme,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+        )
+
+    def _plot(
+        self,
+        plot_mode: PlotMode,
         theme: Optional[Dict[str, Any]] = None,
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
@@ -56,7 +89,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             List[alt.Chart], List[alt.LayerChart]
         ] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
-            prescriptive=prescriptive,
+            plot_mode=plot_mode,
         )
         display_charts.extend(table_domain_chart)
         return_charts.extend(table_domain_chart)
@@ -70,7 +103,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             expectation_configurations=expectation_configurations,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
-            prescriptive=prescriptive,
+            plot_mode=plot_mode,
         )
         display_charts.extend(column_domain_display_charts)
         return_charts.extend(column_domain_return_charts)
@@ -83,7 +116,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def _plot_table_domain_charts(
         self,
         expectation_configurations: List[ExpectationConfiguration],
-        prescriptive: bool,
+        plot_mode: PlotMode,
     ) -> List[alt.Chart]:
         table_based_expectations: List[ExpectationConfiguration] = list(
             filter(
@@ -104,7 +137,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 self._create_chart_for_table_domain_expectation(
                     expectation_configuration=expectation_configuration,
                     attributed_metrics=attributed_metrics_by_table_domain,
-                    prescriptive=prescriptive,
+                    plot_mode=plot_mode,
                 )
             )
             charts.append(table_domain_chart)
@@ -116,7 +149,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         expectation_configurations: List[ExpectationConfiguration],
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
-        prescriptive: bool,
+        plot_mode: PlotMode,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
         def _filter(e: ExpectationConfiguration) -> bool:
             if e.expectation_type != "expect_column_unique_value_count_to_be_between":
@@ -144,7 +177,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         ] = self._create_display_chart_for_column_domain_expectation(
             expectation_configurations=column_based_expectation_configurations,
             attributed_metrics=attributed_metrics_by_column_domain,
-            prescriptive=prescriptive,
+            plot_mode=plot_mode,
         )
 
         return_charts: List[alt.Chart] = []
@@ -153,7 +186,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 self._create_return_chart_for_column_domain_expectation(
                     expectation_configuration=expectation_configuration,
                     attributed_metrics=attributed_metrics_by_column_domain,
-                    prescriptive=prescriptive,
+                    plot_mode=plot_mode,
                 )
             )
             return_charts.append(return_chart)
@@ -164,7 +197,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         self,
         expectation_configuration: ExpectationConfiguration,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
-        prescriptive: bool,
+        plot_mode: PlotMode,
     ) -> alt.Chart:
         attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
             attributed_metrics.values()
@@ -180,14 +213,14 @@ class VolumeDataAssistantResult(DataAssistantResult):
             metric_name=metric_name,
             attributed_values_by_metric_name=attributed_values_by_metric_name,
             expectation_configuration=expectation_configuration,
-            prescriptive=prescriptive,
+            plot_mode=plot_mode,
         )
 
         return self._chart_domain_values(
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
-            prescriptive=prescriptive,
+            plot_mode=plot_mode,
             subtitle=None,
         )
 
@@ -196,7 +229,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         df: pd.DataFrame,
         metric_name: str,
         metric_type: alt.StandardType,
-        prescriptive: bool,
+        plot_mode: PlotMode,
         subtitle: Optional[str],
     ) -> alt.Chart:
         plot_impl: Callable[
@@ -210,7 +243,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             ],
             alt.Chart,
         ]
-        if prescriptive:
+        if plot_mode is PlotMode.PRESCRIPTIVE:
             plot_impl = self.get_expect_domain_values_to_be_between_chart
         else:
             plot_impl = self.get_line_chart
@@ -227,12 +260,12 @@ class VolumeDataAssistantResult(DataAssistantResult):
         self,
         expectation_configurations: List[ExpectationConfiguration],
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
-        prescriptive: bool,
+        plot_mode: PlotMode,
     ) -> List[alt.VConcatChart]:
         column_dfs: List[pd.DataFrame] = self._create_column_dfs_for_charting(
             attributed_metrics=attributed_metrics,
             expectation_configurations=expectation_configurations,
-            prescriptive=prescriptive,
+            plot_mode=plot_mode,
         )
 
         attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
@@ -249,14 +282,14 @@ class VolumeDataAssistantResult(DataAssistantResult):
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
-            prescriptive=prescriptive,
+            plot_mode=plot_mode,
         )
 
     def _create_return_chart_for_column_domain_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
-        prescriptive: bool,
+        plot_mode: PlotMode,
     ) -> alt.Chart:
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
@@ -285,7 +318,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             metric_name=metric_name,
             attributed_values_by_metric_name=attributed_values_by_metric_name,
             expectation_configuration=expectation_configuration,
-            prescriptive=prescriptive,
+            plot_mode=plot_mode,
         )
 
         column_name: str = expectation_configuration.kwargs["column"]
@@ -295,7 +328,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
-            prescriptive=prescriptive,
+            plot_mode=plot_mode,
             subtitle=subtitle,
         )
 
@@ -304,7 +337,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         column_dfs: List[Tuple[str, pd.DataFrame]],
         metric_name: str,
         metric_type: alt.StandardType,
-        prescriptive: bool,
+        plot_mode: PlotMode,
     ) -> List[alt.VConcatChart]:
         plot_impl: Callable[
             [
@@ -314,7 +347,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             ],
             alt.VConcatChart,
         ]
-        if prescriptive:
+        if plot_mode is PlotMode.PRESCRIPTIVE:
             plot_impl = (
                 self.get_interactive_detail_expect_column_values_to_be_between_chart
             )
