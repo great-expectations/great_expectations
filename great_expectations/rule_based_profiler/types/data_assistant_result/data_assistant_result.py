@@ -1019,13 +1019,13 @@ class DataAssistantResult(SerializableDictDot):
         interactive_detail_multi_line_chart.vconcat[0].layer[3] = (
             interactive_detail_multi_line_chart.vconcat[0]
             .layer[3]
-            .encode(color=point_color_condition)
+            .encode(color=point_color_condition, tooltip=tooltip)
         )
 
         interactive_detail_multi_line_chart.vconcat[2].layer[1] = (
             interactive_detail_multi_line_chart.vconcat[2]
             .layer[1]
-            .encode(color=point_color_condition)
+            .encode(color=point_color_condition, tooltip=tooltip)
         )
 
         # add expectation kwargs
@@ -1034,13 +1034,10 @@ class DataAssistantResult(SerializableDictDot):
             band,
             lower_limit,
             upper_limit,
-            detail_chart.layer[0],
-            detail_chart.layer[1],
+            detail_chart.layer[0].encode(tooltip=tooltip),
+            detail_chart.layer[1].encode(tooltip=tooltip),
         ]
         interactive_detail_multi_line_chart.vconcat[2].layer = detail_chart_layers
-
-        for idx, chart in enumerate(interactive_detail_multi_line_chart.vconcat):
-            chart.encoding = alt.Encoding(tooltip=tooltip)
 
         return interactive_detail_multi_line_chart
 
