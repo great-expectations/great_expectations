@@ -412,7 +412,7 @@ class GeCloudError(GreatExpectationsError):
     pass
 
 
-class TestDatabaseConnectionError(GreatExpectationsError):
-    """Error connecting to a test database during an integration test."""
+class DatabaseConnectionError(GreatExpectationsError):
+    """Error connecting to a database including during an integration test."""
 
     pass

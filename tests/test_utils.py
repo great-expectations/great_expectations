@@ -618,7 +618,7 @@ def load_data_into_test_database(
         except SQLAlchemyError as e:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
             logger.error(error_message)
-            raise ge_exceptions.TestDatabaseConnectionError(error_message)
+            raise ge_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
             # sensitive information does not make it into our CI logs.
         finally:
@@ -641,7 +641,7 @@ def load_data_into_test_database(
         except SQLAlchemyError as e:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
             logger.error(error_message)
-            raise ge_exceptions.TestDatabaseConnectionError(error_message)
+            raise ge_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
             # sensitive information does not make it into our CI logs.
         finally:
@@ -803,7 +803,7 @@ def check_athena_table_count(
     except SQLAlchemyError as e:
         error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
         logger.error(error_message)
-        raise ge_exceptions.TestDatabaseConnectionError(error_message)
+        raise ge_exceptions.DatabaseConnectionError(error_message)
         # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
         # sensitive information does not make it into our CI logs.
     finally:
