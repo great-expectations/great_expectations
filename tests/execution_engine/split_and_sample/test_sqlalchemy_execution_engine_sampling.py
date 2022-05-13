@@ -71,6 +71,7 @@ def dialect_name_to_sql_statement():
             GESqlDialect.AWSATHENA: 'SELECT * FROM "TEST_SCHEMA_NAME"."TEST_TABLE" WHERE TRUE LIMIT 10',
             GESqlDialect.DREMIO: 'SELECT * FROM "TEST_SCHEMA_NAME"."TEST_TABLE" WHERE 1 = 1 LIMIT 10',
             GESqlDialect.TERADATASQL: "SELECT TOP 10 * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1",
+            GESqlDialect.TRINO: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
         }
         return DIALECT_NAME_TO_SQL_STATEMENT[dialect_name]
 
@@ -113,6 +114,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             GESqlDialect.AWSATHENA: f"awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
             GESqlDialect.DREMIO: "dremio://",
             GESqlDialect.TERADATASQL: "teradatasql://",
+            GESqlDialect.TRINO: "trino://",
         }
 
         @property
