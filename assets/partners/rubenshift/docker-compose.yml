@@ -2,23 +2,10 @@
 version: "3"
 
 services:
-  db:
-    image: postgres:13.2
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - 5432:5432
-    # Reduce noise in integration test logs
-    logging:
-      driver: none
-  mercury-e2e-tests:
+  integration_test:
     build:
       context: .
       dockerfile: ./Dockerfile
-    command: python -c "print('hello world')"
+#    command: pytest -vvv test_ge.py; echo Done
     environment:
-      COOL_EXAMPLE: opa
-    depends_on:
-      - db
+      REDSHIFT_URL: ${REDSHIFT_URL}

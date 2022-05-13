@@ -48,5 +48,5 @@ stages:
           - task: ChangedFiles@1
             name: CheckDocsChanges
 
-          - bash: cd assets/partners/rubenshift; docker compose up;
+          - bash: cd assets/partners/rubenshift; docker compose up --exit-code-from integration_test;
             name: RunDockerComposeUp
