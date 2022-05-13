@@ -10,7 +10,9 @@ services:
     ports:
       - 1433:1433
   integration_test:
-    image: integration_test:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: pytest -vvv test_ge.py
     environment:
       DB_URL: ${DB_URL}
