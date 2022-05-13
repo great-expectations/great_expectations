@@ -8,8 +8,8 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 def test_ge():
 
 
-    CONNECTION_STRING = os.environ.get("REDSHIFT_URL")
-    print("SEARCHRR",CONNECTION_STRING)
+    CONNECTION_STRING = os.environ.get("DB_URL")
+    
     context = ge.get_context()
 
     datasource_config = {

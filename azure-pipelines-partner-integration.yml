@@ -3,50 +3,14 @@ trigger:
     include:
     - pre_pr_docs-*
 
-resources:
-  containers:
-  - container: postgres
-    image: postgres:11
-    ports:
-    - 5432:5432
-    env:
-      POSTGRES_DB: "test_ci"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
-  - container: mysql
-    image: mysql:8.0.20
-    ports:
-      - 3306:3306
-    env:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: test_ci
-  - container: mssql
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    env:
-      ACCEPT_EULA: Y
-      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
-      MSSQL_DB: test_ci
-      MSSQL_PID: Developer
-    ports:
-      - 1433:1433
-  - container: trino
-    image: trinodb/trino:379
-    ports:
-      - 8088:8080
-
-variables:
-  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-  isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
-  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-
 stages:
   - stage: scope_check
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
-      - job: changes
+      - job: Partner Integration - Rubenshift
         steps:
-          - task: ChangedFiles@1
-            name: CheckDocsChanges
-
           - bash: cd assets/partners/rubenshift; docker compose up --exit-code-from integration_test;
             name: RunDockerComposeUp
+          env:
+            DB_URL: $(REDSHIFT_URL)

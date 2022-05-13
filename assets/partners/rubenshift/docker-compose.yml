@@ -8,4 +8,4 @@ services:
       dockerfile: ./Dockerfile
     command: pytest -vvv test_ge.py; echo Done
     environment:
-      REDSHIFT_URL: ${REDSHIFT_URL}
+      DB_URL: ${DB_URL}
