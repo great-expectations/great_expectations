@@ -754,6 +754,9 @@ def build_map_metric_rule(
     """
     This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for any "map" style metric.
     """
+
+    # Step-1: Instantiate "MapMetricColumnDomainBuilder" for specified "map_metric_name" (subject to directives).
+
     map_metric_column_domain_builder: MapMetricColumnDomainBuilder = (
         MapMetricColumnDomainBuilder(
             map_metric_name=map_metric_name,
@@ -772,6 +775,8 @@ def build_map_metric_rule(
         )
     )
 
+    # Step-2: Declare "ParameterBuilder" for every metric of interest.
+
     column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
         json_serialize=True
     )
@@ -781,6 +786,8 @@ def build_map_metric_rule(
     column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder(
         json_serialize=True
     )
+
+    # Step-3: Set up "MeanUnexpectedMapMetricMultiBatchParameterBuilder" to compute "condition" for emitting "ExpectationConfiguration" (based on "Domain" data).
 
     total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_table_row_count_metric_multi_batch_parameter_builder(
         json_serialize=False
@@ -808,6 +815,8 @@ def build_map_metric_rule(
         data_context=None,
     )
 
+    # Step-4: Pass "MeanUnexpectedMapMetricMultiBatchParameterBuilder" as "validation" "ParameterBuilder" for "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+
     validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         ParameterBuilderConfig(
             **column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.to_json_dict()
@@ -823,6 +832,8 @@ def build_map_metric_rule(
             "profiler_details": f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
         },
     )
+
+    # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
     parameter_builders: List[ParameterBuilder] = [
         column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,

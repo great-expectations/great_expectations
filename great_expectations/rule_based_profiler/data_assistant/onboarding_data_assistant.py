@@ -148,6 +148,9 @@ class OnboardingDataAssistant(DataAssistant):
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for numerical columns.
         """
+
+        # Step-1: Instantiate "ColumnDomainBuilder" for selecting numeric columns (but not "ID-type" columns).
+
         numeric_column_type_domain_builder: ColumnDomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
@@ -165,6 +168,8 @@ class OnboardingDataAssistant(DataAssistant):
             ],
             data_context=None,
         )
+
+        # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
         column_histogram_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_histogram_metric_multi_batch_parameter_builder(
             json_serialize=True
@@ -187,6 +192,8 @@ class OnboardingDataAssistant(DataAssistant):
         column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_standard_deviation_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
+
+        # Step-3: Declare "ParameterBuilder" for every "validation" need "ExpectationConfigurationBuilder" objects.
 
         column_min_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name="column.min",
@@ -223,6 +230,8 @@ class OnboardingDataAssistant(DataAssistant):
         )
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+
+        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -357,6 +366,8 @@ class OnboardingDataAssistant(DataAssistant):
                 "profiler_details": f"{column_standard_deviation_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
             },
         )
+
+        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
         variables: dict = {
             "mostly": 1.0,
