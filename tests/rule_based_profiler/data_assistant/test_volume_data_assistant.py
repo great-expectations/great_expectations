@@ -3307,3 +3307,45 @@ def test_volume_data_assistant_plot_return_tooltip(
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
     assert actual_tooltip == expected_tooltip
+
+
+def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    new_cell: str = "data_assistant_result.plot_metrics(sequential=False)"
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=False,
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=True,
+    )
+
+
+def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    new_cell: str = (
+        "data_assistant_result.plot_expectations_and_metrics(sequential=False)"
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=False,
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=True,
+    )
