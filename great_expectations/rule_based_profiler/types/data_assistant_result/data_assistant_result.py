@@ -195,10 +195,11 @@ class DataAssistantResult(SerializableDictDot):
             return default_theme
 
     @staticmethod
-    def get_line_chart(
+    def get_quantitative_metric_chart(
         df: pd.DataFrame,
         metric_name: str,
         metric_type: alt.StandardType,
+        sequential: bool,
         subtitle: Optional[str] = None,
     ) -> alt.Chart:
         """
@@ -206,6 +207,7 @@ class DataAssistantResult(SerializableDictDot):
             df: A pandas dataframe containing the data to be plotted
             metric_name: The name of the metric as it exists in the pandas dataframe
             metric_type: The altair data type for the metric being plotted
+            sequential: Whether batches are sequential in nature
             subtitle: The subtitle, if applicable
 
         Returns:
@@ -231,15 +233,62 @@ class DataAssistantResult(SerializableDictDot):
             subtitle=subtitle,
         )
 
-        return DataAssistantResult._get_line_chart(
-            df=df,
-            metric_component=metric_component,
-            batch_component=batch_component,
-            domain_component=domain_component,
-        )
+        if sequential:
+            return DataAssistantResult._get_line_chart(
+                df=df,
+                metric_component=metric_component,
+                batch_component=batch_component,
+                domain_component=domain_component,
+            )
+        else:
+            return DataAssistantResult._get_bar_chart(
+                df=df,
+                metric_component=metric_component,
+                batch_component=batch_component,
+                domain_component=domain_component,
+            )
 
     @staticmethod
     def _get_line_chart(
+        df: pd.DataFrame,
+        metric_component: MetricPlotComponent,
+        batch_component: BatchPlotComponent,
+        domain_component: DomainPlotComponent,
+    ) -> alt.Chart:
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_component=metric_component,
+            batch_plot_component=batch_component,
+            domain_plot_component=domain_component,
+        )
+
+        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
+            metric_component.generate_tooltip(format=","),
+        ]
+
+        line: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_line()
+            .encode(
+                x=batch_component.plot_on_axis(),
+                y=metric_component.plot_on_axis(),
+                tooltip=tooltip,
+            )
+        )
+
+        points: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_point()
+            .encode(
+                x=batch_component.plot_on_axis(),
+                y=metric_component.plot_on_axis(),
+                tooltip=tooltip,
+            )
+        )
+
+        return line + points
+
+    @staticmethod
+    def _get_bar_chart(
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,

@@ -375,7 +375,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             plot_impl = (
                 self.get_interactive_detail_expect_column_values_to_be_between_chart
             )
-        elif plot_mode is PlotMode.DESCRIPTIVE:
+        else:
             plot_impl = self.get_interactive_detail_multi_chart
 
         display_chart: alt.VConcatChart = plot_impl(
