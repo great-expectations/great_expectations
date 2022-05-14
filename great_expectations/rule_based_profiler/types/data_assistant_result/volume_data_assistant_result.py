@@ -19,6 +19,7 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_res
 class VolumeDataAssistantResult(DataAssistantResult):
     def plot_metrics(
         self,
+        sequential: bool = True,
         theme: Optional[Dict[str, Any]] = None,
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
@@ -28,6 +29,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         """
         return self._plot(
             plot_mode=PlotMode.DESCRIPTIVE,
+            sequential=sequential,
             theme=theme,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
@@ -35,6 +37,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
     def plot_expectations_and_metrics(
         self,
+        sequential: bool = True,
         theme: Optional[Dict[str, Any]] = None,
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
@@ -44,6 +47,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         """
         return self._plot(
             plot_mode=PlotMode.PRESCRIPTIVE,
+            sequential=sequential,
             theme=theme,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
@@ -52,6 +56,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def _plot(
         self,
         plot_mode: PlotMode,
+        sequential: bool,
         theme: Optional[Dict[str, Any]] = None,
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
@@ -65,7 +70,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
+            plot_mode: Type of plot to generate, prescriptive or descriptive
+            sequential: Whether batches are sequential in nature
             theme: Altair top-level chart configuration dictionary
             include_column_names: A list of columns to chart
             exclude_column_names: A list of columns not to chart
@@ -78,7 +84,9 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 "You may either use `include_column_names` or `exclude_column_names` (but not both)."
             )
 
-        display_charts: Union[List[alt.VConcatChart], List[alt.LayerChart]] = []
+        display_charts: Union[
+            List[alt.Chart], List[alt.LayerChart], List[alt.VConcatChart]
+        ] = []
         return_charts: Union[List[alt.Chart], List[alt.LayerChart]] = []
 
         expectation_configurations: List[
@@ -90,6 +98,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         ] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
+            sequential=sequential,
         )
         display_charts.extend(table_domain_chart)
         return_charts.extend(table_domain_chart)
@@ -101,9 +110,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
             column_domain_return_charts,
         ) = self._plot_column_domain_charts(
             expectation_configurations=expectation_configurations,
+            plot_mode=plot_mode,
+            sequential=sequential,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
-            plot_mode=plot_mode,
         )
         display_charts.extend(column_domain_display_charts)
         return_charts.extend(column_domain_return_charts)
@@ -117,7 +127,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
         self,
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
-    ) -> List[alt.Chart]:
+        sequential: bool,
+    ) -> Union[List[alt.Chart], List[alt.LayerChart]]:
         table_based_expectations: List[ExpectationConfiguration] = list(
             filter(
                 lambda e: e.expectation_type == "expect_table_row_count_to_be_between",
@@ -138,6 +149,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
                     expectation_configuration=expectation_configuration,
                     attributed_metrics=attributed_metrics_by_table_domain,
                     plot_mode=plot_mode,
+                    sequential=sequential,
                 )
             )
             charts.append(table_domain_chart)
@@ -150,6 +162,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
         plot_mode: PlotMode,
+        sequential: bool,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
         def _filter(e: ExpectationConfiguration) -> bool:
             if e.expectation_type != "expect_column_unique_value_count_to_be_between":
@@ -178,6 +191,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             expectation_configurations=column_based_expectation_configurations,
             attributed_metrics=attributed_metrics_by_column_domain,
             plot_mode=plot_mode,
+            sequential=sequential,
         )
 
         return_charts: List[alt.Chart] = []
@@ -187,6 +201,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
                     expectation_configuration=expectation_configuration,
                     attributed_metrics=attributed_metrics_by_column_domain,
                     plot_mode=plot_mode,
+                    sequential=sequential,
                 )
             )
             return_charts.append(return_chart)
@@ -198,6 +213,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         expectation_configuration: ExpectationConfiguration,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
+        sequential: bool,
     ) -> alt.Chart:
         attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
             attributed_metrics.values()
@@ -221,6 +237,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             metric_name=metric_name,
             metric_type=metric_type,
             plot_mode=plot_mode,
+            sequential=sequential,
             subtitle=None,
         )
 
@@ -230,6 +247,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_name: str,
         metric_type: alt.StandardType,
         plot_mode: PlotMode,
+        sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
         plot_impl: Callable[
@@ -245,13 +263,14 @@ class VolumeDataAssistantResult(DataAssistantResult):
         ]
         if plot_mode is PlotMode.PRESCRIPTIVE:
             plot_impl = self.get_expect_domain_values_to_be_between_chart
-        else:
-            plot_impl = self.get_line_chart
+        elif plot_mode is PlotMode.DESCRIPTIVE:
+            plot_impl = self.get_quantitative_metric_chart
 
         chart: alt.Chart = plot_impl(
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
+            sequential=sequential,
             subtitle=subtitle,
         )
         return chart
@@ -261,6 +280,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         expectation_configurations: List[ExpectationConfiguration],
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
+        sequential: bool,
     ) -> List[alt.VConcatChart]:
         column_dfs: List[pd.DataFrame] = self._create_column_dfs_for_charting(
             attributed_metrics=attributed_metrics,
@@ -283,6 +303,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             metric_name=metric_name,
             metric_type=metric_type,
             plot_mode=plot_mode,
+            sequential=sequential,
         )
 
     def _create_return_chart_for_column_domain_expectation(
@@ -290,6 +311,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         expectation_configuration: ExpectationConfiguration,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
+        sequential: bool,
     ) -> alt.Chart:
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
@@ -329,6 +351,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             metric_name=metric_name,
             metric_type=metric_type,
             plot_mode=plot_mode,
+            sequential=sequential,
             subtitle=subtitle,
         )
 
@@ -338,6 +361,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_name: str,
         metric_type: alt.StandardType,
         plot_mode: PlotMode,
+        sequential: bool,
     ) -> List[alt.VConcatChart]:
         plot_impl: Callable[
             [
@@ -351,13 +375,14 @@ class VolumeDataAssistantResult(DataAssistantResult):
             plot_impl = (
                 self.get_interactive_detail_expect_column_values_to_be_between_chart
             )
-        else:
-            plot_impl = self.get_interactive_detail_multi_line_chart
+        elif plot_mode is PlotMode.DESCRIPTIVE:
+            plot_impl = self.get_interactive_detail_multi_chart
 
         display_chart: alt.VConcatChart = plot_impl(
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
+            sequential=sequential,
         )
 
         return [display_chart]
