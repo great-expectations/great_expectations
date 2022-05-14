@@ -27,7 +27,11 @@ def bobby_onboarding_data_assistant_result(
         "data_asset_name": "my_reports",
     }
 
-    return context.assistants.onboarding.run(batch_request=batch_request)
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        batch_request=batch_request
+    )
+
+    return cast(OnboardingDataAssistantResult, data_assistant_result)
 
 
 @pytest.fixture

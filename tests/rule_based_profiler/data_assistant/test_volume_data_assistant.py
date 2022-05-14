@@ -2577,7 +2577,11 @@ def bobby_volume_data_assistant_result(
         "data_asset_name": "my_reports",
     }
 
-    return context.assistants.volume.run(batch_request=batch_request)
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request
+    )
+
+    return cast(VolumeDataAssistantResult, data_assistant_result)
 
 
 @pytest.fixture
