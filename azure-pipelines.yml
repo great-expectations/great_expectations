@@ -50,6 +50,10 @@ resources:
       MSSQL_PID: Developer
     ports:
       - 1433:1433
+  - container: trino
+    image: trinodb/trino:379
+    ports:
+      - 8088:8080
 
 # The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
 variables:
@@ -100,6 +104,15 @@ stages:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
 
+    - job: unused_import_checker
+      condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+      steps:
+      - script: |
+          pip install flake8
+          # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
+          flake8 --select F401 great_expectations tests
+        name: UnusedImportChecker
+
   - stage: import_ge
     dependsOn: [lint]
     pool:
@@ -143,6 +156,7 @@ stages:
     jobs:
       - job: compatibility_matrix
         condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
@@ -226,6 +240,7 @@ stages:
 
       - job: comprehensive
         condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
 
         services:
           postgres: postgres
@@ -256,11 +271,6 @@ stages:
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
-
-          - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
 
           - script: |
               if [[ $(pandas.version) == 'latest' ]]; then
@@ -407,6 +417,44 @@ stages:
               pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
+      - job: trino
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+
+        services:
+          trino: trino
+
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              printf 'Waiting for Trino database to accept connections'
+              sleep 30
+#             until trino --execute "SHOW CATALOGS"; do
+#               printf '.'
+#               sleep 1;
+#             done;
+            displayName: Wait for database to initialise
+
+          - script: |
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            displayName: 'pytest'
+
   - stage: cli_integration
     dependsOn: [lint, import_ge, custom_checks]
     pool:
@@ -430,11 +478,6 @@ stages:
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
-
-          - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
 
           - script: |
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
@@ -464,6 +507,7 @@ stages:
           postgres: postgres
           mysql: mysql
           mssql: mssql
+          trino: trino
 
         steps:
           - task: UsePythonVersion@0
@@ -473,11 +517,6 @@ stages:
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
-
-          - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
 
           - script: |
               pip install $(GE_pytest_pip_opts)
@@ -501,6 +540,15 @@ stages:
           - script: |
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
             displayName: 'Configure mssql'
+
+          - script: |
+              printf 'Waiting for Trino database to accept connections'
+              sleep 30
+#             until trino --execute "SHOW CATALOGS"; do
+#               printf '.'
+#               sleep 1;
+#             done;
+            displayName: 'Wait for Trino database to initialise'
 
 #         - task: DownloadSecureFile@1
 #           name: gcp_authkey

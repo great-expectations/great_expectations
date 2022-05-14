@@ -38,7 +38,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         glob_directive: str = "**/*",
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         """
         Base class for DataConnectors that connect to data on a filesystem. This class supports the configuration of default_regex
         and sorters for filtering and sorting data_references. It takes in configured `assets` as a dictionary.

@@ -17,12 +17,12 @@ rules:
         - user_id
     parameter_builders:
       - name: my_min_user_id
-        class_name: MetricMultiBatchParameterBuilder
+        class_name: MetricSingleBatchParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
       - name: my_max_user_id
-        class_name: MetricMultiBatchParameterBuilder
+        class_name: MetricSingleBatchParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
@@ -45,15 +45,15 @@ rules:
       - expectation_type: expect_column_values_to_be_less_than
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        value: $parameter.my_max_user_id.value[-1]
+        value: $parameter.my_max_user_id.value
         column: $domain.domain_kwargs.column
-        condition: $parameter.my_max_user_id.value[-1] < $variables.very_large_user_id
+        condition: $parameter.my_max_user_id.value < $variables.very_large_user_id
       - expectation_type: expect_column_values_to_be_greater_than
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        value: $parameter.my_min_user_id.value[-1]
+        value: $parameter.my_min_user_id.value
         column: $domain.domain_kwargs.column
-        condition: $parameter.my_min_user_id.value[-1] > 0 & $parameter.my_min_user_id.value[-1] > $variables.very_small_user_id
+        condition: $parameter.my_min_user_id.value > 0 & $parameter.my_min_user_id.value > $variables.very_small_user_id
   my_rule_for_timestamps:
     domain_builder:
       class_name: ColumnDomainBuilder
@@ -63,12 +63,12 @@ rules:
     parameter_builders:
       # unused parameter my_max_ts
       - name: my_max_ts
-        class_name: MetricMultiBatchParameterBuilder
+        class_name: MetricSingleBatchParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
       - name: my_max_event_ts
-        class_name: MetricMultiBatchParameterBuilder
+        class_name: MetricSingleBatchParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.max
         # Note this parameter builder computes parameters only on the provided domain:
@@ -76,7 +76,7 @@ rules:
           column: event_ts
       # unused parameter my_min_ts
       - name: my_min_ts
-        class_name: MetricMultiBatchParameterBuilder
+        class_name: MetricSingleBatchParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
@@ -118,7 +118,7 @@ rules:
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $variables.min_timestamp
-        max_value: $parameter.my_max_event_ts.value[-1]
+        max_value: $parameter.my_max_event_ts.value
         meta:
           notes:
             format: markdown
@@ -128,8 +128,9 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        strftime_format: $parameter.my_date_format
+        strftime_format: $parameter.my_date_format.value
         meta:
+          profiler_details: $parameter.my_date_format.details
           notes:
             format: markdown
             content:

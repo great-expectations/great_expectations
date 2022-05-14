@@ -1,147 +1,71 @@
-import datetime
 from typing import List
 from unittest import mock
 
 import pytest
 from mock_alchemy.comparison import ExpressionMatcher
 
-from great_expectations.execution_engine.sqlalchemy_data_splitter import (
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     DatePart,
     SqlAlchemyDataSplitter,
 )
-
-
-@mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
+from tests.execution_engine.split_and_sample.split_and_sample_test_cases import (
+    MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
+    MULTIPLE_DATE_PART_DATE_PARTS,
+    SINGLE_DATE_PART_BATCH_IDENTIFIERS,
+    SINGLE_DATE_PART_DATE_PARTS,
 )
-def test_split_on_year(
-    mock_split_on_date_parts: mock.MagicMock,
-):
-    """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params."""
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
-    column_name: str = "column_name"
-    batch_identifiers: dict = {column_name: {"year": 2018, "month": 10}}
 
-    sqlalchemy_data_splitter.split_on_year(
-        column_name=column_name,
-        batch_identifiers=batch_identifiers,
-    )
-
-    mock_split_on_date_parts.assert_called_with(
-        column_name=column_name,
-        batch_identifiers=batch_identifiers,
-        date_parts=[DatePart.YEAR],
-    )
-
-
-@mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
-)
-def test_split_on_year_and_month(
-    mock_split_on_date_parts: mock.MagicMock,
-):
-    """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params."""
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
-    column_name: str = "column_name"
-    batch_identifiers: dict = {column_name: {"year": 2018, "month": 10}}
-
-    sqlalchemy_data_splitter.split_on_year_and_month(
-        column_name=column_name,
-        batch_identifiers=batch_identifiers,
-    )
-
-    mock_split_on_date_parts.assert_called_with(
-        column_name=column_name,
-        batch_identifiers=batch_identifiers,
-        date_parts=[DatePart.YEAR, DatePart.MONTH],
-    )
-
-
-@mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
-)
-def test_split_on_year_and_month_and_day(
-    mock_split_on_date_parts: mock.MagicMock,
-):
-    """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params."""
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
-    column_name: str = "column_name"
-    batch_identifiers: dict = {column_name: {"year": 2018, "month": 10, "day": 31}}
-
-    sqlalchemy_data_splitter.split_on_year_and_month_and_day(
-        column_name=column_name,
-        batch_identifiers=batch_identifiers,
-    )
-
-    mock_split_on_date_parts.assert_called_with(
-        column_name=column_name,
-        batch_identifiers=batch_identifiers,
-        date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
-    )
-
-
-SINGLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
-    pytest.param({"month": 10}, id="month_dict"),
-    pytest.param("10-31-2018", id="dateutil parseable date string"),
-    pytest.param(
-        datetime.datetime(2018, 10, 31, 0, 0, 0),
-        id="datetime",
-    ),
-    pytest.param(
-        {"month": 11},
-        marks=pytest.mark.xfail(strict=True),
-        id="incorrect month_dict should fail",
-    ),
-    pytest.param(
-        "not a real date",
-        marks=pytest.mark.xfail(strict=True),
-        id="non dateutil parseable date string",
-    ),
-    pytest.param(
-        datetime.datetime(2018, 11, 30, 0, 0, 0),
-        marks=pytest.mark.xfail(strict=True),
-        id="incorrect datetime should fail",
-    ),
-]
-
-SINGLE_DATE_PART_DATE_PARTS: List[pytest.param] = [
-    pytest.param(
-        [DatePart.MONTH],
-        id="month_with_DatePart",
-    ),
+# Here we add SqlAlchemyDataSplitter specific test cases to the generic test cases:
+SINGLE_DATE_PART_DATE_PARTS += [
     pytest.param(
         [SqlAlchemyDataSplitter.date_part.MONTH],
         id="month getting date parts from SqlAlchemyDataSplitter.date_part",
-    ),
-    pytest.param(
-        ["month"],
-        id="month_with_string_DatePart",
-    ),
-    pytest.param(
-        ["Month"],
-        id="month_with_string_mixed_case_DatePart",
-    ),
-    pytest.param(None, marks=pytest.mark.xfail(strict=True), id="date_parts=None"),
-    pytest.param([], marks=pytest.mark.xfail(strict=True), id="date_parts=[]"),
-    pytest.param(
-        ["invalid"], marks=pytest.mark.xfail(strict=True), id="invalid date_parts"
-    ),
-    pytest.param(
-        "invalid",
-        marks=pytest.mark.xfail(strict=True),
-        id="invalid date_parts (not a list)",
-    ),
-    pytest.param(
-        "month",
-        marks=pytest.mark.xfail(strict=True),
-        id="invalid date_parts (not a list but valid str)",
-    ),
-    pytest.param(
-        DatePart.MONTH,
-        marks=pytest.mark.xfail(strict=True),
-        id="invalid date_parts (not a list but valid DatePart)",
-    ),
+    )
 ]
+MULTIPLE_DATE_PART_DATE_PARTS += [
+    pytest.param(
+        [SqlAlchemyDataSplitter.date_part.YEAR, SqlAlchemyDataSplitter.date_part.MONTH],
+        id="year_month getting date parts from SqlAlchemyDataSplitter.date_part",
+    )
+]
+
+
+@mock.patch(
+    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
+)
+@pytest.mark.parametrize(
+    "splitter_method_name,called_with_date_parts",
+    [
+        ("split_on_year", [DatePart.YEAR]),
+        ("split_on_year_and_month", [DatePart.YEAR, DatePart.MONTH]),
+        (
+            "split_on_year_and_month_and_day",
+            [DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
+        ),
+    ],
+)
+def test_named_date_part_methods(
+    mock_split_on_date_parts: mock.MagicMock,
+    splitter_method_name: str,
+    called_with_date_parts: List[DatePart],
+):
+    """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params.
+    For example, split_on_year.
+    """
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    column_name: str = "column_name"
+    batch_identifiers: dict = {column_name: {"year": 2018, "month": 10, "day": 31}}
+
+    getattr(data_splitter, splitter_method_name)(
+        column_name=column_name,
+        batch_identifiers=batch_identifiers,
+    )
+
+    mock_split_on_date_parts.assert_called_with(
+        column_name=column_name,
+        batch_identifiers=batch_identifiers,
+        date_parts=called_with_date_parts,
+    )
 
 
 @pytest.mark.parametrize(
@@ -163,15 +87,13 @@ def test_split_on_date_parts_single_date_parts(
      or a datetime and also fail when parameters are invalid.
     """
 
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = (
-        sqlalchemy_data_splitter.split_on_date_parts(
-            column_name=column_name,
-            batch_identifiers={column_name: batch_identifiers_for_column},
-            date_parts=date_parts,
-        )
+    result: sa.sql.elements.BooleanClauseList = data_splitter.split_on_date_parts(
+        column_name=column_name,
+        batch_identifiers={column_name: batch_identifiers_for_column},
+        date_parts=date_parts,
     )
 
     # using mock-alchemy
@@ -189,66 +111,6 @@ def test_split_on_date_parts_single_date_parts(
     assert result.left.field == "month"
     assert result.left.expr.name == column_name
     assert result.right.effective_value == 10
-
-
-MULTIPLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
-    pytest.param({"year": 2018, "month": 10}, id="year_and_month_dict"),
-    pytest.param("10-31-2018", id="dateutil parseable date string"),
-    pytest.param(
-        datetime.datetime(2018, 10, 30, 0, 0, 0),
-        id="datetime",
-    ),
-    pytest.param(
-        {"year": 2019, "month": 10},
-        marks=pytest.mark.xfail(strict=True),
-        id="incorrect year_and_month_dict should fail",
-    ),
-    pytest.param(
-        {"year": 2018, "month": 11},
-        marks=pytest.mark.xfail(strict=True),
-        id="incorrect year_and_month_dict should fail",
-    ),
-    pytest.param(
-        "not a real date",
-        marks=pytest.mark.xfail(strict=True),
-        id="non dateutil parseable date string",
-    ),
-    pytest.param(
-        datetime.datetime(2018, 11, 30, 0, 0, 0),
-        marks=pytest.mark.xfail(strict=True),
-        id="incorrect datetime should fail",
-    ),
-]
-
-MULTIPLE_DATE_PART_DATE_PARTS: List[pytest.param] = [
-    pytest.param(
-        [DatePart.YEAR, DatePart.MONTH],
-        id="year_month_with_DatePart",
-    ),
-    pytest.param(
-        [SqlAlchemyDataSplitter.date_part.YEAR, SqlAlchemyDataSplitter.date_part.MONTH],
-        id="year_month getting date parts from SqlAlchemyDataSplitter.date_part",
-    ),
-    pytest.param(
-        [DatePart.YEAR, "month"],
-        id="year_month_with_mixed_DatePart",
-    ),
-    pytest.param(
-        ["year", "month"],
-        id="year_month_with_string_DatePart",
-    ),
-    pytest.param(
-        ["YEAR", "Month"],
-        id="year_month_with_string_mixed_case_DatePart",
-    ),
-    pytest.param(None, marks=pytest.mark.xfail(strict=True), id="date_parts=None"),
-    pytest.param([], marks=pytest.mark.xfail(strict=True), id="date_parts=[]"),
-    pytest.param(
-        ["invalid", "date", "parts"],
-        marks=pytest.mark.xfail(strict=True),
-        id="invalid date_parts",
-    ),
-]
 
 
 @pytest.mark.parametrize(
@@ -270,15 +132,13 @@ def test_split_on_date_parts_multiple_date_parts(
      or a datetime and also fail when parameters are invalid.
     """
 
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = (
-        sqlalchemy_data_splitter.split_on_date_parts(
-            column_name=column_name,
-            batch_identifiers={column_name: batch_identifiers_for_column},
-            date_parts=date_parts,
-        )
+    result: sa.sql.elements.BooleanClauseList = data_splitter.split_on_date_parts(
+        column_name=column_name,
+        batch_identifiers={column_name: batch_identifiers_for_column},
+        date_parts=date_parts,
     )
 
     # using mock-alchemy
@@ -306,7 +166,7 @@ def test_split_on_date_parts_multiple_date_parts(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
+    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 def test_get_data_for_batch_identifiers_year(
@@ -314,11 +174,11 @@ def test_get_data_for_batch_identifiers_year(
     mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
 ):
     """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
     table_name: str = "table_name"
     column_name: str = "column_name"
 
-    sqlalchemy_data_splitter.get_data_for_batch_identifiers_year(
+    data_splitter.get_data_for_batch_identifiers_year(
         execution_engine=mock_execution_engine,
         table_name=table_name,
         column_name=column_name,
@@ -333,7 +193,7 @@ def test_get_data_for_batch_identifiers_year(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
+    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 def test_get_data_for_batch_identifiers_year_and_month(
@@ -341,11 +201,11 @@ def test_get_data_for_batch_identifiers_year_and_month(
     mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
 ):
     """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
     table_name: str = "table_name"
     column_name: str = "column_name"
 
-    sqlalchemy_data_splitter.get_data_for_batch_identifiers_year_and_month(
+    data_splitter.get_data_for_batch_identifiers_year_and_month(
         execution_engine=mock_execution_engine,
         table_name=table_name,
         column_name=column_name,
@@ -360,7 +220,7 @@ def test_get_data_for_batch_identifiers_year_and_month(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
+    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 def test_get_data_for_batch_identifiers_year_and_month_and_day(
@@ -368,11 +228,11 @@ def test_get_data_for_batch_identifiers_year_and_month_and_day(
     mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
 ):
     """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
     table_name: str = "table_name"
     column_name: str = "column_name"
 
-    sqlalchemy_data_splitter.get_data_for_batch_identifiers_year_and_month_and_day(
+    data_splitter.get_data_for_batch_identifiers_year_and_month_and_day(
         execution_engine=mock_execution_engine,
         table_name=table_name,
         column_name=column_name,
@@ -399,11 +259,11 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     query when passed a single element list of date_parts that is a string, DatePart enum object, or mixed case string.
     """
 
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
     table_name: str = "table_name"
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = sqlalchemy_data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
+    result: sa.sql.elements.BooleanClauseList = data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
         table_name=table_name,
         column_name=column_name,
         date_parts=date_parts,
@@ -440,11 +300,11 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts should
     return the correct query when passed any valid set of parameters including multiple date parts.
     """
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
     table_name: str = "table_name"
     column_name: str = "column_name"
 
-    result: sa.sql.elements.BooleanClauseList = sqlalchemy_data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
+    result: sa.sql.elements.BooleanClauseList = data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
         table_name=table_name,
         column_name=column_name,
         date_parts=date_parts,
@@ -461,7 +321,9 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     assert (
         query_str
         == (
-            "SELECT distinct(concat(EXTRACT(year FROM column_name), EXTRACT(month FROM column_name))) AS concat_distinct_values,"
+            "SELECT distinct(concat("
+            "CAST(EXTRACT(year FROM column_name) AS VARCHAR), CAST(EXTRACT(month FROM column_name) AS VARCHAR)"
+            ")) AS concat_distinct_values,"
             "CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year,"
             "CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month"
             "FROM table_name"
@@ -499,10 +361,10 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     ],
 )
 def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
 
     splitter_method_name_with_prefix = f"{underscore_prefix}{splitter_method_name}"
 
-    assert sqlalchemy_data_splitter.get_splitter_method(
+    assert data_splitter.get_splitter_method(
         splitter_method_name_with_prefix
-    ) == getattr(sqlalchemy_data_splitter, splitter_method_name)
+    ) == getattr(data_splitter, splitter_method_name)
