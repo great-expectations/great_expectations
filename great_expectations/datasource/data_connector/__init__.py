@@ -39,3 +39,9 @@ from .inferred_asset_sql_data_connector import (
 )
 from .configured_asset_dbfs_data_connector import ConfiguredAssetDBFSDataConnector
 from .inferred_asset_dbfs_data_connector import InferredAssetDBFSDataConnector
+from .configured_asset_glue_catalog_data_connector import (
+    ConfiguredAssetGlueCatalogDataConnector,
+)
+from .inferred_asset_glue_catalog_data_connector import (
+    InferredAssetGlueCatalogDataConnector,
+)

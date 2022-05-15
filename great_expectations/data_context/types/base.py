@@ -511,6 +511,10 @@ class DataConnectorConfigSchema(Schema):
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
+    # Inferred Glue Catalog
+    glue_introspection_directives = fields.Dict(required=False, allow_none=True)
+    catalog_id = fields.String(required=False, allow_none=True)
+
     # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -651,15 +655,11 @@ data connector. You must only select one between `filename` (from_service_accoun
 """
                 )
         if (
-            "data_asset_name_prefix" in data
-            or "data_asset_name_suffix" in data
-            or "include_schema_name" in data
+            "include_schema_name" in data
             or "splitter_method" in data
             or "splitter_kwargs" in data
             or "sampling_method" in data
             or "sampling_kwargs" in data
-            or "excluded_tables" in data
-            or "included_tables" in data
             or "skip_inapplicable_tables" in data
         ) and not (
             data["class_name"]
@@ -671,6 +671,40 @@ data connector. You must only select one between `filename` (from_service_accoun
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 SQL type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+        if (
+            "data_asset_name_prefix" in data
+            or "data_asset_name_suffix" in data
+            or "excluded_tables" in data
+            or "included_tables" in data
+        ) and not (
+            data["class_name"]
+            in [
+                "InferredAssetSqlDataConnector",
+                "ConfiguredAssetSqlDataConnector",
+                "InferredAssetGlueCatalogDataConnector",
+                "ConfiguredAssetGlueCatalogDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+SQL/GlueCatalog type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+
+        if ("catalog_id" in data or "glue_introspection_directives" in data) and not (
+            data["class_name"]
+            in [
+                "InferredAssetGlueCatalogDataConnector",
+                "ConfiguredAssetGlueCatalogDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+GlueCatalog type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
             )

@@ -13,6 +13,7 @@ from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
+    GlueCatalogBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
@@ -296,6 +297,29 @@ Please check your config."""
             except pyspark.sql.utils.AnalysisException:
                 raise ExecutionEngineError(
                     f"""Unable to read in batch from the following path: {path}. Please check your configuration."""
+                )
+
+        elif isinstance(batch_spec, GlueCatalogBatchSpec):
+            database: str = batch_spec.database_name
+            table_name: str = batch_spec.table_name
+            query_condition: str = batch_spec.query_condition
+
+            table = f"{database}.{table_name}" if database else table_name
+            query = f"SELECT * FROM {table}"
+            try:
+                batch_data = self.spark.sql(query)
+                if query_condition:
+                    batch_data = batch_data.filter(query_condition)
+            except AttributeError:
+                raise ExecutionEngineError(
+                    """
+                    Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
+                    """
+                )
+            # pyspark will raise an AnalysisException error if path is incorrect
+            except pyspark.sql.utils.AnalysisException:
+                raise ExecutionEngineError(
+                    f"""Unable to read in batch from the following table: {table}. Please check your configuration."""
                 )
 
         else:

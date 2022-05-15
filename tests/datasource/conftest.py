@@ -8,6 +8,9 @@ from great_expectations.datasource import (
     SparkDFDatasource,
     SqlAlchemyDatasource,
 )
+from great_expectations.execution_engine.sparkdf_execution_engine import (
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -50,4 +53,12 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
     return SqlAlchemyExecutionEngine(
         name="test_sql_execution_engine",
         engine=conn,
+    )
+
+
+@pytest.fixture(scope="module")
+def test_cases_for_glue_catalog_data_connector_spark_execution_engine(titanic_spark_db):
+    return SparkDFExecutionEngine(
+        name="test_spark_execution_engine",
+        force_reuse_spark_context=True,
     )
