@@ -107,3 +107,21 @@ class RuntimeQueryBatchSpec(BatchSpec):
     @query.setter
     def query(self, query) -> None:
         self["query"] = query
+
+
+class GlueCatalogBatchSpec(BatchSpec, metaclass=ABCMeta):
+    """This is an abstract class and should not be instantiated. It's relevant for testing whether
+    a subclass is allowed
+    """
+
+    @property
+    def database_name(self):
+        return self.get("database_name")
+
+    @property
+    def table_name(self):
+        return self.get("table_name")
+
+    @property
+    def query_condition(self) -> str:
+        return self.get("query_condition", None)

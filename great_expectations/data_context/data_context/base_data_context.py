@@ -282,6 +282,8 @@ class BaseDataContext(ConfigPeer):
         "ConfiguredAssetGCSDataConnector",
         "InferredAssetSqlDataConnector",
         "ConfiguredAssetSqlDataConnector",
+        "InferredAssetGlueCatalogDataConnector",
+        "ConfiguredAssetGlueCatalogDataConnector",
     ]
     TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
         "Checkpoint",
