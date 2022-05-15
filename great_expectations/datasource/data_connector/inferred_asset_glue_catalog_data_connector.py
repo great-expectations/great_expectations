@@ -1,7 +1,6 @@
 import logging
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
-from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_glue_catalog_data_connector import (
     ConfiguredAssetGlueCatalogDataConnector,
 )

@@ -94,8 +94,8 @@ class ConfiguredAssetGlueCatalogDataConnector(ConfiguredAssetSqlDataConnector):
 
     def _get_batch_identifiers_list_from_data_asset_config(
         self,
-        data_asset_name,
-        data_asset_config,
+        data_asset_name: str,
+        data_asset_config: Optional[dict],
     ) -> List[dict]:
         return [{}]
 
