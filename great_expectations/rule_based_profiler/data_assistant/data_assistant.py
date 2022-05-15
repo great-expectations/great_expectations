@@ -314,7 +314,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 json_serialize=json_serialize,
             )
 
-    COMMONLY_USED_PARAMETER_BUILDERS: CommonlyUsedParameterBuilders = (
+    commonly_used_parameter_builders: CommonlyUsedParameterBuilders = (
         CommonlyUsedParameterBuilders()
     )
 
@@ -777,22 +777,22 @@ def build_map_metric_rule(
 
     # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-    column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
+    column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
         json_serialize=True
     )
-    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
+    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
         json_serialize=True
     )
-    column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder(
+    column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder(
         json_serialize=True
     )
 
     # Step-3: Set up "MeanUnexpectedMapMetricMultiBatchParameterBuilder" to compute "condition" for emitting "ExpectationConfiguration" (based on "Domain" data).
 
-    total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_table_row_count_metric_multi_batch_parameter_builder(
+    total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder(
         json_serialize=False
     )
-    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = DataAssistant.COMMONLY_USED_PARAMETER_BUILDERS.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
+    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
         json_serialize=False
     )
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
