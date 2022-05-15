@@ -304,9 +304,9 @@ class DataAssistantResult(SerializableDictDot):
             metric_component.generate_tooltip(format=","),
         ]
 
-        line: alt.Chart = (
+        bars: alt.Chart = (
             alt.Chart(data=df, title=title)
-            .mark_line()
+            .mark_bar()
             .encode(
                 x=batch_component.plot_on_axis(),
                 y=metric_component.plot_on_axis(),
@@ -314,17 +314,7 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        points: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_point()
-            .encode(
-                x=batch_component.plot_on_axis(),
-                y=metric_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-        )
-
-        return line + points
+        return bars
 
     @staticmethod
     def get_expect_domain_values_to_be_between_chart(
@@ -952,15 +942,13 @@ class DataAssistantResult(SerializableDictDot):
         detail_title_font_size: int = 14
         detail_title_font_weight: str = "bold"
 
-        line_chart_height: int = 150
-        detail_line_chart_height: int = 75
+        bar_chart_height: int = 150
+        detail_bar_chart_height: int = 75
 
-        point_size: int = 50
-
-        unselected_color: alt.value = alt.value("lightgray")
+        stroke_width: int = 1
 
         selected_opacity: float = 1.0
-        unselected_opacity: float = 0.4
+        unselected_opacity: float = 9.0
 
         title: alt.TitleParams = determine_plot_title(
             metric_plot_component=metric_component,
@@ -986,9 +974,9 @@ class DataAssistantResult(SerializableDictDot):
             fields=[domain_component.name],
         )
 
-        line: alt.Chart = (
+        bars: alt.Chart = (
             alt.Chart(df)
-            .mark_line()
+            .mark_bar(strokeWidth=stroke_width)
             .encode(
                 x=alt.X(
                     batch_component.name,
@@ -998,15 +986,11 @@ class DataAssistantResult(SerializableDictDot):
                 y=alt.Y(
                     metric_component.name, type=metric_component.alt_type, title=None
                 ),
-                color=alt.condition(
-                    selection,
-                    alt.Color(
-                        domain_component.name,
-                        type=domain_component.alt_type,
-                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                        legend=None,
-                    ),
-                    unselected_color,
+                color=alt.Color(
+                    domain_component.name,
+                    type=domain_component.alt_type,
+                    scale=alt.Scale(range=ColorPalettes.CATEGORY_5.value),
+                    legend=None,
                 ),
                 opacity=alt.condition(
                     selection,
@@ -1015,102 +999,14 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 tooltip=tooltip,
             )
-            .properties(height=line_chart_height, title=title)
+            .properties(height=bar_chart_height, title=title)
         )
 
-        points: alt.Chart = (
-            alt.Chart(df)
-            .mark_point(size=point_size)
-            .encode(
-                x=alt.X(
-                    batch_component.name,
-                    type=batch_component.alt_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                ),
-                y=alt.Y(
-                    metric_component.name, type=metric_component.alt_type, title=None
-                ),
-                color=alt.condition(
-                    selection,
-                    alt.value(Colors.GREEN.value),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=line_chart_height, title=title)
-        )
-
-        highlight_line: alt.Chart = (
-            alt.Chart(df)
-            .mark_line(strokeWidth=2.5)
-            .encode(
-                x=alt.X(
-                    batch_component.name,
-                    type=batch_component.alt_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                ),
-                y=alt.Y(
-                    metric_component.name, type=metric_component.alt_type, title=None
-                ),
-                color=alt.condition(
-                    selection,
-                    alt.Color(
-                        domain_component.name,
-                        type=domain_component.alt_type,
-                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                        legend=None,
-                    ),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=line_chart_height, title=title)
-            .transform_filter(selection)
-        )
-
-        highlight_points: alt.Chart = (
-            alt.Chart(df)
-            .mark_point(size=40)
-            .encode(
-                x=alt.X(
-                    batch_component.name,
-                    type=batch_component.alt_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                ),
-                y=alt.Y(
-                    metric_component.name, type=metric_component.alt_type, title=None
-                ),
-                color=alt.condition(
-                    selection,
-                    alt.value(Colors.GREEN.value),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=line_chart_height, title=title)
-            .transform_filter(selection)
-        )
-
-        detail_line: alt.Chart = (
+        detail_bars: alt.Chart = (
             alt.Chart(
                 df,
             )
-            .mark_line(opacity=selected_opacity)
+            .mark_bar(opacity=selected_opacity, strokeWidth=stroke_width)
             .encode(
                 x=batch_component.plot_on_axis(),
                 y=alt.Y(
@@ -1123,25 +1019,7 @@ class DataAssistantResult(SerializableDictDot):
                 ),
                 tooltip=tooltip,
             )
-            .properties(height=detail_line_chart_height)
-            .transform_filter(selection)
-        )
-
-        detail_points: alt.Chart = (
-            alt.Chart(
-                df,
-            )
-            .mark_point(
-                size=point_size, color=Colors.GREEN.value, opacity=selected_opacity
-            )
-            .encode(
-                x=batch_component.plot_on_axis(),
-                y=alt.Y(
-                    metric_component.name, type=metric_component.alt_type, title=None
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=detail_line_chart_height)
+            .properties(height=detail_bar_chart_height)
             .transform_filter(selection)
         )
 
@@ -1184,9 +1062,9 @@ class DataAssistantResult(SerializableDictDot):
         return (
             alt.VConcatChart(
                 vconcat=[
-                    line + points + highlight_line + highlight_points,
+                    bars,
                     detail_title,
-                    detail_line + detail_points,
+                    detail_bars,
                 ],
             )
             .properties(title=y_axis_title)

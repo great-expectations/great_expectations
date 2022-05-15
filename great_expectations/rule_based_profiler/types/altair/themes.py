@@ -73,6 +73,13 @@ point_color: str = Colors.GREEN.value
 point_filled: bool = True
 point_opacity: float = 1.0
 
+# Bar Chart
+bar_color: str = Colors.PURPLE.value
+bar_opacity: float = 0.7
+bar_stroke_color: str = Colors.BLUE_3.value
+bar_stroke_width: int = 3
+bar_stroke_opacity: float = 1.0
+
 
 class AltairThemes(Enum):
     # https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
@@ -128,5 +135,12 @@ class AltairThemes(Enum):
             "color": point_color,
             "filled": point_filled,
             "opacity": point_opacity,
+        },
+        "bar": {
+            "color": bar_color,
+            "opacity": bar_opacity,
+            "stroke": bar_stroke_color,
+            "strokeWidth": bar_stroke_width,
+            "strokeOpacity": bar_stroke_opacity,
         },
     }
