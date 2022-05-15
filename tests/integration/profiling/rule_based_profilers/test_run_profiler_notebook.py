@@ -54,8 +54,8 @@ def test_run_rbp_notebook(tmp_path):
             )
         )
     except FileNotFoundError:
-        # test will still pass, it just means the files were already deleted by running the optional last cell in the
-        # notebook.
+        # This just means the files were already deleted by running the optional last cell in the notebook.
+        # Therefore we allow the test to pass.
         pass
 
 
@@ -109,6 +109,6 @@ def test_run_data_assistants_notebook(tmp_path):
             )
         )
     except FileNotFoundError:
-        # test will still pass, it just means the files were already deleted by running the optional last cell in the
-        # notebook.
+        # This just means the files were already deleted by running the optional last cell in the notebook.
+        # Therefore we allow the test to pass.
         pass
