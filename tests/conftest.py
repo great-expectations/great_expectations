@@ -299,6 +299,30 @@ def spark_session(test_backends):
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
+@pytest.mark.order(index=2)
+@pytest.fixture(scope="module")
+def spark_warehouse_session(test_backends, tmp_path_factory):
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
+    try:
+        import pyspark
+        from pyspark.sql import SparkSession
+    except ImportError:
+        raise ValueError("spark tests are requested, but pyspark is not installed")
+
+    spark_warehouse_path = str(tmp_path_factory.mktemp("spark-warehouse"))
+    spark = get_or_create_spark_application(
+        spark_config={
+            "spark.sql.catalogImplementation": "in-memory",
+            "spark.executor.memory": "450m",
+            "spark.sql.warehouse.dir": spark_warehouse_path,
+        }
+    )
+    yield spark
+    spark.stop()
+
+
 @pytest.fixture
 def basic_spark_df_execution_engine(spark_session):
     from great_expectations.execution_engine import SparkDFExecutionEngine
@@ -1381,6 +1405,32 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
     return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture(scope="module")
+def titanic_spark_db(spark_warehouse_session):
+    titanic_database_name: str = "db_test"
+    titanic_table_name: str = "tb_titanic"
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/titanic.csv")
+    titanic_df = spark_warehouse_session.read.csv(titanic_csv_path, header=True)
+
+    spark_warehouse_session.sql(
+        f"CREATE DATABASE IF NOT EXISTS {titanic_database_name}"
+    )
+    spark_warehouse_session.catalog.setCurrentDatabase(titanic_database_name)
+    titanic_df.write.saveAsTable(
+        titanic_table_name, partitionBy="PClass", mode="overwrite"
+    )
+
+    row_count = spark_warehouse_session.sql(
+        f"SELECT COUNT(*) from {titanic_database_name}.{titanic_table_name}"
+    ).collect()
+    assert row_count and row_count[0][0] == 1313
+    yield spark_warehouse_session
+    spark_warehouse_session.sql(
+        f"DROP DATABASE IF EXISTS {titanic_database_name} CASCADE"
+    )
+    spark_warehouse_session.catalog.setCurrentDatabase("default")
 
 
 @pytest.fixture

@@ -232,6 +232,54 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     GE_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
+    TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
+        "ExpectationsStore",
+        "ValidationsStore",
+        "HtmlSiteStore",
+        "EvaluationParameterStore",
+        "MetricStore",
+        "SqlAlchemyQueryStore",
+        "CheckpointStore",
+        "ProfilerStore",
+    ]
+    TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES = [
+        "Datasource",
+        "SimpleSqlalchemyDatasource",
+    ]
+    TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES = [
+        "InferredAssetFilesystemDataConnector",
+        "ConfiguredAssetFilesystemDataConnector",
+        "InferredAssetS3DataConnector",
+        "ConfiguredAssetS3DataConnector",
+        "InferredAssetAzureDataConnector",
+        "ConfiguredAssetAzureDataConnector",
+        "InferredAssetGCSDataConnector",
+        "ConfiguredAssetGCSDataConnector",
+        "InferredAssetSqlDataConnector",
+        "ConfiguredAssetSqlDataConnector",
+        "InferredAssetGlueCatalogDataConnector",
+        "ConfiguredAssetGlueCatalogDataConnector",
+    ]
+    TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
+        "Checkpoint",
+        "SimpleCheckpoint",
+    ]
+    TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
+        "RuleBasedProfiler",
+    ]
+    ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
+        "__substitution_error__",
+        "__yaml_parse_error__",
+        "__custom_subclass_not_core_ge__",
+        "__class_name_not_provided__",
+    ]
+    ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES = (
+        TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
+        + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
+        + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
+        + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
+        + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
+    )
 
     _data_context = None
 
