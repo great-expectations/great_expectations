@@ -46,10 +46,17 @@ def test_run_rbp_notebook(tmp_path):
             nbformat.write(nb, f)
 
     # clean up Expectations directory after running test
-    shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/tmp"))
-    os.remove(
-        os.path.join(base_dir, "great_expectations/expectations/.ge_store_backend_id")
-    )
+    try:
+        shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/tmp"))
+        os.remove(
+            os.path.join(
+                base_dir, "great_expectations/expectations/.ge_store_backend_id"
+            )
+        )
+    except FileNotFoundError:
+        # test will still pass, it just means the files were already deleted by running the optional last cell in the
+        # notebook.
+        pass
 
 
 def test_run_data_assistants_notebook(tmp_path):
@@ -89,10 +96,19 @@ def test_run_data_assistants_notebook(tmp_path):
             nbformat.write(nb, f)
 
     # clean up Expectations directory after running test
-    shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/tmp"))
-    os.remove(
-        os.path.join(base_dir, "great_expectations/expectations/.ge_store_backend_id")
-    )
-    os.remove(
-        os.path.join(base_dir, "great_expectations/expectations/taxi_data_suite.json")
-    )
+    try:
+        shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/tmp"))
+        os.remove(
+            os.path.join(
+                base_dir, "great_expectations/expectations/.ge_store_backend_id"
+            )
+        )
+        os.remove(
+            os.path.join(
+                base_dir, "great_expectations/expectations/taxi_data_suite.json"
+            )
+        )
+    except FileNotFoundError:
+        # test will still pass, it just means the files were already deleted by running the optional last cell in the
+        # notebook.
+        pass
