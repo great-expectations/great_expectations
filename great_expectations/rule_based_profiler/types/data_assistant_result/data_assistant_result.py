@@ -939,17 +939,6 @@ class DataAssistantResult(SerializableDictDot):
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
     ) -> alt.VConcatChart:
-        detail_title_font_size: int = 14
-        detail_title_font_weight: str = "bold"
-
-        bar_chart_height: int = 150
-        detail_bar_chart_height: int = 75
-
-        stroke_width: int = 1
-
-        selected_opacity: float = 1.0
-        unselected_opacity: float = 9.0
-
         title: alt.TitleParams = determine_plot_title(
             metric_plot_component=metric_component,
             batch_plot_component=batch_component,
@@ -964,112 +953,40 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        columns: List[str] = [" "] + pd.unique(df[domain_component.name]).tolist()
+        input_dropdown_initial_state: pd.DataFrame = (
+            df.drop(columns=batch_component.batch_identifiers)
+            .groupby([batch_component.name])
+            .max()
+            .reset_index()
+        )
+        input_dropdown_initial_state[
+            batch_component.batch_identifiers + [domain_component.name]
+        ] = " "
+        df = pd.concat([input_dropdown_initial_state, df], axis=0)
+
+        columns: List[str] = pd.unique(df[domain_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
         selection: alt.selection_single = alt.selection_single(
-            empty="none",
             bind=input_dropdown,
             fields=[domain_component.name],
+            init={domain_component.name: " "},
         )
 
         bars: alt.Chart = (
-            alt.Chart(df)
-            .mark_bar(strokeWidth=stroke_width)
-            .encode(
-                x=alt.X(
-                    batch_component.name,
-                    type=batch_component.alt_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                ),
-                y=alt.Y(
-                    metric_component.name, type=metric_component.alt_type, title=None
-                ),
-                color=alt.Color(
-                    domain_component.name,
-                    type=domain_component.alt_type,
-                    scale=alt.Scale(range=ColorPalettes.CATEGORY_5.value),
-                    legend=None,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=bar_chart_height, title=title)
-        )
-
-        detail_bars: alt.Chart = (
-            alt.Chart(
-                df,
-            )
-            .mark_bar(opacity=selected_opacity, strokeWidth=stroke_width)
+            alt.Chart(data=df, title=title)
+            .mark_bar()
             .encode(
                 x=batch_component.plot_on_axis(),
-                y=alt.Y(
-                    metric_component.name, type=metric_component.alt_type, title=None
-                ),
-                color=alt.Color(
-                    domain_component.name,
-                    type=domain_component.alt_type,
-                    scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                ),
+                y=metric_component.plot_on_axis(),
                 tooltip=tooltip,
             )
-            .properties(height=detail_bar_chart_height)
-            .transform_filter(selection)
-        )
-
-        detail_title_column_names: pd.DataFrame = pd.DataFrame(
-            {domain_component.name: pd.unique(df[domain_component.name])}
-        )
-        detail_title_column_titles: str = "column_title"
-        detail_title_column_names[
-            detail_title_column_titles
-        ] = detail_title_column_names[domain_component.name].apply(
-            lambda x: f"Column ({x}) Selection Detail"
-        )
-        detail_title_text: alt.condition = alt.condition(
-            selection, detail_title_column_titles, alt.value("")
-        )
-
-        detail_title = (
-            alt.Chart(detail_title_column_names)
-            .mark_text(
-                color=Colors.PURPLE.value,
-                fontSize=detail_title_font_size,
-                fontWeight=detail_title_font_weight,
-            )
-            .encode(text=detail_title_text)
-            .transform_filter(selection)
-            .properties(height=10)
-        )
-
-        # special title for combined y-axis across two charts
-        y_axis_title = alt.TitleParams(
-            metric_component.title,
-            color=Colors.PURPLE.value,
-            orient="left",
-            angle=270,
-            fontSize=14,
-            dx=70,
-            dy=-5,
-        )
-
-        return (
-            alt.VConcatChart(
-                vconcat=[
-                    bars,
-                    detail_title,
-                    detail_bars,
-                ],
-            )
-            .properties(title=y_axis_title)
             .add_selection(selection)
+            .transform_filter(selection)
         )
+
+        return bars
 
     @staticmethod
     def get_interactive_detail_expect_column_values_to_be_between_chart(
