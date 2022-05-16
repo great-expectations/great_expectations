@@ -1,15 +1,17 @@
-# TODO Run nightly
 trigger:
   branches:
     include:
     - pre_pr_docs-*
 
 stages:
-  - stage: run_partner_integration_tests
+  - stage: scope_check
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
-      - job: placeholder
+      - job: partner_integration_anthony_db
         steps:
-          - bash: echo Hello Partners
-            name: Placeholder
+          - bash: cd assets/partners/anthonydb; ../common/run-2.sh;
+            name: RunDockerComposeUp
+            env:
+              DB_URL: $(ANTHONY_DB_URL)
+              DB_PASS: $(ANTHONY_DB_PASS)
