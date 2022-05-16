@@ -153,9 +153,9 @@ class DataAssistantResult(SerializableDictDot):
                 font-weight: bold;
             }}
             form.vega-bindings {{
-              position: relative;
-              left: 70px;
-              top: -350px;
+              position: absolute;
+              left: 75px;
+              top: 30px;
             }}
             </style>
         """
