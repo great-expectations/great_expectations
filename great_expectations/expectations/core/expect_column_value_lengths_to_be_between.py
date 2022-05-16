@@ -114,11 +114,11 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "profiler_config",
     )
 
-    column_value_lengths_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    column_min_length_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
-        name="column_value_lengths_range_estimator",
-        metric_name="column_values.value_length.between",
+        name="column_min_length_range_estimator",
+        metric_name="column_values.length.min",
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,
@@ -127,15 +127,38 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
         quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
         estimator=f"{VARIABLES_KEY}estimator",
-        num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
-        bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
+        n_resamples=f"{VARIABLES_KEY}n_resamples",
+        random_seed=f"{VARIABLES_KEY}random_seed",
+        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
+        truncate_values=f"{VARIABLES_KEY}truncate_values",
+        round_decimals=f"{VARIABLES_KEY}round_decimals",
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
+    )
+    column_max_length_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="NumericMetricRangeMultiBatchParameterBuilder",
+        name="column_max_length_range_estimator",
+        metric_name="column_values.length.max",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        enforce_numeric_metric=True,
+        replace_nan_with_zero=True,
+        reduce_scalar_metric=True,
+        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        estimator=f"{VARIABLES_KEY}estimator",
+        n_resamples=f"{VARIABLES_KEY}n_resamples",
+        random_seed=f"{VARIABLES_KEY}random_seed",
+        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
         json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        column_value_lengths_range_estimator_parameter_builder_config,
+        column_min_length_range_estimator_parameter_builder_config,
+        column_max_length_range_estimator_parameter_builder_config,
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_value_lengths_to_be_between",  # Convention: use "expectation_type" as profiler name.
@@ -144,13 +167,15 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         rules={
             "default_expect_column_value_lengths_to_be_between_rule": {
                 "variables": {
+                    "mostly": 1.0,
                     "strict_min": False,
                     "strict_max": False,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
                     "estimator": "bootstrap",
-                    "num_bootstrap_samples": 9999,
-                    "bootstrap_random_seed": None,
+                    "n_resamples": 9999,
+                    "random_seed": None,
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": 0,
                         "upper_bound": None,
@@ -168,12 +193,16 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": f"{PARAMETER_KEY}{column_value_lengths_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-                        "max_value": f"{PARAMETER_KEY}{column_value_lengths_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+                        "min_value": f"{PARAMETER_KEY}{column_min_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+                        "max_value": f"{PARAMETER_KEY}{column_max_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+                        "mostly": f"{VARIABLES_KEY}mostly",
                         "strict_min": f"{VARIABLES_KEY}strict_min",
                         "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{column_value_lengths_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": {
+                                "column_min_range_estimator": f"{PARAMETER_KEY}{column_min_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                                "column_max_range_estimator": f"{PARAMETER_KEY}{column_max_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            },
                         },
                     },
                 ],

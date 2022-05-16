@@ -499,11 +499,14 @@ def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profil
     assert expectation_config_kwargs == {
         "auto": True,
         "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
-        "column": "id",
+        "column": "user_agent",
         "include_config": True,
+        "max_value": 115,
+        "min_value": 115,
         "mostly": 1.0,
-        "regex": "(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",
         "result_format": "SUMMARY",
+        "strict_max": False,
+        "strict_min": False,
     }
 
 
