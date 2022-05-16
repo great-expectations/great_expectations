@@ -18,7 +18,7 @@ schedules:
 trigger:
   tags:
     include:
-      - '*.*.*' # SemVer
+      - '*' # Should be SemVer for a successful release but any tag will trigger the build
 
 resources:
   containers:
@@ -50,7 +50,7 @@ resources:
     ports:
       - 8088:8080
 
-# The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
+# The pipeline is run under two primary conditions: if cutting a release or as scheduled by the above cron job.
 variables:
   isRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
@@ -603,13 +603,20 @@ stages:
             displayName: 'Update pip'
 
           - script: |
+              deployment_version=$(cat ./great_expectations/deployment_version)
+              tag=$(basename "$(Build.SourceBranch)")
+              if [[ "$deployment_version" != "$tag" ]]; then
+                printf "There is a discrepancy between the 'deployment_version' file (%s) and the provided tag (%s)" $deployment_version $tag
+                exit 1
+              fi
+            displayName: 'Check for valid tag'
+
+          - script: |
               pip install twine
               pip install wheel
-              echo "Creating tag: $(cat ./great_expectations/deployment_version)"
               git config --global user.email "team@greatexpectations.io"
               git config --global user.name "Great Expectations"
-              git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
-            displayName: 'Add new version tag'
+            displayName: 'Prepare packaging'
 
           # Build the python distribution from source
           - script: |
