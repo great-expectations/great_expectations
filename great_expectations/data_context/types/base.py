@@ -157,6 +157,8 @@ class AssetConfig(DictDot):
         batch_identifiers: Optional[List[str]] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[Dict[str, str]] = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> None:
         if name is not None:
@@ -181,6 +183,10 @@ class AssetConfig(DictDot):
             self.splitter_method = splitter_method
         if splitter_kwargs is not None:
             self.splitter_kwargs = splitter_kwargs
+        if sampling_method is not None:
+            self.sampling_method = sampling_method
+        if sampling_kwargs is not None:
+            self.sampling_kwargs = sampling_kwargs
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -231,6 +237,8 @@ class AssetConfigSchema(Schema):
 
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sampling_method = fields.String(required=False, allow_none=True)
+    sampling_kwargs = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
@@ -436,7 +444,7 @@ class DataConnectorConfigSchema(Schema):
     )
     module_name = fields.String(
         required=False,
-        allow_nonw=True,
+        allow_none=True,
         missing="great_expectations.datasource.data_connector",
     )
 

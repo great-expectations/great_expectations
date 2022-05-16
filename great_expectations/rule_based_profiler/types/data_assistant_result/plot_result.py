@@ -1,7 +1,13 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import List
 
 import altair as alt
+
+
+class PlotMode(Enum):
+    DESCRIPTIVE = "descriptive"
+    PRESCRIPTIVE = "prescriptive"
 
 
 @dataclass(frozen=True)

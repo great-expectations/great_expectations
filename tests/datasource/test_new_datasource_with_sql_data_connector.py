@@ -190,7 +190,7 @@ data_connectors:
     }
 
 
-def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_splitting(
+def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_splitting_and_sampling(
     sa, empty_data_context
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
@@ -219,6 +219,9 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
                     splitter_kwargs:
                         column_name: date
                         date_format_string: "%Y-%W"
+                    sampling_method: sample_using_limit
+                    sampling_kwargs:
+                        n: 10
     """
     context.add_datasource(**yaml.load(config))
     datasource: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
@@ -344,7 +347,7 @@ data_connectors:
     }
 
 
-def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_splitting(
+def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_splitting_and_sampling(
     sa, empty_data_context
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
@@ -373,6 +376,9 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
             splitter_kwargs:
                 column_name: date
                 date_format_string: "%Y-%W"
+            sampling_method: sample_using_limit
+            sampling_kwargs:
+                n: 10
         """
     context.add_datasource(**yaml.load(config))
     datasource: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
