@@ -1,0 +1,15 @@
+# TODO Run nightly
+trigger:
+  branches:
+    include:
+    - pre_pr_docs-*
+
+stages:
+  - stage: run_partner_integration_tests
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: placeholder
+        steps:
+          - bash: echo Hello Partners
+            name: Placeholder

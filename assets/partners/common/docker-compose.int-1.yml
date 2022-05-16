@@ -1,0 +1,9 @@
+## Docker Compose file for running e2e tests
+version: "3"
+
+services:
+  integration_test:
+    image: integration_test:latest
+    command: pytest -vvv test_ge.py;
+    environment:
+      DB_URL: ${DB_URL}
