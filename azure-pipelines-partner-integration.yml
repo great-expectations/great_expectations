@@ -1,15 +1,16 @@
-# TODO Run nightly
 trigger:
   branches:
     include:
     - pre_pr_docs-*
 
 stages:
-  - stage: run_partner_integration_tests
+  - stage: scope_check
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
-      - job: placeholder
+      - job: partner_integration_rubenshift
         steps:
-          - bash: echo Hello Partners
-            name: Placeholder
+          - bash: cd assets/partners/rubenshift; ../common/run-1.sh 
+            name: RunDockerComposeUp
+            env:
+              DB_URL: $(REDSHIFT_URL)
