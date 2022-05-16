@@ -15,7 +15,7 @@ schedules:
     - develop
   always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
 
-triggers:
+trigger:
   tags:
     include:
       - '*.*.*' # SemVer
