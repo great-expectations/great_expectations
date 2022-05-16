@@ -115,6 +115,29 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 json_serialize=json_serialize,
             )
 
+        def get_column_value_counts_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            metric_name: str = "column.value_counts"
+            return MetricMultiBatchParameterBuilder(
+                name=metric_name,
+                metric_name=metric_name,
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs={
+                    "sort": "value",
+                },
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=False,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=json_serialize,
+                data_context=None,
+            )
+
         def get_column_distinct_values_count_metric_multi_batch_parameter_builder(
             self,
             json_serialize: Union[str, bool] = True,
@@ -312,6 +335,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 round_decimals=f"{VARIABLES_KEY}round_decimals",
                 evaluation_parameter_builder_configs=None,
                 json_serialize=json_serialize,
+                data_context=None,
             )
 
     commonly_used_parameter_builders: CommonlyUsedParameterBuilders = (
@@ -388,9 +412,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             rules = profiler.rules
             self._add_rules_to_profiler(rules=rules)
 
-        self._validate_profiler_rule_name_uniqueness()
+        custom_rules: List[Rule] = self.rules
+        self._validate_profiler_rule_name_uniqueness(custom_rules=custom_rules)
 
-        self._add_rules_to_profiler(rules=self.rules)
+        self._add_rules_to_profiler(rules=custom_rules)
 
         custom_variables: Optional[Dict[str, Any]] = self.variables
         if custom_variables is None:
@@ -613,21 +638,23 @@ class DataAssistant(metaclass=MetaDataAssistant):
         ] = rule.expectation_configuration_builders[0].validation_parameter_builders
         return variables, validation_parameter_builders
 
-    def _validate_profiler_rule_name_uniqueness(self) -> None:
+    def _validate_profiler_rule_name_uniqueness(
+        self,
+        custom_rules: List[Rule],
+    ) -> None:
         """
         This private utility method insures that all "Rule" objects in underlying "BaseRuleBasedProfiler" are unique.
         """
-        rule: Rule
-
         profiler_rules: List[Rule] = self.profiler.rules
         if profiler_rules is None:
             profiler_rules = []
 
-        profiler_rule_names: Set[str] = {rule.name for rule in profiler_rules}
-
-        custom_rules: List[Rule] = self.rules
         if custom_rules is None:
             custom_rules = []
+
+        rule: Rule
+
+        profiler_rule_names: Set[str] = {rule.name for rule in profiler_rules}
 
         custom_rule_names: Set[str] = {rule.name for rule in custom_rules}
 
