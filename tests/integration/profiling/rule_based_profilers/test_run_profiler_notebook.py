@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 
@@ -5,6 +6,8 @@ import nbformat
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 
 from great_expectations.data_context.util import file_relative_path
+
+logger = logging.getLogger(__name__)
 
 
 def test_run_rbp_notebook(tmp_path):
@@ -54,8 +57,10 @@ def test_run_rbp_notebook(tmp_path):
             )
         )
     except FileNotFoundError:
-        # This just means the files were already deleted by running the optional last cell in the notebook.
-        # Therefore we allow the test to pass.
+        logger.debug(
+            "Files were already deleted by running the optional last cell in the notebook. "
+            "We therefore allow the test to pass"
+        )
         pass
 
 
@@ -109,6 +114,8 @@ def test_run_data_assistants_notebook(tmp_path):
             )
         )
     except FileNotFoundError:
-        # This just means the files were already deleted by running the optional last cell in the notebook.
-        # Therefore we allow the test to pass.
+        logger.debug(
+            "Files were already deleted by running the optional last cell in the notebook. "
+            "We therefore allow the test to pass"
+        )
         pass
