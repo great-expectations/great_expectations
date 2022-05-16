@@ -3361,3 +3361,17 @@ def test_volume_data_assistant_plot_descriptive_non_sequential(
 
     assert plot_result.charts[0] == ""
     assert plot_result.charts[1] == ""
+
+
+def test_volume_data_assistant_plot_prescriptive_non_sequential(
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    sequential: bool = False
+    plot_result: PlotResult = (
+        bobby_volume_data_assistant_result.plot_expectations_and_metrics(
+            sequential=sequential
+        )
+    )
+
+    assert plot_result.charts[0] == ""
+    assert plot_result.charts[1] == ""

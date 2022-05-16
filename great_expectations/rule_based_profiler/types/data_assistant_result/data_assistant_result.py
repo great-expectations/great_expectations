@@ -589,7 +589,7 @@ class DataAssistantResult(SerializableDictDot):
             .properties(title=title)
         )
 
-        line: alt.Chart = DataAssistantResult._get_line_chart(
+        bars: alt.Chart = DataAssistantResult._get_bar_chart(
             df=df,
             metric_component=metric_component,
             batch_component=batch_component,
@@ -605,21 +605,15 @@ class DataAssistantResult(SerializableDictDot):
             (alt.datum.min_value < alt.datum[metric_name])
             & (alt.datum.max_value < alt.datum[metric_name])
         )
-        point_color_condition: alt.condition = alt.condition(
+        stroke_color_condition: alt.condition = alt.condition(
             predicate=predicate,
             if_false=alt.value(Colors.GREEN.value),
             if_true=alt.value(Colors.PINK.value),
         )
 
-        anomaly_coded_points = line.layer[1].encode(
-            color=point_color_condition,
-            tooltip=tooltip,
-        )
-        anomaly_coded_line = alt.layer(
-            line.layer[0].encode(tooltip=tooltip), anomaly_coded_points
-        )
+        anomaly_coded_bars = bars.encode(stroke=stroke_color_condition, tooltip=tooltip)
 
-        return band + lower_limit + upper_limit + anomaly_coded_line
+        return band + lower_limit + upper_limit + anomaly_coded_bars
 
     @staticmethod
     def get_interactive_detail_multi_chart(
@@ -636,7 +630,7 @@ class DataAssistantResult(SerializableDictDot):
             sequential: Whether batches are sequential in nature
 
         Returns:
-            A interactive detail altair multi-line chart
+            A interactive detail altair multi-chart
         """
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
@@ -733,6 +727,7 @@ class DataAssistantResult(SerializableDictDot):
                     batch_component.name,
                     type=batch_component.alt_type,
                     axis=alt.Axis(ticks=False, title=None, labels=False),
+                    scale=alt.Scale(align=0.05),
                 ),
                 y=alt.Y(
                     metric_component.name, type=metric_component.alt_type, title=None
@@ -765,6 +760,7 @@ class DataAssistantResult(SerializableDictDot):
                     batch_component.name,
                     type=batch_component.alt_type,
                     axis=alt.Axis(ticks=False, title=None, labels=False),
+                    scale=alt.Scale(align=0.05),
                 ),
                 y=alt.Y(
                     metric_component.name, type=metric_component.alt_type, title=None
@@ -792,6 +788,7 @@ class DataAssistantResult(SerializableDictDot):
                     batch_component.name,
                     type=batch_component.alt_type,
                     axis=alt.Axis(ticks=False, title=None, labels=False),
+                    scale=alt.Scale(align=0.05),
                 ),
                 y=alt.Y(
                     metric_component.name, type=metric_component.alt_type, title=None
@@ -1289,10 +1286,9 @@ class DataAssistantResult(SerializableDictDot):
                 metric_component.generate_tooltip(format=","),
             ]
         )
-        detail_line_chart_height: int = 75
 
-        interactive_detail_multi_line_chart: alt.VConcatChart = (
-            DataAssistantResult._get_interactive_detail_multi_line_chart(
+        bars: alt.VConcatChart = (
+            DataAssistantResult._get_interactive_detail_multi_bar_chart(
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
@@ -1300,17 +1296,32 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        # use existing selection
-        selection_name: str = list(
-            interactive_detail_multi_line_chart.vconcat[2].layer[0].selection.keys()
-        )[0]
-        selection_def: alt.SelectionDef = (
-            interactive_detail_multi_line_chart.vconcat[2]
-            .layer[0]
-            .selection[selection_name]
+        bars.selection = alt.Undefined
+        bars.transform = alt.Undefined
+
+        input_dropdown_initial_state: pd.DataFrame = (
+            df.groupby([batch_component.name]).max().reset_index()
         )
-        selection: alt.selection = alt.selection(
-            name=selection_name, **selection_def.to_dict()
+        input_dropdown_initial_state[
+            batch_component.batch_identifiers
+            + [
+                domain_component.name,
+                min_value_component.name,
+                max_value_component.name,
+                strict_min_component.name,
+                strict_max_component.name,
+            ]
+        ] = " "
+        df = pd.concat([input_dropdown_initial_state, df], axis=0)
+
+        columns: List[str] = pd.unique(df[domain_component.name]).tolist()
+        input_dropdown: alt.binding_select = alt.binding_select(
+            options=columns, name="Select Column: "
+        )
+        selection: alt.selection_single = alt.selection_single(
+            empty="none",
+            bind=input_dropdown,
+            fields=[domain_component.name],
         )
 
         lower_limit: alt.Chart = (
@@ -1318,10 +1329,12 @@ class DataAssistantResult(SerializableDictDot):
             .mark_line(color=line_color)
             .encode(
                 x=batch_component.plot_on_axis(),
-                y=min_value_component.plot_on_axis(),
+                y=alt.Y(
+                    min_value_component.name,
+                    type=min_value_component.alt_type,
+                ),
                 tooltip=tooltip,
             )
-            .properties(height=detail_line_chart_height)
             .transform_filter(selection)
         )
 
@@ -1330,10 +1343,12 @@ class DataAssistantResult(SerializableDictDot):
             .mark_line(color=line_color)
             .encode(
                 x=batch_component.plot_on_axis(),
-                y=max_value_component.plot_on_axis(),
+                y=alt.Y(
+                    max_value_component.name,
+                    type=max_value_component.alt_type,
+                ),
                 tooltip=tooltip,
             )
-            .properties(height=detail_line_chart_height)
             .transform_filter(selection)
         )
 
@@ -1342,43 +1357,28 @@ class DataAssistantResult(SerializableDictDot):
             .mark_area()
             .encode(
                 x=batch_component.plot_on_axis(),
-                y=min_value_component.plot_on_axis(),
-                y2=alt.Y2(max_value_component.name, title=max_value_component.title),
+                y=alt.Y(
+                    min_value_component.name,
+                    type=min_value_component.alt_type,
+                ),
+                y2=alt.Y2(max_value_component.name),
             )
-            .properties(height=detail_line_chart_height)
             .transform_filter(selection)
         )
 
-        point_color_condition: alt.condition = alt.condition(
+        stroke_color_condition: alt.condition = alt.condition(
             predicate=predicate,
             if_false=alt.value(Colors.GREEN.value),
             if_true=alt.value(Colors.PINK.value),
         )
 
-        interactive_detail_multi_line_chart.vconcat[0].layer[3] = (
-            interactive_detail_multi_line_chart.vconcat[0]
-            .layer[3]
-            .encode(color=point_color_condition, tooltip=tooltip)
+        anomaly_coded_bars = (
+            bars.encode(stroke=stroke_color_condition, tooltip=tooltip)
+            .add_selection(selection)
+            .transform_filter(selection)
         )
 
-        interactive_detail_multi_line_chart.vconcat[2].layer[1] = (
-            interactive_detail_multi_line_chart.vconcat[2]
-            .layer[1]
-            .encode(color=point_color_condition, tooltip=tooltip)
-        )
-
-        # add expectation kwargs
-        detail_chart: alt.LayerChart = interactive_detail_multi_line_chart.vconcat[2]
-        detail_chart_layers: list[alt.Chart] = [
-            band,
-            lower_limit,
-            upper_limit,
-            detail_chart.layer[0].encode(tooltip=tooltip),
-            detail_chart.layer[1].encode(tooltip=tooltip),
-        ]
-        interactive_detail_multi_line_chart.vconcat[2].layer = detail_chart_layers
-
-        return interactive_detail_multi_line_chart
+        return band + lower_limit + upper_limit + anomaly_coded_bars
 
     def _create_df_for_charting(
         self,
