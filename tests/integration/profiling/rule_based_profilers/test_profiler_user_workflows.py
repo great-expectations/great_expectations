@@ -1727,8 +1727,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         variables={
             "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
             "allow_relative_error": "linear",
-            "num_bootstrap_samples": 9139,
-            "bootstrap_random_seed": 43792,
+            "n_resamples": 9139,
+            "random_seed": 43792,
             "false_positive_rate": 5.0e-2,
             "quantile_statistic_interpolation_method": "auto",
         },
@@ -1749,8 +1749,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                             "quantiles": "$variables.quantiles",
                             "allow_relative_error": "$variables.allow_relative_error",
                         },
-                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                        "n_resamples": "$variables.n_resamples",
+                        "random_seed": "$variables.random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                         "round_decimals": 2,
@@ -1783,7 +1783,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         auto=True,
         profiler_config=custom_profiler_config,
     )
-    assert not result.success
+    assert result.success
 
     value_ranges_expected = [
         [
@@ -1791,7 +1791,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             6.5,
         ],
         [
-            8.52,
+            8.44,
             9.56,
         ],
         [
@@ -1826,8 +1826,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         variables={
             "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
             "allow_relative_error": "linear",
-            "num_bootstrap_samples": 9139,
-            "bootstrap_random_seed": 43792,
+            "n_resamples": 9139,
+            "random_seed": 43792,
             "false_positive_rate": 5.0e-2,
             "quantile_statistic_interpolation_method": "auto",
         },
@@ -1848,8 +1848,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                             "quantiles": "$variables.quantiles",
                             "allow_relative_error": "$variables.allow_relative_error",
                         },
-                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                        "n_resamples": "$variables.n_resamples",
+                        "random_seed": "$variables.random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                         "round_decimals": "$variables.round_decimals",

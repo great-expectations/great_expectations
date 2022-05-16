@@ -398,6 +398,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
         # NOTE: AJB 20220414 concatenating to find distinct values to support all dialects.
         # There are more performant dialect-specific methods that can be implemented in
         # future improvements.
+        # NOTE: AJB 20220511 for awsathena we need to cast extracted date parts
+        # to string first before concatenating them.
         if len(date_parts) == 1:
             # MSSql does not accept single item concatenation
             concat_clause: List[Label] = [
@@ -413,7 +415,12 @@ class SqlAlchemyDataSplitter(DataSplitter):
                     sa.func.concat(
                         *[
                             (
-                                sa.func.extract(date_part.value, sa.column(column_name))
+                                sa.cast(
+                                    sa.func.extract(
+                                        date_part.value, sa.column(column_name)
+                                    ),
+                                    sa.String,
+                                )
                             ).label(date_part.value)
                             for date_part in date_parts
                         ]
