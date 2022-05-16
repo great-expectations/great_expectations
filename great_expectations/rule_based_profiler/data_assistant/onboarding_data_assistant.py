@@ -72,9 +72,25 @@ class OnboardingDataAssistant(DataAssistant):
         table_row_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
+        metric_name: str = "table.columns"
+        table_columns_metric_multi_batch_parameter_builder: ParameterBuilder = (
+            MetricMultiBatchParameterBuilder(
+                name=metric_name,
+                metric_name=metric_name,
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=False,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=True,
+                data_context=None,
+            )
+        )
         return {
             Domain(domain_type=MetricDomainTypes.TABLE,): [
                 table_row_count_metric_multi_batch_parameter_builder,
+                table_columns_metric_multi_batch_parameter_builder,
             ],
         }
 
