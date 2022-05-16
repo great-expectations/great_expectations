@@ -18,6 +18,7 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
     ParameterBuilder,
     ValueSetMultiBatchParameterBuilder,
 )
@@ -633,8 +634,20 @@ class OnboardingDataAssistant(DataAssistant):
         column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
-        column_value_counts_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_value_counts_metric_multi_batch_parameter_builder(
-            json_serialize=True
+        metric_name: str = "column.value_counts"
+        column_value_counts_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = MetricMultiBatchParameterBuilder(
+            name=metric_name,
+            metric_name=metric_name,
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs={
+                "sort": "value",
+            },
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            reduce_scalar_metric=False,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+            data_context=None,
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.

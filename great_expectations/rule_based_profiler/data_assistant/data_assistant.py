@@ -115,29 +115,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 json_serialize=json_serialize,
             )
 
-        def get_column_value_counts_metric_multi_batch_parameter_builder(
-            self,
-            json_serialize: Union[str, bool] = True,
-        ) -> ParameterBuilder:
-            """
-            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
-            """
-            metric_name: str = "column.value_counts"
-            return MetricMultiBatchParameterBuilder(
-                name=metric_name,
-                metric_name=metric_name,
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs={
-                    "sort": "value",
-                },
-                enforce_numeric_metric=False,
-                replace_nan_with_zero=False,
-                reduce_scalar_metric=False,
-                evaluation_parameter_builder_configs=None,
-                json_serialize=json_serialize,
-                data_context=None,
-            )
-
         def get_column_distinct_values_count_metric_multi_batch_parameter_builder(
             self,
             json_serialize: Union[str, bool] = True,
