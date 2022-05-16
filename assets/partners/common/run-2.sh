@@ -1,3 +1,3 @@
 set -e
 
-docker compose up --exit-code-from integration_test
+docker compose up --build --exit-code-from integration_test
