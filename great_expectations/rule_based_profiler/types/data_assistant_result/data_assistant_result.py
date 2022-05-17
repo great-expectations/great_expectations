@@ -926,7 +926,7 @@ class DataAssistantResult(SerializableDictDot):
             )
             .encode(text=detail_title_text)
             .transform_filter(selection)
-            .properties(height=10)
+            .properties(height=35)
         )
 
         # special title for combined y-axis across two charts

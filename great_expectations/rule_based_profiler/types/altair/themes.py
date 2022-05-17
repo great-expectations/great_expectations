@@ -35,6 +35,7 @@ axis_label_color: str = Colors.BLUE_1.value
 axis_label_font_size: int = 12
 
 # X-Axis Only
+x_axis_title_y: int = 30
 x_axis_label_angle: int = 0
 x_axis_label_flush: bool = True
 x_axis_grid: bool = True
@@ -112,6 +113,7 @@ class AltairThemes(Enum):
             "titleX": y_axis_title_x,
         },
         "axisX": {
+            "titleY": x_axis_title_y,
             "labelAngle": x_axis_label_angle,
             "labelFlush": x_axis_label_flush,
             "grid": x_axis_grid,
