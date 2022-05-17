@@ -63,6 +63,10 @@ class OnboardingDataAssistant(DataAssistant):
                 "auto": True,
                 "profiler_config": None,
             },
+            "expect_table_columns_to_match_set": {
+                "auto": True,
+                "profiler_config": None,
+            },
         }
 
     @property
