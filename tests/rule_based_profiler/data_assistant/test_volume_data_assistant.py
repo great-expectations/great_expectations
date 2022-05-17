@@ -3353,7 +3353,7 @@ def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_executio
     )
 
 
-def test_volume_data_assistant_plot_descriptive_non_sequential(
+def test_volume_data_assistant_plot_non_sequential(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     sequential: bool = False

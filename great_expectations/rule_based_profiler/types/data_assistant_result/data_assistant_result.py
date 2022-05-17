@@ -974,10 +974,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         input_dropdown_initial_state: pd.DataFrame = (
-            df.drop(columns=batch_component.batch_identifiers)
-            .groupby([batch_component.name])
-            .max()
-            .reset_index()
+            df.groupby([batch_component.name]).max().reset_index()
         )
         input_dropdown_initial_state[
             batch_component.batch_identifiers + [domain_component.name]
