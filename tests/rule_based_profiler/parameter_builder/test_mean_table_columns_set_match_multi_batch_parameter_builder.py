@@ -11,6 +11,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 )
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -70,6 +71,32 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
         domain.id: parameter_container,
     }
 
+    expected_parameter_value: dict = {
+        "value": {
+            "VendorID",
+            "pickup_datetime",
+            "total_amount",
+            "congestion_surcharge",
+            "dropoff_datetime",
+            "mta_tax",
+            "store_and_fwd_flag",
+            "tip_amount",
+            "trip_distance",
+            "payment_type",
+            "DOLocationID",
+            "improvement_surcharge",
+            "extra",
+            "tolls_amount",
+            "RatecodeID",
+            "passenger_count",
+            "PULocationID",
+            "fare_amount",
+        },
+        "details": {
+            "success_ratio": 1.0,
+        },
+    }
+
     mean_table_columns_set_match_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
@@ -77,25 +104,15 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
         batch_request=batch_request,
     )
 
-    expected_parameter_value: dict = {
-        "value": 1.0,
-        "details": {
-            "metric_configuration": {
-                "metric_name": "table.columns",
-                "domain_kwargs": {},
-                "metric_value_kwargs": None,
-                "metric_dependencies": None,
-            },
-            "num_batches": 3,
-        },
-    }
-
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=mean_table_columns_set_match_multi_batch_parameter_builder.fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
+    )
+    parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] = set(
+        parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
     )
 
     assert parameter_node == expected_parameter_value
