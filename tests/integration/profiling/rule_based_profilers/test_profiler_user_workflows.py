@@ -501,8 +501,8 @@ def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profil
         "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
         "column": "user_agent",
         "include_config": True,
-        "max_value": 115,
-        "min_value": 115,
+        "max_value": 115,  # Chetan - 20220516 - Note that all values in the dataset are of equal length
+        "min_value": 115,  # TODO - we should add an additional test upon using an updated dataset (confirmed behavior through UAT)
         "mostly": 1.0,
         "result_format": "SUMMARY",
         "strict_max": False,
