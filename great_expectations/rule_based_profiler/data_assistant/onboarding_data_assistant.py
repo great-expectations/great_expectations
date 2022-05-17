@@ -22,6 +22,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     ValueSetMultiBatchParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
+    NumericMetricRangeMultiBatchParameterBuilder,
+)
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -155,6 +158,7 @@ class OnboardingDataAssistant(DataAssistant):
         numeric_rule: Rule = self._build_numeric_rule()
         datetime_rule: Rule = self._build_datetime_rule()
         categorical_rule: Rule = self._build_categorical_rule()
+        text_rule: Rule = self._build_text_rule()
 
         return [
             column_value_uniqueness_rule,
@@ -163,6 +167,7 @@ class OnboardingDataAssistant(DataAssistant):
             numeric_rule,
             datetime_rule,
             categorical_rule,
+            text_rule,
         ]
 
     def _build_data_assistant_result(
@@ -780,6 +785,141 @@ class OnboardingDataAssistant(DataAssistant):
             name="categorical_rule",
             variables=variables,
             domain_builder=categorical_column_type_domain_builder,
+            parameter_builders=parameter_builders,
+            expectation_configuration_builders=expectation_configuration_builders,
+        )
+
+        return rule
+
+    @staticmethod
+    def _build_text_rule() -> Rule:
+
+        # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
+
+        text_column_type_domain_builder: ColumnDomainBuilder = ColumnDomainBuilder(
+            include_column_names=None,
+            exclude_column_names=None,
+            include_column_name_suffixes=None,
+            exclude_column_name_suffixes=None,
+            semantic_type_filter_module_name=None,
+            semantic_type_filter_class_name=None,
+            include_semantic_types=[
+                SemanticDomainTypes.TEXT,
+            ],
+            exclude_semantic_types=None,
+            data_context=None,
+        )
+
+        # Step-2: Declare "ParameterBuilder" for every metric of interest.
+
+        column_min_length_range_estimator_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
+            name="column_min_length_range_estimator",
+            metric_name="column_values.length.min",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+            quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+            estimator=f"{VARIABLES_KEY}estimator",
+            n_resamples=f"{VARIABLES_KEY}n_resamples",
+            random_seed=f"{VARIABLES_KEY}random_seed",
+            include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
+            truncate_values=f"{VARIABLES_KEY}truncate_values",
+            round_decimals=f"{VARIABLES_KEY}round_decimals",
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+        column_max_length_range_estimator_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
+            name="column_max_length_range_estimator",
+            metric_name="column_values.length.max",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+            quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+            estimator=f"{VARIABLES_KEY}estimator",
+            n_resamples=f"{VARIABLES_KEY}n_resamples",
+            random_seed=f"{VARIABLES_KEY}random_seed",
+            include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
+            truncate_values=f"{VARIABLES_KEY}truncate_values",
+            round_decimals=f"{VARIABLES_KEY}round_decimals",
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+
+        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
+
+        column_min_length_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name="column_values.length.min",
+            metric_value_kwargs=None,
+            json_serialize=True,
+        )
+        column_max_length_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name="column_values.length.max",
+            metric_value_kwargs=None,
+            json_serialize=True,
+        )
+
+        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **column_min_length_range_parameter_builder_for_validations.to_json_dict(),
+            ),
+            ParameterBuilderConfig(
+                **column_max_length_range_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
+        expect_column_value_lengths_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_column_value_lengths_to_be_between",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            min_value=f"{column_min_length_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+            max_value=f"{column_max_length_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+            mostly=f"{VARIABLES_KEY}mostly",
+            strict_min=f"{VARIABLES_KEY}strict_min",
+            strict_max=f"{VARIABLES_KEY}strict_max",
+            meta={
+                "profiler_details": {
+                    "column_min_length_range_estimator": f"{column_min_length_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                    "column_max_length_range_estimator": f"{column_max_length_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                },
+            },
+        )
+
+        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+
+        variables: dict = {
+            "mostly": 1.0,
+            "strict_min": False,
+            "strict_max": False,
+            "false_positive_rate": 0.05,
+            "quantile_statistic_interpolation_method": "auto",
+            "estimator": "bootstrap",
+            "n_resamples": 9999,
+            "random_seed": None,
+            "include_estimator_samples_histogram_in_details": False,
+            "truncate_values": {
+                "lower_bound": None,
+                "upper_bound": None,
+            },
+            "round_decimals": 1,
+        }
+        parameter_builders: List[ParameterBuilder] = [
+            column_min_length_range_estimator_parameter_builder,
+            column_max_length_range_estimator_parameter_builder,
+        ]
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
+            expect_column_value_lengths_to_be_between_expectation_configuration_builder
+        ]
+        rule: Rule = Rule(
+            name="text_columns_rule",
+            variables=variables,
+            domain_builder=text_column_type_domain_builder,
             parameter_builders=parameter_builders,
             expectation_configuration_builders=expectation_configuration_builders,
         )
