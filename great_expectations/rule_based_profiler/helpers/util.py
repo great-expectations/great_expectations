@@ -794,4 +794,7 @@ def get_or_create_expectation_suite(
 
 
 def sanitize_parameter_name(name: str) -> str:
+    """
+    This method provides display-friendly version of "name" argument.
+    """
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
