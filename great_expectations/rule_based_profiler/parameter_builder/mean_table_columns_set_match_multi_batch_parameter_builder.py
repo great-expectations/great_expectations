@@ -26,6 +26,11 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 ):
     """
     Compute mean match ratio (as a fraction) of "table.columns" metric across every Batch of data given.
+
+    Step-1: Compute "table.columns" metric value for each Batch object.
+    Step-2: Compute set union operation of column lists from Step-1 over all Batch objects (gives maximum column set).
+    Step-3: Assign match scores: if column set of a Batch equals overall (maximum) column set, give it 1; 0 otherwise.
+    Step-4: Compute mean value of match scores as "success_ratio" (divide sum of scores by number of Batch objects).
     """
 
     exclude_field_names: Set[
@@ -134,9 +139,9 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         return Attributes(
             {
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: mean_table_columns_set_match,
-                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ],
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: multi_batch_table_columns_names_as_set,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: {
+                    "success_ratio": mean_table_columns_set_match,
+                },
             }
         )
