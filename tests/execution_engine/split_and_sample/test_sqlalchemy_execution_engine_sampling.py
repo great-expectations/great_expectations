@@ -94,7 +94,9 @@ def dialect_name_to_sql_statement():
 @pytest.mark.parametrize(
     "dialect_name",
     [
-        pytest.param(dialect_name, id=dialect_name.value)
+        pytest.param(
+            dialect_name, id=dialect_name.value, marks=pytest.mark.external_sqldialect
+        )
         for dialect_name in GESqlDialect.get_all_dialects()
     ],
 )

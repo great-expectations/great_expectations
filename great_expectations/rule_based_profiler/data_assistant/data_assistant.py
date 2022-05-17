@@ -109,7 +109,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="table.row_count",
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
@@ -122,7 +122,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.distinct_values.count",
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
@@ -135,7 +135,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column_values.unique.unexpected_count",
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
@@ -148,7 +148,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column_values.nonnull.unexpected_count",
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
@@ -161,7 +161,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column_values.null.unexpected_count",
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
@@ -174,7 +174,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.histogram",
                 metric_value_kwargs={
                     "bins": f"{VARIABLES_KEY}bins",
@@ -189,7 +189,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.quantile_values",
                 metric_value_kwargs={
                     "quantiles": f"{VARIABLES_KEY}quantiles",
@@ -205,7 +205,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.min",
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
@@ -218,7 +218,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.max",
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
@@ -231,7 +231,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.median",
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
@@ -244,7 +244,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.mean",
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
@@ -257,14 +257,14 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            return self.build_metric_multi_batch_parameter_builder(
+            return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.standard_deviation",
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
             )
 
         @staticmethod
-        def build_metric_multi_batch_parameter_builder(
+        def build_numeric_metric_multi_batch_parameter_builder(
             metric_name: str,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
             json_serialize: Union[str, bool] = True,
@@ -312,6 +312,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 round_decimals=f"{VARIABLES_KEY}round_decimals",
                 evaluation_parameter_builder_configs=None,
                 json_serialize=json_serialize,
+                data_context=None,
             )
 
     commonly_used_parameter_builders: CommonlyUsedParameterBuilders = (
@@ -388,9 +389,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             rules = profiler.rules
             self._add_rules_to_profiler(rules=rules)
 
-        self._validate_profiler_rule_name_uniqueness()
+        custom_rules: List[Rule] = self.rules
+        self._validate_profiler_rule_name_uniqueness(custom_rules=custom_rules)
 
-        self._add_rules_to_profiler(rules=self.rules)
+        self._add_rules_to_profiler(rules=custom_rules)
 
         custom_variables: Optional[Dict[str, Any]] = self.variables
         if custom_variables is None:
@@ -613,21 +615,23 @@ class DataAssistant(metaclass=MetaDataAssistant):
         ] = rule.expectation_configuration_builders[0].validation_parameter_builders
         return variables, validation_parameter_builders
 
-    def _validate_profiler_rule_name_uniqueness(self) -> None:
+    def _validate_profiler_rule_name_uniqueness(
+        self,
+        custom_rules: List[Rule],
+    ) -> None:
         """
         This private utility method insures that all "Rule" objects in underlying "BaseRuleBasedProfiler" are unique.
         """
-        rule: Rule
-
         profiler_rules: List[Rule] = self.profiler.rules
         if profiler_rules is None:
             profiler_rules = []
 
-        profiler_rule_names: Set[str] = {rule.name for rule in profiler_rules}
-
-        custom_rules: List[Rule] = self.rules
         if custom_rules is None:
             custom_rules = []
+
+        rule: Rule
+
+        profiler_rule_names: Set[str] = {rule.name for rule in profiler_rules}
 
         custom_rule_names: Set[str] = {rule.name for rule in custom_rules}
 
