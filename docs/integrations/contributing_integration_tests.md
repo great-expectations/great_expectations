@@ -7,11 +7,14 @@ As the data stack ecosystem grows and expands in usage and tooling, so does the 
 products or services. [Superconductive](https://superconductive.com) as drivers and ushers
 of [Great Expectations](https://greatexpectations.io), we want to make the process to integrating with Great Expectations
 as low friction as possible. We are committed to work and iterate in the process and greatly value any feedback you may have.
-The aim of this document is to provide guidance for vendors or community partners which wish to integrate with us as to how to test said integrations within our testing framework.
+The aim of this document is to provide guidance for vendors or community partners which wish to integrate with us as to how to test said integrations within our testing infrastructure.
 
 ### Scope
 While test requirements vary widly, we made some decisions to help us narrow down the cases we cover while keeping developer friction at a minimum.
 To this end we have created a taxonomy of the types of tests that our self service integration tests framework supports.
+
+#### Type 1
+
 
 ## Steps
 
