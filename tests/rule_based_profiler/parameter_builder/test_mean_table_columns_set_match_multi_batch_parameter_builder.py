@@ -111,8 +111,12 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
         variables=variables,
         parameters=parameters,
     )
+
+    assert len(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]) == len(
+        expected_parameter_value[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
+    )
+
     parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] = set(
         parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
     )
-
     assert parameter_node == expected_parameter_value
