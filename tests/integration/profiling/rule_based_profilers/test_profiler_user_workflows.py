@@ -1566,6 +1566,62 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
+def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_validator: Validator,
+):
+    validator: Validator = quentin_validator
+
+    # Use all batches, loaded by Validator, for estimating Expectation argument values.
+    result: ExpectationValidationResult = validator.expect_table_columns_to_match_set(
+        result_format="SUMMARY",
+        include_config=True,
+        auto=True,
+    )
+    assert result.success
+
+    value: Any
+    expectation_config_kwargs: dict = {
+        key: value
+        for key, value in result.expectation_config["kwargs"].items()
+        if key != "column_set"
+    }
+    assert expectation_config_kwargs == {
+        "result_format": "SUMMARY",
+        "include_config": True,
+        "auto": True,
+        "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+    }
+
+    column_set_expected: List[str] = [
+        "total_amount",
+        "tip_amount",
+        "payment_type",
+        "pickup_datetime",
+        "trip_distance",
+        "dropoff_location_id",
+        "improvement_surcharge",
+        "vendor_id",
+        "tolls_amount",
+        "congestion_surcharge",
+        "rate_code_id",
+        "pickup_location_id",
+        "extra",
+        "fare_amount",
+        "mta_tax",
+        "dropoff_datetime",
+        "store_and_fwd_flag",
+        "passenger_count",
+    ]
+    column_set_computed: List[str] = result.expectation_config["kwargs"]["column_set"]
+
+    assert len(column_set_computed) == len(column_set_expected)
+    assert set(column_set_computed) == set(column_set_expected)
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
