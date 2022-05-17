@@ -70,7 +70,10 @@ from great_expectations.self_check.util import (
     get_dataset,
 )
 from great_expectations.util import is_library_loadable
-from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
+from tests.rule_based_profiler.parameter_builder.conftest import (
+    RANDOM_SEED,
+    RANDOM_STATE,
+)
 
 yaml = YAML()
 ###
@@ -5845,10 +5848,13 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     file_name_list = sorted(file_name_list)
     num_files: int = len(file_name_list)
 
+    random_state: np.random.Generator = RANDOM_STATE
     rnd_num_sample: np.float64
     output_file_lenths: List[int] = [
         round(rnd_num_sample)
-        for rnd_num_sample in np.random.normal(loc=5.0e3, scale=1.0e3, size=num_files)
+        for rnd_num_sample in random_state.normal(
+            loc=5.0e3, scale=1.0e3, size=num_files
+        )
     ]
 
     idx: int
