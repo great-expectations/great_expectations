@@ -1,5 +1,6 @@
-import itertools
-from typing import Any, Collection, Dict, List, Optional, Set, Union
+from typing import Dict, List, Optional, Set, Union
+
+import numpy as np
 
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -9,11 +10,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    AttributedResolvedMetrics,
     Domain,
+    MetricValue,
     MetricValues,
     ParameterContainer,
     ParameterNode,
@@ -21,23 +21,11 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.types.attributes import Attributes
 
 
-class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
-    """Build a set of unique values across all specified batches.
-
-    This parameter builder can be used to build a unique value_set for each
-    of the domains specified by the DomainBuilder from all of the batches
-    specified. This value_set can be used to create Expectations.
-
-    This unique value_set is the unique values from ALL batches accessible
-    to the parameter builder. For example, if batch 1 has the unique values
-    {1, 4, 8} and batch 2 {2, 8, 10} the unique values returned by this
-    parameter builder are the set union, or {1, 2, 4, 8, 10}
-
-    Notes:
-        1. The computation of the unique values across batches is done within
-           this ParameterBuilder so please be aware that testing large columns with
-           high cardinality could require a large amount of memory.
-        2. This ParameterBuilder filters null values out from the unique value_set.
+class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
+    MetricMultiBatchParameterBuilder
+):
+    """
+    Compute mean match ratio (as a fraction) of "table.columns" metric across every Batch of data given.
     """
 
     exclude_field_names: Set[
@@ -75,12 +63,12 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         """
         super().__init__(
             name=name,
-            metric_name="column.distinct_values",
+            metric_name="table.columns",
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
-            reduce_scalar_metric=False,
+            reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
             data_context=data_context,
@@ -99,17 +87,17 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
-        # Build the list of unique values for each Batch object.
+        # Compute "table.columns" metric value for each Batch object.
         super().build_parameters(
             domain=domain,
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            json_serialize=None,
+            json_serialize=False,
             recompute_existing_parameter_values=recompute_existing_parameter_values,
         )
 
-        # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.
+        # Retrieve "table.columns" metric values for all Batch objects.
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.fully_qualified_parameter_name,
@@ -117,53 +105,38 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = (
-            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
-                attributed_metric_values=parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+        table_columns_names_multi_batch_value: MetricValues = parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+        ]
+
+        one_batch_table_columns_names_value: MetricValue
+        multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
+            set(one_batch_table_columns_names_value.tolist())
+            for one_batch_table_columns_names_value in table_columns_names_multi_batch_value
+        ]
+
+        multi_batch_table_columns_names_as_set: Set[str] = set().union(
+            *multi_batch_table_columns_names_sets_as_list
+        )
+
+        one_batch_table_columns_names_set: Set[str]
+        mean_table_columns_set_match: np.float64 = np.mean(
+            np.array(
+                [
+                    1
+                    if one_batch_table_columns_names_set
+                    == multi_batch_table_columns_names_as_set
+                    else 0
+                    for one_batch_table_columns_names_set in multi_batch_table_columns_names_sets_as_list
                 ]
             )
         )
 
         return Attributes(
             {
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: _get_unique_values_from_nested_collection_of_sets(
-                    collection=metric_values
-                ),
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: mean_table_columns_set_match,
                 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
                     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
                 ],
             }
         )
-
-
-def _get_unique_values_from_nested_collection_of_sets(
-    collection: Collection[Collection[Set[Any]]],
-) -> Set[Any]:
-    """Get unique values from a collection of sets e.g. a list of sets.
-
-    Args:
-        collection: Collection of Sets containing collections of values.
-            can be nested Collections.
-
-    Returns:
-        Single flattened set containing unique values.
-    """
-
-    flattened: List[Set[Any]] = list(itertools.chain.from_iterable(collection))
-
-    """
-    In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to
-    reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
-    resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
-    """
-    unique_values: Set[Any] = set(
-        sorted(
-            filter(
-                lambda element: element is not None,
-                set().union(*flattened),
-            )
-        )
-    )
-
-    return unique_values
