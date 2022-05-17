@@ -40,6 +40,7 @@ x_axis_label_flush: bool = True
 x_axis_grid: bool = True
 
 # Y-Axis Only
+y_axis_title_x: int = -55
 
 # Legend
 legend_title_color: str = Colors.PURPLE.value
@@ -76,8 +77,8 @@ point_opacity: float = 1.0
 # Bar Chart
 bar_color: str = Colors.PURPLE.value
 bar_opacity: float = 0.7
-bar_stroke_color: str = Colors.BLUE_3.value
-bar_stroke_width: int = 3
+bar_stroke_color: str = Colors.BLUE_1.value
+bar_stroke_width: int = 1
 bar_stroke_opacity: float = 1.0
 
 
@@ -106,6 +107,9 @@ class AltairThemes(Enum):
             "titlePadding": axis_title_padding,
             "labelFontSize": axis_label_font_size,
             "labelColor": axis_label_color,
+        },
+        "axisY": {
+            "titleX": y_axis_title_x,
         },
         "axisX": {
             "labelAngle": x_axis_label_angle,

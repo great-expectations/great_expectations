@@ -161,6 +161,9 @@ class DataAssistantResult(SerializableDictDot):
         """
         display(HTML(dropdown_css))
 
+        # max rows for Altair charts is set to 5,000 without this
+        alt.data_transformers.disable_max_rows()
+
         chart: alt.Chart
         for chart in themed_charts:
             chart.display()
@@ -308,7 +311,12 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df, title=title)
             .mark_bar()
             .encode(
-                x=batch_component.plot_on_axis(),
+                x=alt.X(
+                    batch_component.name,
+                    type=batch_component.alt_type,
+                    title=batch_component.title,
+                    axis=alt.Axis(labels=False),
+                ),
                 y=metric_component.plot_on_axis(),
                 tooltip=tooltip,
             )
@@ -560,7 +568,12 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_line(color=line_color)
             .encode(
-                x=batch_component.plot_on_axis(),
+                x=alt.X(
+                    batch_component.name,
+                    type=batch_component.alt_type,
+                    title=batch_component.title,
+                    axis=alt.Axis(labels=False),
+                ),
                 y=min_value_component.plot_on_axis(),
                 tooltip=tooltip,
             )
@@ -571,7 +584,12 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_line(color=line_color)
             .encode(
-                x=batch_component.plot_on_axis(),
+                x=alt.X(
+                    batch_component.name,
+                    type=batch_component.alt_type,
+                    title=batch_component.title,
+                    axis=alt.Axis(labels=False),
+                ),
                 y=max_value_component.plot_on_axis(),
                 tooltip=tooltip,
             )
@@ -582,7 +600,12 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_area()
             .encode(
-                x=batch_component.plot_on_axis(),
+                x=alt.X(
+                    batch_component.name,
+                    type=batch_component.alt_type,
+                    title=batch_component.title,
+                    axis=alt.Axis(labels=False),
+                ),
                 y=min_value_component.plot_on_axis(),
                 y2=alt.Y2(max_value_component.name, title=metric_component.title),
             )
@@ -605,13 +628,13 @@ class DataAssistantResult(SerializableDictDot):
             (alt.datum.min_value < alt.datum[metric_name])
             & (alt.datum.max_value < alt.datum[metric_name])
         )
-        stroke_color_condition: alt.condition = alt.condition(
+        bar_color_condition: alt.condition = alt.condition(
             predicate=predicate,
             if_false=alt.value(Colors.GREEN.value),
             if_true=alt.value(Colors.PINK.value),
         )
 
-        anomaly_coded_bars = bars.encode(stroke=stroke_color_condition, tooltip=tooltip)
+        anomaly_coded_bars = bars.encode(color=bar_color_condition, tooltip=tooltip)
 
         return band + lower_limit + upper_limit + anomaly_coded_bars
 
@@ -975,7 +998,12 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df, title=title)
             .mark_bar()
             .encode(
-                x=batch_component.plot_on_axis(),
+                x=alt.X(
+                    batch_component.name,
+                    type=batch_component.alt_type,
+                    title=batch_component.title,
+                    axis=alt.Axis(labels=False),
+                ),
                 y=metric_component.plot_on_axis(),
                 tooltip=tooltip,
             )
@@ -1328,7 +1356,12 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_line(color=line_color)
             .encode(
-                x=batch_component.plot_on_axis(),
+                x=alt.X(
+                    batch_component.name,
+                    type=batch_component.alt_type,
+                    title=batch_component.title,
+                    axis=alt.Axis(labels=False),
+                ),
                 y=alt.Y(
                     min_value_component.name,
                     type=min_value_component.alt_type,
@@ -1342,7 +1375,12 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_line(color=line_color)
             .encode(
-                x=batch_component.plot_on_axis(),
+                x=alt.X(
+                    batch_component.name,
+                    type=batch_component.alt_type,
+                    title=batch_component.title,
+                    axis=alt.Axis(labels=False),
+                ),
                 y=alt.Y(
                     max_value_component.name,
                     type=max_value_component.alt_type,
@@ -1356,7 +1394,12 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_area()
             .encode(
-                x=batch_component.plot_on_axis(),
+                x=alt.X(
+                    batch_component.name,
+                    type=batch_component.alt_type,
+                    title=batch_component.title,
+                    axis=alt.Axis(labels=False),
+                ),
                 y=alt.Y(
                     min_value_component.name,
                     type=min_value_component.alt_type,
@@ -1366,14 +1409,14 @@ class DataAssistantResult(SerializableDictDot):
             .transform_filter(selection)
         )
 
-        stroke_color_condition: alt.condition = alt.condition(
+        bar_color_condition: alt.condition = alt.condition(
             predicate=predicate,
             if_false=alt.value(Colors.GREEN.value),
             if_true=alt.value(Colors.PINK.value),
         )
 
         anomaly_coded_bars = (
-            bars.encode(stroke=stroke_color_condition, tooltip=tooltip)
+            bars.encode(color=bar_color_condition, tooltip=tooltip)
             .add_selection(selection)
             .transform_filter(selection)
         )
