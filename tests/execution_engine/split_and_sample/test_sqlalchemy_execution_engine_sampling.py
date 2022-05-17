@@ -1,10 +1,23 @@
-import pytest
+import datetime
+import os
+from typing import List
 
+import pandas as pd
+import pytest
+from dateutil.parser import parse
+
+from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
+)
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import import_library_module
 
 
@@ -81,7 +94,9 @@ def dialect_name_to_sql_statement():
 @pytest.mark.parametrize(
     "dialect_name",
     [
-        pytest.param(dialect_name, id=dialect_name.value)
+        pytest.param(
+            dialect_name, id=dialect_name.value, marks=pytest.mark.external_sqldialect
+        )
         for dialect_name in GESqlDialect.get_all_dialects()
     ],
 )
@@ -197,3 +212,44 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
     )
 
     assert query_str == expected
+
+
+@pytest.mark.integration
+def test_sqlite_sample_using_limit(sa):
+
+    csv_path: str = file_relative_path(
+        os.path.dirname(os.path.dirname(__file__)),
+        os.path.join(
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "ten_trips_from_each_month",
+            "yellow_tripdata_sample_10_trips_from_each_month.csv",
+        ),
+    )
+    df: pd.DataFrame = pd.read_csv(csv_path)
+    engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
+
+    n: int = 10
+    batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
+        table_name="test",
+        schema_name="main",
+        sampling_method="sample_using_limit",
+        sampling_kwargs={"n": n},
+    )
+    batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
+
+    # Right number of rows?
+    num_rows: int = batch_data.execution_engine.engine.execute(
+        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == n
+
+    # Right rows?
+    rows: sa.Row = batch_data.execution_engine.engine.execute(
+        sa.select([sa.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
+    for row_date in row_dates:
+        assert row_date.month == 1
+        assert row_date.year == 2018

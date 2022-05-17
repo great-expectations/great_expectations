@@ -29,12 +29,10 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
+    VolumeDataAssistantResult,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
     PlotResult,
-)
-from great_expectations.rule_based_profiler.types.data_assistant_result.volume_data_assistant_result import (
-    VolumeDataAssistantResult,
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
@@ -2579,7 +2577,11 @@ def bobby_volume_data_assistant_result(
         "data_asset_name": "my_reports",
     }
 
-    return context.assistants.volume.run(batch_request=batch_request)
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request
+    )
+
+    return cast(VolumeDataAssistantResult, data_assistant_result)
 
 
 @pytest.fixture
@@ -3307,3 +3309,62 @@ def test_volume_data_assistant_plot_return_tooltip(
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
     assert actual_tooltip == expected_tooltip
+
+
+def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    new_cell: str = "data_assistant_result.plot_metrics(sequential=False)"
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=False,
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=True,
+    )
+
+
+def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    new_cell: str = (
+        "data_assistant_result.plot_expectations_and_metrics(sequential=False)"
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=False,
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=True,
+    )
+
+
+def test_volume_data_assistant_plot_non_sequential(
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    sequential: bool = False
+    plot_metrics_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics(
+        sequential=sequential
+    )
+
+    assert all([chart.mark == "bar" for chart in plot_metrics_result.charts])
+
+    plot_expectations_result: PlotResult = (
+        bobby_volume_data_assistant_result.plot_metrics(sequential=sequential)
+    )
+
+    assert all([chart.mark == "bar" for chart in plot_expectations_result.charts])
