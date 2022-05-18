@@ -45,6 +45,10 @@ class VolumeDataAssistant(DataAssistant):
                 "auto": True,
                 "profiler_config": None,
             },
+            "expect_column_mean_to_be_between": {
+                "auto": True,
+                "profiler_config": None,
+            },
         }
 
     @property
@@ -69,7 +73,7 @@ class VolumeDataAssistant(DataAssistant):
 
     @property
     def variables(self) -> Optional[Dict[str, Any]]:
-        return None
+        return None1
 
     @property
     def rules(self) -> Optional[List[Rule]]:
@@ -78,6 +82,9 @@ class VolumeDataAssistant(DataAssistant):
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
+
+        # this must --> this is a lot harder.
+        #
         return VolumeDataAssistantResult(
             batch_id_to_batch_identifier_display_name_map=data_assistant_result.batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
