@@ -1603,7 +1603,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                 "profiler_details": "$parameter.table_row_count_range.details"
                             },
                             "class_name": "DefaultExpectationConfigurationBuilder",
-                            "min_value": "$parameter.table_row_count_range_estimator.value[0]",
+                            "min_value": "$parameter.table_row_count_range.value[0]",
                         },
                     ],
                 },
