@@ -79,6 +79,7 @@ class CardinalityLimitMode(enum.Enum):
     REL_25 = RelativeCardinalityLimit("REL_25", 0.25)
     REL_50 = RelativeCardinalityLimit("REL_50", 0.50)
     REL_75 = RelativeCardinalityLimit("REL_75", 0.75)
+    REL_100 = RelativeCardinalityLimit("REL_100", 1.0)
     ONE_PCT = RelativeCardinalityLimit("ONE_PCT", 0.01)
     TEN_PCT = RelativeCardinalityLimit("TEN_PCT", 0.10)
 

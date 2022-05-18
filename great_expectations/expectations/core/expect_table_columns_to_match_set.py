@@ -108,8 +108,9 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "column_set": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
                         "condition": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
+                        "column_set": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+                        "exact_match": f"{VARIABLES_KEY}exact_match",
                         "meta": {
                             "profiler_details": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },

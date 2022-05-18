@@ -1618,6 +1618,7 @@ def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profi
         if key != "column_set"
     }
     assert expectation_config_kwargs == {
+        "exact_match": None,
         "result_format": "SUMMARY",
         "include_config": True,
         "auto": True,

@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional
 
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
@@ -9,6 +8,7 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant import
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
     ColumnDomainBuilder,
+    TableDomainBuilder,
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
@@ -17,7 +17,9 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
+from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
+    MeanTableColumnsSetMatchMultiBatchParameterBuilder,
     MetricMultiBatchParameterBuilder,
     ParameterBuilder,
     ValueSetMultiBatchParameterBuilder,
@@ -32,7 +34,6 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     VARIABLES_KEY,
-    Domain,
     SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
@@ -59,54 +60,19 @@ class OnboardingDataAssistant(DataAssistant):
             validator=validator,
         )
 
-    @property
-    def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
-        return {
-            "expect_table_row_count_to_be_between": {
-                "auto": True,
-                "profiler_config": None,
-            },
-            "expect_table_columns_to_match_set": {
-                "auto": True,
-                "profiler_config": None,
-            },
-        }
-
-    @property
-    def metrics_parameter_builders_by_domain(
-        self,
-    ) -> Dict[Domain, List[ParameterBuilder]]:
-        table_row_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
-        metric_name: str = "table.columns"
-        table_columns_metric_multi_batch_parameter_builder: ParameterBuilder = (
-            MetricMultiBatchParameterBuilder(
-                name=metric_name,
-                metric_name=metric_name,
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs=None,
-                enforce_numeric_metric=False,
-                replace_nan_with_zero=False,
-                reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
-                json_serialize=True,
-                data_context=None,
-            )
-        )
-        return {
-            Domain(domain_type=MetricDomainTypes.TABLE,): [
-                table_row_count_metric_multi_batch_parameter_builder,
-                table_columns_metric_multi_batch_parameter_builder,
-            ],
-        }
-
-    @property
-    def variables(self) -> Optional[Dict[str, Any]]:
+    def get_variables(self) -> Optional[Dict[str, Any]]:
+        """
+        Returns:
+            Optional "variables" configuration attribute name/value pairs (overrides), commonly-used in Builder objects.
+        """
         return None
 
-    @property
-    def rules(self) -> Optional[List[Rule]]:
+    def get_rules(self) -> Optional[List[Rule]]:
+        """
+        Returns:
+            Optional custom list of "Rule" objects implementing particular "DataAssistant" functionality.
+        """
+        table_rule: Rule = self._build_table_rule()
         column_value_uniqueness_rule: Rule = build_map_metric_rule(
             rule_name="column_value_uniqueness_rule",
             expectation_type="expect_column_values_to_be_unique",
@@ -157,17 +123,18 @@ class OnboardingDataAssistant(DataAssistant):
         )
         numeric_rule: Rule = self._build_numeric_rule()
         datetime_rule: Rule = self._build_datetime_rule()
-        categorical_rule: Rule = self._build_categorical_rule()
         text_rule: Rule = self._build_text_rule()
+        categorical_rule: Rule = self._build_categorical_rule()
 
         return [
+            table_rule,
             column_value_uniqueness_rule,
             column_value_nullity_rule,
             column_value_nonnullity_rule,
             numeric_rule,
             datetime_rule,
-            categorical_rule,
             text_rule,
+            categorical_rule,
         ]
 
     def _build_data_assistant_result(
@@ -183,7 +150,112 @@ class OnboardingDataAssistant(DataAssistant):
         )
 
     @staticmethod
-    def _build_numeric_rule() -> Rule:
+    def _build_table_rule() -> Rule:
+        """
+        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for table "Domain" type.
+        """
+        # Step-1: Instantiate "TableDomainBuilder" object.
+
+        table_domain_builder: TableDomainBuilder = TableDomainBuilder(
+            data_context=None,
+        )
+
+        # Step-2: Declare "ParameterBuilder" for every metric of interest.
+
+        table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
+        table_columns_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_columns_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
+
+        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
+
+        table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name="table.row_count",
+            metric_value_kwargs=None,
+            json_serialize=True,
+        )
+        mean_table_columns_set_match_multi_batch_parameter_builder_config: ParameterBuilder = MeanTableColumnsSetMatchMultiBatchParameterBuilder(
+            name="column_names_set_estimator",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+
+        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **table_row_count_range_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
+        expect_table_row_count_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_table_row_count_to_be_between",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            min_value=f"{table_row_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+            max_value=f"{table_row_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+            meta={
+                "profiler_details": f"{table_row_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
+
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **mean_table_columns_set_match_multi_batch_parameter_builder_config.to_json_dict(),
+            ),
+        ]
+        expect_table_columns_to_match_set_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_table_columns_to_match_set",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            condition=f"{mean_table_columns_set_match_multi_batch_parameter_builder_config.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
+            column_set=f"{mean_table_columns_set_match_multi_batch_parameter_builder_config.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+            exact_match=f"{VARIABLES_KEY}exact_match",
+            meta={
+                "profiler_details": f"{mean_table_columns_set_match_multi_batch_parameter_builder_config.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
+
+        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+
+        variables: dict = {
+            "false_positive_rate": 0.05,
+            "quantile_statistic_interpolation_method": "auto",
+            "estimator": "bootstrap",
+            "n_resamples": 9999,
+            "random_seed": None,
+            "include_estimator_samples_histogram_in_details": False,
+            "truncate_values": {
+                "lower_bound": 0,
+                "upper_bound": None,
+            },
+            "round_decimals": 0,
+            "exact_match": None,
+            "success_ratio": 1.0,
+        }
+        parameter_builders: List[ParameterBuilder] = [
+            table_row_count_metric_multi_batch_parameter_builder_for_metrics,
+            table_columns_metric_multi_batch_parameter_builder_for_metrics,
+        ]
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
+            expect_table_row_count_to_be_between_expectation_configuration_builder,
+            expect_table_columns_to_match_set_expectation_configuration_builder,
+        ]
+        rule: Rule = Rule(
+            name="table_rule",
+            variables=variables,
+            domain_builder=table_domain_builder,
+            parameter_builders=parameter_builders,
+            expectation_configuration_builders=expectation_configuration_builders,
+        )
+
+        return rule
+
+    @staticmethod
+    def _build_numeric_columns_rule() -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for numeric columns.
         """
@@ -460,7 +532,7 @@ class OnboardingDataAssistant(DataAssistant):
         return rule
 
     @staticmethod
-    def _build_datetime_rule() -> Rule:
+    def _build_datetime_columns_rule() -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for datetime columns.
         """
@@ -629,169 +701,6 @@ class OnboardingDataAssistant(DataAssistant):
         return rule
 
     @staticmethod
-    def _build_categorical_rule() -> Rule:
-        """
-        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for categorical columns.
-        """
-
-        # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.
-
-        categorical_column_type_domain_builder: CategoricalColumnDomainBuilder = (
-            CategoricalColumnDomainBuilder(
-                include_column_names=None,
-                exclude_column_names=None,
-                include_column_name_suffixes=None,
-                exclude_column_name_suffixes=None,
-                semantic_type_filter_module_name=None,
-                semantic_type_filter_class_name=None,
-                include_semantic_types=None,
-                exclude_semantic_types=None,
-                allowed_semantic_types_passthrough=None,
-                limit_mode=CardinalityLimitMode.FEW,
-                max_unique_values=None,
-                max_proportion_unique=None,
-                data_context=None,
-            )
-        )
-
-        # Step-2: Declare "ParameterBuilder" for every metric of interest.
-
-        column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
-        metric_name: str = "column.value_counts"
-        column_value_counts_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = MetricMultiBatchParameterBuilder(
-            name=metric_name,
-            metric_name=metric_name,
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs={
-                "sort": "value",
-            },
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            json_serialize=True,
-            data_context=None,
-        )
-
-        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
-
-        value_set_multi_batch_parameter_builder_for_validations: ParameterBuilder = (
-            ValueSetMultiBatchParameterBuilder(
-                name="value_set_estimator",
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs=None,
-                evaluation_parameter_builder_configs=None,
-                json_serialize=True,
-                data_context=None,
-            )
-        )
-        column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name="column.distinct_values.count",
-            metric_value_kwargs=None,
-            json_serialize=True,
-        )
-        column_unique_proportion_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name="column.unique_proportion",
-            metric_value_kwargs=None,
-            json_serialize=True,
-        )
-
-        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
-
-        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
-
-        validation_parameter_builder_configs = [
-            ParameterBuilderConfig(
-                **value_set_multi_batch_parameter_builder_for_validations.to_json_dict(),
-            ),
-        ]
-        expect_column_values_to_be_in_set_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_values_to_be_in_set",
-            validation_parameter_builder_configs=validation_parameter_builder_configs,
-            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-            value_set=f"{value_set_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-            mostly=f"{VARIABLES_KEY}mostly",
-            meta={
-                "profiler_details": f"{value_set_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-            },
-        )
-
-        validation_parameter_builder_configs = [
-            ParameterBuilderConfig(
-                **column_distinct_values_count_range_parameter_builder_for_validations.to_json_dict(),
-            ),
-        ]
-        expect_column_unique_value_count_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_unique_value_count_to_be_between",
-            validation_parameter_builder_configs=validation_parameter_builder_configs,
-            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-            min_value=f"{column_distinct_values_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-            max_value=f"{column_distinct_values_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
-            strict_min=f"{VARIABLES_KEY}strict_min",
-            strict_max=f"{VARIABLES_KEY}strict_max",
-            meta={
-                "profiler_details": f"{column_distinct_values_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-            },
-        )
-
-        validation_parameter_builder_configs = [
-            ParameterBuilderConfig(
-                **column_unique_proportion_range_parameter_builder_for_validations.to_json_dict(),
-            ),
-        ]
-        expect_column_proportion_of_unique_values_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_proportion_of_unique_values_to_be_between",
-            validation_parameter_builder_configs=validation_parameter_builder_configs,
-            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-            min_value=f"{column_unique_proportion_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-            max_value=f"{column_unique_proportion_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
-            strict_min=f"{VARIABLES_KEY}strict_min",
-            strict_max=f"{VARIABLES_KEY}strict_max",
-            meta={
-                "profiler_details": f"{column_unique_proportion_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-            },
-        )
-
-        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
-
-        variables: dict = {
-            "mostly": 1.0,
-            "strict_min": False,
-            "strict_max": False,
-            "false_positive_rate": 0.05,
-            "quantile_statistic_interpolation_method": "auto",
-            "estimator": "bootstrap",
-            "n_resamples": 9999,
-            "random_seed": None,
-            "include_estimator_samples_histogram_in_details": False,
-            "truncate_values": {
-                "lower_bound": 0.0,
-                "upper_bound": None,
-            },
-            "round_decimals": 1,
-        }
-        parameter_builders: List[ParameterBuilder] = [
-            column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,
-            column_value_counts_metric_multi_batch_parameter_builder_for_metrics,
-        ]
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
-            expect_column_values_to_be_in_set_expectation_configuration_builder,
-            expect_column_unique_value_count_to_be_between_expectation_configuration_builder,
-            expect_column_proportion_of_unique_values_to_be_between_expectation_configuration_builder,
-        ]
-        rule: Rule = Rule(
-            name="categorical_rule",
-            variables=variables,
-            domain_builder=categorical_column_type_domain_builder,
-            parameter_builders=parameter_builders,
-            expectation_configuration_builders=expectation_configuration_builders,
-        )
-
-        return rule
-
-    @staticmethod
     def _build_text_rule() -> Rule:
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
@@ -920,6 +829,170 @@ class OnboardingDataAssistant(DataAssistant):
             name="text_columns_rule",
             variables=variables,
             domain_builder=text_column_type_domain_builder,
+            parameter_builders=parameter_builders,
+            expectation_configuration_builders=expectation_configuration_builders,
+        )
+
+        return rule
+
+    @staticmethod
+    def _build_categorical_columns_rule() -> Rule:
+        """
+        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for categorical columns.
+        """
+
+        # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.
+
+        categorical_column_type_domain_builder: CategoricalColumnDomainBuilder = (
+            CategoricalColumnDomainBuilder(
+                include_column_names=None,
+                exclude_column_names=None,
+                include_column_name_suffixes=None,
+                exclude_column_name_suffixes=None,
+                semantic_type_filter_module_name=None,
+                semantic_type_filter_class_name=None,
+                include_semantic_types=None,
+                exclude_semantic_types=None,
+                allowed_semantic_types_passthrough=None,
+                limit_mode=CardinalityLimitMode.FEW,
+                max_unique_values=None,
+                max_proportion_unique=None,
+                data_context=None,
+            )
+        )
+
+        # Step-2: Declare "ParameterBuilder" for every metric of interest.
+
+        column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
+        metric_name: str = "column.value_counts"
+        name: str = sanitize_parameter_name(name=metric_name)
+        column_value_counts_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = MetricMultiBatchParameterBuilder(
+            name=name,
+            metric_name=metric_name,
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs={
+                "sort": "value",
+            },
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+            data_context=None,
+        )
+
+        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
+
+        value_set_multi_batch_parameter_builder_for_validations: ParameterBuilder = (
+            ValueSetMultiBatchParameterBuilder(
+                name="value_set_estimator",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=True,
+                data_context=None,
+            )
+        )
+        column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name="column.distinct_values.count",
+            metric_value_kwargs=None,
+            json_serialize=True,
+        )
+        column_unique_proportion_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name="column.unique_proportion",
+            metric_value_kwargs=None,
+            json_serialize=True,
+        )
+
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+
+        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **value_set_multi_batch_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
+        expect_column_values_to_be_in_set_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_column_values_to_be_in_set",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            value_set=f"{value_set_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+            mostly=f"{VARIABLES_KEY}mostly",
+            meta={
+                "profiler_details": f"{value_set_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
+
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **column_distinct_values_count_range_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
+        expect_column_unique_value_count_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_column_unique_value_count_to_be_between",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            min_value=f"{column_distinct_values_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+            max_value=f"{column_distinct_values_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+            strict_min=f"{VARIABLES_KEY}strict_min",
+            strict_max=f"{VARIABLES_KEY}strict_max",
+            meta={
+                "profiler_details": f"{column_distinct_values_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
+
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **column_unique_proportion_range_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
+        expect_column_proportion_of_unique_values_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_column_proportion_of_unique_values_to_be_between",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            min_value=f"{column_unique_proportion_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+            max_value=f"{column_unique_proportion_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+            strict_min=f"{VARIABLES_KEY}strict_min",
+            strict_max=f"{VARIABLES_KEY}strict_max",
+            meta={
+                "profiler_details": f"{column_unique_proportion_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
+
+        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+
+        variables: dict = {
+            "mostly": 1.0,
+            "strict_min": False,
+            "strict_max": False,
+            "false_positive_rate": 0.05,
+            "quantile_statistic_interpolation_method": "auto",
+            "estimator": "bootstrap",
+            "n_resamples": 9999,
+            "random_seed": None,
+            "include_estimator_samples_histogram_in_details": False,
+            "truncate_values": {
+                "lower_bound": 0.0,
+                "upper_bound": None,
+            },
+            "round_decimals": 1,
+        }
+        parameter_builders: List[ParameterBuilder] = [
+            column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,
+            column_value_counts_metric_multi_batch_parameter_builder_for_metrics,
+        ]
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
+            expect_column_values_to_be_in_set_expectation_configuration_builder,
+            expect_column_unique_value_count_to_be_between_expectation_configuration_builder,
+            expect_column_proportion_of_unique_values_to_be_between_expectation_configuration_builder,
+        ]
+        rule: Rule = Rule(
+            name="categorical_columns_rule",
+            variables=variables,
+            domain_builder=categorical_column_type_domain_builder,
             parameter_builders=parameter_builders,
             expectation_configuration_builders=expectation_configuration_builders,
         )
