@@ -4,8 +4,8 @@ module.exports = {
     {
       type: 'category',
       label: 'Getting Started (A Tutorial)',
+      link: { type: 'doc', id: 'tutorials/getting_started/tutorial_overview' },
       items: [
-        { type: 'doc', id: 'tutorials/getting_started/tutorial_overview', label: 'Overview' },
         { type: 'doc', id: 'tutorials/getting_started/tutorial_setup', label: '1. Setup' },
         { type: 'doc', id: 'tutorials/getting_started/tutorial_connect_to_data', label: '2. Connect to Data' },
         { type: 'doc', id: 'tutorials/getting_started/tutorial_create_expectations', label: '3. Create Expectations' },
@@ -16,8 +16,8 @@ module.exports = {
     {
       type: 'category',
       label: 'Step 1: Setup',
+      link: { type: 'doc', id: 'guides/setup/setup_overview' },
       items: [
-        { type: 'doc', id: 'guides/setup/setup_overview', label: 'Overview' },
         {
           type: 'category',
           label: 'How-to guides',
@@ -100,8 +100,8 @@ module.exports = {
     {
       type: 'category',
       label: 'Step 2: Connect to data',
+      link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview' },
       items: [
-        { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview', label: 'Overview' },
         {
           type: 'category',
           label: 'How-to guides',
@@ -178,8 +178,8 @@ module.exports = {
     {
       type: 'category',
       label: 'Step 3: Create Expectations',
+      link: { type: 'doc', id: 'guides/expectations/create_expectations_overview' },
       items: [
-        { type: 'doc', id: 'guides/expectations/create_expectations_overview', label: 'Overview' },
         {
           type: 'category',
           label: 'How-to guides',
@@ -248,8 +248,8 @@ module.exports = {
     {
       type: 'category',
       label: 'Step 4: Validate data',
+      link: { type: 'doc', id: 'guides/validation/validate_data_overview' },
       items: [
-        { type: 'doc', id: 'guides/validation/validate_data_overview', label: 'Overview' },
         {
           type: 'category',
           label: 'How-to guides',
@@ -300,6 +300,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Reference Architectures',
+      link: {type: 'doc', id: 'deployment_patterns/reference_architecture_overview'},
       items: [
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
@@ -316,12 +317,12 @@ module.exports = {
     {
       type: 'category',
       label: 'Contributing',
+      link: { type: 'doc', id: 'contributing/contributing' },
       items: [
         {
           type: 'category',
           label: 'Contributing basics',
           items: [
-            { type: 'doc', id: 'contributing/contributing', label: 'Contributing overview' },
             { type: 'doc', id: 'contributing/contributing_setup' },
             { type: 'doc', id: 'contributing/contributing_checklist' },
             { type: 'doc', id: 'contributing/contributing_github' },
@@ -382,10 +383,10 @@ module.exports = {
           ]
         },
         { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
-        'glossary',
         {
           type: 'category',
-          label: 'Technical Terms',
+          label: 'Glossary of Technical Terms',
+          link: { type: 'doc', id: 'glossary' },
           items: [
             'terms/action',
             'terms/batch',
@@ -403,9 +404,9 @@ module.exports = {
             {
               type: 'category',
               label: 'Expectations',
+              link: { type: 'doc', id: 'terms/expectation' },
               collapsed: true,
               items: [
-                { type: 'doc', id: 'terms/expectation', label: 'Expectations: Overview' },
                 { type: 'doc', id: 'reference/expectations/conditional_expectations' },
                 { type: 'doc', id: 'reference/expectations/distributional_expectations' },
                 { type: 'doc', id: 'reference/expectations/implemented_expectations' },
@@ -421,8 +422,8 @@ module.exports = {
             {
               type: 'category',
               label: 'Stores',
+              link: { type: 'doc', id: 'terms/store' },
               items: [
-                { type: 'doc', id: 'terms/store', label: 'Stores: Overview' },
                 'terms/checkpoint_store',
                 'terms/data_docs_store',
                 'terms/evaluation_parameter_store',
@@ -439,13 +440,7 @@ module.exports = {
         }
       ]
     },
-    {
-      type: 'category',
-      label: 'Updates and migration',
-      items: [
-        { type: 'doc', id: 'changelog' },
-        { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
-      ]
-    }
+    { type: 'doc', id: 'changelog' },
+    { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
   ]
 }
