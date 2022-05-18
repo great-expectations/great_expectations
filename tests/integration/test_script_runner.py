@@ -845,7 +845,35 @@ aws_integration_tests = [
         user_flow_script="tests/integration/db/awsathena.py",
         extra_backend_dependencies=BackendDependencies.AWS,
         util_script="tests/test_utils.py",
-    )
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
 ]
 
 # populate integration_test_matrix with sub-lists

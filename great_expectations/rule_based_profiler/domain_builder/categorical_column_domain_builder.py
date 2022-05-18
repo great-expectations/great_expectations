@@ -49,7 +49,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         allowed_semantic_types_passthrough: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
-        limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
+        limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
@@ -93,6 +93,11 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         if exclude_column_names is None:
             exclude_column_names = [
                 "id",
+            ]
+
+        if exclude_column_name_suffixes is None:
+            exclude_column_name_suffixes = [
+                "_id",
             ]
 
         if exclude_semantic_types is None:
@@ -149,7 +154,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self._allowed_semantic_types_passthrough = value
 
     @property
-    def limit_mode(self) -> Optional[Union[CardinalityLimitMode, str]]:
+    def limit_mode(self) -> Optional[Union[str, CardinalityLimitMode, dict]]:
         return self._limit_mode
 
     @property
@@ -190,7 +195,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         # Obtain limit_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         limit_mode: Optional[
-            Union[CardinalityLimitMode, str]
+            Union[str, CardinalityLimitMode, dict]
         ] = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.limit_mode,
