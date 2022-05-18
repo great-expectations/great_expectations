@@ -5,6 +5,7 @@ import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
@@ -215,22 +216,27 @@ class OnboardingDataAssistantResult(DataAssistantResult):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+
         attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
             attributed_metrics.values()
         )[0]
 
-        # Altair does not accept periods.
-        metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
-            ".", "_"
-        )
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+        for metric_name in attributed_values_by_metric_name.keys():
+            if (
+                metric_name
+                == expectation_metric_map[expectation_configuration.expectation_type]
+            ):
+                df: pd.DataFrame = self._create_df_for_charting(
+                    metric_name=metric_name,
+                    attributed_values_by_metric_name=attributed_values_by_metric_name,
+                    expectation_configuration=expectation_configuration,
+                    plot_mode=plot_mode,
+                )
 
-        df: pd.DataFrame = self._create_df_for_charting(
-            metric_name=metric_name,
-            attributed_values_by_metric_name=attributed_values_by_metric_name,
-            expectation_configuration=expectation_configuration,
-            plot_mode=plot_mode,
-        )
+        metric_name: str = sanitize_parameter_name(metric_name)
 
         return self._chart_domain_values(
             df=df,
@@ -313,6 +319,10 @@ class OnboardingDataAssistantResult(DataAssistantResult):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
             domain.domain_kwargs["column"]: domain
@@ -330,30 +340,29 @@ class OnboardingDataAssistantResult(DataAssistantResult):
             domain
         ]
 
-        # Altair does not accept periods.
-        metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
-            ".", "_"
-        )
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+        for metric_name in attributed_values_by_metric_name.keys():
+            if (
+                metric_name
+                == expectation_metric_map[expectation_configuration.expectation_type]
+            ):
+                df: pd.DataFrame = self._create_df_for_charting(
+                    metric_name=metric_name,
+                    attributed_values_by_metric_name=attributed_values_by_metric_name,
+                    expectation_configuration=expectation_configuration,
+                    plot_mode=plot_mode,
+                )
 
-        df: pd.DataFrame = self._create_df_for_charting(
-            metric_name=metric_name,
-            attributed_values_by_metric_name=attributed_values_by_metric_name,
-            expectation_configuration=expectation_configuration,
-            plot_mode=plot_mode,
-        )
+                column_name: str = expectation_configuration.kwargs["column"]
+                subtitle = f"Column: {column_name}"
 
-        column_name: str = expectation_configuration.kwargs["column"]
-        subtitle = f"Column: {column_name}"
-
-        return self._chart_domain_values(
-            df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            plot_mode=plot_mode,
-            sequential=sequential,
-            subtitle=subtitle,
-        )
+                return self._chart_domain_values(
+                    df=df,
+                    metric_name=metric_name,
+                    metric_type=metric_type,
+                    plot_mode=plot_mode,
+                    sequential=sequential,
+                    subtitle=subtitle,
+                )
 
     def _chart_column_values(
         self,

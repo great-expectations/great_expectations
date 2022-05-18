@@ -46,6 +46,12 @@ class DataAssistantResult(SerializableDictDot):
     Use "batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
     """
 
+    # A mapping is defined for which metrics to plot and their associated expectations
+    EXPECTATION_METRIC_MAP = {
+        "expect_table_row_count_to_be_between": "table.row_count",
+        "expect_column_unique_value_count_to_be_between": "column.distinct_values.count",
+    }
+
     ALLOWED_KEYS = {
         "batch_id_to_batch_identifier_display_name_map",
         "profiler_config",
@@ -1428,13 +1434,14 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configuration: ExpectationConfiguration,
         plot_mode: PlotMode,
     ) -> pd.DataFrame:
-        batch_ids: KeysView[str]
-        metric_values: MetricValues
-        batch_ids, metric_values = list(attributed_values_by_metric_name.values())[
-            0
-        ].keys(), sum(list(attributed_values_by_metric_name.values())[0].values(), [])
+        batch_ids: KeysView[str] = attributed_values_by_metric_name[metric_name].keys()
+        metric_values: MetricValues = [
+            value[0] for value in attributed_values_by_metric_name[metric_name].values()
+        ]
 
-        df: pd.DataFrame = pd.DataFrame({metric_name: metric_values})
+        df: pd.DataFrame = pd.DataFrame(
+            {sanitize_parameter_name(name=metric_name): metric_values}
+        )
 
         batch_identifier_list: List[Set[Tuple[str, str]]] = [
             self.batch_id_to_batch_identifier_display_name_map[batch_id]
@@ -1500,12 +1507,15 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> List[pd.DataFrame]:
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
             domain.domain_kwargs["column"]: domain
             for domain in list(attributed_metrics.keys())
         }
 
+        metric_names: List[str]
         column_dfs: List[Tuple[str, pd.DataFrame]] = []
         for expectation_configuration in expectation_configurations:
             metric_configuration: dict = expectation_configuration.meta[
@@ -1519,20 +1529,22 @@ class DataAssistantResult(SerializableDictDot):
                 str, ParameterNode
             ] = attributed_metrics[domain]
 
-            # Altair does not accept periods.
-            metric_name = sanitize_parameter_name(
-                name=list(attributed_values_by_metric_name.keys())[0]
-            )
+            for metric_name in attributed_values_by_metric_name.keys():
+                if (
+                    metric_name
+                    == expectation_metric_map[
+                        expectation_configuration.expectation_type
+                    ]
+                ):
+                    df: pd.DataFrame = self._create_df_for_charting(
+                        metric_name=metric_name,
+                        attributed_values_by_metric_name=attributed_values_by_metric_name,
+                        expectation_configuration=expectation_configuration,
+                        plot_mode=plot_mode,
+                    )
 
-            df: pd.DataFrame = self._create_df_for_charting(
-                metric_name,
-                attributed_values_by_metric_name,
-                expectation_configuration,
-                plot_mode,
-            )
-
-            column_name: str = expectation_configuration.kwargs["column"]
-            column_dfs.append((column_name, df))
+                    column_name: str = expectation_configuration.kwargs["column"]
+                    column_dfs.append((column_name, df))
 
         return column_dfs
 
