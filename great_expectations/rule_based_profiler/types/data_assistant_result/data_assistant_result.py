@@ -118,6 +118,28 @@ class DataAssistantResult(SerializableDictDot):
         }
         return metrics_attributed_values_by_domain
 
+    def filter_expectation_configurations_by_column_names(
+        self,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> None:
+        if self.expectation_configurations is None:
+            return
+
+        filtered_expectation_configurations: List[ExpectationConfiguration] = []
+
+        for expectation_configuration in self.expectation_configurations:
+            kwargs: dict = expectation_configuration.get("kwargs", {})
+            column: Optional[str] = kwargs.get("column")
+            if column is None:
+                continue
+            if (include_column_names and column in include_column_names) or (
+                exclude_column_names and column not in exclude_column_names
+            ):
+                filtered_expectation_configurations.append(expectation_configuration)
+
+        self.expectation_configurations = filtered_expectation_configurations
+
     @staticmethod
     def display(
         charts: Union[List[alt.Chart], List[alt.VConcatChart]],

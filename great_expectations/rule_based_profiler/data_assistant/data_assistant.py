@@ -420,6 +420,13 @@ class DataAssistant(metaclass=MetaDataAssistant):
             batch_list=list(self._batches.values()),
             batch_request=None,
         )
+
+        if include_column_names or exclude_column_names:
+            data_assistant_result.filter_expectation_configurations_by_column_names(
+                include_column_names=include_column_names,
+                exclude_column_names=exclude_column_names,
+            )
+
         return self._build_data_assistant_result(
             data_assistant_result=data_assistant_result
         )
