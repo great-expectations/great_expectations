@@ -3,7 +3,7 @@ title: "Contributing: Index"
 ---
 
 ## Contributing basics
-- [Introduction](../contributing/contributing.md)
+- [Introduction](../contributing/contributing_overview.md)
 - [Setting up your Dev Environment](../contributing/contributing_setup.md)
 - [Contribution Checklist](../contributing/contributing_checklist.md)
 - [Contributing through GitHub](../contributing/contributing_github.md)

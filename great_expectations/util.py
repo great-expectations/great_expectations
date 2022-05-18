@@ -28,6 +28,7 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
+import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
@@ -1489,3 +1490,28 @@ def pandas_series_between_inclusive(
         metric_series = series.between(min_value, max_value, inclusive=True)
 
     return metric_series
+
+
+def numpy_quantile(
+    a: np.ndarray, q: float, method: str, axis: Optional[int] = None
+) -> np.ndarray:
+    """
+    As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
+    Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
+    """
+    quantile: np.ndarray
+    if version.parse(np.__version__) >= version.parse("1.22.0"):
+        quantile = np.quantile(
+            a=a,
+            q=q,
+            axis=axis,
+            method=method,
+        )
+    else:
+        quantile = np.quantile(
+            a=a,
+            q=q,
+            axis=axis,
+            interpolation=method,
+        )
+    return quantile

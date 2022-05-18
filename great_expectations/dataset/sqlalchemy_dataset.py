@@ -612,6 +612,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
             )
+        elif dialect_name == "trino":
+            # WARNING: Trino Support is experimental, functionality is not fully under test
+            self.dialect = import_library_module(module_name="trino.sqlalchemy")
         else:
             self.dialect = None
 
