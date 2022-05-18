@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 
@@ -5,6 +6,8 @@ import nbformat
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 
 from great_expectations.data_context.util import file_relative_path
+
+logger = logging.getLogger(__name__)
 
 
 def test_run_rbp_notebook(tmp_path):
@@ -44,12 +47,18 @@ def test_run_rbp_notebook(tmp_path):
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
-
-    # clean up Expectations directory after running test
-    shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/tmp"))
-    os.remove(
-        os.path.join(base_dir, "great_expectations/expectations/.ge_store_backend_id")
-    )
+        try:
+            shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/tmp"))
+            os.remove(
+                os.path.join(
+                    base_dir, "great_expectations/expectations/.ge_store_backend_id"
+                )
+            )
+        except FileNotFoundError:
+            logger.debug(
+                "Files were already deleted by running the optional last cell in the notebook. "
+                "We therefore allow the test to pass"
+            )
 
 
 def test_run_data_assistants_notebook(tmp_path):
@@ -87,12 +96,21 @@ def test_run_data_assistants_notebook(tmp_path):
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
-
-    # clean up Expectations directory after running test
-    shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/tmp"))
-    os.remove(
-        os.path.join(base_dir, "great_expectations/expectations/.ge_store_backend_id")
-    )
-    os.remove(
-        os.path.join(base_dir, "great_expectations/expectations/taxi_data_suite.json")
-    )
+        # clean up Expectations directory after running test
+        try:
+            shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/tmp"))
+            os.remove(
+                os.path.join(
+                    base_dir, "great_expectations/expectations/.ge_store_backend_id"
+                )
+            )
+            os.remove(
+                os.path.join(
+                    base_dir, "great_expectations/expectations/taxi_data_suite.json"
+                )
+            )
+        except FileNotFoundError:
+            logger.debug(
+                "Files were already deleted by running the optional last cell in the notebook. "
+                "We therefore allow the test to pass"
+            )
