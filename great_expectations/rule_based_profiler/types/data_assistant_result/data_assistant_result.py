@@ -10,6 +10,7 @@ from IPython.display import HTML, display
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
@@ -1519,8 +1520,8 @@ class DataAssistantResult(SerializableDictDot):
             ] = attributed_metrics[domain]
 
             # Altair does not accept periods.
-            metric_name = list(attributed_values_by_metric_name.keys())[0].replace(
-                ".", "_"
+            metric_name = sanitize_parameter_name(
+                name=list(attributed_values_by_metric_name.keys())[0]
             )
 
             df: pd.DataFrame = self._create_df_for_charting(
