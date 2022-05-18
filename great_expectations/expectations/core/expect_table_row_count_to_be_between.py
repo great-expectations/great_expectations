@@ -16,6 +16,7 @@ from great_expectations.rule_based_profiler.config import (
     RuleBasedProfilerConfig,
 )
 from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
@@ -92,7 +93,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="table_row_count_range_estimator",
         metric_name="table.row_count",
-        metric_domain_kwargs=None,
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,
         replace_nan_with_zero=True,

@@ -43,11 +43,8 @@ from tests.test_utils import find_strings_in_nested_obj
 @pytest.fixture
 def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
-        Domain(
-            domain_type=MetricDomainTypes.TABLE,
-            rule_name="default_expect_table_row_count_to_be_between_rule",
-        ): {
-            "$parameter.table.row_count": {
+        Domain(domain_type=MetricDomainTypes.TABLE, rule_name="table_rule",): {
+            "$parameter.table_row_count": {
                 "value": [
                     10000,
                     10000,
@@ -147,7 +144,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     9979,
                     9965,
@@ -247,7 +244,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     9979,
                     9977,
@@ -347,7 +344,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     7,
                     7,
@@ -447,7 +444,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     1157,
                     1141,
@@ -547,7 +544,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     2,
                     2,
@@ -647,7 +644,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     4,
                     4,
@@ -747,7 +744,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     153,
                     148,
@@ -847,7 +844,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     6,
                     6,
@@ -947,7 +944,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     3,
                     3,
@@ -1047,7 +1044,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     532,
                     530,
@@ -1147,7 +1144,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     20,
                     24,
@@ -1247,7 +1244,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     3,
                     3,
@@ -1347,7 +1344,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     898,
                     884,
@@ -1447,7 +1444,7 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             },
             rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     0,
                     0,
@@ -1547,7 +1544,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
             name=name,
             variables={"random_seed": None},
             rules={
-                "default_expect_table_row_count_to_be_between_rule": {
+                "table_rule": {
                     "variables": {
                         "false_positive_rate": 0.05,
                         "quantile_statistic_interpolation_method": "auto",
@@ -1567,7 +1564,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         {
                             "metric_domain_kwargs": "$domain.domain_kwargs",
                             "replace_nan_with_zero": True,
-                            "name": "table.row_count",
+                            "name": "table_row_count",
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
@@ -1578,12 +1575,12 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     ],
                     "expectation_configuration_builders": [
                         {
-                            "max_value": "$parameter.table_row_count_range_estimator.value[1]",
+                            "max_value": "$parameter.table_row_count_range.value[1]",
                             "validation_parameter_builder_configs": [
                                 {
                                     "replace_nan_with_zero": True,
-                                    "name": "table_row_count_range_estimator",
-                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                                    "name": "table_row_count_range",
+                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                                     "truncate_values": "$variables.truncate_values",
                                     "enforce_numeric_metric": True,
                                     "n_resamples": "$variables.n_resamples",
@@ -1592,6 +1589,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "estimator": "$variables.estimator",
                                     "reduce_scalar_metric": True,
                                     "metric_name": "table.row_count",
+                                    "metric_domain_kwargs": "$domain.domain_kwargs",
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "random_seed": "$variables.random_seed",
@@ -1602,10 +1600,10 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "expectation_type": "expect_table_row_count_to_be_between",
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                             "meta": {
-                                "profiler_details": "$parameter.table_row_count_range_estimator.details"
+                                "profiler_details": "$parameter.table_row_count_range.details"
                             },
                             "class_name": "DefaultExpectationConfigurationBuilder",
-                            "min_value": "$parameter.table_row_count_range_estimator.value[0]",
+                            "min_value": "$parameter.table_row_count_range.value[0]",
                         },
                     ],
                 },
@@ -1641,7 +1639,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         {
                             "metric_domain_kwargs": "$domain.domain_kwargs",
                             "replace_nan_with_zero": True,
-                            "name": "column.distinct_values.count",
+                            "name": "column_distinct_values_count",
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
