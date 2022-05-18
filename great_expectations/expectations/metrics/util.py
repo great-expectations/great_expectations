@@ -66,6 +66,11 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
+try:
+    import trino
+except ImportError:
+    trino = None
+
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
     import sqlalchemy_bigquery as sqla_bigquery
@@ -178,6 +183,19 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
             "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",
             exc_info=True,
         )
+        pass
+
+    try:
+        # Trino
+        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+            if positive:
+                return sa.func.regexp_like(column, literal(regex))
+            else:
+                return sa.not_(sa.func.regexp_like(column, literal(regex)))
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
     try:
@@ -578,16 +596,17 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
-    if issubclass(
-        dialect.dialect,
-        (
-            sa.dialects.sqlite.dialect,
-            sa.dialects.postgresql.dialect,
-            sa.dialects.mysql.dialect,
-            sa.dialects.mssql.dialect,
-        ),
-    ):
-        dialect_supported = True
+    if hasattr(dialect, "dialect"):
+        if issubclass(
+            dialect.dialect,
+            (
+                sa.dialects.sqlite.dialect,
+                sa.dialects.postgresql.dialect,
+                sa.dialects.mysql.dialect,
+                sa.dialects.mssql.dialect,
+            ),
+        ):
+            dialect_supported = True
 
     try:
         # noinspection PyUnresolvedReferences
@@ -595,6 +614,14 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
             dialect_supported = True
     except (AttributeError, TypeError):
         pass
+
+    try:
+        # noinspection PyUnresolvedReferences
+        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
     try:
         if hasattr(dialect, "DremioDialect"):
             dialect_supported = True
