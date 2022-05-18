@@ -715,7 +715,10 @@ class OnboardingDataAssistant(DataAssistant):
             include_semantic_types=[
                 SemanticDomainTypes.TEXT,
             ],
-            exclude_semantic_types=None,
+            exclude_semantic_types=[
+                SemanticDomainTypes.NUMERIC,
+                SemanticDomainTypes.DATETIME,
+            ],
             data_context=None,
         )
 
@@ -813,10 +816,10 @@ class OnboardingDataAssistant(DataAssistant):
             "random_seed": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
-                "lower_bound": None,
+                "lower_bound": 0,
                 "upper_bound": None,
             },
-            "round_decimals": 1,
+            "round_decimals": 0,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_min_length_range_estimator_parameter_builder,
