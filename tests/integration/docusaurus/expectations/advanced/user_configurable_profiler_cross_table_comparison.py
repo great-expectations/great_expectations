@@ -97,7 +97,10 @@ validator = context.get_validator(batch_request=mysql_batch_request)
 # <snippet>
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
-    excluded_expectations=["expect_column_quantile_values_to_be_between"],
+    excluded_expectations=[
+        "expect_column_quantile_values_to_be_between",
+        "expect_column_mean_to_be_between",
+    ],
 )
 # </snippet>
 # <snippet>
