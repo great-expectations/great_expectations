@@ -131,10 +131,10 @@ class DataAssistantResult(SerializableDictDot):
         for expectation_configuration in self.expectation_configurations:
             kwargs: dict = expectation_configuration.get("kwargs", {})
             column: Optional[str] = kwargs.get("column")
-            if column is None:
-                continue
-            if (include_column_names and column in include_column_names) or (
-                exclude_column_names and column not in exclude_column_names
+            if (
+                (column is None)
+                or (include_column_names and column in include_column_names)
+                or (exclude_column_names and column not in exclude_column_names)
             ):
                 filtered_expectation_configurations.append(expectation_configuration)
 
