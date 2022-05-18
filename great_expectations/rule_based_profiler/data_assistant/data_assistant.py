@@ -309,19 +309,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 json_serialize=json_serialize,
             )
 
-        def get_column_value_regex_matches_metric_multi_batch_parameter_builder(
-            self,
-            json_serialize: Union[str, bool] = True,
-        ) -> ParameterBuilder:
-            """
-            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
-            """
-            return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name="column_values.match_regex",
-                metric_value_kwargs=None,
-                json_serialize=json_serialize,
-            )
-
         @staticmethod
         def build_numeric_metric_multi_batch_parameter_builder(
             metric_name: str,
@@ -378,16 +365,15 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         @staticmethod
         def build_regex_pattern_string_parameter_builder(
-            metric_name: str,
+            name: str,
             json_serialize: Union[str, bool] = True,
         ) -> RegexPatternStringParameterBuilder:
             """
             This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=metric_name)
             return RegexPatternStringParameterBuilder(
                 name=name,
-                metric_domain_kwargs=None,
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
                 threshold=1.0,
                 candidate_regexes=None,

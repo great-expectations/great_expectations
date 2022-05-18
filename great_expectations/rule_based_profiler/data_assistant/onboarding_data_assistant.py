@@ -730,9 +730,6 @@ class OnboardingDataAssistant(DataAssistant):
         column_max_length_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_max_length_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
-        column_values_match_regex_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_value_regex_matches_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
@@ -747,7 +744,7 @@ class OnboardingDataAssistant(DataAssistant):
             json_serialize=True,
         )
         column_values_to_match_regex_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_regex_pattern_string_parameter_builder(
-            metric_name="column_values.match_regex", json_serialize=True
+            name="column_values.match_regex", json_serialize=True
         )
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
@@ -785,11 +782,12 @@ class OnboardingDataAssistant(DataAssistant):
         expect_column_values_to_match_regex_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_match_regex",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
+            condition=f"{column_values_to_match_regex_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-            regex=f"{PARAMETER_KEY}{column_values_to_match_regex_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+            regex=f"{column_values_to_match_regex_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
             mostly=f"{VARIABLES_KEY}mostly",
             meta={
-                "profiler_details": f"{PARAMETER_KEY}{column_values_to_match_regex_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                "profiler_details": f"{column_values_to_match_regex_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
             },
         )
 
@@ -810,11 +808,11 @@ class OnboardingDataAssistant(DataAssistant):
                 "upper_bound": None,
             },
             "round_decimals": 0,
+            "success_ratio": 7.5e1,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_min_length_metric_multi_batch_parameter_builder_for_metrics,
             column_max_length_metric_multi_batch_parameter_builder_for_metrics,
-            column_values_match_regex_metric_multi_batch_parameter_builder_for_metrics,
         ]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
             expect_column_value_lengths_to_be_between_expectation_configuration_builder,
