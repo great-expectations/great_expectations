@@ -89,7 +89,7 @@ def test_onboarding_data_assistant_result_serialization(
         bobby_onboarding_data_assistant_result.to_json_dict()
         == onboarding_data_assistant_result_as_dict
     )
-    assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 8
+    assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 7
 
 
 def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(

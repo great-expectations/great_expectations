@@ -5,6 +5,7 @@ from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
+    TableDomainBuilder,
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
@@ -54,12 +55,7 @@ class VolumeDataAssistant(DataAssistant):
 
     @property
     def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
-        return {
-            "expect_table_row_count_to_be_between": {
-                "auto": True,
-                "profiler_config": None,
-            },
-        }
+        return {}
 
     @property
     def metrics_parameter_builders_by_domain(
@@ -86,9 +82,11 @@ class VolumeDataAssistant(DataAssistant):
 
     @property
     def rules(self) -> Optional[List[Rule]]:
+        table_rule: Rule = self._build_table_rule()
         categorical_columns_rule: Rule = self._build_categorical_columns_rule()
 
         return [
+            table_rule,
             categorical_columns_rule,
         ]
 
@@ -103,6 +101,81 @@ class VolumeDataAssistant(DataAssistant):
             citation=data_assistant_result.citation,
             execution_time=data_assistant_result.execution_time,
         )
+
+    @staticmethod
+    def _build_table_rule() -> Rule:
+        """
+        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for table "Domain" type.
+        """
+        # Step-1: Instantiate "TableDomainBuilder" object.
+
+        table_domain_builder: TableDomainBuilder = TableDomainBuilder(
+            data_context=None,
+        )
+
+        # Step-2: Declare "ParameterBuilder" for every metric of interest.
+
+        table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
+
+        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
+
+        table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name="table.row_count",
+            metric_value_kwargs=None,
+            json_serialize=True,
+        )
+
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+
+        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **table_row_count_range_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
+        expect_table_row_count_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_table_row_count_to_be_between",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            min_value=f"{table_row_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+            max_value=f"{table_row_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+            meta={
+                "profiler_details": f"{table_row_count_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
+
+        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+
+        variables: dict = {
+            "false_positive_rate": 0.05,
+            "quantile_statistic_interpolation_method": "auto",
+            "estimator": "bootstrap",
+            "n_resamples": 9999,
+            "random_seed": None,
+            "include_estimator_samples_histogram_in_details": False,
+            "truncate_values": {
+                "lower_bound": 0,
+                "upper_bound": None,
+            },
+            "round_decimals": 0,
+        }
+        parameter_builders: List[ParameterBuilder] = [
+            table_row_count_metric_multi_batch_parameter_builder_for_metrics,
+        ]
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
+            expect_table_row_count_to_be_between_expectation_configuration_builder,
+        ]
+        rule: Rule = Rule(
+            name="table_rule",
+            variables=variables,
+            domain_builder=table_domain_builder,
+            parameter_builders=parameter_builders,
+            expectation_configuration_builders=expectation_configuration_builders,
+        )
+
+        return rule
 
     @staticmethod
     def _build_categorical_columns_rule() -> Rule:

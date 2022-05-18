@@ -116,6 +116,28 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 json_serialize=json_serialize,
             )
 
+        @staticmethod
+        def get_table_columns_metric_multi_batch_parameter_builder(
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            metric_name: str = "table.columns"
+            name: str = sanitize_parameter_name(name=metric_name)
+            return MetricMultiBatchParameterBuilder(
+                name=name,
+                metric_name=metric_name,
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=json_serialize,
+                data_context=None,
+            )
+
         def get_column_distinct_values_count_metric_multi_batch_parameter_builder(
             self,
             json_serialize: Union[str, bool] = True,
@@ -273,8 +295,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """
+            name: str = sanitize_parameter_name(name=metric_name)
             return MetricMultiBatchParameterBuilder(
-                name=metric_name,
+                name=name,
                 metric_name=metric_name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=metric_value_kwargs,
