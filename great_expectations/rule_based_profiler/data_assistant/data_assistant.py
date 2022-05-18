@@ -398,9 +398,14 @@ class DataAssistant(metaclass=MetaDataAssistant):
         Args:
             variables: attribute name/value pairs (overrides), commonly-used in Builder objects
             rules: name/(configuration-dictionary) (overrides)
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
+
+        Raises:
+            ValueError if both include_column_names and exclude_column_names have been provided.
         """
         if include_column_names is not None and exclude_column_names is not None:
             raise ValueError(

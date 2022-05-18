@@ -123,6 +123,20 @@ class DataAssistantResult(SerializableDictDot):
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
     ) -> None:
+        """Modify the expectation configuration attribute of the result object based on input column lists (performed in-place).
+
+        Args:
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
+
+        Raises:
+            ValueError if both include_column_names and exclude_column_names have been provided.
+        """
+        if include_column_names is not None and exclude_column_names is not None:
+            raise ValueError(
+                "You may either use `include_column_names` or `exclude_column_names` (but not both)."
+            )
+
         if self.expectation_configurations is None:
             return
 
@@ -132,9 +146,7 @@ class DataAssistantResult(SerializableDictDot):
             kwargs: dict = expectation_configuration.get("kwargs", {})
             column: Optional[str] = kwargs.get("column")
             if (
-                (
-                    column is None
-                )  # Lack of column kwarg denotes a table-domain configuration
+                (column is None)
                 or (include_column_names and column in include_column_names)
                 or (exclude_column_names and column not in exclude_column_names)
             ):
