@@ -10,11 +10,11 @@ the country of origin to not be null only for people of foreign descent.
 Great Expectations allows you to express such Conditional Expectations via a `row_condition` argument that can be passed
 to all Dataset Expectations.
 
-Today, conditional Expectations are available only for the Pandas but not for the Spark and SQLAlchemy backends. The
+Today, conditional Expectations are available only for the Pandas, Spark, and SQLAlchemy backends. The
 feature is **experimental**. Please expect changes to API as additional backends are supported.
 
-For Pandas, the `row_condition` argument should be a boolean expression string, which can be passed
-to `pandas.DataFrame.query()` before Expectation Validation (see
+When using conditional Expectations the `row_condition` argument should be a boolean expression string.  For example,
+in Pandas the `row_condition` will be passed to `pandas.DataFrame.query()` before Expectation Validation (see
 the [Pandas docs](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html).
 
 Additionally, the `condition_parser` argument must be provided, which defines the syntax of conditions. Since the
@@ -100,6 +100,10 @@ This results in the following Expectation Suite:
     "data_asset_type": "Dataset"
 }
 ```
+
+:::note
+In the earlier rendition of conditional Expectations, the `row_conditions` parameter would be overridden by `filter_nan` and `filter_none`.  This prevented `row_conditions` from being defined when `filter_nan` and `filter_none` were being used and was handled by raising an Error.  This conflict has been resolved since then and now all three parameters can be used together without causing an error to be thrown.
+:::
 
 :::warning
 You should not use single quotes nor \\n inside the specified `row_condition` (see examples below). Otherwise a bug may be introduced when running `great_expectations suite edit` from the CLI.
