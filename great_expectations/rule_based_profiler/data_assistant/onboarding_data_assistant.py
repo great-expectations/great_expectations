@@ -37,9 +37,6 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
     OnboardingDataAssistantResult,
 )
-from great_expectations.rule_based_profiler.types.parameter_container import (
-    PARAMETER_KEY,
-)
 from great_expectations.validator.validator import Validator
 
 
