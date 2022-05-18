@@ -2163,6 +2163,33 @@ set as active.
         return df.reset_index(drop=True, inplace=False)
 
     @staticmethod
+    def is_expectation_auto_initializing(name: str) -> bool:
+        """
+        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
+
+        Args:
+            name (str): name of Expectation
+
+        Returns:
+            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
+        """
+
+        expectation_impl: "MetaExpectation" = get_expectation_impl(name)
+        if not expectation_impl:
+            raise ValidationError(
+                f"Expectation {name} was not found in the list of registered Expectations. "
+                f"Please check your configuration and try again"
+            )
+        if "auto" in expectation_impl.default_kwarg_values:
+            logger.info(
+                f"The Expectation {name} is able to be auto-initialized. Please run by using the auto=True parameter."
+            )
+            return True
+        else:
+            logger.info(f"The Expectation {name} in not able to be auto-intialized.")
+            return False
+
+    @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
         metrics: Dict[Tuple[str, str, str], Any],
