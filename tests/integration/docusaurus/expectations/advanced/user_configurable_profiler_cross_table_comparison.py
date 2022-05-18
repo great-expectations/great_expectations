@@ -14,19 +14,19 @@ context = ge.get_context()
 from tests.test_utils import load_data_into_test_database
 
 # The following load & config blocks up until the batch requests are only to support testing.
-MY_CONNECTION_STRING = "mysql+pymysql://root:root@localhost/test_ci"
+MY_CONNECTION_STRING = "mysql+pymysql://root@localhost/test_ci"
 
 PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
 load_data_into_test_database(
     table_name="mysql_taxi_data",
-    csv_path="tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
+    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=MY_CONNECTION_STRING,
 )
 
 load_data_into_test_database(
     table_name="postgres_taxi_data",
-    csv_path="tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
+    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=PG_CONNECTION_STRING,
 )
 
