@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.marshmallow__shade import ValidationError
@@ -98,11 +99,13 @@ def test_run_profiler_on_data_emits_proper_usage_stats(
         mock_profiler_store.__get__ = mock.Mock(return_value=populated_profiler_store)
         empty_data_context_stats_enabled.run_profiler_on_data(
             name=profiler_name,
-            batch_request={
-                "datasource_name": "my_datasource",
-                "data_connector_name": "my_data_connector",
-                "data_asset_name": "my_data_asset",
-            },
+            batch_request=BatchRequest(
+                **{
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_data_connector",
+                    "data_asset_name": "my_data_asset",
+                }
+            ),
         )
 
     assert mock_emit.call_count == 1

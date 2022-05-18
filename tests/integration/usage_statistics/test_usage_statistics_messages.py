@@ -214,7 +214,6 @@ valid_usage_statistics_messages = {
                         },
                         "anonymized_site_index_builder": {
                             "parent_class": "DefaultSiteIndexBuilder",
-                            "show_cta_footer": True,
                         },
                     },
                 ],
@@ -307,7 +306,6 @@ valid_usage_statistics_messages = {
                         },
                         "anonymized_site_index_builder": {
                             "parent_class": "DefaultSiteIndexBuilder",
-                            "show_cta_footer": True,
                         },
                     },
                 ],
