@@ -270,6 +270,17 @@ local_tests = [
             BackendDependencies.MYSQL,
         ],
     ),
+     IntegrationTestFixture(
+        name="cross_table_comparisons",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        util_script="tests/test_utils.py",
+        extra_backend_dependencies=[
+            BackendDependencies.POSTGRESQL,
+            BackendDependencies.MYSQL,
+        ],
+    ),
 ]
 
 
