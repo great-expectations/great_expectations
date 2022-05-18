@@ -195,7 +195,7 @@ class Expectation(metaclass=MetaExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-    ) -> None:
+    ) -> Union[ExpectationValidationResult, dict]:
         raise NotImplementedError
 
     @classmethod

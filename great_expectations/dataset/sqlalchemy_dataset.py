@@ -612,6 +612,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
             )
+        elif dialect_name == "trino":
+            # WARNING: Trino Support is experimental, functionality is not fully under test
+            self.dialect = import_library_module(module_name="trino.sqlalchemy")
         else:
             self.dialect = None
 
@@ -1394,7 +1397,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if engine_dialect == "bigquery":
             stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "databricks":
-            stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
+            stmt = f"CREATE OR REPLACE TEMPORARY VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "dremio":
             stmt = f"CREATE OR REPLACE VDS {table_name} AS {custom_sql}"
         elif engine_dialect == "snowflake":

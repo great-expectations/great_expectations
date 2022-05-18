@@ -5,6 +5,7 @@ from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 
 try:
     import sqlalchemy as sa
@@ -12,15 +13,19 @@ except ImportError:
     sa = None
 
 try:
+    from sqlalchemy.engine import Dialect
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
 except ImportError:
     Selectable = None
     BinaryExpression = None
     BooleanClauseList = None
+    Dialect = None
 
 
 class SqlAlchemyDataSampler(DataSampler):
+    """Sampling methods for data stores with SQL interfaces."""
+
     def sample_using_limit(
         self,
         execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
@@ -52,8 +57,8 @@ class SqlAlchemyDataSampler(DataSampler):
 
         # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
         # so the business logic for building the query needs to be different.
-        dialect: str = execution_engine.engine.dialect.name.lower()
-        if dialect == "oracle":
+        dialect_name: str = execution_engine.dialect_name
+        if dialect_name == GESqlDialect.ORACLE.value:
             # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
             # limit doesn't compile properly for oracle so we will append rownum to query string later
             raw_query: Selectable = (
@@ -65,13 +70,16 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             query: str = str(
                 raw_query.compile(
-                    execution_engine, compile_kwargs={"literal_binds": True}
+                    dialect=execution_engine.dialect,
+                    compile_kwargs={"literal_binds": True},
                 )
             )
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
-        elif dialect == "mssql":
+        elif dialect_name == GESqlDialect.MSSQL.value:
             # TODO: AJB 20220429 WARNING THIS mssql dialect METHOD IS NOT COVERED BY TESTS
+            # Note that this code path exists because the limit parameter is not getting rendered
+            # successfully in the resulting mssql query.
             selectable_query: Selectable = (
                 sa.select("*")
                 .select_from(
@@ -82,21 +90,13 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             string_of_query: str = str(
                 selectable_query.compile(
-                    execution_engine.engine, compile_kwargs={"literal_binds": True}
+                    dialect=execution_engine.dialect,
+                    compile_kwargs={"literal_binds": True},
                 )
             )
-            # TODO: AJB 20220504 REMOVE THIS HACK!
-            # This hack is here because the limit parameter is not substituted during query.compile()
             n: Union[str, int] = batch_spec["sampling_kwargs"]["n"]
-            if not isinstance(n, (str, int)):
-                raise ge_exceptions.InvalidConfigError(
-                    "Please specify your sampling kwargs 'n' parameter as a string or int."
-                )
-            if isinstance(n, str) and not n.isdigit():
-                raise ge_exceptions.InvalidConfigError(
-                    "If specifying your sampling kwargs 'n' parameter as a string please ensure it is "
-                    "parseable as an integer."
-                )
+            self._validate_mssql_limit_param(n)
+            # This string replacement is here because the limit parameter is not substituted during query.compile()
             string_of_query = string_of_query.replace("?", str(n))
             return string_of_query
         else:
@@ -107,6 +107,25 @@ class SqlAlchemyDataSampler(DataSampler):
                 )
                 .where(where_clause)
                 .limit(batch_spec["sampling_kwargs"]["n"])
+            )
+
+    def _validate_mssql_limit_param(self, n: Union[str, int]) -> None:
+        """Validate that the mssql limit param is passed as an int or a string representation of an int.
+
+        Args:
+            n: mssql limit parameter.
+
+        Returns:
+            None
+        """
+        if not isinstance(n, (str, int)):
+            raise ge_exceptions.InvalidConfigError(
+                "Please specify your sampling kwargs 'n' parameter as a string or int."
+            )
+        if isinstance(n, str) and not n.isdigit():
+            raise ge_exceptions.InvalidConfigError(
+                "If specifying your sampling kwargs 'n' parameter as a string please ensure it is "
+                "parseable as an integer."
             )
 
     def sample_using_random(

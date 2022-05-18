@@ -478,6 +478,38 @@ def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_pro
     }
 
 
+@freeze_time(TIMESTAMP)
+def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    alice_validator: Validator,
+) -> None:
+    validator: Validator = alice_validator
+
+    result: ExpectationValidationResult = (
+        validator.expect_column_value_lengths_to_be_between(
+            column="user_agent",
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
+    )
+
+    assert result.success
+
+    expectation_config_kwargs: dict = result.expectation_config.kwargs
+    assert expectation_config_kwargs == {
+        "auto": True,
+        "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
+        "column": "user_agent",
+        "include_config": True,
+        "max_value": 115,  # Chetan - 20220516 - Note that all values in the dataset are of equal length
+        "min_value": 115,  # TODO - we should add an additional test upon using an updated dataset (confirmed behavior through UAT)
+        "mostly": 1.0,
+        "result_format": "SUMMARY",
+        "strict_max": False,
+        "strict_min": False,
+    }
+
+
 # noinspection PyUnusedLocal
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     monkeypatch,
@@ -1529,7 +1561,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 4,
+                "variable_count": 5,
             },
             "event": "profiler.run",
             "success": True,
@@ -1560,6 +1592,63 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
         )
     )
     assert result.expectation_config.kwargs["auto"]
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_validator: Validator,
+):
+    validator: Validator = quentin_validator
+
+    # Use all batches, loaded by Validator, for estimating Expectation argument values.
+    result: ExpectationValidationResult = validator.expect_table_columns_to_match_set(
+        result_format="SUMMARY",
+        include_config=True,
+        auto=True,
+    )
+    assert result.success
+
+    value: Any
+    expectation_config_kwargs: dict = {
+        key: value
+        for key, value in result.expectation_config["kwargs"].items()
+        if key != "column_set"
+    }
+    assert expectation_config_kwargs == {
+        "exact_match": None,
+        "result_format": "SUMMARY",
+        "include_config": True,
+        "auto": True,
+        "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+    }
+
+    column_set_expected: List[str] = [
+        "total_amount",
+        "tip_amount",
+        "payment_type",
+        "pickup_datetime",
+        "trip_distance",
+        "dropoff_location_id",
+        "improvement_surcharge",
+        "vendor_id",
+        "tolls_amount",
+        "congestion_surcharge",
+        "rate_code_id",
+        "pickup_location_id",
+        "extra",
+        "fare_amount",
+        "mta_tax",
+        "dropoff_datetime",
+        "store_and_fwd_flag",
+        "passenger_count",
+    ]
+    column_set_computed: List[str] = result.expectation_config["kwargs"]["column_set"]
+
+    assert len(column_set_computed) == len(column_set_expected)
+    assert set(column_set_computed) == set(column_set_expected)
 
 
 @pytest.mark.skipif(
@@ -1698,7 +1787,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 6,
+                "variable_count": 7,
             },
             "event": "profiler.run",
             "success": True,
@@ -1727,8 +1816,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         variables={
             "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
             "allow_relative_error": "linear",
-            "num_bootstrap_samples": 9139,
-            "bootstrap_random_seed": 43792,
+            "n_resamples": 9139,
+            "random_seed": 43792,
             "false_positive_rate": 5.0e-2,
             "quantile_statistic_interpolation_method": "auto",
         },
@@ -1749,8 +1838,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                             "quantiles": "$variables.quantiles",
                             "allow_relative_error": "$variables.allow_relative_error",
                         },
-                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                        "n_resamples": "$variables.n_resamples",
+                        "random_seed": "$variables.random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                         "round_decimals": 2,
@@ -1783,7 +1872,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         auto=True,
         profiler_config=custom_profiler_config,
     )
-    assert not result.success
+    assert result.success
 
     value_ranges_expected = [
         [
@@ -1791,7 +1880,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             6.5,
         ],
         [
-            8.52,
+            8.44,
             9.56,
         ],
         [
@@ -1826,8 +1915,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         variables={
             "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
             "allow_relative_error": "linear",
-            "num_bootstrap_samples": 9139,
-            "bootstrap_random_seed": 43792,
+            "n_resamples": 9139,
+            "random_seed": 43792,
             "false_positive_rate": 5.0e-2,
             "quantile_statistic_interpolation_method": "auto",
         },
@@ -1848,8 +1937,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                             "quantiles": "$variables.quantiles",
                             "allow_relative_error": "$variables.allow_relative_error",
                         },
-                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                        "n_resamples": "$variables.n_resamples",
+                        "random_seed": "$variables.random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                         "round_decimals": "$variables.round_decimals",
