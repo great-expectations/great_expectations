@@ -46,46 +46,12 @@ class VolumeDataAssistant(DataAssistant):
             validator=validator,
         )
 
-    @property
-    def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
-        return {
-            "expect_table_row_count_to_be_between": {
-                "auto": True,
-                "profiler_config": None,
-            },
-            "expect_column_unique_value_count_to_be_between": {
-                "auto": True,
-                "profiler_config": None,
-            },
-            "expect_column_mean_to_be_between": {
-                "auto": True,
-                "profiler_config": None,
-            },
-        }
-
-    @property
-    def metrics_parameter_builders_by_domain(
-        self,
-    ) -> Dict[Domain, List[ParameterBuilder]]:
-        table_row_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
-        column_distinct_values_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
-
-        return {
-            Domain(domain_type=MetricDomainTypes.TABLE,): [
-                table_row_count_metric_multi_batch_parameter_builder,
-            ],
-            Domain(domain_type=MetricDomainTypes.COLUMN,): [
-                column_distinct_values_count_metric_multi_batch_parameter_builder,
-            ],
-        }
-
-    @property
-    def variables(self) -> Optional[Dict[str, Any]]:
-        return None1
+    def get_variables(self) -> Optional[Dict[str, Any]]:
+        """
+        Returns:
+            Optional "variables" configuration attribute name/value pairs (overrides), commonly-used in Builder objects.
+        """
+        return None
 
     def get_rules(self) -> Optional[List[Rule]]:
         """
