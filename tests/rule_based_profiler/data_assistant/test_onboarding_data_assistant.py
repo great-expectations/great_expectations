@@ -121,7 +121,7 @@ def test_onboarding_data_assistant_metrics_count(
     ) in bobby_onboarding_data_assistant_result.metrics_by_domain.items():
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
-    assert num_metrics == 2
+    assert num_metrics == 178
 
 
 def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(

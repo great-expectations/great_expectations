@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional
 
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
@@ -32,7 +31,6 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     VARIABLES_KEY,
-    Domain,
     SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
@@ -59,33 +57,10 @@ class OnboardingDataAssistant(DataAssistant):
             validator=validator,
         )
 
-    @property
-    def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
-        return {}
-
-    @property
-    def metrics_parameter_builders_by_domain(
-        self,
-    ) -> Dict[Domain, List[ParameterBuilder]]:
-        table_row_count_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
-        table_columns_metric_multi_batch_parameter_builder: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_columns_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
-        return {
-            Domain(domain_type=MetricDomainTypes.TABLE,): [
-                table_row_count_metric_multi_batch_parameter_builder,
-                table_columns_metric_multi_batch_parameter_builder,
-            ],
-        }
-
-    @property
-    def variables(self) -> Optional[Dict[str, Any]]:
+    def get_variables(self) -> Optional[Dict[str, Any]]:
         return None
 
-    @property
-    def rules(self) -> Optional[List[Rule]]:
+    def get_rules(self) -> Optional[List[Rule]]:
         table_rule: Rule = self._build_table_rule()
         column_value_uniqueness_rule: Rule = build_map_metric_rule(
             rule_name="column_value_uniqueness_rule",
