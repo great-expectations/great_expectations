@@ -244,12 +244,6 @@ class DataContext(BaseDataContext):
                 conf_file_section="ge_cloud_config",
                 conf_file_option="account_id",
             )
-            logger.warning(
-                'If you have an environment variable named "GE_CLOUD_ACCOUNT_ID", please rename it to '
-                '"GE_CLOUD_ORGANIZATION_ID". If you have a global config file with an "account_id" '
-                'option, please rename it to "organization_id". "GE_CLOUD_ACCOUNT_ID" and "account_id" '
-                "will be deprecated in the next major release."
-            )
 
         if ge_cloud_organization_id is None:
             ge_cloud_organization_id = super()._get_global_config_value(
