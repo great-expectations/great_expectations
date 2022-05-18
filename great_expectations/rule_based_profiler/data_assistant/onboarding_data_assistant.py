@@ -37,6 +37,9 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
     OnboardingDataAssistantResult,
 )
+from great_expectations.rule_based_profiler.types.parameter_container import (
+    PARAMETER_KEY,
+)
 from great_expectations.validator.validator import Validator
 
 
@@ -721,10 +724,13 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        column_min_length_range_estimator_parameter_builder: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_min_length_metric_multi_batch_parameter_builder(
+        column_min_length_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_min_length_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
-        column_max_length_range_estimator_parameter_builder: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_max_length_metric_multi_batch_parameter_builder(
+        column_max_length_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_max_length_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
+        column_values_match_regex_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_value_regex_matches_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
 
@@ -739,6 +745,9 @@ class OnboardingDataAssistant(DataAssistant):
             metric_name="column_values.length.max",
             metric_value_kwargs=None,
             json_serialize=True,
+        )
+        column_values_to_match_regex_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_regex_pattern_string_parameter_builder(
+            metric_name="column_values.match_regex", json_serialize=True
         )
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
@@ -768,6 +777,22 @@ class OnboardingDataAssistant(DataAssistant):
             },
         )
 
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **column_values_to_match_regex_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
+        expect_column_values_to_match_regex_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_column_values_to_match_regex",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            regex=f"{PARAMETER_KEY}{column_values_to_match_regex_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+            mostly=f"{VARIABLES_KEY}mostly",
+            meta={
+                "profiler_details": f"{PARAMETER_KEY}{column_values_to_match_regex_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
+
         # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
         variables: dict = {
@@ -787,11 +812,13 @@ class OnboardingDataAssistant(DataAssistant):
             "round_decimals": 0,
         }
         parameter_builders: List[ParameterBuilder] = [
-            column_min_length_range_estimator_parameter_builder,
-            column_max_length_range_estimator_parameter_builder,
+            column_min_length_metric_multi_batch_parameter_builder_for_metrics,
+            column_max_length_metric_multi_batch_parameter_builder_for_metrics,
+            column_values_match_regex_metric_multi_batch_parameter_builder_for_metrics,
         ]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
-            expect_column_value_lengths_to_be_between_expectation_configuration_builder
+            expect_column_value_lengths_to_be_between_expectation_configuration_builder,
+            expect_column_values_to_match_regex_expectation_configuration_builder,
         ]
         rule: Rule = Rule(
             name="text_columns_rule",

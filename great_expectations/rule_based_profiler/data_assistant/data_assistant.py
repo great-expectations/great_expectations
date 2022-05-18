@@ -22,6 +22,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
+    RegexPatternStringParameterBuilder,
+)
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
@@ -306,6 +309,19 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 json_serialize=json_serialize,
             )
 
+        def get_column_value_regex_matches_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_numeric_metric_multi_batch_parameter_builder(
+                metric_name="column_values.match_regex",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
         @staticmethod
         def build_numeric_metric_multi_batch_parameter_builder(
             metric_name: str,
@@ -355,6 +371,23 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
                 truncate_values=f"{VARIABLES_KEY}truncate_values",
                 round_decimals=f"{VARIABLES_KEY}round_decimals",
+                evaluation_parameter_builder_configs=None,
+                json_serialize=json_serialize,
+                data_context=None,
+            )
+
+        @staticmethod
+        def build_regex_pattern_string_parameter_builder(
+            metric_name: str,
+            json_serialize: Union[str, bool] = True,
+        ) -> RegexPatternStringParameterBuilder:
+            name: str = sanitize_parameter_name(name=metric_name)
+            return RegexPatternStringParameterBuilder(
+                name=name,
+                metric_domain_kwargs=None,
+                metric_value_kwargs=None,
+                threshold=1.0,
+                candidate_regexes=None,
                 evaluation_parameter_builder_configs=None,
                 json_serialize=json_serialize,
                 data_context=None,
