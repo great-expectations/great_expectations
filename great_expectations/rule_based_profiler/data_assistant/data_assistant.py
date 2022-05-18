@@ -241,6 +241,32 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 json_serialize=json_serialize,
             )
 
+        def get_column_min_length_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_numeric_metric_multi_batch_parameter_builder(
+                metric_name="column_values.length.min",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_max_length_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_numeric_metric_multi_batch_parameter_builder(
+                metric_name="column_values.length.max",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
         def get_column_median_metric_multi_batch_parameter_builder(
             self,
             json_serialize: Union[str, bool] = True,

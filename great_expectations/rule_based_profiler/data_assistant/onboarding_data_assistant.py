@@ -24,9 +24,6 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     ValueSetMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
-    NumericMetricRangeMultiBatchParameterBuilder,
-)
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -121,10 +118,10 @@ class OnboardingDataAssistant(DataAssistant):
             max_unexpected_ratio=None,
             min_max_unexpected_values_proportion=9.75e-1,
         )
-        numeric_rule: Rule = self._build_numeric_rule()
-        datetime_rule: Rule = self._build_datetime_rule()
-        text_rule: Rule = self._build_text_rule()
-        categorical_rule: Rule = self._build_categorical_rule()
+        numeric_rule: Rule = self._build_numeric_columns_rule()
+        datetime_rule: Rule = self._build_datetime_columns_rule()
+        text_rule: Rule = self._build_text_columns_rule()
+        categorical_rule: Rule = self._build_categorical_columns_rule()
 
         return [
             table_rule,
@@ -701,7 +698,7 @@ class OnboardingDataAssistant(DataAssistant):
         return rule
 
     @staticmethod
-    def _build_text_rule() -> Rule:
+    def _build_text_columns_rule() -> Rule:
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
@@ -724,43 +721,11 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        column_min_length_range_estimator_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-            name="column_min_length_range_estimator",
-            metric_name="column_values.length.min",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-            quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
-            estimator=f"{VARIABLES_KEY}estimator",
-            n_resamples=f"{VARIABLES_KEY}n_resamples",
-            random_seed=f"{VARIABLES_KEY}random_seed",
-            include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
-            truncate_values=f"{VARIABLES_KEY}truncate_values",
-            round_decimals=f"{VARIABLES_KEY}round_decimals",
-            evaluation_parameter_builder_configs=None,
-            json_serialize=True,
+        column_min_length_range_estimator_parameter_builder: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_min_length_metric_multi_batch_parameter_builder(
+            json_serialize=True
         )
-        column_max_length_range_estimator_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-            name="column_max_length_range_estimator",
-            metric_name="column_values.length.max",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-            quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
-            estimator=f"{VARIABLES_KEY}estimator",
-            n_resamples=f"{VARIABLES_KEY}n_resamples",
-            random_seed=f"{VARIABLES_KEY}random_seed",
-            include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
-            truncate_values=f"{VARIABLES_KEY}truncate_values",
-            round_decimals=f"{VARIABLES_KEY}round_decimals",
-            evaluation_parameter_builder_configs=None,
-            json_serialize=True,
+        column_max_length_range_estimator_parameter_builder: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_max_length_metric_multi_batch_parameter_builder(
+            json_serialize=True
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
