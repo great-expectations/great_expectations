@@ -300,7 +300,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Reference Architectures',
-      link: {type: 'doc', id: 'deployment_patterns/reference_architecture_overview'},
+      link: { type: 'doc', id: 'deployment_patterns/reference_architecture_overview' },
       items: [
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
@@ -370,22 +370,11 @@ module.exports = {
     {
       type: 'category',
       label: 'Reference',
+      link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
         {
           type: 'category',
-          label: 'Supplemental documentation',
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
-            { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/data_discovery' },
-            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
-          ]
-        },
-        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
-        {
-          type: 'category',
-          label: 'Glossary of Technical Terms',
+          label: 'Glossary of Terms',
           link: { type: 'doc', id: 'glossary' },
           items: [
             'terms/action',
@@ -436,6 +425,18 @@ module.exports = {
             'terms/supporting_resource',
             'terms/validator',
             'terms/validation_result'
+          ]
+        },
+        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
+        {
+          type: 'category',
+          label: 'Supplemental documentation',
+          items: [
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+            { type: 'doc', id: 'reference/customize_your_deployment' },
+            { type: 'doc', id: 'reference/data_discovery' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         }
       ]
