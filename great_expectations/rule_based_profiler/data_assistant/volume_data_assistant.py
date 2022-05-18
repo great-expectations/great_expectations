@@ -47,9 +47,17 @@ class VolumeDataAssistant(DataAssistant):
         )
 
     def get_variables(self) -> Optional[Dict[str, Any]]:
+        """
+        Returns:
+            Optional "variables" configuration attribute name/value pairs (overrides), commonly-used in Builder objects.
+        """
         return None
 
     def get_rules(self) -> Optional[List[Rule]]:
+        """
+        Returns:
+            Optional custom list of "Rule" objects implementing particular "DataAssistant" functionality.
+        """
         table_rule: Rule = self._build_table_rule()
         categorical_columns_rule: Rule = self._build_categorical_columns_rule()
 
