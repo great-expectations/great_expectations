@@ -95,6 +95,11 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
                 "id",
             ]
 
+        if exclude_column_name_suffixes is None:
+            exclude_column_name_suffixes = [
+                "_id",
+            ]
+
         if exclude_semantic_types is None:
             exclude_semantic_types = [
                 SemanticDomainTypes.BINARY,
