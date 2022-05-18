@@ -381,6 +381,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             metric_name: str,
             json_serialize: Union[str, bool] = True,
         ) -> RegexPatternStringParameterBuilder:
+            """
+            This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
+            """
             name: str = sanitize_parameter_name(name=metric_name)
             return RegexPatternStringParameterBuilder(
                 name=name,
