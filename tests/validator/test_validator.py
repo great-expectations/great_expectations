@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
@@ -1177,4 +1178,34 @@ def test_validator_docstrings(multi_batch_taxi_validator):
     )
     assert expectation_impl.__doc__.startswith(
         "Expect each column value to be in a given set"
+    )
+
+
+def test_validator_is_expectation_auto_initializing(multi_batch_taxi_validator, caplog):
+    validator: Validator = multi_batch_taxi_validator
+    caplog.set_level(logging.INFO)
+
+    with pytest.raises(ge_exceptions.ValidationError):
+        validator.is_expectation_auto_initializing(name="I_dont_exist")
+
+    assert (
+        validator.is_expectation_auto_initializing(
+            name="expect_column_distinct_values_to_be_in_set"
+        )
+        is False
+    )
+    assert (
+        "The Expectation expect_column_distinct_values_to_be_in_set in not able to be auto-intialized."
+        in caplog.text
+    )
+
+    assert (
+        validator.is_expectation_auto_initializing(
+            name="expect_column_mean_to_be_between"
+        )
+        is True
+    )
+    assert (
+        "The Expectation expect_column_mean_to_be_between is able to be auto-initialized. Please run by using the auto=True parameter."
+        in caplog.text
     )
