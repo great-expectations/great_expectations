@@ -6,7 +6,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import defaultdict, namedtuple
+from collections import OrderedDict, defaultdict, namedtuple
 from collections.abc import Hashable
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
@@ -1415,6 +1415,9 @@ aborting graph resolution.
     @property
     def batches(self) -> Dict[str, Batch]:
         """Getter for batches"""
+        if not isinstance(self._batches, OrderedDict):
+            self._batches = OrderedDict(self._batches)
+
         return self._batches
 
     @property

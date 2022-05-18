@@ -70,7 +70,10 @@ from great_expectations.self_check.util import (
     get_dataset,
 )
 from great_expectations.util import is_library_loadable
-from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
+from tests.rule_based_profiler.parameter_builder.conftest import (
+    RANDOM_SEED,
+    RANDOM_STATE,
+)
 
 yaml = YAML()
 ###
@@ -5845,10 +5848,13 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     file_name_list = sorted(file_name_list)
     num_files: int = len(file_name_list)
 
+    random_state: np.random.Generator = RANDOM_STATE
     rnd_num_sample: np.float64
     output_file_lenths: List[int] = [
         round(rnd_num_sample)
-        for rnd_num_sample in np.random.normal(loc=5.0e3, scale=1.0e3, size=num_files)
+        for rnd_num_sample in random_state.normal(
+            loc=5.0e3, scale=1.0e3, size=num_files
+        )
     ]
 
     idx: int
@@ -5910,6 +5916,9 @@ def quentin_columnar_table_multi_batch():
         "quentin_columnar_table_multi_batch"
     )
 
+    """
+    [[8.276101187, 11.420814914], [11.29625, 14.8625], [16.766350257, 21.32575015]]
+    """
     return {
         "profiler_config": verbose_profiler_config,
         "test_configuration": {
@@ -5935,7 +5944,7 @@ def quentin_columnar_table_multi_batch():
                         6.5,
                     ],
                     [
-                        8.522670697,
+                        8.4375,
                         9.5625,
                     ],
                     [
@@ -5967,8 +5976,8 @@ def quentin_columnar_table_multi_batch():
                         14.8625,
                     ],
                     [
-                        16.758025632,
-                        21.327228225,
+                        16.766350257,
+                        21.32575015,
                     ],
                 ],
             },
