@@ -6,7 +6,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import defaultdict, namedtuple
+from collections import OrderedDict, defaultdict, namedtuple
 from collections.abc import Hashable
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
@@ -169,6 +169,8 @@ class Validator:
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
 
+        self._show_progress_bars = self._determine_progress_bars()
+
         if batches is None:
             batches = []
 
@@ -227,6 +229,27 @@ class Validator:
             combined_dir | set(dir(pd.DataFrame))
 
         return list(combined_dir)
+
+    def _determine_progress_bars(self) -> bool:
+        enable: bool = True
+        if self._data_context:
+            progress_bars = self._data_context.progress_bars
+            # If progress_bars are not present, assume we want them enabled
+            if progress_bars is not None:
+                if "globally" in progress_bars:
+                    enable = progress_bars["globally"]
+                if "metric_calculations" in progress_bars:
+                    enable = progress_bars["metric_calculations"]
+
+        return enable
+
+    @property
+    def show_progress_bars(self) -> bool:
+        return self._show_progress_bars
+
+    @show_progress_bars.setter
+    def show_progress_bars(self, enable: bool) -> None:
+        self._show_progress_bars = enable
 
     @property
     def data_context(self) -> Optional["DataContext"]:  # noqa: F821
@@ -1233,16 +1256,7 @@ class Validator:
             )
 
             # Check to see if the user has disabled progress bars
-            disable = False
-            if self._data_context:
-                progress_bars = self._data_context.progress_bars
-                # If progress_bars are not present, assume we want them enabled
-                if progress_bars is not None:
-                    if "globally" in progress_bars:
-                        disable = not progress_bars["globally"]
-                    if "metric_calculations" in progress_bars:
-                        disable = not progress_bars["metric_calculations"]
-
+            disable = not self._show_progress_bars
             if len(graph.edges) < min_graph_edges_pbar_enable:
                 disable = True
 
@@ -1401,6 +1415,9 @@ aborting graph resolution.
     @property
     def batches(self) -> Dict[str, Batch]:
         """Getter for batches"""
+        if not isinstance(self._batches, OrderedDict):
+            self._batches = OrderedDict(self._batches)
+
         return self._batches
 
     @property
