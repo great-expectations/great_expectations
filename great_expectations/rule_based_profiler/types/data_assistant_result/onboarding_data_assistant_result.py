@@ -209,44 +209,6 @@ class OnboardingDataAssistantResult(DataAssistantResult):
 
         return display_charts, return_charts
 
-    def _create_chart_for_table_domain_expectation(
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
-        plot_mode: PlotMode,
-        sequential: bool,
-    ) -> alt.Chart:
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-
-        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
-
-        attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
-            attributed_metrics.values()
-        )[0]
-
-        for metric_name in attributed_values_by_metric_name.keys():
-            if (
-                metric_name
-                == expectation_metric_map[expectation_configuration.expectation_type]
-            ):
-                df: pd.DataFrame = self._create_df_for_charting(
-                    metric_name=metric_name,
-                    attributed_values_by_metric_name=attributed_values_by_metric_name,
-                    expectation_configuration=expectation_configuration,
-                    plot_mode=plot_mode,
-                )
-
-        metric_name: str = sanitize_parameter_name(metric_name)
-
-        return self._chart_domain_values(
-            df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            plot_mode=plot_mode,
-            sequential=sequential,
-            subtitle=None,
-        )
-
     def _chart_domain_values(
         self,
         df: pd.DataFrame,
