@@ -335,7 +335,6 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
     alice_all_column_names: List[str] = [
         "id",
         "event_type",
-        "user_id",
         "event_ts",
         "server_ts",
         "device_ts",
@@ -353,7 +352,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
         )
         for column_name in alice_all_column_names
     ]
-    assert len(domains) == 7
+    assert len(domains) == 6
 
     # Unit Tests for "inferred_semantic_domain_type" are provided separately.
     domain: Domain

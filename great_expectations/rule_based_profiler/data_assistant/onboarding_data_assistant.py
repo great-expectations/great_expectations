@@ -152,17 +152,17 @@ class OnboardingDataAssistant(DataAssistant):
             max_unexpected_ratio=None,
             min_max_unexpected_values_proportion=9.75e-1,
         )
-        numeric_rule: Rule = self._build_numeric_rule()
-        datetime_rule: Rule = self._build_datetime_rule()
-        categorical_rule: Rule = self._build_categorical_rule()
+        numeric_columns_rule: Rule = self._build_numeric_columns_rule()
+        datetime_columns_rule: Rule = self._build_datetime_columns_rule()
+        categorical_columns_rule: Rule = self._build_categorical_columns_rule()
 
         return [
             column_value_uniqueness_rule,
             column_value_nullity_rule,
             column_value_nonnullity_rule,
-            numeric_rule,
-            datetime_rule,
-            categorical_rule,
+            numeric_columns_rule,
+            datetime_columns_rule,
+            categorical_columns_rule,
         ]
 
     def _build_data_assistant_result(
@@ -178,7 +178,7 @@ class OnboardingDataAssistant(DataAssistant):
         )
 
     @staticmethod
-    def _build_numeric_rule() -> Rule:
+    def _build_numeric_columns_rule() -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for numeric columns.
         """
@@ -455,7 +455,7 @@ class OnboardingDataAssistant(DataAssistant):
         return rule
 
     @staticmethod
-    def _build_datetime_rule() -> Rule:
+    def _build_datetime_columns_rule() -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for datetime columns.
         """
@@ -624,7 +624,7 @@ class OnboardingDataAssistant(DataAssistant):
         return rule
 
     @staticmethod
-    def _build_categorical_rule() -> Rule:
+    def _build_categorical_columns_rule() -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for categorical columns.
         """
@@ -777,7 +777,7 @@ class OnboardingDataAssistant(DataAssistant):
             expect_column_proportion_of_unique_values_to_be_between_expectation_configuration_builder,
         ]
         rule: Rule = Rule(
-            name="categorical_rule",
+            name="categorical_columns_rule",
             variables=variables,
             domain_builder=categorical_column_type_domain_builder,
             parameter_builders=parameter_builders,

@@ -19,6 +19,7 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
+    sanitize_parameter_name,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MeanUnexpectedMapMetricMultiBatchParameterBuilder,
@@ -294,8 +295,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """
+            name: str = sanitize_parameter_name(name=f"{metric_name}.range")
             return NumericMetricRangeMultiBatchParameterBuilder(
-                name=f"{metric_name}.range",
+                name=name,
                 metric_name=metric_name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=metric_value_kwargs,
