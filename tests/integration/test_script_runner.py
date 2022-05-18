@@ -270,7 +270,7 @@ local_tests = [
             BackendDependencies.MYSQL,
         ],
     ),
-     IntegrationTestFixture(
+    IntegrationTestFixture(
         name="cross_table_comparisons",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
