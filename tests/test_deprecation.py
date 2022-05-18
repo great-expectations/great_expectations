@@ -1,4 +1,5 @@
 import glob
+import os
 import re
 from typing import List, Pattern, Tuple, cast
 
@@ -6,6 +7,7 @@ import pytest
 from packaging import version
 
 import versioneer
+from great_expectations.data_context.util import file_relative_path
 
 
 @pytest.fixture
@@ -57,7 +59,13 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
     To ensure that we're appropriately deprecating, we want to test that we're fully
     removing warnings (and the code they correspond to) after two minor versions have passed.
     """
-    current_version: str = versioneer.get_version()
+    deployment_version_path: str = file_relative_path(
+        __file__, "../great_expectations/deployment_version"
+    )
+    current_version: str
+    with open(deployment_version_path) as f:
+        current_version = f.read().strip()
+
     current_parsed_version: version.Version = cast(
         version.Version, version.parse(current_version)
     )
