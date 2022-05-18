@@ -2495,6 +2495,93 @@ def test_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explic
     )
 
 
+def test_volume_data_assistant_run_include_columns_filters_expectation_configurations(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    include_column_names: List[str] = ["extra", "passenger_count", "rate_code"]
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request, include_column_names=include_column_names
+    )
+
+    expectation_configurations: Optional[
+        List[ExpectationConfiguration]
+    ] = data_assistant_result.expectation_configurations
+    assert (
+        expectation_configurations is not None and len(expectation_configurations) == 3
+    )
+
+    for expectation_configuration in expectation_configurations:
+        kwargs: dict = expectation_configuration.kwargs
+        column: Optional[str] = kwargs.get("column")
+        if column:
+            assert column in include_column_names
+
+
+def test_volume_data_assistant_run_both_include_and_exclude_columns_raises_value_error(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    include_column_names: List[str] = ["extra", "passenger_count", "rate_code"]
+    exclude_column_names: List[str] = ["VendorID", "pickup_datetime"]
+
+    with pytest.raises(ValueError) as e:
+        context.assistants.volume.run(
+            batch_request=batch_request,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+        )
+
+    assert (
+        str(e.value)
+        == "You may either use `include_column_names` or `exclude_column_names` (but not both)."
+    )
+
+
+def test_volume_data_assistant_run_exclude_columns_filters_expectation_configurations(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    exclude_column_names: List[str] = ["VendorID", "pickup_datetime"]
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request, exclude_column_names=exclude_column_names
+    )
+
+    expectation_configurations: Optional[
+        List[ExpectationConfiguration]
+    ] = data_assistant_result.expectation_configurations
+    assert (
+        expectation_configurations is not None and len(expectation_configurations) == 17
+    )
+
+    for expectation_configuration in expectation_configurations:
+        kwargs: dict = expectation_configuration.kwargs
+        column: Optional[str] = kwargs.get("column")
+        if column:
+            assert column not in exclude_column_names
+
+
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):

@@ -132,7 +132,9 @@ class DataAssistantResult(SerializableDictDot):
             kwargs: dict = expectation_configuration.get("kwargs", {})
             column: Optional[str] = kwargs.get("column")
             if (
-                (column is None)
+                (
+                    column is None
+                )  # Lack of column kwarg denotes a table-domain configuration
                 or (include_column_names and column in include_column_names)
                 or (exclude_column_names and column not in exclude_column_names)
             ):
