@@ -208,39 +208,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         return display_charts, return_charts
 
-    def _create_chart_for_table_domain_expectation(
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
-        plot_mode: PlotMode,
-        sequential: bool,
-    ) -> alt.Chart:
-        attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
-            attributed_metrics.values()
-        )[0]
-
-        # Altair does not accept periods.
-        metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
-            ".", "_"
-        )
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-
-        df: pd.DataFrame = self._create_df_for_charting(
-            metric_name=metric_name,
-            attributed_values_by_metric_name=attributed_values_by_metric_name,
-            expectation_configuration=expectation_configuration,
-            plot_mode=plot_mode,
-        )
-
-        return self._chart_domain_values(
-            df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            plot_mode=plot_mode,
-            sequential=sequential,
-            subtitle=None,
-        )
-
     def _chart_domain_values(
         self,
         df: pd.DataFrame,
@@ -313,6 +280,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
             domain.domain_kwargs["column"]: domain
@@ -330,30 +301,33 @@ class VolumeDataAssistantResult(DataAssistantResult):
             domain
         ]
 
-        # Altair does not accept periods.
-        metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
-            ".", "_"
-        )
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+        for metric_name in attributed_values_by_metric_name.keys():
+            if (
+                metric_name
+                == expectation_metric_map[expectation_configuration.expectation_type]
+            ):
+                attributed_values: ParameterNode = attributed_values_by_metric_name[
+                    metric_name
+                ]
 
-        df: pd.DataFrame = self._create_df_for_charting(
-            metric_name=metric_name,
-            attributed_values_by_metric_name=attributed_values_by_metric_name,
-            expectation_configuration=expectation_configuration,
-            plot_mode=plot_mode,
-        )
+                df: pd.DataFrame = self._create_df_for_charting(
+                    metric_name=metric_name,
+                    attributed_values=attributed_values,
+                    expectation_configuration=expectation_configuration,
+                    plot_mode=plot_mode,
+                )
 
-        column_name: str = expectation_configuration.kwargs["column"]
-        subtitle = f"Column: {column_name}"
+                column_name: str = expectation_configuration.kwargs["column"]
+                subtitle = f"Column: {column_name}"
 
-        return self._chart_domain_values(
-            df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            plot_mode=plot_mode,
-            sequential=sequential,
-            subtitle=subtitle,
-        )
+                return self._chart_domain_values(
+                    df=df,
+                    metric_name=metric_name,
+                    metric_type=metric_type,
+                    plot_mode=plot_mode,
+                    sequential=sequential,
+                    subtitle=subtitle,
+                )
 
     def _chart_column_values(
         self,
