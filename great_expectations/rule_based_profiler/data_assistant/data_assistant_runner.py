@@ -1,6 +1,5 @@
-from typing import Optional, Type, Union
+from typing import Any, Dict, Optional, Type, Union
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -35,18 +34,16 @@ class DataAssistantRunner:
 
     def run(
         self,
-        batch_request: Union[BatchRequestBase, dict],
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-        save_updated_expectation_suite: bool = False,
+        variables: Optional[Dict[str, Any]] = None,
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> DataAssistantResult:
         data_assistant_name: str = self._data_assistant_cls.data_assistant_type
         validator: Validator = get_validator_with_expectation_suite(
             batch_request=batch_request,
             data_context=self._data_context,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
+            expectation_suite=None,
+            expectation_suite_name=None,
             component_name=data_assistant_name,
         )
         data_assistant: DataAssistant = self._data_assistant_cls(
@@ -54,9 +51,7 @@ class DataAssistantRunner:
             validator=validator,
         )
         data_assistant_result: DataAssistantResult = data_assistant.run(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-            save_updated_expectation_suite=save_updated_expectation_suite,
+            variables=variables,
+            rules=rules,
         )
         return data_assistant_result

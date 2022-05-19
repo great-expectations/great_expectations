@@ -11,6 +11,7 @@ This how-to guide assumes that you have already:
 
 * Configured an email account on the SMTP server you are going to use to send the email
 * Identified the email addresses that messages will be sent to.
+* Created a <TechnicalTag tag="checkpoint" text="Checlpoint" /> which will be configured to send the emails.
 :::
 
 ## Steps
@@ -28,48 +29,40 @@ sender_alias: [optional alias used to send the email (default = sender_login)]
 receiver_emails: [addresses you want to send the email to]  # each address must be separated by commas
 ````
 
-### 2. Update `validation_operators` in `great_expectations.yml`
+### 2. Update `action_list` in your Checkpoint configuration
 
 Open `great_expectations.yml` and add `send_email_on_validation_result` Action to `validation_operators`. Make sure the following section exists in the `great_expectations.yml` file.
 
-````python
-validation_operators:
-    action_list_operator:
-        # To learn how to configure sending emails during evaluation
-        # (and other customizations), (/docs/reference/checkpoints-and-actions/) 
-        class_name: ActionListValidationOperator
-        action_list:
-        #--------------------------------
-        # here is what you will be adding
-        #--------------------------------
-        - name: send_email_on_validation_result # name can be set to any value
-          action:
-            class_name: EmailAction
-            notify_on: all # possible values: "all", "failure", "success"
-            notify_with: # optional list containing the DataDocs sites to include in the notification. Defaults to including links to all configured sites.
-            # You can choose between using SSL encryption, TLS encryption or none of them (not advised)
-            use_tls: False
-            use_ssl: True
-            renderer:
-              module_name: great_expectations.render.renderer.email_renderer
-              class_name: EmailRenderer
-            # put the actual following information in the uncommitted/config_variables.yml file
-            # or pass in as environment variable
-            smtp_address: ${smtp_address}
-            smtp_port: ${smtp_port}
-            sender_login: ${sender_login}
-            sender_password: ${sender_password}
-            sender_alias: ${sender_alias}
-            receiver_emails: ${receiver_emails}  # string containing email addresses separated by commas
+````yaml
+action_list:
+    - name: send_email_on_validation_result # name can be set to any value
+      action:
+        class_name: EmailAction
+        notify_on: all # possible values: "all", "failure", "success"
+        notify_with: # optional list containing the DataDocs sites to include in the notification. Defaults to including links to all configured sites.
+        # You can choose between using SSL encryption, TLS encryption or none of them (not advised)
+        use_tls: False
+        use_ssl: True
+        renderer:
+          module_name: great_expectations.render.renderer.email_renderer
+          class_name: EmailRenderer
+        # put the actual following information in the uncommitted/config_variables.yml file
+        # or pass in as environment variable
+        smtp_address: ${smtp_address}
+        smtp_port: ${smtp_port}
+        sender_login: ${sender_login}
+        sender_password: ${sender_password}
+        sender_alias: ${sender_alias}
+        receiver_emails: ${receiver_emails}  # string containing email addresses separated by commas
 ````
 
 ### 3. Test your updated Action list
 
-Run your `action_list_operator`, to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and receive an email on the success or failure of the Validation.
+Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and receive an email on the success or failure of the Validation.
 
-```
-context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="email_test")
-```
+:::note Reminder
+Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md) has instructions for this step.
+:::
 
 If successful, you should receive an email that looks like this:
 
@@ -77,12 +70,12 @@ If successful, you should receive an email that looks like this:
 
 ## Additional notes
 
-If your `great_expectations.yml` contains multiple configurations for Data Docs sites, all of them will be included in the email by default. If you would like to be more specific, you can configure the `notify_with` variable in your `great_expectations.yml`.
+If your `great_expectations.yml` contains multiple configurations for Data Docs sites, all of them will be included in the email by default. If you would like to be more specific, you can configure the `notify_with` variable in your Checkpoint configuration.
 
 The following example will configure the email to include links <TechnicalTag tag="data_docs" text="Data Docs" /> at local_site and s3_site.
 
-````yaml
-# Example data_docs_sites configuration
+```yaml
+# Example data_docs_sites configuration in `great_expectations.yml`
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -100,10 +93,11 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
       show_cta_footer: true
+```
 
-validation_operators:
-    action_list_operator:
-    ...
+```yaml
+# Example Checkpoint configuration
+action_list:
     - name: send_email_on_validation_result # name can be set to any value
           action:
             class_name: EmailAction
@@ -127,8 +121,8 @@ validation_operators:
             sender_password: ${sender_password}
             sender_alias: ${sender_alias}
             receiver_emails: ${receiver_emails} # string containing email addresses separated by commas
-````
+```
 
-### Additional resources
+## Additional resources
 
 The EmailAction uses smtplib. You can get more information about this module [here](https://docs.python.org/3/library/smtplib.html).

@@ -397,6 +397,10 @@ def column_condition_partial(
                 sqlalchemy_engine: Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
+                if dialect is None:
+                    # Trino
+                    if hasattr(sqlalchemy_engine, "dialect"):
+                        dialect = sqlalchemy_engine.dialect
                 expected_condition = metric_fn(
                     cls,
                     sa.column(column_name),
