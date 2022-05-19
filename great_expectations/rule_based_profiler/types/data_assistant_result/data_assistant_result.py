@@ -1618,6 +1618,8 @@ class DataAssistantResult(SerializableDictDot):
                 column_name: str = expectation_configuration.kwargs["column"]
                 subtitle = f"Column: {column_name}"
 
+                metric_name: str = sanitize_parameter_name(name=metric_name)
+
                 return self._chart_domain_values(
                     df=df,
                     metric_name=metric_name,
