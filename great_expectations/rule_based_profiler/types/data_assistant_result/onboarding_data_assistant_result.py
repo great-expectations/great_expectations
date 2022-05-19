@@ -255,15 +255,8 @@ class OnboardingDataAssistantResult(DataAssistantResult):
             plot_mode=plot_mode,
         )
 
-        attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
-            attributed_metrics.values()
-        )[0]
-
-        # Altair does not accept periods.
-        metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
-            ".", "_"
-        )
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+        metric_name: str = "column_distinct_values_count"
 
         return self._chart_column_values(
             column_dfs=column_dfs,

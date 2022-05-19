@@ -381,26 +381,18 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics()
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 18  # One for each column present
+    assert len(column_domain_charts) == 10  # One for each low cardinality column
 
     columns: List[str] = [
         "VendorID",
-        "pickup_datetime",
-        "dropoff_datetime",
         "passenger_count",
-        "trip_distance",
         "RatecodeID",
         "store_and_fwd_flag",
-        "PULocationID",
-        "DOLocationID",
         "payment_type",
-        "fare_amount",
         "extra",
         "mta_tax",
-        "tip_amount",
         "tolls_amount",
         "improvement_surcharge",
-        "total_amount",
         "congestion_surcharge",
     ]
     assert find_strings_in_nested_obj(column_domain_charts, columns)
@@ -409,26 +401,26 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
 def test_onboarding_data_assistant_plot_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
-    include_column_names: List[str] = ["VendorID", "pickup_datetime"]
+    include_column_names: List[str] = ["VendorID", "passenger_count"]
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics(
         include_column_names=include_column_names
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 2  # Normally 18 without filtering
+    assert len(column_domain_charts) == 2  # Normally 10 without filtering
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
 def test_onboarding_data_assistant_plot_exclude_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
-    exclude_column_names: List[str] = ["VendorID", "pickup_datetime"]
+    exclude_column_names: List[str] = ["VendorID", "passenger_count"]
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics(
         exclude_column_names=exclude_column_names
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 16  # Normally 18 without filtering
+    assert len(column_domain_charts) == 8  # Normally 10 without filtering
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
