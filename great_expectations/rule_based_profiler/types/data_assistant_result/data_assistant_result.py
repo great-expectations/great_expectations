@@ -1,5 +1,4 @@
 import copy
-from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
 
@@ -47,7 +46,7 @@ class DataAssistantResult(SerializableDictDot):
     """
 
     # A mapping is defined for which metrics to plot and their associated expectations
-    DEFAULT_EXPECTATION_METRIC_MAP = {
+    EXPECTATION_METRIC_MAP = {
         "expect_table_row_count_to_be_between": "table.row_count",
         "expect_column_unique_value_count_to_be_between": "column.distinct_values.count",
     }
@@ -1577,7 +1576,7 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
-        expectation_metric_map: Dict[str, str] = self.DEFAULT_EXPECTATION_METRIC_MAP
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
 
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
@@ -1736,7 +1735,7 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> List[pd.DataFrame]:
-        expectation_metric_map: Dict[str, str] = self.DEFAULT_EXPECTATION_METRIC_MAP
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
 
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
@@ -1790,7 +1789,7 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.Chart:
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
-        expectation_metric_map: Dict[str, str] = self.DEFAULT_EXPECTATION_METRIC_MAP
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
 
         table_domain: Domain = Domain(
             domain_type=MetricDomainTypes.TABLE, rule_name="table_rule"
