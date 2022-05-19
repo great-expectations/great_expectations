@@ -69,141 +69,6 @@ class DataAssistantResult(SerializableDictDot):
     citation: Optional[dict] = None
     execution_time: Optional[float] = None  # Execution time (in seconds).
 
-    def to_dict(self) -> dict:
-        """
-        Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
-        """
-        domain: Domain
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
-        expectation_configuration: ExpectationConfiguration
-        return {
-            "batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
-                data=self.batch_id_to_batch_identifier_display_name_map
-            ),
-            "profiler_config": self.profiler_config.to_json_dict(),
-            "metrics_by_domain": [
-                {
-                    "domain_id": domain.id,
-                    "domain": domain.to_json_dict(),
-                    "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(
-                        data=parameter_values_for_fully_qualified_parameter_names
-                    ),
-                }
-                for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-            ],
-            "expectation_configurations": [
-                expectation_configuration.to_json_dict()
-                for expectation_configuration in self.expectation_configurations
-            ],
-            "execution_time": convert_to_json_serializable(data=self.execution_time),
-        }
-
-    def to_json_dict(self) -> dict:
-        """
-        Returns: This DataAssistantResult as JSON-serializable dictionary.
-        """
-        return self.to_dict()
-
-    def get_attributed_metrics_by_domain(
-        self,
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        domain: Domain
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
-        fully_qualified_parameter_name: str
-        parameter_value: ParameterNode
-        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
-            domain: {
-                parameter_value[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ].metric_configuration.metric_name: parameter_value[
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-                for fully_qualified_parameter_name, parameter_value in parameter_values_for_fully_qualified_parameter_names.items()
-            }
-            for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-        }
-        return metrics_attributed_values_by_domain
-
-    @staticmethod
-    def display(
-        charts: Union[List[alt.Chart], List[alt.VConcatChart]],
-        theme: Optional[Dict[str, Any]],
-    ) -> None:
-        """
-        Display each chart passed by DataAssistantResult.plot()
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            charts: A list of Altair chart objects to display
-            theme: An Optional Altair top-level chart configuration dictionary to apply over the default theme
-        """
-        altair_theme: Dict[str, Any]
-        if theme:
-            altair_theme = DataAssistantResult._get_theme(theme=theme)
-        else:
-            altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
-
-        themed_charts: List[alt.chart] = DataAssistantResult.apply_theme(
-            charts=charts, theme=altair_theme
-        )
-
-        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
-        dropdown_title_color: str = altair_theme["legend"]["titleColor"]
-        dropdown_title_font: str = altair_theme["font"]
-        dropdown_css: str = f"""
-            <style>
-            span.vega-bind-name {{
-                color: {dropdown_title_color};
-                font-family: "{dropdown_title_font}";
-                font-weight: bold;
-            }}
-            form.vega-bindings {{
-              position: absolute;
-              left: 75px;
-              top: 30px;
-            }}
-            </style>
-        """
-        display(HTML(dropdown_css))
-
-        # max rows for Altair charts is set to 5,000 without this
-        alt.data_transformers.disable_max_rows()
-
-        chart: alt.Chart
-        for chart in themed_charts:
-            chart.display()
-
-    @staticmethod
-    def apply_theme(
-        charts: List[alt.Chart],
-        theme: Optional[Dict[str, Any]],
-    ) -> List[alt.Chart]:
-        """
-        Apply the Great Expectations default theme and any user-provided theme overrides to each chart
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            charts: A list of Altair chart objects to apply a theme to
-            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
-
-        Returns:
-            A list of Altair charts with the theme applied
-        """
-        theme: Dict[str, Any] = DataAssistantResult._get_theme(theme=theme)
-        return [chart.configure(**theme) for chart in charts]
-
-    @staticmethod
-    def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-        default_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
-        if theme:
-            return nested_update(default_theme, theme)
-        else:
-            return default_theme
-
     @staticmethod
     def get_quantitative_metric_chart(
         df: pd.DataFrame,
@@ -1426,6 +1291,141 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         return band + lower_limit + upper_limit + anomaly_coded_bars
+
+    def to_dict(self) -> dict:
+        """
+        Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
+        """
+        domain: Domain
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        expectation_configuration: ExpectationConfiguration
+        return {
+            "batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
+                data=self.batch_id_to_batch_identifier_display_name_map
+            ),
+            "profiler_config": self.profiler_config.to_json_dict(),
+            "metrics_by_domain": [
+                {
+                    "domain_id": domain.id,
+                    "domain": domain.to_json_dict(),
+                    "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(
+                        data=parameter_values_for_fully_qualified_parameter_names
+                    ),
+                }
+                for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
+            ],
+            "expectation_configurations": [
+                expectation_configuration.to_json_dict()
+                for expectation_configuration in self.expectation_configurations
+            ],
+            "execution_time": convert_to_json_serializable(data=self.execution_time),
+        }
+
+    def to_json_dict(self) -> dict:
+        """
+        Returns: This DataAssistantResult as JSON-serializable dictionary.
+        """
+        return self.to_dict()
+
+    def get_attributed_metrics_by_domain(
+        self,
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+        domain: Domain
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        fully_qualified_parameter_name: str
+        parameter_value: ParameterNode
+        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
+            domain: {
+                parameter_value[
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                ].metric_configuration.metric_name: parameter_value[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
+                for fully_qualified_parameter_name, parameter_value in parameter_values_for_fully_qualified_parameter_names.items()
+            }
+            for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
+        }
+        return metrics_attributed_values_by_domain
+
+    @staticmethod
+    def display(
+        charts: Union[List[alt.Chart], List[alt.VConcatChart]],
+        theme: Optional[Dict[str, Any]],
+    ) -> None:
+        """
+        Display each chart passed by DataAssistantResult.plot()
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            charts: A list of Altair chart objects to display
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the default theme
+        """
+        altair_theme: Dict[str, Any]
+        if theme:
+            altair_theme = DataAssistantResult._get_theme(theme=theme)
+        else:
+            altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
+
+        themed_charts: List[alt.chart] = DataAssistantResult.apply_theme(
+            charts=charts, theme=altair_theme
+        )
+
+        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+        dropdown_title_color: str = altair_theme["legend"]["titleColor"]
+        dropdown_title_font: str = altair_theme["font"]
+        dropdown_css: str = f"""
+            <style>
+            span.vega-bind-name {{
+                color: {dropdown_title_color};
+                font-family: "{dropdown_title_font}";
+                font-weight: bold;
+            }}
+            form.vega-bindings {{
+              position: absolute;
+              left: 75px;
+              top: 30px;
+            }}
+            </style>
+        """
+        display(HTML(dropdown_css))
+
+        # max rows for Altair charts is set to 5,000 without this
+        alt.data_transformers.disable_max_rows()
+
+        chart: alt.Chart
+        for chart in themed_charts:
+            chart.display()
+
+    @staticmethod
+    def apply_theme(
+        charts: List[alt.Chart],
+        theme: Optional[Dict[str, Any]],
+    ) -> List[alt.Chart]:
+        """
+        Apply the Great Expectations default theme and any user-provided theme overrides to each chart
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            charts: A list of Altair chart objects to apply a theme to
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
+
+        Returns:
+            A list of Altair charts with the theme applied
+        """
+        theme: Dict[str, Any] = DataAssistantResult._get_theme(theme=theme)
+        return [chart.configure(**theme) for chart in charts]
+
+    @staticmethod
+    def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        default_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
+        if theme:
+            return nested_update(default_theme, theme)
+        else:
+            return default_theme
 
     def _plot_table_domain_charts(
         self,
