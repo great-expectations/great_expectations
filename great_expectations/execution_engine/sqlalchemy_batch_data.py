@@ -240,6 +240,11 @@ class SqlAlchemyBatchData(BatchData):
             )
         # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
         # Similar message may be needed in the future for Trino backend.
+        elif dialect == GESqlDialect.TRINO:
+            logger.warning(
+                f"GE has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
+            )
+            stmt = f"CREATE TABLE {temp_table_name} AS {query}"
         elif dialect == GESqlDialect.AWSATHENA:
             logger.warning(
                 f"GE has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
