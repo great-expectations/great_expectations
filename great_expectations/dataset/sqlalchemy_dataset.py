@@ -532,7 +532,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
-            schema = None
+            # TODO: aezo to check
+            # schema = None
             table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
@@ -560,6 +561,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
             temp_table_schema_name = None
+        if self.engine.dialect.name.lower() == "trino":
+            # In BigQuery the table name is already qualified with its schema name
+            self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
+            temp_table_schema_name = schema
         else:
             try:
                 # use the schema name configured for the datasource
@@ -588,6 +593,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
+
         elif dialect_name == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
@@ -614,7 +620,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
         elif dialect_name == "trino":
             # WARNING: Trino Support is experimental, functionality is not fully under test
-            self.dialect = import_library_module(module_name="trino.sqlalchemy")
+            self.dialect = import_library_module( module_name="trino.sqlalchemy.dialect")
+
         else:
             self.dialect = None
 
@@ -649,6 +656,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if self.generated_table_name is not None:
                 if self.engine.dialect.name.lower() == "bigquery":
                     logger.warning(f"Created permanent table {table_name}")
+                if self.engine.dialect.name.lower() == "trino":
+                    logger.warning(f"Created permanent view {schema}.{table_name}")
                 if self.engine.dialect.name.lower() == "awsathena":
                     logger.warning(f"Created permanent table default.{table_name}")
 
@@ -1396,6 +1405,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             engine_dialect = str(engine_dialect, "utf-8")
         if engine_dialect == "bigquery":
             stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
+        elif engine_dialect == "trino":
+            stmt = f"CREATE OR REPLACE VIEW {schema_name}.{table_name} AS {custom_sql}"
         elif engine_dialect == "databricks":
             stmt = f"CREATE OR REPLACE TEMPORARY VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "dremio":
