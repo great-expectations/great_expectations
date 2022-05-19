@@ -2181,12 +2181,12 @@ set as active.
                 f"Please check your configuration and try again"
             )
         if "auto" in expectation_impl.default_kwarg_values:
-            logger.info(
+            print(
                 f"The Expectation {name} is able to be auto-initialized. Please run by using the auto=True parameter."
             )
             return True
         else:
-            logger.info(f"The Expectation {name} in not able to be auto-intialized.")
+            print(f"The Expectation {name} in not able to be auto-intialized.")
             return False
 
     @staticmethod
