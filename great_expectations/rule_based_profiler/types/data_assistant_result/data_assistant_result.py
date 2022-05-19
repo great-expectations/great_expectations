@@ -1430,14 +1430,12 @@ class DataAssistantResult(SerializableDictDot):
     def _create_df_for_charting(
         self,
         metric_name: str,
-        attributed_values_by_metric_name: Dict[str, ParameterNode],
+        attributed_values: ParameterNode,
         expectation_configuration: ExpectationConfiguration,
         plot_mode: PlotMode,
     ) -> pd.DataFrame:
-        batch_ids: KeysView[str] = attributed_values_by_metric_name[metric_name].keys()
-        metric_values: MetricValues = [
-            value[0] for value in attributed_values_by_metric_name[metric_name].values()
-        ]
+        batch_ids: KeysView[str] = attributed_values.keys()
+        metric_values: MetricValues = [value[0] for value in attributed_values.values()]
 
         df: pd.DataFrame = pd.DataFrame(
             {sanitize_parameter_name(name=metric_name): metric_values}
@@ -1536,9 +1534,13 @@ class DataAssistantResult(SerializableDictDot):
                         expectation_configuration.expectation_type
                     ]
                 ):
+                    attributed_values: ParameterNode = attributed_values_by_metric_name[
+                        metric_name
+                    ]
+
                     df: pd.DataFrame = self._create_df_for_charting(
                         metric_name=metric_name,
-                        attributed_values_by_metric_name=attributed_values_by_metric_name,
+                        attributed_values=attributed_values,
                         expectation_configuration=expectation_configuration,
                         plot_mode=plot_mode,
                     )
@@ -1559,18 +1561,25 @@ class DataAssistantResult(SerializableDictDot):
 
         expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
 
-        attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
-            attributed_metrics.values()
-        )[0]
+        table_domain: Domain = Domain(
+            domain_type=MetricDomainTypes.TABLE, rule_name="table_rule"
+        )
+        attributed_metrics_by_domain: Dict[str, ParameterNode] = attributed_metrics[
+            table_domain
+        ]
 
-        for metric_name in attributed_values_by_metric_name.keys():
+        for metric_name in attributed_metrics_by_domain.keys():
             if (
                 metric_name
                 == expectation_metric_map[expectation_configuration.expectation_type]
             ):
+                attributed_values: ParameterNode = attributed_metrics_by_domain[
+                    metric_name
+                ]
+
                 df: pd.DataFrame = self._create_df_for_charting(
                     metric_name=metric_name,
-                    attributed_values_by_metric_name=attributed_values_by_metric_name,
+                    attributed_values=attributed_values,
                     expectation_configuration=expectation_configuration,
                     plot_mode=plot_mode,
                 )

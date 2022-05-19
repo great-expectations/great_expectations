@@ -306,9 +306,13 @@ class OnboardingDataAssistantResult(DataAssistantResult):
                 metric_name
                 == expectation_metric_map[expectation_configuration.expectation_type]
             ):
+                attributed_values: ParameterNode = attributed_values_by_metric_name[
+                    metric_name
+                ]
+
                 df: pd.DataFrame = self._create_df_for_charting(
                     metric_name=metric_name,
-                    attributed_values_by_metric_name=attributed_values_by_metric_name,
+                    attributed_values=attributed_values,
                     expectation_configuration=expectation_configuration,
                     plot_mode=plot_mode,
                 )
