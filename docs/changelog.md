@@ -2,6 +2,11 @@
 title: Changelog
 ---
 
+### 0.15.6
+* [MAINTENANCE] Update how_to_configure_a_new_checkpoint_using_test_yaml_config.md (#5157)
+* [MAINTENANCE] Speed up the site builder (#5125) (thanks @tanelk)
+* [MAINTENANCE] remove account id deprecation notice (#5158)
+
 ### 0.15.5
 * [FEATURE] Add subset operation to Domain class (#5049)
 * [FEATURE] In DataAssistant: Use Domain instead of domain_type as key for Metrics Parameter Builders (#5057)
