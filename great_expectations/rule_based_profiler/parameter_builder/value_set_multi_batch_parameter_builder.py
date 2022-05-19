@@ -6,19 +6,19 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
-    AttributedResolvedMetrics,
     MetricMultiBatchParameterBuilder,
-    MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    Attributes,
+    AttributedResolvedMetrics,
     Domain,
+    MetricValues,
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.types.attributes import Attributes
 
 
 class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
@@ -59,7 +59,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         ] = None,
         json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Args:
             name: the name of this parameter -- this is user-specified parameter name (from configuration);
@@ -105,6 +105,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
+            json_serialize=None,
             recompute_existing_parameter_values=recompute_existing_parameter_values,
         )
 

@@ -1,8 +1,8 @@
 import copy
+import datetime
 import json
 import logging
 import sys
-import uuid
 from typing import Any, Dict, List, Optional, Set, Union
 
 from tqdm.auto import tqdm
@@ -15,20 +15,20 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     get_profiler_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import nested_update
+from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config.base import (
     DomainBuilderConfig,
     ExpectationConfigurationBuilderConfig,
@@ -88,7 +88,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
-    ):
+    ) -> None:
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
 
@@ -120,8 +120,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self.variables = _variables
 
         self._usage_statistics_handler = usage_statistics_handler
-
-        self._citation = None
 
         self._data_context = data_context
 
@@ -220,15 +218,20 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
-    ) -> None:
+    ) -> RuleBasedProfilerResult:
         """
+        Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
+
         Args:
-            variables: attribute name/value pairs (overrides), commonly-used in Builder objects.
+            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
             rules: name/(configuration-dictionary) (overrides)
-            batch_list: Explicit list of Batch objects to supply data at runtime.
-            batch_request: Explicit batch_request used to supply data at runtime.
+            batch_list: Explicit list of Batch objects to supply data at runtime
+            batch_request: Explicit batch_request used to supply data at runtime
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
+
+        Returns:
+            "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
         """
         # Check to see if the user has disabled progress bars
         disable = False
@@ -241,16 +244,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
                 if "rule_based_profiler" in progress_bars:
                     disable = not progress_bars["rule_based_profiler"]
-
-        # noinspection PyProtectedMember,SpellCheckingInspection
-        progress_bar: tqdm = tqdm(
-            desc="Profiling Dataset",
-            disable=disable,
-        )
-        progress_bar.update(0)
-        progress_bar.refresh()
-        sys.stdout.write("\n")
-        sys.stdout.flush()
 
         effective_variables: Optional[
             ParameterContainer
@@ -268,16 +261,20 @@ class BaseRuleBasedProfiler(ConfigPeer):
         effective_rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
             rule.name: rule.to_json_dict() for rule in effective_rules
         }
-        self.citation = {
-            "name": self.name,
-            "config_version": self.config_version,
-            "variables": convert_variables_to_dict(variables=self.variables),
-            "rules": effective_rules_configs,
-        }
+
+        # noinspection PyProtectedMember,SpellCheckingInspection
+        progress_bar: tqdm = tqdm(
+            total=len(effective_rules),
+            desc="Profiling Dataset",
+            disable=disable,
+        )
+        progress_bar.update(0)
+        progress_bar.refresh()
+        sys.stdout.write("\n")
+        sys.stdout.flush()
 
         rule_state: RuleState
         rule: Rule
-        domains_count: int = 0
         for rule in effective_rules:
             rule_state = rule.run(
                 variables=effective_variables,
@@ -287,63 +284,32 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 reconciliation_directives=reconciliation_directives,
             )
             self.rule_states.append(rule_state)
-
-            domains_count += len(rule_state.domains)
-            progress_bar.update(domains_count)
+            progress_bar.update(1)
             progress_bar.refresh()
 
         progress_bar.close()
 
-    def get_expectation_suite(
-        self,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
-        """
-        Args:
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
+        return RuleBasedProfilerResult(
+            fully_qualified_parameter_names_by_domain=self.get_fully_qualified_parameter_names_by_domain(),
+            parameter_values_for_fully_qualified_parameter_names_by_domain=self.get_parameter_values_for_fully_qualified_parameter_names_by_domain(),
+            expectation_configurations=list(
+                filter(None, self.get_expectation_configurations())
+            ),
+            citation={
+                "citation_date": convert_to_json_serializable(
+                    data=datetime.datetime.now(datetime.timezone.utc)
+                ),
+                "comment": "Suite created by Rule-Based Profiler with the configuration included.",
+                "profiler_config": {
+                    "name": self.name,
+                    "config_version": self.config_version,
+                    "variables": convert_variables_to_dict(variables=self.variables),
+                    "rules": effective_rules_configs,
+                },
+            },
+        )
 
-        Returns:
-            ExpectationSuite using ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
-        """
-        assert not (
-            expectation_suite and expectation_suite_name
-        ), "Ambiguous arguments provided; you may pass in an ExpectationSuite or provide a name to instantiate a new one (but you may not do both)."
-
-        if expectation_suite is None:
-            if expectation_suite_name is None:
-                expectation_suite_name = f"tmp.profiler_{self.__class__.__name__}_suite_{str(uuid.uuid4())[:8]}"
-
-            expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
-                data_context=self._data_context,
-            )
-
-        if include_citation:
-            expectation_suite.add_citation(
-                comment="Suite created by Rule-Based Profiler with the configuration included.",
-                profiler_config=self.citation,
-            )
-
-        expectation_configurations: List[
-            ExpectationConfiguration
-        ] = self._get_expectation_configurations()
-
-        expectation_configuration: ExpectationConfiguration
-        for expectation_configuration in expectation_configurations:
-            expectation_suite._add_expectation(
-                expectation_configuration=expectation_configuration,
-                send_usage_event=False,
-                match_type="domain",
-                overwrite_existing=True,
-            )
-
-        return expectation_suite
-
-    def _get_expectation_configurations(self) -> List[ExpectationConfiguration]:
+    def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
         """
         Returns:
             List of ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
@@ -875,10 +841,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> RuleBasedProfilerResult:
         profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
             data_context=data_context,
             profiler_store=profiler_store,
@@ -886,7 +849,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ge_cloud_id=ge_cloud_id,
         )
 
-        profiler.run(
+        return profiler.run(
             variables=variables,
             rules=rules,
             batch_list=None,
@@ -894,14 +857,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             recompute_existing_parameter_values=False,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )
-
-        result: ExpectationSuite = profiler.get_expectation_suite(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-        )
-
-        return result
 
     @staticmethod
     def run_profiler_on_data(
@@ -911,10 +866,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> RuleBasedProfilerResult:
         profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
             data_context=data_context,
             profiler_store=profiler_store,
@@ -927,7 +879,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rule.name: rule.to_json_dict() for rule in profiler.rules
         }
 
-        profiler.run(
+        return profiler.run(
             variables=None,
             rules=rules,
             batch_list=batch_list,
@@ -935,14 +887,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             recompute_existing_parameter_values=False,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )
-
-        result: ExpectationSuite = profiler.get_expectation_suite(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-        )
-
-        return result
 
     @staticmethod
     def add_profiler(
@@ -1102,8 +1046,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         Returns:
             Dictionary that contains RuleBasedProfiler state
         """
-        # Provide visibility into parameters that RuleBasedProfiler was instantiated with.
-        report_object: dict = {"config": self.citation}
+        report_object: dict = {"config": self.config.to_json_dict()}
 
         if pretty_print:
             print(f"\nRuleBasedProfiler class name: {self.name}")
@@ -1134,7 +1077,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return copy.deepcopy(self._variables)
 
     @variables.setter
-    def variables(self, value: Optional[ParameterContainer]):
+    def variables(self, value: Optional[ParameterContainer]) -> None:
         self._variables = value
         self.config.variables = convert_variables_to_dict(variables=value)
 
@@ -1143,16 +1086,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._rules
 
     @rules.setter
-    def rules(self, value: List[Rule]):
+    def rules(self, value: List[Rule]) -> None:
         self._rules = value
-
-    @property
-    def citation(self) -> Optional[Dict[str, Any]]:
-        return self._citation
-
-    @citation.setter
-    def citation(self, value: Optional[Dict[str, Any]]):
-        self._citation = value
 
     @property
     def rule_states(self) -> List[RuleState]:
@@ -1263,7 +1198,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Create a new Profiler using configured rules.
         For a Rule or an item in a Rule configuration, instantiates the following if
@@ -1296,7 +1231,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         )
 
 
-def _validate_builder_override_config(builder_config: dict):
+def _validate_builder_override_config(builder_config: dict) -> None:
     """
     In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
     candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.

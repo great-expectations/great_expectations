@@ -23,6 +23,9 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+    DataAssistantDispatcher,
+)
 
 try:
     from typing import Literal
@@ -103,7 +106,10 @@ from great_expectations.datasource.new_datasource import BaseDatasource, Datasou
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler import (
+    RuleBasedProfiler,
+    RuleBasedProfilerResult,
+)
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import (
     filter_properties_dict,
@@ -398,6 +404,8 @@ class BaseDataContext(ConfigPeer):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
+        self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -1124,7 +1132,7 @@ class BaseDataContext(ConfigPeer):
 
     def save_config_variable(
         self, config_variable_name, value, skip_if_substitution_variable: bool = True
-    ):
+    ) -> None:
         r"""Save config variable value
         Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
 
@@ -1168,7 +1176,7 @@ class BaseDataContext(ConfigPeer):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self, datasource_name: str):
+    def delete_datasource(self, datasource_name: str) -> None:
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
@@ -2022,7 +2030,7 @@ class BaseDataContext(ConfigPeer):
         )
         return generator
 
-    def set_config(self, project_config: DataContextConfig):
+    def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
 
     def _build_datasource_from_config(
@@ -2177,7 +2185,7 @@ class BaseDataContext(ConfigPeer):
 
     def send_usage_message(
         self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
-    ):
+    ) -> None:
         """helper method to send a usage method using DataContext. Used when sending usage events from
             classes like ExpectationSuite.
             event
@@ -2375,7 +2383,9 @@ class BaseDataContext(ConfigPeer):
         self._evaluation_parameter_dependencies_compiled = False
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
-    def _store_metrics(self, requested_metrics, validation_results, target_store_name):
+    def _store_metrics(
+        self, requested_metrics, validation_results, target_store_name
+    ) -> None:
         """
         requested_metrics is a dictionary like this:
 
@@ -2449,10 +2459,12 @@ class BaseDataContext(ConfigPeer):
 
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
-    ):
+    ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
 
-    def store_evaluation_parameters(self, validation_results, target_store_name=None):
+    def store_evaluation_parameters(
+        self, validation_results, target_store_name=None
+    ) -> None:
         if not self._evaluation_parameter_dependencies_compiled:
             self._compile_evaluation_parameter_dependencies()
 
@@ -2483,7 +2495,11 @@ class BaseDataContext(ConfigPeer):
     def validations_store(self) -> ValidationsStore:
         return self.stores[self.validations_store_name]
 
-    def _compile_evaluation_parameter_dependencies(self):
+    @property
+    def assistants(self) -> DataAssistantDispatcher:
+        return self._assistants
+
+    def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
@@ -3385,10 +3401,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> RuleBasedProfilerResult:
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
 
         Args:
@@ -3396,12 +3409,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
             variables: Attribute name/value pairs (overrides)
             rules: Key-value pairs of name/configuration-dictionary (overrides)
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
 
         Returns:
-            Set of rule evaluation results in the form of an ExpectationSuite.
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
 
         Raises:
             AssertionError if both a `name` and `ge_cloud_id` are provided.
@@ -3414,9 +3424,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id=ge_cloud_id,
             variables=variables,
             rules=rules,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
         )
 
     @usage_statistics_enabled_method(
@@ -3428,10 +3435,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         batch_request: Optional[BatchRequestBase] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> RuleBasedProfilerResult:
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
         Args:
@@ -3439,12 +3443,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             batch_request: Explicit batch_request used to supply data at runtime.
             name: Identifier used to retrieve the profiler from a store.
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
 
         Returns:
-            Set of rule evaluation results in the form of an ExpectationSuite.
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
 
         Raises:
             ProfilerConfigurationError is both "batch_list" and "batch_request" arguments are specified.
@@ -3458,9 +3459,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             batch_request=batch_request,
             name=name,
             ge_cloud_id=ge_cloud_id,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
         )
 
     def test_yaml_config(

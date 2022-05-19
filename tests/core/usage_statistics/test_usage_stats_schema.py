@@ -1,3 +1,5 @@
+import json
+
 import jsonschema
 
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -17,6 +19,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
     empty_payload_schema,
 )
+from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_usage_statistics_messages import (
     valid_usage_statistics_messages,
 )
@@ -399,3 +402,14 @@ def test_rule_based_profiler_run_message():
                 message["event_payload"],
                 anonymized_rule_based_profiler_run_schema,
             )
+
+
+def test_usage_stats_schema_in_codebase_is_up_to_date() -> None:
+    path: str = file_relative_path(
+        __file__,
+        "../../../great_expectations/core/usage_statistics/usage_statistics_record_schema.json",
+    )
+    with open(path) as f:
+        contents: dict = json.load(f)
+
+    assert contents == anonymized_usage_statistics_record_schema

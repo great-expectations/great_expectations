@@ -116,7 +116,7 @@ class PandasDatasource(LegacyDatasource):
         reader_options=None,
         limit=None,
         **kwargs,
-    ):
+    ) -> None:
         configuration_with_defaults = PandasDatasource.build_configuration(
             data_asset_type,
             batch_kwargs_generators,

@@ -244,12 +244,6 @@ class DataContext(BaseDataContext):
                 conf_file_section="ge_cloud_config",
                 conf_file_option="account_id",
             )
-            logger.warning(
-                'If you have an environment variable named "GE_CLOUD_ACCOUNT_ID", please rename it to '
-                '"GE_CLOUD_ORGANIZATION_ID". If you have a global config file with an "account_id" '
-                'option, please rename it to "organization_id". "GE_CLOUD_ACCOUNT_ID" and "account_id" '
-                "will be deprecated in the next major release."
-            )
 
         if ge_cloud_organization_id is None:
             ge_cloud_organization_id = super()._get_global_config_value(
@@ -318,7 +312,7 @@ class DataContext(BaseDataContext):
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
-    ):
+    ) -> None:
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = None
         ge_cloud_config = None
@@ -439,7 +433,7 @@ class DataContext(BaseDataContext):
         """Save the current project to disk."""
         if self.ge_cloud_mode:
             logger.debug(
-                "ge_cloud_mode detected - skipping DataContect._save_project_config"
+                "ge_cloud_mode detected - skipping DataContext._save_project_config"
             )
             return
         logger.debug("Starting DataContext._save_project_config")
@@ -467,7 +461,7 @@ class DataContext(BaseDataContext):
 
         return new_datasource
 
-    def delete_datasource(self, name: str):
+    def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
 
         super().delete_datasource(datasource_name=name)

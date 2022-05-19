@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -9,7 +9,7 @@ class TableDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Args:
             data_context: BaseDataContext associated with this DomainBuilder
@@ -29,11 +29,13 @@ class TableDomainBuilder(DomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         domains: List[Domain] = [
             Domain(
                 domain_type=self.domain_type,
+                rule_name=rule_name,
             ),
         ]
 

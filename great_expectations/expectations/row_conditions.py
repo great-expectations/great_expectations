@@ -26,7 +26,7 @@ except ImportError:
     sa = None
 
 
-def _set_notnull(s, l, t):
+def _set_notnull(s, l, t) -> None:
     t["notnull"] = True
 
 

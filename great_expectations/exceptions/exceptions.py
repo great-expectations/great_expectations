@@ -7,13 +7,13 @@ from great_expectations.marshmallow__shade import ValidationError
 
 
 class GreatExpectationsError(Exception):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         self.message = message
         super().__init__(message)
 
 
 class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
-    def __init__(self, message, validation_error=None):
+    def __init__(self, message, validation_error=None) -> None:
         self.message = message
         self.messages = None
         if validation_error is not None:
@@ -26,7 +26,7 @@ class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
 
 
 class SuiteEditNotebookCustomTemplateModuleNotFoundError(ModuleNotFoundError):
-    def __init__(self, custom_module):
+    def __init__(self, custom_module) -> None:
         message = f"The custom module '{custom_module}' could not be found"
         super().__init__(message)
 
@@ -64,7 +64,7 @@ class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
 
 
 class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
-    def __init__(self, message, validation_error=None, field_name=None):
+    def __init__(self, message, validation_error=None, field_name=None) -> None:
         if validation_error is not None:
             if (
                 validation_error
@@ -136,13 +136,13 @@ class ProfilerNotFoundError(ProfilerError):
 
 
 class InvalidConfigError(DataContextError):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         self.message = message
         super().__init__(self.message)
 
 
 class MissingConfigVariableError(InvalidConfigError):
-    def __init__(self, message, missing_config_variable=None):
+    def __init__(self, message, missing_config_variable=None) -> None:
         if not missing_config_variable:
             missing_config_variable = []
         self.message = message
@@ -151,7 +151,7 @@ class MissingConfigVariableError(InvalidConfigError):
 
 
 class AmbiguousDataAssetNameError(DataContextError):
-    def __init__(self, message, candidates=None):
+    def __init__(self, message, candidates=None) -> None:
         self.message = message
         self.candidates = candidates
         super().__init__(self.message)
@@ -186,7 +186,7 @@ class InvalidKeyError(StoreError):
 
 
 class InvalidCacheValueError(GreatExpectationsError):
-    def __init__(self, result_dict):
+    def __init__(self, result_dict) -> None:
         template = """\
 Invalid result values were found when trying to instantiate an ExpectationValidationResult.
 - Invalid result values are likely caused by inconsistent cache values.
@@ -201,7 +201,7 @@ Result: {}
 class ConfigNotFoundError(DataContextError):
     """The great_expectations dir could not be found."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.message = """Error: No great_expectations directory was found here!
     - Please check that you are in the correct directory or have specified the correct directory.
     - If you have never run Great Expectations in this project, please run `great_expectations init` to get started.
@@ -212,7 +212,7 @@ class ConfigNotFoundError(DataContextError):
 class PluginModuleNotFoundError(GreatExpectationsError):
     """A module import failed."""
 
-    def __init__(self, module_name):
+    def __init__(self, module_name) -> None:
         template = """\
 No module named `{}` could be found in your plugins directory.
     - Please verify your plugins directory is configured correctly.
@@ -231,7 +231,7 @@ No module named `{}` could be found in your plugins directory.
 class PluginClassNotFoundError(DataContextError, AttributeError):
     """A module import failed."""
 
-    def __init__(self, module_name, class_name):
+    def __init__(self, module_name, class_name) -> None:
         class_name_changes = {
             "FixedLengthTupleFilesystemStoreBackend": "TupleFilesystemStoreBackend",
             "FixedLengthTupleS3StoreBackend": "TupleS3StoreBackend",
@@ -282,7 +282,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
 
 
 class ClassInstantiationError(GreatExpectationsError):
-    def __init__(self, module_name, package_name, class_name):
+    def __init__(self, module_name, package_name, class_name) -> None:
         module_spec = importlib.util.find_spec(module_name, package=package_name)
         if not module_spec:
             if not package_name:
@@ -300,7 +300,7 @@ properly defined inside its intended module and declared correctly by the callin
 
 
 class ExpectationSuiteNotFoundError(GreatExpectationsError):
-    def __init__(self, data_asset_name):
+    def __init__(self, data_asset_name) -> None:
         self.data_asset_name = data_asset_name
         self.message = (
             f"No expectation suite found for data_asset_name {data_asset_name}"
@@ -309,26 +309,26 @@ class ExpectationSuiteNotFoundError(GreatExpectationsError):
 
 
 class BatchKwargsError(DataContextError):
-    def __init__(self, message, batch_kwargs=None):
+    def __init__(self, message, batch_kwargs=None) -> None:
         self.message = message
         self.batch_kwargs = batch_kwargs
         super().__init__(self.message)
 
 
 class BatchDefinitionError(DataContextError):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         self.message = message
         super().__init__(self.message)
 
 
 class BatchSpecError(DataContextError):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         self.message = message
         super().__init__(self.message)
 
 
 class DatasourceError(DataContextError):
-    def __init__(self, datasource_name, message):
+    def __init__(self, datasource_name, message) -> None:
         self.message = "Cannot initialize datasource {}, error: {}".format(
             datasource_name,
             message,
@@ -353,25 +353,25 @@ class InvalidConfigValueTypeError(DataContextError):
 
 
 class DataConnectorError(DataContextError):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         self.message = message
         super().__init__(self.message)
 
 
 class ExecutionEngineError(DataContextError):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         self.message = message
         super().__init__(self.message)
 
 
 class BatchFilterError(DataContextError):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         self.message = message
         super().__init__(self.message)
 
 
 class SorterError(DataContextError):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         self.message = message
         super().__init__(self.message)
 
@@ -397,7 +397,7 @@ class InvalidMetricAccessorDomainKwargsKeyError(MetricError):
 
 
 class MetricResolutionError(MetricError):
-    def __init__(self, message, failed_metrics):
+    def __init__(self, message, failed_metrics) -> None:
         super().__init__(message)
         if not isinstance(failed_metrics, Iterable):
             failed_metrics = (failed_metrics,)
@@ -408,5 +408,11 @@ class GeCloudError(GreatExpectationsError):
     """
     Generic error used to provide additional context around Cloud-specific issues.
     """
+
+    pass
+
+
+class DatabaseConnectionError(GreatExpectationsError):
+    """Error connecting to a database including during an integration test."""
 
     pass

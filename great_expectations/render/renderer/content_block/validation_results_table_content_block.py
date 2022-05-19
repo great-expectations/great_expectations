@@ -4,20 +4,14 @@ import warnings
 from copy import deepcopy
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (
+from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (  # noqa: F401
     ExpectColumnKlDivergenceToBeLessThan,
 )
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
-from great_expectations.render.types import (
-    CollapseContent,
-    RenderedContentBlockContainer,
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-)
-from great_expectations.render.util import num_to_str
+from great_expectations.render.types import RenderedTableContent
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +55,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         return sorted(custom_columns)
 
     @classmethod
-    def _process_content_block(cls, content_block, has_failed_evr, render_object=None):
+    def _process_content_block(
+        cls, content_block, has_failed_evr, render_object=None
+    ) -> None:
         super()._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}
