@@ -6,7 +6,6 @@ from collections.abc import Iterable
 from typing import Any, Dict, List
 
 import numpy as np
-from sqlalchemy import text
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -148,8 +147,6 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             return _get_column_quantiles_athena(
                 column=column,
                 quantiles=quantiles,
-                allow_relative_error=allow_relative_error,
-                dialect=dialect,
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )
@@ -343,20 +340,29 @@ def _get_column_quantiles_sqlite(
 def _get_column_quantiles_athena(
     column,
     quantiles: Iterable,
-    allow_relative_error: bool,
-    dialect,
     selectable,
     sqlalchemy_engine,
 ) -> list:
-
     approx_percentiles = f"approx_percentile({column}, ARRAY{list(quantiles)})"
     selects_approx: List[TextClause] = [sa.text(approx_percentiles)]
     quantiles_query_approx: Select = sa.select(selects_approx).select_from(selectable)
-    quantiles_results: Row = sqlalchemy_engine.execute(
-        quantiles_query_approx
-    ).fetchone()
-    results = ast.literal_eval(quantiles_results[0])
-    return results
+    try:
+        quantiles_results: Row = sqlalchemy_engine.execute(
+            quantiles_query_approx
+        ).fetchone()
+        # the ast literal eval is needed because the method is returning a json string and not a dict
+        results = ast.literal_eval(quantiles_results[0])
+        return results
+
+        return results
+    except ProgrammingError as pe:
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe
 
 
 # Support for computing the quantiles column for PostGreSQL and Redshift is included in the same method as that for
