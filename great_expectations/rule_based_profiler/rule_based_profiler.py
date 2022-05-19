@@ -38,6 +38,9 @@ from great_expectations.rule_based_profiler.config.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
+from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
+    ColumnDomainBuilder,
+)
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
@@ -218,6 +221,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
     ) -> RuleBasedProfilerResult:
         """
         Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
@@ -233,6 +238,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         Returns:
             "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
         """
+        if include_column_names is not None and exclude_column_names is not None:
+            raise ValueError(
+                "You may either use `include_column_names` or `exclude_column_names` (but not both)."
+            )
+
         # Check to see if the user has disabled progress bars
         disable = False
         if self._data_context:
@@ -256,6 +266,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules,
             reconciliation_directives=reconciliation_directives,
         )
+
+        if include_column_names is not None or exclude_column_names is not None:
+            self._filter_column_names_in_profiler_rules(
+                rules=effective_rules,
+                include_column_names=include_column_names,
+                exclude_column_names=exclude_column_names,
+            )
 
         rule: Rule
         effective_rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
@@ -527,6 +544,20 @@ class BaseRuleBasedProfiler(ConfigPeer):
         }
         effective_rules.update(override_rules)
         return effective_rules
+
+    def _filter_column_names_in_profiler_rules(
+        self,
+        rules: List[Rule],
+        include_column_names: Optional[List[str]],
+        exclude_column_names: Optional[List[str]],
+    ) -> None:
+        for rule in rules:
+            domain_builder = rule.domain_builder
+            if domain_builder is not None and isinstance(
+                domain_builder, ColumnDomainBuilder
+            ):
+                domain_builder.include_column_names = include_column_names
+                domain_builder.exclude_column_names = exclude_column_names
 
     @staticmethod
     def _reconcile_rule_config(

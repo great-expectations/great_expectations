@@ -424,13 +424,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             rules=rules,
             batch_list=list(self._batches.values()),
             batch_request=None,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
         )
-
-        if include_column_names or exclude_column_names:
-            data_assistant_result.filter_expectation_configurations_by_column_names(
-                include_column_names=include_column_names,
-                exclude_column_names=exclude_column_names,
-            )
 
         return self._build_data_assistant_result(
             data_assistant_result=data_assistant_result
@@ -582,6 +578,8 @@ def run_profiler_on_data(
     rules: Optional[Dict[str, Dict[str, Any]]] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+    include_column_names: Optional[List[str]] = None,
+    exclude_column_names: Optional[List[str]] = None,
 ) -> None:
     """
     This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
@@ -609,6 +607,8 @@ def run_profiler_on_data(
         batch_request=batch_request,
         recompute_existing_parameter_values=False,
         reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
+        include_column_names=include_column_names,
+        exclude_column_names=exclude_column_names,
     )
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
