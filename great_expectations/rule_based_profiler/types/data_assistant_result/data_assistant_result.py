@@ -1,6 +1,6 @@
 import copy
 from abc import abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, KeysView, List, Optional, Set, Tuple, Union
 
 import altair as alt
