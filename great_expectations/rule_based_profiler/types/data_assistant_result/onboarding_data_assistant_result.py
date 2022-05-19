@@ -273,7 +273,7 @@ class OnboardingDataAssistantResult(DataAssistantResult):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
-        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+        expectation_metric_map: Dict[str, str] = self.DEFAULT_EXPECTATION_METRIC_MAP
 
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
