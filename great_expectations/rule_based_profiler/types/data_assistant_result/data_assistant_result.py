@@ -515,7 +515,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_name: str,
         metric_type: alt.StandardType,
         sequential: bool,
-    ) -> alt.VConcatChart:
+    ) -> Union[alt.Chart, alt.VConcatChart]:
         """
         Args:
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
@@ -829,7 +829,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
-    ) -> alt.VConcatChart:
+    ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             metric_plot_component=metric_component,
             batch_plot_component=batch_component,
@@ -1183,13 +1183,11 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        bars: alt.VConcatChart = (
-            DataAssistantResult._get_interactive_detail_multi_bar_chart(
-                df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-            )
+        bars: alt.Chart = DataAssistantResult._get_interactive_detail_multi_bar_chart(
+            df=df,
+            metric_component=metric_component,
+            batch_component=batch_component,
+            domain_component=domain_component,
         )
 
         bars.selection = alt.Undefined
@@ -1457,7 +1455,7 @@ class DataAssistantResult(SerializableDictDot):
             )
             charts.append(table_domain_chart)
 
-        return charts
+        return [chart for chart in charts if chart is not None]
 
     def _plot_column_domain_charts(
         self,
@@ -1509,7 +1507,9 @@ class DataAssistantResult(SerializableDictDot):
             )
             return_charts.append(return_chart)
 
-        return display_charts, return_charts
+        return [chart for chart in display_charts if chart is not None], [
+            chart for chart in return_charts if chart is not None
+        ]
 
     def _chart_domain_values(
         self,
@@ -1525,8 +1525,7 @@ class DataAssistantResult(SerializableDictDot):
                 pd.DataFrame,
                 str,
                 alt.StandardType,
-                str,
-                alt.StandardType,
+                bool,
                 Optional[str],
             ],
             alt.Chart,
@@ -1599,6 +1598,9 @@ class DataAssistantResult(SerializableDictDot):
 
         for metric_name in attributed_values_by_metric_name.keys():
             if (
+                expectation_configuration.expectation_type
+                in expectation_metric_map.keys()
+            ) and (
                 metric_name
                 == expectation_metric_map[expectation_configuration.expectation_type]
             ):
@@ -1641,21 +1643,24 @@ class DataAssistantResult(SerializableDictDot):
             ],
             alt.VConcatChart,
         ]
-        if plot_mode is PlotMode.PRESCRIPTIVE:
-            plot_impl = (
-                self.get_interactive_detail_expect_column_values_to_be_between_chart
+        if len(column_dfs) > 0:
+            if plot_mode is PlotMode.PRESCRIPTIVE:
+                plot_impl = (
+                    self.get_interactive_detail_expect_column_values_to_be_between_chart
+                )
+            else:
+                plot_impl = self.get_interactive_detail_multi_chart
+
+            display_chart: alt.VConcatChart = plot_impl(
+                column_dfs=column_dfs,
+                metric_name=metric_name,
+                metric_type=metric_type,
+                sequential=sequential,
             )
+
+            return [display_chart]
         else:
-            plot_impl = self.get_interactive_detail_multi_chart
-
-        display_chart: alt.VConcatChart = plot_impl(
-            column_dfs=column_dfs,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            sequential=sequential,
-        )
-
-        return [display_chart]
+            return []
 
     def _create_df_for_charting(
         self,
@@ -1759,6 +1764,9 @@ class DataAssistantResult(SerializableDictDot):
 
             for metric_name in attributed_values_by_metric_name.keys():
                 if (
+                    expectation_configuration.expectation_type
+                    in expectation_metric_map.keys()
+                ) and (
                     metric_name
                     == expectation_metric_map[
                         expectation_configuration.expectation_type
@@ -1800,6 +1808,9 @@ class DataAssistantResult(SerializableDictDot):
 
         for metric_name in attributed_metrics_by_domain.keys():
             if (
+                expectation_configuration.expectation_type
+                in expectation_metric_map.keys()
+            ) and (
                 metric_name
                 == expectation_metric_map[expectation_configuration.expectation_type]
             ):
@@ -1839,6 +1850,7 @@ class DataAssistantResult(SerializableDictDot):
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
+            sequential: Whether the batches are sequential or not
             theme: Altair top-level chart configuration dictionary
             include_column_names: Columns to include in metrics plot
             exclude_column_names: Columns to exclude from metrics plot
@@ -1868,6 +1880,7 @@ class DataAssistantResult(SerializableDictDot):
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
+            sequential: Whether the batches are sequential or not
             theme: Altair top-level chart configuration dictionary
             include_column_names: Columns to include in expectations and metrics plot
             exclude_column_names: Columns to exclude from expectations and metrics plot
