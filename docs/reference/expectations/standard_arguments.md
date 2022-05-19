@@ -9,63 +9,15 @@ All Expectations return a JSON-serializable dictionary when evaluated, and share
 * [catch_exceptions](#catch_exceptions): If true, execution will not fail if the Expectation encounters an error.
   Instead, it will return success = False and provide an informative error message.
 * [meta](#meta): Allows user-supplied meta-data to be stored with an Expectation.
-
-:::note
-The parameter [include_config](#include_config) is also a standard argument, but it currently has no functionality.  It remains an option purely to maintain backward compatability with legacy code.
-:::
   
 All `ColumnMapExpectations` also have the following argument:
 
 * [mostly](#mostly): A special argument that allows for _fuzzy_ validation based on some percentage (available for all `column_map_expectations`)
 
 ## `result_format`
+
 See [Result format](./result_format.md) for more information.
 
-## `include_config`
-
-The original behaviour of `include_config` was to indicate if the Expectation Suite itself is returned as part of the result.  However, this is now the permanent behaviour regardless of what `include_config` is set to.  The `include_config` parameter is only still included to maintain backward compatability for existing scripts that define it. All Expectations in an Expectation Suite include a `expectation_config` key in their results.
-
-For example, if you are [creating Expectations using the dynamic process](../../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) and you executed something like the following statement:
-
-```python
-results = validator.expect_column_values_to_be_in_set(
-  "passenger_count",
-  [1, 2, 3, 4, 5,6,7,8],
-  include_config=False,
-  result_format="COMPLETE")
-print(results["expectation_config"])
-)
-```
-
-Despite `include_config` being set to `False`, the print statement will still output the `expectation_config` value seen below:
-
-```
-{
-  "expectation_context": {
-    "description": null
-  },
-  "expectation_type": "expect_column_values_to_be_in_set",
-  "kwargs": {
-    "include_config": false,
-    "result_format": "COMPLETE",
-    "column": "passenger_count",
-    "value_set": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8
-    ],
-    "batch_id": "3aa0a5a68a2bbe5abd3b08ea9739616c"
-  },
-  "meta": {}
-}
-```
-
-For this reason, it is perfectly valid to omit the `include_config` parameter when creating Expectations.
 
 ## `catch_exceptions`
 
@@ -181,7 +133,7 @@ validator.expect_column_values_to_be_between(
 
 ## Checkpoints and `result_format`
 
-While `result_format`, `include_config`, and `catch_expectations` are all standard arguments for Expectations, the `result_format` argument is also a valid parameter when included in calls to the `run(...)` command of a Checkpoint.
+While `result_format` and `catch_expectations` are both standard arguments for Expectations, the `result_format` argument is also a valid parameter when included in calls to the `run(...)` command of a Checkpoint.
 
 :::note Reminder:
 For more detailed information on how to define `result_format` values, please see [our reference guide on `result_format`](./result_format.md).
