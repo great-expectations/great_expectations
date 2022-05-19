@@ -805,7 +805,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "upper_bound": None,
             },
             "round_decimals": 0,
-            "success_ratio": 7.5e1,
+            "success_ratio": 7.5e-1,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_min_length_metric_multi_batch_parameter_builder_for_metrics,
