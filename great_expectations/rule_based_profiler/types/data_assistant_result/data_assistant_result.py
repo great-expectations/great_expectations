@@ -1,7 +1,7 @@
 import copy
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, KeysView, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
 
 import altair as alt
 import pandas as pd
@@ -1426,6 +1426,125 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         return band + lower_limit + upper_limit + anomaly_coded_bars
+
+    def _plot_table_domain_charts(
+        self,
+        expectation_configurations: List[ExpectationConfiguration],
+        plot_mode: PlotMode,
+        sequential: bool,
+    ) -> Union[List[alt.Chart], List[alt.LayerChart]]:
+        table_based_expectations: List[ExpectationConfiguration] = list(
+            filter(
+                lambda e: e.expectation_type == "expect_table_row_count_to_be_between",
+                expectation_configurations,
+            )
+        )
+
+        attributed_metrics_by_table_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.TABLE)
+
+        charts: List[alt.Chart] = []
+
+        expectation_configuration: ExpectationConfiguration
+        for expectation_configuration in table_based_expectations:
+            table_domain_chart: alt.Chart = (
+                self._create_chart_for_table_domain_expectation(
+                    expectation_configuration=expectation_configuration,
+                    attributed_metrics=attributed_metrics_by_table_domain,
+                    plot_mode=plot_mode,
+                    sequential=sequential,
+                )
+            )
+            charts.append(table_domain_chart)
+
+        return charts
+
+    def _plot_column_domain_charts(
+        self,
+        expectation_configurations: List[ExpectationConfiguration],
+        include_column_names: Optional[List[str]],
+        exclude_column_names: Optional[List[str]],
+        plot_mode: PlotMode,
+        sequential: bool,
+    ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
+        def _filter(e: ExpectationConfiguration) -> bool:
+            if e.expectation_type != "expect_column_unique_value_count_to_be_between":
+                return False
+            column_name: str = e.kwargs["column"]
+            if exclude_column_names and column_name in exclude_column_names:
+                return False
+            if include_column_names and column_name not in include_column_names:
+                return False
+            return True
+
+        column_based_expectation_configurations: List[ExpectationConfiguration] = list(
+            filter(
+                lambda e: _filter(e),
+                expectation_configurations,
+            )
+        )
+
+        attributed_metrics_by_column_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
+
+        display_charts: List[
+            alt.VConcatChart
+        ] = self._create_display_chart_for_column_domain_expectation(
+            expectation_configurations=column_based_expectation_configurations,
+            attributed_metrics=attributed_metrics_by_column_domain,
+            plot_mode=plot_mode,
+            sequential=sequential,
+        )
+
+        return_charts: List[alt.Chart] = []
+        for expectation_configuration in column_based_expectation_configurations:
+            return_chart: alt.Chart = (
+                self._create_return_chart_for_column_domain_expectation(
+                    expectation_configuration=expectation_configuration,
+                    attributed_metrics=attributed_metrics_by_column_domain,
+                    plot_mode=plot_mode,
+                    sequential=sequential,
+                )
+            )
+            return_charts.append(return_chart)
+
+        return display_charts, return_charts
+
+    def _chart_domain_values(
+        self,
+        df: pd.DataFrame,
+        metric_name: str,
+        metric_type: alt.StandardType,
+        plot_mode: PlotMode,
+        sequential: bool,
+        subtitle: Optional[str],
+    ) -> alt.Chart:
+        plot_impl: Callable[
+            [
+                pd.DataFrame,
+                str,
+                alt.StandardType,
+                str,
+                alt.StandardType,
+                Optional[str],
+            ],
+            alt.Chart,
+        ]
+        if plot_mode is PlotMode.PRESCRIPTIVE:
+            plot_impl = self.get_expect_domain_values_to_be_between_chart
+        elif plot_mode is PlotMode.DESCRIPTIVE:
+            plot_impl = self.get_quantitative_metric_chart
+
+        chart: alt.Chart = plot_impl(
+            df=df,
+            metric_name=metric_name,
+            metric_type=metric_type,
+            sequential=sequential,
+            subtitle=subtitle,
+        )
+        return chart
 
     def _create_df_for_charting(
         self,
