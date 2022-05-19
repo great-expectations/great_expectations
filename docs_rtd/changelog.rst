@@ -4,6 +4,44 @@
 Changelog
 #########
 
+0.15.6
+-----------------
+* [FEATURE] `NumericMetricRangeMultiBatchParameterBuilder` kernel density estimation (#5084)
+* [FEATURE] Splitters and limit sample work on AWS Athena (#5024)
+* [FEATURE] `ColumnValuesLengthMin` and `ColumnValuesLengthMax` metrics (#5107)
+* [FEATURE] Use `batch_identifiers` in plot tooltips (#5091)
+* [FEATURE] Updated `DataAssistantResult` plotting API (#5117)
+* [FEATURE] Onboarding DataAssistant: Numeric Rules and Relevant Metrics (#5120)
+* [FEATURE] DateTime Rule for OnboardingDataAssistant (#5121)
+* [FEATURE] Categorical Rule is added to OnboardingDataAssistant (#5134)
+* [FEATURE] OnboardingDataAssistant: Introduce MeanTableColumnsSetMatchMultiBatchParameterBuilder (to enable expect_table_columns_to_match_set) (#5135)
+* [FEATURE] Giving the "expect_table_columns_to_match_set" Expectation Self-Initializing Capabilities. (#5136)
+* [FEATURE] For OnboardingDataAssistant: Implement a TABLE Domain level rule to output "expect_table_columns_to_match_set" (#5137)
+* [FEATURE] Enable self-initializing `ExpectColumnValueLengthsToBeBetween` (#4985)
+* [FEATURE] `DataAssistant` plotting for non-sequential batches (#5126)
+* [BUGFIX] Insure that Batch IDs are accessible in the order in which they were loaded in Validator (#5112)
+* [BUGFIX] Update `DataAssistant` notebook for new plotting API (#5118)
+* [BUGFIX] For DataAssistants, added try-except for Notebook tests (#5124)
+* [BUGFIX] CategoricalColumnDomainBuilder needs to accept limit_mode with dictionary type (#5127)
+* [BUGFIX] Use `external_sqldialect` mark to skip during lightweight runs (#5139)
+* [BUGFIX] Use RANDOM_STATE in fixture to make tests deterministic (#5142)
+* [BUGFIX] Read deployment_version instead of using versioneer in deprecation tests (#5147)
+* [MAINTENANCE] DataAssistant: Refactoring Access to common ParameterBuilder instances (#5108)
+* [MAINTENANCE] Refactor of`MetricTypes` and `AttributedResolvedMetrics` (#5100)
+* [MAINTENANCE] Remove references to show_cta_footer except in schemas.py (#5111)
+* [MAINTENANCE] Adding unit tests for sqlalchemy limit sampler part 1 (#5109)
+* [MAINTENANCE] Don't re-raise connection errors in CI (#5115)
+* [MAINTENANCE] Sqlite specific tests for splitting and sampling (#5119)
+* [MAINTENANCE]  [MAINTENANCE] Add Trino dialect in SqlAlchemyDataset (#5085) (thanks @ms32035)
+* [MAINTENANCE] Move upper bound on sqlalchemy to <2.0.0. (#5140)
+* [MAINTENANCE] Update primary pipeline to cut releases with tags (#5128)
+* [MAINTENANCE] Improve handling of "expect_column_unique_values_count_to_be_between" in VolumeDataAssistant (#5146)
+* [MAINTENANCE] Simplify DataAssistant Operation to not Depend on Self-Initializing Expectations (#5148)
+* [MAINTENANCE] Improvements to Trino support (#5152)
+* [MAINTENANCE] Update how_to_configure_a_new_checkpoint_using_test_yaml_config.md (#5157)
+* [MAINTENANCE] Speed up the site builder (#5125) (thanks @tanelk)
+* [MAINTENANCE] remove account id deprecation notice (#5158)
+
 0.15.5
 -----------------
 * [FEATURE] Add subset operation to Domain class (#5049)
