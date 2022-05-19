@@ -2506,7 +2506,7 @@ def test_volume_data_assistant_run_include_columns_filters_expectation_configura
         "data_asset_name": "my_reports",
     }
 
-    include_column_names: List[str] = ["extra", "passenger_count", "rate_code"]
+    include_column_names: List[str] = ["extra", "passenger_count", "RatecodeID"]
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request, include_column_names=include_column_names
     )
@@ -2515,7 +2515,7 @@ def test_volume_data_assistant_run_include_columns_filters_expectation_configura
         List[ExpectationConfiguration]
     ] = data_assistant_result.expectation_configurations
     assert (
-        expectation_configurations is not None and len(expectation_configurations) == 3
+        expectation_configurations is not None and len(expectation_configurations) == 4
     )
 
     for expectation_configuration in expectation_configurations:
@@ -2536,7 +2536,7 @@ def test_volume_data_assistant_run_both_include_and_exclude_columns_raises_value
         "data_asset_name": "my_reports",
     }
 
-    include_column_names: List[str] = ["extra", "passenger_count", "rate_code"]
+    include_column_names: List[str] = ["extra", "passenger_count", "RatecodeID"]
     exclude_column_names: List[str] = ["VendorID", "pickup_datetime"]
 
     with pytest.raises(ValueError) as e:

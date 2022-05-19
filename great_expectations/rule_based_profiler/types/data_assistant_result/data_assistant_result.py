@@ -118,42 +118,6 @@ class DataAssistantResult(SerializableDictDot):
         }
         return metrics_attributed_values_by_domain
 
-    def filter_expectation_configurations_by_column_names(
-        self,
-        include_column_names: Optional[List[str]] = None,
-        exclude_column_names: Optional[List[str]] = None,
-    ) -> None:
-        """Modify the expectation configuration attribute of the result object based on input column lists (performed in-place).
-
-        Args:
-            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
-            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
-
-        Raises:
-            ValueError if both include_column_names and exclude_column_names have been provided.
-        """
-        if include_column_names is not None and exclude_column_names is not None:
-            raise ValueError(
-                "You may either use `include_column_names` or `exclude_column_names` (but not both)."
-            )
-
-        if self.expectation_configurations is None:
-            return
-
-        filtered_expectation_configurations: List[ExpectationConfiguration] = []
-
-        for expectation_configuration in self.expectation_configurations:
-            kwargs: dict = expectation_configuration.get("kwargs", {})
-            column: Optional[str] = kwargs.get("column")
-            if (
-                (column is None)
-                or (include_column_names and column in include_column_names)
-                or (exclude_column_names and column not in exclude_column_names)
-            ):
-                filtered_expectation_configurations.append(expectation_configuration)
-
-        self.expectation_configurations = filtered_expectation_configurations
-
     @staticmethod
     def display(
         charts: Union[List[alt.Chart], List[alt.VConcatChart]],
