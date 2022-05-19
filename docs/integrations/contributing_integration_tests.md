@@ -11,14 +11,14 @@ The aim of this document is to provide guidance for vendors or community partner
 
 ### Scope
 While test requirements vary widly, we made some decisions to help us narrow down the cases we cover while keeping developer friction at a minimum.
-To this end we have created a taxonomy of the types of tests that our self service integration tests framework supports.
+To this end we have created a taxonomy of the types of tests that our self-service integration tests framework supports.
 
 #### Type 1
 Type 1 integration tests are those which are fully self-contained and can be or are already containerized. Our framework supports running tests in docker containers and(optionally) orchestrated via `docker compose`.
 
 #### Type 2
 Type 2 integration tests are those which depend on outside/third party services. For example, your integration depends on AWS Redshift, Snowflake, Databricks, etc. In this case
-credentials for those will have to be provided to us (off-band). More about the specifics later.
+credentials for those will have to be provided to us (off-band). More about the specifics below.
 
 ## Steps for Adding Type 1 Tests
 

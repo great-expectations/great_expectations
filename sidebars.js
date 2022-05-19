@@ -345,9 +345,10 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'How to contribute integration documentation',
+              label: 'How to contribute integrations',
               items: [
                 'integrations/contributing_integration',
+                'integrations/contributing_integration_tests',
                 { type: 'doc', id: 'integrations/integration_template', label: 'TEMPLATE Integration Document' }
               ]
             },
