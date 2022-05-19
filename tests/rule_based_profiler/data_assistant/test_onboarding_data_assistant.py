@@ -199,7 +199,7 @@ def test_onboarding_data_assistant_result_serialization(
         bobby_onboarding_data_assistant_result.to_json_dict()
         == onboarding_data_assistant_result_as_dict
     )
-    assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 7
+    assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 8
 
 
 def test_onboarding_data_assistant_metrics_count(
@@ -230,7 +230,7 @@ def test_onboarding_data_assistant_metrics_count(
     ) in bobby_onboarding_data_assistant_result.metrics_by_domain.items():
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
-    assert num_metrics == 178
+    assert num_metrics == 184
 
 
 def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(

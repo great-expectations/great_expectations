@@ -22,6 +22,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
+    RegexPatternStringParameterBuilder,
+)
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
@@ -241,6 +244,32 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 json_serialize=json_serialize,
             )
 
+        def get_column_min_length_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_numeric_metric_multi_batch_parameter_builder(
+                metric_name="column_values.length.min",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_max_length_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_numeric_metric_multi_batch_parameter_builder(
+                metric_name="column_values.length.max",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
         def get_column_median_metric_multi_batch_parameter_builder(
             self,
             json_serialize: Union[str, bool] = True,
@@ -329,6 +358,25 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
                 truncate_values=f"{VARIABLES_KEY}truncate_values",
                 round_decimals=f"{VARIABLES_KEY}round_decimals",
+                evaluation_parameter_builder_configs=None,
+                json_serialize=json_serialize,
+                data_context=None,
+            )
+
+        @staticmethod
+        def build_regex_pattern_string_parameter_builder(
+            name: str,
+            json_serialize: Union[str, bool] = True,
+        ) -> RegexPatternStringParameterBuilder:
+            """
+            This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
+            """
+            return RegexPatternStringParameterBuilder(
+                name=name,
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                threshold=1.0,
+                candidate_regexes=None,
                 evaluation_parameter_builder_configs=None,
                 json_serialize=json_serialize,
                 data_context=None,
