@@ -32,7 +32,7 @@ Changelog
 * [MAINTENANCE] Adding unit tests for sqlalchemy limit sampler part 1 (#5109)
 * [MAINTENANCE] Don't re-raise connection errors in CI (#5115)
 * [MAINTENANCE] Sqlite specific tests for splitting and sampling (#5119)
-* [MAINTENANCE]  [MAINTENANCE] Add Trino dialect in SqlAlchemyDataset (#5085) (thanks @ms32035)
+* [MAINTENANCE] Add Trino dialect in SqlAlchemyDataset (#5085) (thanks @ms32035)
 * [MAINTENANCE] Move upper bound on sqlalchemy to <2.0.0. (#5140)
 * [MAINTENANCE] Update primary pipeline to cut releases with tags (#5128)
 * [MAINTENANCE] Improve handling of "expect_column_unique_values_count_to_be_between" in VolumeDataAssistant (#5146)
