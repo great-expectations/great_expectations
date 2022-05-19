@@ -76,12 +76,12 @@ We can now use the `mysql_batch_request` defined above to build a <TechnicalTag 
 
 Instantiate our `UserConfigurableProfiler`:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L98-L101
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L98-L104
 ```
 
 And use that profiler to build and save an Expectation Suite:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L104-L108
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L107-L111
 ```
 
 <details>
@@ -100,7 +100,7 @@ Before we can validate our second table, we need to define a <TechnicalTag tag="
 
 We will pass both the `pg_batch_request` and Expectation Suite defined above to this checkpoint.
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L111-L121
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L114-L124
 ```
 
 ### 6. Validation
@@ -108,7 +108,7 @@ We will pass both the `pg_batch_request` and Expectation Suite defined above to 
 
 Finally, we can use our Checkpoint to validate that our two tables are identical:
 
-```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L124-L126
+```python file=../../../../tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py#L127-L129
 ```
 
 If we now inspect the results of this Checkpoint (`results["success"]`), we can see that our Validation was successful!
