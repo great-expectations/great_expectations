@@ -169,6 +169,10 @@ class InvalidExpectationConfigurationError(GreatExpectationsError):
     pass
 
 
+class ExpectationNotFoundError(GreatExpectationsError):
+    pass
+
+
 class InvalidValidationResultError(GreatExpectationsError):
     pass
 
