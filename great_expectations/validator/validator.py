@@ -2163,7 +2163,7 @@ set as active.
         return df.reset_index(drop=True, inplace=False)
 
     @staticmethod
-    def is_expectation_auto_initializing(name: str) -> bool:
+    def is_expectation_self_initializing(name: str) -> bool:
         """
         Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
 
@@ -2182,11 +2182,11 @@ set as active.
             )
         if "auto" in expectation_impl.default_kwarg_values:
             print(
-                f"The Expectation {name} is able to be auto-initialized. Please run by using the auto=True parameter."
+                f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
             )
             return True
         else:
-            print(f"The Expectation {name} in not able to be auto-intialized.")
+            print(f"The Expectation {name} is not able to be self-initialized.")
             return False
 
     @staticmethod
