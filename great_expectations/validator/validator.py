@@ -2163,7 +2163,7 @@ set as active.
         return df.reset_index(drop=True, inplace=False)
 
     @staticmethod
-    def is_expectation_auto_initializing(name: str) -> bool:
+    def is_expectation_self_initializing(name: str) -> bool:
         """
         Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
 

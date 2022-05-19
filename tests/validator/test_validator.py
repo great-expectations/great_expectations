@@ -1181,14 +1181,14 @@ def test_validator_docstrings(multi_batch_taxi_validator):
     )
 
 
-def test_validator_is_expectation_auto_initializing(multi_batch_taxi_validator, capsys):
+def test_validator_is_expectation_self_initializing(multi_batch_taxi_validator, capsys):
     validator: Validator = multi_batch_taxi_validator
 
     with pytest.raises(ge_exceptions.ValidationError):
-        validator.is_expectation_auto_initializing(name="I_dont_exist")
+        validator.is_expectation_self_initializing(name="I_dont_exist")
 
     assert (
-        validator.is_expectation_auto_initializing(
+        validator.is_expectation_self_initializing(
             name="expect_column_distinct_values_to_be_in_set"
         )
         is False
@@ -1200,7 +1200,7 @@ def test_validator_is_expectation_auto_initializing(multi_batch_taxi_validator, 
     )
 
     assert (
-        validator.is_expectation_auto_initializing(
+        validator.is_expectation_self_initializing(
             name="expect_column_mean_to_be_between"
         )
         is True
