@@ -2182,11 +2182,11 @@ set as active.
             )
         if "auto" in expectation_impl.default_kwarg_values:
             print(
-                f"The Expectation {name} is able to be auto-initialized. Please run by using the auto=True parameter."
+                f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
             )
             return True
         else:
-            print(f"The Expectation {name} in not able to be auto-intialized.")
+            print(f"The Expectation {name} is not able to be self-initialized.")
             return False
 
     @staticmethod
