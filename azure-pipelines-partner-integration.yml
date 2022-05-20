@@ -10,6 +10,13 @@ stages:
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
+      - job: partner_integration_anthony_db
+        steps:
+          - bash: cd assets/partners/anthonydb; ../common/run-2.sh;
+            name: RunDockerComposeUp
+            env:
+              DB_URL: $(ANTHONY_DB_URL)
+              DB_PASS: $(ANTHONY_DB_PASS)
       - job: partner_integration_rubenshift
         steps:
           - bash: cd assets/partners/rubenshift; ../common/run-1.sh 
