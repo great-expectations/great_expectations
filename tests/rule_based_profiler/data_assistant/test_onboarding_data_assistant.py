@@ -4,6 +4,7 @@ import pytest
 from freezegun import freeze_time
 
 from great_expectations import DataContext
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     Domain,
@@ -89,7 +90,38 @@ def test_onboarding_data_assistant_result_serialization(
         bobby_onboarding_data_assistant_result.to_json_dict()
         == onboarding_data_assistant_result_as_dict
     )
-    assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 6
+    assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 7
+
+
+def test_onboarding_data_assistant_metrics_count(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+) -> None:
+    domain: Domain
+    parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+    num_metrics: int
+
+    domain_key: Domain = Domain(
+        domain_type=MetricDomainTypes.TABLE,
+    )
+
+    num_metrics = 0
+    for (
+        domain,
+        parameter_values_for_fully_qualified_parameter_names,
+    ) in bobby_onboarding_data_assistant_result.metrics_by_domain.items():
+        if domain.is_superset(domain_key):
+            num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
+
+    assert num_metrics == 2
+
+    num_metrics = 0
+    for (
+        domain,
+        parameter_values_for_fully_qualified_parameter_names,
+    ) in bobby_onboarding_data_assistant_result.metrics_by_domain.items():
+        num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
+
+    assert num_metrics == 178
 
 
 def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
