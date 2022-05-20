@@ -1538,16 +1538,19 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
-        plot_impl: Callable[
-            [
-                pd.DataFrame,
-                str,
-                alt.StandardType,
-                bool,
-                Optional[str],
-            ],
-            alt.Chart,
-        ]
+        plot_impl: Optional[
+            Callable[
+                [
+                    pd.DataFrame,
+                    str,
+                    alt.StandardType,
+                    bool,
+                    Optional[str],
+                ],
+                alt.Chart,
+            ]
+        ] = None
+        chart: Optional[alt.Chart] = None
         if plot_mode is PlotMode.PRESCRIPTIVE:
             if metric_name == "table_row_count":
                 plot_impl = self.get_expect_domain_values_to_be_between_chart
@@ -1555,13 +1558,14 @@ class DataAssistantResult(SerializableDictDot):
             if metric_name == "table_row_count":
                 plot_impl = self.get_quantitative_metric_chart
 
-        chart: alt.Chart = plot_impl(
-            df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            sequential=sequential,
-            subtitle=subtitle,
-        )
+        if plot_impl:
+            chart = plot_impl(
+                df=df,
+                metric_name=metric_name,
+                metric_type=metric_type,
+                sequential=sequential,
+                subtitle=subtitle,
+            )
         return chart
 
     def _create_display_chart_for_column_domain_expectation(
@@ -1656,35 +1660,36 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType,
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> List[alt.VConcatChart]:
-        plot_impl: Callable[
-            [
-                List[Tuple[str, pd.DataFrame]],
-                str,
-                alt.StandardType,
-            ],
-            alt.VConcatChart,
-        ]
-        if len(column_dfs) > 0:
-            if plot_mode is PlotMode.PRESCRIPTIVE:
-                if metric_name == "column_distinct_values_count":
-                    plot_impl = (
-                        self.get_interactive_detail_expect_column_values_to_be_between_chart
-                    )
-            else:
-                if metric_name == "column_distinct_values_count":
-                    plot_impl = self.get_interactive_detail_multi_chart
+    ) -> List[Optional[alt.VConcatChart]]:
+        plot_impl: Optional[
+            Callable[
+                [
+                    List[Tuple[str, pd.DataFrame]],
+                    str,
+                    alt.StandardType,
+                ],
+                alt.VConcatChart,
+            ]
+        ] = None
+        display_chart: Optional[alt.VConcatChart] = None
+        if plot_mode is PlotMode.PRESCRIPTIVE:
+            if metric_name == "column_distinct_values_count":
+                plot_impl = (
+                    self.get_interactive_detail_expect_column_values_to_be_between_chart
+                )
+        else:
+            if metric_name == "column_distinct_values_count":
+                plot_impl = self.get_interactive_detail_multi_chart
 
-            display_chart: alt.VConcatChart = plot_impl(
+        if plot_impl:
+            display_chart = plot_impl(
                 column_dfs=column_dfs,
                 metric_name=metric_name,
                 metric_type=metric_type,
                 sequential=sequential,
             )
 
-            return [display_chart]
-        else:
-            return []
+        return [display_chart]
 
     def _create_df_for_charting(
         self,
