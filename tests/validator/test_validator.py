@@ -837,6 +837,25 @@ def test_validator_can_instantiate_with_a_multi_batch_request(
     ]
 
 
+def test_validator_with_bad_batchrequest(
+    yellow_trip_pandas_data_context,
+):
+    context: DataContext = yellow_trip_pandas_data_context
+
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    multi_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="i_dont_exist",
+        data_connector_query={"batch_filter_parameters": {"year": "2019"}},
+    )
+    with pytest.raises(ge_exceptions.ValidationError):
+        validator_multi_batch: Validator = context.get_validator(
+            batch_request=multi_batch_request, expectation_suite=suite
+        )
+
+
 def test_validator_batch_filter(
     multi_batch_taxi_validator,
 ):

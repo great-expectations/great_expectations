@@ -1873,6 +1873,9 @@ class BaseDataContext(ConfigPeer):
                     )
                 )
 
+        if len(batch_list) == 0:
+            raise ge_exceptions.ValidationError("BatchRequest has returned empty list")
+
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
             batch_list=batch_list,
