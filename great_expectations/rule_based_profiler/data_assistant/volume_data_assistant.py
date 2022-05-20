@@ -69,9 +69,6 @@ class VolumeDataAssistant(DataAssistant):
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
-
-        # this must --> this is a lot harder.
-        #
         return VolumeDataAssistantResult(
             batch_id_to_batch_identifier_display_name_map=data_assistant_result.batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
