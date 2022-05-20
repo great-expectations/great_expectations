@@ -606,7 +606,7 @@ class ExecutionEngine(ABC):
                 unexpected_keys_str: str = ", ".join(
                     map(lambda element: f'"{element}"', unexpected_keys)
                 )
-                logger.warning(
+                logger.info(
                     f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
                 )
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
