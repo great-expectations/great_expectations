@@ -4,16 +4,15 @@ schedules:
 # https://crontab.guru/#0_8_*_*_1-5
 - cron: "'0 8 * * 1-5"
   displayName: Partner Integration Tests
-  branches:
-    include:
-    - develop
 
 stages:
-  - stage: run_partner_integration_tests
+  - stage: scope_check
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
-      - job: placeholder
+      - job: partner_integration_rubenshift
         steps:
-          - bash: echo Hello Partners
-            name: Placeholder
+          - bash: cd assets/partners/rubenshift; ../common/run-1.sh 
+            name: RunDockerComposeUp
+            env:
+              DB_URL: $(REDSHIFT_URL)
