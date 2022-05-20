@@ -44,6 +44,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.exceptions import (
+    ExpectationNotFoundError,
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
@@ -53,6 +54,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
+    get_expectation_impl,
     get_metric_kwargs,
     register_expectation,
     register_renderer,
@@ -1169,6 +1171,33 @@ class Expectation(metaclass=MetaExpectation):
                                 expectation_type=self.expectation_type,
                                 kwargs=test.input,
                             )
+
+    @staticmethod
+    def is_expectation_self_initializing(name: str) -> bool:
+        """
+        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
+
+        Args:
+            name (str): name of Expectation
+
+        Returns:
+            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
+        """
+
+        expectation_impl: MetaExpectation = get_expectation_impl(name)
+        if not expectation_impl:
+            raise ExpectationNotFoundError(
+                f"Expectation {name} was not found in the list of registered Expectations. "
+                f"Please check your configuration and try again"
+            )
+        if "auto" in expectation_impl.default_kwarg_values:
+            print(
+                f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
+            )
+            return True
+        else:
+            print(f"The Expectation {name} is not able to be self-initialized.")
+            return False
 
     @staticmethod
     def _choose_example(

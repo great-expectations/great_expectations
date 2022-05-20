@@ -130,6 +130,7 @@ ENV/
 
 # Vim swap files
 *.swp
+tags
 
 # Special "scratchpad" directory for notes, code samples, experiments, etc.
 DO_NOT_COMMIT
