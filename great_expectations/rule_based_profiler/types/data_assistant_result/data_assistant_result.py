@@ -1549,9 +1549,11 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart,
         ]
         if plot_mode is PlotMode.PRESCRIPTIVE:
-            plot_impl = self.get_expect_domain_values_to_be_between_chart
+            if metric_name == "table_row_count":
+                plot_impl = self.get_expect_domain_values_to_be_between_chart
         elif plot_mode is PlotMode.DESCRIPTIVE:
-            plot_impl = self.get_quantitative_metric_chart
+            if metric_name == "table_row_count":
+                plot_impl = self.get_quantitative_metric_chart
 
         chart: alt.Chart = plot_impl(
             df=df,
@@ -1665,11 +1667,13 @@ class DataAssistantResult(SerializableDictDot):
         ]
         if len(column_dfs) > 0:
             if plot_mode is PlotMode.PRESCRIPTIVE:
-                plot_impl = (
-                    self.get_interactive_detail_expect_column_values_to_be_between_chart
-                )
+                if metric_name == "column_distinct_values_count":
+                    plot_impl = (
+                        self.get_interactive_detail_expect_column_values_to_be_between_chart
+                    )
             else:
-                plot_impl = self.get_interactive_detail_multi_chart
+                if metric_name == "column_distinct_values_count":
+                    plot_impl = self.get_interactive_detail_multi_chart
 
             display_chart: alt.VConcatChart = plot_impl(
                 column_dfs=column_dfs,
@@ -1690,7 +1694,10 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
     ) -> pd.DataFrame:
         batch_ids: KeysView[str] = attributed_values.keys()
-        metric_values: MetricValues = [value[0] for value in attributed_values.values()]
+        metric_values: MetricValues = [
+            value[0] if len(value) == 1 else value
+            for value in attributed_values.values()
+        ]
 
         df: pd.DataFrame = pd.DataFrame(
             {sanitize_parameter_name(name=metric_name): metric_values}
