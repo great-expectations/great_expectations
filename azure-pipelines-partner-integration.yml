@@ -2,8 +2,11 @@ schedules:
 # Runs at 1:00 AM PT (8:00 AM UTC) on every day-of-week from Monday through Friday
 # Since this is on UTC, lets set it to PT (UTC-7)
 # https://crontab.guru/#0_8_*_*_1-5
-- cron: "'0 8 * * 1-5"
+- cron: "0 8 * * 1-5"
   displayName: Partner Integration Tests
+  branches:
+    include:
+    - develop
 
 stages:
   - stage: scope_check
