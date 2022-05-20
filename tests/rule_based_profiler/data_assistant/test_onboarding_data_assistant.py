@@ -640,4 +640,4 @@ def test_onboarding_data_assistant_plot_non_sequential(
         bobby_onboarding_data_assistant_result.plot_metrics(sequential=sequential)
     )
 
-    assert all([chart.mark == "bar" for chart in plot_expectations_result.charts])
+    assert all(chart.mark == "bar" for chart in plot_expectations_result.charts)
