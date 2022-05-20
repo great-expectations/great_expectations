@@ -1331,17 +1331,23 @@ class DataAssistantResult(SerializableDictDot):
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         fully_qualified_parameter_name: str
         parameter_value: ParameterNode
-        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
-            domain: {
-                parameter_value[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ].metric_configuration.metric_name: parameter_value[
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-                for fully_qualified_parameter_name, parameter_value in parameter_values_for_fully_qualified_parameter_names.items()
-            }
-            for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-        }
+        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {}
+        for (
+            domain,
+            parameter_values_for_fully_qualified_parameter_names,
+        ) in self.metrics_by_domain.items():
+            for (
+                fully_qualified_parameter_name,
+                parameter_value,
+            ) in parameter_values_for_fully_qualified_parameter_names.items():
+                metrics_attributed_values_by_domain[domain] = {
+                    parameter_value[
+                        FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                    ].metric_configuration.metric_name: parameter_value[
+                        FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                    ]
+                }
+
         return metrics_attributed_values_by_domain
 
     @staticmethod
