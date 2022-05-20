@@ -1,7 +1,6 @@
 import logging
 import os
 import shutil
-from posixpath import basename
 from typing import List, Optional
 
 import nbformat
