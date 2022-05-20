@@ -1430,10 +1430,17 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> Union[List[alt.Chart], List[alt.LayerChart]]:
-        table_based_expectations: List[ExpectationConfiguration] = list(
+    ) -> List[Union[List[alt.Chart], List[alt.LayerChart]]]:
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+
+        table_based_expectations: List[str] = [
+            expectation
+            for expectation in expectation_metric_map.keys()
+            if expectation.startswith("expect_table_")
+        ]
+        table_based_expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
-                lambda e: e.expectation_type == "expect_table_row_count_to_be_between",
+                lambda e: e.expectation_type in table_based_expectations,
                 expectation_configurations,
             )
         )
@@ -1445,7 +1452,7 @@ class DataAssistantResult(SerializableDictDot):
         charts: List[alt.Chart] = []
 
         expectation_configuration: ExpectationConfiguration
-        for expectation_configuration in table_based_expectations:
+        for expectation_configuration in table_based_expectation_configurations:
             table_domain_chart: alt.Chart = (
                 self._create_chart_for_table_domain_expectation(
                     expectation_configuration=expectation_configuration,
@@ -1466,8 +1473,18 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
-        def _filter(e: ExpectationConfiguration) -> bool:
-            if e.expectation_type != "expect_column_unique_value_count_to_be_between":
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+
+        column_based_expectations: List[str] = [
+            expectation
+            for expectation in expectation_metric_map.keys()
+            if expectation.startswith("expect_column_")
+        ]
+
+        def _filter(
+            e: ExpectationConfiguration, column_based_expectations: List[str]
+        ) -> bool:
+            if e.expectation_type not in column_based_expectations:
                 return False
             column_name: str = e.kwargs["column"]
             if exclude_column_names and column_name in exclude_column_names:
@@ -1478,7 +1495,7 @@ class DataAssistantResult(SerializableDictDot):
 
         column_based_expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
-                lambda e: _filter(e),
+                lambda e: _filter(e, column_based_expectations),
                 expectation_configurations,
             )
         )
@@ -1939,15 +1956,15 @@ class DataAssistantResult(SerializableDictDot):
             ExpectationConfiguration
         ] = self.expectation_configurations
 
-        table_domain_chart: Union[
-            List[alt.Chart], List[alt.LayerChart]
+        table_domain_charts: List[
+            Union[List[alt.Chart], List[alt.LayerChart]]
         ] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
             sequential=sequential,
         )
-        display_charts.extend(table_domain_chart)
-        return_charts.extend(table_domain_chart)
+        display_charts.extend(table_domain_charts)
+        return_charts.extend(table_domain_charts)
 
         column_domain_display_chart: List[alt.VConcatChart]
         column_domain_return_charts: List[alt.Chart]
