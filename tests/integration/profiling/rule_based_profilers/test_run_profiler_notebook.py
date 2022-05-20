@@ -11,28 +11,19 @@ from great_expectations.data_context.util import file_relative_path
 logger = logging.getLogger(__name__)
 
 
-def clean_up_test_files(
-    base_dir: str, additional_files_to_clean_up: Optional[List[str]] = None
-) -> None:
+def clean_up_test_files(paths: List[str]) -> None:
     """
-    Helper method to clean-up files created by tests
+    Helper method to clean-up the files created by tests
+    Args:
+        paths List(str): paths or directories to delete
     """
-    expectations_tmp_path: str = os.path.join(
-        base_dir, "great_expectations/expectations/tmp"
-    )
-
-    files_to_clean_up: List[str] = [
-        os.path.join(base_dir, "great_expectations/expectations/.ge_store_backend_id")
-    ]
-    if additional_files_to_clean_up:
-        files_to_clean_up += additional_files_to_clean_up
-
-    # clean up
-    if os.path.exists(expectations_tmp_path):
-        shutil.rmtree(expectations_tmp_path)
-    for file in files_to_clean_up:
-        if os.path.exists(file):
-            os.remove(file)
+    for path in paths:
+        if not os.path.exists(path):
+            continue
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        else:
+            os.remove(path)
 
 
 def test_run_rbp_notebook(tmp_path):
@@ -73,7 +64,13 @@ def test_run_rbp_notebook(tmp_path):
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
 
-    clean_up_test_files(base_dir=base_dir)
+        paths_to_clean_up: List[str] = [
+            os.path.join(base_dir, "great_expectations/expectations/tmp"),
+            os.path.join(
+                base_dir, "great_expectations/expectations/.ge_store_backend_id"
+            ),
+        ]
+        clean_up_test_files(paths=paths_to_clean_up)
 
 
 def test_run_data_assistants_notebook(tmp_path):
@@ -111,16 +108,16 @@ def test_run_data_assistants_notebook(tmp_path):
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
-
-    # clean up Expectations directory after running test
-    clean_up_test_files(
-        base_dir=base_dir,
-        additional_files_to_clean_up=[
+        paths_to_clean_up: List[str] = [
+            os.path.join(base_dir, "great_expectations/expectations/tmp"),
+            os.path.join(
+                base_dir, "great_expectations/expectations/.ge_store_backend_id"
+            ),
             os.path.join(
                 base_dir, "great_expectations/expectations/taxi_data_suite.json"
-            )
-        ],
-    )
+            ),
+        ]
+        clean_up_test_files(paths=paths_to_clean_up)
 
 
 def test_run_self_initializing_expectations_notebook(tmp_path):
@@ -154,13 +151,14 @@ def test_run_self_initializing_expectations_notebook(tmp_path):
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
-        # clean up Expectations directory after running test
 
-    clean_up_test_files(
-        base_dir=base_dir,
-        additional_files_to_clean_up=[
+        paths_to_clean_up: List[str] = [
+            os.path.join(base_dir, "great_expectations/expectations/tmp"),
+            os.path.join(
+                base_dir, "great_expectations/expectations/.ge_store_backend_id"
+            ),
             os.path.join(
                 base_dir, "great_expectations/expectations/new_expectation_suite.json"
-            )
-        ],
-    )
+            ),
+        ]
+        clean_up_test_files(paths=paths_to_clean_up)
