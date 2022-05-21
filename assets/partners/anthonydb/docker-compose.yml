@@ -22,6 +22,6 @@ services:
     build:
       context: .
       dockerfile: provision.Dockerfile
-    command: cat provision.mssql | /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$DB_PASS" -i /dev/stdin
+    command: bash -c "until cat < /dev/null >/dev/tcp/localhost/1433; do sleep 1; printf waiting...;done" cat provision.mssql | /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$DB_PASS" -i /dev/stdin;
     depends_on:
       - db
