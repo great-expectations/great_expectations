@@ -172,6 +172,7 @@ stages:
     jobs:
       - job: compatibility_matrix
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        timeoutInMinutes: 75
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
@@ -262,6 +263,7 @@ stages:
 
       - job: comprehensive
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        timeoutInMinutes: 90
 
         services:
           postgres: postgres
@@ -393,6 +395,7 @@ stages:
     jobs:
       - job: mysql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        timeoutInMinutes: 75
 
         services:
           mysql: mysql
@@ -443,6 +446,7 @@ stages:
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        timeoutInMinutes: 75
 
         services:
           mssql: mssql
@@ -482,6 +486,7 @@ stages:
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        timeoutInMinutes: 75
 
         services:
           trino: trino
