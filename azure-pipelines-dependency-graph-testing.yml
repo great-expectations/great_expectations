@@ -172,7 +172,6 @@ stages:
     jobs:
       - job: compatibility_matrix
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 75
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
