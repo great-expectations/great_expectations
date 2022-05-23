@@ -10,7 +10,7 @@ jsonschema>=2.5.1
 mistune>=0.8.4
 nbformat>=5.0
 notebook>=6.4.10
-numpy>=1.14.1
+numpy>=1.19.5
 packaging
 pandas>=0.23.0
 pyparsing>=2.4,<3
