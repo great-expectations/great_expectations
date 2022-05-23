@@ -10,9 +10,14 @@ from great_expectations.data_context.util import file_relative_path
 
 
 @pytest.fixture
-def release_schedule() -> Dict[dt.datetime, version.Version]:
+def release_file() -> str:
     path: str = file_relative_path(__file__, "../.github/release_schedule.json")
-    with open(path) as f:
+    return path
+
+
+@pytest.fixture
+def release_schedule(release_file: str) -> Dict[dt.datetime, version.Version]:
+    with open(release_file) as f:
         release_schedule: Dict[str, str] = json.loads(f.read())
 
     parsed_schedule: Dict[dt.datetime, version.Version] = {}
@@ -38,9 +43,10 @@ def test_release_schedule_adheres_to_schema(
 
 
 def test_release_schedule_is_updated_for_future_releases(
-    release_schedule: Dict[dt.datetime, version.Version]
+    release_schedule: Dict[dt.datetime, version.Version], release_file: str
 ) -> None:
     today: dt.datetime = dt.datetime.today()
     future_release_count: int = sum(1 for date in release_schedule if date > today)
-    if future_release_count == 0:
-        raise ValueError("Error with future schedule!")
+    assert (
+        future_release_count > 0
+    ), f"No upcoming releases! Please update `{release_file}`."
