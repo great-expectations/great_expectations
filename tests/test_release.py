@@ -46,6 +46,9 @@ def test_release_schedule_adheres_to_schema(
             # Each date should be greater than the prior one
             assert date > prev_date
 
+            # Each release occurs on a Thursday
+            assert date.weekday() == 3
+
             curr_minor: int = release_version.minor
             curr_patch: int = release_version.micro
             prev_minor: int = prev_version.minor
