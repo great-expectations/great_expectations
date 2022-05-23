@@ -50,7 +50,6 @@ stages:
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
       - template: azure/dev-install-matrix.yml
-        timeoutInMinutes: 75
         parameters:
           vmImage: "ubuntu-latest"
 
@@ -67,7 +66,6 @@ stages:
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
       - template: azure/dev-install-matrix.yml
-        timeoutInMinutes: 75
         parameters:
           vmImage: "macOS-latest"
 
@@ -84,6 +82,5 @@ stages:
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
       - template: azure/dev-install-matrix.yml
-        timeoutInMinutes: 75
         parameters:
           vmImage: "windows-latest"
