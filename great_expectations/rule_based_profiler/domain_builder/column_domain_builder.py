@@ -410,9 +410,6 @@ class ColumnDomainBuilder(DomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = self.exclude_semantic_types
-        exclude_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = self.exclude_semantic_types
         if exclude_semantic_types is None:
             exclude_semantic_types = []
         elif isinstance(exclude_semantic_types, str):
