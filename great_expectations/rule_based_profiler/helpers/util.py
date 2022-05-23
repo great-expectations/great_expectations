@@ -488,7 +488,7 @@ def compute_quantiles(
     )
     return NumericRangeEstimationResult(
         estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
-        value_range=np.array([lower_quantile, upper_quantile]),
+        value_range=np.asarray([lower_quantile, upper_quantile]),
     )
 
 
