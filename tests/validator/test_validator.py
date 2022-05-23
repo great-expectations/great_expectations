@@ -758,6 +758,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     return validator_multi_batch
 
 
+@pytest.mark.cloud
 @mock.patch(
     "great_expectations.data_context.data_context.BaseDataContext.save_expectation_suite"
 )
