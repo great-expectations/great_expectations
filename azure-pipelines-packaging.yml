@@ -48,6 +48,7 @@ stages:
   - stage: dev_install_linux
     dependsOn: user_install_linux
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+    timeoutInMinutes: 75
     jobs:
       - template: azure/dev-install-matrix.yml
         parameters:
@@ -64,6 +65,7 @@ stages:
   - stage: dev_install_macOS
     dependsOn: user_install_macOS
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+    timeoutInMinutes: 75
     jobs:
       - template: azure/dev-install-matrix.yml
         parameters:
@@ -80,6 +82,7 @@ stages:
   - stage: dev_install_windows
     dependsOn: user_install_windows
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+    timeoutInMinutes: 75
     jobs:
       - template: azure/dev-install-matrix.yml
         parameters:
