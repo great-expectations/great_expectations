@@ -195,7 +195,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
                 ].index
             )
             weights = list(
-                np.array(
+                np.asarray(
                     column_value_counts_parameter_node[
                         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
                     ]
@@ -242,7 +242,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             # in this case, we have requested a partition, histogram using said partition, and nonnull count
             bins = list(bins)
             weights = list(
-                np.array(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY])
+                np.asarray(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY])
                 / column_values_nonnull_count_parameter_node[
                     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
                 ]
