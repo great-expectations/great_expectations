@@ -30,25 +30,37 @@ def release_schedule(release_file: str) -> Dict[dt.datetime, version.Version]:
 
 
 def test_release_schedule_adheres_to_schema(
-    release_file: str, release_schedule: Dict[dt.datetime, version.Version]
+    release_schedule: Dict[dt.datetime, version.Version]
 ) -> None:
     today: dt.datetime = dt.datetime.today()
     prev_date: Optional[dt.datetime] = None
     prev_version: Optional[version.Version] = None
 
     for date, release_version in release_schedule.items():
-        assert (
-            date >= today
-        ), f"An old release exists in the schedule; please update `{release_file}`."
+
+        # No old releases should exist within the release schedule (deleted during release process)
+        assert date >= today
+
         if prev_date and prev_version:
-            assert (
-                date > prev_date and release_version > prev_version
-            ), f"An invalid entry exists in the schedule; please update `{release_file}`."
+
+            # Each date should be greater than the prior one
+            assert date > prev_date
+
+            curr_minor: int = release_version.minor
+            curr_patch: int = release_version.micro
+            prev_minor: int = prev_version.minor
+            prev_patch: int = prev_version.micro
+
+            # If incrementing a minor version number, the patch should be 0 (ex: 0.15.7 -> 0.16.0)
+            if curr_minor - prev_minor == 1:
+                assert curr_patch == 0
+            # If incrementing a patch version number, the patch should get incremented by 1 (ex: 0.15.7 -> 0.15.8)
+            else:
+                assert curr_patch - prev_patch == 1
 
         prev_date = date
         prev_version = release_version
 
+    # For release safety, there must always be items in the scheduler
     future_release_count: int = sum(1 for date in release_schedule if date > today)
-    assert (
-        future_release_count > 0
-    ), f"No upcoming releases! Please update `{release_file}`."
+    assert future_release_count > 0
