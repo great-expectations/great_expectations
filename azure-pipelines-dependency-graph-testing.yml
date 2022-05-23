@@ -336,7 +336,8 @@ stages:
                 tests/datasource/test_sqlalchemy_datasource_workarounds.py \
                 tests/expectations/test_generate_diagnostic_checklist.py \
                 tests/test_deprecation.py \
-                tests/test_packaging.py
+                tests/test_packaging.py \
+                tests/test_release.py
 
             displayName: 'dgtest-overrides'
 
