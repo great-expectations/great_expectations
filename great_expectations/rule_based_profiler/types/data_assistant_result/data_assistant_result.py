@@ -1467,9 +1467,9 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
         def _filter(e: ExpectationConfiguration) -> bool:
-            if e.expectation_type != "expect_column_unique_value_count_to_be_between":
+            column_name: Optional[str] = e.kwargs.get("column")
+            if column_name is None:
                 return False
-            column_name: str = e.kwargs["column"]
             if exclude_column_names and column_name in exclude_column_names:
                 return False
             if include_column_names and column_name not in include_column_names:
@@ -1753,10 +1753,14 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_names: List[str]
         column_dfs: List[Tuple[str, pd.DataFrame]] = []
-        for expectation_configuration in expectation_configurations:
-            metric_configuration: dict = expectation_configuration.meta[
-                "profiler_details"
-            ]["metric_configuration"]
+        for i, expectation_configuration in enumerate(expectation_configurations):
+            profiler_details: dict = expectation_configuration.meta["profiler_details"]
+            metric_configuration: Optional[dict] = profiler_details.get(
+                "metric_configuration"
+            )
+            if metric_configuration is None:
+                # print(expectation_configuration)
+                continue
             domain_kwargs: dict = metric_configuration["domain_kwargs"]
 
             domain = domains_by_column_name[domain_kwargs["column"]]
@@ -1778,6 +1782,9 @@ class DataAssistantResult(SerializableDictDot):
                     attributed_values: ParameterNode = attributed_values_by_metric_name[
                         metric_name
                     ]
+
+                    if i == 21:
+                        breakpoint()
 
                     df: pd.DataFrame = self._create_df_for_charting(
                         metric_name=metric_name,
