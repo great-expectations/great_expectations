@@ -1538,6 +1538,11 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
+        implemented_metrics: List[str] = [
+            "table_row_count",
+            "column_distinct_values_count",
+        ]
+
         plot_impl: Optional[
             Callable[
                 [
@@ -1552,10 +1557,10 @@ class DataAssistantResult(SerializableDictDot):
         ] = None
         chart: Optional[alt.Chart] = None
         if plot_mode is PlotMode.PRESCRIPTIVE:
-            if metric_name == "table_row_count":
+            if metric_name in implemented_metrics:
                 plot_impl = self.get_expect_domain_values_to_be_between_chart
         elif plot_mode is PlotMode.DESCRIPTIVE:
-            if metric_name == "table_row_count":
+            if metric_name in implemented_metrics:
                 plot_impl = self.get_quantitative_metric_chart
 
         if plot_impl:
