@@ -202,6 +202,11 @@ class BaseDatasource:
                     batch_markers=batch_markers,
                 )
                 batches.append(new_batch)
+            if len(batches) == 0:
+                raise ge_exceptions.DatasourceError(
+                    f"""
+                    BatchRequest specified has returned empty list. Please check the cofiguration and try again"""
+                )
             return batches
 
     def _build_data_connector_from_config(
