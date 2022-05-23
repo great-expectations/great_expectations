@@ -126,7 +126,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         one_batch_table_columns_names_set: Set[str]
         mean_table_columns_set_match: np.float64 = np.mean(
-            np.array(
+            np.asarray(
                 [
                     1
                     if one_batch_table_columns_names_set
