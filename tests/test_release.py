@@ -52,11 +52,11 @@ def test_release_schedule_adheres_to_schema(
             prev_patch: int = prev_version.micro
 
             # If incrementing a minor version number, the patch should be 0 (ex: 0.15.7 -> 0.16.0)
-            if curr_minor - prev_minor == 1:
-                assert curr_patch == 0
+            if curr_minor > prev_minor:
+                assert curr_minor - prev_minor == 1 and curr_patch == 0
             # If incrementing a patch version number, the patch should get incremented by 1 (ex: 0.15.7 -> 0.15.8)
             else:
-                assert curr_patch - prev_patch == 1
+                assert curr_minor - prev_minor == 0 and curr_patch - prev_patch == 1
 
         prev_date = date
         prev_version = release_version
