@@ -30,22 +30,24 @@ def release_schedule(release_file: str) -> Dict[dt.datetime, version.Version]:
 
 
 def test_release_schedule_adheres_to_schema(
-    release_schedule: Dict[dt.datetime, version.Version]
+    release_file: str, release_schedule: Dict[dt.datetime, version.Version]
 ) -> None:
+    today: dt.datetime = dt.datetime.today()
     prev_date: Optional[dt.datetime] = None
     prev_version: Optional[version.Version] = None
 
     for date, release_version in release_schedule.items():
+        assert (
+            date >= today
+        ), f"An old release exists in the schedule; please update `{release_file}`."
         if prev_date and prev_version:
-            assert date > prev_date and release_version > prev_version
+            assert (
+                date > prev_date and release_version > prev_version
+            ), f"An invalid entry exists in the schedule; please update `{release_file}`."
+
         prev_date = date
         prev_version = release_version
 
-
-def test_release_schedule_is_updated_for_future_releases(
-    release_schedule: Dict[dt.datetime, version.Version], release_file: str
-) -> None:
-    today: dt.datetime = dt.datetime.today()
     future_release_count: int = sum(1 for date in release_schedule if date > today)
     assert (
         future_release_count > 0
