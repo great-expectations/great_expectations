@@ -1430,10 +1430,17 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> Union[List[alt.Chart], List[alt.LayerChart]]:
-        table_based_expectations: List[ExpectationConfiguration] = list(
+    ) -> List[Union[List[alt.Chart], List[alt.LayerChart]]]:
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+
+        table_based_expectations: List[str] = [
+            expectation
+            for expectation in expectation_metric_map.keys()
+            if expectation.startswith("expect_table_")
+        ]
+        table_based_expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
-                lambda e: e.expectation_type == "expect_table_row_count_to_be_between",
+                lambda e: e.expectation_type in table_based_expectations,
                 expectation_configurations,
             )
         )
@@ -1445,7 +1452,7 @@ class DataAssistantResult(SerializableDictDot):
         charts: List[alt.Chart] = []
 
         expectation_configuration: ExpectationConfiguration
-        for expectation_configuration in table_based_expectations:
+        for expectation_configuration in table_based_expectation_configurations:
             table_domain_chart: alt.Chart = (
                 self._create_chart_for_table_domain_expectation(
                     expectation_configuration=expectation_configuration,
@@ -1466,8 +1473,18 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
-        def _filter(e: ExpectationConfiguration) -> bool:
-            if e.expectation_type != "expect_column_unique_value_count_to_be_between":
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+
+        column_based_expectations: List[str] = [
+            expectation
+            for expectation in expectation_metric_map.keys()
+            if expectation.startswith("expect_column_")
+        ]
+
+        def _filter(
+            e: ExpectationConfiguration, column_based_expectations: List[str]
+        ) -> bool:
+            if e.expectation_type not in column_based_expectations:
                 return False
             column_name: str = e.kwargs["column"]
             if exclude_column_names and column_name in exclude_column_names:
@@ -1478,7 +1495,7 @@ class DataAssistantResult(SerializableDictDot):
 
         column_based_expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
-                lambda e: _filter(e),
+                lambda e: _filter(e, column_based_expectations),
                 expectation_configurations,
             )
         )
@@ -1521,28 +1538,39 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
-        plot_impl: Callable[
-            [
-                pd.DataFrame,
-                str,
-                alt.StandardType,
-                bool,
-                Optional[str],
-            ],
-            alt.Chart,
+        implemented_metrics: List[str] = [
+            "table_row_count",
+            "column_distinct_values_count",
         ]
-        if plot_mode is PlotMode.PRESCRIPTIVE:
-            plot_impl = self.get_expect_domain_values_to_be_between_chart
-        elif plot_mode is PlotMode.DESCRIPTIVE:
-            plot_impl = self.get_quantitative_metric_chart
 
-        chart: alt.Chart = plot_impl(
-            df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            sequential=sequential,
-            subtitle=subtitle,
-        )
+        plot_impl: Optional[
+            Callable[
+                [
+                    pd.DataFrame,
+                    str,
+                    alt.StandardType,
+                    bool,
+                    Optional[str],
+                ],
+                alt.Chart,
+            ]
+        ] = None
+        chart: Optional[alt.Chart] = None
+        if plot_mode is PlotMode.PRESCRIPTIVE:
+            if metric_name in implemented_metrics:
+                plot_impl = self.get_expect_domain_values_to_be_between_chart
+        elif plot_mode is PlotMode.DESCRIPTIVE:
+            if metric_name in implemented_metrics:
+                plot_impl = self.get_quantitative_metric_chart
+
+        if plot_impl:
+            chart = plot_impl(
+                df=df,
+                metric_name=metric_name,
+                metric_type=metric_type,
+                sequential=sequential,
+                subtitle=subtitle,
+            )
         return chart
 
     def _create_display_chart_for_column_domain_expectation(
@@ -1637,33 +1665,36 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType,
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> List[alt.VConcatChart]:
-        plot_impl: Callable[
-            [
-                List[Tuple[str, pd.DataFrame]],
-                str,
-                alt.StandardType,
-            ],
-            alt.VConcatChart,
-        ]
-        if len(column_dfs) > 0:
-            if plot_mode is PlotMode.PRESCRIPTIVE:
+    ) -> List[Optional[alt.VConcatChart]]:
+        plot_impl: Optional[
+            Callable[
+                [
+                    List[Tuple[str, pd.DataFrame]],
+                    str,
+                    alt.StandardType,
+                ],
+                alt.VConcatChart,
+            ]
+        ] = None
+        display_chart: Optional[alt.VConcatChart] = None
+        if plot_mode is PlotMode.PRESCRIPTIVE:
+            if metric_name == "column_distinct_values_count":
                 plot_impl = (
                     self.get_interactive_detail_expect_column_values_to_be_between_chart
                 )
-            else:
+        else:
+            if metric_name == "column_distinct_values_count":
                 plot_impl = self.get_interactive_detail_multi_chart
 
-            display_chart: alt.VConcatChart = plot_impl(
+        if plot_impl:
+            display_chart = plot_impl(
                 column_dfs=column_dfs,
                 metric_name=metric_name,
                 metric_type=metric_type,
                 sequential=sequential,
             )
 
-            return [display_chart]
-        else:
-            return []
+        return [display_chart]
 
     def _create_df_for_charting(
         self,
@@ -1673,7 +1704,10 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
     ) -> pd.DataFrame:
         batch_ids: KeysView[str] = attributed_values.keys()
-        metric_values: MetricValues = [value[0] for value in attributed_values.values()]
+        metric_values: MetricValues = [
+            value[0] if len(value) == 1 else value
+            for value in attributed_values.values()
+        ]
 
         df: pd.DataFrame = pd.DataFrame(
             {sanitize_parameter_name(name=metric_name): metric_values}
@@ -1939,15 +1973,15 @@ class DataAssistantResult(SerializableDictDot):
             ExpectationConfiguration
         ] = self.expectation_configurations
 
-        table_domain_chart: Union[
-            List[alt.Chart], List[alt.LayerChart]
+        table_domain_charts: List[
+            Union[List[alt.Chart], List[alt.LayerChart]]
         ] = self._plot_table_domain_charts(
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
             sequential=sequential,
         )
-        display_charts.extend(table_domain_chart)
-        return_charts.extend(table_domain_chart)
+        display_charts.extend(table_domain_charts)
+        return_charts.extend(table_domain_charts)
 
         column_domain_display_chart: List[alt.VConcatChart]
         column_domain_return_charts: List[alt.Chart]
