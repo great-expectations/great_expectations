@@ -1,11 +1,8 @@
 name: Release Prep
-# on:
-#   schedule:
-#     # * is a special character in YAML so you have to quote this string
-#     - cron: '0 16 * * 4'
-
 on:
-  - push
+  schedule:
+    # Every Thursday at 9am PST / 12pm EST
+    - cron: '0 16 * * 4'
 
 jobs:
   prep:
