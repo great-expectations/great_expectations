@@ -1,0 +1,20 @@
+name: Release Prep
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: '0 16 * * 4'
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install ge_releaser
+        run: |
+          git clone https://github.com/superconductive/ge_releaser.git
+          ge_releaser --help
+      - name: Create PR
+        run: |
+          ge_releaser prep --file=./.github/release_schedule.json
