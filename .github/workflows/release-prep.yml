@@ -17,6 +17,7 @@ jobs:
       - name: Install ge_releaser
         run: |
           git clone https://github.com/superconductive/ge_releaser.git
+          pip install -e ge_releaser
           ge_releaser --help
       - name: Create PR
         run: |
