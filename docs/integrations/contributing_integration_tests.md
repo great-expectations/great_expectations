@@ -22,15 +22,138 @@ credentials for those will have to be provided to us (off-band). More about the 
 
 ## Steps for Adding Type 1 Tests
 
-### 0. Reach out to our Developer Relations team
-Before you embark in this journey, drop by and introduce yourself in the #integrations channel in our [Great Expectations Slack](https://greatexpectationstalk.slack.com)
-to let us know. We're big believers of building strong relationships with ecosystem partners. And thus we believe
-opening communication channels early in the process is essential.
+### 0. Create directory structure
+Your test and pipeline definitions must live inside `great_expectations/assets/partners` in a folder named after the service or tool you're integrating. For example, you're contributing an integration to your new cloud-based database service AnthonyDB, thus the testing code and pipeline definition should live in `great_expectations/assets/partners/anthonydb` directry (note all lowercase names by convention).
 
-### 1. Copy the template
-Create a copy of `integration_template.md` and name it `integration_<my_product>.md`. This file is located in `great_expectations/docs/integrations/` directory.
-This file is in markdown format and supports basic [docusaurus admonitions](https://docusaurus.io/docs/markdown-features/admonitions).
+### 1. Create a `Dockerfile`
+This type of integration (Type 1) is for integrating products or services that can be containerized and are self-contained so that
+they can be run without needing to access to outside services. For this example we're calling AnthonyDB, we're containerizing and running tests against MSSQL, which is notoriously difficult to set up and run in containers. The reason we chose this example is as a "worst case", but we expect most integrations contributed will be much simpler to set up and run against. So bearing that in mind, your Dockerfile would look something as follows:
+```
+FROM --platform=linux/amd64 python:3.9-slim
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+RUN apt-get update
+RUN apt-get install -y git build-essential
 
+# deps for mssql
+RUN apt-get install -y curl apt-transport-https debconf-utils
+# Add mssql repo
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
+RUN apt-get update
+# mssql driver
+RUN ACCEPT_EULA=Y apt-get install -y msodbcsql17
+
+# used by requirements.txt: pyodbc, and enables mssql dialect
+RUN apt-get install -y unixodbc-dev
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . /app/
+RUN great_expectations init -y
+CMD pytest test_ge.py -vvv
+```
+
+### 2. Add a `docker-compose.yml`
+In order to orchestrate the tests and the provisioning, we make use of `docker-compose`. In this file we define the service
+dependencies among them. Please note you may not need one or many of the services in the file below, we include them as illustration:
+```
+## Docker Compose file for running e2e tests
+version: "3"
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: "$DB_PASS"
+    ports:
+      - 1433:1433
+  integration_test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: pytest -vvv test_ge.py
+    environment:
+      DB_URL: ${DB_URL}
+    depends_on:
+      - provision
+  provision:
+    build:
+      context: .
+      dockerfile: provision.Dockerfile
+    command: cat provision.mssql | /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$DB_PASS" -i /dev/stdin
+    depends_on:
+      - db
+```
+
+### 3. (Optional) Add provisioning instrumentation `Dockerfile`
+If your tests rely on certain data being present in a database or such, you must provide provisioning instrumentation for it. In the step above we see a service definition called `provision` which is in charge to populate the database. Of note, in the service definition we create an inter service dependency so that this service isn't run until after the `db` has successfully completed.
+```
+FROM --platform=linux/amd64 python:3.9-slim
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+RUN apt-get update
+RUN apt-get install -y git build-essential
+
+# deps for mssql
+RUN apt-get install -y curl apt-transport-https debconf-utils gcc
+# Add mssql repo
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list
+RUN apt-get update
+# mssql driver
+RUN ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools
+
+# used by requirements.txt: pyodbc, and enables mssql dialect
+RUN apt-get install -y unixodbc-dev
+COPY . /app/
+```
+
+### 4. (Optional) Add provisioning script
+Together with the above defined container, this script is what will define the database, schema and (potentially) data:
+```
+    IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'integration')
+  BEGIN
+    CREATE DATABASE [integration]
+    END
+    GO
+           USE [integration]
+    GO
+
+    IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='taxi_data' and xtype='U')
+BEGIN
+    CREATE TABLE taxi_data (
+    vendor_id double precision,
+    pickup_datetime text,
+    dropoff_datetime text,
+    passenger_count double precision,
+    trip_distance double precision,
+    rate_code_id double precision,
+    store_and_fwd_flag text,
+    pickup_location_id bigint,
+    dropoff_location_id bigint,
+    payment_type double precision,
+    fare_amount double precision,
+    extra double precision,
+    mta_tax double precision,
+    tip_amount double precision,
+    tolls_amount double precision,
+    improvement_surcharge double precision,
+    total_amount double precision,
+    congestion_surcharge double precision
+);
+END
+GO
+```
+
+### 5. Add `requirements.txt`
+This `pip` requirements file should contain any and all library dependencies needed to run the tests:
+```
+great_expectations
+pyodbc>=4.0.30
+pyarrow
+pytest
+```
 ## Steps for Adding Type 2 Tests
 
 ### 0. Create directory structure
