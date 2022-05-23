@@ -2,6 +2,20 @@
 title: Changelog
 ---
 
+### 0.15.7
+* [FEATURE] Add Rule for TEXT semantic domains within the Onboarding Assistant (#5144)
+* [FEATURE] Helper method to determine whether Expectation is self-initializing  (#5159)
+* [FEATURE] OnboardingDataAssistantResult plotting feature parity with VolumeDataAssistantResult (#5145)
+* [FEATURE] Example Notebook for self-initializing `Expectations` (#5169)
+* [BUGFIX] Insure TABLE Domain Metrics Do Not Get Column Key From Column Type Rule Domain Builder (#5166)
+* [DOCS] Update ToC with category links (#5155)
+* [MAINTENANCE] Helper method for RBP Notebook tests that does clean-up (#5171)
+* [MAINTENANCE] Increase timeout for longer stages in Azure pipelines (#5175)
+* [MAINTENANCE] Rule-Based Profiler -- In ParameterBuilder insure that metrics are validated for conversion to numpy array (to avoid deprecation warnings) (#5173)
+* [MAINTENANCE] Increase timeout in packaging & installation pipeline (#5178)
+* [MAINTENANCE] OnboardingDataAssistant handle multiple expectations per domain (#5170)
+* [MAINTENANCE] Update timeout in pipelines to fit Azure syntax (#5180)
+
 ### 0.15.6
 * [FEATURE] `NumericMetricRangeMultiBatchParameterBuilder` kernel density estimation (#5084)
 * [FEATURE] Splitters and limit sample work on AWS Athena (#5024)
