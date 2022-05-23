@@ -109,6 +109,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="table.row_count",
+                metric_domain_kwargs=None,
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
             )
@@ -312,6 +313,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_numeric_metric_multi_batch_parameter_builder(
             metric_name: str,
+            metric_domain_kwargs: Optional[
+                Union[str, dict]
+            ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
             json_serialize: Union[str, bool] = True,
         ) -> MetricMultiBatchParameterBuilder:
@@ -322,7 +326,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return MetricMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_domain_kwargs=metric_domain_kwargs,
                 metric_value_kwargs=metric_value_kwargs,
                 enforce_numeric_metric=True,
                 replace_nan_with_zero=True,
