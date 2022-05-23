@@ -1,8 +1,14 @@
 name: Release Prep
+# on:
+#   schedule:
+#     # * is a special character in YAML so you have to quote this string
+#     - cron: '0 16 * * 4'
+
 on:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron: '0 16 * * 4'
+  push:
+    # branches to consider in the event; optional, defaults to all
+    branches:
+      - develop
 
 jobs:
   prep:
