@@ -196,6 +196,138 @@ class DataAssistantResult(SerializableDictDot):
         return bars
 
     @staticmethod
+    def get_qualitative_metric_chart(
+        df: pd.DataFrame,
+        metric_name: str,
+        metric_type: alt.StandardType,
+        sequential: bool,
+        subtitle: Optional[str] = None,
+    ) -> alt.Chart:
+        """
+        Args:
+            df: A pandas dataframe containing the data to be plotted
+            metric_name: The name of the metric as it exists in the pandas dataframe
+            metric_type: The altair data type for the metric being plotted
+            sequential: Whether batches are sequential in nature
+            subtitle: The subtitle, if applicable
+
+        Returns:
+            An altair line chart
+        """
+        metric_component: MetricPlotComponent = MetricPlotComponent(
+            name=metric_name, alt_type=metric_type
+        )
+
+        batch_name: str = "batch"
+        batch_identifiers: List[str] = [
+            column for column in df.columns if column not in [metric_name, batch_name]
+        ]
+        batch_component: BatchPlotComponent = BatchPlotComponent(
+            name=batch_name,
+            alt_type=AltairDataTypes.NOMINAL.value,
+            batch_identifiers=batch_identifiers,
+        )
+
+        domain_component: DomainPlotComponent = DomainPlotComponent(
+            name=None,
+            alt_type=None,
+            subtitle=subtitle,
+        )
+
+        if sequential:
+            return DataAssistantResult._get_sequential_isotype_chart(
+                df=df,
+                metric_component=metric_component,
+                batch_component=batch_component,
+                domain_component=domain_component,
+            )
+        else:
+            return DataAssistantResult._get_nonsequential_isotype_chart(
+                df=df,
+                metric_component=metric_component,
+                batch_component=batch_component,
+                domain_component=domain_component,
+            )
+
+    @staticmethod
+    def _get_sequential_isotype_chart(
+        df: pd.DataFrame,
+        metric_component: MetricPlotComponent,
+        batch_component: BatchPlotComponent,
+        domain_component: DomainPlotComponent,
+    ) -> alt.Chart:
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_component=metric_component,
+            batch_plot_component=batch_component,
+            domain_plot_component=domain_component,
+        )
+
+        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
+            metric_component.generate_tooltip(format=","),
+        ]
+
+        # line: alt.Chart = (
+        #     alt.Chart(data=df, title=title)
+        #     .mark_line()
+        #     .encode(
+        #         x=batch_component.plot_on_axis(),
+        #         y=metric_component.plot_on_axis(),
+        #         tooltip=tooltip,
+        #     )
+        # )
+
+        points: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_line()
+            .encode(
+                x=batch_component.plot_on_axis(),
+                y=metric_component.plot_on_axis(),
+                tooltip=tooltip,
+            )
+            .transform_window()
+        )
+
+        # alt.Chart(df).mark_line(point=True).encode(
+        #     x=alt.X("date:O", timeUnit="yearmonth", title="date"),
+        #     y="rank:O",
+        #     color=alt.Color("symbol:N")
+        # ).transform_window(
+        #     rank="rank()",
+        #     sort=[alt.SortField("price", order="descending")],
+        #     groupby=["date"]
+
+        return points
+
+    @staticmethod
+    def _get_nonsequential_isotype_chart(
+        df: pd.DataFrame,
+        metric_component: MetricPlotComponent,
+        batch_component: BatchPlotComponent,
+        domain_component: DomainPlotComponent,
+    ) -> alt.Chart:
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_component=metric_component,
+            batch_plot_component=batch_component,
+            domain_plot_component=domain_component,
+        )
+
+        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
+            metric_component.generate_tooltip(format=","),
+        ]
+
+        points: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_point()
+            .encode(
+                x=batch_component.plot_on_axis(),
+                y=metric_component.plot_on_axis(),
+                tooltip=tooltip,
+            )
+        )
+
+        return points
+
+    @staticmethod
     def get_expect_domain_values_to_be_between_chart(
         df: pd.DataFrame,
         metric_name: str,
@@ -1538,7 +1670,9 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
-        implemented_metrics: List[str] = [
+        qualitative_metrics: List[str] = ["table_columns"]
+
+        quantitative_metrics: List[str] = [
             "table_row_count",
             "column_distinct_values_count",
         ]
@@ -1557,11 +1691,15 @@ class DataAssistantResult(SerializableDictDot):
         ] = None
         chart: Optional[alt.Chart] = None
         if plot_mode is PlotMode.PRESCRIPTIVE:
-            if metric_name in implemented_metrics:
+            if metric_name in quantitative_metrics:
                 plot_impl = self.get_expect_domain_values_to_be_between_chart
+            elif metric_name in qualitative_metrics:
+                plot_impl = self.get_expect_domain_values_to_be_in_set
         elif plot_mode is PlotMode.DESCRIPTIVE:
-            if metric_name in implemented_metrics:
+            if metric_name in quantitative_metrics:
                 plot_impl = self.get_quantitative_metric_chart
+            elif metric_name in qualitative_metrics:
+                plot_impl = self.get_qualitative_metric_chart
 
         if plot_impl:
             chart = plot_impl(
