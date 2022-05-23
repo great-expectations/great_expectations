@@ -36,6 +36,7 @@ class DataAssistantRunner:
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        runtime_environment: Optional[Dict[str, Any]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> DataAssistantResult:
         data_assistant_name: str = self._data_assistant_cls.data_assistant_type
@@ -53,5 +54,6 @@ class DataAssistantRunner:
         data_assistant_result: DataAssistantResult = data_assistant.run(
             variables=variables,
             rules=rules,
+            runtime_environment=runtime_environment,
         )
         return data_assistant_result

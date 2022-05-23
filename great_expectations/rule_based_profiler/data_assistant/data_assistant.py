@@ -441,6 +441,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        runtime_environment: Optional[Dict[str, Any]] = None,
     ) -> DataAssistantResult:
         """
         Run the DataAssistant as it is currently configured.
@@ -448,6 +449,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         Args:
             variables: attribute name/value pairs (overrides), commonly-used in Builder objects
             rules: name/(configuration-dictionary) (overrides)
+            runtime_environment: additional/override directives supplied at runtime (can modify "BaseRuleBasedProfiler")
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
@@ -462,6 +464,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             profiler=self.profiler,
             variables=variables,
             rules=rules,
+            runtime_environment=runtime_environment,
             batch_list=list(self._batches.values()),
             batch_request=None,
         )
@@ -613,6 +616,7 @@ def run_profiler_on_data(
     profiler: BaseRuleBasedProfiler,
     variables: Optional[Dict[str, Any]] = None,
     rules: Optional[Dict[str, Dict[str, Any]]] = None,
+    runtime_environment: Optional[Dict[str, Any]] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
 ) -> None:
@@ -625,6 +629,7 @@ def run_profiler_on_data(
         profiler: Effective "BaseRuleBasedProfiler", representing containing "DataAssistant" object
         variables: attribute name/value pairs (overrides), commonly-used in Builder objects
         rules: name/(configuration-dictionary) (overrides)
+        runtime_environment: additional/override directives supplied at runtime (can modify "BaseRuleBasedProfiler")
         batch_list: Explicit list of Batch objects to supply data at runtime
         batch_request: Explicit batch_request used to supply data at runtime
     """
@@ -638,6 +643,7 @@ def run_profiler_on_data(
     rule_based_profiler_result: RuleBasedProfilerResult = profiler.run(
         variables=variables,
         rules=rules_configs,
+        runtime_environment=runtime_environment,
         batch_list=batch_list,
         batch_request=batch_request,
         recompute_existing_parameter_values=False,

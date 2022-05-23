@@ -2448,6 +2448,112 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
     )
 
 
+@freeze_time("09/26/2019 13:42:41")
+def test_get_metrics_and_expectations_using_implicit_invocation_with_exclude_column_names_directive(
+    quentin_columnar_table_multi_batch_data_context,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+    quentin_expected_metrics_by_domain,
+    quentin_expected_expectation_suite,
+    quentin_expected_rule_based_profiler_configuration,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    exclude_column_names: List[str] = [
+        "dropoff_datetime",
+        "store_and_fwd_flag",
+        "extra",
+        "congestion_surcharge",
+    ]
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
+        runtime_environment={
+            "domain": {
+                "column": {
+                    "exclude_column_names": exclude_column_names,
+                },
+            },
+        },
+    )
+
+    column_name: str
+    expected_excluded_domains: List[Domain] = [
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": column_name,
+            },
+        )
+        for column_name in exclude_column_names
+    ]
+
+    domain_key: Domain
+
+    # noinspection PyTypeChecker
+    quentin_expected_metrics_by_domain = dict(
+        filter(
+            lambda element: not any(
+                element[0].is_superset(other=domain_key)
+                for domain_key in expected_excluded_domains
+            ),
+            quentin_expected_metrics_by_domain.items(),
+        )
+    )
+
+    registered_data_assistant_name: str = "volume_data_assistant"
+
+    expected_expectation_suite: ExpectationSuite = quentin_expected_expectation_suite(
+        name=registered_data_assistant_name
+    )
+
+    assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
+
+    expectation_configuration: ExpectationConfiguration
+
+    expected_expectation_suite.expectations = [
+        expectation_configuration
+        for expectation_configuration in expected_expectation_suite.expectations
+        if not (
+            expectation_configuration.kwargs
+            and expectation_configuration.kwargs.get("column") in exclude_column_names
+        )
+    ]
+
+    for expectation_configuration in data_assistant_result.expectation_configurations:
+        if "profiler_details" in expectation_configuration.meta:
+            expectation_configuration.meta["profiler_details"].pop(
+                "estimation_histogram", None
+            )
+
+    assert (
+        data_assistant_result.expectation_configurations
+        == expected_expectation_suite.expectations
+    )
+
+    assert deep_filter_properties_iterable(
+        properties=data_assistant_result.profiler_config.to_json_dict(),
+        delete_fields={"random_seed"},
+    ) == deep_filter_properties_iterable(
+        properties=quentin_expected_rule_based_profiler_configuration(
+            name=registered_data_assistant_name
+        ).to_json_dict(),
+        delete_fields={"random_seed"},
+    )
+
+    data_assistant_result.citation.pop("profiler_config", None)
+    expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
+
+    assert (
+        data_assistant_result.citation
+        == expected_expectation_suite.meta["citations"][0]
+    )
+
+
 def test_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
