@@ -5,8 +5,6 @@ from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.rule_based_profiler.types import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
-)
-from great_expectations.rule_based_profiler.types.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -22,20 +20,18 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         batch_ids: Optional[List[str]] = None,
         validator: Optional["Validator"] = None,  # noqa: F821
         column_names: Optional[List[str]] = None,
-    ):
-        self._table_column_name_to_inferred_semantic_domain_type_mapping = (
-            self._get_table_column_name_to_inferred_semantic_domain_type_mapping(
-                batch_ids=batch_ids,
-                validator=validator,
-                column_names=column_names,
-            )
+    ) -> None:
+        self._build_table_column_name_to_inferred_semantic_domain_type_map(
+            batch_ids=batch_ids,
+            validator=validator,
+            column_names=column_names,
         )
 
     @property
-    def table_column_name_to_inferred_semantic_domain_type_mapping(
+    def table_column_name_to_inferred_semantic_domain_type_map(
         self,
     ) -> Dict[str, SemanticDomainTypes]:
-        return self._table_column_name_to_inferred_semantic_domain_type_mapping
+        return self._table_column_name_to_inferred_semantic_domain_type_map
 
     def parse_semantic_domain_type_argument(
         self,
@@ -79,12 +75,12 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         else:
             raise ValueError("Unrecognized semantic_types directive.")
 
-    def _get_table_column_name_to_inferred_semantic_domain_type_mapping(
+    def _build_table_column_name_to_inferred_semantic_domain_type_map(
         self,
         batch_ids: List[str],
         validator: "Validator",  # noqa: F821
         column_names: List[str],
-    ) -> Dict[str, SemanticDomainTypes]:
+    ) -> None:
         column_types_dict_list: List[Dict[str, Any]] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.column_types",
@@ -99,7 +95,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         )
 
         column_name: str
-        return {
+        self._table_column_name_to_inferred_semantic_domain_type_map = {
             column_name: self._infer_semantic_domain_type_from_table_column_type(
                 column_types_dict_list=column_types_dict_list,
                 column_name=column_name,

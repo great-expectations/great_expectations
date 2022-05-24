@@ -145,7 +145,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         column_cache,
         excluded_expectations=None,
         included_expectations=None,
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -192,7 +192,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _create_non_nullity_expectations(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         if (
             not excluded_expectations
             or "expect_column_values_to_not_be_null" not in excluded_expectations
@@ -212,7 +212,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _create_expectations_for_numeric_column(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -350,7 +350,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _create_expectations_for_string_column(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -457,7 +457,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _create_expectations_for_datetime_column(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -814,14 +814,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return expectation_suite
 
 
-def _check_that_expectations_are_available(dataset, expectations):
+def _check_that_expectations_are_available(dataset, expectations) -> None:
     if expectations:
         for expectation in expectations:
             if expectation not in dataset.list_available_expectation_types():
                 raise ProfilerError(f"Expectation {expectation} is not available.")
 
 
-def _check_that_columns_exist(dataset, columns):
+def _check_that_columns_exist(dataset, columns) -> None:
     if columns:
         for column in columns:
             if column not in dataset.get_table_columns():

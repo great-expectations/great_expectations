@@ -11,7 +11,7 @@ class MetricConfiguration:
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict = None,
         metric_dependencies: dict = None,
-    ):
+    ) -> None:
         self._metric_name = metric_name
         if not isinstance(metric_domain_kwargs, IDDict):
             metric_domain_kwargs = IDDict(metric_domain_kwargs)
@@ -56,7 +56,7 @@ class MetricConfiguration:
         return self._metric_dependencies
 
     @metric_dependencies.setter
-    def metric_dependencies(self, metric_dependencies):
+    def metric_dependencies(self, metric_dependencies) -> None:
         self._metric_dependencies = metric_dependencies
 
     @property

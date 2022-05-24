@@ -37,6 +37,7 @@ def test_get_fully_qualified_parameter_names(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=None,
         details=None,
+        rule_name="my_rule",
     )
     # Convert variables argument to ParameterContainer
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -51,9 +52,7 @@ def test_get_fully_qualified_parameter_names(
     }
 
     expected_fully_qualified_parameter_names: List[str] = [
-        "$variables.my_int",
-        "$variables.my_float",
-        "$variables.my_string",
+        "$variables",
         "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format",
         "$parameter.date_strings.yyyy_mm_dd_date_format",
         "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format",
@@ -94,6 +93,7 @@ def test_get_parameter_values_for_fully_qualified_parameter_names(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=None,
         details=None,
+        rule_name="my_rule",
     )
     # Convert variables argument to ParameterContainer
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -109,9 +109,11 @@ def test_get_parameter_values_for_fully_qualified_parameter_names(
 
     # fmt: off
     expected_parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode] = {
-        "$variables.my_string": "hello",
-        "$variables.my_int": 9,
-        "$variables.my_float": 3.38,
+        "$variables": {
+            "my_int": 9,
+            "my_float": 3.38,
+            "my_string": "hello",
+        },
         "$parameter.weekly_taxi_fairs.mean_values": {
             "value": [
                 {
@@ -394,7 +396,9 @@ def test_get_parameter_values_for_fully_qualified_parameter_names(
                     "saturday": 78.39,
                 },
             ],
-            "details": {"confidence": "high"},
+            "details": {
+                "confidence": "high",
+            },
         },
         "$parameter.tolerances.mostly": 0.91,
         "$parameter.tolerances.financial.usd": 1.0,

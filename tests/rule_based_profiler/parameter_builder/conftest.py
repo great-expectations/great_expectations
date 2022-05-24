@@ -6,8 +6,8 @@ import pandas as pd
 import pytest
 import scipy.stats as stats
 
-RANDOM_SEED = 43792
-RANDOM_STATE = np.random.Generator(np.random.PCG64(RANDOM_SEED))
+RANDOM_SEED: int = 43792
+RANDOM_STATE: np.float = np.random.Generator(np.random.PCG64(RANDOM_SEED))
 
 
 def generate_distribution_parameters(

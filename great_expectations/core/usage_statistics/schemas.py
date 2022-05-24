@@ -473,6 +473,7 @@ anonymized_run_validation_operator_payload_schema = {
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_batch": anonymized_batch_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
     },
     "type": "object",
     "properties": {
@@ -1013,7 +1014,12 @@ anonymized_usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {"enum": ["datasource.sqlalchemy.connect"]},
+                "event": {
+                    "enum": [
+                        "datasource.sqlalchemy.connect",
+                        "execution_engine.sqlalchemy.connect",
+                    ]
+                },
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_datasource_sqlalchemy_connect_payload"
                 },
@@ -1028,6 +1034,8 @@ anonymized_usage_statistics_record_schema = {
                         "data_context.open_data_docs",
                         "data_context.run_checkpoint",
                         "expectation_suite.add_expectation",
+                        "data_context.run_profiler_with_dynamic_arguments",
+                        "data_context.run_profiler_on_data",
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
@@ -1181,8 +1189,27 @@ anonymized_usage_statistics_record_schema = {
     ],
 }
 
-if __name__ == "__main__":
-    import json
 
-    with open("usage_statistics_record_schema.json", "w") as outfile:
+def write_schema_to_file(target_dir: str) -> None:
+    """Utility to write schema to disk.
+
+    The file name will always be "usage_statistics_record_schema.json" but the target directory can be specified.
+
+    Args:
+        target_dir (str): The dir you wish to write the schema to.
+    """
+    import json
+    import os
+
+    file: str = "usage_statistics_record_schema.json"
+    out: str = os.path.join(target_dir, file)
+
+    with open(out, "w") as outfile:
         json.dump(anonymized_usage_statistics_record_schema, outfile, indent=2)
+
+
+if __name__ == "__main__":
+    import sys
+
+    target_dir = sys.argv[1] if len(sys.argv) >= 2 else "."
+    write_schema_to_file(target_dir)

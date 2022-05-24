@@ -102,6 +102,15 @@
           "b": "BOOL",
           "s": "STRING",
           "s1": "STRING"
+        },
+        "trino": {
+          "x": "INTEGER",
+          "y": "DOUBLE",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BOOLEAN",
+          "s": "VARCHAR",
+          "s1": "VARCHAR"
         }
       },
       "tests": [
@@ -222,7 +231,7 @@
         {
           "title": "positive_test_float_values",
           "exact_match_out": false,
-          "suppress_test_for": ["bigquery"],
+          "suppress_test_for": ["bigquery", "trino"],
           "in": {
             "column": "y",
             "type_list": [

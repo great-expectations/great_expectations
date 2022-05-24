@@ -109,58 +109,12 @@ def test__get_description_diagnostics():
     )
 
 
-### Tests for _execute_test_examples
-
-
-def test__execute_test_examples__with_an_empty_list():
-    executed_test_examples = (
-        ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
-            expectation_type="expect_column_values_to_equal_three",
-            examples=[],
-        )
-    )
-    assert executed_test_examples == []
-
-
-def test__execute_test_examples__with_a_single_example():
-    example = ExpectationTestDataCases(
-        data=TestData(
-            **{
-                "mostly_threes": [3, 3, 3, 5, None],
-            }
-        ),
-        tests=[
-            ExpectationTestCase(
-                title="positive_test_with_mostly",
-                include_in_gallery=True,
-                exact_match_out=False,
-                input={"column": "mostly_threes", "mostly": 0.6},
-                output={
-                    "success": True,
-                    "unexpected_index_list": [6, 7],
-                    "unexpected_list": [2, -1],
-                },
-            )
-        ],
-    )
-
-    executed_test_cases = (
-        ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
-            expectation_type="expect_column_values_to_equal_three",
-            examples=[example],
-        )
-    )
-    assert len(executed_test_cases) == 1
-
-    # FIXME: Need more here?
-
-
 ### Tests for _get_metric_diagnostics_list
 def test__get_metric_diagnostics_list_on_a_class_without_metrics():
-    executed_test_cases = []
+    _config = None
     metric_diagnostics_list = (
         ExpectColumnValuesToEqualThree()._get_metric_diagnostics_list(
-            executed_test_cases=executed_test_cases
+            expectation_config=_config
         )
     )
     assert len(metric_diagnostics_list) == 0
@@ -171,10 +125,10 @@ def test__get_metric_diagnostics_list_on_a_class_without_metrics():
 
 
 def test__get_metric_diagnostics_list_on_a_class_with_metrics():
-    executed_test_cases = []
+    _config = None
     metric_diagnostics_list = (
         ExpectColumnValuesToEqualThree__ThirdIteration()._get_metric_diagnostics_list(
-            executed_test_cases=executed_test_cases
+            expectation_config=_config
         )
     )
     assert len(metric_diagnostics_list) == 0
@@ -232,6 +186,9 @@ def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
 
 
 ### Tests for _get_test_results
+@pytest.mark.skip(
+    reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
+)
 def test__get_test_results():
     test_results = ExpectColumnValuesToEqualThree__ThirdIteration()._get_test_results(
         expectation_type="expect_column_values_to_equal_three",

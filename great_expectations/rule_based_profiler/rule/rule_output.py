@@ -21,7 +21,7 @@ class RuleOutput:
     def __init__(
         self,
         rule_state: RuleState,
-    ):
+    ) -> None:
         """
         Args:
             rule_state: RuleState object represented by "Domain" objects and parameters,.computed for one Rule object.

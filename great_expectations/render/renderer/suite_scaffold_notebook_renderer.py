@@ -9,14 +9,16 @@ from great_expectations.render.renderer.suite_edit_notebook_renderer import (
 
 
 class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
-    def __init__(self, context: DataContext, suite: ExpectationSuite, batch_kwargs):
+    def __init__(
+        self, context: DataContext, suite: ExpectationSuite, batch_kwargs
+    ) -> None:
         super().__init__(context=context)
         self.suite = suite
         self.suite_name = suite.expectation_suite_name
         self.batch_kwargs = self.get_batch_kwargs(self.suite, batch_kwargs)
         self.batch = self.load_batch()
 
-    def add_header(self):
+    def add_header(self) -> None:
         self.add_markdown_cell(
             f"""# Scaffold a new Expectation Suite (Experimental)
 This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns and other factors that you care about and letting a profiler write some candidate expectations for you to adjust.
@@ -48,7 +50,7 @@ batch.head()""",
             lint=True,
         )
 
-    def _add_scaffold_column_list(self):
+    def _add_scaffold_column_list(self) -> None:
         columns = [f"    '{col}'" for col in self.batch.get_table_columns()]
         columns = ",\n".join(columns)
         code = f"""\
@@ -57,7 +59,7 @@ ignored_columns = [
 ]"""
         self.add_code_cell(code, lint=True)
 
-    def add_footer(self):
+    def add_footer(self) -> None:
         self.add_markdown_cell(
             """## Save & review the scaffolded Expectation Suite
 
@@ -160,7 +162,7 @@ You can find more information about [how to configure this profiler, including a
         self.render(self.batch_kwargs)
         self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
-    def _add_scaffold_cell(self):
+    def _add_scaffold_cell(self) -> None:
         self.add_code_cell(
             """\
 profiler = UserConfigurableProfiler(profile_dataset=batch,
