@@ -339,7 +339,14 @@ stages:
                 tests/test_packaging.py \
                 tests/test_release.py
 
-            displayName: 'dgtest-overrides'
+            displayName: 'dgtest-general-overrides'
+
+          - script: |
+              # These are tests that are specific to Great Expectations Cloud.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              pytest -m cloud
+
+            displayName: 'dgtest-cloud-overrides'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
