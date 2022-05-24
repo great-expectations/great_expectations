@@ -1562,7 +1562,6 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     },
                     "parameter_builders": [
                         {
-                            "metric_domain_kwargs": "$domain.domain_kwargs",
                             "replace_nan_with_zero": True,
                             "name": "table_row_count",
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
