@@ -861,6 +861,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rules: name/(configuration-dictionary) to modify using "runtime_environment"
         domain_type_directives_list: additional/override runtime directives (can modify "BaseRuleBasedProfiler")
         """
+        if domain_type_directives_list is None:
+            domain_type_directives_list = []
+
         domain_type_directives: RuntimeEnvironmentDomainTypeDirectives
         domain_rules: List[Rule]
         rule: Rule
