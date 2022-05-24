@@ -1,13 +1,15 @@
 import copy
 from functools import wraps
 from inspect import Signature, signature
-from typing import Any, Callable, Dict, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (
     RuntimeEnvironmentColumnDomainTypeDirectivesKeys,
+    RuntimeEnvironmentDomainTypeDirectives,
     RuntimeEnvironmentDomainTypeDirectivesKeys,
+    build_domain_type_directives,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
@@ -88,6 +90,21 @@ class DataAssistantRunner:
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         **kwargs: dict,
     ) -> DataAssistantResult:
+        """
+        variables: attribute name/value pairs, commonly-used in Builder objects, to modify using "runtime_environment"
+        rules: name/(configuration-dictionary) to modify using "runtime_environment"
+        kwargs: additional/override directives supplied at runtime
+            "kwargs" directives structure:
+            {
+                "include_column_names": ["column_a", "column_b", "column_c", ...],
+                "exclude_column_names": ["column_d", "column_e", "column_f", "column_g", ...],
+                ...
+            }
+        Implementation makes best effort at assigning directives to appropriate "MetricDomainTypes" member.
+
+        Returns:
+            DataAssistantResult: The result object for the DataAssistant
+        """
         data_assistant_name: str = self._data_assistant_cls.data_assistant_type
         validator: Validator = get_validator_with_expectation_suite(
             batch_request=batch_request,
@@ -100,9 +117,12 @@ class DataAssistantRunner:
             name=data_assistant_name,
             validator=validator,
         )
+        domain_type_directives_list: List[
+            RuntimeEnvironmentDomainTypeDirectives
+        ] = build_domain_type_directives(**kwargs)
         data_assistant_result: DataAssistantResult = data_assistant.run(
             variables=variables,
             rules=rules,
-            **kwargs,
+            domain_type_directives_list=domain_type_directives_list,
         )
         return data_assistant_result

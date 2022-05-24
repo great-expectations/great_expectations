@@ -15,6 +15,9 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
 )
+from great_expectations.rule_based_profiler.helpers.runtime_environment import (
+    RuntimeEnvironmentDomainTypeDirectives,
+)
 from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
     MeanUnexpectedMapMetricMultiBatchParameterBuilder,
@@ -441,7 +444,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-        **kwargs: dict,
+        domain_type_directives_list: Optional[
+            List[RuntimeEnvironmentDomainTypeDirectives]
+        ] = None,
     ) -> DataAssistantResult:
         """
         Run the DataAssistant as it is currently configured.
@@ -449,7 +454,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         Args:
             variables: attribute name/value pairs (overrides), commonly-used in Builder objects
             rules: name/(configuration-dictionary) (overrides)
-            kwargs: additional/override directives supplied at runtime (can modify "BaseRuleBasedProfiler")
+            domain_type_directives_list: additional/override runtime directives (can modify "BaseRuleBasedProfiler")
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
@@ -466,7 +471,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             rules=rules,
             batch_list=list(self._batches.values()),
             batch_request=None,
-            **kwargs,
+            domain_type_directives_list=domain_type_directives_list,
         )
         return self._build_data_assistant_result(
             data_assistant_result=data_assistant_result
@@ -618,7 +623,9 @@ def run_profiler_on_data(
     rules: Optional[Dict[str, Dict[str, Any]]] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-    **kwargs: dict,
+    domain_type_directives_list: Optional[
+        List[RuntimeEnvironmentDomainTypeDirectives]
+    ] = None,
 ) -> None:
     """
     This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
@@ -631,7 +638,7 @@ def run_profiler_on_data(
         rules: name/(configuration-dictionary) (overrides)
         batch_list: Explicit list of Batch objects to supply data at runtime
         batch_request: Explicit batch_request used to supply data at runtime
-        kwargs: additional/override directives supplied at runtime (can modify "BaseRuleBasedProfiler")
+        domain_type_directives_list: additional/override runtime directives (can modify "BaseRuleBasedProfiler")
     """
     if rules is None:
         rules = []
@@ -647,7 +654,7 @@ def run_profiler_on_data(
         batch_request=batch_request,
         recompute_existing_parameter_values=False,
         reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
-        **kwargs,
+        domain_type_directives_list=domain_type_directives_list,
     )
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config

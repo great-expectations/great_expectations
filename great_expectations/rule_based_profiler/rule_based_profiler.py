@@ -54,7 +54,6 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (
     RuntimeEnvironmentDomainTypeDirectives,
     RuntimeEnvironmentDomainTypeDirectivesKeys,
-    build_domain_type_directives,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
@@ -223,7 +222,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
-        **kwargs: dict,
+        domain_type_directives_list: Optional[
+            List[RuntimeEnvironmentDomainTypeDirectives]
+        ] = None,
     ) -> RuleBasedProfilerResult:
         """
         Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
@@ -235,7 +236,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_request: Explicit batch_request used to supply data at runtime
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
-            kwargs: additional/override directives supplied at runtime
+            domain_type_directives_list: additional/override runtime directives (can modify "BaseRuleBasedProfiler")
 
         Returns:
             "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
@@ -267,7 +268,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self._apply_runtime_environment(
             variables=effective_variables,
             rules=effective_rules,
-            **kwargs,
+            domain_type_directives_list=domain_type_directives_list,
         )
 
         rule: Rule
@@ -851,24 +852,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def _apply_runtime_environment(
         variables: Optional[ParameterContainer] = None,
         rules: Optional[List[Rule]] = None,
-        **kwargs: dict,
+        domain_type_directives_list: Optional[
+            List[RuntimeEnvironmentDomainTypeDirectives]
+        ] = None,
     ) -> None:
         """
         variables: attribute name/value pairs, commonly-used in Builder objects, to modify using "runtime_environment"
         rules: name/(configuration-dictionary) to modify using "runtime_environment"
-        kwargs: additional/override directives supplied at runtime
-            "kwargs" directives structure:
-            {
-                "include_column_names": ["column_a", "column_b", "column_c", ...],
-                "exclude_column_names": ["column_d", "column_e", "column_f", "column_g", ...],
-                ...
-            }
-        Implementation makes best effort at assigning directives to appropriate "MetricDomainTypes" member.
+        domain_type_directives_list: additional/override runtime directives (can modify "BaseRuleBasedProfiler")
         """
-        domain_type_directives_list: List[
-            RuntimeEnvironmentDomainTypeDirectives
-        ] = build_domain_type_directives(**kwargs)
-
         domain_type_directives: RuntimeEnvironmentDomainTypeDirectives
         domain_rules: List[Rule]
         rule: Rule
