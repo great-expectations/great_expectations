@@ -51,6 +51,10 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     ReconciliationStrategy,
     reconcile_rule_variables,
 )
+from great_expectations.rule_based_profiler.helpers.runtime_environment import (
+    RuntimeEnvironmentDomainTypeDirectives,
+    RuntimeEnvironmentDomainTypeDirectivesKeys,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
@@ -218,6 +222,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
+        domain_type_directives_list: Optional[
+            List[RuntimeEnvironmentDomainTypeDirectives]
+        ] = None,
     ) -> RuleBasedProfilerResult:
         """
         Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
@@ -229,6 +236,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_request: Explicit batch_request used to supply data at runtime
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
+            domain_type_directives_list: additional/override runtime directives (can modify "BaseRuleBasedProfiler")
 
         Returns:
             "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
@@ -255,6 +263,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
             rules=rules,
             reconciliation_directives=reconciliation_directives,
+        )
+
+        self._apply_runtime_environment(
+            variables=effective_variables,
+            rules=effective_rules,
+            domain_type_directives_list=domain_type_directives_list,
         )
 
         rule: Rule
@@ -833,6 +847,76 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rule: Rule
         return {rule.name: rule for rule in self.rules}
 
+    # noinspection PyUnusedLocal
+    @staticmethod
+    def _apply_runtime_environment(
+        variables: Optional[ParameterContainer] = None,
+        rules: Optional[List[Rule]] = None,
+        domain_type_directives_list: Optional[
+            List[RuntimeEnvironmentDomainTypeDirectives]
+        ] = None,
+    ) -> None:
+        """
+        variables: attribute name/value pairs, commonly-used in Builder objects, to modify using "runtime_environment"
+        rules: name/(configuration-dictionary) to modify using "runtime_environment"
+        domain_type_directives_list: additional/override runtime directives (can modify "BaseRuleBasedProfiler")
+        """
+        if domain_type_directives_list is None:
+            domain_type_directives_list = []
+
+        domain_type_directives: RuntimeEnvironmentDomainTypeDirectives
+        domain_rules: List[Rule]
+        rule: Rule
+        for domain_type_directives in domain_type_directives_list:
+            domain_rules = [
+                rule
+                for rule in rules
+                if rule.domain_builder.domain_type == domain_type_directives.domain_type
+            ]
+            property_key: RuntimeEnvironmentDomainTypeDirectivesKeys
+            property_value: Any
+            existing_property_value: Any
+            for rule in domain_rules:
+                for (
+                    property_key,
+                    property_value,
+                ) in domain_type_directives.directives.items():
+                    # Insure that new directives augment (not eliminate) existing directives.
+                    existing_property_value = getattr(
+                        rule.domain_builder, property_key.value, None
+                    )
+                    property_value = BaseRuleBasedProfiler._get_effective_domain_builder_property_value(
+                        dest_property_value=property_value,
+                        source_property_value=existing_property_value,
+                    )
+                    setattr(rule.domain_builder, property_key.value, property_value)
+
+    @staticmethod
+    def _get_effective_domain_builder_property_value(
+        dest_property_value: Optional[Any] = None,
+        source_property_value: Optional[Any] = None,
+    ) -> Optional[Any]:
+        if dest_property_value is None:
+            return source_property_value
+
+        if type(source_property_value) != type(dest_property_value):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"Types of source and destination property values for DomainBuilder are incompatible."
+            )
+
+        # Property values of collections types must be unique (use set for "list"/"tuple" and "update" for dictionary).
+
+        if isinstance(dest_property_value, list):
+            return list(set(dest_property_value + source_property_value))
+
+        if isinstance(dest_property_value, tuple):
+            return tuple(set(dest_property_value + source_property_value))
+
+        if isinstance(dest_property_value, dict):
+            return dict(dest_property_value, **source_property_value)
+
+        return dest_property_value
+
     @staticmethod
     def run_profiler(
         data_context: "BaseDataContext",  # noqa: F821
@@ -973,7 +1057,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         try:
             profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
-            id_ = (
+            id_: Union[GeCloudIdentifier, ConfigurationIdentifier] = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
