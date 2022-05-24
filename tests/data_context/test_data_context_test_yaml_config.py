@@ -777,7 +777,6 @@ def test_golden_path_sql_datasource_configuration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-# WILL THIS IS THE FIRST TEST
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -970,7 +969,6 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-# WILL THIS IS THE OTHER TEST
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1139,11 +1137,6 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
             ]
             .drop("timestamp", axis=1)
             .equals(df_data.drop("timestamp", axis=1))
-        )
-        my_batch = context.get_batch(
-            datasource_name="my_directory_datasource",
-            data_connector_name="my_filesystem_data_connector",
-            data_asset_name="DOES_NOT_EXIST",
         )
         with pytest.raises(ValueError):
             # noinspection PyUnusedLocal

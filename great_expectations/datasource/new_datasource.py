@@ -202,7 +202,6 @@ class BaseDatasource:
                     batch_markers=batch_markers,
                 )
                 batches.append(new_batch)
-
             return batches
 
     def _build_data_connector_from_config(

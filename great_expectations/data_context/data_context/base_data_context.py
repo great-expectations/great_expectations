@@ -1445,8 +1445,6 @@ class BaseDataContext(ConfigPeer):
             "get_batch_list instead.",
             DeprecationWarning,
         )
-        # DO WE HIT THIS FROM THE VALIDATOR!
-        # this is where we hit from DAtaContext. can we hit it from Validator?
         if len(batch_list) != 1:
             raise ValueError(
                 f"Got {len(batch_list)} batches instead of a single batch. If you would like to use a BatchRequest to "
@@ -1887,7 +1885,7 @@ class BaseDataContext(ConfigPeer):
     ) -> Validator:
         if len(batch_list) == 0:
             raise ge_exceptions.ValidationError(
-                "BatchRequest has returned an empty list. Please check your configuration"
+                "Validator could not be created because BatchRequest has returned an empty batch_list. Please check your parameters and try again."
             )
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
