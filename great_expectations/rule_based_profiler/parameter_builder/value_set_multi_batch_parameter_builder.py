@@ -150,7 +150,12 @@ def _get_unique_values_from_nested_collection_of_sets(
         Single flattened set containing unique values.
     """
 
-    flattened: List[Set[Any]] = list(itertools.chain.from_iterable(collection))
+    flattened: Union[List[Set[Any]], Set[Any]] = list(
+        itertools.chain.from_iterable(collection)
+    )
+    element: Any
+    if all(isinstance(element, set) for element in flattened):
+        flattened = set().union(*flattened)
 
     """
     In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to
@@ -161,7 +166,7 @@ def _get_unique_values_from_nested_collection_of_sets(
         sorted(
             filter(
                 lambda element: element is not None,
-                set().union(*flattened),
+                set(flattened),
             )
         )
     )
