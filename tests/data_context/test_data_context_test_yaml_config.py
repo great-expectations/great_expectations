@@ -1138,6 +1138,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
             .drop("timestamp", axis=1)
             .equals(df_data.drop("timestamp", axis=1))
         )
+
         with pytest.raises(ValueError):
             # noinspection PyUnusedLocal
             my_batch = context.get_batch(
