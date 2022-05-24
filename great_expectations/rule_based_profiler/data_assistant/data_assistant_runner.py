@@ -23,7 +23,7 @@ def augment_arguments(**extra_kwargs) -> Callable:
     Decorator factory that defines additional arguments that are passed to every function invocation.
     """
 
-    def signature_modification_decorator(func: Callable):
+    def signature_modification_decorator(func: Callable) -> Callable:
         @wraps(func)
         def modify_signature(*args, **kwargs):
             kwargs = kwargs or {}
