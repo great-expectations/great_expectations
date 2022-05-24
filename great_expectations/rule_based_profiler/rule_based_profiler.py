@@ -3,7 +3,6 @@ import datetime
 import json
 import logging
 import sys
-from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
 from tqdm.auto import tqdm
@@ -29,7 +28,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config.base import (
     DomainBuilderConfig,
@@ -52,6 +50,11 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     ReconciliationDirectives,
     ReconciliationStrategy,
     reconcile_rule_variables,
+)
+from great_expectations.rule_based_profiler.helpers.runtime_environment import (
+    RuntimeEnvironmentDomainTypeDirectives,
+    RuntimeEnvironmentDomainTypeDirectivesKeys,
+    build_domain_type_directives,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
@@ -84,16 +87,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         "auto",
         "profiler_config",
     }
-
-    class RuntimeEnvironmentKeys(Enum):
-        DOMAIN = "domain"
-
-        @classmethod
-        def to_set(cls) -> set:
-            """
-            Returns values of this Enum in list format.
-            """
-            return set(map(lambda c: c.value, cls))
 
     def __init__(
         self,
@@ -226,11 +219,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-        runtime_environment: Optional[Dict[str, Any]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
+        **kwargs,
     ) -> RuleBasedProfilerResult:
         """
         Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
@@ -238,11 +231,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         Args:
             variables: attribute name/value pairs (overrides), commonly-used in Builder objects
             rules: name/(configuration-dictionary) (overrides)
-            runtime_environment: additional/override directives supplied at runtime
             batch_list: Explicit list of Batch objects to supply data at runtime
             batch_request: Explicit batch_request used to supply data at runtime
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
+            kwargs: additional/override directives supplied at runtime
 
         Returns:
             "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
@@ -274,7 +267,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self._apply_runtime_environment(
             variables=effective_variables,
             rules=effective_rules,
-            runtime_environment=runtime_environment,
+            **kwargs,
         )
 
         rule: Rule
@@ -854,100 +847,80 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return {rule.name: rule for rule in self.rules}
 
     # noinspection PyUnusedLocal
+    @staticmethod
     def _apply_runtime_environment(
-        self,
         variables: Optional[ParameterContainer] = None,
         rules: Optional[List[Rule]] = None,
-        runtime_environment: Optional[Dict[str, Any]] = None,
+        **kwargs,
     ) -> None:
         """
         variables: attribute name/value pairs, commonly-used in Builder objects, to modify using "runtime_environment"
         rules: name/(configuration-dictionary) to modify using "runtime_environment"
-        runtime_environment: additional/override directives supplied at runtime
-            "runtime_environment" directives structure:
+        kwargs: additional/override directives supplied at runtime
+            "kwargs" directives structure:
             {
-                "domain": {
-                    "column": {
-                        "include_column_names": ["column_a", "column_b", "column_c", ...],
-                        "exclude_column_names": ["column_d", "column_e", "column_f", "column_g", ...],
-                        ...
-                    },
-                    "table": {
-                        ...
-                    }
-                    ...
-                },
+                "include_column_names": ["column_a", "column_b", "column_c", ...],
+                "exclude_column_names": ["column_d", "column_e", "column_f", "column_g", ...],
                 ...
             }
+        Implementation makes best effort at assigning directives to appropriate "MetricDomainTypes" member.
         """
-        if runtime_environment is None:
-            return
+        domain_type_directives_list: List[
+            RuntimeEnvironmentDomainTypeDirectives
+        ] = build_domain_type_directives(**kwargs)
 
-        runtime_environment_keys: set = set(runtime_environment.keys())
-        recognized_runtime_environment_keys: set = (
-            BaseRuleBasedProfiler.RuntimeEnvironmentKeys.to_set()
-        )
-        if not runtime_environment_keys <= recognized_runtime_environment_keys:
+        domain_type_directives: RuntimeEnvironmentDomainTypeDirectives
+        domain_rules: List[Rule]
+        rule: Rule
+        for domain_type_directives in domain_type_directives_list:
+            domain_rules = [
+                rule
+                for rule in rules
+                if rule.domain_builder.domain_type == domain_type_directives.domain_type
+            ]
+            property_key: RuntimeEnvironmentDomainTypeDirectivesKeys
+            property_value: Any
+            existing_property_value: Any
+            for rule in domain_rules:
+                for (
+                    property_key,
+                    property_value,
+                ) in domain_type_directives.directives.items():
+                    # Insure that new directives augment (not eliminate) existing directives.
+                    existing_property_value = getattr(
+                        rule.domain_builder, property_key.value, None
+                    )
+                    property_value = BaseRuleBasedProfiler._get_effective_domain_builder_property_value(
+                        dest_property_value=property_value,
+                        source_property_value=existing_property_value,
+                    )
+                    setattr(rule.domain_builder, property_key.value, property_value)
+
+    @staticmethod
+    def _get_effective_domain_builder_property_value(
+        dest_property_value: Optional[Any] = None,
+        source_property_value: Optional[Any] = None,
+    ) -> Optional[Any]:
+        if dest_property_value is None and source_property_value is None:
+            return None
+
+        if type(source_property_value) != type(dest_property_value):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Unrecognized runtime_environment key(s) in {self.__class__.__name__}:
-"{str(runtime_environment_keys - recognized_runtime_environment_keys)}" detected.
-"""
+                message=f"Types of source and destination property values for DomainBuilder are incompatible."
             )
 
-        rule: Rule
+        # Property values of collections types must be unique (use set for "list"/"tuple" and "update" for dictionary).
 
-        domain_runtime_environment: Optional[Dict[str, Any]] = runtime_environment.get(
-            BaseRuleBasedProfiler.RuntimeEnvironmentKeys.DOMAIN.value
-        )
-        if domain_runtime_environment:
-            # Handle additional "MetricDomainTypes" runtime directives as requirements specifications become available.
-            column_domain_type_runtime_environment: Optional[
-                Dict[str, Any]
-            ] = domain_runtime_environment.get(MetricDomainTypes.COLUMN.value)
-            if column_domain_type_runtime_environment:
-                # Restrict "Rule" objects of interest to contain only those corresponding to specified "Domain" object.
-                column_domain_rules: List[Rule] = [
-                    rule
-                    for rule in rules
-                    if rule.domain_builder.domain_type == MetricDomainTypes.COLUMN
-                ]
-                include_column_names: Optional[Union[str, Optional[List[str]]]] = (
-                    column_domain_type_runtime_environment.get("include_column_names")
-                    or []
-                )
-                exclude_column_names: Optional[Union[str, Optional[List[str]]]] = (
-                    column_domain_type_runtime_environment.get("exclude_column_names")
-                    or []
-                )
-                property_directives: Dict[
-                    str, Optional[Union[str, Optional[List[str]]]]
-                ] = dict(
-                    zip(
-                        [
-                            "include_column_names",
-                            "exclude_column_names",
-                        ],
-                        [
-                            include_column_names,
-                            exclude_column_names,
-                        ],
-                    )
-                )
-                property_name: str
-                property_value: Optional[Union[str, Optional[List[str]]]]
-                existing_property_value: Optional[Union[str, Optional[List[str]]]]
-                for rule in column_domain_rules:
-                    for property_name, property_value in property_directives.items():
-                        # Insure that new directives augment (not eliminate) existing directives.
-                        existing_property_value = getattr(
-                            rule.domain_builder, property_name, []
-                        )
-                        if existing_property_value is None:
-                            existing_property_value = []
-                        property_value.extend(existing_property_value)
-                        # Directives must be unique.
-                        property_value = list(set(property_value))
-                        setattr(rule.domain_builder, property_name, property_value)
+        if isinstance(dest_property_value, list):
+            return list(set(dest_property_value + source_property_value))
+
+        if isinstance(dest_property_value, tuple):
+            return tuple(set(dest_property_value + source_property_value))
+
+        if isinstance(dest_property_value, dict):
+            return dict(dest_property_value, **source_property_value)
+
+        return dest_property_value
 
     @staticmethod
     def run_profiler(

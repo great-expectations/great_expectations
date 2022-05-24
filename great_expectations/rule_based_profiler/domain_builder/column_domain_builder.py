@@ -1,5 +1,6 @@
-# noinspection PyUnresolvedReferences
 from types import GenericAlias
+
+# noinspection PyUnresolvedReferences
 from typing import Iterable, List, Optional, Set, Union, _UnionGenericAlias, cast
 
 import great_expectations.exceptions as ge_exceptions
@@ -182,7 +183,7 @@ class ColumnDomainBuilder(DomainBuilder):
         variables: Optional[ParameterContainer] = None,
     ) -> List[str]:
         include_column_names: Optional[List[str]] = cast(
-            Optional[List[stype_tr]],
+            Optional[List[str]],
             self._resolve_list_type_property(
                 property_name="include_column_names",
                 property_value_type=list,

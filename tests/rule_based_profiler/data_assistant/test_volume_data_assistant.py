@@ -2472,12 +2472,8 @@ def test_get_metrics_and_expectations_using_implicit_invocation_with_exclude_col
     ]
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        runtime_environment={
-            "domain": {
-                "column": {
-                    "exclude_column_names": exclude_column_names,
-                },
-            },
+        **{
+            "exclude_column_names": exclude_column_names,
         },
     )
 
