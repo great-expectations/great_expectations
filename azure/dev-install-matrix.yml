@@ -5,6 +5,7 @@ parameters:
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
+      timeoutInMinutes: 75
       displayName: full${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
