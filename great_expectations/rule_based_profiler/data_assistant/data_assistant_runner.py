@@ -37,7 +37,7 @@ class DataAssistantRunner:
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> DataAssistantResult:
         data_assistant_name: str = self._data_assistant_cls.data_assistant_type
         validator: Validator = get_validator_with_expectation_suite(

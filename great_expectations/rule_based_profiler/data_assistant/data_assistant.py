@@ -441,7 +441,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> DataAssistantResult:
         """
         Run the DataAssistant as it is currently configured.
@@ -618,7 +618,7 @@ def run_profiler_on_data(
     rules: Optional[Dict[str, Dict[str, Any]]] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-    **kwargs,
+    **kwargs: dict,
 ) -> None:
     """
     This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.

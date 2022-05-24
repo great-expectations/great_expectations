@@ -223,7 +223,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
-        **kwargs,
+        **kwargs: dict,
     ) -> RuleBasedProfilerResult:
         """
         Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
@@ -851,7 +851,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def _apply_runtime_environment(
         variables: Optional[ParameterContainer] = None,
         rules: Optional[List[Rule]] = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> None:
         """
         variables: attribute name/value pairs, commonly-used in Builder objects, to modify using "runtime_environment"
