@@ -97,9 +97,6 @@ def test_get_validator_bad_batch_request(context_with_single_titanic_csv):
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
     context.create_expectation_suite(expectation_suite_name="temp_suite")
-    context.get_validator(
-        batch_request=batch_request, expectation_suite_name="temp_suite"
-    )
     with pytest.raises(InvalidBatchRequestError):
         context.get_validator(
             batch_request=batch_request, expectation_suite_name="temp_suite"
