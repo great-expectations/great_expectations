@@ -182,6 +182,9 @@ class ColumnDomainBuilder(DomainBuilder):
         validator: Optional["Validator"] = None,  # noqa: F821
         variables: Optional[ParameterContainer] = None,
     ) -> List[str]:
+        """
+        This method applies multiple directives to obtain columns to be included as part of returned "Domain" objects.
+        """
         include_column_names: Optional[List[str]] = cast(
             Optional[List[str]],
             self._resolve_list_type_property(

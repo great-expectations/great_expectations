@@ -47,15 +47,26 @@ class RuntimeEnvironmentDomainTypeDirectives(SerializableDictDot):
     directives: Dict[RuntimeEnvironmentDomainTypeDirectivesKeys, Any]
 
     def to_dict(self) -> dict:
+        """
+        Returns dictionary equivalent of this object.
+        """
         return asdict(self)
 
     def to_json_dict(self) -> dict:
+        """
+        Returns JSON dictionary equivalent of this object.
+        """
         return convert_to_json_serializable(data=self.to_dict())
 
 
 def build_domain_type_directives(
-    **kwargs,
+    **kwargs: dict,
 ) -> List[RuntimeEnvironmentDomainTypeDirectives]:
+    """
+    This method makes best-effort attempt to identify directives, supplied in "kwargs", as supported properties,
+    corresponnding to "DomainBuilder" classes, associated with every "MetricDomainTypes", and return each of these
+    directives as part of dedicated "RuntimeEnvironmentDomainTypeDirectives" typed object for every "MetricDomainTypes".
+    """
     domain_type_directives_list: List[RuntimeEnvironmentDomainTypeDirectives] = []
 
     column_domain_type_directives: RuntimeEnvironmentDomainTypeDirectives = (
@@ -76,7 +87,7 @@ def build_domain_type_directives(
 def _build_specific_domain_type_directives(
     domain_type: MetricDomainTypes,
     domain_type_directives_keys: RuntimeEnvironmentDomainTypeDirectivesKeys,
-    **kwargs,
+    **kwargs: dict,
 ) -> RuntimeEnvironmentDomainTypeDirectives:
     domain_type_directives: RuntimeEnvironmentDomainTypeDirectives = (
         RuntimeEnvironmentDomainTypeDirectives(
