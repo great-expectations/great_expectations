@@ -1588,9 +1588,6 @@ class DataAssistantResult(SerializableDictDot):
         }
 
         profiler_details: dict = expectation_configuration.meta["profiler_details"]
-        if "metric_configuration" not in profiler_details:
-            return None
-
         metric_configuration: dict = profiler_details["metric_configuration"]
         domain_kwargs: dict = metric_configuration["domain_kwargs"]
 
@@ -1725,8 +1722,6 @@ class DataAssistantResult(SerializableDictDot):
 
         if plot_mode is PlotMode.PRESCRIPTIVE:
             for kwarg_name in expectation_configuration.kwargs:
-                if kwarg_name == "quantile_ranges":
-                    continue
                 df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
 
         return df
@@ -1760,12 +1755,7 @@ class DataAssistantResult(SerializableDictDot):
         column_dfs: List[Tuple[str, pd.DataFrame]] = []
         for expectation_configuration in expectation_configurations:
             profiler_details: dict = expectation_configuration.meta["profiler_details"]
-            metric_configuration: Optional[dict] = profiler_details.get(
-                "metric_configuration"
-            )
-            if metric_configuration is None:
-                # print(expectation_configuration)
-                continue
+            metric_configuration: dict = profiler_details["metric_configuration"]
             domain_kwargs: dict = metric_configuration["domain_kwargs"]
 
             domain = domains_by_column_name[domain_kwargs["column"]]
