@@ -1284,8 +1284,10 @@ class Expectation(metaclass=MetaExpectation):
     def _get_rendered_result_as_string(self, rendered_result) -> str:
         """Convenience method to get rendered results as strings."""
 
+        result: str = ""
+
         if type(rendered_result) == str:
-            return rendered_result
+            result = rendered_result
 
         elif type(rendered_result) == list:
             sub_result_list = []
@@ -1294,44 +1296,48 @@ class Expectation(metaclass=MetaExpectation):
                 if res is not None:
                     sub_result_list.append(res)
 
-            return "\n".join(sub_result_list)
+            result = "\n".join(sub_result_list)
 
         elif isinstance(rendered_result, RenderedStringTemplateContent):
-            return rendered_result.__str__()
+            result = rendered_result.__str__()
 
         elif isinstance(rendered_result, CollapseContent):
-            return rendered_result.__str__()
+            result = rendered_result.__str__()
 
         elif isinstance(rendered_result, RenderedAtomicContent):
-            return f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, RenderedContentBlockContainer):
-            return "(RenderedContentBlockContainer) " + repr(
+            result = "(RenderedContentBlockContainer) " + repr(
                 rendered_result.to_json_dict()
             )
 
         elif isinstance(rendered_result, RenderedTableContent):
-            return f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, RenderedGraphContent):
-            return f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, ValueListContent):
-            return f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, dict):
-            return f"(dict) {repr(rendered_result)}"
+            result = f"(dict) {repr(rendered_result)}"
 
         elif isinstance(rendered_result, int):
-            return repr(rendered_result)
+            result = repr(rendered_result)
 
         elif rendered_result == None:
-            return ""
+            result = ""
 
         else:
             raise TypeError(
                 f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."
             )
+
+        if "inf" in result:
+            result = ""
+        return result
 
     def _get_renderer_diagnostics(
         self,
