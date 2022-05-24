@@ -2120,6 +2120,7 @@ def quentin_explicit_instantiation_result_actual_time(
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
+        persist=False,
     )
     assert len(validator.batches) == 36
 
@@ -2155,6 +2156,7 @@ def quentin_explicit_instantiation_result_frozen_time(
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
+        persist=False,
     )
     assert len(validator.batches) == 36
 
@@ -2270,6 +2272,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
+        persist=False,
     )
 
     data_assistant: DataAssistant = VolumeDataAssistant(
