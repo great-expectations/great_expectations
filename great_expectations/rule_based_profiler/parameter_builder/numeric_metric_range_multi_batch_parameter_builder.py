@@ -515,7 +515,7 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                     estimation_histogram=np.histogram(
                         a=metric_value_vector, bins=NUM_HISTOGRAM_BINS
                     )[0],
-                    value_range=np.array(
+                    value_range=np.asarray(
                         [metric_value_vector[0], metric_value_vector[0]]
                     ),
                 )
