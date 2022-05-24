@@ -137,6 +137,11 @@ def test_get_batch(data_context_with_simple_sql_datasource_for_testing_get_batch
         )
 
 
+# TODO
+def test_get_validator_bad_batch_request():
+    pass
+
+
 def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_batch):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
     context.create_expectation_suite("my_expectations")

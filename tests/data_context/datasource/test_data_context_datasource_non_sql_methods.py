@@ -12,6 +12,15 @@ from tests.test_utils import create_files_in_directory
 yaml = YAMLHandler()
 
 
+# TODO
+def test_get_validator_bad_batch_request():
+    pass
+
+
+def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_batch):
+    pass
+
+
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_inferred_assets(
     empty_data_context, tmp_path_factory
 ):
@@ -315,6 +324,82 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "name": "Test",
         "year": "2010",
     }
+
+
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_bad_batch_request(
+    empty_data_context, tmp_path_factory
+):
+    context = empty_data_context
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_queries"
+        )
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "Test_1998.csv",
+            "Test_1999.csv",
+            "Test_2000.csv",
+            "Test_2010.csv",
+            "Test_2021.csv",
+        ],
+        file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
+    )
+
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+
+    execution_engine:
+        class_name: PandasExecutionEngine
+
+    data_connectors:
+        my_data_connector:
+            class_name: ConfiguredAssetFilesystemDataConnector
+            base_directory: {base_directory}
+            glob_directive: "*.csv"
+
+            default_regex:
+                pattern: (.+)_(\\d.*)\\.csv
+                group_names:
+                    - name
+                    - year
+            sorters:
+                - orderby: desc
+                  class_name: NumericSorter
+                  name: year
+            assets:
+                YearTest:
+                    base_directory: {base_directory}
+                    pattern: (.+)_(\\d.*)\\.csv
+                    group_names:
+                        - name
+                        - year
+
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+
+    # only select files from after 2000
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return int(batch_identifiers["year"]) > 2000
+
+    batch_request: Union[dict, BatchRequest] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_data_connector",
+        "data_asset_name": "I_DONT_EXIST",
+        "data_connector_query": {
+            "custom_filter_function": my_custom_batch_selector,
+        },
+    }
+
+    batch_list: List[Batch] = context.get_batch_list(**batch_request)
+    # is this the behavior that we what?
+    assert len(batch_list) == 0
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter(
