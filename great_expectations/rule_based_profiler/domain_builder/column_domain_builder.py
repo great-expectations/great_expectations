@@ -1,7 +1,4 @@
-from types import GenericAlias
-
-# noinspection PyUnresolvedReferences
-from typing import Iterable, List, Optional, Set, Union, _UnionGenericAlias, cast
+from typing import Iterable, List, Optional, Set, Tuple, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -399,9 +396,9 @@ class ColumnDomainBuilder(DomainBuilder):
     def _resolve_list_type_property(
         self,
         property_name: str,
-        property_value_type: Union[GenericAlias, _UnionGenericAlias],
+        property_value_type: Union[type, Tuple[type, ...]],
         variables: Optional[ParameterContainer] = None,
-    ) -> List[Union[GenericAlias, _UnionGenericAlias]]:
+    ) -> List[type]:
         property_value: Optional[property_value_type] = getattr(self, property_name, [])
         if property_value is None:
             property_value = []
@@ -413,7 +410,7 @@ class ColumnDomainBuilder(DomainBuilder):
                     f'Unrecognized "{property_name}" directive -- must be "{property_value_type}" (or string).'
                 )
 
-        property_cursor: Union[GenericAlias, _UnionGenericAlias]
+        property_cursor: type
         property_value = [
             # Obtain property from "rule state" (i.e., variables and parameters); from instance variable otherwise.
             get_parameter_value_and_validate_return_type(
