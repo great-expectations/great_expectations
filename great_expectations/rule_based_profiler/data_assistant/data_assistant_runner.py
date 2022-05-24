@@ -24,8 +24,15 @@ def augment_arguments(**extra_kwargs) -> Callable:
     """
 
     def signature_modification_decorator(func: Callable) -> Callable:
+        """
+        Specific decorator definition for including additional arguments that are passed to every function invocation.
+        """
+
         @wraps(func)
-        def modify_signature(*args, **kwargs):
+        def modify_signature(*args, **kwargs) -> Any:
+            """
+            Actual implementation logic for including additional arguments that are passed to every function invocation.
+            """
             kwargs = kwargs or {}
             augmented_kwargs: dict = copy.deepcopy(extra_kwargs)
             augmented_kwargs.update(kwargs)
