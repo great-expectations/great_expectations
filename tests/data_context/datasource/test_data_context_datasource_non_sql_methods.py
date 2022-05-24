@@ -8,7 +8,7 @@ import pytest
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import ValidationError
+from great_expectations.exceptions import InvalidBatchRequestError
 from great_expectations.validator.validator import Validator
 from tests.test_utils import create_files_in_directory
 
@@ -97,7 +97,10 @@ def test_get_validator_bad_batch_request(context_with_single_titanic_csv):
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
     context.create_expectation_suite(expectation_suite_name="temp_suite")
-    with pytest.raises(ValidationError):
+    context.get_validator(
+        batch_request=batch_request, expectation_suite_name="temp_suite"
+    )
+    with pytest.raises(InvalidBatchRequestError):
         context.get_validator(
             batch_request=batch_request, expectation_suite_name="temp_suite"
         )
