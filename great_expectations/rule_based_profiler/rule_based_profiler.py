@@ -901,8 +901,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         dest_property_value: Optional[Any] = None,
         source_property_value: Optional[Any] = None,
     ) -> Optional[Any]:
-        if dest_property_value is None and source_property_value is None:
-            return None
+        if dest_property_value is None:
+            return source_property_value
 
         if type(source_property_value) != type(dest_property_value):
             raise ge_exceptions.ProfilerExecutionError(
