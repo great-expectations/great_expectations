@@ -18,7 +18,7 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
 from great_expectations.validator.validator import Validator
 
 
-def augment_arguments(**extra_kwargs) -> Callable:
+def augment_arguments(**extra_kwargs: dict) -> Callable:
     """
     Decorator factory that defines additional arguments that are passed to every function invocation.
     """
