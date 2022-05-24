@@ -1508,9 +1508,10 @@ class DataAssistantResult(SerializableDictDot):
             )
             return_charts.append(return_chart)
 
-        return [chart for chart in display_charts if chart is not None], [
-            chart for chart in return_charts if chart is not None
-        ]
+        display_charts = [chart for chart in display_charts if chart is not None]
+        return_charts = [chart for chart in return_charts if chart is not None]
+
+        return display_charts, return_charts
 
     def _chart_domain_values(
         self,
@@ -1586,9 +1587,11 @@ class DataAssistantResult(SerializableDictDot):
             for domain in list(attributed_metrics.keys())
         }
 
-        metric_configuration: dict = expectation_configuration.meta["profiler_details"][
-            "metric_configuration"
-        ]
+        profiler_details: dict = expectation_configuration.meta["profiler_details"]
+        if "metric_configuration" not in profiler_details:
+            return None
+
+        metric_configuration: dict = profiler_details["metric_configuration"]
         domain_kwargs: dict = metric_configuration["domain_kwargs"]
 
         domain = domains_by_column_name[domain_kwargs["column"]]
@@ -1722,6 +1725,8 @@ class DataAssistantResult(SerializableDictDot):
 
         if plot_mode is PlotMode.PRESCRIPTIVE:
             for kwarg_name in expectation_configuration.kwargs:
+                if kwarg_name == "quantile_ranges":
+                    continue
                 df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
 
         return df
@@ -1753,7 +1758,7 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_names: List[str]
         column_dfs: List[Tuple[str, pd.DataFrame]] = []
-        for i, expectation_configuration in enumerate(expectation_configurations):
+        for expectation_configuration in expectation_configurations:
             profiler_details: dict = expectation_configuration.meta["profiler_details"]
             metric_configuration: Optional[dict] = profiler_details.get(
                 "metric_configuration"
@@ -1782,9 +1787,6 @@ class DataAssistantResult(SerializableDictDot):
                     attributed_values: ParameterNode = attributed_values_by_metric_name[
                         metric_name
                     ]
-
-                    if i == 21:
-                        breakpoint()
 
                     df: pd.DataFrame = self._create_df_for_charting(
                         metric_name=metric_name,
