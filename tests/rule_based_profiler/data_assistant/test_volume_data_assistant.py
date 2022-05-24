@@ -2066,7 +2066,7 @@ def quentin_expected_expectation_suite(
         expected_expectation_suite_meta: Dict[str, Any] = {
             "citations": [
                 {
-                    "citation_date": "2019-09-26T13:42:41+00:00",
+                    "citation_date": "2019-09-26T13:42:41.000000Z",
                     "profiler_config": quentin_expected_rule_based_profiler_configuration(
                         name=name
                     ).to_json_dict(),
@@ -2395,10 +2395,21 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
     data_assistant_result.citation.pop("profiler_config", None)
     expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
 
+    data_assistant_result.citation.pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
     assert (
         data_assistant_result.citation
         == expected_expectation_suite.meta["citations"][0]
     )
+
+    actual_expectation_suite: ExpectationSuite = (
+        data_assistant_result.get_expectation_suite(expectation_suite_name="my_suite")
+    )
+    actual_expectation_suite.meta.pop("great_expectations_version", None)
+    expected_expectation_suite.meta.pop("great_expectations_version", None)
+    actual_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    assert actual_expectation_suite == expected_expectation_suite
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -2445,10 +2456,21 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
     data_assistant_result.citation.pop("profiler_config", None)
     expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
 
+    data_assistant_result.citation.pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
     assert (
         data_assistant_result.citation
         == expected_expectation_suite.meta["citations"][0]
     )
+
+    actual_expectation_suite: ExpectationSuite = (
+        data_assistant_result.get_expectation_suite(expectation_suite_name="my_suite")
+    )
+    actual_expectation_suite.meta.pop("great_expectations_version", None)
+    expected_expectation_suite.meta.pop("great_expectations_version", None)
+    actual_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    assert actual_expectation_suite == expected_expectation_suite
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -2545,10 +2567,21 @@ def test_get_metrics_and_expectations_using_implicit_invocation_with_exclude_col
     data_assistant_result.citation.pop("profiler_config", None)
     expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
 
+    data_assistant_result.citation.pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
     assert (
         data_assistant_result.citation
         == expected_expectation_suite.meta["citations"][0]
     )
+
+    actual_expectation_suite: ExpectationSuite = (
+        data_assistant_result.get_expectation_suite(expectation_suite_name="my_suite")
+    )
+    actual_expectation_suite.meta.pop("great_expectations_version", None)
+    expected_expectation_suite.meta.pop("great_expectations_version", None)
+    actual_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    assert actual_expectation_suite == expected_expectation_suite
 
 
 def test_execution_time_within_proper_bounds_using_explicit_instantiation(
