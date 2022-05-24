@@ -38,9 +38,6 @@ def test_release_schedule_adheres_to_schema(
 
     for date, release_version in release_schedule.items():
 
-        # No old releases should exist within the release schedule (deleted during release process)
-        assert date >= today
-
         if prev_date and prev_version:
 
             # Each date should be greater than the prior one
