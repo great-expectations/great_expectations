@@ -27,7 +27,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Median Implementation"""
-        metrics: Dict[str, Any] = kwargs.get("metrics") or {}
+        metrics: Dict[str, Any] = kwargs.get("metrics", {})
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return 0.0
