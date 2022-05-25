@@ -10,12 +10,15 @@ the country of origin to not be null only for people of foreign descent.
 Great Expectations allows you to express such Conditional Expectations via a `row_condition` argument that can be passed
 to all Dataset Expectations.
 
-Today, conditional Expectations are available only for the Pandas but not for the Spark and SQLAlchemy backends. The
+Today, conditional Expectations are available for the Pandas, Spark, and SQLAlchemy backends. The
 feature is **experimental**. Please expect changes to API as additional backends are supported.
 
-For Pandas, the `row_condition` argument should be a boolean expression string, which can be passed
-to `pandas.DataFrame.query()` before Expectation Validation (see
+When using conditional Expectations the `row_condition` argument should be a boolean expression string.
+
+:::note
+In Pandas the `row_condition` value will be passed to `pandas.DataFrame.query()` before Expectation Validation (see
 the [Pandas docs](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html).
+:::
 
 Additionally, the `condition_parser` argument must be provided, which defines the syntax of conditions. Since the
 feature is **experimental** and only available for Pandas this argument must be set to *"pandas"* by default, thus,
@@ -25,9 +28,7 @@ The feature can be used, e.g., to test if different encodings of identical piece
 each other. See the following example setup:
 
 ```python
-import great_expectations as ge
-my_df = ge.read_csv("./tests/test_sets/Titanic.csv")
-my_df.expect_column_values_to_be_in_set(
+validator.expect_column_values_to_be_in_set(
     column='Sex',
     value_set=['male'],
     condition_parser='pandas',
@@ -52,23 +53,27 @@ This will return:
 }
 ```
 
+:::note
+For instructions on how to get a Validator object, please see [our guide on how to create and edit Expectations with instant feedback from a sample Batch of data](../../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
+:::
+
 It is also possible to add multiple Expectations of the same type to the Expectation Suite for a single column. At most
 one Expectation can be unconditional while an arbitrary number of Expectations -- each with a different condition -- can
 be conditional.
 
 ```python
-my_df.expect_column_values_to_be_in_set(
+validator.expect_column_values_to_be_in_set(
         column='Survived',
         value_set=[0, 1]
     )
-my_df.expect_column_values_to_be_in_set(
+validator.expect_column_values_to_be_in_set(
         column='Survived',
         value_set=[1],
         condition_parser='pandas',
         row_condition='PClass=="1st"'
     )
 # The second Expectation fails, but we want to include it in the output:
-my_df.get_expectation_suite(
+validator.get_expectation_suite(
   discard_failed_expectations=False
 )  
 ```
@@ -101,9 +106,14 @@ This results in the following Expectation Suite:
 }
 ```
 
-:::warning
-You should not use single quotes nor \\n inside the specified `row_condition` (see examples below). Otherwise a bug may be introduced when running `great_expectations suite edit` from the CLI.
+:::note
+In the earlier rendition of conditional Expectations, the `row_condition` parameter would be overridden by `filter_nan` and `filter_none`.  This prevented `row_conditions` from being defined when `filter_nan` and `filter_none` were being used and was handled by raising an Error.  This conflict has been resolved since then and now all three parameters can be used together without causing an error to be thrown.
 :::
+
+### Gotchas for formatting of `row_conditions` values
+
+
+You should not use single quotes nor `\n` inside the specified `row_condition` (see examples below).
 
 ```python 
 row_condition="PClass=='1st'"  # never use simple quotes inside !!!
@@ -112,8 +122,12 @@ row_condition="PClass=='1st'"  # never use simple quotes inside !!!
 ```python 
 row_condition="""
 PClass=="1st"
-"""  # never use \\n inside !!!
+"""  # never use \n inside !!!
 ```
+
+:::warning
+If you do use single quotes or `\n` inside a specified `row_condition` a bug may be introduced when running `great_expectations suite edit` from the CLI.
+:::
 
 ## Data Docs and Conditional Expectations
 
