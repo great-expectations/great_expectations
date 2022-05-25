@@ -633,7 +633,7 @@ class DataAssistantResult(SerializableDictDot):
             column
             for column in column_dfs[0][1].columns
             if column
-            not in [
+            not in {
                 metric_name,
                 batch_name,
                 column_name,
@@ -641,7 +641,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value,
                 strict_min,
                 strict_max,
-            ]
+            }
         ]
         batch_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         batch_component: BatchPlotComponent = BatchPlotComponent(
@@ -1723,11 +1723,15 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
         subtitle: Optional[str],
-    ) -> alt.Chart:
-        implemented_metrics: List[str] = [
+    ) -> Optional[alt.Chart]:
+        implemented_metrics: Set[str] = {
             "table_row_count",
             "column_distinct_values_count",
-        ]
+            "column_max",
+            "column_mean",
+            "column_median",
+            "column_min",
+        }
 
         plot_impl: Optional[
             Callable[
@@ -1742,11 +1746,10 @@ class DataAssistantResult(SerializableDictDot):
             ]
         ] = None
         chart: Optional[alt.Chart] = None
-        if plot_mode is PlotMode.PRESCRIPTIVE:
-            if metric_name in implemented_metrics:
+        if metric_name in implemented_metrics:
+            if plot_mode is PlotMode.PRESCRIPTIVE:
                 plot_impl = self.get_expect_domain_values_to_be_between_chart
-        elif plot_mode is PlotMode.DESCRIPTIVE:
-            if metric_name in implemented_metrics:
+            elif plot_mode is PlotMode.DESCRIPTIVE:
                 plot_impl = self.get_quantitative_metric_chart
 
         if plot_impl:
