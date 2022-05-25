@@ -45,7 +45,7 @@ def test_ge():
         datasource_name="my_redshift_datasource",
         data_connector_name="default_runtime_data_connector_name",
         data_asset_name="default_name",  # this can be anything that identifies this data
-        runtime_parameters={"query": "SELECT * from date LIMIT 10"},
+        runtime_parameters={"query": "SELECT TOP 10 * from dbo.taxi_data"},
         batch_identifiers={"default_identifier_name": "default_identifier"},
         batch_spec_passthrough={
             "create_temp_table": False
