@@ -65,6 +65,7 @@ def alice_validator(alice_columnar_table_single_batch_context) -> Validator:
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 1
@@ -89,6 +90,7 @@ def bobby_validator(
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 3
@@ -118,6 +120,7 @@ def bobster_validator(
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 36
@@ -144,6 +147,7 @@ def quentin_validator(
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 36
@@ -1111,6 +1115,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
     assert len(validator.batches) == 1
 
@@ -1356,6 +1361,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
     assert len(validator.batches) == 1
 

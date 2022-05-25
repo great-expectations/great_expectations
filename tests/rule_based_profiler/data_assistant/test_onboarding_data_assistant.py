@@ -145,6 +145,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="onboarding_data_assistant",
+        persist=False,
     )
 
     data_assistant: DataAssistant = OnboardingDataAssistant(
