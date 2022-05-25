@@ -1814,10 +1814,7 @@ class DataAssistantResult(SerializableDictDot):
 
         for metric_name in attributed_values_by_metric_name.keys():
             type_: str = expectation_configuration.expectation_type
-            if (
-                type_ in expectation_metric_map.keys()
-                and metric_name == expectation_metric_map[type_]
-            ):
+            if expectation_metric_map.get(type_) == metric_name:
                 attributed_values: ParameterNode = attributed_values_by_metric_name[
                     metric_name
                 ]
@@ -1986,10 +1983,7 @@ class DataAssistantResult(SerializableDictDot):
 
             for metric_name in attributed_values_by_metric_name.keys():
                 type_: str = expectation_configuration.expectation_type
-                if (
-                    type_ in expectation_metric_map.keys()
-                    and metric_name == expectation_metric_map[type_]
-                ):
+                if expectation_metric_map.get(type_) == metric_name:
                     attributed_values: ParameterNode = attributed_values_by_metric_name[
                         metric_name
                     ]
