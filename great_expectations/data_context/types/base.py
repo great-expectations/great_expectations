@@ -64,7 +64,7 @@ class BaseYamlConfig(SerializableDictDot):
         "commented_map",
     }
 
-    def __init__(self, commented_map: Optional[CommentedMap] = None):
+    def __init__(self, commented_map: Optional[CommentedMap] = None) -> None:
         if commented_map is None:
             commented_map = CommentedMap()
         self._commented_map = commented_map
@@ -110,7 +110,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(self._get_schema_instance().dump(self))
         return commented_map
 
-    def to_yaml(self, outfile):
+    def to_yaml(self, outfile) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
@@ -124,7 +124,7 @@ class BaseYamlConfig(SerializableDictDot):
 
     def to_json_dict(self) -> dict:
         """
-        :returns a JSON-serialiable dict containing the project configuration
+        :returns a JSON-serializable dict containing the project configuration
         """
         commented_map: CommentedMap = self.commented_map
         return convert_to_json_serializable(data=commented_map)
@@ -134,28 +134,33 @@ class BaseYamlConfig(SerializableDictDot):
         return self._get_schema_validated_updated_commented_map()
 
     @classmethod
-    def get_config_class(cls):
+    def get_config_class(cls) -> None:
         raise NotImplementedError
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls) -> None:
         raise NotImplementedError
 
 
 class AssetConfig(DictDot):
     def __init__(
         self,
-        name=None,
-        class_name=None,
-        module_name=None,
-        bucket=None,
-        prefix=None,
-        delimiter=None,
-        max_keys=None,
-        schema_name=None,
-        batch_spec_passthrough=None,
+        name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        bucket: Optional[str] = None,
+        prefix: Optional[str] = None,
+        delimiter: Optional[str] = None,
+        max_keys: Optional[int] = None,
+        schema_name: Optional[str] = None,
+        batch_spec_passthrough: Optional[Dict[str, Any]] = None,
+        batch_identifiers: Optional[List[str]] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[Dict[str, str]] = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[Dict[str, str]] = None,
         **kwargs,
-    ):
+    ) -> None:
         if name is not None:
             self.name = name
         self._class_name = class_name
@@ -172,6 +177,16 @@ class AssetConfig(DictDot):
             self.schema_name = schema_name
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
+        if batch_identifiers is not None:
+            self.batch_identifiers = batch_identifiers
+        if splitter_method is not None:
+            self.splitter_method = splitter_method
+        if splitter_kwargs is not None:
+            self.splitter_kwargs = splitter_kwargs
+        if sampling_method is not None:
+            self.sampling_method = sampling_method
+        if sampling_kwargs is not None:
+            self.sampling_kwargs = sampling_kwargs
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -216,8 +231,17 @@ class AssetConfigSchema(Schema):
     table_name = fields.String(required=False, allow_none=True)
     type = fields.String(required=False, allow_none=True)
 
+    batch_identifiers = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+
+    splitter_method = fields.String(required=False, allow_none=True)
+    splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sampling_method = fields.String(required=False, allow_none=True)
+    sampling_kwargs = fields.Dict(required=False, allow_none=True)
+
     @validates_schema
-    def validate_schema(self, data, **kwargs):
+    def validate_schema(self, data, **kwargs) -> None:
         pass
 
     # noinspection PyUnusedLocal
@@ -236,7 +260,7 @@ class SorterConfig(DictDot):
         reference_list=None,
         datetime_format=None,
         **kwargs,
-    ):
+    ) -> None:
         self._name = name
         self._class_name = class_name
         self._module_name = module_name
@@ -309,7 +333,7 @@ class SorterConfigSchema(Schema):
     )
 
     @validates_schema
-    def validate_schema(self, data, **kwargs):
+    def validate_schema(self, data, **kwargs) -> None:
         pass
 
     # noinspection PyUnusedLocal
@@ -347,7 +371,7 @@ class DataConnectorConfig(SerializableDictDot):
         # Both S3/Azure
         delimiter=None,
         **kwargs,
-    ):
+    ) -> None:
         self._class_name = class_name
         self._module_name = module_name
         if credentials is not None:
@@ -397,6 +421,7 @@ class DataConnectorConfig(SerializableDictDot):
         if delimiter is not None:
             self.delimiter = delimiter
 
+        # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -430,7 +455,7 @@ class DataConnectorConfigSchema(Schema):
     )
     module_name = fields.String(
         required=False,
-        allow_nonw=True,
+        allow_none=True,
         missing="great_expectations.datasource.data_connector",
     )
 
@@ -682,7 +707,7 @@ class ExecutionEngineConfig(DictDot):
         gcs_options=None,
         credentials_info=None,
         **kwargs,
-    ):
+    ) -> None:
         self._class_name = class_name
         self._module_name = module_name
         if caching is not None:
@@ -803,7 +828,7 @@ class DatasourceConfig(SerializableDictDot):
         reader_options=None,
         limit=None,
         **kwargs,
-    ):
+    ) -> None:
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
@@ -971,7 +996,9 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
 
 
 class AnonymizedUsageStatisticsConfig(DictDot):
-    def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None):
+    def __init__(
+        self, enabled=True, data_context_id=None, usage_statistics_url=None
+    ) -> None:
         self._enabled = enabled
 
         if data_context_id is None:
@@ -1059,7 +1086,7 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
 
 
 class NotebookTemplateConfig(DictDot):
-    def __init__(self, file_name, template_kwargs=None):
+    def __init__(self, file_name, template_kwargs=None) -> None:
         self.file_name = file_name
         if template_kwargs:
             self.template_kwargs = template_kwargs
@@ -1097,7 +1124,7 @@ class NotebookConfig(DictDot):
         footer_code=None,
         table_expectation_code=None,
         column_expectation_code=None,
-    ):
+    ) -> None:
         self.class_name = class_name
         self.module_name = module_name
         self.custom_templates_module = custom_templates_module
@@ -1165,7 +1192,7 @@ class NotebookConfigSchema(Schema):
 
 
 class NotebooksConfig(DictDot):
-    def __init__(self, suite_edit):
+    def __init__(self, suite_edit) -> None:
         self.suite_edit = suite_edit
 
 
@@ -1186,7 +1213,7 @@ class ProgressBarsConfig(DictDot):
         globally: bool = True,
         profilers: bool = True,
         metric_calculations: bool = True,
-    ):
+    ) -> None:
         self.globally = globally
         self.profilers = profilers
         self.metric_calculations = metric_calculations
@@ -1201,7 +1228,7 @@ class ProgressBarsConfigSchema(Schema):
 class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
-    def __init__(self, enabled: bool = False):
+    def __init__(self, enabled: bool = False) -> None:
         """Initialize a concurrency configuration to control multithreaded execution.
 
         Args:
@@ -1257,7 +1284,7 @@ class GeCloudConfig(DictDot):
         account_id: str = None,
         access_token: str = None,
         organization_id: str = None,
-    ):
+    ) -> None:
         # access_token was given a default value to maintain arg position of account_id
         if access_token is None:
             raise ValueError("Access token cannot be None.")
@@ -1346,7 +1373,7 @@ class DataContextConfigSchema(Schema):
                 data.pop(key)
         return data
 
-    def handle_error(self, exc, data, **kwargs):
+    def handle_error(self, exc, data, **kwargs) -> None:
         """Log and raise our custom exception when (de)serialization fails."""
         if (
             exc
@@ -1366,7 +1393,7 @@ class DataContextConfigSchema(Schema):
 
     # noinspection PyUnusedLocal
     @validates_schema
-    def validate_schema(self, data, **kwargs):
+    def validate_schema(self, data, **kwargs) -> None:
         if "config_version" not in data:
             raise ge_exceptions.InvalidDataContextConfigError(
                 "The key `config_version` is missing; please check your config file.",
@@ -1566,7 +1593,7 @@ class BaseStoreBackendDefaults(DictDot):
         validation_operators: dict = None,
         stores: dict = None,
         data_docs_sites: dict = None,
-    ):
+    ) -> None:
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
@@ -1626,7 +1653,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
         checkpoint_store_name: str = "checkpoint_S3_store",
         profiler_store_name: str = "profiler_S3_store",
-    ):
+    ) -> None:
         # Initialize base defaults
         super().__init__()
 
@@ -1711,7 +1738,7 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
         self,
         root_directory: Optional[str] = None,
         plugins_directory: Optional[str] = None,
-    ):
+    ) -> None:
         # Initialize base defaults
         super().__init__()
 
@@ -1747,7 +1774,7 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
 
     def __init__(
         self,
-    ):
+    ) -> None:
         # Initialize base defaults
         super().__init__()
 
@@ -1835,7 +1862,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
         checkpoint_store_name: str = "checkpoint_GCS_store",
         profiler_store_name: str = "profiler_GCS_store",
-    ):
+    ) -> None:
         # Initialize base defaults
         super().__init__()
 
@@ -1953,7 +1980,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
         checkpoint_store_name: str = "checkpoint_database_store",
         profiler_store_name: str = "profiler_database_store",
-    ):
+    ) -> None:
         # Initialize base defaults
         super().__init__()
 
@@ -2036,7 +2063,7 @@ class DataContextConfig(BaseYamlConfig):
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
-    ):
+    ) -> None:
         # Set defaults
         if config_version is None:
             config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
@@ -2254,7 +2281,7 @@ class CheckpointConfigSchema(Schema):
 
     # noinspection PyUnusedLocal
     @validates_schema
-    def validate_schema(self, data, **kwargs):
+    def validate_schema(self, data, **kwargs) -> None:
         if not (
             "name" in data or "validation_operator_name" in data or "batches" in data
         ):
@@ -2321,7 +2348,7 @@ class CheckpointConfig(BaseYamlConfig):
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[Union[UUID, str]] = None,
-    ):
+    ) -> None:
         self._name = name
         self._config_version = config_version
         if self.config_version is None:
@@ -2367,7 +2394,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._validation_operator_name
 
     @validation_operator_name.setter
-    def validation_operator_name(self, value: str):
+    def validation_operator_name(self, value: str) -> None:
         self._validation_operator_name = value
 
     @property
@@ -2375,7 +2402,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._batches
 
     @batches.setter
-    def batches(self, value: List[dict]):
+    def batches(self, value: List[dict]) -> None:
         self._batches = value
 
     @property
@@ -2383,7 +2410,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
-    def ge_cloud_id(self, value: Union[UUID, str]):
+    def ge_cloud_id(self, value: Union[UUID, str]) -> None:
         self._ge_cloud_id = value
 
     @property
@@ -2391,7 +2418,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._expectation_suite_ge_cloud_id
 
     @expectation_suite_ge_cloud_id.setter
-    def expectation_suite_ge_cloud_id(self, value: Union[UUID, str]):
+    def expectation_suite_ge_cloud_id(self, value: Union[UUID, str]) -> None:
         self._expectation_suite_ge_cloud_id = value
 
     @property
@@ -2399,7 +2426,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._name
 
     @name.setter
-    def name(self, value: str):
+    def name(self, value: str) -> None:
         self._name = value
 
     @property
@@ -2407,7 +2434,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._template_name
 
     @template_name.setter
-    def template_name(self, value: str):
+    def template_name(self, value: str) -> None:
         self._template_name = value
 
     @property
@@ -2415,7 +2442,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._config_version
 
     @config_version.setter
-    def config_version(self, value: float):
+    def config_version(self, value: float) -> None:
         self._config_version = value
 
     @property
@@ -2423,7 +2450,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[dict]):
+    def validations(self, value: List[dict]) -> None:
         self._validations = value
 
     @property
@@ -2431,7 +2458,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._profilers
 
     @profilers.setter
-    def profilers(self, value: List[dict]):
+    def profilers(self, value: List[dict]) -> None:
         self._profilers = value
 
     @property
@@ -2439,7 +2466,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._module_name
 
     @module_name.setter
-    def module_name(self, value: str):
+    def module_name(self, value: str) -> None:
         self._module_name = value
 
     @property
@@ -2447,7 +2474,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._class_name
 
     @class_name.setter
-    def class_name(self, value: str):
+    def class_name(self, value: str) -> None:
         self._class_name = value
 
     @property
@@ -2455,7 +2482,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._run_name_template
 
     @run_name_template.setter
-    def run_name_template(self, value: str):
+    def run_name_template(self, value: str) -> None:
         self._run_name_template = value
 
     @property
@@ -2463,7 +2490,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._batch_request
 
     @batch_request.setter
-    def batch_request(self, value: dict):
+    def batch_request(self, value: dict) -> None:
         self._batch_request = value
 
     @property
@@ -2471,7 +2498,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._expectation_suite_name
 
     @expectation_suite_name.setter
-    def expectation_suite_name(self, value: str):
+    def expectation_suite_name(self, value: str) -> None:
         self._expectation_suite_name = value
 
     @property
@@ -2479,7 +2506,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._action_list
 
     @action_list.setter
-    def action_list(self, value: List[dict]):
+    def action_list(self, value: List[dict]) -> None:
         self._action_list = value
 
     @property
@@ -2487,7 +2514,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._site_names
 
     @site_names.setter
-    def site_names(self, value: List[str]):
+    def site_names(self, value: List[str]) -> None:
         self._site_names = value
 
     @property
@@ -2495,7 +2522,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._slack_webhook
 
     @slack_webhook.setter
-    def slack_webhook(self, value: str):
+    def slack_webhook(self, value: str) -> None:
         self._slack_webhook = value
 
     @property
@@ -2503,7 +2530,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._notify_on
 
     @notify_on.setter
-    def notify_on(self, value: str):
+    def notify_on(self, value: str) -> None:
         self._notify_on = value
 
     @property
@@ -2511,7 +2538,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._notify_with
 
     @notify_with.setter
-    def notify_with(self, value: str):
+    def notify_with(self, value: str) -> None:
         self._notify_with = value
 
     @property
@@ -2519,7 +2546,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._evaluation_parameters
 
     @evaluation_parameters.setter
-    def evaluation_parameters(self, value: dict):
+    def evaluation_parameters(self, value: dict) -> None:
         self._evaluation_parameters = value
 
     @property
@@ -2527,7 +2554,7 @@ class CheckpointConfig(BaseYamlConfig):
         return self._runtime_configuration
 
     @runtime_configuration.setter
-    def runtime_configuration(self, value: dict):
+    def runtime_configuration(self, value: dict) -> None:
         self._runtime_configuration = value
 
     def __deepcopy__(self, memo):

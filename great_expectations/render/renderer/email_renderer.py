@@ -8,7 +8,7 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 class EmailRenderer(Renderer):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def render(self, validation_result=None, data_docs_pages=None, notify_with=None):

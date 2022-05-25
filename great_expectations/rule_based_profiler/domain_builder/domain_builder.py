@@ -1,12 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest,
-    BatchRequestBase,
-    RuntimeBatchRequest,
-)
+from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
@@ -25,44 +20,34 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class DomainBuilder(Builder, ABC):
+class DomainBuilder(ABC, Builder):
     """
     A DomainBuilder provides methods to get domains based on one or more batches of data.
     """
 
     def __init__(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         Args:
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
-            data_context: DataContext
+            data_context: BaseDataContext associated with DomainBuilder
         """
-        super().__init__(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            data_context=data_context,
-        )
+        super().__init__(data_context=data_context)
 
     def get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
     ) -> List[Domain]:
         """
         Args:
+            rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: attribute name/value pairs
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite existing batch_request value in DomainBuilder components.
 
         Returns:
             List of Domain objects.
@@ -73,10 +58,9 @@ class DomainBuilder(Builder, ABC):
         self.set_batch_list_or_batch_request(
             batch_list=batch_list,
             batch_request=batch_request,
-            force_batch_data=force_batch_data,
         )
 
-        return self._get_domains(variables=variables)
+        return self._get_domains(rule_name=rule_name, variables=variables)
 
     @property
     @abstractmethod
@@ -86,6 +70,7 @@ class DomainBuilder(Builder, ABC):
     @abstractmethod
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """

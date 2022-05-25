@@ -8,22 +8,12 @@ from great_expectations.util import filter_properties_dict
 
 try:
     import sqlalchemy
-    from sqlalchemy import (
-        Column,
-        MetaData,
-        String,
-        Table,
-        and_,
-        column,
-        create_engine,
-        select,
-        text,
-    )
+    from sqlalchemy import create_engine
     from sqlalchemy.engine.url import URL
-    from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     sqlalchemy = None
     create_engine = None
+    URL = None
 
 
 logger = logging.getLogger(__name__)
@@ -42,7 +32,7 @@ class SqlAlchemyQueryStore(Store):
         store_backend=None,
         runtime_environment=None,
         store_name=None,
-    ):
+    ) -> None:
         if not sqlalchemy:
             raise ge_exceptions.DataContextError(
                 "sqlalchemy module not found, but is required for "

@@ -8,9 +8,9 @@ By default, Validation Results are stored in JSON format in the ``uncommitted/va
 
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- [Configured an Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
-- [Configured a Checkpoint](../../../tutorials/getting_started/validate_your_data.md).
+- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
+- [Configured an Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md).
+- [Configured a Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md).
 - [Configured a PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
 
 </Prerequisites>
@@ -103,6 +103,6 @@ store_backend:
 
 ### 6. Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](../../../tutorials/getting_started/validate_your_data.md) to store results in the new Validation Results store in PostgreSQL then visualize the results by [re-building Data Docs](../../../tutorials/getting_started/check_out_data_docs.md).
+[Run a Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md) to store results in the new Validation Results store in PostgreSQL then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
 
 Behind the scenes, Great Expectations will create a new table in your database called ``ge_validations_store``, and populate the fields with information from the Validation Results.

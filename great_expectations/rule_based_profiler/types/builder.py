@@ -20,32 +20,20 @@ class Builder(SerializableDictDot):
 
     exclude_field_names: Set[str] = {
         "batch_list",
+        "batch_request",
         "data_context",
     }
 
     def __init__(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         Args:
-            data_context: DataContext
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+            data_context: BaseDataContext associated with this Builder
         """
-        self._batch_list = batch_list
-
-        if batch_request_contains_batch_data(batch_request=batch_request):
-            raise ValueError(
-                f"""Error: batch_data found in batch_request -- only primitive types are allowed as part of \
-{self.__class__.__name__} instance attributes.
-"""
-            )
-
-        self._batch_request = batch_request
-
+        self._batch_list = None
+        self._batch_request = None
         self._data_context = data_context
 
     """
@@ -72,16 +60,15 @@ class Builder(SerializableDictDot):
         self._batch_request = value
 
     @property
-    def data_context(self) -> Optional["DataContext"]:  # noqa: F821
+    def data_context(self) -> Optional["BaseDataContext"]:  # noqa: F821
         return self._data_context
 
     def set_batch_list_or_batch_request(
         self,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
     ) -> None:
-        if force_batch_data or self.batch_request is None:
+        if self.batch_request is None:
             self.set_batch_data(
                 batch_list=batch_list,
                 batch_request=batch_request,

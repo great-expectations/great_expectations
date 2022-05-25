@@ -185,7 +185,7 @@
         "unexpected_index_list": [4],
         "unexpected_list": ["bee"]
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title": "positive_test_exact_mostly_w_one_non_matching_value",
@@ -201,7 +201,7 @@
         "unexpected_index_list": [4],
         "unexpected_list": ["bee"]
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title": "positive_test_column_name_has_space",
@@ -216,7 +216,7 @@
         "unexpected_index_list": [4],
         "unexpected_list": ["bee"]
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title": "positive_test_sufficient_mostly_w_one_non_matching_value",
@@ -231,7 +231,7 @@
         "unexpected_index_list": [4],
         "unexpected_list": ["bee"]
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title": "negative_test_one_missing_value_and_insufficent_mostly",
@@ -246,7 +246,7 @@
         "unexpected_index_list": [3],
         "unexpected_list": ["bdd"]
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title": "positive_test_one_missing_value_and_exact_mostly",
@@ -261,7 +261,7 @@
         "unexpected_index_list": [3],
         "unexpected_list": ["bdd"]
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title": "positive_test_one_missing_value_and_sufficent_mostly",
@@ -276,7 +276,7 @@
         "unexpected_index_list": [3],
         "unexpected_list": ["bdd"]
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title": "positive_test_all_missing_values",
@@ -290,7 +290,7 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title": "positive_test_all_missing_values_mostly",
@@ -305,7 +305,7 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title": "positive_test_match_characters_not_at_the_beginning_of_string",
@@ -320,7 +320,7 @@
         "unexpected_index_list": [0, 2, 3],
         "unexpected_list": ["aaa", "acc", "add"]
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     }
    ]
   }]

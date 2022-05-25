@@ -397,6 +397,10 @@ def column_condition_partial(
                 sqlalchemy_engine: Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
+                if dialect is None:
+                    # Trino
+                    if hasattr(sqlalchemy_engine, "dialect"):
+                        dialect = sqlalchemy_engine.dialect
                 expected_condition = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -1992,7 +1996,13 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 ]
             )
         ).scalar()
-        unexpected_count = int(unexpected_count)
+        # Unexpected count can be None if the table is empty, in which case the count
+        # should default to zero.
+        try:
+            unexpected_count = int(unexpected_count)
+        except TypeError:
+            unexpected_count = 0
+
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
@@ -2046,7 +2056,7 @@ def _sqlalchemy_column_map_condition_values(
         query = query.limit(result_format["partial_unexpected_count"])
     elif (
         result_format["result_format"] == "COMPLETE"
-        and "bigquery" in execution_engine.engine.dialect.name
+        and execution_engine.engine.dialect.name.lower() == "bigquery"
     ):
         logger.warning(
             "BigQuery imposes a limit of 10000 parameters on individual queries; "

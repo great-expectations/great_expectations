@@ -20,7 +20,7 @@ def renderer(renderer_type, **kwargs):
 
 
 class Renderer:
-    def __init__(self):
+    def __init__(self) -> None:
         # This is purely a convenience to provide an explicit mechanism to instantiate any Renderer, even ones that
         # used to be composed exclusively of classmethods
         pass

@@ -30,7 +30,7 @@ class BatchDefinition(SerializableDictDot):
         data_asset_name: str,
         batch_identifiers: IDDict,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         self._validate_batch_definition(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
@@ -71,7 +71,7 @@ class BatchDefinition(SerializableDictDot):
         data_connector_name: str,
         data_asset_name: str,
         batch_identifiers: IDDict,
-    ):
+    ) -> None:
         if datasource_name is None:
             raise ValueError("A valid datasource must be specified.")
         if datasource_name and not isinstance(datasource_name, str):
@@ -124,7 +124,7 @@ class BatchDefinition(SerializableDictDot):
         return self._batch_spec_passthrough
 
     @batch_spec_passthrough.setter
-    def batch_spec_passthrough(self, batch_spec_passthrough: Optional[dict]):
+    def batch_spec_passthrough(self, batch_spec_passthrough: Optional[dict]) -> None:
         self._batch_spec_passthrough = batch_spec_passthrough
 
     @property
@@ -176,7 +176,7 @@ class BatchRequestBase(SerializableDictDot):
         runtime_parameters: Optional[dict] = None,
         batch_identifiers: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
@@ -192,7 +192,7 @@ class BatchRequestBase(SerializableDictDot):
         return self._datasource_name
 
     @datasource_name.setter
-    def datasource_name(self, value: str):
+    def datasource_name(self, value: str) -> None:
         self._datasource_name = value
 
     @property
@@ -200,7 +200,7 @@ class BatchRequestBase(SerializableDictDot):
         return self._data_connector_name
 
     @data_connector_name.setter
-    def data_connector_name(self, value: str):
+    def data_connector_name(self, value: str) -> None:
         self._data_connector_name = value
 
     @property
@@ -208,7 +208,7 @@ class BatchRequestBase(SerializableDictDot):
         return self._data_asset_name
 
     @data_asset_name.setter
-    def data_asset_name(self, data_asset_name):
+    def data_asset_name(self, data_asset_name) -> None:
         self._data_asset_name = data_asset_name
 
     @property
@@ -216,7 +216,7 @@ class BatchRequestBase(SerializableDictDot):
         return self._data_connector_query
 
     @data_connector_query.setter
-    def data_connector_query(self, value: dict):
+    def data_connector_query(self, value: dict) -> None:
         self._data_connector_query = value
 
     @property
@@ -224,7 +224,7 @@ class BatchRequestBase(SerializableDictDot):
         return self._limit
 
     @limit.setter
-    def limit(self, value: int):
+    def limit(self, value: int) -> None:
         self._limit = value
 
     @property
@@ -232,7 +232,7 @@ class BatchRequestBase(SerializableDictDot):
         return self._runtime_parameters
 
     @runtime_parameters.setter
-    def runtime_parameters(self, value: dict):
+    def runtime_parameters(self, value: dict) -> None:
         self._runtime_parameters = value
 
     @property
@@ -240,7 +240,7 @@ class BatchRequestBase(SerializableDictDot):
         return self._batch_identifiers
 
     @batch_identifiers.setter
-    def batch_identifiers(self, value: dict):
+    def batch_identifiers(self, value: dict) -> None:
         self._batch_identifiers = value
 
     @property
@@ -248,7 +248,7 @@ class BatchRequestBase(SerializableDictDot):
         return self._batch_spec_passthrough
 
     @batch_spec_passthrough.setter
-    def batch_spec_passthrough(self, value: dict):
+    def batch_spec_passthrough(self, value: dict) -> None:
         self._batch_spec_passthrough = value
 
     @property
@@ -338,7 +338,7 @@ class BatchRequestBase(SerializableDictDot):
         data_asset_name: str,
         data_connector_query: Optional[dict] = None,
         limit: Optional[int] = None,
-    ):
+    ) -> None:
         # TODO test and check all logic in this validator!
         if not (datasource_name and isinstance(datasource_name, str)):
             raise TypeError(
@@ -396,7 +396,7 @@ class BatchRequest(BatchRequestBase):
         data_connector_query: Optional[dict] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         self._validate_init_parameters(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
@@ -432,7 +432,7 @@ class RuntimeBatchRequest(BatchRequestBase):
         runtime_parameters: dict,
         batch_identifiers: dict,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         self._validate_init_parameters(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
@@ -457,7 +457,7 @@ class RuntimeBatchRequest(BatchRequestBase):
         runtime_parameters: dict,
         batch_identifiers: dict,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         if not (runtime_parameters and (isinstance(runtime_parameters, dict))):
             raise TypeError(
                 f"""The runtime_parameters must be a non-empty dict object.
@@ -484,7 +484,7 @@ class BatchMarkers(BatchKwargs):
     NOT require specific keys and instead captures information about the OUTPUT of a datasource's fetch
     process, such as the timestamp at which a query was executed."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "ge_load_time" not in self:
             raise InvalidBatchIdError("BatchMarkers requires a ge_load_time")
@@ -512,7 +512,7 @@ class Batch(SerializableDictDot):
         datasource_name=None,
         batch_parameters=None,
         batch_kwargs=None,
-    ):
+    ) -> None:
         self._data = data
         if batch_request is None:
             batch_request = {}
@@ -549,7 +549,7 @@ class Batch(SerializableDictDot):
         return self._batch_request
 
     @batch_request.setter
-    def batch_request(self, batch_request):
+    def batch_request(self, batch_request) -> None:
         self._batch_request = batch_request
 
     @property
@@ -557,7 +557,7 @@ class Batch(SerializableDictDot):
         return self._batch_definition
 
     @batch_definition.setter
-    def batch_definition(self, batch_definition):
+    def batch_definition(self, batch_definition) -> None:
         self._batch_definition = batch_definition
 
     @property
@@ -630,7 +630,7 @@ class Batch(SerializableDictDot):
 
 def materialize_batch_request(
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
+) -> Optional[BatchRequestBase]:
     effective_batch_request: dict = get_batch_request_as_dict(
         batch_request=batch_request
     )
