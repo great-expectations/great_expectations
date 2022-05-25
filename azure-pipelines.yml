@@ -235,7 +235,7 @@ stages:
 
       - job: comprehensive
         condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 75
+        timeoutInMinutes: 90
 
         services:
           postgres: postgres
@@ -339,6 +339,7 @@ stages:
     jobs:
       - job: mysql
         condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
 
         services:
           mysql: mysql
@@ -382,6 +383,7 @@ stages:
 
       - job: mssql
         condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
 
         services:
           mssql: mssql
@@ -414,6 +416,7 @@ stages:
 
       - job: trino
         condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
 
         services:
           trino: trino
@@ -486,7 +489,7 @@ stages:
             displayName: 'pytest'
 
   - stage: deploy_gallery
-    condition: and(succeeded(), eq(variables.isRelease, true))
+    condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-18.04'
     dependsOn: [import_ge, custom_checks, required, lint, db_integration, usage_stats_integration, cli_integration]

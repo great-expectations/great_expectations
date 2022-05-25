@@ -261,6 +261,7 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
     }
 
 
+@pytest.mark.cloud
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys"
 )
