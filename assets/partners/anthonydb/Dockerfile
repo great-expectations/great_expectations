@@ -18,5 +18,5 @@ RUN apt-get install -y unixodbc-dev
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . /app/
-RUN yes | great_expectations init
+RUN great_expectations -y init
 CMD pytest test_ge.py -vvv
