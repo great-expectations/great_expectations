@@ -1729,10 +1729,6 @@ class DataAssistantResult(SerializableDictDot):
         implemented_metrics: Set[str] = {
             "table_row_count",
             "column_distinct_values_count",
-            "column_max",
-            "column_mean",
-            "column_median",
-            "column_min",
         }
 
         plot_impl: Optional[
