@@ -1164,6 +1164,7 @@ def test_add_profiler(
     )
 
 
+@pytest.mark.cloud
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
 def test_add_profiler_ge_cloud_mode(
     mock_data_context: mock.MagicMock,
@@ -1321,6 +1322,7 @@ def test_list_profilers(mock_profiler_store: mock.MagicMock):
     assert store.list_keys.called
 
 
+@pytest.mark.cloud
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
 def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
     store = mock_profiler_store()
