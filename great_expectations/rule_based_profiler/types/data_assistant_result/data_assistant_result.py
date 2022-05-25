@@ -1666,8 +1666,8 @@ class DataAssistantResult(SerializableDictDot):
                 )
                 return_charts.append(return_chart)
 
-        display_charts = [chart for chart in display_charts if chart is not None]
-        return_charts = [chart for chart in return_charts if chart is not None]
+        display_charts = list(filter(None, display_charts))
+        return_charts = list(filter(None, return_charts))
 
         return display_charts, return_charts
 
@@ -1686,7 +1686,7 @@ class DataAssistantResult(SerializableDictDot):
         }
 
         def _filter(
-            e: ExpectationConfiguration, column_based_expectations: List[str]
+            e: ExpectationConfiguration, column_based_expectations: Set[str]
         ) -> bool:
             if e.expectation_type not in column_based_expectations:
                 return False
