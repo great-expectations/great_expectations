@@ -131,7 +131,15 @@ rules:
       class_name: CategoricalColumnDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
       limit_mode: VERY_FEW
-      exclude_column_names: DOLocationID, RatecodeID, store_and_fwd_flag, payment_type, extra, mta_tax, improvement_surcharge, congestion_surcharge
+      exclude_column_names:
+        - DOLocationID
+        - RatecodeID
+        - store_and_fwd_flag
+        - payment_type
+        - extra
+        - mta_tax
+        - improvement_surcharge
+        - congestion_surcharge
     parameter_builders:
       - name: my_pickup_location_id_value_set
         class_name: ValueSetMultiBatchParameterBuilder
