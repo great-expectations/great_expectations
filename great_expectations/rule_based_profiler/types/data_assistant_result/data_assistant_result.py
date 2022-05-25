@@ -1806,20 +1806,19 @@ class DataAssistantResult(SerializableDictDot):
         profiler_details: dict = expectation_configuration.meta["profiler_details"]
         metric_configuration: dict = profiler_details["metric_configuration"]
         domain_kwargs: dict = metric_configuration["domain_kwargs"]
+        column_name: str = domain_kwargs["column"]
 
-        domain = domains_by_column_name[domain_kwargs["column"]]
+        domain = domains_by_column_name[column_name]
 
         attributed_values_by_metric_name: Dict[str, ParameterNode] = attributed_metrics[
             domain
         ]
 
         for metric_name in attributed_values_by_metric_name.keys():
+            type_: str = expectation_configuration.expectation_type
             if (
-                expectation_configuration.expectation_type
-                in expectation_metric_map.keys()
-            ) and (
-                metric_name
-                == expectation_metric_map[expectation_configuration.expectation_type]
+                type_ in expectation_metric_map.keys()
+                and metric_name == expectation_metric_map[type_]
             ):
                 attributed_values: ParameterNode = attributed_values_by_metric_name[
                     metric_name
@@ -1979,22 +1978,19 @@ class DataAssistantResult(SerializableDictDot):
             profiler_details: dict = expectation_configuration.meta["profiler_details"]
             metric_configuration: dict = profiler_details["metric_configuration"]
             domain_kwargs: dict = metric_configuration["domain_kwargs"]
+            column_name: str = domain_kwargs["column"]
 
-            domain = domains_by_column_name[domain_kwargs["column"]]
+            domain = domains_by_column_name[column_name]
 
             attributed_values_by_metric_name: Dict[
                 str, ParameterNode
             ] = attributed_metrics[domain]
 
             for metric_name in attributed_values_by_metric_name.keys():
+                type_: str = expectation_configuration.expectation_type
                 if (
-                    expectation_configuration.expectation_type
-                    in expectation_metric_map.keys()
-                ) and (
-                    metric_name
-                    == expectation_metric_map[
-                        expectation_configuration.expectation_type
-                    ]
+                    type_ in expectation_metric_map.keys()
+                    and metric_name == expectation_metric_map[type_]
                 ):
                     attributed_values: ParameterNode = attributed_values_by_metric_name[
                         metric_name
