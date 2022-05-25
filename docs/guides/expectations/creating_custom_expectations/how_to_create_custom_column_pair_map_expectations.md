@@ -38,11 +38,9 @@ cp column_pair_map_expectation_template.py /SOME_DIRECTORY/expect_column_pair_va
 <details>
   <summary>Where should I put my Expectation file?</summary>
   <div>
+  <br/>
     <p>
-        During development, you don't actually need to put the file anywhere in particular. It's self-contained, and can be executed anywhere as long as <code>great_expectations</code> is installed.
-    </p>
-    <p>
-        But to use your new Expectation alongside the other components of Great Expectations, you'll need to make sure the file is in the right place. The right place depends on what you intend to use it for.
+        Within a development environment, you don't need to put the file in a specific folder. The Expectation itself should be self-contained, and can be executed anywhere as long as <code>great_expectations</code> is installed, which is sufficient for development and testing. However, to use your new Expectation alongside the other components of Great Expectations (as one would for production purposes), you'll need to make sure the file is in the right place. Where the right place is will depend on what you intend to use it for.
     </p>
     <p>
         <ul>
