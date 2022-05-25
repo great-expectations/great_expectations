@@ -1,4 +1,5 @@
 import copy
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
 
@@ -1628,13 +1629,61 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
+        column_based_expectation_configurations_by_type: Dict[
+            str, List[ExpectationConfiguration]
+        ] = self._filter_expectation_configurations_by_column_type(
+            expectation_configurations, include_column_names, exclude_column_names
+        )
+
+        attributed_metrics_by_column_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
+
+        display_charts: List[alt.VConcatChart] = []
+        return_charts: List[alt.Chart] = []
+
+        for (
+            column_based_expectation_configurations
+        ) in column_based_expectation_configurations_by_type.values():
+            display_charts_for_expectation: List[
+                alt.VConcatChart
+            ] = self._create_display_chart_for_column_domain_expectation(
+                expectation_configurations=column_based_expectation_configurations,
+                attributed_metrics=attributed_metrics_by_column_domain,
+                plot_mode=plot_mode,
+                sequential=sequential,
+            )
+            display_charts.extend(display_charts_for_expectation)
+
+            for expectation_configuration in column_based_expectation_configurations:
+                return_chart: alt.Chart = (
+                    self._create_return_chart_for_column_domain_expectation(
+                        expectation_configuration=expectation_configuration,
+                        attributed_metrics=attributed_metrics_by_column_domain,
+                        plot_mode=plot_mode,
+                        sequential=sequential,
+                    )
+                )
+                return_charts.append(return_chart)
+
+        display_charts = [chart for chart in display_charts if chart is not None]
+        return_charts = [chart for chart in return_charts if chart is not None]
+
+        return display_charts, return_charts
+
+    def _filter_expectation_configurations_by_column_type(
+        self,
+        expectation_configurations: List[ExpectationConfiguration],
+        include_column_names: Optional[List[str]],
+        exclude_column_names: Optional[List[str]],
+    ) -> Dict[str, List[ExpectationConfiguration]]:
         expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
 
-        column_based_expectations: List[str] = [
+        column_based_expectations: Set[str] = {
             expectation
             for expectation in expectation_metric_map.keys()
             if expectation.startswith("expect_column_")
-        ]
+        }
 
         def _filter(
             e: ExpectationConfiguration, column_based_expectations: List[str]
@@ -1655,35 +1704,16 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        attributed_metrics_by_column_domain: Dict[
-            Domain, Dict[str, ParameterNode]
-        ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
-
-        display_charts: List[
-            alt.VConcatChart
-        ] = self._create_display_chart_for_column_domain_expectation(
-            expectation_configurations=column_based_expectation_configurations,
-            attributed_metrics=attributed_metrics_by_column_domain,
-            plot_mode=plot_mode,
-            sequential=sequential,
-        )
-
-        return_charts: List[alt.Chart] = []
+        column_based_expectation_configurations_by_type: Dict[
+            str, List[ExpectationConfiguration]
+        ] = defaultdict(list)
         for expectation_configuration in column_based_expectation_configurations:
-            return_chart: alt.Chart = (
-                self._create_return_chart_for_column_domain_expectation(
-                    expectation_configuration=expectation_configuration,
-                    attributed_metrics=attributed_metrics_by_column_domain,
-                    plot_mode=plot_mode,
-                    sequential=sequential,
-                )
+            type_: str = expectation_configuration.expectation_type
+            column_based_expectation_configurations_by_type[type_].append(
+                expectation_configuration
             )
-            return_charts.append(return_chart)
 
-        display_charts = [chart for chart in display_charts if chart is not None]
-        return_charts = [chart for chart in return_charts if chart is not None]
-
-        return display_charts, return_charts
+        return column_based_expectation_configurations_by_type
 
     def _chart_domain_values(
         self,
@@ -1832,13 +1862,13 @@ class DataAssistantResult(SerializableDictDot):
             ]
         ] = None
         display_chart: Optional[alt.VConcatChart] = None
-        if plot_mode is PlotMode.PRESCRIPTIVE:
-            if metric_name == "column_distinct_values_count":
+
+        if metric_name == "column_distinct_values_count":
+            if plot_mode is PlotMode.PRESCRIPTIVE:
                 plot_impl = (
                     self.get_interactive_detail_expect_column_values_to_be_between_chart
                 )
-        else:
-            if metric_name == "column_distinct_values_count":
+            else:
                 plot_impl = self.get_interactive_detail_multi_chart
 
         if plot_impl:
