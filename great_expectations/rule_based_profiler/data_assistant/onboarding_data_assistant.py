@@ -462,8 +462,8 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_standard_deviation_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_standard_deviation_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_standard_deviation_to_be_between",
+        expect_column_stdev_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_column_stdev_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
             min_value=f"{column_standard_deviation_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
@@ -516,7 +516,7 @@ class OnboardingDataAssistant(DataAssistant):
             expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder,
             expect_column_median_to_be_between_expectation_configuration_builder,
             expect_column_mean_to_be_between_expectation_configuration_builder,
-            expect_column_standard_deviation_to_be_between_expectation_configuration_builder,
+            expect_column_stdev_to_be_between_expectation_configuration_builder,
         ]
         rule: Rule = Rule(
             name="numeric_columns_rule",
