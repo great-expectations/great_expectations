@@ -75,15 +75,18 @@ class BaseYamlConfig(SerializableDictDot):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."
             )
+
         if not issubclass(cls.get_config_class(), BaseYamlConfig):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
             )
+
         if hasattr(cls.get_config_class(), "_schema_instance"):
             # noinspection PyProtectedMember
-            schema_instance: Schema = cls.get_config_class()._schema_instance
+            schema_instance: Optional[Schema] = cls.get_config_class()._schema_instance
             if schema_instance is None:
                 cls.get_config_class()._schema_instance = (cls.get_schema_class())()
+                return cls.get_config_class().schema_instance
             else:
                 return schema_instance
         else:
@@ -93,11 +96,11 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def from_commented_map(cls, commented_map: CommentedMap):
         try:
-            config: Union[dict, BaseYamlConfig] = cls._get_schema_instance().load(
-                commented_map
-            )
+            schema_instance: Any = cls._get_schema_instance()
+            config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
+
             return config
         except ValidationError:
             logger.error(
@@ -1343,6 +1346,7 @@ class DataContextConfigSchema(Schema):
         "progress_bars",  # 0.13.49
     ]
 
+    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
         data = copy.deepcopy(data)
