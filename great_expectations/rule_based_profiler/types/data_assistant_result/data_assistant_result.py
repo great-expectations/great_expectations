@@ -319,8 +319,8 @@ class DataAssistantResult(SerializableDictDot):
             }}
             form.vega-bindings {{
               position: absolute;
-              left: 75px;
-              top: 30px;
+              left: 80px;
+              top: 40px;
             }}
             </style>
         """
