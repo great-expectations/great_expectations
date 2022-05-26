@@ -1,8 +1,9 @@
-from great_expectations.core.config_peer import ConfigPeer
+from abc import ABC
+
 from great_expectations.data_context.types.base import BaseYamlConfig
 
 
-class AbstractDataContext(ConfigPeer):
+class AbstractDataContext(ABC):
     """
     Base class for all DataContexts that contain all context-agnostic data context operations.
 
@@ -12,6 +13,4 @@ class AbstractDataContext(ConfigPeer):
     TODO: eventually the dependency on ConfigPeer will be removed and this will become a pure ABC.
     """
 
-    @property
-    def config(self) -> BaseYamlConfig:
-        return super().config
+    pass

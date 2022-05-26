@@ -17,6 +17,7 @@ from dateutil.parser import parse
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
@@ -133,7 +134,7 @@ yaml.default_flow_style = False
 
 
 # TODO: <WILL> Most of the logic here will be migrated to EphemeralDataContext
-class BaseDataContext(EphemeralDataContext):
+class BaseDataContext(EphemeralDataContext, ConfigPeer):
     """
         This class implements most of the functionality of DataContext, with a few exceptions.
 

@@ -9,6 +9,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -36,7 +37,7 @@ yaml.default_flow_style = False
 
 
 # TODO: <WILL> Most of the logic here will be migrated to FileDataContext
-class DataContext(BaseDataContext):
+class DataContext(BaseDataContext, ConfigPeer):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
     expectation suites, datasources, notification settings, and data fixtures.
 
