@@ -758,6 +758,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     return validator_multi_batch
 
 
+@pytest.mark.cloud
 @mock.patch(
     "great_expectations.data_context.data_context.BaseDataContext.save_expectation_suite"
 )
@@ -835,6 +836,25 @@ def test_validator_can_instantiate_with_a_multi_batch_request(
         "0808e185a52825d22356de2fe00a8f5f",
         "90bb41c1fbd7c71c05dbc8695320af71",
     ]
+
+
+def test_validator_with_bad_batchrequest(
+    yellow_trip_pandas_data_context,
+):
+    context: DataContext = yellow_trip_pandas_data_context
+
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    multi_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="i_dont_exist",
+        data_connector_query={"batch_filter_parameters": {"year": "2019"}},
+    )
+    with pytest.raises(ge_exceptions.InvalidBatchRequestError):
+        validator_multi_batch: Validator = context.get_validator(
+            batch_request=multi_batch_request, expectation_suite=suite
+        )
 
 
 def test_validator_batch_filter(
@@ -1106,7 +1126,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
             expectation_suite=suite,
         )
     assert ve.value.args == (
-        "Only one of batch_request or batch_request_list may be specified",
+        "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified",
     )
 
 

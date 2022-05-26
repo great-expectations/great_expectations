@@ -1,0 +1,24 @@
+name: Release Prep
+on:
+  schedule:
+    # Every Thursday at 9am PST / 12pm EST
+    - cron: '0 16 * * 4'
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install ge_releaser
+        run: |
+          git clone https://github.com/superconductive/ge_releaser.git
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          pip install -e ge_releaser
+      - name: Create PR
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          ge_releaser prep --file=./.github/release_schedule.json

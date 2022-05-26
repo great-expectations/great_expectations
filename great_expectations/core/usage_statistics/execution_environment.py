@@ -58,7 +58,7 @@ class GEExecutionEnvironment:
     Attributes: None
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._ge_dependencies: GEDependencies = GEDependencies()
         self._all_installed_packages = None
         self._get_all_installed_packages()

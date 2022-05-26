@@ -63,7 +63,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_options=None,
         asset_globs=None,
         reader_method=None,
-    ):
+    ) -> None:
         logger.debug(f"Constructing GlobReaderBatchKwargsGenerator {name!r}")
         super().__init__(name, datasource=datasource)
         if reader_options is None:
@@ -220,7 +220,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_method=None,
         reader_options=None,
         limit=None,
-    ):
+    ) -> None:
         for path in path_list:
             yield self._build_batch_kwargs_from_path(
                 path,

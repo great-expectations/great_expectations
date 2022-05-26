@@ -1,7 +1,7 @@
 # This file is responsible for configuring the `great_expectations` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
 #
 # The pipeline is run under the following conditions:
-#   - On the main branch when a weekly release is being cut
+#   - On the develop branch when a weekly release is being cut
 #   - On the develop branch as scheduled by the below cron job
 #
 #  `great_expectations` runs the entire test suite and is meant to safeguard the codebase against any errors that may have slipped through the cracks
@@ -13,17 +13,12 @@ schedules:
   branches:
     include:
     - develop
-    exclude:
-    - main
   always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
 
 trigger:
-  branches:
+  tags:
     include:
-    - pre_pr-* # Can be used to test both `great_expectations` and `dependency_graph` pipelines
-    - main
-    exclude:
-    - develop
+      - '*' # Should be SemVer for a successful release but any tag will trigger the build
 
 resources:
   containers:
@@ -50,10 +45,14 @@ resources:
       MSSQL_PID: Developer
     ports:
       - 1433:1433
+  - container: trino
+    image: trinodb/trino:379
+    ports:
+      - 8088:8080
 
-# The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
+# The pipeline is run under two primary conditions: if cutting a release or as scheduled by the above cron job.
 variables:
-  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  isRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -65,7 +64,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -81,14 +80,78 @@ stages:
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
-  - stage: required
+  - stage: custom_checks
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+    - job: type_hint_checker
+      condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+      - script: |
+          pip install mypy # Prereq for type hint script
+          python scripts/check_type_hint_coverage.py
+        name: TypeHintChecker
+
+    - job: docstring_checker
+      condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+      - bash: python scripts/check_docstring_coverage.py
+        name: DocstringChecker
+
+    - job: unused_import_checker
+      condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+      - script: |
+          pip install flake8
+          # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
+          flake8 --select F401 great_expectations tests
+        name: UnusedImportChecker
+
+  - stage: import_ge
     dependsOn: [lint]
+    pool:
+      vmImage: 'ubuntu-18.04'
+    jobs:
+      - job: import_ge
+        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+
+        strategy:
+         matrix:
+           Python37:
+             python.version: '3.7'
+           Python38:
+             python.version: '3.8'
+           Python39:
+             python.version: '3.9'
+
+
+        steps:
+         - task: UsePythonVersion@0
+           inputs:
+             versionSpec: '$(python.version)'
+           displayName: 'Use Python $(python.version)'
+
+         - bash: python -m pip install --upgrade pip==21.3.1
+           displayName: 'Update pip'
+
+         - script: |
+             pip install  .
+           displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
+
+         - script: |
+             python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
+           displayName: 'Import Great Expectations'
+
+  - stage: required
+    dependsOn: [lint, import_ge, custom_checks]
     pool:
       vmImage: 'ubuntu-18.04'
 
     jobs:
       - job: compatibility_matrix
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
@@ -171,7 +234,8 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 90
 
         services:
           postgres: postgres
@@ -202,11 +266,6 @@ stages:
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
-
-          - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
 
           - script: |
               if [[ $(pandas.version) == 'latest' ]]; then
@@ -241,13 +300,13 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [lint]
+    dependsOn: [lint, import_ge, custom_checks]
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
       - job: test_usage_stats_messages
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
         variables:
           python.version: '3.8'
 
@@ -275,11 +334,12 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [lint]
+    dependsOn: [lint, import_ge, custom_checks]
 
     jobs:
       - job: mysql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
 
         services:
           mysql: mysql
@@ -322,7 +382,8 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
 
         services:
           mssql: mssql
@@ -353,14 +414,53 @@ stages:
               pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
+      - job: trino
+        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
+
+        services:
+          trino: trino
+
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              printf 'Waiting for Trino database to accept connections'
+              sleep 30
+#             until trino --execute "SHOW CATALOGS"; do
+#               printf '.'
+#               sleep 1;
+#             done;
+            displayName: Wait for database to initialise
+
+          - script: |
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            displayName: 'pytest'
+
   - stage: cli_integration
-    dependsOn: [lint]
+    dependsOn: [lint, import_ge, custom_checks]
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
       - job: test_cli
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
 
         services:
           postgres: postgres
@@ -378,11 +478,6 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
-
-          - script: |
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
@@ -393,103 +488,11 @@ stages:
               pytest --postgresql --spark --aws-integration -v tests/cli
             displayName: 'pytest'
 
-  - stage: deploy_gallery
-    condition: and(succeeded(), eq(variables.isMain, true))
-    pool:
-      vmImage: 'ubuntu-18.04'
-    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
-
-    jobs:
-      - job: build_gallery
-        variables:
-          python.version: '3.7'
-          GE_pytest_pip_opts: '"pyspark<3.0.0" "cookiecutter==1.7.3" "google-cloud-bigquery-storage" --requirement requirements-dev.txt --constraint constraints-dev.txt'
-          GE_pytest_opts: ''
-
-        services:
-          postgres: postgres
-          mysql: mysql
-          mssql: mssql
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
-
-          - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
-
-          - script: |
-              pip install $(GE_pytest_pip_opts)
-              pip install --requirement requirements.txt
-              pip install  --editable .
-            displayName: 'Install dependencies'
-
-          - script: |
-              printf 'Waiting for MySQL database to accept connections'
-              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
-                printf '.'
-                sleep 1;
-              done;
-            displayName: 'Wait for MySQL database to initialise'
-
-          - script: |
-              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
-              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
-            displayName: 'Configure mysql'
-
-          - script: |
-              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
-            displayName: 'Configure mssql'
-
-#         - task: DownloadSecureFile@1
-#           name: gcp_authkey
-#           displayName: 'Download Google Service Account'
-#           inputs:
-#             secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
-#             retryCount: '2'
-
-          - bash: python ./build_gallery.py
-            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Build Gallery'
-#           env:
-#             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-#             GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
-#             GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
-#             GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
-
-          - bash: python ./build_package_gallery.py
-            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Build Package Gallery'
-
-          - task: S3Upload@1
-            inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
-
-          - bash: |
-              echo "About to trigger webhook: $GALLERY_BUILD_HOOK"
-              curl -X POST -d {} $GALLERY_BUILD_HOOK
-            displayName: 'Trigger gallery build'
-            env:
-              GALLERY_BUILD_HOOK: $(gallerywebhook)
-
   - stage: deploy
-    condition: and(succeeded(), eq(variables.isMain, true))
+    condition: and(succeeded(), eq(variables.isRelease, true))
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
+    dependsOn: [import_ge, custom_checks, required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
       - job: deploy
@@ -506,13 +509,20 @@ stages:
             displayName: 'Update pip'
 
           - script: |
+              deployment_version=$(cat ./great_expectations/deployment_version)
+              tag=$(basename "$(Build.SourceBranch)")
+              if [[ "$deployment_version" != "$tag" ]]; then
+                printf "There is a discrepancy between the 'deployment_version' file (%s) and the provided tag (%s)" $deployment_version $tag
+                exit 1
+              fi
+            displayName: 'Check for valid tag'
+
+          - script: |
               pip install twine
               pip install wheel
-              echo "Creating tag: $(cat ./great_expectations/deployment_version)"
               git config --global user.email "team@greatexpectations.io"
               git config --global user.name "Great Expectations"
-              git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
-            displayName: 'Add new version tag'
+            displayName: 'Prepare packaging'
 
           # Build the python distribution from source
           - script: |

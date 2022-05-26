@@ -15,32 +15,32 @@ class FieldABC:
     parent = None
     name = None
 
-    def serialize(self, attr, obj, accessor=None):
+    def serialize(self, attr, obj, accessor=None) -> None:
         raise NotImplementedError
 
-    def deserialize(self, value):
+    def deserialize(self, value) -> None:
         raise NotImplementedError
 
-    def _serialize(self, value, attr, obj, **kwargs):
+    def _serialize(self, value, attr, obj, **kwargs) -> None:
         raise NotImplementedError
 
-    def _deserialize(self, value, attr, data, **kwargs):
+    def _deserialize(self, value, attr, data, **kwargs) -> None:
         raise NotImplementedError
 
 
 class SchemaABC:
     """Abstract base class from which all Schemas inherit."""
 
-    def dump(self, obj, *, many: bool = None):
+    def dump(self, obj, *, many: bool = None) -> None:
         raise NotImplementedError
 
-    def dumps(self, obj, *, many: bool = None):
+    def dumps(self, obj, *, many: bool = None) -> None:
         raise NotImplementedError
 
-    def load(self, data, *, many: bool = None, partial=None, unknown=None):
+    def load(self, data, *, many: bool = None, partial=None, unknown=None) -> None:
         raise NotImplementedError
 
     def loads(
         self, json_data, *, many: bool = None, partial=None, unknown=None, **kwargs
-    ):
+    ) -> None:
         raise NotImplementedError

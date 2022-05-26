@@ -6,6 +6,14 @@
 # To install dev dependencies using the new pip resolver (recommended) please use the following syntax:
 # `python -m pip install -r requirements-dev.txt -c constraints-dev.txt`
 
+# NOTE - 20220511
+# pypandoc is a dependency of pyspark and is only compatible up to 1.7.5 with pyspark<3.0.0
+# constraining the version of pypandoc for now.
+#
+# ` AttributeError: module 'pypandoc' has no attribute 'convert'` was the error we were getting
+pypandoc==1.7.5
+# END NOTE
+
 # NOTE - 20210114
 # aiobotocore is a dependency of the s3fs package
 # The latest version of aiobotocore (v1.4.0) is only compatible with botocore up to 1.20.106

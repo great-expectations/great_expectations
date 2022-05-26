@@ -25,8 +25,6 @@ class ProfilerStore(ConfigurationStore):
         test_profiler_name = f"profiler_{''.join([random.choice(list('0123456789ABCDEF')) for _ in range(20)])}"
         test_profiler_configuration = RuleBasedProfilerConfig(
             name=test_profiler_name,
-            class_name="RuleBasedProfiler",
-            module_name="great_expectations.rule_based_profiler",
             config_version=1.0,
             rules={},
         )
