@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 try:
-    pyspark = pytest.importorskip("pyspark")
+    import pyspark
     # noinspection PyPep8Naming
     import pyspark.sql.functions as F
     from pyspark.sql.types import IntegerType, StringType
