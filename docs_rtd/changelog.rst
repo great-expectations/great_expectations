@@ -4,6 +4,36 @@
 Changelog
 #########
 
+0.15.7
+-----------------
+* [FEATURE] Add Rule for TEXT semantic domains within the Onboarding Assistant (#5144)
+* [FEATURE] Helper method to determine whether Expectation is self-initializing  (#5159)
+* [FEATURE] OnboardingDataAssistantResult plotting feature parity with VolumeDataAssistantResult (#5145)
+* [FEATURE] Example Notebook for self-initializing `Expectations` (#5169)
+* [FEATURE] DataAssistant: Enable passing directives to run() method using runtime_environment argument (#5187)
+* [FEATURE] Adding DataAssistantResult.get_expectation_suite(expectation_suite_name) method (#5191)
+* [FEATURE] Cronjob to automatically create release PR (#5181)
+* [BUGFIX] Insure TABLE Domain Metrics Do Not Get Column Key From Column Type Rule Domain Builder (#5166)
+* [BUGFIX] Update name for stdev expectation in `OnboardingDataAssistant` backend (#5193)
+* [BUGFIX] OnboardingDataAssistant and Underlying Metrics: Add Defensive Programming Into Metric Implementations So As To Avoid Warnings About Incompatible Data (#5195)
+* [BUGFIX] Insure that Histogram Metric in Pandas operates on numerical columns that do not have NULL values (#5199)
+* [BUGFIX] RuleBasedProfiler: Ensure that run() method runtime environment directives are handled correctly when existing setting is None (by default) (#5202)
+* [BUGFIX] In aggregate metrics, Spark Implementation already gets Column type as argument -- no need for F.col() as the operand is not a string. (#5207)
+* [DOCS] Update ToC with category links (#5155)
+* [DOCS] update on availability and parameters of conditional expectations (#5150)
+* [MAINTENANCE] Helper method for RBP Notebook tests that does clean-up (#5171)
+* [MAINTENANCE] Increase timeout for longer stages in Azure pipelines (#5175)
+* [MAINTENANCE] Rule-Based Profiler -- In ParameterBuilder insure that metrics are validated for conversion to numpy array (to avoid deprecation warnings) (#5173)
+* [MAINTENANCE] Increase timeout in packaging & installation pipeline (#5178)
+* [MAINTENANCE] OnboardingDataAssistant handle multiple expectations per domain (#5170)
+* [MAINTENANCE] Update timeout in pipelines to fit Azure syntax (#5180)
+* [MAINTENANCE] Error message when `Validator` is instantiated with Incorrect `BatchRequest` (#5172)
+* [MAINTENANCE] Don't include infinity in rendered string for diagnostics (#5190)
+* [MAINTENANCE] Mark Great Expectations Cloud tests and add stage to CI/CD (#5186)
+* [MAINTENANCE] Trigger expectation gallery build with scheduled CI/CD runs (#5192)
+* [MAINTENANCE] `expectation_gallery` Azure pipeline (#5194)
+* [MAINTENANCE] General cleanup/refactor of `DataAssistantResult` (#5198)
+
 0.15.6
 -----------------
 * [FEATURE] `NumericMetricRangeMultiBatchParameterBuilder` kernel density estimation (#5084)
