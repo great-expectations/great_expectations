@@ -2,7 +2,6 @@ import datetime
 import hashlib
 import logging
 import pickle
-import random
 import warnings
 from functools import partial
 from io import BytesIO
@@ -24,6 +23,9 @@ from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compr
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations.execution_engine.split_and_sample.pandas_data_sampler import (
+    PandasDataSampler,
+)
 from great_expectations.execution_engine.split_and_sample.pandas_data_splitter import (
     PandasDataSplitter,
 )
@@ -131,6 +133,7 @@ Notes:
         )
 
         self._data_splitter = PandasDataSplitter()
+        self._data_sampler = PandasDataSampler()
 
     def _instantiate_azure_client(self) -> None:
         azure_options = self.config.get("azure_options", {})
@@ -338,10 +341,16 @@ Please check your config."""
             splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
-        if batch_spec.get("sampling_method"):
-            sampling_fn = getattr(self, batch_spec.get("sampling_method"))
+        sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
+        if sampler_method_name:
+            sampling_fn: Callable = self._data_sampler.get_sampler_method(
+                sampler_method_name
+            )
             sampling_kwargs: dict = batch_spec.get("sampling_kwargs") or {}
-            batch_data = sampling_fn(batch_data, **sampling_kwargs)
+            if sampler_method_name in ["sample_using_limit", "_sample_using_limit"]:
+                batch_data = sampling_fn(batch_data, batch_spec)
+            else:
+                batch_data = sampling_fn(batch_data, **sampling_kwargs)
         return batch_data
 
     @property
@@ -590,60 +599,6 @@ Please check your config."""
         )
 
         return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
-
-    ### Sampling methods ###
-
-    @staticmethod
-    def _sample_using_random(
-        df,
-        p: float = 0.1,
-    ):
-        """Take a random sample of rows, retaining proportion p"""
-        return df[df.index.map(lambda x: random.random() < p)]
-
-    @staticmethod
-    def _sample_using_mod(
-        df,
-        column_name: str,
-        mod: int,
-        value: int,
-    ):
-        """Take the mod of named column, and only keep rows that match the given value"""
-        return df[df[column_name].map(lambda x: x % mod == value)]
-
-    @staticmethod
-    def _sample_using_a_list(
-        df,
-        column_name: str,
-        value_list: list,
-    ):
-        """Match the values in the named column against value_list, and only keep the matches"""
-        return df[df[column_name].isin(value_list)]
-
-    @staticmethod
-    def _sample_using_hash(
-        df,
-        column_name: str,
-        hash_digits: int = 1,
-        hash_value: str = "f",
-        hash_function_name: str = "md5",
-    ):
-        """Hash the values in the named column, and only keep rows that match the given hash_value"""
-        try:
-            hash_func = getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError):
-            raise (
-                ge_exceptions.ExecutionEngineError(
-                    f"""The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""
-                )
-            )
-
-        matches = df[column_name].map(
-            lambda x: hash_func(str(x).encode()).hexdigest()[-1 * hash_digits :]
-            == hash_value
-        )
-        return df[matches]
 
 
 def hash_pandas_dataframe(df):
