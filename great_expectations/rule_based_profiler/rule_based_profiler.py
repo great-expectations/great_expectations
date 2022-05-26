@@ -896,6 +896,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         dest_property_value: Optional[Any] = None,
         source_property_value: Optional[Any] = None,
     ) -> Optional[Any]:
+        if source_property_value is None:
+            return dest_property_value
+
         if dest_property_value is None:
             return source_property_value
 
