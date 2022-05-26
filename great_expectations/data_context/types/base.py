@@ -796,7 +796,7 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(DictDot):
+class DatasourceConfig(BaseYamlConfig):
     def __init__(
         self,
         class_name=None,
