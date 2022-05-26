@@ -35,7 +35,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-# TODO: Migrate to FileDataContext
+# TODO: <WILL> Most of the logic here will be migrated to FileDataContext
 class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
     expectation suites, datasources, notification settings, and data fixtures.
