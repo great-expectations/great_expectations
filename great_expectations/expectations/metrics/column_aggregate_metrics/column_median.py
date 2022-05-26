@@ -27,11 +27,6 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Median Implementation"""
-        metrics: Dict[str, Any] = kwargs.get("metrics", {})
-        nonnull_count = metrics.get("column_values.nonnull.count")
-        if not nonnull_count:
-            return 0.0
-
         return column.median()
 
     @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
@@ -53,12 +48,10 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
-
         """SqlAlchemy Median Implementation"""
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None
-
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)
@@ -113,10 +106,6 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         # in the degenerate case when n_values = 0
 
         """Spark Median Implementation"""
-        nonnull_count = metrics.get("column_values.nonnull.count")
-        if not nonnull_count:
-            return None
-
         table_row_count = metrics.get("table.row_count")
         result = df.approxQuantile(
             column, [0.5, 0.5 + (1 / (2 + (2 * table_row_count)))], 0
@@ -144,9 +133,10 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        dependencies["column_values.nonnull.count"] = MetricConfiguration(
-            metric_name="column_values.nonnull.count",
-            metric_domain_kwargs=metric.metric_domain_kwargs,
-        )
+        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+            dependencies["column_values.nonnull.count"] = MetricConfiguration(
+                metric_name="column_values.nonnull.count",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
 
         return dependencies
