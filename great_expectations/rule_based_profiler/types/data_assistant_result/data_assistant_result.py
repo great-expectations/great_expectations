@@ -1776,7 +1776,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_name: Optional[str] = self.EXPECTATION_METRIC_MAP.get(expectation_type)
         if metric_name:
-            metric_name = metric_name.replace(".", "_")
+            metric_name = sanitize_parameter_name(metric_name)
 
         return self._chart_column_values(
             column_dfs=column_dfs,
