@@ -5,6 +5,7 @@ import pytest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store.datasource_store import DatasourceStore
+from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
@@ -14,13 +15,43 @@ from tests.test_utils import build_profiler_store_using_filesystem
 
 
 @pytest.fixture
+def profiler_name() -> str:
+    return "my_first_datasource"
+
+
+@pytest.fixture
 def datasource_store_name() -> str:
     return "datasource_store"
 
 
 @pytest.fixture
+def datasource_key(profiler_name: str) -> ConfigurationIdentifier:
+    return ConfigurationIdentifier(configuration_key=profiler_name)
+
+
+@pytest.fixture
 def empty_datasource_store(datasource_store_name: str) -> DatasourceStore:
     return DatasourceStore(datasource_store_name)
+
+
+@pytest.fixture
+def datasource_config() -> DatasourceConfig:
+    return DatasourceConfig(
+        class_name="Datasource",
+        execution_engine={"class_name": "PandasExecutionEngine"},
+        data_connectors={
+            "tripdata_monthly_configured": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "base_directory": "/path/to/trip_data",
+                "assets": {
+                    "yellow": {
+                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                        "group_names": ["year", "month"],
+                    }
+                },
+            }
+        },
+    )
 
 
 def test_datasource_store_raises_error_with_invalid_value(
@@ -32,16 +63,14 @@ def test_datasource_store_raises_error_with_invalid_value(
         )
 
 
-# def test_datasource_store_set_adds_valid_key(
-#     empty_datasource_store: DatasourceStore,
-#     datasource_config_with_placeholder_args: RuleBasedProfilerConfig,
-#     datasource_key: ConfigurationIdentifier,
-# ):
-#     assert len(empty_datasource_store.list_keys()) == 0
-#     empty_datasource_store.set(
-#         key=datasource_key, value=profiler_config_with_placeholder_args
-#     )
-#     assert len(empty_datasource_store.list_keys()) == 1
+def test_datasource_store_set_adds_valid_key(
+    empty_datasource_store: DatasourceStore,
+    datasource_config: DatasourceConfig,
+    datasource_key: ConfigurationIdentifier,
+):
+    assert len(empty_datasource_store.list_keys()) == 0
+    empty_datasource_store.set(key=datasource_key, value=datasource_config)
+    assert len(empty_datasource_store.list_keys()) == 1
 
 
 # def test_datasource_store_integration(
