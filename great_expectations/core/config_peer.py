@@ -24,8 +24,8 @@ class ConfigPeer(ABC):
     """
     A ConfigPeer is an object, whose subclasses can be instantiated using instantiate_class_from_config() (located in
     great_expectations/util.py).  Its immediate descendant subclass must use a subclass of BaseYamlConfig as an argument
-    to its constructor, and the subsequent descentants must use only primitive types as their constructor arguments,
-    whereever keys correspond to the keys of the "BaseYamlConfig" configuration object counterpart. The name ConfigPeer
+    to its constructor, and the subsequent descendants must use only primitive types as their constructor arguments,
+    wherever keys correspond to the keys of the "BaseYamlConfig" configuration object counterpart. The name ConfigPeer
     means: Every immediate descendant subclass must have Marshmallow Schema validated configuration class as its peer.
 
     # TODO: <Alex>2/11/2022</Alex>

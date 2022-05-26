@@ -1883,6 +1883,11 @@ class BaseDataContext(ConfigPeer):
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
     ) -> Validator:
+        if len(batch_list) == 0:
+            raise ge_exceptions.InvalidBatchRequestError(
+                """Validator could not be created because BatchRequest returned an empty batch_list.
+                Please check your parameters and try again."""
+            )
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         batch_definition: BatchDefinition = batch_list[-1].batch_definition
