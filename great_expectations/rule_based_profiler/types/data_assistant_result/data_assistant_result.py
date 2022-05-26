@@ -768,7 +768,6 @@ class DataAssistantResult(SerializableDictDot):
                 strict_min_component=strict_min_component,
                 strict_max_component=strict_max_component,
                 predicate=predicate,
-                subtitle=subtitle,
             )
 
     @staticmethod
