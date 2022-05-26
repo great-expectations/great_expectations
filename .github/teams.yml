@@ -1,8 +1,17 @@
 core-team:
-  - '@NathanFarmer'
-  - '@Shinnyshinshin'
-  - '@Super-Tanner'
-  - '@alexsherstinsky'
-  - '@anthonyburdi'
-  - '@cdkini'
-  - '@donaldheppner'
+  - '@NathanFarmer'    # Nathan Farmer
+  - '@Shinnyshinshin'  # Will Shin
+  - '@Super-Tanner'    # Tanner Beam
+  - '@alexsherstinsky' # Alex Sherstinsky
+  - '@anthonyburdi'    # Anthony Burdi
+  - '@cdkini'          # Chetan Kini
+  - '@donaldheppner'   # Don Heppner
+
+devrel:
+  - '@AFineDayFor'     # Hannah Stokes
+  - '@Rachel-Reverie'  # Rachel Reverie
+  - '@austiezr'        # Austin Robinson
+  - '@kenwade4'        # Ken Wade
+  - '@kyleaton'        # Kyle Eaton
+  - '@rdodev'          # Ruben Orduz
+  - '@talagluck'       # Tal Gluck

@@ -49,7 +49,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_options=None,
         known_extensions=None,
         reader_method=None,
-    ):
+    ) -> None:
         super().__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = self._default_reader_options
@@ -97,9 +97,10 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
+                "Please use 'data_asset_name' instead.",
                 DeprecationWarning,
             )
             data_asset_name = generator_asset
@@ -256,7 +257,9 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 ),
             )
 
-    def _build_batch_kwargs_path_iter(self, path_list, reader_options=None, limit=None):
+    def _build_batch_kwargs_path_iter(
+        self, path_list, reader_options=None, limit=None
+    ) -> None:
         for path in path_list:
             yield self._build_batch_kwargs_from_path(
                 path, reader_options=reader_options, limit=limit

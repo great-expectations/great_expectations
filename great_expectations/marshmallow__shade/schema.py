@@ -152,7 +152,7 @@ class SchemaMeta(type):
         """
         return dict_cls(inherited_fields + cls_fields)
 
-    def __init__(cls, name, bases, attrs):
+    def __init__(cls, name, bases, attrs) -> None:
         super().__init__(name, bases, attrs)
         if name and cls.opts.register:
             class_registry.register(name, cls)
@@ -201,7 +201,7 @@ class SchemaMeta(type):
 class SchemaOpts:
     """class Meta options for the :class:`Schema`. Defines defaults."""
 
-    def __init__(self, meta, ordered: bool = False):
+    def __init__(self, meta, ordered: bool = False) -> None:
         self.fields = getattr(meta, "fields", ())
         if not isinstance(self.fields, (list, tuple)):
             raise ValueError("`fields` option must be a list or tuple.")
@@ -378,7 +378,7 @@ class Schema(base.SchemaABC, metaclass=SchemaMeta):
         dump_only: types.StrSequenceOrSet = (),
         partial: typing.Union[bool, types.StrSequenceOrSet] = False,
         unknown: str = None,
-    ):
+    ) -> None:
         # Raise error if only or exclude is passed as string, not list of strings
         if only is not None and not is_collection(only):
             raise StringNotCollectionError('"only" should be a list of strings')
@@ -455,7 +455,7 @@ class Schema(base.SchemaABC, metaclass=SchemaMeta):
 
     def handle_error(
         self, error: ValidationError, data: typing.Any, *, many: bool, **kwargs
-    ):
+    ) -> None:
         """Custom error handler function for the schema.
 
         :param error: The `ValidationError` raised during (de)serialization.
@@ -777,7 +777,7 @@ class Schema(base.SchemaABC, metaclass=SchemaMeta):
         partial,
         pass_original,
         index=None,
-    ):
+    ) -> None:
         try:
             if pass_original:  # Pass original, raw data (before unmarshalling)
                 validator_func(output, original_data, partial=partial, many=many)
@@ -1108,7 +1108,9 @@ class Schema(base.SchemaABC, metaclass=SchemaMeta):
         )
         return data
 
-    def _invoke_field_validators(self, *, error_store: ErrorStore, data, many: bool):
+    def _invoke_field_validators(
+        self, *, error_store: ErrorStore, data, many: bool
+    ) -> None:
         for attr_name in self._hooks[VALIDATES]:
             validator = getattr(self, attr_name)
             validator_kwargs = validator.__marshmallow_hook__[VALIDATES]
@@ -1165,7 +1167,7 @@ class Schema(base.SchemaABC, metaclass=SchemaMeta):
         many: bool,
         partial: typing.Union[bool, types.StrSequenceOrSet],
         field_errors: bool = False,
-    ):
+    ) -> None:
         for attr_name in self._hooks[(VALIDATES_SCHEMA, pass_many)]:
             validator = getattr(self, attr_name)
             validator_kwargs = validator.__marshmallow_hook__[

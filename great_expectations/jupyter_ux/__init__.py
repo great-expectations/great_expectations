@@ -7,7 +7,7 @@ from datetime import datetime
 
 import pandas as pd
 import tzlocal
-from IPython.core.display import HTML, display
+from IPython.display import HTML, display
 from packaging import version
 
 pd.set_option("display.max_rows", None)
@@ -181,7 +181,7 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
     # warnings.filterwarnings('ignore')
 
 
-def show_available_data_asset_names(context, data_source_name=None):
+def show_available_data_asset_names(context, data_source_name=None) -> None:
     """List asset names found in the current context."""
     # TODO: Needs tests.
     styles = """

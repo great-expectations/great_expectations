@@ -43,7 +43,6 @@ try:
         struct,
         udf,
         when,
-        year,
     )
 except ImportError as e:
     logger.debug(str(e))
@@ -60,7 +59,7 @@ class MetaSparkDFDataset(Dataset):
     and SparkDFDataset implements the expectation methods themselves.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -609,7 +608,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         else:
             raise ValueError("from_dataset requires a SparkDFDataset dataset")
 
-    def __init__(self, spark_df, *args, **kwargs):
+    def __init__(self, spark_df, *args, **kwargs) -> None:
         # Creation of the Spark DataFrame is done outside this class
         self.spark_df = spark_df
         self._persist = kwargs.pop("persist", True)
@@ -653,7 +652,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         return self.spark_df.select(column).groupBy().sum().collect()[0][0]
 
     # TODO: consider getting all basic statistics in one go:
-    def _describe_column(self, column):
+    def _describe_column(self, column) -> None:
         # temp_column = self.spark_df.select(column).where(col(column).isNotNull())
         # return self.spark_df.select(
         #     [
@@ -1434,9 +1433,10 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         deprecation_warning = (
-            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
-            "expect_select_column_values_to_be_unique_within_record instead."
+            "expect_multicolumn_values_to_be_unique is deprecated as of v0.13.4 and will be removed in v0.16. "
+            "Please use expect_select_column_values_to_be_unique_within_record instead."
         )
+        # deprecated-v0.13.4
         warnings.warn(
             deprecation_warning,
             DeprecationWarning,

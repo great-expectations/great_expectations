@@ -17,9 +17,21 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
+    VARIABLES_KEY,
+)
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: F401
 except ImportError:
     pass
 
@@ -84,10 +96,11 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.value_length.between"
@@ -97,7 +110,106 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "strict_min",
         "strict_max",
         "mostly",
+        "auto",
+        "profiler_config",
     )
+
+    column_min_length_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="NumericMetricRangeMultiBatchParameterBuilder",
+        name="column_min_length_range_estimator",
+        metric_name="column_values.length.min",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        enforce_numeric_metric=True,
+        replace_nan_with_zero=True,
+        reduce_scalar_metric=True,
+        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        estimator=f"{VARIABLES_KEY}estimator",
+        n_resamples=f"{VARIABLES_KEY}n_resamples",
+        random_seed=f"{VARIABLES_KEY}random_seed",
+        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
+        truncate_values=f"{VARIABLES_KEY}truncate_values",
+        round_decimals=f"{VARIABLES_KEY}round_decimals",
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
+    )
+    column_max_length_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="NumericMetricRangeMultiBatchParameterBuilder",
+        name="column_max_length_range_estimator",
+        metric_name="column_values.length.max",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        enforce_numeric_metric=True,
+        replace_nan_with_zero=True,
+        reduce_scalar_metric=True,
+        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        estimator=f"{VARIABLES_KEY}estimator",
+        n_resamples=f"{VARIABLES_KEY}n_resamples",
+        random_seed=f"{VARIABLES_KEY}random_seed",
+        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
+        truncate_values=f"{VARIABLES_KEY}truncate_values",
+        round_decimals=f"{VARIABLES_KEY}round_decimals",
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
+    )
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        column_min_length_range_estimator_parameter_builder_config,
+        column_max_length_range_estimator_parameter_builder_config,
+    ]
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_value_lengths_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        variables={},
+        rules={
+            "default_expect_column_value_lengths_to_be_between_rule": {
+                "variables": {
+                    "mostly": 1.0,
+                    "strict_min": False,
+                    "strict_max": False,
+                    "false_positive_rate": 0.05,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "estimator": "bootstrap",
+                    "n_resamples": 9999,
+                    "random_seed": None,
+                    "include_estimator_samples_histogram_in_details": False,
+                    "truncate_values": {
+                        "lower_bound": 0,
+                        "upper_bound": None,
+                    },
+                    "round_decimals": 0,
+                },
+                "domain_builder": {
+                    "class_name": "ColumnDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_value_lengths_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+                        "min_value": f"{PARAMETER_KEY}{column_min_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+                        "max_value": f"{PARAMETER_KEY}{column_max_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+                        "mostly": f"{VARIABLES_KEY}mostly",
+                        "strict_min": f"{VARIABLES_KEY}strict_min",
+                        "strict_max": f"{VARIABLES_KEY}strict_max",
+                        "meta": {
+                            "profiler_details": {
+                                "column_min_range_estimator": f"{PARAMETER_KEY}{column_min_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                                "column_max_range_estimator": f"{PARAMETER_KEY}{column_max_length_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            },
+                        },
+                    },
+                ],
+            },
+        },
+    )
+
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
@@ -109,6 +221,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "column",
@@ -118,7 +232,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
 
         if configuration is None:
@@ -150,7 +264,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -191,6 +304,10 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 "value": params.get("max_value"),
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "string"},
+                "value": params.get("mostly_pct"),
+            },
             "row_condition": {
                 "schema": {"type": "string"},
                 "value": params.get("row_condition"),
@@ -214,8 +331,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
 
-            if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
+            if params["mostly"] is not None and params["mostly"] < 1.0:
+                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
@@ -298,7 +415,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
 
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )

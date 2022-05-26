@@ -1,0 +1,114 @@
+{
+  "expectation_type" : "expect_column_pair_values_A_to_be_greater_than_B",
+  "datasets" : [{
+    "data" : {
+      "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "x" : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9, null],
+      "z" : [1, 2, 3, 4, 5, null, null, null, null, null],
+      "a" : ["1/1/2016", "2/2/2016", "3/3/2016", "4/4/2016", "5/5/2016", null, null, null, null, null],
+      "b" : ["1/1/2016", "2/1/2016", "3/1/2016", "4/1/2016", "5/1/2020", null, null, null, null, null],
+      "c" : [1, 2, 3, 6, 7, 6, 7, 8, 9, 10]
+    },
+    "schemas": {
+      "spark": {
+        "w": "IntegerType",
+        "x": "IntegerType",
+        "y": "IntegerType",
+        "z": "IntegerType",
+        "a": "StringType",
+        "b": "StringType",
+        "c": "IntegerType"
+      }
+    },
+    "tests" : [{
+      "title" : "basic_positive_test",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "x",
+        "column_B": "w"
+      },
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      }
+    },{
+      "title" : "basic_positive_test_with_missing_values_and_ignore_row_if__either_value_is_missing",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "x",
+        "column_B": "z",
+        "ignore_row_if": "either_value_is_missing"
+      },
+      "out" : {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      }
+    },{
+      "title" : "test_ties",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "w",
+        "column_B": "z",
+        "ignore_row_if": "either_value_is_missing"
+      },
+      "out" : {
+        "unexpected_list": [
+          [1.0,1.0],
+          [2.0,2.0],
+          [3.0,3.0],
+          [4.0,4.0],
+          [5.0,5.0]
+        ],
+        "unexpected_index_list": [0,1,2,3,4],
+        "success": false
+      }
+    },{
+      "title" : "test_ties_with_or_equal",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "w",
+        "column_B": "z",
+        "or_equal": true,
+        "ignore_row_if": "either_value_is_missing"
+      },
+      "out" : {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      }
+    },{
+      "title" : "test_parse_strings_as_datetimes_and_mostly",
+      "exact_match_out" : false,
+      "only_for": ["pandas"],
+      "in": {
+        "column_A": "a",
+        "column_B": "b",
+        "parse_strings_as_datetimes": true,
+        "mostly": 0.6
+      },
+      "out" : {
+        "unexpected_list": [["1/1/2016", "1/1/2016"], ["5/5/2016", "5/1/2020"]],
+        "unexpected_index_list": [0,4],
+        "success": true
+      }
+    },{
+      "title" : "test_mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "x",
+        "column_B": "c",
+        "mostly": 0.8
+      },
+      "out" : {
+        "unexpected_list": [[5, 6], [6, 7]],
+        "unexpected_index_list": [3,4],
+        "success": true
+      }
+    }]
+  }]
+}

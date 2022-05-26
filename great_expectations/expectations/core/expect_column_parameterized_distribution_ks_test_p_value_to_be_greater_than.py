@@ -11,7 +11,6 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "column aggregate expectation",
@@ -36,7 +35,7 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass
 
     @classmethod
@@ -48,5 +47,5 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass

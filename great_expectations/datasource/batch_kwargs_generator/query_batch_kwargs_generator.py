@@ -67,7 +67,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
 
     def __init__(
         self, name="default", datasource=None, query_store_backend=None, queries=None
-    ):
+    ) -> None:
         super().__init__(name=name, datasource=datasource)
         if (
             datasource
@@ -135,15 +135,16 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
         return iter_
 
     # TODO: deprecate generator_asset argument, remove default on query arg
-    def add_query(self, generator_asset=None, query=None, data_asset_name=None):
+    def add_query(self, generator_asset=None, query=None, data_asset_name=None) -> None:
         assert query, "Please provide a query."
         assert (generator_asset and not data_asset_name) or (
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
+                "Please use 'data_asset_name' instead.",
                 DeprecationWarning,
             )
             data_asset_name = generator_asset
@@ -176,14 +177,17 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
         return SqlAlchemyDatasourceQueryBatchKwargs(batch_kwargs)
 
     # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
+    def get_available_partition_ids(
+        self, generator_asset=None, data_asset_name=None
+    ) -> None:
         assert (generator_asset and not data_asset_name) or (
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
+                "Please use 'data_asset_name' instead.",
                 DeprecationWarning,
             )
         raise BatchKwargsError(

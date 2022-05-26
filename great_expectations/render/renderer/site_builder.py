@@ -120,7 +120,7 @@ class SiteBuilder:
         runtime_environment=None,
         ge_cloud_mode=False,
         **kwargs,
-    ):
+    ) -> None:
         self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
@@ -279,7 +279,7 @@ class SiteBuilder:
                 class_name=site_index_builder["class_name"],
             )
 
-    def clean_site(self):
+    def clean_site(self) -> None:
         self.target_store.clean_site()
 
     def build(self, resource_identifiers=None, build_index: bool = True):
@@ -350,7 +350,7 @@ class DefaultSiteSectionBuilder:
         data_context_id=None,
         ge_cloud_mode=False,
         **kwargs,
-    ):
+    ) -> None:
         self.name = name
         self.data_context = data_context
         self.source_store = data_context.stores[source_store_name]
@@ -402,7 +402,7 @@ class DefaultSiteSectionBuilder:
                 class_name=view["class_name"],
             )
 
-    def build(self, resource_identifiers=None):
+    def build(self, resource_identifiers=None) -> None:
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
             source_store_keys = sorted(
@@ -514,7 +514,7 @@ class DefaultSiteIndexBuilder:
         data_context_id=None,
         source_stores=None,
         **kwargs,
-    ):
+    ) -> None:
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
         self.site_name = site_name
@@ -816,9 +816,13 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 if (validations and validations not in FALSEY_YAML_STRINGS)
                 else "profiling"
             )
-            validation_and_profiling_result_source_keys = self.data_context.stores[
-                self.site_section_builders_config[source_store].get("source_store_name")
-            ].list_keys()
+            validation_and_profiling_result_source_keys = set(
+                self.data_context.stores[
+                    self.site_section_builders_config[source_store].get(
+                        "source_store_name"
+                    )
+                ].list_keys()
+            )
             validation_and_profiling_result_site_keys = [
                 ValidationResultIdentifier.from_tuple(validation_result_tuple)
                 for validation_result_tuple in self.target_store.store_backends[
@@ -948,6 +952,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
 
 class CallToActionButton:
-    def __init__(self, title, link):
+    def __init__(self, title, link) -> None:
         self.title = title
         self.link = link

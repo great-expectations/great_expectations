@@ -38,7 +38,7 @@ class ValidationOperator:
         self._validation_operator_config = None
 
     @property
-    def validation_operator_config(self):
+    def validation_operator_config(self) -> None:
         """
         This method builds the config dict of a particular validation operator. The "kwargs" key is what really
         distinguishes different validation operators.
@@ -77,7 +77,7 @@ class ValidationOperator:
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
-    ):
+    ) -> None:
         raise NotImplementedError
 
 
@@ -193,7 +193,7 @@ class ActionListValidationOperator(ValidationOperator):
         action_list,
         name,
         result_format={"result_format": "SUMMARY"},
-    ):
+    ) -> None:
         super().__init__()
         self.data_context = data_context
         self.name = name
@@ -291,8 +291,9 @@ class ActionListValidationOperator(ValidationOperator):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional). Instead of providing a run_id, you may also provide"
                 "run_name and run_time separately.",
@@ -617,7 +618,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         notify_on="all",
         notify_with=None,
         result_format={"result_format": "SUMMARY"},
-    ):
+    ) -> None:
         super().__init__(data_context, action_list, name)
 
         if expectation_suite_name_suffixes is None:
@@ -768,8 +769,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional). Instead of providing a run_id, you may also provide"
                 "run_name and run_time separately.",

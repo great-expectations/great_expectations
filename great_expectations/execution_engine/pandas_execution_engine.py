@@ -1,4 +1,3 @@
-import copy
 import datetime
 import hashlib
 import logging
@@ -7,7 +6,7 @@ import random
 import warnings
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Iterable, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -25,6 +24,9 @@ from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compr
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations.execution_engine.split_and_sample.pandas_data_splitter import (
+    PandasDataSplitter,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +105,7 @@ Notes:
         "reader_options",
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
@@ -128,7 +130,9 @@ Notes:
             }
         )
 
-    def _instantiate_azure_client(self):
+        self._data_splitter = PandasDataSplitter()
+
+    def _instantiate_azure_client(self) -> None:
         azure_options = self.config.get("azure_options", {})
         try:
             if "conn_str" in azure_options:
@@ -138,7 +142,7 @@ Notes:
         except (TypeError, AttributeError):
             self._azure = None
 
-    def _instantiate_s3_client(self):
+    def _instantiate_s3_client(self) -> None:
         # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
         boto3_options = self.config.get("boto3_options", {})
         try:
@@ -146,7 +150,7 @@ Notes:
         except (TypeError, AttributeError):
             self._s3 = None
 
-    def _instantiate_gcs_client(self):
+    def _instantiate_gcs_client(self) -> None:
         """
         Helper method for instantiating GCS client when GCSBatchSpec is passed in.
 
@@ -173,7 +177,7 @@ Notes:
         except (TypeError, AttributeError, DefaultCredentialsError):
             self._gcs = None
 
-    def configure_validator(self, validator):
+    def configure_validator(self, validator) -> None:
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
 
@@ -326,8 +330,11 @@ Please check your config."""
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
-        if batch_spec.get("splitter_method"):
-            splitter_fn = getattr(self, batch_spec.get("splitter_method"))
+        splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
+        if splitter_method_name:
+            splitter_fn: Callable = self._data_splitter.get_splitter_method(
+                splitter_method_name
+            )
             splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
@@ -507,9 +514,10 @@ Please check your config."""
                     )
 
                 if ignore_row_if == "never":
+                    # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" instead.
 """,
                         DeprecationWarning,
                     )
@@ -582,97 +590,6 @@ Please check your config."""
         )
 
         return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
-
-    ### Splitter methods for partitioning dataframes ###
-    @staticmethod
-    def _split_on_whole_table(
-        df,
-    ) -> pd.DataFrame:
-        return df
-
-    @staticmethod
-    def _split_on_column_value(
-        df, column_name: str, batch_identifiers: dict
-    ) -> pd.DataFrame:
-        return df[df[column_name] == batch_identifiers[column_name]]
-
-    @staticmethod
-    def _split_on_converted_datetime(
-        df,
-        column_name: str,
-        batch_identifiers: dict,
-        date_format_string: str = "%Y-%m-%d",
-    ):
-        """Convert the values in the named column to the given date_format, and split on that"""
-        stringified_datetime_series = df[column_name].map(
-            lambda x: x.strftime(date_format_string)
-        )
-        matching_string = batch_identifiers[column_name]
-        return df[stringified_datetime_series == matching_string]
-
-    @staticmethod
-    def _split_on_divided_integer(
-        df, column_name: str, divisor: int, batch_identifiers: dict
-    ):
-        """Divide the values in the named column by `divisor`, and split on that"""
-
-        matching_divisor = batch_identifiers[column_name]
-        matching_rows = df[column_name].map(
-            lambda x: int(x / divisor) == matching_divisor
-        )
-
-        return df[matching_rows]
-
-    @staticmethod
-    def _split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
-        """Divide the values in the named column by `divisor`, and split on that"""
-
-        matching_mod_value = batch_identifiers[column_name]
-        matching_rows = df[column_name].map(lambda x: x % mod == matching_mod_value)
-
-        return df[matching_rows]
-
-    @staticmethod
-    def _split_on_multi_column_values(
-        df, column_names: List[str], batch_identifiers: dict
-    ):
-        """Split on the joint values in the named columns"""
-
-        subset_df = df.copy()
-        for column_name in column_names:
-            value = batch_identifiers.get(column_name)
-            if not value:
-                raise ValueError(
-                    f"In order for PandasExecution to `_split_on_multi_column_values`, "
-                    f"all values in column_names must also exist in batch_identifiers. "
-                    f"{column_name} was not found in batch_identifiers."
-                )
-            subset_df = subset_df[subset_df[column_name] == value]
-        return subset_df
-
-    @staticmethod
-    def _split_on_hashed_column(
-        df,
-        column_name: str,
-        hash_digits: int,
-        batch_identifiers: dict,
-        hash_function_name: str = "md5",
-    ):
-        """Split on the hashed value of the named column"""
-        try:
-            hash_method = getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError):
-            raise (
-                ge_exceptions.ExecutionEngineError(
-                    f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""
-                )
-            )
-        matching_rows = df[column_name].map(
-            lambda x: hash_method(str(x).encode()).hexdigest()[-1 * hash_digits :]
-            == batch_identifiers["hash_value"]
-        )
-        return df[matching_rows]
 
     ### Sampling methods ###
 

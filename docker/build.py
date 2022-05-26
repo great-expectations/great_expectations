@@ -24,7 +24,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 PYTHON_DOCKER_TAGS = [
-    "3.6-buster",
     "3.7-buster",
 ]
 

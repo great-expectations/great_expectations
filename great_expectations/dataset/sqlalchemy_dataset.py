@@ -75,7 +75,7 @@ except ImportError:
         Row = None
 
 try:
-    import psycopg2
+    import psycopg2  # noqa: F401
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
@@ -111,19 +111,13 @@ except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
+        # deprecated-v0.14.7
         warnings.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
+            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        ###
-        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-        # to define an attribute "dialect". A PR has been submitted to fix this upstream
-        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-        # fix isn't present, add this "dialect" attribute here:
-        if not hasattr(sqla_bigquery, "dialect"):
-            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
-
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
@@ -170,7 +164,7 @@ except ImportError:
 
 
 class SqlAlchemyBatchReference:
-    def __init__(self, engine, table_name=None, schema=None, query=None):
+    def __init__(self, engine, table_name=None, schema=None, query=None) -> None:
         self._engine = engine
         if table_name is None and query is None:
             raise ValueError("Table_name or query must be specified")
@@ -199,7 +193,7 @@ class SqlAlchemyBatchReference:
 
 
 class MetaSqlAlchemyDataset(Dataset):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -534,7 +528,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         schema=None,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         if custom_sql and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
@@ -618,6 +612,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
             )
+        elif dialect_name == "trino":
+            # WARNING: Trino Support is experimental, functionality is not fully under test
+            self.dialect = import_library_module(module_name="trino.sqlalchemy")
         else:
             self.dialect = None
 
@@ -640,7 +637,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 and self.engine.dialect.dataset_id is None
             ):
                 raise ValueError(
-                    "No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
+                    "No BigQuery dataset specified. Please specify a "
                     "default dataset in engine url"
                 )
 
@@ -946,7 +943,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
 
     @classmethod
-    def _treat_quantiles_exception(cls, pe):
+    def _treat_quantiles_exception(cls, pe) -> None:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
@@ -1359,7 +1356,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return convert_to_json_serializable(self.engine.execute(query).scalar())
 
-    def create_temporary_table(self, table_name, custom_sql, schema_name=None):
+    def create_temporary_table(self, table_name, custom_sql, schema_name=None) -> None:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         WARNING: this feature is new in v0.4.
@@ -1397,11 +1394,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # handle cases where dialect.name.lower() returns a byte string (e.g. databricks)
         if isinstance(engine_dialect, bytes):
             engine_dialect = str(engine_dialect, "utf-8")
-
         if engine_dialect == "bigquery":
             stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "databricks":
-            stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
+            stmt = f"CREATE OR REPLACE TEMPORARY VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "dremio":
             stmt = f"CREATE OR REPLACE VDS {table_name} AS {custom_sql}"
         elif engine_dialect == "snowflake":

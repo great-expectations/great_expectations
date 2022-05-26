@@ -381,11 +381,12 @@ diagnostics = ExpectColumnValuesToEqualThree().run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
-    assert check["error_message"] is None
-    assert check["stack_trace"] is None
+    assert check["error_diagnostics"] is None
 
 for check in diagnostics["errors"]:
     assert check is None
 
 for check in diagnostics["maturity_checklist"]["experimental"]:
+    if check["message"] == "Passes all linting checks":
+        continue
     assert check["passed"] is True

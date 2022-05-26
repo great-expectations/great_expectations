@@ -36,7 +36,7 @@ class MetaPandasDataset(Dataset):
     and PandasDataset implements the expectation methods themselves.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -409,7 +409,7 @@ Notes:
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
@@ -1831,9 +1831,10 @@ Notes:
         meta=None,
     ):
         deprecation_warning = (
-            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
-            "expect_select_column_values_to_be_unique_within_record instead."
+            "expect_multicolumn_values_to_be_unique is deprecated as of v0.13.4 and will be removed in v0.16. "
+            "Please use expect_select_column_values_to_be_unique_within_record instead."
         )
+        # deprecated-v0.13.4
         warnings.warn(
             deprecation_warning,
             DeprecationWarning,

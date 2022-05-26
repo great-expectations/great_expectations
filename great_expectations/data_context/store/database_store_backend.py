@@ -40,7 +40,7 @@ class DatabaseStoreBackend(StoreBackend):
         suppress_store_backend_id=False,
         manually_initialize_store_backend_id: str = "",
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
@@ -250,7 +250,7 @@ class DatabaseStoreBackend(StoreBackend):
             logger.debug(f"Error fetching value: {str(e)}")
             raise ge_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
-    def _set(self, key, value, allow_update=True, **kwargs):
+    def _set(self, key, value, allow_update=True, **kwargs) -> None:
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
 
@@ -276,7 +276,7 @@ class DatabaseStoreBackend(StoreBackend):
                     f"Integrity error {str(e)} while trying to store key"
                 )
 
-    def _move(self):
+    def _move(self) -> None:
         raise NotImplementedError
 
     def get_url_for_key(self, key):
@@ -322,10 +322,11 @@ class DatabaseStoreBackend(StoreBackend):
             .select_from(self._table)
             .where(
                 and_(
+                    True,
                     *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns[: len(prefix)], prefix)
-                    )
+                    ),
                 )
             )
         )

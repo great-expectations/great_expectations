@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):
-    def __init__(self, expectation_suite_name: str):
+    def __init__(self, expectation_suite_name: str) -> None:
         super().__init__()
         if not isinstance(expectation_suite_name, str):
             raise InvalidDataContextKeyError(
@@ -61,7 +61,7 @@ class BatchIdentifier(DataContextKey):
         self,
         batch_identifier: Union[BatchKwargs, dict, str],
         data_asset_name: str = None,
-    ):
+    ) -> None:
         super().__init__()
         # if isinstance(batch_identifier, (BatchKwargs, dict)):
         #     self._batch_identifier = batch_identifier.batch_fingerprint
@@ -100,7 +100,7 @@ class ValidationResultIdentifier(DataContextKey):
     and run_id.
     """
 
-    def __init__(self, expectation_suite_identifier, run_id, batch_identifier):
+    def __init__(self, expectation_suite_identifier, run_id, batch_identifier) -> None:
         """Constructs a ValidationResultIdentifier
 
         Args:
@@ -111,8 +111,9 @@ class ValidationResultIdentifier(DataContextKey):
         super().__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
         if isinstance(run_id, str):
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional).",
                 DeprecationWarning,
@@ -195,7 +196,7 @@ class ValidationResultIdentifier(DataContextKey):
 
 
 class GeCloudIdentifier(DataContextKey):
-    def __init__(self, resource_type: str, ge_cloud_id: Optional[str] = None):
+    def __init__(self, resource_type: str, ge_cloud_id: Optional[str] = None) -> None:
         super().__init__()
 
         self._resource_type = resource_type
@@ -206,7 +207,7 @@ class GeCloudIdentifier(DataContextKey):
         return self._resource_type
 
     @resource_type.setter
-    def resource_type(self, value):
+    def resource_type(self, value) -> None:
         self._resource_type = value
 
     @property
@@ -214,7 +215,7 @@ class GeCloudIdentifier(DataContextKey):
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
-    def ge_cloud_id(self, value):
+    def ge_cloud_id(self, value) -> None:
         self._ge_cloud_id = value
 
     def to_tuple(self):
@@ -259,7 +260,7 @@ class ValidationResultIdentifierSchema(Schema):
 
 
 class SiteSectionIdentifier(DataContextKey):
-    def __init__(self, site_section_name, resource_identifier):
+    def __init__(self, site_section_name, resource_identifier) -> None:
         self._site_section_name = site_section_name
         if site_section_name in ["validations", "profiling"]:
             if isinstance(resource_identifier, ValidationResultIdentifier):
@@ -321,7 +322,7 @@ class SiteSectionIdentifier(DataContextKey):
 
 
 class ConfigurationIdentifier(DataContextKey):
-    def __init__(self, configuration_key: Union[str, UUID]):
+    def __init__(self, configuration_key: Union[str, UUID]) -> None:
         super().__init__()
         if isinstance(configuration_key, UUID):
             configuration_key = str(configuration_key)

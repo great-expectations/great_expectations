@@ -20,13 +20,20 @@ def test_column_values_unique_single_batch(alice_columnar_table_single_batch_con
 
     domain_builder: MapMetricColumnDomainBuilder = MapMetricColumnDomainBuilder(
         map_metric_name="column_values.unique",
-        batch_request=batch_request,
-        data_context=data_context,
         max_unexpected_values=0,
         max_unexpected_ratio=None,
         min_max_unexpected_values_proportion=9.75e-1,
+        data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     alice_compliant_column_names: List[str] = [
@@ -45,6 +52,7 @@ def test_column_values_unique_single_batch(alice_columnar_table_single_batch_con
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in alice_compliant_column_names
     ]
@@ -71,13 +79,20 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted(
 
     domain_builder: MapMetricColumnDomainBuilder = MapMetricColumnDomainBuilder(
         map_metric_name="column_values.nonnull",
-        batch_request=batch_request,
-        data_context=data_context,
         max_unexpected_values=0,
         max_unexpected_ratio=None,
         min_max_unexpected_values_proportion=9.75e-1,
+        data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     bobby_compliant_column_names: List[str] = [
@@ -107,6 +122,7 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted(
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -133,13 +149,20 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
 
     domain_builder: MapMetricColumnDomainBuilder = MapMetricColumnDomainBuilder(
         map_metric_name="column_values.nonnull",
-        batch_request=batch_request,
-        data_context=data_context,
         max_unexpected_values=4736,
         max_unexpected_ratio=None,
         min_max_unexpected_values_proportion=1.0,
+        data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     bobby_compliant_column_names: List[str] = [
@@ -170,6 +193,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -196,13 +220,20 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_une
 
     domain_builder: MapMetricColumnDomainBuilder = MapMetricColumnDomainBuilder(
         map_metric_name="column_values.nonnull",
-        batch_request=batch_request,
-        data_context=data_context,
         max_unexpected_values=0,
         max_unexpected_ratio=None,
         min_max_unexpected_values_proportion=6.66e-1,
+        data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     bobby_compliant_column_names: List[str] = [
@@ -233,6 +264,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_une
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -259,13 +291,20 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted_tight_max_unex
 
     domain_builder: MapMetricColumnDomainBuilder = MapMetricColumnDomainBuilder(
         map_metric_name="column_values.nonnull",
-        batch_request=batch_request,
-        data_context=data_context,
         max_unexpected_values=0,
         max_unexpected_ratio=0.0,
         min_max_unexpected_values_proportion=1.0,
+        data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     bobby_compliant_column_names: List[str] = [
@@ -295,6 +334,7 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted_tight_max_unex
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]
@@ -321,13 +361,20 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
 
     domain_builder: MapMetricColumnDomainBuilder = MapMetricColumnDomainBuilder(
         map_metric_name="column_values.nonnull",
-        batch_request=batch_request,
-        data_context=data_context,
         max_unexpected_values=0,
         max_unexpected_ratio=5.58 - 1,
         min_max_unexpected_values_proportion=1.0,
+        data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     bobby_compliant_column_names: List[str] = [
@@ -358,6 +405,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
             domain_kwargs={
                 "column": column_name,
             },
+            rule_name="my_rule",
         )
         for column_name in bobby_compliant_column_names
     ]

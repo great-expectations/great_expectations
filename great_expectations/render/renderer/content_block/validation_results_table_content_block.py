@@ -4,20 +4,14 @@ import warnings
 from copy import deepcopy
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (
+from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (  # noqa: F401
     ExpectColumnKlDivergenceToBeLessThan,
 )
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
-from great_expectations.render.types import (
-    CollapseContent,
-    RenderedContentBlockContainer,
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-)
-from great_expectations.render.util import num_to_str
+from great_expectations.render.types import RenderedTableContent
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +55,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         return sorted(custom_columns)
 
     @classmethod
-    def _process_content_block(cls, content_block, has_failed_evr, render_object=None):
+    def _process_content_block(
+        cls, content_block, has_failed_evr, render_object=None
+    ) -> None:
         super()._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}
@@ -223,8 +219,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
             # If no legacy rendering is present, return None.
             return None
 
+        # deprecated-v0.13.28
         warnings.warn(
-            "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
+            "V2 API style custom rendering is deprecated as of v0.13.28 and is not fully supported anymore; "
+            "As it will be removed in v0.16, please transition to V3 API and associated rendering style",
             DeprecationWarning,
         )
 

@@ -148,7 +148,6 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["nlp", "hackathon"],
         "contributors": ["@victorwyee"],
-        "package": "experimental_expectations",
         "requirements": ["langid>=1.1.6"],
     }
 

@@ -144,7 +144,7 @@ class Profiler(metaclass=abc.ABCMeta):
       kind of object. You should raise an appropriate Exception if the object is not valid.
     """
 
-    def __init__(self, configuration: dict = None):
+    def __init__(self, configuration: dict = None) -> None:
         self.configuration = configuration
 
     def validate(self, item_to_validate: Any) -> None:
@@ -219,8 +219,9 @@ class DatasetProfiler(DataAssetProfiler):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional). Instead of providing a run_id, you may also provide"
                 "run_name and run_time separately.",
@@ -258,5 +259,5 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite, validation_results
 
     @classmethod
-    def _profile(cls, dataset, configuration=None):
+    def _profile(cls, dataset, configuration=None) -> None:
         raise NotImplementedError

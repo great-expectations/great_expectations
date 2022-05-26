@@ -3,12 +3,12 @@ import sys
 from typing import List
 
 import click
-from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
@@ -27,9 +27,6 @@ try:
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     SQLAlchemyError = RuntimeError
-
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 """
@@ -56,7 +53,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 
 @click.group(short_help="Checkpoint operations")
 @click.pass_context
-def checkpoint(ctx):
+def checkpoint(ctx: click.Context) -> None:
     """
     Checkpoint operations
 
@@ -71,13 +68,20 @@ def checkpoint(ctx):
     """
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
-    usage_stats_prefix = f"cli.checkpoint.{ctx.invoked_subcommand}"
+    cli_event_noun: str = "checkpoint"
+    (
+        begin_event_name,
+        end_event_name,
+    ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
+        noun=cli_event_noun,
+        verb=ctx.invoked_subcommand,
+    )
     send_usage_message(
         data_context=ctx.obj.data_context,
-        event=f"{usage_stats_prefix}.begin",
+        event=begin_event_name,
         success=True,
     )
-    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
+    ctx.obj.usage_event_end = end_event_name
 
 
 @checkpoint.command(name="new")
@@ -89,7 +93,7 @@ def checkpoint(ctx):
     default=True,
 )
 @click.pass_context
-def checkpoint_new(ctx, name, jupyter):
+def checkpoint_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     """Create a new Checkpoint for easy deployments.
 
     NAME is the name of the Checkpoint to create.
@@ -97,7 +101,7 @@ def checkpoint_new(ctx, name, jupyter):
     _checkpoint_new(ctx=ctx, checkpoint_name=name, jupyter=jupyter)
 
 
-def _checkpoint_new(ctx, checkpoint_name, jupyter):
+def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> None:
 
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -158,7 +162,7 @@ def _verify_checkpoint_does_not_exist(
         )
 
 
-def _get_notebook_path(context, notebook_name):
+def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
     return os.path.abspath(
         os.path.join(
             context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
@@ -168,7 +172,7 @@ def _get_notebook_path(context, notebook_name):
 
 @checkpoint.command(name="list")
 @click.pass_context
-def checkpoint_list(ctx):
+def checkpoint_list(ctx: click.Context) -> None:
     """List configured checkpoints."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -201,7 +205,7 @@ def checkpoint_list(ctx):
 @checkpoint.command(name="delete")
 @click.argument("checkpoint")
 @click.pass_context
-def checkpoint_delete(ctx, checkpoint):
+def checkpoint_delete(ctx: click.Context, checkpoint: str) -> None:
     """Delete a Checkpoint."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -233,7 +237,7 @@ def checkpoint_delete(ctx, checkpoint):
 @checkpoint.command(name="run")
 @click.argument("checkpoint")
 @click.pass_context
-def checkpoint_run(ctx, checkpoint):
+def checkpoint_run(ctx: click.Context, checkpoint: str) -> None:
     """Run a Checkpoint."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -304,7 +308,7 @@ def print_validation_operator_results_details(
 @checkpoint.command(name="script")
 @click.argument("checkpoint")
 @click.pass_context
-def checkpoint_script(ctx, checkpoint):
+def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
     """
     Create a python script to run a Checkpoint.
 

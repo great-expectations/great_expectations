@@ -26,6 +26,7 @@
       },
       "tests": [{
           "title": "simple_mean_positive_range",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -39,6 +40,7 @@
         },
         {
           "title": "simple_mean_negative_range",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -165,7 +167,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "mssql", "spark", "bigquery"],
+          "suppress_test_for": ["postgresql", "mssql", "spark", "bigquery", "trino"],
           "_comment": "postgresql, mssql, bigquery, and spark will not allow coercing the boolean type to an average"
         },
         {
@@ -180,7 +182,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "mssql", "bigquery","spark"],
+          "suppress_test_for": ["postgresql", "mssql", "bigquery", "spark", "trino"],
           "_comment": "postgresql, mssql, bigquery and spark will not allow coercing the boolean type to an average"
         },
         {

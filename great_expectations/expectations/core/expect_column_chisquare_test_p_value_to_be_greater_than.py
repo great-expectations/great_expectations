@@ -9,7 +9,6 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(TableExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "column aggregate expectation",
@@ -39,7 +38,7 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(TableExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass
 
     @classmethod
@@ -51,5 +50,5 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(TableExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass

@@ -14,8 +14,17 @@
 
 general:
   package_name: CapitalOne DataProfiler Expectations
-  icon: ~ # May be a relative path to `assets/` or a URL
-  description: Expectations using CapitalOne's DataProfiler library
+  icon: assets/logo.png
+  description: |
+    Data Profiler is an [open source solution](https://www.capitalone.com/tech/open-source/) from Capital One that uses [machine learning](https://www.capitalone.com/tech/machine-learning/) to help companies monitor big data and detect private customer information so that it can be protected. [Data Profiler](https://www.capitalone.com/tech/open-source/basics-of-data-profiler/) provides a pre-trained deep learning model to efficiently identify sensitive information, components to conduct statistical analysis of the dataset, and an API to build data labelers. Data Profiler can accept a wide range of data formats including csv, avro, parquet, json, text, and pandas DataFrames. Whether the data is structured, semi-structured or unstructured, the library is able to identify the schema, statistics, entities from the data. Versatility of the data labeler allows models to be modified as needed and it’s possible to run multiple models on the same dataset with just a few lines of code.
+
+    * [Data Profiler on GitHub](https://github.com/capitalone/dataprofiler)
+    * Website: [https://www.capitalone.com/tech](https://www.capitalone.com/tech/)
+    * Twitter: [@CapitalOneTech](https://twitter.com/CapitalOneTech)
+    * Articles:
+      *  [Data Profiler - An Open Source Solution to Explain Your Data](https://www.capitalone.com/tech/open-source/basics-of-data-profiler/)
+      *  [Detecting Sensitive Information in Data with Data Profiler](https://www.capitalone.com/tech/open-source/sensitive-data-detection-with-data-profiler/)
+      *  [Evaluating Data Quality for Machine Learning Models at Scale](https://www.capitalone.com/tech/open-source/data-profiler-evaluating-data-quality-at-scale/)
 
 # Please add more code owners as you see fit
 code_owners:
@@ -24,9 +33,27 @@ code_owners:
 
 # Please fill in the details and add more domain experts as you see fit
 domain_experts:
+  - full_name: Taylor Turner
+    picture: assets/taylor.jpeg
+    title: Principal Machine Learning Engineer at Capital One
+    bio: Since joining Capital One in 2016, Taylor has worked on projects within the model lifecycle, consulted with other departments on their ML projects, and taken new ideas and made them reusable tools internal and external to Capital One. He developed the profiler validator, null data flag, and data quantile reporting features for Data Profiler. Prior to Capital One, Taylor worked as a lead engineer for a hedge fund focused on using deep learning to glean tradable datapoints from a corpus of niche data streams of high-profile market commentators.
+    social_links:
+      - account_type: GITHUB
+        identifier: https://github.com/taylorfturner
+      - account_type: LINKEDIN
+        identifier: https://www.linkedin.com/in/taylorfturner
+
   - full_name: Jeremy Goodsitt
-  - full_name: Austin Walters
+    picture: assets/jeremy.png
+    title: Lead Machine Learning Engineer at Capital One
+    bio: Since joining Capital One in 2017, Jeremy has worked on machine learning optimization infrastructure, NLP model development such as the sensitive data labeler within the Data Profiler, and the engineering design behind the open source library, Data Profiler. His doctoral studies were at the University of Illinois where he worked on improving medical diagnostic techniques through computer vision and optimization techniques.
+    social_links:
+      - account_type: GITHUB
+        identifier: https://github.com/JGSweets
+      - account_type: LINKEDIN
+        identifier: https://www.linkedin.com/in/jeremy-goodsitt
+
     # social_links:
-    #   - account_type: ~ # May be one of TWITTER | INSTAGRAM | LINKEDIN | MEDIUM
+    #   - account_type: ~ # May be one of TWITTER | GITHUB | LINKEDIN | MEDIUM | WEBSITE
     #     identifier: ~
     # picture: ~ # May be a relative path to `assets/` or a URL

@@ -27,6 +27,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
@@ -44,7 +45,7 @@ class DataAsset:
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "DataAsset"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """
         Initialize the DataAsset.
 
@@ -70,8 +71,9 @@ class DataAsset:
         batch_markers = kwargs.pop("batch_markers", {})
 
         if "autoinspect_func" in kwargs:
+            # deprecated-v0.10.10
             warnings.warn(
-                "Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).",
+                "Autoinspect_func is deprecated as of v0.10.10 and will be removed in v0.16; use a profiler instead (migration is easy!).",
                 category=DeprecationWarning,
             )
         super().__init__(*args, **kwargs)
@@ -110,9 +112,11 @@ class DataAsset:
         Returns:
             tuple(expectation_suite, validation_results)
         """
+        # deprecated-v0.10.10
         warnings.warn(
-            "The term autoinspect is deprecated and will be removed in a future release. Please use 'profile'\
-        instead."
+            "The term autoinspect is deprecated as of v0.10.10 and will be removed in v0.16. Please use 'profile'\
+        instead.",
+            DeprecationWarning,
         )
         expectation_suite, validation_results = profiler.profile(self)
         return expectation_suite, validation_results
@@ -337,7 +341,7 @@ class DataAsset:
 
     def _initialize_expectations(
         self, expectation_suite=None, expectation_suite_name=None
-    ):
+    ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -401,10 +405,11 @@ class DataAsset:
             "result_format": "BASIC",
         }
 
-    def append_expectation(self, expectation_config):
+    def append_expectation(self, expectation_config) -> None:
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
+        # deprecated-v0.12.0
         warnings.warn(
-            "append_expectation is deprecated, and will be removed in a future release. "
+            "append_expectation is deprecated as of v0.12.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.add_expectation instead.",
             DeprecationWarning,
         )
@@ -416,8 +421,9 @@ class DataAsset:
         match_type: str = "domain",
     ) -> List[int]:
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
+        # deprecated-v0.12.0
         warnings.warn(
-            "find_expectation_indexes is deprecated, and will be removed in a future release. "
+            "find_expectation_indexes is deprecated as of v0.12.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
@@ -431,8 +437,9 @@ class DataAsset:
         match_type: str = "domain",
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
+        # deprecated-v0.12.0
         warnings.warn(
-            "find_expectations is deprecated, and will be removed in a future release. "
+            "find_expectations is deprecated as of v0.12.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
@@ -447,8 +454,9 @@ class DataAsset:
         remove_multiple_matches: bool = False,
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.remove()"""
+        # deprecated-v0.12.0
         warnings.warn(
-            "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
+            "DataAsset.remove_expectations is deprecated as of v0.12.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.remove_expectation instead.",
             DeprecationWarning,
         )
@@ -458,7 +466,7 @@ class DataAsset:
             remove_multiple_matches=remove_multiple_matches,
         )
 
-    def set_config_value(self, key, value):
+    def set_config_value(self, key, value) -> None:
         self._config[key] = value
 
     def get_config_value(self, key):
@@ -480,7 +488,7 @@ class DataAsset:
     def batch_parameters(self):
         return self._batch_parameters
 
-    def discard_failing_expectations(self):
+    def discard_failing_expectations(self) -> None:
         res = self.validate(only_return_failures=True).results
         if any(res):
             for item in res:
@@ -509,7 +517,7 @@ class DataAsset:
         """
         return self.default_expectation_args
 
-    def set_default_expectation_argument(self, argument, value):
+    def set_default_expectation_argument(self, argument, value) -> None:
         """Set a default expectation argument for this data_asset
 
         Args:
@@ -534,8 +542,9 @@ class DataAsset:
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False,
     ):
+        # deprecated-v0.10.10
         warnings.warn(
-            "get_expectations_config is deprecated, and will be removed in a future release. "
+            "get_expectations_config is deprecated as of v0.10.10 and will be removed in v0.16. "
             + "Please use get_expectation_suite instead.",
             DeprecationWarning,
         )
@@ -658,7 +667,7 @@ class DataAsset:
         discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False,
-    ):
+    ) -> None:
         """Writes ``_expectation_config`` to a JSON file.
 
            Writes the DataAsset's expectation config to the specified JSON ``filepath``. Failing expectations \
@@ -794,8 +803,9 @@ class DataAsset:
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
             if isinstance(run_id, str) and not run_name:
+                # deprecated-v0.11.0
                 warnings.warn(
-                    "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                    "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                     "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                     "and run_time (both optional). Instead of providing a run_id, you may also provide"
                     "run_name and run_time separately.",
@@ -859,8 +869,8 @@ class DataAsset:
                 if getattr(data_context, "_usage_statistics_handler", None):
                     handler = data_context._usage_statistics_handler
                     handler.send_usage_message(
-                        event="data_asset.validate",
-                        event_payload=handler.anonymizer.anonymize_batch_info(self),
+                        event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
+                        event_payload=handler.anonymizer.anonymize(obj=self),
                         success=False,
                     )
                 return ExpectationValidationResult(success=False)
@@ -1019,8 +1029,8 @@ class DataAsset:
             if getattr(data_context, "_usage_statistics_handler", None):
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
-                    event="data_asset.validate",
-                    event_payload=handler.anonymizer.anonymize_batch_info(self),
+                    event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
+                    event_payload=handler.anonymizer.anonymize(obj=self),
                     success=False,
                 )
             raise
@@ -1030,8 +1040,8 @@ class DataAsset:
         if getattr(data_context, "_usage_statistics_handler", None):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event="data_asset.validate",
-                event_payload=handler.anonymizer.anonymize_batch_info(self),
+                event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
+                event_payload=handler.anonymizer.anonymize(obj=self),
                 success=True,
             )
         return result
@@ -1051,7 +1061,7 @@ class DataAsset:
         else:
             return default_value
 
-    def set_evaluation_parameter(self, parameter_name, parameter_value):
+    def set_evaluation_parameter(self, parameter_name, parameter_value) -> None:
         """Provide a value to be stored in the data_asset evaluation_parameters object and used to evaluate
         parameterized expectations.
 
@@ -1070,7 +1080,7 @@ class DataAsset:
         batch_markers=None,
         batch_parameters=None,
         citation_date=None,
-    ):
+    ) -> None:
         if batch_kwargs is None:
             batch_kwargs = self.batch_kwargs
         if batch_markers is None:
@@ -1091,7 +1101,7 @@ class DataAsset:
         return self._expectation_suite.expectation_suite_name
 
     @expectation_suite_name.setter
-    def expectation_suite_name(self, expectation_suite_name):
+    def expectation_suite_name(self, expectation_suite_name) -> None:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite.expectation_suite_name = expectation_suite_name
 

@@ -5,7 +5,7 @@ import logging
 import uuid
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from dateutil.parser import parse
 
@@ -28,7 +28,14 @@ from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
-from great_expectations.expectations.row_conditions import parse_condition_to_spark
+from great_expectations.execution_engine.split_and_sample.sparkdf_data_splitter import (
+    SparkDataSplitter,
+)
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+    parse_condition_to_spark,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -152,7 +159,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         spark_config=None,
         force_reuse_spark_context=False,
         **kwargs,
-    ):
+    ) -> None:
         # Creation of the Spark DataFrame is done outside this class
         self._persist = persist
 
@@ -182,6 +189,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 "azure_options": azure_options,
             }
         )
+
+        self._data_splitter = SparkDataSplitter()
 
     @property
     def dataframe(self):
@@ -302,8 +311,12 @@ Please check your config."""
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
-        if batch_spec.get("splitter_method"):
-            splitter_fn = getattr(self, batch_spec.get("splitter_method"))
+
+        splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
+        if splitter_method_name:
+            splitter_fn: Callable = self._data_splitter.get_splitter_method(
+                splitter_method_name
+            )
             splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
@@ -414,9 +427,18 @@ Please check your config."""
                     f"unrecognized condition_parser {str(condition_parser)} for Spark execution engine"
                 )
 
+        # Filtering by filter_conditions
+        filter_conditions: List[RowCondition] = domain_kwargs.get(
+            "filter_conditions", []
+        )
+        if len(filter_conditions) > 0:
+            filter_condition = self._combine_row_conditions(filter_conditions)
+            data = data.filter(filter_condition.condition)
+
         if "column" in domain_kwargs:
             return data
 
+        # Filtering by ignore_row_if directive
         if (
             "column_A" in domain_kwargs
             and "column_B" in domain_kwargs
@@ -445,9 +467,10 @@ Please check your config."""
                     )
 
                 if ignore_row_if == "never":
+                    # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
 """,
                         DeprecationWarning,
                     )
@@ -478,6 +501,33 @@ Please check your config."""
             return data
 
         return data
+
+    def _combine_row_conditions(
+        self, row_conditions: List[RowCondition]
+    ) -> RowCondition:
+        """Combine row conditions using AND if condition_type is SPARK_SQL
+
+        Note, although this method does not currently use `self` internally we
+        are not marking as @staticmethod since it is meant to only be called
+        internally in this class.
+
+        Args:
+            row_conditions: Row conditions of type Spark
+
+        Returns:
+            Single Row Condition combined
+        """
+        assert all(
+            condition.condition_type == RowConditionParserType.SPARK_SQL
+            for condition in row_conditions
+        ), "All row conditions must have type SPARK_SQL"
+        conditions: List[str] = [
+            row_condition.condition for row_condition in row_conditions
+        ]
+        joined_condition: str = " AND ".join(conditions)
+        return RowCondition(
+            condition=joined_condition, condition_type=RowConditionParserType.SPARK_SQL
+        )
 
     def get_compute_domain(
         self,
@@ -522,10 +572,6 @@ Please check your config."""
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
         # We explicitly handle filter_nan & filter_null for spark using a spark-native condition
-        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
-            raise GreatExpectationsError(
-                "ExecutionEngine does not support updating existing row_conditions."
-            )
 
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
         assert "column" in domain_kwargs or column_name is not None
@@ -533,26 +579,36 @@ Please check your config."""
             column = column_name
         else:
             column = domain_kwargs["column"]
-        if filter_null and filter_nan:
-            new_domain_kwargs[
-                "row_condition"
-            ] = f"NOT isnan({column}) AND {column} IS NOT NULL"
-        elif filter_null:
-            new_domain_kwargs["row_condition"] = f"{column} IS NOT NULL"
-        elif filter_nan:
-            new_domain_kwargs["row_condition"] = f"NOT isnan({column})"
-        else:
+
+        filter_conditions: List[RowCondition] = []
+        if filter_null:
+            filter_conditions.append(
+                RowCondition(
+                    condition=f"{column} IS NOT NULL",
+                    condition_type=RowConditionParserType.SPARK_SQL,
+                )
+            )
+        if filter_nan:
+            filter_conditions.append(
+                RowCondition(
+                    condition=f"NOT isnan({column})",
+                    condition_type=RowConditionParserType.SPARK_SQL,
+                )
+            )
+
+        if not (filter_null or filter_nan):
             logger.warning(
                 "add_column_row_condition called without specifying a desired row condition"
             )
 
-        new_domain_kwargs["condition_parser"] = "spark"
+        new_domain_kwargs.setdefault("filter_conditions", []).extend(filter_conditions)
+
         return new_domain_kwargs
 
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
-    ) -> dict:
+    ) -> Dict[Tuple[str, str, str], Any]:
         """For each metric name in the given metric_fn_bundle, finds the domain of the metric and calculates it using a
         metric function from the given provider class.
 
@@ -613,108 +669,6 @@ Please check your config."""
     def head(self, n=5):
         """Returns dataframe head. Default is 5"""
         return self.dataframe.limit(n).toPandas()
-
-    @staticmethod
-    def _split_on_whole_table(
-        df,
-    ):
-        return df
-
-    @staticmethod
-    def _split_on_column_value(df, column_name: str, batch_identifiers: dict):
-        return df.filter(F.col(column_name) == batch_identifiers[column_name])
-
-    @staticmethod
-    def _split_on_converted_datetime(
-        df,
-        column_name: str,
-        batch_identifiers: dict,
-        date_format_string: str = "yyyy-MM-dd",
-    ):
-        matching_string = batch_identifiers[column_name]
-        res = (
-            df.withColumn(
-                "date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)
-            )
-            .filter(F.col("date_time_tmp") == matching_string)
-            .drop("date_time_tmp")
-        )
-        return res
-
-    @staticmethod
-    def _split_on_divided_integer(
-        df, column_name: str, divisor: int, batch_identifiers: dict
-    ):
-        """Divide the values in the named column by `divisor`, and split on that"""
-        matching_divisor = batch_identifiers[column_name]
-        res = (
-            df.withColumn(
-                "div_temp",
-                (F.col(column_name) / divisor).cast(sparktypes.IntegerType()),
-            )
-            .filter(F.col("div_temp") == matching_divisor)
-            .drop("div_temp")
-        )
-        return res
-
-    @staticmethod
-    def _split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
-        """Divide the values in the named column by `divisor`, and split on that"""
-        matching_mod_value = batch_identifiers[column_name]
-        res = (
-            df.withColumn(
-                "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
-            )
-            .filter(F.col("mod_temp") == matching_mod_value)
-            .drop("mod_temp")
-        )
-        return res
-
-    @staticmethod
-    def _split_on_multi_column_values(df, column_names: list, batch_identifiers: dict):
-        """Split on the joint values in the named columns"""
-        for column_name in column_names:
-            value = batch_identifiers.get(column_name)
-            if not value:
-                raise ValueError(
-                    f"In order for SparkDFExecutionEngine to `_split_on_multi_column_values`, "
-                    f"all values in  column_names must also exist in batch_identifiers. "
-                    f"{column_name} was not found in batch_identifiers."
-                )
-            df = df.filter(F.col(column_name) == value)
-        return df
-
-    @staticmethod
-    def _split_on_hashed_column(
-        df,
-        column_name: str,
-        hash_digits: int,
-        batch_identifiers: dict,
-        hash_function_name: str = "sha256",
-    ):
-        """Split on the hashed value of the named column"""
-        try:
-            getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError):
-            raise (
-                ge_exceptions.ExecutionEngineError(
-                    f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""
-                )
-            )
-
-        def _encrypt_value(to_encode):
-            hash_func = getattr(hashlib, hash_function_name)
-            hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits :]
-            return hashed_value
-
-        encrypt_udf = F.udf(_encrypt_value, sparktypes.StringType())
-        res = (
-            df.withColumn("encrypted_value", encrypt_udf(column_name))
-            .filter(F.col("encrypted_value") == batch_identifiers["hash_value"])
-            .drop("encrypted_value")
-        )
-        return res
 
     ### Sampling methods ###
     @staticmethod

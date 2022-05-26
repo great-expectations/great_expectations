@@ -4,17 +4,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional, Union
 
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestCase,
-    TestData,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.types import SerializableDictDot
-
-# from pydantic.dataclasses import dataclass
 
 
 class Maturity(Enum):
@@ -24,15 +17,6 @@ class Maturity(Enum):
     EXPERIMENTAL = "EXPERIMENTAL"
     BETA = "BETA"
     PRODUCTION = "PRODUCTION"
-
-
-@dataclass
-class Package:
-    """A package name, link to its pypi or Gallery page, and (optional) version number"""
-
-    text: str
-    link: str
-    version: Optional[str]
 
 
 @dataclass
@@ -46,7 +30,7 @@ class AugmentedLibraryMetadata(SerializableDictDot):
     library_metadata_passed_checks: bool
     has_full_test_suite: bool
     manually_reviewed_code: bool
-    package: Optional[Package] = None
+    problems: List[str] = field(default_factory=list)
 
     legacy_maturity_level_substitutions = {
         "experimental": "EXPERIMENTAL",
@@ -130,34 +114,33 @@ class ExpectationExecutionEngineDiagnostics(SerializableDictDot):
 
 
 @dataclass
+class ExpectationErrorDiagnostics(SerializableDictDot):
+    error_msg: str
+    stack_trace: str
+    test_title: Optional[str] = None
+    test_backend: Optional[str] = None
+
+
+@dataclass
 class ExpectationTestDiagnostics(SerializableDictDot):
     """Captures information from executing Expectation test cases. Used within the ExpectationDiagnostic object."""
 
     test_title: str
     backend: str
     test_passed: bool
-    error_message: Union[str, None] = None
-    stack_trace: Union[str, None] = None
-
-
-@dataclass
-class ExpectationErrorDiagnostics(SerializableDictDot):
-    error_msg: str
-    stack_trace: str
-
-
-@dataclass
-class ExecutedExpectationTestCase(SerializableDictDot):
-    """Captures information from executing Expectation test cases. Used within the ExpectationDiagnostic object.
-
-    This may turn out to be the same thing as ExpectationTestDiagnostics.
-    """
-
-    data: TestData
-    test_case: ExpectationTestCase
-    expectation_configuration: ExpectationConfiguration
+    include_in_gallery: bool
     validation_result: ExpectationValidationResult
     error_diagnostics: ExpectationErrorDiagnostics
+
+
+@dataclass
+class ExpectationBackendTestResultCounts(SerializableDictDot):
+    """Has each tested backend and the number of passing/failing tests"""
+
+    backend: str
+    num_passed: int
+    num_failed: int
+    failing_names: Optional[List[str]]
 
 
 @dataclass

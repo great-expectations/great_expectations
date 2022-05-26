@@ -51,11 +51,22 @@
         "unique": "NUMERIC",
         "null": "STRING",
         "mult_dup": "STRING"
+      },
+      "trino": {
+        "a": "VARCHAR",
+        "b": "VARCHAR",
+        "c": "INTEGER",
+        "d": "VARCHAR",
+        "n": "INTEGER",
+        "unique": "INTEGER",
+        "null": "VARCHAR",
+        "mult_dup": "VARCHAR"
       }
     },
     "tests" : [
       {
         "title": "basic_positive_test_case",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "in": {
           "column": "unique"
@@ -67,6 +78,7 @@
         }
       },{
         "title": "basic_negative_case_all_non_unique_character_values",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "in": {
           "column": "a"
@@ -138,6 +150,7 @@
       },{
         "title": "positive_case_all_null_values",
         "exact_match_out": false,
+        "suppress_test_for": ["trino"],
         "in": {
           "column": "null"
         },

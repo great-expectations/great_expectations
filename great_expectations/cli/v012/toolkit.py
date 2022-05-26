@@ -81,9 +81,9 @@ def create_expectation_suite(
     :return: a tuple: (success, suite name, profiling_results)
     """
     if generator_asset:
+        # deprecated-v0.13.12
         warnings.warn(
-            "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-            "Please update code accordingly.",
+            "The 'generator_asset' argument is deprecated as of v0.13.12 and will be removed in v0.16. Please use 'data_asset_name' instead.",
             DeprecationWarning,
         )
         data_asset_name = generator_asset
@@ -216,7 +216,7 @@ Great Expectations will store these expectations in a new Expectation Suite '{:s
     return profiling_results
 
 
-def _raise_profiling_errors(profiling_results):
+def _raise_profiling_errors(profiling_results) -> None:
     if (
         profiling_results["error"]["code"]
         == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
@@ -232,7 +232,7 @@ def _raise_profiling_errors(profiling_results):
     )
 
 
-def attempt_to_open_validation_results_in_data_docs(context, profiling_results):
+def attempt_to_open_validation_results_in_data_docs(context, profiling_results) -> None:
     try:
         # TODO this is really brittle and not covered in tests
         validation_result = profiling_results["results"][0][1]
@@ -478,7 +478,7 @@ def load_data_context_with_error_handling(
 
 def upgrade_project(
     context_root_dir, ge_config_version, from_cli_upgrade_command=False
-):
+) -> None:
     if from_cli_upgrade_command:
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "

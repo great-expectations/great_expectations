@@ -25,6 +25,9 @@ from tests.core.usage_statistics.util import (
 
 @freeze_time("09/26/2019 13:42:41")
 @mock_s3
+@pytest.mark.filterwarnings(
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+)
 def test_ValidationsStore_with_TupleS3StoreBackend():
     bucket = "test_validation_store_bucket"
     prefix = "test/prefix"
@@ -156,6 +159,9 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
 
 
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.filterwarnings(
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+)
 def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
     path = str(
         tmp_path_factory.mktemp(
@@ -246,6 +252,9 @@ test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
     assert my_store.store_backend_id == my_store_duplicate.store_backend_id
 
 
+@pytest.mark.filterwarnings(
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+)
 def test_ValidationsStore_with_DatabaseStoreBackend(sa):
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {"drivername": "sqlite"}
@@ -304,6 +313,9 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@pytest.mark.filterwarnings(
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
