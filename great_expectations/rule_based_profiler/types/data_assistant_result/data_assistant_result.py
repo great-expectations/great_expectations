@@ -553,6 +553,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_name: str,
         metric_type: alt.StandardType,
         sequential: bool,
+        subtitle: Optional[str] = None,
     ) -> Union[alt.Chart, alt.VConcatChart]:
         """
         Args:
@@ -613,6 +614,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_name: str,
         metric_type: alt.StandardType,
         sequential: bool,
+        subtitle: Optional[str] = None,
     ) -> alt.VConcatChart:
         """
         Args:
@@ -658,6 +660,7 @@ class DataAssistantResult(SerializableDictDot):
         domain_component: DomainPlotComponent = DomainPlotComponent(
             name="column",
             alt_type=AltairDataTypes.NOMINAL.value,
+            subtitle=subtitle,
         )
 
         min_value_component: ExpectationKwargPlotComponent = (
@@ -765,6 +768,7 @@ class DataAssistantResult(SerializableDictDot):
                 strict_min_component=strict_min_component,
                 strict_max_component=strict_max_component,
                 predicate=predicate,
+                subtitle=subtitle,
             )
 
     @staticmethod
@@ -1728,7 +1732,10 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
         subtitle: Optional[str],
     ) -> Optional[alt.Chart]:
-        implemented_metrics: Set[str] = set(self.EXPECTATION_METRIC_MAP.keys())
+        implemented_metrics: Set[str] = {
+            sanitize_parameter_name(metric)
+            for metric in self.EXPECTATION_METRIC_MAP.values()
+        }
 
         plot_impl: Optional[
             Callable[
@@ -1779,6 +1786,7 @@ class DataAssistantResult(SerializableDictDot):
             metric_name = sanitize_parameter_name(metric_name)
 
         return self._chart_column_values(
+            expectation_type=expectation_type,
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
@@ -1844,6 +1852,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _chart_column_values(
         self,
+        expectation_type: str,
         column_dfs: List[ColumnDataFrame],
         metric_name: Optional[str],
         metric_type: alt.StandardType,
@@ -1856,26 +1865,31 @@ class DataAssistantResult(SerializableDictDot):
                     List[ColumnDataFrame],
                     str,
                     alt.StandardType,
+                    bool,
+                    Optional[str],
                 ],
                 alt.VConcatChart,
             ]
         ] = None
-        display_chart: Optional[alt.VConcatChart] = None
 
+        subtitle: Optional[str] = None
         if metric_name:
             if plot_mode is PlotMode.PRESCRIPTIVE:
                 plot_impl = (
                     self.get_interactive_detail_expect_column_values_to_be_between_chart
                 )
+                subtitle = expectation_type
             else:
                 plot_impl = self.get_interactive_detail_multi_chart
 
+        display_chart: Optional[alt.VConcatChart] = None
         if plot_impl:
             display_chart = plot_impl(
                 column_dfs=column_dfs,
                 metric_name=metric_name,
                 metric_type=metric_type,
                 sequential=sequential,
+                subtitle=subtitle,
             )
 
         return [display_chart]
