@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
@@ -10,6 +10,18 @@ from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
+)
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
+    VARIABLES_KEY,
 )
 
 
@@ -76,15 +88,92 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.median",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+    success_keys = (
+        "min_value",
+        "strict_min",
+        "max_value",
+        "strict_max",
+        "auto",
+        "profiler_config",
+    )
+
+    median_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="NumericMetricRangeMultiBatchParameterBuilder",
+        name="median_range_estimator",
+        metric_name="column.median",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        enforce_numeric_metric=True,
+        replace_nan_with_zero=True,
+        reduce_scalar_metric=True,
+        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        estimator=f"{VARIABLES_KEY}estimator",
+        n_resamples=f"{VARIABLES_KEY}n_resamples",
+        random_seed=f"{VARIABLES_KEY}random_seed",
+        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
+        truncate_values=f"{VARIABLES_KEY}truncate_values",
+        round_decimals=f"{VARIABLES_KEY}round_decimals",
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
+    )
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        median_range_estimator_parameter_builder_config,
+    ]
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_median_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        variables={},
+        rules={
+            "default_expect_column_median_to_be_between_rule": {
+                "variables": {
+                    "strict_min": False,
+                    "strict_max": False,
+                    "false_positive_rate": 0.05,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "estimator": "bootstrap",
+                    "n_resamples": 9999,
+                    "random_seed": None,
+                    "include_estimator_samples_histogram_in_details": False,
+                    "truncate_values": {
+                        "lower_bound": None,
+                        "upper_bound": None,
+                    },
+                    "round_decimals": 2,
+                },
+                "domain_builder": {
+                    "class_name": "ColumnDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_median_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+                        "min_value": f"{PARAMETER_KEY}{median_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+                        "max_value": f"{PARAMETER_KEY}{median_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+                        "strict_min": f"{VARIABLES_KEY}strict_min",
+                        "strict_max": f"{VARIABLES_KEY}strict_max",
+                        "meta": {
+                            "profiler_details": f"{PARAMETER_KEY}{median_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                        },
+                    },
+                ],
+            },
+        },
+    )
 
     # Default values
     default_kwarg_values = {
@@ -95,6 +184,8 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "column",
@@ -106,7 +197,7 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -115,12 +206,10 @@ class ExpectColumnMedianToBeBetween(ColumnExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
-
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(

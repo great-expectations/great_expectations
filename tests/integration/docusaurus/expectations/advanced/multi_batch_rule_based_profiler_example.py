@@ -1,6 +1,10 @@
+from typing import List
+
 from ruamel import yaml
 
 from great_expectations import DataContext
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 profiler_config = r"""
@@ -21,24 +25,18 @@ rules:
     parameter_builders:
       - name: row_count_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
-        batch_request:
-            datasource_name: taxi_pandas
-            data_connector_name: monthly
-            data_asset_name: my_reports
-            data_connector_query:
-              index: "-6:-1"
         metric_name: table.row_count
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
-        round_decimals: 0
         truncate_values:
           lower_bound: 0
+        round_decimals: 0
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        min_value: $parameter.row_count_range.value.value_range[0]
-        max_value: $parameter.row_count_range.value.value_range[1]
+        min_value: $parameter.row_count_range.value[0]
+        max_value: $parameter.row_count_range.value[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.row_count_range.details
@@ -47,34 +45,15 @@ rules:
       class_name: ColumnDomainBuilder
       include_semantic_types:
         - numeric
-      # BatchRequest yielding exactly one batch (March, 2019 trip data)
-      batch_request:
-        datasource_name: taxi_pandas
-        data_connector_name: monthly
-        data_asset_name: my_reports
-        data_connector_query:
-          index: -1
     parameter_builders:
       - name: min_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
-        batch_request:
-            datasource_name: taxi_pandas
-            data_connector_name: monthly
-            data_asset_name: my_reports
-            data_connector_query:
-              index: "-6:-1"
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
       - name: max_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
-        batch_request:
-            datasource_name: taxi_pandas
-            data_connector_name: monthly
-            data_asset_name: my_reports
-            data_connector_query:
-              index: "-6:-1"
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
@@ -84,8 +63,8 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $parameter.min_range.value.value_range[0]
-        max_value: $parameter.min_range.value.value_range[1]
+        min_value: $parameter.min_range.value[0]
+        max_value: $parameter.min_range.value[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.min_range.details
@@ -93,8 +72,8 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $parameter.max_range.value.value_range[0]
-        max_value: $parameter.max_range.value.value_range[1]
+        min_value: $parameter.max_range.value[0]
+        max_value: $parameter.max_range.value[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.max_range.details
@@ -112,8 +91,21 @@ rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
     data_context=data_context,
 )
 
-suite = rule_based_profiler.run(expectation_suite_name="test_suite_name")
-print(suite)
+batch_request: dict = {
+    "datasource_name": "taxi_pandas",
+    "data_connector_name": "monthly",
+    "data_asset_name": "my_reports",
+    "data_connector_query": {
+        "index": "-6:-1",
+    },
+}
+
+result: RuleBasedProfilerResult = rule_based_profiler.run(batch_request=batch_request)
+expectation_configurations: List[
+    ExpectationConfiguration
+] = result.expectation_configurations
+
+print(expectation_configurations)
 
 # Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.
 first_rule_suite = """

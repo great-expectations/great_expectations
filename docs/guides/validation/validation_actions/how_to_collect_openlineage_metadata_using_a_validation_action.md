@@ -1,82 +1,70 @@
 ---
-title: How to collect OpenLineage metadata using a Validation Action
+title: How to collect OpenLineage metadata using an Action
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 [OpenLineage](https://openlineage.io) is an open framework for collection and analysis of data lineage. It tracks the movement of data over time, tracing relationships between datasets. Data engineers can use data lineage metadata to determine the root cause of failures, identify performance bottlenecks, and simulate the effects of planned changes.
 
-Enhancing the metadata in OpenLineage with results from an Expectation Suite makes it possible to answer questions like:
+Enhancing the metadata in OpenLineage with results from an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> makes it possible to answer questions like:
 * have there been failed assertions in any upstream datasets?
 * what jobs are currently consuming data that is known to be of poor quality?
 * is there something in common among failed assertions that seem otherwise unrelated?
 
-This guide will explain how to use a Validation Action to emit results to an OpenLineage backend, where their effect on related datasets can be studied.
+This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to emit results to an OpenLineage backend, where their effect on related datasets can be studied.
 
 <Prerequisites>
 
- - Created at least one Expectation Suite.
- - Created at least one [Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint) - you will need it in order to test that the OpenLineage Validation Operator is working.
+ - Created at least one Expectation Suite
+ - [Created at least one Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md) - you will need it in order to test that the OpenLineage <TechnicalTag tag="validation" text="Validation" /> is working.
 
 </Prerequisites>
 
-Steps
-------
+## Steps
 
-1. Ensure that the `openlineage-common` package has been installed in your Python environment.
 
-    ```bash
-    % pip3 install openlineage-common
-    ```
+### 1. Ensure that the `openlineage-integration-common` package has been installed in your Python environment.
 
-2. Update the action_list key in your Validation Operator config.
+ ```bash
+ % pip3 install openlineage-integration-common
+ ```
 
-    Add the ``OpenLineageValidationAction`` action to the ``action_list`` key of the ``ActionListValidationOperator`` config in your ``great_expectations.yml``.
+### 2. Update the `action_list` key in your Validation Operator config.
 
-    ```yaml
-    validation_operators:
-      action_list_operator:
-        class_name: ActionListValidationOperator
-        action_list:
-        - name: openlineage
-          action:
-            class_name: OpenLineageValidationAction
-            module_name: openlineage.common.provider.great_expectations
-            openlineage_host: ${OPENLINEAGE_URL}
-            openlineage_apiKey: ${OPENLINEAGE_API_KEY}
-            job_name: ge_validation # This is user-definable
-            openlineage_namespace: ge_namespace # This is user-definable
-    ```
+ Add the ``OpenLineageValidationAction`` action to the ``action_list`` key your Checkpoint configuration.
 
-    The `openlineage_host` and `openlineage_apiKey` values can be set via the environment, as shown above, or can be implemented as variables in `uncommitted/config_variables.yml`. The `openlineage_apiKey` value is optional, and is not required by all OpenLineage backends.
+ ```yaml
+action_list:
+ - name: openlineage
+   action:
+     class_name: OpenLineageValidationAction
+     module_name: openlineage.common.provider.great_expectations
+     openlineage_host: ${OPENLINEAGE_URL}
+     openlineage_apiKey: ${OPENLINEAGE_API_KEY}
+     job_name: ge_validation # This is user-definable
+     openlineage_namespace: ge_namespace # This is user-definable
+ ```
 
-    A Great Expecations checkpoint is recorded as a Job in OpenLineage, and will be named according to the `job_name` value. Similarly, the `openlineage_namespace` value can be optionally set. For more information on job naming, consult the [Naming section](https://github.com/OpenLineage/OpenLineage/blob/main/spec/Naming.md#job-namespace-and-constructing-job-names) of the OpenLineage spec.
+ The `openlineage_host` and `openlineage_apiKey` values can be set via the environment, as shown above, or can be implemented as variables in `uncommitted/config_variables.yml`. The `openlineage_apiKey` value is optional, and is not required by all OpenLineage backends.
 
-3. Trigger your `action_list_operator` to validate a batch of data and emit lineage events to the OpenLineage backend. This can be done in code:
+ A Great Expecations <TechnicalTag tag="checkpoint" text="Checkpoint" /> is recorded as a Job in OpenLineage, and will be named according to the `job_name` value. Similarly, the `openlineage_namespace` value can be optionally set. For more information on job naming, consult the [Naming section](https://github.com/OpenLineage/OpenLineage/blob/main/spec/Naming.md#job-namespace-and-constructing-job-names) of the OpenLineage spec.
 
-    ```python
-    context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="openlineage_test")
-    ```
+### 3.  Test your Action by Validating a Batch of data.
 
-    Alteratively, this can be done with a checkpoint. First, make sure that the `validation_operator_name` is set in your checkpoint's XML file:
+Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and emit lineage events to the OpenLineage backend.  This can be done from the command line:
 
-    ```diff
-    module_name: great_expectations.checkpoint
-    class_name: LegacyCheckpoint
-    +validation_operator_name: action_list_operator
-    batches:
-      - batch_kwargs:
-    ```
+ ```bash
+ % great_expectations checkpoint run <checkpoint_name>
+ ```
 
-    Then, run the checkpoint:
+:::note Reminder
+Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md) has more detailed instructions for this step, including instructions on how to run a checkpoint from a Python script instead of from the <TechnicalTag tag="cli" text="CLI" />.
+:::
 
-    ```bash
-    % great_expectations checkpoint run <checkpoint_name>
-    ```
+## Additional resources
 
-Additional resources
---------------------
-
-- [Checkpoints and Actions](/docs/reference/checkpoints_and_actions)
+- [Checkpoints overview page](../../../terms/checkpoint.md)
+- [Actions overview page](../../../terms/action.md)
 - The [OpenLineage Spec](https://github.com/OpenLineage/OpenLineage/blob/main/spec/OpenLineage.md)
 - Blog: [Expecting Great Quality with OpenLineage Facets](https://openlineage.io/blog/dataquality_expectations_facet/)

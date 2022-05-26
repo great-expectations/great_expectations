@@ -20,6 +20,24 @@
       "alpha": ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
       "numeric": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     },
+    "data_alt": {
+      "x": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "y": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "z": [1, 2, 3, 4, 5, null, null, null, null],
+      "ts": [
+        "Jan 01 1970 12:00:01",
+        "Dec 31 1999 12:00:01",
+        "Jan 01 2000 12:00:01",
+        "Feb 01 2000 12:00:01",
+        "Mar 01 2000 12:00:01",
+        "Apr 01 2000 12:00:01",
+        "May 01 2000 12:00:01",
+        "Jun 01 2000 12:00:01",
+        null
+      ],
+      "alpha": ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
+      "numeric": ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    },
     "schemas": {
       "spark": {
         "x": "IntegerType",
@@ -68,11 +86,20 @@
         "ts": "DATETIME",
         "alpha": "STRING",
         "numeric": "NUMERIC"
+      },
+      "trino": {
+        "x": "INTEGER",
+        "y": "INTEGER",
+        "z": "INTEGER",
+        "ts": "TIMESTAMP",
+        "alpha": "VARCHAR",
+        "numeric": "INTEGER"
       }
     },
     "tests": [
       {
         "title": "basic_positive_test",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -170,7 +197,9 @@
       },
       {
         "title" : "basic_negative_test",
+        "include_in_gallery": true,
         "exact_match_out": false,
+        "suppress_test_for": ["trino"],
         "out": {
           "unexpected_list": [
             10
@@ -240,6 +269,7 @@
       {
         "title" : "negative_test_with_result_format__boolean_only",
         "exact_match_out": false,
+        "suppress_test_for": ["trino"],
         "out": {"success": false},
         "in": {
           "column": "x",
@@ -292,6 +322,7 @@
       {
         "title" : "3rd_positive_test_with_mostly",
         "exact_match_out": false,
+        "suppress_test_for": ["trino"],
         "out": {
           "unexpected_list": [
             10
@@ -525,6 +556,7 @@
       {
         "title": "test_strict_max_failure",
         "exact_match_out": false,
+        "suppress_test_for": ["trino"],
         "in": {
           "column": "x",
           "max_value": 10,

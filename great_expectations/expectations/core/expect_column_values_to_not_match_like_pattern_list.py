@@ -59,12 +59,13 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.not_match_like_pattern_list"
@@ -88,7 +89,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -107,7 +108,6 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -119,7 +119,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs
-    ):
+    ) -> None:
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (

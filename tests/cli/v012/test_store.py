@@ -1,5 +1,3 @@
-import os
-
 from click.testing import CliRunner
 
 from great_expectations import DataContext

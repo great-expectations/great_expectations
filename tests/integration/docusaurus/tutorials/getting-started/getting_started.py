@@ -88,7 +88,6 @@ ignored_columns = [
     "pickup_datetime",
     "dropoff_datetime",
     # "passenger_count",
-    # </snippet>
     "trip_distance",
     "rate_code_id",
     "store_and_fwd_flag",
@@ -104,6 +103,7 @@ ignored_columns = [
     "total_amount",
     "congestion_surcharge",
 ]
+# </snippet>
 
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,

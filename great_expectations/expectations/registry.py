@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -88,6 +89,7 @@ def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F82
             logger.warning(
                 f"Overwriting declaration of expectation {expectation_type}."
             )
+
     logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
 
@@ -128,6 +130,7 @@ def register_metric(
                 "warning",
                 f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys",
             )
+
         current_value_keys = metric_definition.get("metric_value_keys", set())
         if set(current_value_keys) != set(metric_value_keys):
             logger.warning(
@@ -138,6 +141,7 @@ def register_metric(
                 "warning",
                 f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys",
             )
+
         providers = metric_definition.get("providers", {})
         if execution_engine_name in providers:
             current_provider_cls, current_provider_fn = providers[execution_engine_name]
@@ -170,7 +174,9 @@ def register_metric(
             "providers": {execution_engine_name: (metric_class, metric_provider)},
         }
         _registered_metrics[metric_name] = metric_definition
+
     res["success"] = True
+
     return res
 
 
@@ -261,7 +267,20 @@ def get_domain_metrics_dict_by_name(
     }
 
 
-def get_expectation_impl(expectation_name):
+def get_expectation_impl(expectation_name: str):
+    renamed: Dict[str, str] = {
+        "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
+        "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
+        "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",
+    }
+    if expectation_name in renamed:
+        # deprecated-v0.14.12
+        warnings.warn(
+            f"Expectation {expectation_name} was renamed to {renamed['expectation_name']} as of v0.14.12 "
+            "Please update usage in your pipeline(s) before the v0.17 release",
+            DeprecationWarning,
+        )
+        expectation_name = renamed[expectation_name]
     return _registered_expectations.get(expectation_name)
 
 

@@ -34,7 +34,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
         and sorters for filtering and sorting data_references.
@@ -58,7 +58,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
-    def _refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self) -> None:
         """refreshes data_reference cache"""
         # Map data_references to batch_definitions
         self._data_references_cache = {}

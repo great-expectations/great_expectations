@@ -107,7 +107,7 @@ The `name` and `class_name` top level keys will be the first you need to define.
 
 After your Datasource's configuration has a `name` and `class_name` defined, you will need to define a single `execution_engine`.  In your configuration the value of your `execution_engine` will at the very least contain the `class_name` of your Execution Engine, and may also include a `connection_string` if your source data system requires one.
 
-Great Expectations supports Pandas, Spark, and SqlAlchemy as execution engines.
+Great Expectations supports Pandas, Spark, and SqlAlchemy as execution engines.  The corresponding Execution Engine class names are `PandasExecutionEngine`, `SparkDFExecutionEngine`, and `SqlAlchemyExecutionEngine`.
 
 #### Configuring your Datasource's Data Connectors
 
@@ -116,7 +116,7 @@ Great Expectations provides three types of `DataConnector` classes, which are us
 - A `ConfiguredAssetDataConnector`, which allows you to have the most fine-tuning by requiring an explicit listing of each <TechnicalTag tag="data_asset" text="Data Asset" /> you want to connect to.
 - A `RuntimeDataConnector` which enables you to use a `RuntimeBatchRequest` to wrap either an in-memory dataframe, filepath, or SQL query.
 
-In the `data_connectors` dictionary you may define multiple Data Connectors, including different types of Data Connectors, so long as they all have unique values in the place of the `<name_of_your_data_connector>` key.  We provide detailed guidance to help you decide on which Data Connectors to use in our guide: [How to choose which DataConnector to use](/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use).
+In the `data_connectors` dictionary you may define multiple Data Connectors, including different types of Data Connectors, so long as they all have unique values in the place of the `<name_of_your_data_connector>` key.  We provide detailed guidance to help you decide on which Data Connectors to use in our guide: [How to choose which DataConnector to use](./how_to_choose_which_dataconnector_to_use.md).
 
 The `<additional_keys_based_on_source_data_system>` will be things like `batch_identifiers`, `base_directory`, and `default_regex` for filesystems, or  `batch_identifiers` for SQL based data systems. For specifics on the additional keys that you can use in your Data Connectors' configurations, please see the corresponding guide for connecting to a specific source data system (since the keys you will need to define will depend on the source data system you are connecting to).
 

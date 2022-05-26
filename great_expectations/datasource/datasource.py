@@ -2,8 +2,6 @@ import copy
 import logging
 import warnings
 
-from ruamel.yaml import YAML
-
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
@@ -12,8 +10,6 @@ from great_expectations.data_context.util import (
 from great_expectations.exceptions import ClassInstantiationError
 
 logger = logging.getLogger(__name__)
-yaml = YAML()
-yaml.default_flow_style = False
 
 
 class LegacyDatasource:
@@ -162,7 +158,7 @@ class LegacyDatasource:
         data_asset_type=None,
         batch_kwargs_generators=None,
         **kwargs
-    ):
+    ) -> None:
         """
         Build a new datasource.
 
@@ -207,7 +203,7 @@ class LegacyDatasource:
         """
         return self._data_context
 
-    def _build_generators(self):
+    def _build_generators(self) -> None:
         """
         Build batch kwargs generator objects from the datasource configuration.
 
@@ -327,7 +323,7 @@ class LegacyDatasource:
         return batch_kwargs
 
     # TODO: move to execution engine or make a wrapper
-    def get_batch(self, batch_kwargs, batch_parameters=None):
+    def get_batch(self, batch_kwargs, batch_parameters=None) -> None:
         """Get a batch of data from the datasource.
 
         Args:

@@ -21,6 +21,7 @@
     "tests" : [
     {
       "title" : "basic_positive_test",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -50,6 +51,7 @@
     },
     {
       "title" : "basic_negative_test",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -119,7 +121,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title" : "positive_test_with_multiple_like_patternes",
@@ -134,7 +136,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title" : "positive_test_with_match_on__any",
@@ -149,7 +151,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     },
     {
       "title" : "positive_test_column_name_has_space_and_match_on__any",
@@ -164,7 +166,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino"]
     }
    ]
   }]

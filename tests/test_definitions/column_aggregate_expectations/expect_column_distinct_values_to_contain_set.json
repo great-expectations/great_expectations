@@ -11,6 +11,7 @@
     "tests": [
       {
         "title": "basic_positive_test",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "in": {
           "column": "dist1",
@@ -59,6 +60,7 @@
       },
       {
         "title": "basic_negative_test_no_set_intersection",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "in": {
           "column": "dist1",

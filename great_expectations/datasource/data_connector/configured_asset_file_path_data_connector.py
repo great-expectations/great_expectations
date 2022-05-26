@@ -2,15 +2,13 @@ import logging
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.data_context.types.base import assetConfigSchema
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset.asset import Asset
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
+from great_expectations.datasource.data_connector.util import _build_asset_from_config
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -40,7 +38,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         """
         Base class for DataConnectors that connect to filesystem-like data by taking in
         configured `assets` as a dictionary. This class supports the configuration of default_regex and
@@ -75,32 +73,16 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     def assets(self) -> Dict[str, Union[dict, Asset]]:
         return self._assets
 
-    def _build_assets_from_config(self, config: Dict[str, dict]):
+    def _build_assets_from_config(self, config: Dict[str, dict]) -> None:
         for name, asset_config in config.items():
             if asset_config is None:
                 asset_config = {}
             asset_config.update({"name": name})
-            new_asset: Asset = self._build_asset_from_config(
+            new_asset: Asset = _build_asset_from_config(
+                runtime_environment=self,
                 config=asset_config,
             )
             self.assets[name] = new_asset
-
-    def _build_asset_from_config(self, config: dict):
-        runtime_environment: dict = {"data_connector": self}
-        config = assetConfigSchema.load(config)
-        config = assetConfigSchema.dump(config)
-        asset: Asset = instantiate_class_from_config(
-            config=config,
-            runtime_environment=runtime_environment,
-            config_defaults={},
-        )
-        if not asset:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name="great_expectations.datasource.data_connector.asset",
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        return asset
 
     def get_available_data_asset_names(self) -> List[str]:
         """
@@ -111,7 +93,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         """
         return list(self.assets.keys())
 
-    def _refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self) -> None:
 
         # Map data_references to batch_definitions
         self._data_references_cache = {}

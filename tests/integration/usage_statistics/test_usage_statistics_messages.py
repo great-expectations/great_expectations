@@ -10,8 +10,14 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
 from great_expectations.data_context import BaseDataContext
+from tests.integration.usage_statistics.example_events.data_context_run_validation_operator import (
+    data_context_run_validation_operator_events,
+)
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
+)
+from tests.integration.usage_statistics.usage_stats_event_examples import (
+    data_context_init_with_dependencies,
 )
 
 
@@ -208,7 +214,6 @@ valid_usage_statistics_messages = {
                         },
                         "anonymized_site_index_builder": {
                             "parent_class": "DefaultSiteIndexBuilder",
-                            "show_cta_footer": True,
                         },
                     },
                 ],
@@ -301,7 +306,6 @@ valid_usage_statistics_messages = {
                         },
                         "anonymized_site_index_builder": {
                             "parent_class": "DefaultSiteIndexBuilder",
-                            "show_cta_footer": True,
                         },
                     },
                 ],
@@ -350,6 +354,7 @@ valid_usage_statistics_messages = {
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
             "ge_version": "0.13.0.manual_test",
         },
+        data_context_init_with_dependencies,
     ],
     "data_asset.validate": [
         {
@@ -1100,6 +1105,7 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
+    "data_context.run_validation_operator": data_context_run_validation_operator_events,
     "legacy_profiler.build_suite": [
         {
             "event": "legacy_profiler.build_suite",
@@ -1447,6 +1453,21 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.5.manual_testing",
         },
     ],
+    "execution_engine.sqlalchemy.connect": [
+        {
+            "event": "execution_engine.sqlalchemy.connect",
+            "event_payload": {
+                "anonymized_name": "6989a7654d0e27470dc01292b6ed0dea",
+                "sqlalchemy_dialect": "postgresql",
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T00:38:32.664Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.13.0.manual_testing",
+        },
+    ],
     "expectation_suite.add_expectation": [
         {
             "event_payload": {},
@@ -1457,6 +1478,32 @@ valid_usage_statistics_messages = {
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.13.47.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
+    "data_context.run_profiler_with_dynamic_arguments": [
+        {
+            "event_payload": {},
+            "event": "data_context.run_profiler_with_dynamic_arguments",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2022-04-21T16:08:28.070Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.14.6.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+    ],
+    "data_context.run_profiler_on_data": [
+        {
+            "event_payload": {},
+            "event": "data_context.run_profiler_on_data",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2022-04-21T16:08:28.070Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.14.8.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
     ],
@@ -2639,8 +2686,12 @@ for message_type, messages in valid_usage_statistics_messages.items():
 
 @pytest.mark.aws_integration
 @pytest.mark.parametrize("message", test_messages, ids=message_test_ids)
-def test_usage_statistics_message(message):
+def test_usage_statistics_message(
+    message: dict, requests_session_with_retries: requests.Session
+):
     """known message formats should be valid"""
-    res = requests.post(USAGE_STATISTICS_QA_URL, json=message, timeout=2)
+    res = requests_session_with_retries.post(
+        USAGE_STATISTICS_QA_URL, json=message, timeout=2
+    )
     assert res.status_code == 201
     assert res.json() == {"event_count": 1}
