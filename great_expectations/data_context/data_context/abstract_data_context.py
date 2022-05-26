@@ -1,7 +1,5 @@
 from abc import ABC
 
-from great_expectations.data_context.types.base import BaseYamlConfig
-
 
 class AbstractDataContext(ABC):
     """
