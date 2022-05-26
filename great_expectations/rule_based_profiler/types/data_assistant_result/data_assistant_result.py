@@ -1645,11 +1645,13 @@ class DataAssistantResult(SerializableDictDot):
         return_charts: List[alt.Chart] = []
 
         for (
-            column_based_expectation_configurations
-        ) in column_based_expectation_configurations_by_type.values():
+            expectation_type,
+            column_based_expectation_configurations,
+        ) in column_based_expectation_configurations_by_type.items():
             display_charts_for_expectation: List[
                 alt.VConcatChart
             ] = self._create_display_chart_for_column_domain_expectation(
+                expectation_type=expectation_type,
                 expectation_configurations=column_based_expectation_configurations,
                 attributed_metrics=attributed_metrics_by_column_domain,
                 plot_mode=plot_mode,
@@ -1726,15 +1728,7 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
         subtitle: Optional[str],
     ) -> Optional[alt.Chart]:
-        implemented_metrics: Set[str] = {
-            "table_row_count",
-            "column_distinct_values_count",
-            "column_max",
-            "column_mean",
-            "column_median",
-            "column_min",
-            "column_standard_deviation",
-        }
+        implemented_metrics: Set[str] = set(self.EXPECTATION_METRIC_MAP.keys())
 
         plot_impl: Optional[
             Callable[
@@ -1767,6 +1761,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _create_display_chart_for_column_domain_expectation(
         self,
+        expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
@@ -1779,7 +1774,9 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        metric_name: str = "column_distinct_values_count"
+        metric_name: Optional[str] = self.EXPECTATION_METRIC_MAP.get(expectation_type)
+        if metric_name:
+            metric_name = metric_name.replace(".", "_")
 
         return self._chart_column_values(
             column_dfs=column_dfs,
@@ -1848,7 +1845,7 @@ class DataAssistantResult(SerializableDictDot):
     def _chart_column_values(
         self,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        metric_name: Optional[str],
         metric_type: alt.StandardType,
         plot_mode: PlotMode,
         sequential: bool,
@@ -1865,7 +1862,7 @@ class DataAssistantResult(SerializableDictDot):
         ] = None
         display_chart: Optional[alt.VConcatChart] = None
 
-        if metric_name == "column_distinct_values_count":
+        if metric_name:
             if plot_mode is PlotMode.PRESCRIPTIVE:
                 plot_impl = (
                     self.get_interactive_detail_expect_column_values_to_be_between_chart
