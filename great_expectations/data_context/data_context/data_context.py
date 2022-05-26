@@ -37,7 +37,7 @@ yaml.default_flow_style = False
 
 
 # TODO: <WILL> Most of the logic here will be migrated to FileDataContext
-class DataContext(BaseDataContext, ConfigPeer):
+class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
     expectation suites, datasources, notification settings, and data fixtures.
 
