@@ -1433,6 +1433,7 @@ class DataAssistantResult(SerializableDictDot):
             options=columns, name="Select Column: "
         )
         selection: alt.selection_single = alt.selection_single(
+            empty="none",
             bind=input_dropdown,
             fields=[domain_component.name],
             init={domain_component.name: " "},
