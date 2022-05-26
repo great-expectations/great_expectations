@@ -26,6 +26,7 @@ from great_expectations.dataset.util import (
 from great_expectations.util import (
     generate_temporary_table_name,
     get_pyathena_potential_type,
+    get_trino_potential_type,
     get_sqlalchemy_inspector,
     import_library_module,
 )
@@ -161,8 +162,11 @@ try:
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
     teradatasqlalchemy = None
-
-
+try:
+    import trino.sqlalchemy.dialect
+    import trino.sqlalchemy.datatype as trinotypes
+except ImportError:
+    trino = None
 class SqlAlchemyBatchReference:
     def __init__(self, engine, table_name=None, schema=None, query=None) -> None:
         self._engine = engine
@@ -872,7 +876,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def get_column_median(self, column):
         # AWS Athena and presto have an special function that can be used to retrieve the median
-        if self.sql_engine_dialect.name.lower() == "awsathena":
+        if self.sql_engine_dialect.name.lower() == "awsathena" or self.sql_engine_dialect.name.lower() == "trino":
             element_values = self.engine.execute(
                 f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
             )
@@ -913,7 +917,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ) -> list:
         if self.sql_engine_dialect.name.lower() == "mssql":
             return self._get_column_quantiles_mssql(column=column, quantiles=quantiles)
-        elif self.sql_engine_dialect.name.lower() == "awsathena":
+        elif self.sql_engine_dialect.name.lower() == "awsathena" or self.sql_engine_dialect.name.lower() == "trino":
             return self._get_column_quantiles_awsathena(
                 column=column, quantiles=quantiles
             )
@@ -1173,7 +1177,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 .select_from(self._table)
                 .where(sa.column(column) is not None)
             ).fetchone()
-        return float(res[0])
+            try:
+                result = float(res[0])
+            except:
+                logger.warning(f"Having issue with stddev_samp on {column}, schema: {self._table.schema} table: {self._table.name}")
+                result = 0.0
+        return result
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins
@@ -1708,7 +1717,17 @@ WHERE
                 return teradatatypes
         except (TypeError, AttributeError):
             pass
-
+        try:
+            if (
+                isinstance(
+                    self.sql_engine_dialect,
+                    trino.sqlalchemy.dialect.TrinoDialect,
+                )
+                and trinotypes is not None
+            ):
+                return trinotypes
+        except (TypeError, AttributeError):
+            pass
         return self.dialect
 
     @DocInherit
@@ -1755,6 +1774,12 @@ WHERE
                     potential_type = get_pyathena_potential_type(type_module, type_)
                     # In the case of the PyAthena dialect we need to verify that
                     # the type returned is indeed a type and not an instance.
+                    if not inspect.isclass(potential_type):
+                        real_type = type(potential_type)
+                    else:
+                        real_type = potential_type
+                elif type_module.__name__ == "trino.sqlalchemy.datatype":
+                    potential_type = get_trino_potential_type(type_module, type_)
                     if not inspect.isclass(potential_type):
                         real_type = type(potential_type)
                     else:
@@ -1813,6 +1838,13 @@ WHERE
                         potential_type = get_pyathena_potential_type(type_module, type_)
                         # In the case of the PyAthena dialect we need to verify that
                         # the type returned is indeed a type and not an instance.
+                        if not inspect.isclass(potential_type):
+                            real_type = type(potential_type)
+                        else:
+                            real_type = potential_type
+                        types.append(real_type)
+                    elif type_module.__name__ == "trino.sqlalchemy.datatype":
+                        potential_type = get_trino_potential_type(type_module, type_)
                         if not inspect.isclass(potential_type):
                             real_type = type(potential_type)
                         else:
