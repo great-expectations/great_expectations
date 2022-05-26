@@ -105,7 +105,8 @@ Feel free to adjust your configuration and re-run `test_yaml_config` as needed.
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
 :::note
-Great Expectations previously asked users to define a named permanent table to be used as a "temporary" table with the name passed in as a `batch_spec_passthrough` parameter. This is no longer the case, and Great Expectations will automatically set tables that are created as the result of queries to expire after 1 day. 
+
+In order to support tables that are created as the result of queries in BigQuery, Great Expectations previously asked users to define a named permanent table to be used as a "temporary" table that could later be deleted, or set to expire by the database. This is no longer the case, and Great Expectations will automatically set tables that are created as the result of queries to expire after 1 day. 
 
 :::
 

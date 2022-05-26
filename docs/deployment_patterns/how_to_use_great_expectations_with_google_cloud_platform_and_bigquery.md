@@ -169,7 +169,7 @@ Next, load the following Datasource configuration that will connect to data in B
 
 :::note
 
-Great Expectations previously asked users to define a named permanent table to be used as a "temporary" table with the name passed in as a `batch_spec_passthrough` parameter. This is no longer the case, and Great Expectations will automatically set tables that are created as the result of queries to expire after 1 day. 
+In order to support tables that are created as the result of queries in BigQuery, Great Expectations previously asked users to define a named permanent table to be used as a "temporary" table that could later be deleted, or set to expire by the database. This is no longer the case, and Great Expectations will automatically set tables that are created as the result of queries to expire after 1 day. 
 
 :::
 
