@@ -1436,7 +1436,6 @@ class DataAssistantResult(SerializableDictDot):
             empty="none",
             bind=input_dropdown,
             fields=[domain_component.name],
-            init={domain_component.name: " "},
         )
 
         bars: alt.Chart = (
