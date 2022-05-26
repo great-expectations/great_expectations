@@ -6,6 +6,7 @@ import pytest
 
 try:
     import pyspark
+
     # noinspection PyPep8Naming
     import pyspark.sql.functions as F
     from pyspark.sql.types import IntegerType, StringType
