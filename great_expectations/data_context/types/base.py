@@ -134,11 +134,11 @@ class BaseYamlConfig(SerializableDictDot):
         return self._get_schema_validated_updated_commented_map()
 
     @classmethod
-    def get_config_class(cls) -> None:
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         raise NotImplementedError
 
     @classmethod
-    def get_schema_class(cls) -> None:
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         raise NotImplementedError
 
 
@@ -2100,11 +2100,11 @@ class DataContextConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls):
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         return cls  # DataContextConfig
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         return DataContextConfigSchema
 
     @property
@@ -2360,11 +2360,11 @@ class CheckpointConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls) -> type:
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         return cls  # CheckpointConfig
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         return CheckpointConfigSchema
 
     @property
