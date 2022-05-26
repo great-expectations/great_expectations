@@ -14,4 +14,4 @@ class AbstractDataContext(ConfigPeer):
 
     @property
     def config(self) -> BaseYamlConfig:
-        pass
+        return super().config
