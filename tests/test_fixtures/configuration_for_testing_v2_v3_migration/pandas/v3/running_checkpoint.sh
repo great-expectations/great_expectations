@@ -1,1 +1,1 @@
-great_expectations checkpoint run test_v3_checkpoint
+great_expectations checkpoint run test_v3_checkpoint_part1_part2
