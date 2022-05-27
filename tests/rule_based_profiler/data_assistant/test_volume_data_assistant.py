@@ -16,6 +16,9 @@ from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
+from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
+    CardinalityLimitMode,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
@@ -1624,7 +1627,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     "domain_builder": {
                         "allowed_semantic_types_passthrough": ["logic"],
                         "class_name": "CategoricalColumnDomainBuilder",
-                        "limit_mode": {
+                        "cardinality_limit_mode": {
                             "name": "REL_100",
                             "max_proportion_unique": 1.0,
                             "metric_name_defining_limit": "column.unique_proportion",
@@ -2474,7 +2477,7 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
 
 
 @freeze_time("09/26/2019 13:42:41")
-def test_get_metrics_and_expectations_using_implicit_invocation_with_exclude_column_names_directive(
+def test_get_metrics_and_expectations_using_implicit_invocation_with_directives(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     quentin_expected_metrics_by_domain,
@@ -2498,6 +2501,7 @@ def test_get_metrics_and_expectations_using_implicit_invocation_with_exclude_col
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
         exclude_column_names=exclude_column_names,
+        cardinality_limit_mode=CardinalityLimitMode.REL_100,
     )
 
     column_name: str
@@ -2964,7 +2968,7 @@ def test_volume_data_assistant_plot_return_tooltip(
     assert actual_tooltip == expected_tooltip
 
 
-def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -2984,7 +2988,7 @@ def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_executio
     )
 
 
-def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
