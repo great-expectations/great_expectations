@@ -585,7 +585,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
     assert actual_tooltip == expected_tooltip
 
 
-def test_onboarding_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -605,7 +605,7 @@ def test_onboarding_data_assistant_plot_descriptive_non_sequential_notebook_exec
     )
 
 
-def test_onboarding_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
