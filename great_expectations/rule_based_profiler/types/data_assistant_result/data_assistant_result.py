@@ -230,8 +230,17 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair line chart
         """
+        metric_one_hot_encoded: pd.DataFrame = pd.get_dummies(
+            df[metric_name].apply(pd.Series).stack()
+        ).sum(level=0)
+        metric_values: MetricValues = set(df[metric_name].sum())
+        df = pd.concat(
+            [df.drop(columns=[metric_name], axis=1), metric_one_hot_encoded], axis=1
+        )
+
         metric_component: MetricPlotComponent = MetricPlotComponent(
-            name=metric_name, alt_type=metric_type
+            name=metric_name,
+            alt_type=metric_type,
         )
 
         batch_name: str = "batch"
@@ -282,16 +291,6 @@ class DataAssistantResult(SerializableDictDot):
             metric_component.generate_tooltip(format=","),
         ]
 
-        # line: alt.Chart = (
-        #     alt.Chart(data=df, title=title)
-        #     .mark_line()
-        #     .encode(
-        #         x=batch_component.plot_on_axis(),
-        #         y=metric_component.plot_on_axis(),
-        #         tooltip=tooltip,
-        #     )
-        # )
-
         points: alt.Chart = (
             alt.Chart(data=df, title=title)
             .mark_line()
@@ -301,15 +300,6 @@ class DataAssistantResult(SerializableDictDot):
                 tooltip=tooltip,
             )
         )
-
-        # alt.Chart(df).mark_line(point=True).encode(
-        #     x=alt.X("date:O", timeUnit="yearmonth", title="date"),
-        #     y="rank:O",
-        #     color=alt.Color("symbol:N")
-        # ).transform_window(
-        #     rank="rank()",
-        #     sort=[alt.SortField("price", order="descending")],
-        #     groupby=["date"]
 
         return points
 
