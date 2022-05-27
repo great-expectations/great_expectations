@@ -227,7 +227,7 @@ class DataAssistantResult(SerializableDictDot):
             subtitle: The subtitle, if applicable
 
         Returns:
-            An altair line chart
+            An altair chart for nominal metrics
         """
         df = df.explode(metric_name).reset_index(drop=True)
 
