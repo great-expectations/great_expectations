@@ -12,6 +12,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
+class RuntimeEnvironmentColumnPairDomainTypeDirectivesKeys(Enum):
+    pass
+
+
 class RuntimeEnvironmentColumnDomainTypeDirectivesKeys(Enum):
     INCLUDE_COLUMN_NAMES = "include_column_names"
     EXCLUDE_COLUMN_NAMES = "exclude_column_names"
@@ -19,10 +23,7 @@ class RuntimeEnvironmentColumnDomainTypeDirectivesKeys(Enum):
     EXCLUDE_COLUMN_NAME_SUFFIXES = "exclude_column_name_suffixes"
     INCLUDE_SEMANTIC_TYPES = "include_semantic_types"
     EXCLUDE_SEMANTIC_TYPES = "exclude_semantic_types"
-
-
-class RuntimeEnvironmentColumnPairDomainTypeDirectivesKeys(Enum):
-    pass
+    CARDINALITY_LIMIT_MODE = "cardinality_limit_mode"
 
 
 class RuntimeEnvironmentMulticolumnDomainTypeDirectivesKeys(Enum):

@@ -881,29 +881,24 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     property_key,
                     property_value,
                 ) in domain_type_directives.directives.items():
-                    # Insure that new directives augment (not eliminate) existing directives.
-                    existing_property_value = getattr(
-                        rule.domain_builder, property_key.value, None
-                    )
-                    property_value = BaseRuleBasedProfiler._get_effective_domain_builder_property_value(
-                        dest_property_value=property_value,
-                        source_property_value=existing_property_value,
-                    )
-                    setattr(rule.domain_builder, property_key.value, property_value)
+                    try:
+                        # Insure that new directives augment (not eliminate) existing directives.
+                        existing_property_value = getattr(
+                            rule.domain_builder, property_key.value
+                        )
+                        property_value = BaseRuleBasedProfiler._get_effective_domain_builder_property_value(
+                            dest_property_value=property_value,
+                            source_property_value=existing_property_value,
+                        )
+                        setattr(rule.domain_builder, property_key.value, property_value)
+                    except AttributeError:
+                        pass
 
     @staticmethod
     def _get_effective_domain_builder_property_value(
         dest_property_value: Optional[Any] = None,
         source_property_value: Optional[Any] = None,
     ) -> Optional[Any]:
-        if dest_property_value is None:
-            return source_property_value
-
-        if type(source_property_value) != type(dest_property_value):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"Types of source and destination property values for DomainBuilder are incompatible."
-            )
-
         # Property values of collections types must be unique (use set for "list"/"tuple" and "update" for dictionary).
 
         if isinstance(dest_property_value, list):
