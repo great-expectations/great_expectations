@@ -19,6 +19,9 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -130,7 +133,8 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-class BaseDataContext(ConfigPeer):
+# TODO: <WILL> Most of the logic here will be migrated to EphemeralDataContext
+class BaseDataContext(EphemeralDataContext, ConfigPeer):
     """
         This class implements most of the functionality of DataContext, with a few exceptions.
 
