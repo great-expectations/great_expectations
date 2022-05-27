@@ -37,10 +37,14 @@ class SparkDataSampler(DataSampler):
 
         Args:
             df: Spark dataframe.
-            batch_spec: BatchSpec with sampling_kwargs for limit sampling e.g. sampling_kwargs={"n": 100}.
+            batch_spec: Should contain key `n` in sampling_kwargs, the number of
+                values in the sample e.g. sampling_kwargs={"n": 100}.
 
         Returns:
-            Pandas dataframe reduced to number of items specified in BatchSpec sampling kwargs.
+            Sampled dataframe
+
+        Raises:
+            SamplerError
         """
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("n", batch_spec)
@@ -48,9 +52,26 @@ class SparkDataSampler(DataSampler):
         n: int = batch_spec["sampling_kwargs"]["n"]
         return df.limit(n)
 
-    @staticmethod
-    def sample_using_random(df: DataFrame, p: float = 0.1, seed: int = 1):
-        """Take a random sample of rows, retaining proportion p"""
+    def sample_using_random(self, df: DataFrame, batch_spec: BatchSpec) -> DataFrame:
+        """Take a random sample of rows, retaining proportion p.
+
+        Args:
+            df: dataframe to sample
+            batch_spec: Can contain keys `p` (float), `seed` (int) which
+                default to 0.1 and 1 respectively if not provided.
+
+        Returns:
+            Sampled dataframe
+
+        Raises:
+            SamplerError
+        """
+        p: float = self.get_sampling_kwargs_value_or_default(
+            batch_spec=batch_spec, sampling_kwargs_key="p", default_value=0.1
+        )
+        seed: int = self.get_sampling_kwargs_value_or_default(
+            batch_spec=batch_spec, sampling_kwargs_key="seed", default_value=1
+        )
         res = (
             df.withColumn("rand", F.rand(seed=seed))
             .filter(F.col("rand") < p)
@@ -58,14 +79,28 @@ class SparkDataSampler(DataSampler):
         )
         return res
 
-    @staticmethod
-    def sample_using_mod(
-        df: DataFrame,
-        column_name: str,
-        mod: int,
-        value: int,
-    ):
-        """Take the mod of named column, and only keep rows that match the given value"""
+    def sample_using_mod(self, df: DataFrame, batch_spec: BatchSpec) -> DataFrame:
+        """Take the mod of named column, and only keep rows that match the given value.
+
+        Args:
+            df: dataframe to sample
+            batch_spec: should contain keys `column_name`, `mod` and `value`
+
+        Returns:
+            Sampled dataframe
+
+        Raises:
+            SamplerError
+        """
+        self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("mod", batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("value", batch_spec)
+        column_name: str = self.get_sampling_kwargs_value_or_default(
+            batch_spec, "column_name"
+        )
+        mod: int = self.get_sampling_kwargs_value_or_default(batch_spec, "mod")
+        value: int = self.get_sampling_kwargs_value_or_default(batch_spec, "value")
         res = (
             df.withColumn(
                 "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
@@ -75,23 +110,72 @@ class SparkDataSampler(DataSampler):
         )
         return res
 
-    @staticmethod
     def sample_using_a_list(
+        self,
         df: DataFrame,
-        column_name: str,
-        value_list: list,
-    ):
-        """Match the values in the named column against value_list, and only keep the matches"""
+        batch_spec: BatchSpec,
+    ) -> DataFrame:
+        """Match the values in the named column against value_list, and only keep the matches.
+
+        Args:
+            df: dataframe to sample
+            batch_spec: should contain keys `column_name` and `value_list`
+
+        Returns:
+            Sampled dataframe
+
+        Raises:
+            SamplerError
+        """
+        self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("value_list", batch_spec)
+        column_name: str = self.get_sampling_kwargs_value_or_default(
+            batch_spec, "column_name"
+        )
+        value_list: list = self.get_sampling_kwargs_value_or_default(
+            batch_spec, "value_list"
+        )
+
         return df.where(F.col(column_name).isin(value_list))
 
-    @staticmethod
     def sample_using_hash(
+        self,
         df: DataFrame,
-        column_name: str,
-        hash_digits: int = 1,
-        hash_value: str = "f",
-        hash_function_name: str = "md5",
-    ):
+        batch_spec: BatchSpec,
+    ) -> DataFrame:
+        """Hash the values in the named column, and only keep rows that match the given hash_value.
+
+        Args:
+            df: dataframe to sample
+            batch_spec: should contain keys `column_name` and optionally `hash_digits`
+                (default is 1 if not provided), `hash_value` (default is "f" if not provided),
+                and `hash_function_name` (default is "md5" if not provided)
+
+        Returns:
+            Sampled dataframe
+
+        Raises:
+            SamplerError
+        """
+        self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
+        column_name: str = self.get_sampling_kwargs_value_or_default(
+            batch_spec, "column_name"
+        )
+        hash_digits: int = self.get_sampling_kwargs_value_or_default(
+            batch_spec=batch_spec, sampling_kwargs_key="hash_digits", default_value=1
+        )
+        hash_value: str = self.get_sampling_kwargs_value_or_default(
+            batch_spec=batch_spec, sampling_kwargs_key="hash_value", default_value="f"
+        )
+
+        hash_function_name: str = self.get_sampling_kwargs_value_or_default(
+            batch_spec=batch_spec,
+            sampling_kwargs_key="hash_function_name",
+            default_value="md5",
+        )
+
         try:
             getattr(hashlib, str(hash_function_name))
         except (TypeError, AttributeError):
