@@ -227,7 +227,6 @@ class SqlAlchemyBatchData(BatchData):
         elif dialect == GESqlDialect.MYSQL or dialect == GESqlDialect.HIVE:
             stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS {query}"
         elif dialect == GESqlDialect.MSSQL:
-
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
             # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
