@@ -35,6 +35,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
+# TODO: <WILL> Most of the logic here will be migrated to FileDataContext
 class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
     expectation suites, datasources, notification settings, and data fixtures.
@@ -267,7 +268,7 @@ class DataContext(BaseDataContext):
             "access_token": ge_cloud_access_token,
         }
 
-    # TODO: deprecate ge_cloud_ascount_id
+    # TODO: deprecate ge_cloud_account_id
     def get_ge_cloud_config(
         self,
         ge_cloud_base_url: Optional[str] = None,
