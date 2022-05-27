@@ -20,10 +20,11 @@ class PandasDataSampler(DataSampler):
 
         Args:
             df: pandas dataframe.
-            batch_spec: BatchSpec with sampling_kwargs for limit sampling e.g. sampling_kwargs={"n": 100}.
+            batch_spec: Should contain key `n` in sampling_kwargs, the number of
+                values in the sample e.g. sampling_kwargs={"n": 100}.
 
         Returns:
-            Pandas dataframe reduced to number of items specified in BatchSpec sampling kwargs.
+            Sampled dataframe
 
         Raises:
             SamplerError
@@ -39,7 +40,19 @@ class PandasDataSampler(DataSampler):
         df: pd.DataFrame,
         batch_spec: BatchSpec,
     ) -> pd.DataFrame:
-        """Take a random sample of rows, retaining proportion p"""
+        """Take a random sample of rows, retaining proportion p.
+
+        Args:
+            df: dataframe to sample
+            batch_spec: Can contain key `p` (float) which defaults to 0.1
+                if not provided.
+
+        Returns:
+            Sampled dataframe
+
+        Raises:
+            SamplerError
+        """
         p: float = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec, sampling_kwargs_key="p", default_value=0.1
         )
@@ -50,7 +63,18 @@ class PandasDataSampler(DataSampler):
         df: pd.DataFrame,
         batch_spec: BatchSpec,
     ) -> pd.DataFrame:
-        """Take the mod of named column, and only keep rows that match the given value"""
+        """Take the mod of named column, and only keep rows that match the given value.
+
+        Args:
+            df: dataframe to sample
+            batch_spec: should contain keys `column_name`, `mod` and `value`
+
+        Returns:
+            Sampled dataframe
+
+        Raises:
+            SamplerError
+        """
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("mod", batch_spec)
@@ -68,7 +92,18 @@ class PandasDataSampler(DataSampler):
         df: pd.DataFrame,
         batch_spec: BatchSpec,
     ) -> pd.DataFrame:
-        """Match the values in the named column against value_list, and only keep the matches"""
+        """Match the values in the named column against value_list, and only keep the matches.
+
+        Args:
+            df: dataframe to sample
+            batch_spec: should contain keys `column_name` and `value_list`
+
+        Returns:
+            Sampled dataframe
+
+        Raises:
+            SamplerError
+        """
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("value_list", batch_spec)
@@ -87,8 +122,20 @@ class PandasDataSampler(DataSampler):
         df: pd.DataFrame,
         batch_spec: BatchSpec,
     ) -> pd.DataFrame:
-        """Hash the values in the named column, and only keep rows that match the given hash_value"""
+        """Hash the values in the named column, and only keep rows that match the given hash_value.
 
+        Args:
+            df: dataframe to sample
+            batch_spec: should contain keys `column_name` and optionally `hash_digits`
+                (default is 1 if not provided), `hash_value` (default is "f" if not provided),
+                and `hash_function_name` (default is "md5" if not provided)
+
+        Returns:
+            Sampled dataframe
+
+        Raises:
+            SamplerError
+        """
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         column_name: str = self.get_sampling_kwargs_value_or_default(
