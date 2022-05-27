@@ -77,7 +77,6 @@ class SqlAlchemyDataSampler(DataSampler):
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
         elif dialect_name == GESqlDialect.MSSQL.value:
-            # TODO: AJB 20220429 WARNING THIS mssql dialect METHOD IS NOT COVERED BY TESTS
             # Note that this code path exists because the limit parameter is not getting rendered
             # successfully in the resulting mssql query.
             selectable_query: Selectable = (
