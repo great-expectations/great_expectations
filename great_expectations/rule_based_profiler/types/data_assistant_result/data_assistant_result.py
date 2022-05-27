@@ -216,7 +216,6 @@ class DataAssistantResult(SerializableDictDot):
     def get_qualitative_metric_chart(
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: alt.StandardType,
         sequential: bool,
         subtitle: Optional[str] = None,
     ) -> alt.Chart:
@@ -224,7 +223,6 @@ class DataAssistantResult(SerializableDictDot):
         Args:
             df: A pandas dataframe containing the data to be plotted
             metric_name: The name of the metric as it exists in the pandas dataframe
-            metric_type: The altair data type for the metric being plotted
             sequential: Whether batches are sequential in nature
             subtitle: The subtitle, if applicable
 
@@ -529,7 +527,6 @@ class DataAssistantResult(SerializableDictDot):
     def get_quantitative_metric_chart(
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: alt.StandardType,
         sequential: bool,
         subtitle: Optional[str] = None,
     ) -> alt.Chart:
@@ -537,13 +534,13 @@ class DataAssistantResult(SerializableDictDot):
         Args:
             df: A pandas dataframe containing the data to be plotted
             metric_name: The name of the metric as it exists in the pandas dataframe
-            metric_type: The altair data type for the metric being plotted
             sequential: Whether batches are sequential in nature
             subtitle: The subtitle, if applicable
 
         Returns:
             An altair line chart
         """
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_component: MetricPlotComponent = MetricPlotComponent(
             name=metric_name, alt_type=metric_type
         )
@@ -583,7 +580,6 @@ class DataAssistantResult(SerializableDictDot):
     def get_expect_domain_values_to_be_between_chart(
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: alt.StandardType,
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
@@ -591,7 +587,6 @@ class DataAssistantResult(SerializableDictDot):
         Args:
             df: A pandas dataframe containing the data to be plotted
             metric_name: The name of the metric as it exists in the pandas dataframe
-            metric_type: The altair data type for the metric being plotted
             sequential: Whether batches are sequential in nature
             subtitle: The subtitle, if applicable
 
@@ -629,6 +624,7 @@ class DataAssistantResult(SerializableDictDot):
             alt_type=AltairDataTypes.NOMINAL.value,
             batch_identifiers=batch_identifiers,
         )
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_component: MetricPlotComponent = MetricPlotComponent(
             name=metric_name, alt_type=metric_type
         )
@@ -722,14 +718,12 @@ class DataAssistantResult(SerializableDictDot):
     def get_interactive_detail_multi_chart(
         column_dfs: List[ColumnDataFrame],
         metric_name: str,
-        metric_type: alt.StandardType,
         sequential: bool,
     ) -> Union[alt.Chart, alt.VConcatChart]:
         """
         Args:
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
             metric_name: The name of the metric as it exists in the pandas dataframe
-            metric_type: The altair data type for the metric being plotted
             sequential: Whether batches are sequential in nature
 
         Returns:
@@ -746,6 +740,7 @@ class DataAssistantResult(SerializableDictDot):
             alt_type=AltairDataTypes.NOMINAL.value,
             batch_identifiers=batch_identifiers,
         )
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_component: MetricPlotComponent = MetricPlotComponent(
             name=metric_name, alt_type=metric_type
         )
@@ -782,14 +777,12 @@ class DataAssistantResult(SerializableDictDot):
     def get_interactive_detail_expect_column_values_to_be_between_chart(
         column_dfs: List[ColumnDataFrame],
         metric_name: str,
-        metric_type: alt.StandardType,
         sequential: bool,
     ) -> alt.VConcatChart:
         """
         Args:
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
             metric_name: The name of the metric as it exists in the pandas dataframe
-            metric_type: The altair data type for the metric being plotted
             sequential: Whether batches are sequential in nature
 
         Returns:
@@ -822,6 +815,7 @@ class DataAssistantResult(SerializableDictDot):
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
+        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_component: MetricPlotComponent = MetricPlotComponent(
             name=metric_name, alt_type=metric_type
         )
@@ -1892,12 +1886,11 @@ class DataAssistantResult(SerializableDictDot):
         self,
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: alt.StandardType,
         plot_mode: PlotMode,
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
-        qualitative_metrics: Set[str] = {"table_columns"}
+        nominal_metrics: Set[str] = {"table_columns"}
 
         quantitative_metrics: Set[str] = {
             "table_row_count",
@@ -1920,19 +1913,18 @@ class DataAssistantResult(SerializableDictDot):
         if plot_mode is PlotMode.PRESCRIPTIVE:
             if metric_name in quantitative_metrics:
                 plot_impl = self.get_expect_domain_values_to_be_between_chart
-            elif metric_name in qualitative_metrics:
+            elif metric_name in nominal_metrics:
                 plot_impl = self.get_expect_domain_values_to_be_in_set
         elif plot_mode is PlotMode.DESCRIPTIVE:
             if metric_name in quantitative_metrics:
                 plot_impl = self.get_quantitative_metric_chart
-            elif metric_name in qualitative_metrics:
-                plot_impl = self.get_qualitative_metric_chart
+            elif metric_name in nominal_metrics:
+                plot_impl = self.get_nominal_metric_chart
 
         if plot_impl:
             chart = plot_impl(
                 df=df,
                 metric_name=metric_name,
-                metric_type=metric_type,
                 sequential=sequential,
                 subtitle=subtitle,
             )
@@ -1951,13 +1943,11 @@ class DataAssistantResult(SerializableDictDot):
             plot_mode=plot_mode,
         )
 
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_name: str = "column_distinct_values_count"
 
         return self._chart_column_values(
             column_dfs=column_dfs,
             metric_name=metric_name,
-            metric_type=metric_type,
             plot_mode=plot_mode,
             sequential=sequential,
         )
@@ -1970,8 +1960,6 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
     ) -> alt.Chart:
         expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
-
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
         domain: Domain
         domains_by_column_name: Dict[str, Domain] = {
@@ -2012,7 +2000,6 @@ class DataAssistantResult(SerializableDictDot):
                 return self._chart_domain_values(
                     df=df,
                     metric_name=metric_name,
-                    metric_type=metric_type,
                     plot_mode=plot_mode,
                     sequential=sequential,
                     subtitle=subtitle,
@@ -2022,7 +2009,6 @@ class DataAssistantResult(SerializableDictDot):
         self,
         column_dfs: List[ColumnDataFrame],
         metric_name: str,
-        metric_type: alt.StandardType,
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
@@ -2050,7 +2036,6 @@ class DataAssistantResult(SerializableDictDot):
             display_chart = plot_impl(
                 column_dfs=column_dfs,
                 metric_name=metric_name,
-                metric_type=metric_type,
                 sequential=sequential,
             )
 
@@ -2186,7 +2171,6 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
         expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
 
@@ -2221,7 +2205,6 @@ class DataAssistantResult(SerializableDictDot):
                 return self._chart_domain_values(
                     df=df,
                     metric_name=metric_name,
-                    metric_type=metric_type,
                     plot_mode=plot_mode,
                     sequential=sequential,
                     subtitle=None,
