@@ -30,6 +30,7 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_com
     DomainPlotComponent,
     ExpectationKwargPlotComponent,
     MetricPlotComponent,
+    PlotComponent,
     determine_plot_title,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
@@ -230,18 +231,29 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair line chart
         """
-        metric_one_hot_encoded: pd.DataFrame = pd.get_dummies(
-            df[metric_name].apply(pd.Series).stack()
-        ).sum(level=0)
-        metric_values: MetricValues = set(df[metric_name].sum())
-        df = pd.concat(
-            [df.drop(columns=[metric_name], axis=1), metric_one_hot_encoded], axis=1
-        )
+        df = df.explode(metric_name).reset_index(drop=True)
 
-        metric_component: MetricPlotComponent = MetricPlotComponent(
-            name=metric_name,
-            alt_type=metric_type,
-        )
+        column_number: str = "column_number"
+        df[column_number] = pd.factorize(df[metric_name])[0] + 1
+
+        metric_type = AltairDataTypes.NOMINAL.value
+        metric_component: MetricPlotComponent
+        if metric_name == "table_columns":
+            table_column: str = "table_column"
+            df_columns = [
+                table_column if column == "table_columns" else column
+                for column in list(df.columns)
+            ]
+            df.columns = df_columns
+            metric_component = MetricPlotComponent(
+                name=table_column,
+                alt_type=metric_type,
+            )
+        else:
+            metric_component = MetricPlotComponent(
+                name=metric_name,
+                alt_type=metric_type,
+            )
 
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
@@ -259,12 +271,18 @@ class DataAssistantResult(SerializableDictDot):
             subtitle=subtitle,
         )
 
+        column_number_component: PlotComponent = PlotComponent(
+            name=column_number,
+            alt_type=AltairDataTypes.ORDINAL.value,
+        )
+
         if sequential:
             return DataAssistantResult._get_sequential_isotype_chart(
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
                 domain_component=domain_component,
+                column_number_component=column_number_component,
             )
         else:
             return DataAssistantResult._get_nonsequential_isotype_chart(
@@ -272,6 +290,7 @@ class DataAssistantResult(SerializableDictDot):
                 metric_component=metric_component,
                 batch_component=batch_component,
                 domain_component=domain_component,
+                column_number_component=column_number_component,
             )
 
     @staticmethod
@@ -280,6 +299,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
+        column_number_component: PlotComponent,
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             metric_plot_component=metric_component,
@@ -288,20 +308,35 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            metric_component.generate_tooltip(format=","),
+            metric_component.generate_tooltip(),
         ]
 
-        points: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_line()
-            .encode(
-                x=batch_component.plot_on_axis(),
-                y=metric_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
+        base: alt.Chart = alt.Chart(data=df, title=title).mark_point(
+            color=Colors.PURPLE.value
         )
 
-        return points
+        points: alt.Chart = base.encode(
+            x=alt.X(
+                batch_component.name,
+                type=batch_component.alt_type,
+                title=batch_component.title,
+                axis=alt.Axis(grid=False),
+            ),
+            y=alt.Y(
+                metric_component.name,
+                type=metric_component.alt_type,
+                axis=alt.Axis(labels=False),
+            ),
+            tooltip=tooltip,
+        )
+
+        y_axis_labels: alt.Chart = base.encode(
+            x=batch_component.plot_on_axis(),
+            y=column_number_component.plot_on_y_axis(),
+            tooltip=tooltip,
+        )
+
+        return points + y_axis_labels
 
     @staticmethod
     def _get_nonsequential_isotype_chart(
@@ -309,6 +344,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
+        column_number_component: PlotComponent,
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             metric_plot_component=metric_component,
@@ -317,20 +353,35 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            metric_component.generate_tooltip(format=","),
+            metric_component.generate_tooltip(),
         ]
 
-        points: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_point()
-            .encode(
-                x=batch_component.plot_on_axis(),
-                y=metric_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
+        base: alt.Chart = alt.Chart(data=df, title=title).mark_point(
+            color=Colors.PURPLE.value
         )
 
-        return points
+        points: alt.Chart = base.encode(
+            x=alt.X(
+                batch_component.name,
+                type=batch_component.alt_type,
+                title=batch_component.title,
+                axis=alt.Axis(grid=False),
+            ),
+            y=alt.Y(
+                metric_component.name,
+                type=metric_component.alt_type,
+                axis=alt.Axis(labels=False),
+            ),
+            tooltip=tooltip,
+        )
+
+        y_axis_labels: alt.Chart = base.encode(
+            x=batch_component.plot_on_axis(),
+            y=column_number_component.plot_on_y_axis(),
+            tooltip=tooltip,
+        )
+
+        return points + y_axis_labels
 
     def _plot(
         self,

@@ -32,6 +32,33 @@ class PlotComponent:
             format=format,
         )
 
+    def plot_on_x_axis(self) -> alt.X:
+        """
+        Plots domain on X axis.
+
+        Returns:
+            An instance of alt.X.
+        """
+        return alt.X(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
+            scale=alt.Scale(align=0.05),
+        )
+
+    def plot_on_y_axis(self) -> alt.Y:
+        """
+        Plots domain on Y axis.
+
+        Returns:
+            An instance of alt.Y.
+        """
+        return alt.Y(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
+        )
+
     def plot_on_axis(self) -> Union[alt.X, alt.Y]:
         """Wrapper around alt.X/alt.Y plotting utility.
 
@@ -140,7 +167,7 @@ def determine_plot_title(
     batch_plot_component: BatchPlotComponent,
     domain_plot_component: DomainPlotComponent,
 ) -> alt.TitleParams:
-    """Determines the appropriate title for a chart based on input componentsself.
+    """Determines the appropriate title for a chart based on input components.
 
     Conditionally renders a subtitle if relevant (specifically with column domain)
 
