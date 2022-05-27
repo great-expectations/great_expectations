@@ -972,10 +972,16 @@ class DatasourceConfig(BaseYamlConfig):
 
     @classmethod
     def get_config_class(cls) -> Type["DatasourceConfig"]:  # noqa: F821
+        """
+        See parent `BaseYamlConfig` for more details.
+        """
         return cls
 
     @classmethod
     def get_schema_class(cls) -> Type[DatasourceConfigSchema]:
+        """
+        See parent `BaseYamlConfig` for more details.
+        """
         return DatasourceConfigSchema
 
     @property
