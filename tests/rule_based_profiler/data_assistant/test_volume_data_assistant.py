@@ -1541,7 +1541,10 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
 
 @pytest.fixture
 def quentin_expected_rule_based_profiler_configuration() -> Callable:
-    def _profiler_config(name: str) -> RuleBasedProfilerConfig:
+    def _profiler_config(
+        name: str, exclude_column_names: Optional[List[str]] = None
+    ) -> RuleBasedProfilerConfig:
+        exclude_column_names = exclude_column_names or []
         expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
             config_version=1.0,
             name=name,
@@ -1633,7 +1636,12 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "metric_name_defining_limit": "column.unique_proportion",
                         },
                         "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
-                        "exclude_column_names": ["id"],
+                        "exclude_column_names": sorted(
+                            [
+                                "id",
+                            ]
+                            + exclude_column_names
+                        ),
                         "exclude_column_name_suffixes": ["_id"],
                         "exclude_semantic_types": ["binary", "currency", "identifier"],
                     },
@@ -2355,7 +2363,7 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     )
 
 
-def test_get_metrics_and_expectations_using_explicit_instantiation(
+def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_instantiation(
     quentin_explicit_instantiation_result_frozen_time,
     quentin_expected_metrics_by_domain,
     quentin_expected_expectation_suite,
@@ -2390,7 +2398,7 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
         delete_fields={"random_seed"},
     ) == deep_filter_properties_iterable(
         properties=quentin_expected_rule_based_profiler_configuration(
-            name=data_assistant_name
+            name=data_assistant_name,
         ).to_json_dict(),
         delete_fields={"random_seed"},
     )
@@ -2416,7 +2424,7 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
 
 
 @freeze_time("09/26/2019 13:42:41")
-def test_get_metrics_and_expectations_using_implicit_invocation(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
     quentin_expected_metrics_by_domain,
     quentin_expected_expectation_suite,
@@ -2477,7 +2485,7 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
 
 
 @freeze_time("09/26/2019 13:42:41")
-def test_get_metrics_and_expectations_using_implicit_invocation_with_directives(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     quentin_expected_metrics_by_domain,
@@ -2558,14 +2566,38 @@ def test_get_metrics_and_expectations_using_implicit_invocation_with_directives(
         == expected_expectation_suite.expectations
     )
 
-    assert deep_filter_properties_iterable(
-        properties=data_assistant_result.profiler_config.to_json_dict(),
-        delete_fields={"random_seed"},
-    ) == deep_filter_properties_iterable(
-        properties=quentin_expected_rule_based_profiler_configuration(
-            name=registered_data_assistant_name
-        ).to_json_dict(),
-        delete_fields={"random_seed"},
+    data_assistant_result_profiler_config_as_json_dict: dict = (
+        deep_filter_properties_iterable(
+            properties=data_assistant_result.profiler_config.to_json_dict(),
+            delete_fields={"random_seed"},
+        )
+    )
+    quentin_expected_rule_based_profiler_configuration_as_json_dict: dict = (
+        deep_filter_properties_iterable(
+            properties=quentin_expected_rule_based_profiler_configuration(
+                name=registered_data_assistant_name,
+                exclude_column_names=exclude_column_names,
+            ).to_json_dict(),
+            delete_fields={"random_seed"},
+        )
+    )
+    data_assistant_result_profiler_config_as_json_dict["rules"][
+        "categorical_columns_rule"
+    ]["domain_builder"]["exclude_column_names"] = sorted(
+        data_assistant_result_profiler_config_as_json_dict["rules"][
+            "categorical_columns_rule"
+        ]["domain_builder"]["exclude_column_names"]
+    )
+    quentin_expected_rule_based_profiler_configuration_as_json_dict["rules"][
+        "categorical_columns_rule"
+    ]["domain_builder"]["exclude_column_names"] = sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict["rules"][
+            "categorical_columns_rule"
+        ]["domain_builder"]["exclude_column_names"]
+    )
+    assert (
+        data_assistant_result_profiler_config_as_json_dict
+        == quentin_expected_rule_based_profiler_configuration_as_json_dict
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
@@ -2588,7 +2620,32 @@ def test_get_metrics_and_expectations_using_implicit_invocation_with_directives(
     assert actual_expectation_suite == expected_expectation_suite
 
 
-def test_execution_time_within_proper_bounds_using_explicit_instantiation(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
+        categorical_columns_rule={
+            "false_positive_rate": 0.1,
+        },
+    )
+    assert (
+        data_assistant_result.profiler_config.rules["categorical_columns_rule"][
+            "variables"
+        ]["false_positive_rate"]
+        == 1.0e-1
+    )
+
+
+def test_volume_data_assistant_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
     validator: Validator
@@ -2599,7 +2656,7 @@ def test_execution_time_within_proper_bounds_using_explicit_instantiation(
     assert data_assistant_result.execution_time > 0.0
 
 
-def test_execution_time_within_proper_bounds_using_implicit_invocation(
+def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
 ):
     data_assistant_result: DataAssistantResult = (
@@ -2610,7 +2667,7 @@ def test_execution_time_within_proper_bounds_using_implicit_invocation(
     assert data_assistant_result.execution_time > 0.0
 
 
-def test_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
+def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
     validator: Validator
