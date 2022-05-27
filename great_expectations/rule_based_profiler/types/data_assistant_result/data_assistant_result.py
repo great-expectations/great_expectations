@@ -213,7 +213,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
     @staticmethod
-    def get_qualitative_metric_chart(
+    def get_nominal_metric_chart(
         df: pd.DataFrame,
         metric_name: str,
         sequential: bool,
