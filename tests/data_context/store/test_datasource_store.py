@@ -72,6 +72,7 @@ def test_datasource_store_set_adds_valid_key(
     assert len(empty_datasource_store.list_keys()) == 1
 
 
+@pytest.mark.integration
 def test_datasource_store_integration(
     empty_data_context: DataContext,
     datasource_store_name: str,
