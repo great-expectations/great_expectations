@@ -234,7 +234,7 @@ class DataAssistantResult(SerializableDictDot):
         column_number: str = "column_number"
         df[column_number] = pd.factorize(df[metric_name])[0] + 1
 
-        metric_type = AltairDataTypes.NOMINAL.value
+        metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         metric_component: MetricPlotComponent
         if metric_name == "table_columns":
             table_column: str = "table_column"
@@ -257,9 +257,14 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column for column in df.columns if column not in [metric_name, batch_name]
         ]
+        batch_type: alt.StandardType
+        if sequential:
+            batch_type = AltairDataTypes.ORDINAL.value
+        else:
+            batch_type = AltairDataTypes.NOMINAL.value
         batch_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
-            alt_type=AltairDataTypes.NOMINAL.value,
+            alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
 
@@ -549,9 +554,14 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column for column in df.columns if column not in [metric_name, batch_name]
         ]
+        batch_type: alt.StandardType
+        if sequential:
+            batch_type = AltairDataTypes.ORDINAL.value
+        else:
+            batch_type = AltairDataTypes.NOMINAL.value
         batch_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
-            alt_type=AltairDataTypes.NOMINAL.value,
+            alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
 
@@ -619,14 +629,19 @@ class DataAssistantResult(SerializableDictDot):
                 strict_max,
             }
         ]
+
+        batch_type: alt.StandardType
+        if sequential:
+            batch_type = AltairDataTypes.ORDINAL.value
+        else:
+            batch_type = AltairDataTypes.NOMINAL.value
         batch_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
-            alt_type=AltairDataTypes.NOMINAL.value,
+            alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_component: MetricPlotComponent = MetricPlotComponent(
-            name=metric_name, alt_type=metric_type
+            name=metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
         )
         min_value_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
@@ -646,10 +661,9 @@ class DataAssistantResult(SerializableDictDot):
         domain_component: DomainPlotComponent
         tooltip: List[alt.Tooltip]
         if domain_type == MetricDomainTypes.COLUMN:
-            column_type: alt.StandardType = AltairDataTypes.NOMINAL.value
             domain_component = DomainPlotComponent(
                 name=column_name,
-                alt_type=column_type,
+                alt_type=AltairDataTypes.NOMINAL.value,
                 subtitle=subtitle,
             )
             strict_min_component: ExpectationKwargPlotComponent = (
@@ -735,9 +749,14 @@ class DataAssistantResult(SerializableDictDot):
             for column in column_dfs[0].df.columns
             if column not in [metric_name, batch_name]
         ]
+        batch_type: alt.StandardType
+        if sequential:
+            batch_type = AltairDataTypes.ORDINAL.value
+        else:
+            batch_type = AltairDataTypes.NOMINAL.value
         batch_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
-            alt_type=AltairDataTypes.NOMINAL.value,
+            alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
@@ -809,15 +828,18 @@ class DataAssistantResult(SerializableDictDot):
                 strict_max,
             }
         ]
-        batch_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+        batch_type: alt.StandardType
+        if sequential:
+            batch_type = AltairDataTypes.ORDINAL.value
+        else:
+            batch_type = AltairDataTypes.NOMINAL.value
         batch_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_component: MetricPlotComponent = MetricPlotComponent(
-            name=metric_name, alt_type=metric_type
+            name=metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
         )
 
         domain_component: DomainPlotComponent = DomainPlotComponent(
