@@ -140,7 +140,7 @@ def determine_plot_title(
     batch_plot_component: BatchPlotComponent,
     domain_plot_component: DomainPlotComponent,
 ) -> alt.TitleParams:
-    """Determines the appropriate title for a chart based on input componentsself.
+    """Determines the appropriate title for a chart based on input components.
 
     Conditionally renders a subtitle if relevant (specifically with column domain)
 
@@ -159,7 +159,7 @@ def determine_plot_title(
 
     title: alt.TitleParams
     if subtitle:
-        title = alt.TitleParams(contents, subtitle=[subtitle])
+        title = alt.TitleParams(contents, subtitle=[subtitle], dy=-25)
     elif domain_selector:
         title = alt.TitleParams(contents, dy=-35)
     else:
