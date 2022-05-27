@@ -2566,15 +2566,38 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
         == expected_expectation_suite.expectations
     )
 
-    assert deep_filter_properties_iterable(
-        properties=data_assistant_result.profiler_config.to_json_dict(),
-        delete_fields={"random_seed"},
-    ) == deep_filter_properties_iterable(
-        properties=quentin_expected_rule_based_profiler_configuration(
-            name=registered_data_assistant_name,
-            exclude_column_names=exclude_column_names,
-        ).to_json_dict(),
-        delete_fields={"random_seed"},
+    data_assistant_result_profiler_config_as_json_dict: dict = (
+        deep_filter_properties_iterable(
+            properties=data_assistant_result.profiler_config.to_json_dict(),
+            delete_fields={"random_seed"},
+        )
+    )
+    quentin_expected_rule_based_profiler_configuration_as_json_dict: dict = (
+        deep_filter_properties_iterable(
+            properties=quentin_expected_rule_based_profiler_configuration(
+                name=registered_data_assistant_name,
+                exclude_column_names=exclude_column_names,
+            ).to_json_dict(),
+            delete_fields={"random_seed"},
+        )
+    )
+    data_assistant_result_profiler_config_as_json_dict["rules"][
+        "categorical_columns_rule"
+    ]["domain_builder"]["exclude_column_names"] = sorted(
+        data_assistant_result_profiler_config_as_json_dict["rules"][
+            "categorical_columns_rule"
+        ]["domain_builder"]["exclude_column_names"]
+    )
+    quentin_expected_rule_based_profiler_configuration_as_json_dict["rules"][
+        "categorical_columns_rule"
+    ]["domain_builder"]["exclude_column_names"] = sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict["rules"][
+            "categorical_columns_rule"
+        ]["domain_builder"]["exclude_column_names"]
+    )
+    assert (
+        data_assistant_result_profiler_config_as_json_dict
+        == quentin_expected_rule_based_profiler_configuration_as_json_dict
     )
 
     data_assistant_result.citation.pop("profiler_config", None)

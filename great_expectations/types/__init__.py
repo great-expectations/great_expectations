@@ -150,10 +150,7 @@ class DictDot:
                 new_dict[key] = value.value
 
             if isinstance(value, list) or isinstance(value, tuple):
-                new_dict[key] = sorted(
-                    [temp_element for temp_element in value],
-                    key=lambda element: str(element),
-                )
+                new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
                     if isinstance(element, DictDot):
                         new_dict[key][i] = element.to_dict()

@@ -297,35 +297,39 @@ def test_basic_checkpoint_config_validation(
             clean_falsy=True,
         ),
     )
-    assert sorted(
+    assert (
         filter_properties_dict(
             properties=checkpoint.self_check()["config"],
             clean_falsy=True,
         )
-    ) == sorted(expected_checkpoint_config)
-    assert sorted(
+        == expected_checkpoint_config
+    )
+    assert (
         filter_properties_dict(
             properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
             clean_falsy=True,
         )
-    ) == sorted(expected_checkpoint_config)
+        == expected_checkpoint_config
+    )
 
     checkpoint: Checkpoint = context.test_yaml_config(
         yaml_config=yaml_config,
         name="my_checkpoint",
     )
-    assert sorted(
+    assert (
         filter_properties_dict(
             properties=checkpoint.self_check()["config"],
             clean_falsy=True,
         )
-    ) == sorted(expected_checkpoint_config)
-    assert sorted(
+        == expected_checkpoint_config
+    )
+    assert (
         filter_properties_dict(
             properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
             clean_falsy=True,
         )
-    ) == sorted(expected_checkpoint_config)
+        == expected_checkpoint_config
+    )
 
     assert mock_emit.call_count == 5
 
