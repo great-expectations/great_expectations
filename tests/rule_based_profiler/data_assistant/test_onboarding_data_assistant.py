@@ -257,6 +257,77 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
     )
 
 
+def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        batch_request=batch_request,
+        numeric_columns_rule={
+            "false_positive_rate": 0.1,
+            "random_seed": 43792,
+        },
+        datetime_columns_rule={
+            "truncate_values": {
+                "lower_bound": 0,
+                "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+            },
+            "round_decimals": 0,
+        },
+        text_columns_rule={
+            "strict_min": True,
+            "strict_max": True,
+            "success_ratio": 0.8,
+        },
+        categorical_columns_rule={
+            "false_positive_rate": 0.1,
+        },
+    )
+    assert (
+        data_assistant_result.profiler_config.rules["numeric_columns_rule"][
+            "variables"
+        ]["false_positive_rate"]
+        == 1.0e-1
+    )
+    assert data_assistant_result.profiler_config.rules["datetime_columns_rule"][
+        "variables"
+    ]["truncate_values"] == {
+        "lower_bound": 0,
+        "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+    }
+    assert (
+        data_assistant_result.profiler_config.rules["datetime_columns_rule"][
+            "variables"
+        ]["round_decimals"]
+        == 0
+    )
+    assert data_assistant_result.profiler_config.rules["text_columns_rule"][
+        "variables"
+    ]["strict_min"]
+    assert data_assistant_result.profiler_config.rules["text_columns_rule"][
+        "variables"
+    ]["strict_max"]
+    assert (
+        data_assistant_result.profiler_config.rules["text_columns_rule"]["variables"][
+            "success_ratio"
+        ]
+        == 8.0e-1
+    )
+    assert (
+        data_assistant_result.profiler_config.rules["categorical_columns_rule"][
+            "variables"
+        ]["false_positive_rate"]
+        == 1.0e-1
+    )
+
+
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):

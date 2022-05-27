@@ -5,15 +5,6 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
-from great_expectations.rule_based_profiler.helpers.runtime_environment import (
-    RuntimeEnvironmentColumnDomainTypeDirectivesKeys,
-    RuntimeEnvironmentColumnPairDomainTypeDirectivesKeys,
-    RuntimeEnvironmentDomainTypeDirectives,
-    RuntimeEnvironmentDomainTypeDirectivesKeys,
-    RuntimeEnvironmentMulticolumnDomainTypeDirectivesKeys,
-    RuntimeEnvironmentTableDomainTypeDirectivesKeys,
-    build_domain_type_directives,
-)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
@@ -22,6 +13,18 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
+
+from great_expectations.rule_based_profiler.helpers.runtime_environment import (  # isort:skip
+    RuntimeEnvironmentVariablesDirectives,
+    RuntimeEnvironmentTableDomainTypeDirectivesKeys,
+    RuntimeEnvironmentColumnDomainTypeDirectivesKeys,
+    RuntimeEnvironmentColumnPairDomainTypeDirectivesKeys,
+    RuntimeEnvironmentMulticolumnDomainTypeDirectivesKeys,
+    RuntimeEnvironmentDomainTypeDirectivesKeys,
+    RuntimeEnvironmentDomainTypeDirectives,
+    build_domain_type_directives,
+    build_variables_directives,
+)
 
 
 def augment_arguments(**extra_kwargs: dict) -> Callable:
@@ -131,6 +134,7 @@ class DataAssistantRunner:
             expectation_suite=None,
             expectation_suite_name=None,
             component_name=data_assistant_name,
+            persist=False,
         )
         data_assistant: DataAssistant = self._data_assistant_cls(
             name=data_assistant_name,
@@ -139,12 +143,17 @@ class DataAssistantRunner:
         directives: dict = deep_filter_properties_iterable(
             properties=kwargs,
         )
+
+        variables_directives_list: List[
+            RuntimeEnvironmentVariablesDirectives
+        ] = build_variables_directives(**directives)
         domain_type_directives_list: List[
             RuntimeEnvironmentDomainTypeDirectives
         ] = build_domain_type_directives(**directives)
         data_assistant_result: DataAssistantResult = data_assistant.run(
             variables=variables,
             rules=rules,
+            variables_directives_list=variables_directives_list,
             domain_type_directives_list=domain_type_directives_list,
         )
         return data_assistant_result
