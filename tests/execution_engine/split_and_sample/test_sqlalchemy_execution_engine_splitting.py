@@ -8,16 +8,8 @@ import pytest
 from dateutil.parser import parse
 from mock_alchemy.comparison import ExpressionMatcher
 
-from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.data_context import BaseDataContext
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    InMemoryStoreBackendDefaults,
-)
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource import BaseDatasource
-from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     DatePart,
