@@ -5,7 +5,7 @@ import itertools
 import json
 import logging
 import uuid
-from typing import Any, Dict, List, MutableMapping, Optional, Set, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Set, Type, Union
 from uuid import UUID
 
 from ruamel.yaml import YAML
@@ -799,91 +799,6 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(BaseYamlConfig):
-    def __init__(
-        self,
-        class_name=None,
-        module_name: str = "great_expectations.datasource",
-        execution_engine=None,
-        data_connectors=None,
-        data_asset_type=None,
-        batch_kwargs_generators=None,
-        connection_string=None,
-        credentials=None,
-        introspection=None,
-        tables=None,
-        boto3_options=None,
-        azure_options=None,
-        gcs_options=None,
-        credentials_info=None,
-        reader_method=None,
-        reader_options=None,
-        limit=None,
-        **kwargs,
-    ) -> None:
-        # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
-        self._class_name = class_name
-        self._module_name = module_name
-        if execution_engine is not None:
-            self.execution_engine = execution_engine
-        if data_connectors is not None and isinstance(data_connectors, dict):
-            self.data_connectors = data_connectors
-
-        # NOTE - AJB - 20201202: This should use the datasource class build_configuration method as in DataContext.add_datasource()
-        if data_asset_type is None:
-            if class_name == "PandasDatasource":
-                data_asset_type = {
-                    "class_name": "PandasDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-            elif class_name == "SqlAlchemyDatasource":
-                data_asset_type = {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-            elif class_name == "SparkDFDatasource":
-                data_asset_type = {
-                    "class_name": "SparkDFDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-        if data_asset_type is not None:
-            self.data_asset_type = data_asset_type
-        if batch_kwargs_generators is not None:
-            self.batch_kwargs_generators = batch_kwargs_generators
-        if connection_string is not None:
-            self.connection_string = connection_string
-        if credentials is not None:
-            self.credentials = credentials
-        if introspection is not None:
-            self.introspection = introspection
-        if tables is not None:
-            self.tables = tables
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
-        if azure_options is not None:
-            self.azure_options = azure_options
-        if gcs_options is not None:
-            self.gcs_options = gcs_options
-        if credentials_info is not None:
-            self.credentials_info = credentials_info
-        if reader_method is not None:
-            self.reader_method = reader_method
-        if reader_options is not None:
-            self.reader_options = reader_options
-        if limit is not None:
-            self.limit = limit
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-    @property
-    def class_name(self):
-        return self._class_name
-
-    @property
-    def module_name(self):
-        return self._module_name
-
-
 class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
@@ -974,6 +889,102 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
     @post_load
     def make_datasource_config(self, data, **kwargs):
         return DatasourceConfig(**data)
+
+
+class DatasourceConfig(BaseYamlConfig):
+    def __init__(
+        self,
+        class_name=None,
+        module_name: str = "great_expectations.datasource",
+        execution_engine=None,
+        data_connectors=None,
+        data_asset_type=None,
+        batch_kwargs_generators=None,
+        connection_string=None,
+        credentials=None,
+        introspection=None,
+        tables=None,
+        boto3_options=None,
+        azure_options=None,
+        gcs_options=None,
+        credentials_info=None,
+        reader_method=None,
+        reader_options=None,
+        limit=None,
+        commented_map: Optional[CommentedMap] = None,
+        **kwargs,
+    ) -> None:
+        # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
+        self._class_name = class_name
+        self._module_name = module_name
+        if execution_engine is not None:
+            self.execution_engine = execution_engine
+        if data_connectors is not None and isinstance(data_connectors, dict):
+            self.data_connectors = data_connectors
+
+        # NOTE - AJB - 20201202: This should use the datasource class build_configuration method as in DataContext.add_datasource()
+        if data_asset_type is None:
+            if class_name == "PandasDatasource":
+                data_asset_type = {
+                    "class_name": "PandasDataset",
+                    "module_name": "great_expectations.dataset",
+                }
+            elif class_name == "SqlAlchemyDatasource":
+                data_asset_type = {
+                    "class_name": "SqlAlchemyDataset",
+                    "module_name": "great_expectations.dataset",
+                }
+            elif class_name == "SparkDFDatasource":
+                data_asset_type = {
+                    "class_name": "SparkDFDataset",
+                    "module_name": "great_expectations.dataset",
+                }
+        if data_asset_type is not None:
+            self.data_asset_type = data_asset_type
+        if batch_kwargs_generators is not None:
+            self.batch_kwargs_generators = batch_kwargs_generators
+        if connection_string is not None:
+            self.connection_string = connection_string
+        if credentials is not None:
+            self.credentials = credentials
+        if introspection is not None:
+            self.introspection = introspection
+        if tables is not None:
+            self.tables = tables
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
+        if azure_options is not None:
+            self.azure_options = azure_options
+        if gcs_options is not None:
+            self.gcs_options = gcs_options
+        if credentials_info is not None:
+            self.credentials_info = credentials_info
+        if reader_method is not None:
+            self.reader_method = reader_method
+        if reader_options is not None:
+            self.reader_options = reader_options
+        if limit is not None:
+            self.limit = limit
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+        super().__init__(commented_map=commented_map)
+
+    @classmethod
+    def get_config_class(cls) -> Type["DatasourceConfig"]:  # noqa: F821
+        return cls
+
+    @classmethod
+    def get_schema_class(cls) -> Type[DatasourceConfigSchema]:
+        return DatasourceConfigSchema
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
 
 
 class AnonymizedUsageStatisticsConfig(DictDot):

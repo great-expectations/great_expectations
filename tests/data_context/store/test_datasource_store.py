@@ -9,13 +9,12 @@ from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import gen_directory_tree_str
-from tests.test_utils import build_profiler_store_using_filesystem
+from tests.test_utils import build_datasource_store_using_filesystem
 
 
 @pytest.fixture
-def profiler_name() -> str:
+def datasource_name() -> str:
     return "my_first_datasource"
 
 
@@ -25,8 +24,8 @@ def datasource_store_name() -> str:
 
 
 @pytest.fixture
-def datasource_key(profiler_name: str) -> ConfigurationIdentifier:
-    return ConfigurationIdentifier(configuration_key=profiler_name)
+def datasource_key(datasource_name: str) -> ConfigurationIdentifier:
+    return ConfigurationIdentifier(configuration_key=datasource_name)
 
 
 @pytest.fixture
@@ -73,69 +72,69 @@ def test_datasource_store_set_adds_valid_key(
     assert len(empty_datasource_store.list_keys()) == 1
 
 
-# def test_datasource_store_integration(
-#     empty_data_context: DataContext,
-#     datasource_store_name: str,
-#     datasource_name: str,
-#     datasource_config_with_placeholder_args: RuleBasedProfilerConfig,
-# ):
-#     base_directory: str = str(Path(empty_data_context.root_directory) / "datasources")
+def test_datasource_store_integration(
+    empty_data_context: DataContext,
+    datasource_store_name: str,
+    datasource_name: str,
+    datasource_config: DatasourceConfig,
+):
+    base_directory: str = str(Path(empty_data_context.root_directory) / "datasources")
 
-#     profiler_store: ProfilerStore = build_profiler_store_using_filesystem(
-#         store_name=datasource_store_name,
-#         base_directory=base_directory,
-#         overwrite_existing=True,
-#     )
+    datasource_store: DatasourceStore = build_datasource_store_using_filesystem(
+        store_name=datasource_store_name,
+        base_directory=base_directory,
+        overwrite_existing=True,
+    )
 
-#     dir_tree: str
+    dir_tree: str
 
-#     dir_tree = gen_directory_tree_str(startpath=base_directory)
-#     assert (
-#         dir_tree
-#         == """datasources/
-#     .ge_store_backend_id
-# """
-#     )
+    dir_tree = gen_directory_tree_str(startpath=base_directory)
+    assert (
+        dir_tree
+        == """datasources/
+    .ge_store_backend_id
+"""
+    )
 
-#     key: ConfigurationIdentifier = ConfigurationIdentifier(
-#         configuration_key=datasource_name
-#     )
-#     datasource_store.set(key=key, value=profiler_config_with_placeholder_args)
+    key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=datasource_name
+    )
+    datasource_store.set(key=key, value=datasource_config)
 
-#     dir_tree = gen_directory_tree_str(startpath=base_directory)
-#     assert (
-#         dir_tree
-#         == """datasources/
-#     .ge_store_backend_id
-#     my_first_datasource.yml
-# """
-#     )
+    dir_tree = gen_directory_tree_str(startpath=base_directory)
+    assert (
+        dir_tree
+        == """datasources/
+    .ge_store_backend_id
+    my_first_datasource.yml
+"""
+    )
 
-#     assert len(datasource_store.list_keys()) == 1
-#     datasource_store.remove_key(key=key)
-#     assert len(datasource_store.list_keys()) == 0
+    assert len(datasource_store.list_keys()) == 1
+    datasource_store.remove_key(key=key)
+    assert len(datasource_store.list_keys()) == 0
 
-#     data: dict = datasource_store.self_check()
-#     self_check_report: dict = convert_to_json_serializable(data=data)
+    data: dict = datasource_store.self_check()
+    self_check_report: dict = convert_to_json_serializable(data=data)
 
-#     # Drop dynamic value to ensure appropriate assert
-#     self_check_report["config"]["store_backend"].pop("base_directory")
+    # Drop dynamic value to ensure appropriate assert
+    self_check_report["config"]["store_backend"].pop("base_directory")
 
-#     assert self_check_report == {
-#         "config": {
-#             "class_name": "ProfilerStore",
-#             "module_name": "great_expectations.data_context.store.profiler_store",
-#             "overwrite_existing": True,
-#             "store_backend": {
-#                 "class_name": "TupleFilesystemStoreBackend",
-#                 "filepath_suffix": ".yml",
-#                 "fixed_length_key": False,
-#                 "module_name": "great_expectations.data_context.store.tuple_store_backend",
-#                 "platform_specific_separator": True,
-#                 "suppress_store_backend_id": False,
-#             },
-#             "store_name": "profiler_store",
-#         },
-#         "keys": [],
-#         "len_keys": 0,
-#     }
+    assert self_check_report == {
+        "config": {
+            "class_name": "DatasourceStore",
+            "module_name": "great_expectations.data_context.store.datasource_store",
+            "overwrite_existing": True,
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "filepath_suffix": ".yml",
+                "fixed_length_key": False,
+                "module_name": "great_expectations.data_context.store.tuple_store_backend",
+                "platform_specific_separator": True,
+                "suppress_store_backend_id": False,
+            },
+            "store_name": "datasource_store",
+        },
+        "keys": [],
+        "len_keys": 0,
+    }
