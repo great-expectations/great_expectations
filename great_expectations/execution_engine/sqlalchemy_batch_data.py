@@ -196,16 +196,10 @@ class SqlAlchemyBatchData(BatchData):
         :param query:
         """
         dialect_name: str = self.sql_engine_dialect.name.lower()
-        try:
-            # Sometimes `dialect_name` is a byte string, e.g. `b"hive"`, it should be converted
-            # to string for proper comparison.
-            dialect_name = dialect_name.decode()
-        except (UnicodeDecodeError, AttributeError):
-            pass
 
-        if dialect_name in GESqlDialect.get_all_dialect_names():
+        try:
             dialect: Union[GESqlDialect, str] = GESqlDialect(dialect_name)
-        else:
+        except ValueError:
             dialect: Union[GESqlDialect, str] = dialect_name
 
         if dialect == GESqlDialect.BIGQUERY:

@@ -20,6 +20,14 @@ class GESqlDialect(enum.Enum):
     TRINO = "trino"
 
     @classmethod
+    def _missing_(cls, value) -> None:
+        try:
+            # Sometimes `value` is a byte string, e.g. `b"hive"`, it should be converted
+            return cls(value.decode())
+        except (UnicodeDecodeError, AttributeError):
+            return super()._missing_(value)
+
+    @classmethod
     def get_all_dialect_names(cls) -> List[str]:
         """Get dialect names for all SQL dialects."""
         return [dialect_name.value for dialect_name in cls]
