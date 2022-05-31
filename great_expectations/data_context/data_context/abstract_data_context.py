@@ -1,38 +1,26 @@
 import configparser
-import copy
 import json
 import logging
 import os
-from abc import ABC, abstractmethod
-from typing import Dict, List, Mapping, Optional, Union
+from abc import ABC
+from typing import Dict, Mapping, Optional, Union
 
-import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     anonymizedUsageStatisticsSchema,
 )
 from great_expectations.data_context.util import (
-    PasswordMasker,
     build_store_from_config,
-    instantiate_class_from_config,
     substitute_all_config_variables,
 )
-from great_expectations.datasource import BaseDatasource, LegacyDatasource
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
 )
 
 from great_expectations.data_context.store import (  # isort:skip
     ExpectationsStore,
-    ValidationsStore,
-)
-
-from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
-    UsageStatisticsHandler,
 )
 
 from great_expectations.data_context.store import Store  # isort:skip
@@ -180,12 +168,6 @@ class AbstractDataContext(ABC):
     def project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
 
-    #
-    # @property
-    # def config_variables(self):
-    #     # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
-    #     return dict(self._load_config_variables_file())
-
     ### public methods
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -200,43 +182,6 @@ class AbstractDataContext(ABC):
 
         self.config["stores"][store_name] = store_config
         return self._build_store_from_config(store_name, store_config)
-
-    def add_validation_operator(
-        self, validation_operator_name: str, validation_operator_config: dict
-    ) -> "ValidationOperator":
-        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
-
-        Args:
-            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
-            validation_operator_config (dict): a config for the ValidationOperator to add
-
-        Returns:
-            validation_operator (ValidationOperator)
-        """
-
-        self.config["validation_operators"][
-            validation_operator_name
-        ] = validation_operator_config
-        config = self.project_config_with_variables_substituted.validation_operators[
-            validation_operator_name
-        ]
-        module_name = "great_expectations.validation_operators"
-        new_validation_operator = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": self,
-                "name": validation_operator_name,
-            },
-            config_defaults={"module_name": module_name},
-        )
-        if not new_validation_operator:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        self.validation_operators[validation_operator_name] = new_validation_operator
-        return new_validation_operator
 
     ### private methods
 
