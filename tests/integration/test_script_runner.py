@@ -220,7 +220,7 @@ local_tests = [
         name="self_initializing_expect_column_mean_to_be_between",
         user_flow_script="tests/integration/docusaurus/expectations/self_initializing_expectations/self_initializing_expect_column_mean_to_be_between.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2018",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
     IntegrationTestFixture(
         name="is_expectation_self_initializing",
