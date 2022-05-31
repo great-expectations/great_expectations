@@ -39,4 +39,4 @@ def test_parameterized_expect_table_query_column_value_frequency_to_meet_thresho
         threshold=0.5,
     )
 
-    assert result["success"] is True and result["observed_value"] == 0.65
+    assert result["success"] is True and result["result"]["observed_value"] == 0.65
