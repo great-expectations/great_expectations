@@ -273,18 +273,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        super().__init__(
-            project_config=project_config, runtime_environment=runtime_environment
-        )
-
         if not BaseDataContext.validate_config(project_config):
             raise ge_exceptions.InvalidConfigError(
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
+
+        super().__init__(
+            project_config=project_config, runtime_environment=runtime_environment
+        )
+
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
-        self._project_config = project_config
-        self._apply_global_config_overrides()
 
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
@@ -389,17 +388,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._stores[store_name] = new_store
         return new_store
 
-    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
-        """Initialize all Stores for this DataContext.
-
-        Stores are a good fit for reading/writing objects that:
-            1. follow a clear key-value pattern, and
-            2. are usually edited programmatically, using the Context
-
-        Note that stores do NOT manage plugins.
-        """
-        for store_name, store_config in store_configs.items():
-            self._build_store_from_config(store_name, store_config)
+    # def _init_stores(self, store_configs: Dict[str, dict]) -> None:
+    #     """Initialize all Stores for this DataContext.
+    #
+    #     Stores are a good fit for reading/writing objects that:
+    #         1. follow a clear key-value pattern, and
+    #         2. are usually edited programmatically, using the Context
+    #
+    #     Note that stores do NOT manage plugins.
+    #     """
+    #     for store_name, store_config in store_configs.items():
+    #         print(f"storename: {store_name}")
+    #         self._build_store_from_config(store_name, store_config)
 
     def _init_datasources(self, config: DataContextConfig) -> None:
         if not config.datasources:
@@ -533,7 +533,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
 
         # if in ge_cloud_mode, use ge_cloud_organization_id
-        if self.ge_cloud_mode:
+        if hasattr(self, "ge_cloud_mode") and self.ge_cloud_mode:
             return self.ge_cloud_config.organization_id
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
@@ -564,19 +564,19 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
-    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
-        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
-
-        Args:
-            store_name (str): a key for the new Store in in self._stores
-            store_config (dict): a config for the Store to add
-
-        Returns:
-            store (Store)
-        """
-
-        self.config["stores"][store_name] = store_config
-        return self._build_store_from_config(store_name, store_config)
+    # def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
+    #     """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+    #
+    #     Args:
+    #         store_name (str): a key for the new Store in in self._stores
+    #         store_config (dict): a config for the Store to add
+    #
+    #     Returns:
+    #         store (Store)
+    #     """
+    #
+    #     self.config["stores"][store_name] = store_config
+    #     return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
@@ -932,11 +932,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     #
     #####
 
+    # WILL THIS WILL NEED TO BE CHANGED
     def _load_config_variables_file(self):
         """
         Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
         have already been interpolated before being sent from the Cloud API.
         """
+        # this needs to be changed so that it is either cloud mode or if we are just not doing the file path stuff
+        # TODO this cleaned up so that we only handle the file_path
+        # if not hasattr(self, "ge_cloud_mode"):
+        #     print("hello i am here")
+        #     return super()._load_config_variables_files()
         if self.ge_cloud_mode:
             return {}
         config_variables_file_path = cast(
@@ -974,20 +980,32 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         if not config:
             config = self.config
-
-        substituted_config_variables = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
+        # substitutions: dict = {}
+        #
+        # substituted_config_variables = substitute_all_config_variables(
+        #     self.config_variables,
+        #     dict(os.environ),
+        #     self.DOLLAR_SIGN_ESCAPE_STRING,
+        # )
+        #
+        # # Substitutions should have already occurred for GE Cloud configs at this point
+        # substitutions = {
+        #     **substituted_config_variables,
+        #     **dict(os.environ),
+        #     **self.runtime_environment,
+        # }
+        # print(f"substitutions: {substitutions})
+        # environment level changes are handled at the AbstractDataContext
+        # calls parent for os.environment-level changes.
+        config: DataContextConfig = super().get_config_with_variables_substituted(
+            config=config
         )
-
-        # Substitutions should have already occurred for GE Cloud configs at this point
-        substitutions = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
-
+        substitutions: dict = {}
+        # how do we serialize the config?
+        # why is it not Serializable?
+        # we should be able to turn it into
+        # print(f"res: {res}")
+        # res = dataContextConfigSchema.load(config_to_return)
         if self.ge_cloud_mode:
             ge_cloud_config_variable_defaults = {
                 "plugins_directory": self._normalize_absolute_or_relative_path(

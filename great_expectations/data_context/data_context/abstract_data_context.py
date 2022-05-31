@@ -146,16 +146,68 @@ class AbstractDataContext(ABC):
         ] = None
 
         self.runtime_environment = runtime_environment or {}
-
-        #
         self._apply_global_config_overrides()
+
+        # # Init stores
+        # self._stores = {}
+        # self._init_stores(self.project_config_with_variables_substituted.stores)
 
     ### properties
     @property
     def config(self) -> DataContextConfig:
         return self._project_config
 
+    #
+    # @property
+    # def config_variables(self):
+    #     # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
+    #     return dict(self._load_config_variables_file())
+
+    ### public methods
+    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
+        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+
+        Args:
+            store_name (str): a key for the new Store in in self._stores
+            store_config (dict): a config for the Store to add
+
+        Returns:
+            store (Store)
+        """
+
+        self.config["stores"][store_name] = store_config
+        return self._build_store_from_config(store_name, store_config)
+
     ### private methods
+
+    def _construct_data_context_id(self) -> str:
+        """
+        Choose the id of the currently-configured expectations store, if available and a persistent store.
+        If not, it should choose the id stored in DataContextConfig.
+        Returns:
+            UUID to use as the data_context_id
+        """
+
+        # if in ge_cloud_mode, use ge_cloud_organization_id
+        if hasattr(self, "ge_cloud_mode") and self.ge_cloud_mode:
+            return self.ge_cloud_config.organization_id
+        # Choose the id of the currently-configured expectations store, if it is a persistent store
+        expectations_store = self._stores[
+            self.project_config_with_variables_substituted.expectations_store_name
+        ]
+        if isinstance(expectations_store.store_backend, TupleStoreBackend):
+            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
+            return expectations_store.store_backend_id_warnings_suppressed
+
+        # Otherwise choose the id stored in the project_config
+        else:
+            return (
+                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+            )
+
+    def _load_config_variables_files(self):
+        return {}
+
     def _apply_global_config_overrides(self) -> None:
         # check for global usage statistics opt out
         validation_errors = {}
@@ -232,7 +284,6 @@ class AbstractDataContext(ABC):
             for falsey_string in AbstractDataContext.FALSEY_STRINGS:
                 states[falsey_string] = False
             states["TRUE"] = True
-            states["True"] = True
             config.BOOLEAN_STATES = states
             config.read(config_path)
             try:
@@ -241,6 +292,64 @@ class AbstractDataContext(ABC):
                     return True
             except (ValueError, configparser.Error):
                 pass
+
+    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
+        """Initialize all Stores for this DataContext.
+
+        Stores are a good fit for reading/writing objects that:
+            1. follow a clear key-value pattern, and
+            2. are usually edited programmatically, using the Context
+
+        Note that stores do NOT manage plugins.
+        """
+        for store_name, store_config in store_configs.items():
+            print(f"storename: {store_name}")
+            self._build_store_from_config(store_name, store_config)
+
+    # def _build_store_from_config(
+    #     self, store_name: str, store_config: dict
+    # ) -> Optional[Store]:
+    #     """
+    #     Helper method
+    #
+    #     Args:
+    #         store_name ():
+    #         store_config ():
+    #
+    #     Returns:
+    #
+    #     """
+    #     module_name = "great_expectations.data_context.store"
+    #     # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+    #     # the expectations_store does not yet exist by:
+    #     # adding the data_context_id from the project_config
+    #     # to the store_config under the key manually_initialize_store_backend_id
+    #     if (store_name == self.expectations_store_name) and store_config.get(
+    #         "store_backend"
+    #     ):
+    #         store_config["store_backend"].update(
+    #             {
+    #                 "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+    #             }
+    #         )
+    #
+    #     # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+    #     if (
+    #         store_name not in [store["name"] for store in self.list_active_stores()]
+    #         and store_config.get("store_backend") is not None
+    #     ):
+    #         store_config["store_backend"].update({"suppress_store_backend_id": True})
+    #
+    #     new_store = build_store_from_config(
+    #         store_name=store_name,
+    #         store_config=store_config,
+    #         module_name=module_name,
+    #         runtime_environment={
+    #             "root_directory": self.root_directory,
+    #         },
+    #     )
+    #     self._stores[store_name] = new_store
+    #     return new_store
 
     #### class method
     @classmethod
@@ -265,3 +374,30 @@ class AbstractDataContext(ABC):
                 if config_value:
                     return config_value
         return None
+
+    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
+        """
+
+        Args:
+            config ():
+
+        Returns:
+
+        """
+        substituted_config_variables = substitute_all_config_variables(
+            self.config_variables,
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        # Substitutions should have already occurred for GE Cloud configs at this point
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+        return DataContextConfig(
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
+        )
