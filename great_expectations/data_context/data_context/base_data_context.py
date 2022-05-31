@@ -278,10 +278,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
 
-        super().__init__(
-            project_config=project_config, runtime_environment=runtime_environment
-        )
-
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
 
@@ -290,6 +286,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._context_root_directory = context_root_dir
 
         self.runtime_environment = runtime_environment or {}
+
+        super().__init__(
+            project_config=project_config, runtime_environment=runtime_environment
+        )
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -340,10 +340,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_config,
                 )
 
-        self._evaluation_parameter_dependencies_compiled = False
-        self._evaluation_parameter_dependencies = {}
-
-        self._assistants = DataAssistantDispatcher(data_context=self)
+        # self._evaluation_parameter_dependencies_compiled = False
+        # self._evaluation_parameter_dependencies = {}
+        #
+        # self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -353,40 +353,42 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
 
-    def _build_store_from_config(
-        self, store_name: str, store_config: dict
-    ) -> Optional[Store]:
-        module_name = "great_expectations.data_context.store"
-        # Set expectations_store.store_backend_id to the data_context_id from the project_config if
-        # the expectations_store does not yet exist by:
-        # adding the data_context_id from the project_config
-        # to the store_config under the key manually_initialize_store_backend_id
-        if (store_name == self.expectations_store_name) and store_config.get(
-            "store_backend"
-        ):
-            store_config["store_backend"].update(
-                {
-                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-                }
-            )
-
-        # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
-        if (
-            store_name not in [store["name"] for store in self.list_active_stores()]
-            and store_config.get("store_backend") is not None
-        ):
-            store_config["store_backend"].update({"suppress_store_backend_id": True})
-
-        new_store = build_store_from_config(
-            store_name=store_name,
-            store_config=store_config,
-            module_name=module_name,
-            runtime_environment={
-                "root_directory": self.root_directory,
-            },
-        )
-        self._stores[store_name] = new_store
-        return new_store
+    # def _build_store_from_config(
+    #     self, store_name: str, store_config: dict
+    # ) -> Optional[Store]:
+    #     module_name = "great_expectations.data_context.store"
+    #     # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+    #     # the expectations_store does not yet exist by:
+    #     # adding the data_context_id from the project_config
+    #     # to the store_config under the key manually_initialize_store_backend_id
+    #     if (store_name == self.expectations_store_name) and store_config.get(
+    #         "store_backend"
+    #     ):
+    #         store_config["store_backend"].update(
+    #             {
+    #                 "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+    #             }
+    #         )
+    #
+    #     # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+    #     if (
+    #         store_name not in [store["name"] for store in self.list_active_stores()]
+    #         and store_config.get("store_backend") is not None
+    #     ):
+    #         store_config["store_backend"].update({"suppress_store_backend_id": True})
+    #
+    #     if hasattr(self.root_directory)
+    #     # this is what we have to split up?
+    #     new_store = build_store_from_config(
+    #         store_name=store_name,
+    #         store_config=store_config,
+    #         module_name=module_name,
+    #         runtime_environment={
+    #             "root_directory": self.root_directory,
+    #         },
+    #     )
+    #     self._stores[store_name] = new_store
+    #     return new_store
 
     # def _init_stores(self, store_configs: Dict[str, dict]) -> None:
     #     """Initialize all Stores for this DataContext.
@@ -578,42 +580,42 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     #     self.config["stores"][store_name] = store_config
     #     return self._build_store_from_config(store_name, store_config)
 
-    def add_validation_operator(
-        self, validation_operator_name: str, validation_operator_config: dict
-    ) -> "ValidationOperator":
-        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
-
-        Args:
-            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
-            validation_operator_config (dict): a config for the ValidationOperator to add
-
-        Returns:
-            validation_operator (ValidationOperator)
-        """
-
-        self.config["validation_operators"][
-            validation_operator_name
-        ] = validation_operator_config
-        config = self.project_config_with_variables_substituted.validation_operators[
-            validation_operator_name
-        ]
-        module_name = "great_expectations.validation_operators"
-        new_validation_operator = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": self,
-                "name": validation_operator_name,
-            },
-            config_defaults={"module_name": module_name},
-        )
-        if not new_validation_operator:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        self.validation_operators[validation_operator_name] = new_validation_operator
-        return new_validation_operator
+    # def add_validation_operator(
+    #     self, validation_operator_name: str, validation_operator_config: dict
+    # ) -> "ValidationOperator":
+    #     """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
+    #
+    #     Args:
+    #         validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
+    #         validation_operator_config (dict): a config for the ValidationOperator to add
+    #
+    #     Returns:
+    #         validation_operator (ValidationOperator)
+    #     """
+    #
+    #     self.config["validation_operators"][
+    #         validation_operator_name
+    #     ] = validation_operator_config
+    #     config = self.project_config_with_variables_substituted.validation_operators[
+    #         validation_operator_name
+    #     ]
+    #     module_name = "great_expectations.validation_operators"
+    #     new_validation_operator = instantiate_class_from_config(
+    #         config=config,
+    #         runtime_environment={
+    #             "data_context": self,
+    #             "name": validation_operator_name,
+    #         },
+    #         config_defaults={"module_name": module_name},
+    #     )
+    #     if not new_validation_operator:
+    #         raise ge_exceptions.ClassInstantiationError(
+    #             module_name=module_name,
+    #             package_name=None,
+    #             class_name=config["class_name"],
+    #         )
+    #     self.validation_operators[validation_operator_name] = new_validation_operator
+    #     return new_validation_operator
 
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
@@ -772,9 +774,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
         return self._usage_statistics_handler
 
-    @property
-    def project_config_with_variables_substituted(self) -> DataContextConfig:
-        return self.get_config_with_variables_substituted()
+    # @property
+    # def project_config_with_variables_substituted(self) -> DataContextConfig:
+    #     return self.get_config_with_variables_substituted()
 
     @property
     def anonymous_usage_statistics(self):
@@ -792,10 +794,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def notebooks(self):
         return self.project_config_with_variables_substituted.notebooks
 
-    @property
-    def stores(self):
-        """A single holder for all Stores in this context"""
-        return self._stores
+    # @property
+    # def stores(self):
+    #     """A single holder for all Stores in this context"""
+    #     return self._stores
 
     @property
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
@@ -893,13 +895,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         return os.path.isdir(profiler_directory_path)
 
-    @property
-    def expectations_store_name(self) -> Optional[str]:
-        return self.project_config_with_variables_substituted.expectations_store_name
-
-    @property
-    def expectations_store(self) -> ExpectationsStore:
-        return self.stores[self.expectations_store_name]
+    # @property
+    # def expectations_store_name(self) -> Optional[str]:
+    #     return self.project_config_with_variables_substituted.expectations_store_name
+    #
+    # @property
+    # def expectations_store(self) -> ExpectationsStore:
+    #     return self.stores[self.expectations_store_name]
 
     @property
     def data_context_id(self):
@@ -943,7 +945,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # if not hasattr(self, "ge_cloud_mode"):
         #     print("hello i am here")
         #     return super()._load_config_variables_files()
-        if self.ge_cloud_mode:
+        if hasattr(self, "ge_cloud_mode") and self.ge_cloud_mode:
             return {}
         config_variables_file_path = cast(
             DataContextConfig, self.get_config()

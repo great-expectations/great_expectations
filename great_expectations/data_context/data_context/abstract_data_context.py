@@ -149,13 +149,36 @@ class AbstractDataContext(ABC):
         self._apply_global_config_overrides()
 
         # # Init stores
-        # self._stores = {}
-        # self._init_stores(self.project_config_with_variables_substituted.stores)
+        self._stores = {}
+        self._init_stores(self.project_config_with_variables_substituted.stores)
+        # TODO migration of Stores and Datasources
+
+        self._evaluation_parameter_dependencies_compiled = False
+        self._evaluation_parameter_dependencies = {}
+
+        self._assistants = DataAssistantDispatcher(data_context=self)
 
     ### properties
     @property
     def config(self) -> DataContextConfig:
         return self._project_config
+
+    @property
+    def stores(self):
+        """A single holder for all Stores in this context"""
+        return self._stores
+
+    @property
+    def expectations_store_name(self) -> Optional[str]:
+        return self.project_config_with_variables_substituted.expectations_store_name
+
+    @property
+    def expectations_store(self) -> ExpectationsStore:
+        return self.stores[self.expectations_store_name]
+
+    @property
+    def project_config_with_variables_substituted(self) -> DataContextConfig:
+        return self.get_config_with_variables_substituted()
 
     #
     # @property
@@ -178,7 +201,79 @@ class AbstractDataContext(ABC):
         self.config["stores"][store_name] = store_config
         return self._build_store_from_config(store_name, store_config)
 
+    def add_validation_operator(
+        self, validation_operator_name: str, validation_operator_config: dict
+    ) -> "ValidationOperator":
+        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
+
+        Args:
+            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
+            validation_operator_config (dict): a config for the ValidationOperator to add
+
+        Returns:
+            validation_operator (ValidationOperator)
+        """
+
+        self.config["validation_operators"][
+            validation_operator_name
+        ] = validation_operator_config
+        config = self.project_config_with_variables_substituted.validation_operators[
+            validation_operator_name
+        ]
+        module_name = "great_expectations.validation_operators"
+        new_validation_operator = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                "data_context": self,
+                "name": validation_operator_name,
+            },
+            config_defaults={"module_name": module_name},
+        )
+        if not new_validation_operator:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=config["class_name"],
+            )
+        self.validation_operators[validation_operator_name] = new_validation_operator
+        return new_validation_operator
+
     ### private methods
+
+    def _build_store_from_config(
+        self, store_name: str, store_config: dict
+    ) -> Optional[Store]:
+        module_name = "great_expectations.data_context.store"
+        # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+        # the expectations_store does not yet exist by:
+        # adding the data_context_id from the project_config
+        # to the store_config under the key manually_initialize_store_backend_id
+        if (store_name == self.expectations_store_name) and store_config.get(
+            "store_backend"
+        ):
+            store_config["store_backend"].update(
+                {
+                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                }
+            )
+
+        # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+        if (
+            store_name not in [store["name"] for store in self.list_active_stores()]
+            and store_config.get("store_backend") is not None
+        ):
+            store_config["store_backend"].update({"suppress_store_backend_id": True})
+
+        new_store = build_store_from_config(
+            store_name=store_name,
+            store_config=store_config,
+            module_name=module_name,
+            runtime_environment={
+                "root_directory": self.root_directory,
+            },
+        )
+        self._stores[store_name] = new_store
+        return new_store
 
     def _construct_data_context_id(self) -> str:
         """
@@ -306,50 +401,57 @@ class AbstractDataContext(ABC):
             print(f"storename: {store_name}")
             self._build_store_from_config(store_name, store_config)
 
-    # def _build_store_from_config(
-    #     self, store_name: str, store_config: dict
-    # ) -> Optional[Store]:
-    #     """
-    #     Helper method
-    #
-    #     Args:
-    #         store_name ():
-    #         store_config ():
-    #
-    #     Returns:
-    #
-    #     """
-    #     module_name = "great_expectations.data_context.store"
-    #     # Set expectations_store.store_backend_id to the data_context_id from the project_config if
-    #     # the expectations_store does not yet exist by:
-    #     # adding the data_context_id from the project_config
-    #     # to the store_config under the key manually_initialize_store_backend_id
-    #     if (store_name == self.expectations_store_name) and store_config.get(
-    #         "store_backend"
-    #     ):
-    #         store_config["store_backend"].update(
-    #             {
-    #                 "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-    #             }
-    #         )
-    #
-    #     # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
-    #     if (
-    #         store_name not in [store["name"] for store in self.list_active_stores()]
-    #         and store_config.get("store_backend") is not None
-    #     ):
-    #         store_config["store_backend"].update({"suppress_store_backend_id": True})
-    #
-    #     new_store = build_store_from_config(
-    #         store_name=store_name,
-    #         store_config=store_config,
-    #         module_name=module_name,
-    #         runtime_environment={
-    #             "root_directory": self.root_directory,
-    #         },
-    #     )
-    #     self._stores[store_name] = new_store
-    #     return new_store
+    def _build_store_from_config(
+        self, store_name: str, store_config: dict
+    ) -> Optional[Store]:
+        """
+        Helper method
+
+        Args:
+            store_name ():
+            store_config ():
+
+        Returns:
+
+        """
+        module_name = "great_expectations.data_context.store"
+        # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+        # the expectations_store does not yet exist by:
+        # adding the data_context_id from the project_config
+        # to the store_config under the key manually_initialize_store_backend_id
+        if (store_name == self.expectations_store_name) and store_config.get(
+            "store_backend"
+        ):
+            store_config["store_backend"].update(
+                {
+                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                }
+            )
+
+        # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+        if (
+            store_name not in [store["name"] for store in self.list_active_stores()]
+            and store_config.get("store_backend") is not None
+        ):
+            store_config["store_backend"].update({"suppress_store_backend_id": True})
+
+        if hasattr(self, "root_directory"):
+            new_store = build_store_from_config(
+                store_name=store_name,
+                store_config=store_config,
+                module_name=module_name,
+                runtime_environment={
+                    "root_directory": self.root_directory,
+                },
+            )
+        else:
+            new_store = build_store_from_config(
+                store_name=store_name,
+                store_config=store_config,
+                module_name=module_name,
+            )
+        self._stores[store_name] = new_store
+        return new_store
 
     #### class method
     @classmethod
