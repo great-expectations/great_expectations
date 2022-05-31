@@ -7,14 +7,13 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will walk you through the process of using a self-initializing <TechnicalTag tag="expectation" text="Expectations" /> to automate parameter estimation when you are creating Expectations interactively by using a <TechnicalTag tag="batch" text="Batch" /> or Batches that have been loaded into a <TechnicalTag tag="validator" text="Validator" />.
 
-<Prerequisites>
-
+:::note PREREQUISITES: THIS HOW-TO GUIDE ASSUMES YOU HAVE:
+- Completed the [Getting started tutorial](../../tutorials/getting_started/tutorial_overview.md)
 - [Configured a Data Context](../../tutorials/getting_started/tutorial_setup.md).
 - [Configured a Data Source](../../tutorials/getting_started/tutorial_connect_to_data.md)
 - [An understanding of how to configure a BatchRequest](../../guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.md)
 - [An understanding of how to create and edit expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-
-</Prerequisites>
+:::
 
 ## Steps
 
@@ -22,7 +21,7 @@ This guide will walk you through the process of using a self-initializing <Techn
 
 This guide assumes that you are creating and editing expectations in a Jupyter Notebook.  This process is covered in the guide: [How to create and edit expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).  
 
-Additionally, this guide assumes that you are using a multi-batch Batch Request to provide your sample data.  (Self-initializing Expectations will work when run on a single Batch, but they really shine when run on multiple Batches that would have otherwise needed to be individually processed if a manual aproach were taken.)
+Additionally, this guide assumes that you are using a multi-batch <TechnicalTag tag="batch_request" text="Batch Request" /> to provide your sample data.  (Self-initializing Expectations will work when run on a single Batch, but they really shine when run on multiple Batches that would have otherwise needed to be individually processed if a manual aproach were taken.)
 
 ### 1. Determine if your Expectation is self-initializing
 
@@ -58,7 +57,7 @@ For the purposes of this guide, we will be using `expect_column_mean_to_be_betwe
 
 ### 2. Run the expectation with `auto=True`
 
-Say you are interested in constructing an Expectation that captures the average distance of taxi trips across all of 2018.  You have a Datasource that provides 12 Batches (one for each month of the year) and you know that `expect_colum_mean_to_be_between` is the Expectation you want to implement.
+Say you are interested in constructing an Expectation that captures the average distance of taxi trips across all of 2018.  You have a <TechnicalTag tag="datasource" text="Datasource" /> that provides 12 Batches (one for each month of the year) and you know that `expect_colum_mean_to_be_between` is the Expectation you want to implement.
 
 #### The manual way
 
@@ -83,7 +82,7 @@ Now the Expectation will calculate the `min_value` (2.83) and `max_value` (3.06)
 
 ### 3. Save your Expectation with the calculated values
 
-Now that the Expectation's upper and lower bounds have come from the Batches, you can save your Expectation Suite and move on.
+Now that the Expectation's upper and lower bounds have come from the Batches, you can save your <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and move on.
 
 ```python file=../../../tests/integration/docusaurus/expectations/self_initializing_expectations/self_initializing_expect_column_mean_to_be_between.py#L85
 ```
