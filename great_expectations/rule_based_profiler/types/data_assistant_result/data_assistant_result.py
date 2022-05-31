@@ -320,7 +320,7 @@ class DataAssistantResult(SerializableDictDot):
             form.vega-bindings {{
               position: absolute;
               left: 75px;
-              top: 38px;
+              top: 30px;
             }}
             </style>
         """
@@ -549,7 +549,6 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def get_interactive_detail_multi_chart(
-        expectation_type: str,
         column_dfs: List[ColumnDataFrame],
         metric_name: str,
         metric_type: alt.StandardType,
@@ -595,7 +594,6 @@ class DataAssistantResult(SerializableDictDot):
 
         if sequential:
             return DataAssistantResult._get_interactive_detail_multi_line_chart(
-                expectation_type=expectation_type,
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
@@ -603,7 +601,6 @@ class DataAssistantResult(SerializableDictDot):
             )
         else:
             return DataAssistantResult._get_interactive_detail_multi_bar_chart(
-                expectation_type=expectation_type,
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
@@ -1023,11 +1020,11 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _get_interactive_detail_multi_line_chart(
-        expectation_type: str,
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
+        expectation_type: Optional[str] = None,
     ) -> alt.VConcatChart:
         detail_title_font_size: int = 14
         detail_title_font_weight: str = "bold"
@@ -1279,11 +1276,11 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _get_interactive_detail_multi_bar_chart(
-        expectation_type: str,
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
+        expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
@@ -1869,35 +1866,25 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
-        plot_impl: Optional[
-            Callable[
-                [
-                    List[ColumnDataFrame],
-                    str,
-                    alt.StandardType,
-                    bool,
-                ],
-                alt.VConcatChart,
-            ]
-        ] = None
+
+        display_chart: Optional[alt.VConcatChart] = None
 
         if metric_name:
             if plot_mode is PlotMode.PRESCRIPTIVE:
-                plot_impl = (
-                    self.get_interactive_detail_expect_column_values_to_be_between_chart
+                display_chart = self.get_interactive_detail_expect_column_values_to_be_between_chart(
+                    expectation_type=expectation_type,
+                    column_dfs=column_dfs,
+                    metric_name=metric_name,
+                    metric_type=metric_type,
+                    sequential=sequential,
                 )
             else:
-                plot_impl = self.get_interactive_detail_multi_chart
-
-        display_chart: Optional[alt.VConcatChart] = None
-        if plot_impl:
-            display_chart = plot_impl(
-                expectation_type=expectation_type,
-                column_dfs=column_dfs,
-                metric_name=metric_name,
-                metric_type=metric_type,
-                sequential=sequential,
-            )
+                display_chart = self.get_interactive_detail_multi_chart(
+                    column_dfs=column_dfs,
+                    metric_name=metric_name,
+                    metric_type=metric_type,
+                    sequential=sequential,
+                )
 
         return [display_chart]
 
