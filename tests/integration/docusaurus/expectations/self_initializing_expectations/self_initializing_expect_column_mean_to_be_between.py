@@ -75,9 +75,15 @@ validator = data_context.get_validator(
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert len(validator.batches) == 12
 
+# <snippet>
 expectation_result = validator.expect_column_mean_to_be_between(
     column="trip_distance", auto=True
 )
+# </snippet>
+
+# <snippet>
+validator.save_expectation_suite(discard_failed_expectations=False)
+# </snippet>
 
 # NOTE: The following assertions are only for testing and can be ignored by users.
 assert (

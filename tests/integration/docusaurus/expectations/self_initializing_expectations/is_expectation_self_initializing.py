@@ -12,11 +12,15 @@ the snippets that are specified for use in documentation are maintained.  These 
 <relevant documentation>
     https://docs.greatexpectations.io/docs/
 """
+# <snippet>
 from great_expectations.expectations.expectation import Expectation
 
 Expectation.is_expectation_self_initializing(name="expect_column_to_exist")
+# </snippet>
 
+# <snippet>
 Expectation.is_expectation_self_initializing(name="expect_column_mean_to_be_between")
+# </snippet>
 
 # NOTE: The following assertions are only for testing and can be ignored by users.
 assert (
