@@ -169,6 +169,10 @@ class InvalidExpectationConfigurationError(GreatExpectationsError):
     pass
 
 
+class ExpectationNotFoundError(GreatExpectationsError):
+    pass
+
+
 class InvalidValidationResultError(GreatExpectationsError):
     pass
 
@@ -376,6 +380,10 @@ class SorterError(DataContextError):
         super().__init__(self.message)
 
 
+class SamplerError(DataContextError):
+    pass
+
+
 class MetricError(GreatExpectationsError):
     pass
 
@@ -408,5 +416,11 @@ class GeCloudError(GreatExpectationsError):
     """
     Generic error used to provide additional context around Cloud-specific issues.
     """
+
+    pass
+
+
+class DatabaseConnectionError(GreatExpectationsError):
+    """Error connecting to a database including during an integration test."""
 
     pass

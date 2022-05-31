@@ -44,6 +44,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.exceptions import (
+    ExpectationNotFoundError,
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
@@ -53,6 +54,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
+    get_expectation_impl,
     get_metric_kwargs,
     register_expectation,
     register_renderer,
@@ -1171,6 +1173,33 @@ class Expectation(metaclass=MetaExpectation):
                             )
 
     @staticmethod
+    def is_expectation_self_initializing(name: str) -> bool:
+        """
+        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
+
+        Args:
+            name (str): name of Expectation
+
+        Returns:
+            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
+        """
+
+        expectation_impl: MetaExpectation = get_expectation_impl(name)
+        if not expectation_impl:
+            raise ExpectationNotFoundError(
+                f"Expectation {name} was not found in the list of registered Expectations. "
+                f"Please check your configuration and try again"
+            )
+        if "auto" in expectation_impl.default_kwarg_values:
+            print(
+                f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
+            )
+            return True
+        else:
+            print(f"The Expectation {name} is not able to be self-initialized.")
+            return False
+
+    @staticmethod
     def _choose_example(
         examples: List[ExpectationTestDataCases],
     ) -> Tuple[TestData, ExpectationTestCase]:
@@ -1255,8 +1284,10 @@ class Expectation(metaclass=MetaExpectation):
     def _get_rendered_result_as_string(self, rendered_result) -> str:
         """Convenience method to get rendered results as strings."""
 
+        result: str = ""
+
         if type(rendered_result) == str:
-            return rendered_result
+            result = rendered_result
 
         elif type(rendered_result) == list:
             sub_result_list = []
@@ -1265,44 +1296,48 @@ class Expectation(metaclass=MetaExpectation):
                 if res is not None:
                     sub_result_list.append(res)
 
-            return "\n".join(sub_result_list)
+            result = "\n".join(sub_result_list)
 
         elif isinstance(rendered_result, RenderedStringTemplateContent):
-            return rendered_result.__str__()
+            result = rendered_result.__str__()
 
         elif isinstance(rendered_result, CollapseContent):
-            return rendered_result.__str__()
+            result = rendered_result.__str__()
 
         elif isinstance(rendered_result, RenderedAtomicContent):
-            return f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, RenderedContentBlockContainer):
-            return "(RenderedContentBlockContainer) " + repr(
+            result = "(RenderedContentBlockContainer) " + repr(
                 rendered_result.to_json_dict()
             )
 
         elif isinstance(rendered_result, RenderedTableContent):
-            return f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, RenderedGraphContent):
-            return f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, ValueListContent):
-            return f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, dict):
-            return f"(dict) {repr(rendered_result)}"
+            result = f"(dict) {repr(rendered_result)}"
 
         elif isinstance(rendered_result, int):
-            return repr(rendered_result)
+            result = repr(rendered_result)
 
         elif rendered_result == None:
-            return ""
+            result = ""
 
         else:
             raise TypeError(
                 f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."
             )
+
+        if "inf" in result:
+            result = ""
+        return result
 
     def _get_renderer_diagnostics(
         self,

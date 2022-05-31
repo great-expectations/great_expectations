@@ -75,15 +75,18 @@ class BaseYamlConfig(SerializableDictDot):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."
             )
+
         if not issubclass(cls.get_config_class(), BaseYamlConfig):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
             )
+
         if hasattr(cls.get_config_class(), "_schema_instance"):
             # noinspection PyProtectedMember
-            schema_instance: Schema = cls.get_config_class()._schema_instance
+            schema_instance: Optional[Schema] = cls.get_config_class()._schema_instance
             if schema_instance is None:
                 cls.get_config_class()._schema_instance = (cls.get_schema_class())()
+                return cls.get_config_class().schema_instance
             else:
                 return schema_instance
         else:
@@ -91,13 +94,13 @@ class BaseYamlConfig(SerializableDictDot):
             return cls.get_config_class().schema_instance
 
     @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap):
+    def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
         try:
-            config: Union[dict, BaseYamlConfig] = cls._get_schema_instance().load(
-                commented_map
-            )
+            schema_instance: Any = cls._get_schema_instance()
+            config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
+
             return config
         except ValidationError:
             logger.error(
@@ -134,11 +137,11 @@ class BaseYamlConfig(SerializableDictDot):
         return self._get_schema_validated_updated_commented_map()
 
     @classmethod
-    def get_config_class(cls) -> None:
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         raise NotImplementedError
 
     @classmethod
-    def get_schema_class(cls) -> None:
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         raise NotImplementedError
 
 
@@ -1343,6 +1346,7 @@ class DataContextConfigSchema(Schema):
         "progress_bars",  # 0.13.49
     ]
 
+    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
         data = copy.deepcopy(data)
@@ -2100,11 +2104,11 @@ class DataContextConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls):
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         return cls  # DataContextConfig
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         return DataContextConfigSchema
 
     @property
@@ -2360,11 +2364,11 @@ class CheckpointConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls) -> type:
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         return cls  # CheckpointConfig
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         return CheckpointConfigSchema
 
     @property

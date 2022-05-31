@@ -17,15 +17,15 @@ from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
-    AttributedResolvedMetrics,
     MetricMultiBatchParameterBuilder,
-    MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    AttributedResolvedMetrics,
     Domain,
+    MetricValues,
     NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
@@ -515,7 +515,7 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                     estimation_histogram=np.histogram(
                         a=metric_value_vector, bins=NUM_HISTOGRAM_BINS
                     )[0],
-                    value_range=np.array(
+                    value_range=np.asarray(
                         [metric_value_vector[0], metric_value_vector[0]]
                     ),
                 )
