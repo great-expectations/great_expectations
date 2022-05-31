@@ -380,6 +380,10 @@ class SorterError(DataContextError):
         super().__init__(self.message)
 
 
+class SamplerError(DataContextError):
+    pass
+
+
 class MetricError(GreatExpectationsError):
     pass
 
