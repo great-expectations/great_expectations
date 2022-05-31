@@ -334,7 +334,12 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         y_axis_labels: alt.Chart = base.encode(
-            x=batch_component.plot_on_axis(),
+            x=alt.X(
+                batch_component.name,
+                type=batch_component.alt_type,
+                title=batch_component.title,
+                axis=alt.Axis(grid=False),
+            ),
             y=column_number_component.plot_on_y_axis(),
             tooltip=tooltip,
         )
@@ -379,7 +384,12 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         y_axis_labels: alt.Chart = base.encode(
-            x=batch_component.plot_on_axis(),
+            x=alt.X(
+                batch_component.name,
+                type=batch_component.alt_type,
+                title=batch_component.title,
+                axis=alt.Axis(grid=False),
+            ),
             y=column_number_component.plot_on_y_axis(),
             tooltip=tooltip,
         )
@@ -746,10 +756,9 @@ class DataAssistantResult(SerializableDictDot):
             A interactive detail altair multi-chart
         """
         batch_name: str = "batch"
+        all_columns: List[str] = [column_df.column for column_df in column_dfs]
         batch_identifiers: List[str] = [
-            column
-            for column in column_dfs[0].df.columns
-            if column not in [metric_name, batch_name]
+            column for column in all_columns if column not in [metric_name, batch_name]
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -773,11 +782,11 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         df: pd.DataFrame = pd.DataFrame(
-            columns=[batch_name, metric_name] + batch_identifiers
+            columns=[batch_name, domain_name, metric_name] + batch_identifiers
         )
-        for column, column_df in column_dfs:
-            column_df[domain_name] = column
-            df = pd.concat([df, column_df], axis=0)
+        for column_df in column_dfs:
+            column_df.df[domain_name] = column_df.column
+            df = pd.concat([df, column_df.df], axis=0)
 
         if sequential:
             return DataAssistantResult._get_interactive_detail_multi_line_chart(
@@ -1936,6 +1945,13 @@ class DataAssistantResult(SerializableDictDot):
         quantitative_metrics: Set[str] = {
             "table_row_count",
             "column_distinct_values_count",
+            "column_min",
+            "column_max",
+            "column_values_between",
+            "column_mean",
+            "column_median",
+            "column_quantile_values",
+            "column_standard_deviation",
         }
 
         plot_impl: Optional[
@@ -2247,18 +2263,18 @@ class DataAssistantResult(SerializableDictDot):
                 new_column_list: List[str]
                 new_record_list: List[List[str]] = []
                 if metric_name in table_column_metrics:
-                    if include_column_names or exclude_column_names:
+                    if (include_column_names is not None) or (
+                        exclude_column_names is not None
+                    ):
                         all_columns = df[metric_name].apply(pd.Series).values.tolist()
                         for record in all_columns:
                             new_column_list = []
                             for column in record:
                                 if (
-                                    include_column_names
+                                    include_column_names is not None
                                     and column in include_column_names
-                                ):
-                                    new_column_list.append(column)
-                                elif (
-                                    exclude_column_names
+                                ) or (
+                                    exclude_column_names is not None
                                     and column not in exclude_column_names
                                 ):
                                     new_column_list.append(column)

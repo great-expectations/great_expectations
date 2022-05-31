@@ -478,7 +478,7 @@ def test_onboarding_data_assistant_plot_include_column_names_filters_output(
         include_column_names=include_column_names
     )
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
     assert len(column_domain_charts) == 6  # Normally 40 without filtering
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
@@ -491,7 +491,7 @@ def test_onboarding_data_assistant_plot_exclude_column_names_filters_output(
         exclude_column_names=exclude_column_names
     )
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
     assert len(column_domain_charts) == 38
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
