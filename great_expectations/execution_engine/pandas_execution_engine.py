@@ -346,11 +346,8 @@ Please check your config."""
             sampling_fn: Callable = self._data_sampler.get_sampler_method(
                 sampler_method_name
             )
-            sampling_kwargs: dict = batch_spec.get("sampling_kwargs") or {}
-            if sampler_method_name in ["sample_using_limit", "_sample_using_limit"]:
-                batch_data = sampling_fn(batch_data, batch_spec)
-            else:
-                batch_data = sampling_fn(batch_data, **sampling_kwargs)
+            batch_data = sampling_fn(batch_data, batch_spec)
+
         return batch_data
 
     @property
