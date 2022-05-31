@@ -1682,6 +1682,36 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
+class TableQueryExpectation(TableExpectation, ABC):
+    metric_dependencies = ("table.query",)
+    success_keys = ("table.query",)
+    default_kwarg_values = {
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": False,
+        "meta": None,
+        "query": None,
+    }
+
+    domain_keys = ("batch_id", "table", "row_condition", "condition_parser", "query")
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        super().validate_configuration(configuration)
+
+        query = configuration.kwargs.get("query") or self.default_kwarg_values.get(
+            "query"
+        )
+
+        try:
+            assert (
+                "query" in configuration.kwargs or query
+            ), "'query' parameter is required for Table Query Expectations."
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+
+
 class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
