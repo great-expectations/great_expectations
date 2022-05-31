@@ -51,7 +51,9 @@ class ExpectColumnValuesToMatchPowersOfBase(ColumnMapExpectation):
         "data": {
             "mostly_powers_of_two_but_one": [1, 2, 4, 8, 16.0, 11, 67108864, 32.00, 64, 128, 256, 512, 1024, 128],
             "all_powers_of_3": [59049, 1, 3, 729, 1594323, 81, 27, 243, 9, 177147, 531441, 2187, 6561, 19683],
-            "all_powers_of_2_increasing_order": [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
+            "all_powers_of_2_increasing_order": [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192],
+            "all_powers_of_7": [1, 49, 678223072849, 7, 4747561509943, 343, 823543, 2401, 40353607, 96889010407, 16807,
+                                4747561509943, 1628413597910449, 40353607]
         },
         "tests": [
             {
@@ -70,6 +72,17 @@ class ExpectColumnValuesToMatchPowersOfBase(ColumnMapExpectation):
                 "exact_match_out": False,
                 "include_in_gallery": True,
                 "in": {"column": "all_powers_of_3", "base_integer": 3},
+                "out": {
+                    "success": True,
+                    "unexpected_index_list": [],
+                    "unexpected_list": []
+                },
+            },
+            {
+                "title": "positive_test_with_all_powers_of_7",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in": {"column": "all_powers_of_7", "base_integer": 7, "mostly": 0.3},
                 "out": {
                     "success": True,
                     "unexpected_index_list": [],
