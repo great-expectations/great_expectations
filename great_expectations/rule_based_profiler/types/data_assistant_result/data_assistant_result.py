@@ -432,6 +432,8 @@ class DataAssistantResult(SerializableDictDot):
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
             sequential=sequential,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
         )
         display_charts.extend(table_domain_charts)
         return_charts.extend(table_domain_charts)
@@ -1773,6 +1775,8 @@ class DataAssistantResult(SerializableDictDot):
     def _plot_table_domain_charts(
         self,
         expectation_configurations: List[ExpectationConfiguration],
+        include_column_names: Optional[List[str]],
+        exclude_column_names: Optional[List[str]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Union[List[alt.Chart], List[alt.LayerChart]]]:
@@ -1802,6 +1806,8 @@ class DataAssistantResult(SerializableDictDot):
                 self._create_chart_for_table_domain_expectation(
                     expectation_configuration=expectation_configuration,
                     attributed_metrics=attributed_metrics_by_table_domain,
+                    include_column_names=include_column_names,
+                    exclude_column_names=exclude_column_names,
                     plot_mode=plot_mode,
                     sequential=sequential,
                 )
@@ -2190,6 +2196,8 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_configuration: ExpectationConfiguration,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        include_column_names: Optional[List[str]],
+        exclude_column_names: Optional[List[str]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
@@ -2223,6 +2231,29 @@ class DataAssistantResult(SerializableDictDot):
                 )
 
                 metric_name: str = sanitize_parameter_name(metric_name)
+
+                # If columns are included/excluded we need to filter them out for table level metrics here
+                table_column_metrics: List[str] = ["table_columns"]
+                new_column_list: List[str]
+                new_record_list: List[List[str]] = []
+                if metric_name in table_column_metrics:
+                    if include_column_names or exclude_column_names:
+                        all_columns = df[metric_name].apply(pd.Series).values.tolist()
+                        for record in all_columns:
+                            new_column_list = []
+                            for column in record:
+                                if (
+                                    include_column_names
+                                    and column in include_column_names
+                                ):
+                                    new_column_list.append(column)
+                                elif (
+                                    exclude_column_names
+                                    and column not in exclude_column_names
+                                ):
+                                    new_column_list.append(column)
+                            new_record_list.append(new_column_list)
+                        df[metric_name] = new_record_list
 
                 return self._chart_domain_values(
                     df=df,
