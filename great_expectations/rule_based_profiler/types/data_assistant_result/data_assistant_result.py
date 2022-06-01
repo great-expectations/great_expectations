@@ -789,6 +789,7 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def get_expect_domain_values_to_be_between_chart(
+        expectation_type: str,
         df: pd.DataFrame,
         metric_name: str,
         sequential: bool,
@@ -796,6 +797,7 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.Chart:
         """
         Args:
+            expectation_type: The name of the expectation
             df: A pandas dataframe containing the data to be plotted
             metric_name: The name of the metric as it exists in the pandas dataframe
             sequential: Whether batches are sequential in nature
@@ -907,6 +909,7 @@ class DataAssistantResult(SerializableDictDot):
         if sequential:
             return (
                 DataAssistantResult._get_expect_domain_values_to_be_between_line_chart(
+                    expectation_type=expectation_type,
                     df=df,
                     metric_component=metric_component,
                     batch_component=batch_component,
@@ -919,6 +922,7 @@ class DataAssistantResult(SerializableDictDot):
         else:
             return (
                 DataAssistantResult._get_expect_domain_values_to_be_between_bar_chart(
+                    expectation_type=expectation_type,
                     df=df,
                     metric_component=metric_component,
                     batch_component=batch_component,
@@ -1001,6 +1005,7 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.VConcatChart:
         """
         Args:
+            expectation_type: The name of the expectation
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
             metric_name: The name of the metric as it exists in the pandas dataframe
             sequential: Whether batches are sequential in nature
@@ -1239,10 +1244,12 @@ class DataAssistantResult(SerializableDictDot):
         min_value_component: ExpectationKwargPlotComponent,
         max_value_component: ExpectationKwargPlotComponent,
         tooltip: List[alt.Tooltip],
+        expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
         title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
             metric_plot_component=metric_component,
             batch_plot_component=batch_component,
             domain_plot_component=domain_component,
@@ -1322,10 +1329,12 @@ class DataAssistantResult(SerializableDictDot):
         min_value_component: ExpectationKwargPlotComponent,
         max_value_component: ExpectationKwargPlotComponent,
         tooltip: List[alt.Tooltip],
+        expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
         title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
             metric_plot_component=metric_component,
             batch_plot_component=batch_component,
             domain_plot_component=domain_component,
@@ -2010,9 +2019,12 @@ class DataAssistantResult(SerializableDictDot):
         charts: List[alt.Chart] = []
 
         expectation_configuration: ExpectationConfiguration
+        expectation_type: str
         for expectation_configuration in table_based_expectation_configurations:
+            expectation_type = expectation_configuration.expectation_type
             table_domain_chart: alt.Chart = (
                 self._create_chart_for_table_domain_expectation(
+                    expectation_type=expectation_type,
                     expectation_configuration=expectation_configuration,
                     attributed_metrics=attributed_metrics_by_table_domain,
                     include_column_names=include_column_names,
@@ -2061,9 +2073,12 @@ class DataAssistantResult(SerializableDictDot):
             )
             display_charts.extend(display_charts_for_expectation)
 
+            expectation_type: str
             for expectation_configuration in column_based_expectation_configurations:
+                expectation_type = expectation_configuration.expectation_type
                 return_chart: alt.Chart = (
                     self._create_return_chart_for_column_domain_expectation(
+                        expectation_type=expectation_type,
                         expectation_configuration=expectation_configuration,
                         attributed_metrics=attributed_metrics_by_column_domain,
                         plot_mode=plot_mode,
@@ -2123,6 +2138,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _chart_domain_values(
         self,
+        expectation_type: str,
         df: pd.DataFrame,
         metric_name: str,
         plot_mode: PlotMode,
@@ -2157,7 +2173,13 @@ class DataAssistantResult(SerializableDictDot):
         chart: Optional[alt.Chart] = None
         if plot_mode is PlotMode.PRESCRIPTIVE:
             if metric_name in quantitative_metrics:
-                plot_impl = self.get_expect_domain_values_to_be_between_chart
+                chart = self.get_expect_domain_values_to_be_between_chart(
+                    expectation_type=expectation_type,
+                    df=df,
+                    metric_name=metric_name,
+                    sequential=sequential,
+                    subtitle=subtitle,
+                )
             elif metric_name in nominal_metrics:
                 plot_impl = self.get_expect_domain_values_to_match_set
         elif plot_mode is PlotMode.DESCRIPTIVE:
@@ -2202,6 +2224,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _create_return_chart_for_column_domain_expectation(
         self,
+        expectation_type: str,
         expectation_configuration: ExpectationConfiguration,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
@@ -2246,6 +2269,7 @@ class DataAssistantResult(SerializableDictDot):
                 metric_name: str = sanitize_parameter_name(name=metric_name)
 
                 return self._chart_domain_values(
+                    expectation_type=expectation_type,
                     df=df,
                     metric_name=metric_name,
                     plot_mode=plot_mode,
@@ -2425,6 +2449,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _create_chart_for_table_domain_expectation(
         self,
+        expectation_type: str,
         expectation_configuration: ExpectationConfiguration,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         include_column_names: Optional[List[str]],
@@ -2487,6 +2512,7 @@ class DataAssistantResult(SerializableDictDot):
                         df[metric_name] = new_record_list
 
                 return self._chart_domain_values(
+                    expectation_type=expectation_type,
                     df=df,
                     metric_name=metric_name,
                     plot_mode=plot_mode,
