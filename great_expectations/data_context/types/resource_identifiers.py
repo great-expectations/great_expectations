@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 from uuid import UUID
 
 from dateutil.parser import parse
@@ -14,6 +14,41 @@ from great_expectations.marshmallow__shade import Schema, fields, post_load
 logger = logging.getLogger(__name__)
 
 
+class DatasourceIdentifier(DataContextKey):
+    def __init__(self, datasource_name: str) -> None:
+        super().__init__()
+        if not isinstance(datasource_name, str):
+            raise InvalidDataContextKeyError(
+                f"datasource_name must be a string, not {type(datasource_name).__name__}"
+            )
+        self._datasource_name = datasource_name
+
+    @property
+    def datasource_name(self) -> str:
+        return self._datasource_name
+
+    def to_tuple(self) -> Tuple[str, ...]:
+        return tuple(self.datasource_name.split("."))
+
+    def to_fixed_length_tuple(self) -> Tuple[str]:
+        return (self.datasource_name,)
+
+    @classmethod
+    def from_tuple(
+        cls, tuple_: Tuple[str, ...]
+    ) -> "DatasourceIdentifier":  # noqa: F821
+        return cls(".".join(tuple_))
+
+    @classmethod
+    def from_fixed_length_tuple(
+        cls, tuple_: Tuple[str, ...]
+    ) -> "DatasourceIdentifier":  # noqa: F821
+        return cls(datasource_name=tuple_[0])
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}::{self._datasource_name}"
+
+
 class ExpectationSuiteIdentifier(DataContextKey):
     def __init__(self, expectation_suite_name: str) -> None:
         super().__init__()
@@ -24,24 +59,28 @@ class ExpectationSuiteIdentifier(DataContextKey):
         self._expectation_suite_name = expectation_suite_name
 
     @property
-    def expectation_suite_name(self):
+    def expectation_suite_name(self) -> str:
         return self._expectation_suite_name
 
-    def to_tuple(self):
+    def to_tuple(self) -> Tuple[str, ...]:
         return tuple(self.expectation_suite_name.split("."))
 
-    def to_fixed_length_tuple(self):
+    def to_fixed_length_tuple(self) -> Tuple[str]:
         return (self.expectation_suite_name,)
 
     @classmethod
-    def from_tuple(cls, tuple_):
+    def from_tuple(
+        cls, tuple_: Tuple[str, ...]
+    ) -> "ExpectationSuiteIdentifier":  # noqa: F821
         return cls(".".join(tuple_))
 
     @classmethod
-    def from_fixed_length_tuple(cls, tuple_):
+    def from_fixed_length_tuple(
+        cls, tuple_: Tuple[str, ...]
+    ) -> "ExpectationSuiteIdentifier":  # noqa: F821
         return cls(expectation_suite_name=tuple_[0])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}::{self._expectation_suite_name}"
 
 
