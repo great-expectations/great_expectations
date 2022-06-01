@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
 
 import altair as alt
+import numpy as np
 import pandas as pd
 from IPython.display import HTML, display
 
@@ -229,30 +230,6 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair chart for nominal metrics
         """
-        df = df.explode(metric_name).reset_index(drop=True)
-
-        column_number: str = "column_number"
-        df[column_number] = pd.factorize(df[metric_name])[0] + 1
-
-        metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-        metric_component: MetricPlotComponent
-        if metric_name == "table_columns":
-            table_column: str = "table_column"
-            df_columns = [
-                table_column if column == "table_columns" else column
-                for column in list(df.columns)
-            ]
-            df.columns = df_columns
-            metric_component = MetricPlotComponent(
-                name=table_column,
-                alt_type=metric_type,
-            )
-        else:
-            metric_component = MetricPlotComponent(
-                name=metric_name,
-                alt_type=metric_type,
-            )
-
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
             column for column in df.columns if column not in [metric_name, batch_name]
@@ -268,15 +245,50 @@ class DataAssistantResult(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
 
-        domain_component: DomainPlotComponent = DomainPlotComponent(
-            name=None,
-            alt_type=None,
-            subtitle=subtitle,
-        )
+        column_number: str = "column_number"
+
+        metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+        column_set: List[str]
+        metric_component: MetricPlotComponent
+        if metric_name == "table_columns":
+            table_column: str = "table_column"
+            if len(np.unique(df[metric_name])) == 1:
+                column_set = df[metric_name].iloc[0]
+            else:
+                column_set = None
+
+            metric_component = MetricPlotComponent(
+                name=table_column,
+                alt_type=metric_type,
+            )
+        else:
+            metric_component = MetricPlotComponent(
+                name=metric_name,
+                alt_type=metric_type,
+            )
+
+        df = df.explode(metric_name).reset_index(drop=True)
+
+        df[column_number] = pd.factorize(df[metric_name])[0] + 1
+
+        df_columns = [
+            table_column if column == "table_columns" else column
+            for column in list(df.columns)
+        ]
+        df.columns = df_columns
+
+        if column_set is not None:
+            df = df.iloc[:1]
 
         column_number_component: PlotComponent = PlotComponent(
             name=column_number,
             alt_type=AltairDataTypes.ORDINAL.value,
+        )
+
+        domain_component: DomainPlotComponent = DomainPlotComponent(
+            name=None,
+            alt_type=AltairDataTypes.NOMINAL.value,
+            subtitle=subtitle,
         )
 
         if sequential:
@@ -286,6 +298,7 @@ class DataAssistantResult(SerializableDictDot):
                 batch_component=batch_component,
                 domain_component=domain_component,
                 column_number_component=column_number_component,
+                column_set=column_set,
             )
         else:
             return DataAssistantResult._get_nonsequential_isotype_chart(
@@ -294,6 +307,7 @@ class DataAssistantResult(SerializableDictDot):
                 batch_component=batch_component,
                 domain_component=domain_component,
                 column_number_component=column_number_component,
+                column_set=column_set,
             )
 
     @staticmethod
@@ -303,6 +317,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
         column_number_component: PlotComponent,
+        column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             metric_plot_component=metric_component,
@@ -314,37 +329,65 @@ class DataAssistantResult(SerializableDictDot):
             metric_component.generate_tooltip(),
         ]
 
-        base: alt.Chart = alt.Chart(data=df, title=title).mark_point(
-            color=Colors.PURPLE.value
-        )
+        points: alt.Chart
+        if column_set is None:
+            points = (
+                alt.Chart(data=df, title=title)
+                .mark_point(color=Colors.PURPLE.value)
+                .encode(
+                    x=alt.X(
+                        batch_component.name,
+                        type=batch_component.alt_type,
+                        title=batch_component.title,
+                        axis=alt.Axis(grid=False),
+                    ),
+                    y=column_number_component.plot_on_y_axis(),
+                    tooltip=tooltip,
+                )
+            )
+        else:
+            column_set = column_set * 5
+            dy: int
+            if len(column_set) > 50:
+                text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
+                dy = 0
+            else:
+                column_set_text: str = ""
+                idx: int = 1
+                for column in column_set:
+                    if idx % 4 == 0:
+                        column_set_text += f"{column},$"
+                    else:
+                        column_set_text += f"{column}, "
+                    idx += 1
+                text = f"All batches have columns matching the set:${column_set_text[:-2]}."
+                dy = -100
 
-        points: alt.Chart = base.encode(
-            x=alt.X(
-                batch_component.name,
-                type=batch_component.alt_type,
-                title=batch_component.title,
-                axis=alt.Axis(grid=False),
-            ),
-            y=alt.Y(
-                metric_component.name,
-                type=metric_component.alt_type,
-                axis=alt.Axis(labels=False),
-            ),
-            tooltip=tooltip,
-        )
+            points = (
+                alt.Chart(data=df, title=title)
+                .mark_point(opacity=0.0)
+                .encode(
+                    x=alt.X(
+                        batch_component.name,
+                        type=batch_component.alt_type,
+                        title=None,
+                        axis=alt.Axis(labels=False, ticks=False, grid=False),
+                    ),
+                    y=alt.Y(
+                        column_number_component.name,
+                        type=column_number_component.alt_type,
+                        title=None,
+                        axis=alt.Axis(labels=False, ticks=False),
+                    ),
+                )
+            ).mark_text(
+                text=text,
+                color=Colors.PURPLE.value,
+                lineBreak=r"$",
+                dy=dy,
+            )
 
-        y_axis_labels: alt.Chart = base.encode(
-            x=alt.X(
-                batch_component.name,
-                type=batch_component.alt_type,
-                title=batch_component.title,
-                axis=alt.Axis(grid=False),
-            ),
-            y=column_number_component.plot_on_y_axis(),
-            tooltip=tooltip,
-        )
-
-        return points + y_axis_labels
+        return points
 
     @staticmethod
     def _get_nonsequential_isotype_chart(
@@ -353,6 +396,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
         column_number_component: PlotComponent,
+        column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             metric_plot_component=metric_component,
@@ -364,37 +408,65 @@ class DataAssistantResult(SerializableDictDot):
             metric_component.generate_tooltip(),
         ]
 
-        base: alt.Chart = alt.Chart(data=df, title=title).mark_point(
-            color=Colors.PURPLE.value
-        )
+        points: alt.Chart
+        if column_set is None:
+            points = (
+                alt.Chart(data=df, title=title)
+                .mark_point(color=Colors.PURPLE.value)
+                .encode(
+                    x=alt.X(
+                        batch_component.name,
+                        type=batch_component.alt_type,
+                        title=batch_component.title,
+                        axis=alt.Axis(grid=False),
+                    ),
+                    y=column_number_component.plot_on_y_axis(),
+                    tooltip=tooltip,
+                )
+            )
+        else:
+            column_set = column_set * 5
+            dy: int
+            if len(column_set) > 50:
+                text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
+                dy = 0
+            else:
+                column_set_text: str = ""
+                idx: int = 1
+                for column in column_set:
+                    if idx % 4 == 0:
+                        column_set_text += f"{column},$"
+                    else:
+                        column_set_text += f"{column}, "
+                    idx += 1
+                text = f"All batches have columns matching the set:${column_set_text[:-2]}."
+                dy = -100
 
-        points: alt.Chart = base.encode(
-            x=alt.X(
-                batch_component.name,
-                type=batch_component.alt_type,
-                title=batch_component.title,
-                axis=alt.Axis(grid=False),
-            ),
-            y=alt.Y(
-                metric_component.name,
-                type=metric_component.alt_type,
-                axis=alt.Axis(labels=False),
-            ),
-            tooltip=tooltip,
-        )
+            points = (
+                alt.Chart(data=df, title=title)
+                .mark_point(opacity=0.0)
+                .encode(
+                    x=alt.X(
+                        batch_component.name,
+                        type=batch_component.alt_type,
+                        title=None,
+                        axis=alt.Axis(labels=False, ticks=False, grid=False),
+                    ),
+                    y=alt.Y(
+                        column_number_component.name,
+                        type=column_number_component.alt_type,
+                        title=None,
+                        axis=alt.Axis(labels=False, ticks=False),
+                    ),
+                )
+            ).mark_text(
+                text=text,
+                color=Colors.PURPLE.value,
+                lineBreak=r"$",
+                dy=dy,
+            )
 
-        y_axis_labels: alt.Chart = base.encode(
-            x=alt.X(
-                batch_component.name,
-                type=batch_component.alt_type,
-                title=batch_component.title,
-                axis=alt.Axis(grid=False),
-            ),
-            y=column_number_component.plot_on_y_axis(),
-            tooltip=tooltip,
-        )
-
-        return points + y_axis_labels
+        return points
 
     def _plot(
         self,
