@@ -814,7 +814,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def escape_all_config_variables(
         self,
         value: Union[str, dict, list],
-        dollar_sign_escape_string: str,
+        dollar_sign_escape_string: Optional[str] = None,
         skip_if_substitution_variable: bool = True,
     ) -> Union[str, dict, list]:
         """
@@ -828,6 +828,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             input value with all `$` characters replaced with the escape string
         """
+        if not dollar_sign_escape_string:
+            dollar_sign_escape_string: str = self.DOLLAR_SIGN_ESCAPE_STRING
 
         if isinstance(value, dict) or isinstance(value, OrderedDict):
             return {
