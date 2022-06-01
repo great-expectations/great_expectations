@@ -64,10 +64,8 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import Store, TupleStoreBackend
-from great_expectations.data_context.store.expectations_store import ExpectationsStore
+from great_expectations.data_context.store import Store
 from great_expectations.data_context.store.profiler_store import ProfilerStore
-from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
@@ -80,7 +78,6 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     GeCloudConfig,
     ProgressBarsConfig,
-    anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
@@ -93,7 +90,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
-    build_store_from_config,
     instantiate_class_from_config,
     load_class,
     parse_substitution_variable,

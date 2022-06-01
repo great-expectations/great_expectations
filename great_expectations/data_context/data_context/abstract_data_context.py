@@ -31,9 +31,9 @@ from great_expectations.data_context.store import Store  # isort:skip
 from great_expectations.data_context.store import TupleStoreBackend  # isort:skip
 
 # this is here because of circular imports
-from great_expectations.rule_based_profiler import RuleBasedProfiler  # isort:skip
-from great_expectations.rule_based_profiler import RuleBasedProfilerResult  # isort:skip
-
+# from great_expectations.rule_based_profiler import RuleBasedProfiler  # isort:skip
+# from great_expectations.rule_based_profiler import RuleBasedProfilerResult  # isort:skip
+#
 
 logger = logging.getLogger(__name__)
 
