@@ -233,10 +233,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     --ge-feature-maturity-info--
     """
 
-    DOLLAR_SIGN_ESCAPE_STRING = r"/$"
-
     @classmethod
     def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
+        """
+        Validation of the configuration against schema, performed as part of __init__()
+        Args:
+            project_config (DataContextConfig or Mapping): config to validate
+
+        Returns:
+            True if the validation is successful. Raises ValidationError if not.
+        """
         if isinstance(project_config, DataContextConfig):
             return True
         try:
@@ -281,7 +287,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         self.runtime_environment = runtime_environment or {}
 
-        # it is weird that this has to be so far down
         super().__init__(
             project_config=project_config, runtime_environment=runtime_environment
         )
@@ -388,7 +393,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     ) -> "ValidationOperator":
         """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
         Args:
-            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
+            validation_operator_name (str): a key for the new ValidationOperator in self._validation_operators
             validation_operator_config (dict): a config for the ValidationOperator to add
         Returns:
             validation_operator (ValidationOperator)
@@ -575,9 +580,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
         return self._usage_statistics_handler
 
-    # @property
-    # def project_config_with_variables_substituted(self) -> DataContextConfig:
-    #     return self.get_config_with_variables_substituted()
+    @property
+    def project_config_with_variables_substituted(self) -> DataContextConfig:
+        return self.get_config_with_variables_substituted()
 
     @property
     def anonymous_usage_statistics(self):
@@ -797,16 +802,19 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     )
                     substitutions[config_variable] = value
 
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        if len(substitutions) == 0:
+            return config
+        else:
+            return DataContextConfig(
+                **substitute_all_config_variables(
+                    config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+                )
             )
-        )
 
     def escape_all_config_variables(
         self,
         value: Union[str, dict, list],
-        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+        dollar_sign_escape_string: str,
         skip_if_substitution_variable: bool = True,
     ) -> Union[str, dict, list]:
         """
@@ -1612,6 +1620,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
     ) -> Validator:
+        """
+        Retrieving Validator using List[Batch].
+
+        Args:
+            expectation_suite (ExpectationSuite): Suite associated with Validator.
+            batch_list (List[Batch]): List of Batches to associate with Validator.
+
+        Returns:
+            Validator
+        """
         if len(batch_list) == 0:
             raise ge_exceptions.InvalidBatchRequestError(
                 """Validator could not be created because BatchRequest returned an empty batch_list.

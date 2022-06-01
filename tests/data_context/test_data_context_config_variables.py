@@ -260,6 +260,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
     os.environ["replace_me"] = value_from_environment
 
     value_from_runtime_override = "runtime_var"
+    # want to make sure this is used preferentially
     runtime_environment = {"replace_me": value_from_runtime_override}
 
     project_path = str(tmp_path_factory.mktemp("data_context"))

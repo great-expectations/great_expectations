@@ -30,11 +30,6 @@ from great_expectations.data_context.store import (  # isort:skip
 from great_expectations.data_context.store import Store  # isort:skip
 from great_expectations.data_context.store import TupleStoreBackend  # isort:skip
 
-# this is here because of circular imports
-# from great_expectations.rule_based_profiler import RuleBasedProfiler  # isort:skip
-# from great_expectations.rule_based_profiler import RuleBasedProfilerResult  # isort:skip
-#
-
 logger = logging.getLogger(__name__)
 
 yaml: YAMLHandler = YAMLHandler()
@@ -128,20 +123,24 @@ class AbstractDataContext(ABC):
     def __init__(
         self,
         project_config: Union[DataContextConfig, Mapping],
-        runtime_environment: Optional[dict] = None
-        # context_root_dir do we keep this?
+        runtime_environment: Optional[dict] = None,
     ):
+        """
+        __init__ method for AbstractDataContext. In subclasses, typically called *after* initializing subclass-specific
+        properties.
+
+        Args:
+            project_config (DataContextConfig or Mapping): config for DataContext
+            runtime_environment (dict): runtime environment parameters passed in as dict
+        """
         self._project_config = project_config
-        # is this the property that we want?
-        self._project_config_with_variables_substituted: Optional[
-            DataContextConfig
-        ] = None
 
         self.runtime_environment = runtime_environment or {}
         self._apply_global_config_overrides()
 
         # Init stores
         self._stores = {}
+        # the issue is that this is the current class, which is missing
         self._init_stores(self.project_config_with_variables_substituted.stores)
 
         # TODO : Datasources
@@ -323,6 +322,16 @@ class AbstractDataContext(ABC):
             )
 
     def _load_config_variables_file(self):
+        """
+        Method is used by BaseDataContext (soon to be FileDataContext) to load the config file from filesystem.
+
+        For cloud and in-memory, we return an empty dictionary. This method exists at the AbstractDataContext-level to
+        make the hierarchy explicit
+
+        Returns:
+            Empty dict when called from AbstractDataContext (no filesystem)
+
+        """
         return {}
 
     def _apply_global_config_overrides(self) -> None:
@@ -455,6 +464,7 @@ class AbstractDataContext(ABC):
         Returns:
 
         """
+        res = os.environ
         substituted_config_variables = substitute_all_config_variables(
             # so this is actually a file that is loaded?
             self.config_variables,
