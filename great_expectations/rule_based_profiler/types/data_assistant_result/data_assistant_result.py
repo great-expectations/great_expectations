@@ -456,6 +456,7 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def get_expect_domain_values_to_match_set(
+        expectation_type: str,
         df: pd.DataFrame,
         metric_name: str,
         sequential: bool,
@@ -463,6 +464,7 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.Chart:
         """
         Args:
+            expectation_type: The name of the expectation
             df: A pandas dataframe containing the data to be plotted
             metric_name: The name of the metric as it exists in the pandas dataframe
             sequential: Whether batches are sequential in nature
@@ -534,6 +536,7 @@ class DataAssistantResult(SerializableDictDot):
 
         if sequential:
             return DataAssistantResult._get_sequential_expect_domain_values_to_match_set_isotype_chart(
+                expectation_type=expectation_type,
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
@@ -543,6 +546,7 @@ class DataAssistantResult(SerializableDictDot):
             )
         else:
             return DataAssistantResult._get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
+                expectation_type=expectation_type,
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
@@ -709,6 +713,7 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _get_sequential_expect_domain_values_to_match_set_isotype_chart(
+        expectation_type: str,
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
@@ -716,10 +721,27 @@ class DataAssistantResult(SerializableDictDot):
         column_number_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
-        pass
+        title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
+            metric_plot_component=metric_component,
+            batch_plot_component=batch_component,
+            domain_plot_component=domain_component,
+        )
+
+        chart: alt.Chart = DataAssistantResult._get_sequential_isotype_chart(
+            df=df,
+            metric_component=metric_component,
+            batch_component=batch_component,
+            domain_component=domain_component,
+            column_number_component=column_number_component,
+            column_set=column_set,
+        ).properties(title=title)
+
+        return chart
 
     @staticmethod
     def _get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
+        expectation_type: str,
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
@@ -727,7 +749,23 @@ class DataAssistantResult(SerializableDictDot):
         column_number_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
-        pass
+        title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
+            metric_plot_component=metric_component,
+            batch_plot_component=batch_component,
+            domain_plot_component=domain_component,
+        )
+
+        chart: alt.Chart = DataAssistantResult._get_nonsequential_isotype_chart(
+            df=df,
+            metric_component=metric_component,
+            batch_component=batch_component,
+            domain_component=domain_component,
+            column_number_component=column_number_component,
+            column_set=column_set,
+        ).properties(title=title)
+
+        return chart
 
     @staticmethod
     def get_quantitative_metric_chart(
@@ -2181,7 +2219,13 @@ class DataAssistantResult(SerializableDictDot):
                     subtitle=subtitle,
                 )
             elif metric_name in nominal_metrics:
-                plot_impl = self.get_expect_domain_values_to_match_set
+                chart = self.get_expect_domain_values_to_match_set(
+                    expectation_type=expectation_type,
+                    df=df,
+                    metric_name=metric_name,
+                    sequential=sequential,
+                    subtitle=subtitle,
+                )
         elif plot_mode is PlotMode.DESCRIPTIVE:
             if metric_name in quantitative_metrics:
                 plot_impl = self.get_quantitative_metric_chart
