@@ -117,12 +117,10 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = (
-            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
-                attributed_metric_values=parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-            )
+        metric_values: MetricValues = AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+            attributed_metric_values=parameter_node[
+                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+            ]
         )
 
         return Attributes(
