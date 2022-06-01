@@ -1000,13 +1000,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
     ) -> Optional[Any]:
         # Property values of collections types must be unique (use set for "list"/"tuple" and "update" for dictionary).
 
-        if isinstance(dest_property_value, list):
+        if isinstance(dest_property_value, list) and source_property_value is not None:
             return list(set(dest_property_value + source_property_value))
 
-        if isinstance(dest_property_value, tuple):
+        if isinstance(dest_property_value, tuple) and source_property_value is not None:
             return tuple(set(dest_property_value + source_property_value))
 
-        if isinstance(dest_property_value, dict):
+        if isinstance(dest_property_value, dict) and source_property_value is not None:
             return dict(dest_property_value, **source_property_value)
 
         return dest_property_value
