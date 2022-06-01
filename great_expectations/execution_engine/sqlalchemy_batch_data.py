@@ -218,8 +218,10 @@ class SqlAlchemyBatchData(BatchData):
                 temp_table_name = f"{temp_table_schema_name}.{temp_table_name}"
 
             stmt = f"CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}"
-        elif dialect == GESqlDialect.MYSQL or dialect == GESqlDialect.HIVE:
+        elif dialect == GESqlDialect.MYSQL:
             stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS {query}"
+        elif dialect == GESqlDialect.HIVE:
+            stmt = f"CREATE TEMPORARY TABLE `{temp_table_name}` AS {query}"
         elif dialect == GESqlDialect.MSSQL:
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
