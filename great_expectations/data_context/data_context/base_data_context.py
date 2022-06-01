@@ -285,6 +285,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         self.runtime_environment = runtime_environment or {}
 
+        # it is weird that this has to be so far down
         super().__init__(
             project_config=project_config, runtime_environment=runtime_environment
         )
@@ -372,19 +373,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # if in ge_cloud_mode, use ge_cloud_organization_id
         if hasattr(self, "ge_cloud_mode") and self.ge_cloud_mode:
             return self.ge_cloud_config.organization_id
-        # Choose the id of the currently-configured expectations store, if it is a persistent store
-        expectations_store = self._stores[
-            self.project_config_with_variables_substituted.expectations_store_name
-        ]
-        if isinstance(expectations_store.store_backend, TupleStoreBackend):
-            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
-            return expectations_store.store_backend_id_warnings_suppressed
-
-        # Otherwise choose the id stored in the project_config
         else:
-            return (
-                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-            )
+            return super()._construct_data_context_id()
 
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
@@ -621,7 +611,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def checkpoint_store_name(self):
         try:
-            return self.project_config_with_variables_substituted.checkpoint_store_name
+            return super().checkpoint_store_name
+
         except AttributeError:
             from great_expectations.data_context.store.checkpoint_store import (
                 CheckpointStore,
@@ -654,10 +645,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     f'Checkpoint store named "{checkpoint_store_name}" is not a configured store, so will try to use default Checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
                 return self._build_store_from_config(
-                    checkpoint_store_name,
-                    DataContextConfigDefaults.DEFAULT_STORES.value[
+                    store_name=checkpoint_store_name,
+                    store_config=DataContextConfigDefaults.DEFAULT_STORES.value[
                         checkpoint_store_name
                     ],
+                    runtime_environment={
+                        "root_directory": self.root_directory,
+                    },
                 )
             raise ge_exceptions.StoreConfigurationError(
                 f'Attempted to access the Checkpoint store named "{checkpoint_store_name}", which is not a configured store.'
@@ -691,8 +685,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
                 return self._build_store_from_config(
-                    profiler_store_name,
-                    DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],
+                    store_name=profiler_store_name,
+                    store_config=DataContextConfigDefaults.DEFAULT_STORES.value[
+                        profiler_store_name
+                    ],
+                    runtime_environment={"root_directory": self.root_directory},
                 )
             raise ge_exceptions.StoreConfigurationError(
                 f'Attempted to access the Profiler store named "{profiler_store_name}", which is not a configured store.'
@@ -725,10 +722,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._in_memory_instance_id = instance_id
         return instance_id
 
-    @property
-    def config_variables(self):
-        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
-        return dict(self._load_config_variables_file())
+    # @property
+    # def config_variables(self):
+    #     # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
+    #     return dict(self._load_config_variables_file())
 
     @property
     def config(self) -> DataContextConfig:
@@ -747,19 +744,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         # this needs to be changed so that it is either cloud mode or if we are just not doing the file path stuff
         # TODO this cleaned up so that we only handle the file_path
-        # if not hasattr(self, "ge_cloud_mode"):
-        #     print("hello i am here")
-        #     return super()._load_config_variables_files()
-        if hasattr(self, "ge_cloud_mode") and self.ge_cloud_mode:
-            return {}
-        config_variables_file_path = cast(
-            DataContextConfig, self.get_config()
-        ).config_variables_file_path
-        if config_variables_file_path:
+        config: DataContextConfig = cast(DataContextConfig, self.get_config())
+        if (
+            hasattr(config, "config_variables_file_path")
+            and config.config_variables_file_path
+        ):
             try:
                 # If the user specifies the config variable path with an environment variable, we want to substitute it
                 defined_path = substitute_config_variable(
-                    config_variables_file_path, dict(os.environ)
+                    config.config_variables_file_path, dict(os.environ)
                 )
                 if not os.path.isabs(defined_path):
                     # A BaseDataContext will not have a root directory; in that case use the current directory
@@ -776,7 +769,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 logger.debug("Generating empty config variables file.")
                 return {}
         else:
-            return {}
+            return super()._load_config_variables_file()
 
     def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
         """
@@ -1767,6 +1760,21 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
 
+    def _build_store_from_config(
+        self,
+        store_name: str,
+        store_config: dict,
+        runtime_environment: Optional[dict] = None,
+    ) -> Optional[Store]:
+        runtime_environment: dict = {
+            "root_directory": self.root_directory,
+        }
+        return super()._build_store_from_config(
+            store_name=store_name,
+            store_config=store_config,
+            runtime_environment=runtime_environment,
+        )
+
     def _build_datasource_from_config(
         self, name: str, config: Union[dict, DatasourceConfig]
     ):
@@ -1856,19 +1864,19 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             datasources.append(masked_config)
         return datasources
 
-    def list_stores(self):
-        """List currently-configured Stores on this context"""
-
-        stores = []
-        for (
-            name,
-            value,
-        ) in self.project_config_with_variables_substituted.stores.items():
-            store_config = copy.deepcopy(value)
-            store_config["name"] = name
-            masked_config = PasswordMasker.sanitize_config(store_config)
-            stores.append(masked_config)
-        return stores
+    # def list_stores(self):
+    #     """List currently-configured Stores on this context"""
+    #
+    #     stores = []
+    #     for (
+    #         name,
+    #         value,
+    #     ) in self.project_config_with_variables_substituted.stores.items():
+    #         store_config = copy.deepcopy(value)
+    #         store_config["name"] = name
+    #         masked_config = PasswordMasker.sanitize_config(store_config)
+    #         stores.append(masked_config)
+    #     return stores
 
     def list_active_stores(self):
         """
@@ -2215,11 +2223,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def evaluation_parameter_store(self):
         return self.stores[self.evaluation_parameter_store_name]
 
-    @property
-    def evaluation_parameter_store_name(self):
-        return (
-            self.project_config_with_variables_substituted.evaluation_parameter_store_name
-        )
+    # @property
+    # def evaluation_parameter_store_name(self):
+    #     return (
+    #         self.project_config_with_variables_substituted.evaluation_parameter_store_name
+    #     )
 
     @property
     def assistants(self) -> DataAssistantDispatcher:
@@ -3422,6 +3430,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             self._build_store_from_config(
                 store_name=store_name,
                 store_config=config,
+                runtime_environment={
+                    "root_directory": self.root_directory,
+                },
             ),
         )
         store_name = instantiated_class.store_name or store_name

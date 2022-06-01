@@ -1,4 +1,5 @@
 import configparser
+import copy
 import json
 import logging
 import os
@@ -13,6 +14,7 @@ from great_expectations.data_context.types.base import (
     anonymizedUsageStatisticsSchema,
 )
 from great_expectations.data_context.util import (
+    PasswordMasker,
     build_store_from_config,
     substitute_all_config_variables,
 )
@@ -149,6 +151,7 @@ class AbstractDataContext(ABC):
         self._assistants = DataAssistantDispatcher(data_context=self)
 
     ### properties
+
     @property
     def config(self) -> DataContextConfig:
         return self._project_config
@@ -179,10 +182,40 @@ class AbstractDataContext(ABC):
         return self.stores[self.validations_store_name]
 
     @property
+    def checkpoint_store_name(self):
+        return self.project_config_with_variables_substituted.checkpoint_store_name
+
+    @property
     def profiler_store_name(self) -> str:
         return self.project_config_with_variables_substituted.profiler_store_name
 
+    @property
+    def config_variables(self):
+        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
+        return dict(self._load_config_variables_file())
+
+    @property
+    def evaluation_parameter_store_name(self):
+        return (
+            self.project_config_with_variables_substituted.evaluation_parameter_store_name
+        )
+
     ### public methods
+
+    def list_stores(self):
+        """List currently-configured Stores on this context"""
+
+        stores = []
+        for (
+            name,
+            value,
+        ) in self.project_config_with_variables_substituted.stores.items():
+            store_config = copy.deepcopy(value)
+            store_config["name"] = name
+            masked_config = PasswordMasker.sanitize_config(store_config)
+            stores.append(masked_config)
+        return stores
+
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
@@ -233,7 +266,10 @@ class AbstractDataContext(ABC):
     ### private methods
 
     def _build_store_from_config(
-        self, store_name: str, store_config: dict
+        self,
+        store_name: str,
+        store_config: dict,
+        runtime_environment: Optional[dict] = None,
     ) -> Optional[Store]:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
@@ -260,9 +296,7 @@ class AbstractDataContext(ABC):
             store_name=store_name,
             store_config=store_config,
             module_name=module_name,
-            runtime_environment={
-                "root_directory": self.root_directory,
-            },
+            runtime_environment=runtime_environment,
         )
         self._stores[store_name] = new_store
         return new_store
@@ -274,10 +308,6 @@ class AbstractDataContext(ABC):
         Returns:
             UUID to use as the data_context_id
         """
-
-        # if in ge_cloud_mode, use ge_cloud_organization_id
-        if hasattr(self, "ge_cloud_mode") and self.ge_cloud_mode:
-            return self.ge_cloud_config.organization_id
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
             self.project_config_with_variables_substituted.expectations_store_name
@@ -292,7 +322,7 @@ class AbstractDataContext(ABC):
                 self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
             )
 
-    def _load_config_variables_files(self):
+    def _load_config_variables_file(self):
         return {}
 
     def _apply_global_config_overrides(self) -> None:
@@ -426,6 +456,7 @@ class AbstractDataContext(ABC):
 
         """
         substituted_config_variables = substitute_all_config_variables(
+            # so this is actually a file that is loaded?
             self.config_variables,
             dict(os.environ),
             self.DOLLAR_SIGN_ESCAPE_STRING,
