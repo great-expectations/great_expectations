@@ -147,24 +147,24 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                 and isinstance(
                     metric_computation_result.attributed_resolved_metrics[
                         0
-                    ].metric_values,
+                    ].conditioned_metric_values,
                     np.ndarray,
                 )
                 and metric_computation_result.attributed_resolved_metrics[
                     0
-                ].metric_values.shape[1]
+                ].conditioned_metric_values.shape[1]
                 == 1
             ):
                 return Attributes(
                     {
                         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                             0
-                        ].metric_values[
+                        ].conditioned_metric_values[
                             :, 0
                         ],
                         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                             0
-                        ].attributed_metric_values,
+                        ].conditioned_attributed_metric_values,
                         FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
                     }
                 )
@@ -173,10 +173,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                 {
                     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                         0
-                    ].metric_values,
+                    ].conditioned_metric_values,
                     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                         0
-                    ].attributed_metric_values,
+                    ].conditioned_attributed_metric_values,
                     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
                 }
             )
