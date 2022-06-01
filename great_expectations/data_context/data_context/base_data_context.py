@@ -297,10 +297,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             None  # This variable *may* be used in case we cannot save an instance id
         )
 
-        # Init stores
-        self._stores = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
-
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
 
