@@ -417,7 +417,7 @@ class DataAssistantResult(SerializableDictDot):
                         batch_component.name,
                         type=batch_component.alt_type,
                         title=batch_component.title,
-                        axis=alt.Axis(grid=False),
+                        axis=alt.Axis(labels=False, grid=False),
                     ),
                     y=column_number_component.plot_on_y_axis(),
                     tooltip=tooltip,
