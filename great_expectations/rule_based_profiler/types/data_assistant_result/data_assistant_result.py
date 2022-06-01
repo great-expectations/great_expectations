@@ -329,9 +329,9 @@ class DataAssistantResult(SerializableDictDot):
             metric_component.generate_tooltip(),
         ]
 
-        points: alt.Chart
+        chart: Union[alt.Chart, alt.LayerChart]
         if column_set is None:
-            points = (
+            chart = (
                 alt.Chart(data=df, title=title)
                 .mark_point(color=Colors.PURPLE.value)
                 .encode(
@@ -346,7 +346,6 @@ class DataAssistantResult(SerializableDictDot):
                 )
             )
         else:
-            column_set = column_set * 5
             dy: int
             if len(column_set) > 50:
                 text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
@@ -363,7 +362,7 @@ class DataAssistantResult(SerializableDictDot):
                 text = f"All batches have columns matching the set:${column_set_text[:-2]}."
                 dy = -100
 
-            points = (
+            chart = (
                 alt.Chart(data=df, title=title)
                 .mark_point(opacity=0.0)
                 .encode(
@@ -387,7 +386,7 @@ class DataAssistantResult(SerializableDictDot):
                 dy=dy,
             )
 
-        return points
+        return chart
 
     @staticmethod
     def _get_nonsequential_isotype_chart(
@@ -408,9 +407,9 @@ class DataAssistantResult(SerializableDictDot):
             metric_component.generate_tooltip(),
         ]
 
-        points: alt.Chart
+        chart: alt.Chart
         if column_set is None:
-            points = (
+            chart = (
                 alt.Chart(data=df, title=title)
                 .mark_point(color=Colors.PURPLE.value)
                 .encode(
@@ -425,7 +424,6 @@ class DataAssistantResult(SerializableDictDot):
                 )
             )
         else:
-            column_set = column_set * 5
             dy: int
             if len(column_set) > 50:
                 text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
@@ -442,7 +440,7 @@ class DataAssistantResult(SerializableDictDot):
                 text = f"All batches have columns matching the set:${column_set_text[:-2]}."
                 dy = -100
 
-            points = (
+            chart = (
                 alt.Chart(data=df, title=title)
                 .mark_point(opacity=0.0)
                 .encode(
@@ -466,7 +464,7 @@ class DataAssistantResult(SerializableDictDot):
                 dy=dy,
             )
 
-        return points
+        return chart
 
     def _plot(
         self,
