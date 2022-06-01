@@ -213,6 +213,150 @@ class DataAssistantResult(SerializableDictDot):
             exclude_column_names=exclude_column_names,
         )
 
+    def _plot(
+        self,
+        plot_mode: PlotMode,
+        sequential: bool,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        """
+        VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
+        Display Charts are condensed and interactive while Return Charts are separated into an individual chart for
+        each metric-domain/expectation-domain combination.
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            plot_mode: Type of plot to generate, prescriptive or descriptive
+            sequential: Whether batches are sequential in nature
+            theme: Altair top-level chart configuration dictionary
+            include_column_names: A list of columns to chart
+            exclude_column_names: A list of columns not to chart
+
+        Returns:
+            A PlotResult object consisting of an individual chart for each metric-domain/expectation-domain
+        """
+        if include_column_names is not None and exclude_column_names is not None:
+            raise ValueError(
+                "You may either use `include_column_names` or `exclude_column_names` (but not both)."
+            )
+
+        display_charts: Union[
+            List[alt.Chart], List[alt.LayerChart], List[alt.VConcatChart]
+        ] = []
+        return_charts: Union[List[alt.Chart], List[alt.LayerChart]] = []
+
+        expectation_configurations: List[
+            ExpectationConfiguration
+        ] = self.expectation_configurations
+
+        table_domain_charts: List[
+            Union[List[alt.Chart], List[alt.LayerChart]]
+        ] = self._plot_table_domain_charts(
+            expectation_configurations=expectation_configurations,
+            plot_mode=plot_mode,
+            sequential=sequential,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+        )
+        display_charts.extend(table_domain_charts)
+        return_charts.extend(table_domain_charts)
+
+        column_domain_display_chart: List[alt.VConcatChart]
+        column_domain_return_charts: List[alt.Chart]
+        (
+            column_domain_display_charts,
+            column_domain_return_charts,
+        ) = self._plot_column_domain_charts(
+            expectation_configurations=expectation_configurations,
+            plot_mode=plot_mode,
+            sequential=sequential,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+        )
+        display_charts.extend(column_domain_display_charts)
+        return_charts.extend(column_domain_return_charts)
+
+        self.display(charts=display_charts, theme=theme)
+
+        return_charts = self.apply_theme(charts=return_charts, theme=theme)
+        return PlotResult(charts=return_charts)
+
+    @staticmethod
+    def display(
+        charts: Union[List[alt.Chart], List[alt.VConcatChart]],
+        theme: Optional[Dict[str, Any]],
+    ) -> None:
+        """
+        Display each chart passed by DataAssistantResult.plot()
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            charts: A list of Altair chart objects to display
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the default theme
+        """
+        altair_theme: Dict[str, Any]
+        if theme:
+            altair_theme = DataAssistantResult._get_theme(theme=theme)
+        else:
+            altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
+
+        themed_charts: List[alt.chart] = DataAssistantResult.apply_theme(
+            charts=charts, theme=altair_theme
+        )
+
+        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+        dropdown_title_color: str = altair_theme["legend"]["titleColor"]
+        dropdown_title_font: str = altair_theme["font"]
+        dropdown_css: str = f"""
+            <style>
+            span.vega-bind-name {{
+                color: {dropdown_title_color};
+                font-family: "{dropdown_title_font}";
+                font-weight: bold;
+            }}
+            form.vega-bindings {{
+              position: absolute;
+              left: 75px;
+              top: 30px;
+            }}
+            </style>
+        """
+        display(HTML(dropdown_css))
+
+        # max rows for Altair charts is set to 5,000 without this
+        alt.data_transformers.disable_max_rows()
+
+        chart: alt.Chart
+        for chart in themed_charts:
+            chart.display()
+
+    @staticmethod
+    def apply_theme(
+        charts: List[alt.Chart],
+        theme: Optional[Dict[str, Any]],
+    ) -> List[alt.Chart]:
+        """
+        Apply the Great Expectations default theme and any user-provided theme overrides to each chart
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            charts: A list of Altair chart objects to apply a theme to
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
+
+        Returns:
+            A list of Altair charts with the theme applied
+        """
+        theme = DataAssistantResult._get_theme(theme=theme)
+        return [chart.configure(**theme) for chart in charts]
+
     @staticmethod
     def get_nominal_metric_chart(
         df: pd.DataFrame,
@@ -302,6 +446,103 @@ class DataAssistantResult(SerializableDictDot):
             )
         else:
             return DataAssistantResult._get_nonsequential_isotype_chart(
+                df=df,
+                metric_component=metric_component,
+                batch_component=batch_component,
+                domain_component=domain_component,
+                column_number_component=column_number_component,
+                column_set=column_set,
+            )
+
+    @staticmethod
+    def get_expect_domain_values_to_match_set(
+        df: pd.DataFrame,
+        metric_name: str,
+        sequential: bool,
+        subtitle: Optional[str] = None,
+    ) -> alt.Chart:
+        """
+        Args:
+            df: A pandas dataframe containing the data to be plotted
+            metric_name: The name of the metric as it exists in the pandas dataframe
+            sequential: Whether batches are sequential in nature
+            subtitle: The subtitle, if applicable
+
+        Returns:
+            An altair chart for nominal metrics
+        """
+        batch_name: str = "batch"
+        batch_identifiers: List[str] = [
+            column for column in df.columns if column not in [metric_name, batch_name]
+        ]
+        batch_type: alt.StandardType
+        if sequential:
+            batch_type = AltairDataTypes.ORDINAL.value
+        else:
+            batch_type = AltairDataTypes.NOMINAL.value
+        batch_component: BatchPlotComponent = BatchPlotComponent(
+            name=batch_name,
+            alt_type=batch_type,
+            batch_identifiers=batch_identifiers,
+        )
+
+        column_number: str = "column_number"
+
+        metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+        column_set: List[str]
+        metric_component: MetricPlotComponent
+        if metric_name == "table_columns":
+            table_column: str = "table_column"
+            if len(np.unique(df[metric_name])) == 1:
+                column_set = df[metric_name].iloc[0]
+            else:
+                column_set = None
+
+            metric_component = MetricPlotComponent(
+                name=table_column,
+                alt_type=metric_type,
+            )
+        else:
+            metric_component = MetricPlotComponent(
+                name=metric_name,
+                alt_type=metric_type,
+            )
+
+        df = df.explode(metric_name).reset_index(drop=True)
+
+        df[column_number] = pd.factorize(df[metric_name])[0] + 1
+
+        df_columns = [
+            table_column if column == "table_columns" else column
+            for column in list(df.columns)
+        ]
+        df.columns = df_columns
+
+        if column_set is not None:
+            df = df.iloc[:1]
+
+        column_number_component: PlotComponent = PlotComponent(
+            name=column_number,
+            alt_type=AltairDataTypes.ORDINAL.value,
+        )
+
+        domain_component: DomainPlotComponent = DomainPlotComponent(
+            name=None,
+            alt_type=AltairDataTypes.NOMINAL.value,
+            subtitle=subtitle,
+        )
+
+        if sequential:
+            return DataAssistantResult._get_sequential_expect_domain_values_to_match_set_isotype_chart(
+                df=df,
+                metric_component=metric_component,
+                batch_component=batch_component,
+                domain_component=domain_component,
+                column_number_component=column_number_component,
+                column_set=column_set,
+            )
+        else:
+            return DataAssistantResult._get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
@@ -466,149 +707,27 @@ class DataAssistantResult(SerializableDictDot):
 
         return chart
 
-    def _plot(
-        self,
-        plot_mode: PlotMode,
-        sequential: bool,
-        theme: Optional[Dict[str, Any]] = None,
-        include_column_names: Optional[List[str]] = None,
-        exclude_column_names: Optional[List[str]] = None,
-    ) -> PlotResult:
-        """
-        VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
-        Display Charts are condensed and interactive while Return Charts are separated into an individual chart for
-        each metric-domain/expectation-domain combination.
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            plot_mode: Type of plot to generate, prescriptive or descriptive
-            sequential: Whether batches are sequential in nature
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: A list of columns to chart
-            exclude_column_names: A list of columns not to chart
-
-        Returns:
-            A PlotResult object consisting of an individual chart for each metric-domain/expectation-domain
-        """
-        if include_column_names is not None and exclude_column_names is not None:
-            raise ValueError(
-                "You may either use `include_column_names` or `exclude_column_names` (but not both)."
-            )
-
-        display_charts: Union[
-            List[alt.Chart], List[alt.LayerChart], List[alt.VConcatChart]
-        ] = []
-        return_charts: Union[List[alt.Chart], List[alt.LayerChart]] = []
-
-        expectation_configurations: List[
-            ExpectationConfiguration
-        ] = self.expectation_configurations
-
-        table_domain_charts: List[
-            Union[List[alt.Chart], List[alt.LayerChart]]
-        ] = self._plot_table_domain_charts(
-            expectation_configurations=expectation_configurations,
-            plot_mode=plot_mode,
-            sequential=sequential,
-            include_column_names=include_column_names,
-            exclude_column_names=exclude_column_names,
-        )
-        display_charts.extend(table_domain_charts)
-        return_charts.extend(table_domain_charts)
-
-        column_domain_display_chart: List[alt.VConcatChart]
-        column_domain_return_charts: List[alt.Chart]
-        (
-            column_domain_display_charts,
-            column_domain_return_charts,
-        ) = self._plot_column_domain_charts(
-            expectation_configurations=expectation_configurations,
-            plot_mode=plot_mode,
-            sequential=sequential,
-            include_column_names=include_column_names,
-            exclude_column_names=exclude_column_names,
-        )
-        display_charts.extend(column_domain_display_charts)
-        return_charts.extend(column_domain_return_charts)
-
-        self.display(charts=display_charts, theme=theme)
-
-        return_charts = self.apply_theme(charts=return_charts, theme=theme)
-        return PlotResult(charts=return_charts)
+    @staticmethod
+    def _get_sequential_expect_domain_values_to_match_set_isotype_chart(
+        df: pd.DataFrame,
+        metric_component: MetricPlotComponent,
+        batch_component: BatchPlotComponent,
+        domain_component: DomainPlotComponent,
+        column_number_component: PlotComponent,
+        column_set: Optional[List[str]],
+    ) -> alt.Chart:
+        pass
 
     @staticmethod
-    def display(
-        charts: Union[List[alt.Chart], List[alt.VConcatChart]],
-        theme: Optional[Dict[str, Any]],
-    ) -> None:
-        """
-        Display each chart passed by DataAssistantResult.plot()
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            charts: A list of Altair chart objects to display
-            theme: An Optional Altair top-level chart configuration dictionary to apply over the default theme
-        """
-        altair_theme: Dict[str, Any]
-        if theme:
-            altair_theme = DataAssistantResult._get_theme(theme=theme)
-        else:
-            altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
-
-        themed_charts: List[alt.chart] = DataAssistantResult.apply_theme(
-            charts=charts, theme=altair_theme
-        )
-
-        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
-        dropdown_title_color: str = altair_theme["legend"]["titleColor"]
-        dropdown_title_font: str = altair_theme["font"]
-        dropdown_css: str = f"""
-            <style>
-            span.vega-bind-name {{
-                color: {dropdown_title_color};
-                font-family: "{dropdown_title_font}";
-                font-weight: bold;
-            }}
-            form.vega-bindings {{
-              position: absolute;
-              left: 75px;
-              top: 30px;
-            }}
-            </style>
-        """
-        display(HTML(dropdown_css))
-
-        # max rows for Altair charts is set to 5,000 without this
-        alt.data_transformers.disable_max_rows()
-
-        chart: alt.Chart
-        for chart in themed_charts:
-            chart.display()
-
-    @staticmethod
-    def apply_theme(
-        charts: List[alt.Chart],
-        theme: Optional[Dict[str, Any]],
-    ) -> List[alt.Chart]:
-        """
-        Apply the Great Expectations default theme and any user-provided theme overrides to each chart
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            charts: A list of Altair chart objects to apply a theme to
-            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
-
-        Returns:
-            A list of Altair charts with the theme applied
-        """
-        theme = DataAssistantResult._get_theme(theme=theme)
-        return [chart.configure(**theme) for chart in charts]
+    def _get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
+        df: pd.DataFrame,
+        metric_component: MetricPlotComponent,
+        batch_component: BatchPlotComponent,
+        domain_component: DomainPlotComponent,
+        column_number_component: PlotComponent,
+        column_set: Optional[List[str]],
+    ) -> alt.Chart:
+        pass
 
     @staticmethod
     def get_quantitative_metric_chart(
@@ -2040,7 +2159,7 @@ class DataAssistantResult(SerializableDictDot):
             if metric_name in quantitative_metrics:
                 plot_impl = self.get_expect_domain_values_to_be_between_chart
             elif metric_name in nominal_metrics:
-                plot_impl = self.get_expect_domain_values_to_be_in_set
+                plot_impl = self.get_expect_domain_values_to_match_set
         elif plot_mode is PlotMode.DESCRIPTIVE:
             if metric_name in quantitative_metrics:
                 plot_impl = self.get_quantitative_metric_chart
