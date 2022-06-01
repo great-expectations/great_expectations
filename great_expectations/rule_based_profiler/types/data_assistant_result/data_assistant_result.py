@@ -2262,6 +2262,17 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
 
+        plot_impl: Optional[
+            Callable[
+                [
+                    List[ColumnDataFrame],
+                    str,
+                    bool,
+                    Optional[str],
+                ],
+                alt.Chart,
+            ]
+        ] = None
         display_chart: Optional[alt.VConcatChart] = None
 
         if metric_name:
@@ -2344,7 +2355,12 @@ class DataAssistantResult(SerializableDictDot):
 
         if plot_mode is PlotMode.PRESCRIPTIVE:
             for kwarg_name in expectation_configuration.kwargs:
-                df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
+                if isinstance(expectation_configuration.kwargs[kwarg_name], list):
+                    df[kwarg_name] = [
+                        expectation_configuration.kwargs[kwarg_name] for _ in df.index
+                    ]
+                else:
+                    df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
 
         return df
 

@@ -470,7 +470,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     assert find_strings_in_nested_obj(column_domain_charts, columns)
 
 
-def test_onboarding_data_assistant_plot_include_column_names_filters_output(
+def test_onboarding_data_assistant_plot_metrics_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
     include_column_names: List[str] = ["passenger_count", "trip_distance"]
@@ -483,12 +483,42 @@ def test_onboarding_data_assistant_plot_include_column_names_filters_output(
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
-def test_onboarding_data_assistant_plot_exclude_column_names_filters_output(
+def test_onboarding_data_assistant_plot_metrics_exclude_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
     exclude_column_names: List[str] = ["VendorID", "passenger_count"]
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics(
         exclude_column_names=exclude_column_names
+    )
+
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
+    assert len(column_domain_charts) == 38
+    assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
+
+
+def test_onboarding_data_assistant_plot_expectations_and_metrics_include_column_names_filters_output(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+) -> None:
+    include_column_names: List[str] = ["passenger_count", "trip_distance"]
+    plot_result: PlotResult = (
+        bobby_onboarding_data_assistant_result.plot_expectations_and_metrics(
+            include_column_names=include_column_names
+        )
+    )
+
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
+    assert len(column_domain_charts) == 6  # Normally 40 without filtering
+    assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
+
+
+def test_onboarding_data_assistant_plot_expectations_and_metrics_exclude_column_names_filters_output(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+) -> None:
+    exclude_column_names: List[str] = ["VendorID", "passenger_count"]
+    plot_result: PlotResult = (
+        bobby_onboarding_data_assistant_result.plot_expectations_and_metrics(
+            exclude_column_names=exclude_column_names
+        )
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
