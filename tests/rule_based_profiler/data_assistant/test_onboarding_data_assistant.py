@@ -452,7 +452,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
 ) -> None:
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics()
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
     assert len(column_domain_charts) == 40  # One for each low cardinality column
 
     columns: List[str] = [
@@ -618,7 +618,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
                 "field": "month",
                 "format": "",
                 "title": "Month",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -626,7 +626,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
                 "field": "name",
                 "format": "",
                 "title": "Name",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -634,7 +634,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
                 "field": "year",
                 "format": "",
                 "title": "Year",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -726,20 +726,3 @@ def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non
         new_cell=new_cell,
         implicit=True,
     )
-
-
-def test_onboarding_data_assistant_plot_non_sequential(
-    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
-) -> None:
-    sequential: bool = False
-    plot_metrics_result: PlotResult = (
-        bobby_onboarding_data_assistant_result.plot_metrics(sequential=sequential)
-    )
-
-    assert all([chart.mark == "bar" for chart in plot_metrics_result.charts])
-
-    plot_expectations_result: PlotResult = (
-        bobby_onboarding_data_assistant_result.plot_metrics(sequential=sequential)
-    )
-
-    assert all(chart.mark == "bar" for chart in plot_expectations_result.charts)
