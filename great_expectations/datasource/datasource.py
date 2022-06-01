@@ -273,8 +273,7 @@ class LegacyDatasource:
             )
         else:
             raise ValueError(
-                "Unable to load batch kwargs generator %s -- no configuration found or invalid configuration."
-                % name
+                f"Unable to load batch kwargs generator {name} -- no configuration found or invalid configuration."
             )
         generator = self._build_batch_kwargs_generator(**generator_config)
         self._batch_kwargs_generators[name] = generator

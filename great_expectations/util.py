@@ -918,8 +918,7 @@ def validate(
                 "When providing an expectation suite, expectation_suite_name cannot also be provided."
             )
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s"
-            % (data_asset_name, expectation_suite.expectation_suite_name)
+            f"Validating data_asset_name {data_asset_name} with expectation_suite_name {expectation_suite.expectation_suite_name}"
         )
 
     # If the object is already a DataAsset type, then this is purely a convenience method

@@ -357,8 +357,7 @@ def ensure_json_serializable(data):
 
     else:
         raise InvalidExpectationConfigurationError(
-            "%s is of type %s which cannot be serialized to json"
-            % (str(data), type(data).__name__)
+            f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
         )
 
 

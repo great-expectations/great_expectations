@@ -77,7 +77,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if class_name is None:
         logger.warning(
             "Instantiating class from config without an explicit class_name is dangerous. Consider adding "
-            "an explicit class_name for %s" % config.get("name")
+            f"an explicit class_name for {config.get('name')}"
         )
         try:
             class_name = config_defaults.pop("class_name")
