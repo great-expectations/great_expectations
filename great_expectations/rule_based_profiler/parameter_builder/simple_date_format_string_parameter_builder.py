@@ -199,7 +199,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         metric_values: MetricValues
 
-        metric_values = attributed_resolved_metrics.metric_values
+        metric_values = attributed_resolved_metrics.conditioned_metric_values
 
         if metric_values is None:
             raise ge_exceptions.ProfilerExecutionError(
@@ -258,7 +258,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             attributed_resolved_metrics
         ) in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
-            metric_values = attributed_resolved_metrics.metric_values[:, 0]
+            metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
             match_strftime_unexpected_count: int = sum(metric_values)
             success_ratio: float = (
