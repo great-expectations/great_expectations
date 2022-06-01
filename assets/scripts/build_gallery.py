@@ -190,6 +190,9 @@ def build_gallery(
         if only_these_expectations:
             if expectation not in only_these_expectations:
                 continue
+        # Temp
+        if expectation == "expect_column_kl_divergence_to_be_less_than":
+            continue
         group = requirements_dict[expectation]["group"]
         print(f"\n\n\n=== {expectation} ({group}) ===")
         requirements = requirements_dict[expectation].get("requirements", [])

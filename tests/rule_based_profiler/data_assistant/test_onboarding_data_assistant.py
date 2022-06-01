@@ -453,7 +453,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics()
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 10  # One for each low cardinality column
+    assert len(column_domain_charts) == 40  # One for each low cardinality column
 
     columns: List[str] = [
         "VendorID",
@@ -473,13 +473,13 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
 def test_onboarding_data_assistant_plot_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
-    include_column_names: List[str] = ["VendorID", "passenger_count"]
+    include_column_names: List[str] = ["passenger_count", "trip_distance"]
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics(
         include_column_names=include_column_names
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 2  # Normally 10 without filtering
+    assert len(column_domain_charts) == 6  # Normally 40 without filtering
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
@@ -492,7 +492,7 @@ def test_onboarding_data_assistant_plot_exclude_column_names_filters_output(
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 8  # Normally 10 without filtering
+    assert len(column_domain_charts) == 38
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
@@ -641,9 +641,9 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         ),
         alt.Tooltip(
             **{
-                "field": "column_distinct_values_count",
+                "field": "column_min",
                 "format": ",",
-                "title": "Column Distinct Values Count",
+                "title": "Column Min",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
         ),
