@@ -970,8 +970,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     def __init__(
         self,
         container,
-        connection_string,
-        prefix="",
+        connection_string=None,
+        account_url=None,
+        prefix=None,
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
@@ -993,9 +994,12 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
-        self.connection_string = connection_string
-        self.prefix = prefix
+        self.connection_string = connection_string or os.environ.get(
+            "AZURE_STORAGE_CONNECTION_STRING"
+        )
+        self.prefix = prefix or ""
         self.container = container
+        self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
 
     def _get_container_client(self):
 
@@ -1004,6 +1008,10 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         if self.connection_string:
             return BlobServiceClient.from_connection_string(
                 self.connection_string
+            ).get_container_client(self.container)
+        elif self.account_url:
+            return BlobServiceClient(
+                account_url=self.account_url, credential=DefaultAzureCredential()
             ).get_container_client(self.container)
         else:
             raise StoreBackendError(
