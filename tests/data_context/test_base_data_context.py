@@ -1,58 +1,13 @@
-import json
 import os
 import shutil
-from collections import OrderedDict
 
-import pandas as pd
 import pytest
-from freezegun import freeze_time
 
 import great_expectations as ge
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
-from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.config_peer import ConfigOutputModes
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context import (
-    BaseDataContext,
-    DataContext,
-    ExplorerDataContext,
-)
-from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    DataContextConfig,
-    DataContextConfigDefaults,
-    DatasourceConfig,
-)
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-    ExpectationSuiteIdentifier,
-)
-from great_expectations.data_context.util import PasswordMasker, file_relative_path
-from great_expectations.dataset import Dataset
-from great_expectations.datasource import (
-    Datasource,
-    LegacyDatasource,
-    SimpleSqlalchemyDatasource,
-)
-from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.util import (
-    deep_filter_properties_iterable,
-    gen_directory_tree_str,
-    is_library_loadable,
-)
-from tests.test_utils import create_files_in_directory, safe_remove
-
-try:
-    from unittest import mock
-except ImportError:
-    from unittest import mock
-
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import BaseDataContext, DataContext
+from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.util import PasswordMasker, file_relative_path
 
 yaml: YAMLHandler = YAMLHandler()
 
@@ -107,11 +62,12 @@ def titanic_multibatch_data_context(
     return ge.data_context.DataContext(context_path)
 
 
-def test_instantiation(titanic_multibatch_data_context):
-    my_context = titanic_multibatch_data_context
+# def test_instantiation(titanic_multibatch_data_context):
+#    my_context = titanic_multibatch_data_context
 
 
 def test_abstract_instantiation(basic_in_memory_data_context_config_just_stores):
     context = BaseDataContext(
         project_config=basic_in_memory_data_context_config_just_stores
     )
+    assert context

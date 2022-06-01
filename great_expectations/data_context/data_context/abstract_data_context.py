@@ -3,8 +3,9 @@ import json
 import logging
 import os
 from abc import ABC
-from typing import Dict, Mapping, Optional, Union
+from typing import Dict, List, Mapping, Optional, Union
 
+import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
@@ -21,6 +22,7 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispat
 
 from great_expectations.data_context.store import (  # isort:skip
     ExpectationsStore,
+    ValidationsStore,
 )
 
 from great_expectations.data_context.store import Store  # isort:skip
@@ -136,11 +138,11 @@ class AbstractDataContext(ABC):
         self.runtime_environment = runtime_environment or {}
         self._apply_global_config_overrides()
 
-        # # Init stores
+        # Init stores
         self._stores = {}
         self._init_stores(self.project_config_with_variables_substituted.stores)
-        # TODO migration of Stores and Datasources
 
+        # TODO : Datasources
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
@@ -168,6 +170,18 @@ class AbstractDataContext(ABC):
     def project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
 
+    @property
+    def validations_store_name(self):
+        return self.project_config_with_variables_substituted.validations_store_name
+
+    @property
+    def validations_store(self) -> ValidationsStore:
+        return self.stores[self.validations_store_name]
+
+    @property
+    def profiler_store_name(self) -> str:
+        return self.project_config_with_variables_substituted.profiler_store_name
+
     ### public methods
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -182,6 +196,39 @@ class AbstractDataContext(ABC):
 
         self.config["stores"][store_name] = store_config
         return self._build_store_from_config(store_name, store_config)
+
+    def list_active_stores(self):
+        """
+        List active Stores on this context. Active stores are identified by setting the following parameters:
+            expectations_store_name,
+            validations_store_name,
+            evaluation_parameter_store_name,
+            checkpoint_store_name
+            profiler_store_name
+        """
+        active_store_names: List[str] = [
+            self.expectations_store_name,
+            self.validations_store_name,
+            self.evaluation_parameter_store_name,
+        ]
+
+        try:
+            active_store_names.append(self.checkpoint_store_name)
+        except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
+            logger.info(
+                "Checkpoint store is not configured; omitting it from active stores"
+            )
+
+        try:
+            active_store_names.append(self.profiler_store_name)
+        except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
+            logger.info(
+                "Profiler store is not configured; omitting it from active stores"
+            )
+
+        return [
+            store for store in self.list_stores() if store["name"] in active_store_names
+        ]
 
     ### private methods
 
@@ -343,60 +390,7 @@ class AbstractDataContext(ABC):
         Note that stores do NOT manage plugins.
         """
         for store_name, store_config in store_configs.items():
-            print(f"storename: {store_name}")
             self._build_store_from_config(store_name, store_config)
-
-    def _build_store_from_config(
-        self, store_name: str, store_config: dict
-    ) -> Optional[Store]:
-        """
-        Helper method
-
-        Args:
-            store_name ():
-            store_config ():
-
-        Returns:
-
-        """
-        module_name = "great_expectations.data_context.store"
-        # Set expectations_store.store_backend_id to the data_context_id from the project_config if
-        # the expectations_store does not yet exist by:
-        # adding the data_context_id from the project_config
-        # to the store_config under the key manually_initialize_store_backend_id
-        if (store_name == self.expectations_store_name) and store_config.get(
-            "store_backend"
-        ):
-            store_config["store_backend"].update(
-                {
-                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-                }
-            )
-
-        # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
-        if (
-            store_name not in [store["name"] for store in self.list_active_stores()]
-            and store_config.get("store_backend") is not None
-        ):
-            store_config["store_backend"].update({"suppress_store_backend_id": True})
-
-        if hasattr(self, "root_directory"):
-            new_store = build_store_from_config(
-                store_name=store_name,
-                store_config=store_config,
-                module_name=module_name,
-                runtime_environment={
-                    "root_directory": self.root_directory,
-                },
-            )
-        else:
-            new_store = build_store_from_config(
-                store_name=store_name,
-                store_config=store_config,
-                module_name=module_name,
-            )
-        self._stores[store_name] = new_store
-        return new_store
 
     #### class method
     @classmethod

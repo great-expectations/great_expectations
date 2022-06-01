@@ -401,6 +401,41 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
+    def add_validation_operator(
+        self, validation_operator_name: str, validation_operator_config: dict
+    ) -> "ValidationOperator":
+        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
+        Args:
+            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
+            validation_operator_config (dict): a config for the ValidationOperator to add
+        Returns:
+            validation_operator (ValidationOperator)
+        """
+
+        self.config["validation_operators"][
+            validation_operator_name
+        ] = validation_operator_config
+        config = self.project_config_with_variables_substituted.validation_operators[
+            validation_operator_name
+        ]
+        module_name = "great_expectations.validation_operators"
+        new_validation_operator = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                "data_context": self,
+                "name": validation_operator_name,
+            },
+            config_defaults={"module_name": module_name},
+        )
+        if not new_validation_operator:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=config["class_name"],
+            )
+        self.validation_operators[validation_operator_name] = new_validation_operator
+        return new_validation_operator
+
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
     ) -> Optional[str]:
@@ -631,7 +666,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def profiler_store_name(self) -> str:
         try:
-            return self.project_config_with_variables_substituted.profiler_store_name
+            return super().profiler_store_name
         except AttributeError:
             if BaseDataContext._default_profilers_exist(
                 directory_path=self.root_directory
@@ -705,7 +740,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     #
     #####
 
-    # WILL THIS WILL NEED TO BE CHANGED
     def _load_config_variables_file(self):
         """
         Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
@@ -2186,14 +2220,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return (
             self.project_config_with_variables_substituted.evaluation_parameter_store_name
         )
-
-    @property
-    def validations_store_name(self):
-        return self.project_config_with_variables_substituted.validations_store_name
-
-    @property
-    def validations_store(self) -> ValidationsStore:
-        return self.stores[self.validations_store_name]
 
     @property
     def assistants(self) -> DataAssistantDispatcher:
