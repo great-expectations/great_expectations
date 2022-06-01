@@ -68,9 +68,23 @@ class AttributedResolvedMetrics(SerializableDictDot):
     metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
 
     @staticmethod
-    def get_metric_values_from_attributed_metric_values(
+    def get_conditioned_attributed_metric_values_from_attributed_metric_values(
+        attributed_metric_values: Dict[str, MetricValues]
+    ) -> Optional[Dict[str, MetricValues]]:
+        if attributed_metric_values is None:
+            return None
+
+        batch_id: str
+        metric_values: MetricValues
+        return {
+            batch_id: _condition_metric_values(metric_values=metric_values)
+            for batch_id, metric_values in attributed_metric_values.items()
+        }
+
+    @staticmethod
+    def get_conditioned_metric_values_from_attributed_metric_values(
         attributed_metric_values: Dict[str, MetricValue]
-    ) -> MetricValues:
+    ) -> Optional[MetricValues]:
         if attributed_metric_values is None:
             return None
 
@@ -102,11 +116,15 @@ class AttributedResolvedMetrics(SerializableDictDot):
         }
 
     @property
-    def metric_values(self) -> MetricValues:
-        return (
-            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
-                attributed_metric_values=self.attributed_metric_values
-            )
+    def conditioned_attributed_metric_values(self) -> Dict[str, MetricValues]:
+        return AttributedResolvedMetrics.get_conditioned_attributed_metric_values_from_attributed_metric_values(
+            attributed_metric_values=self.attributed_metric_values
+        )
+
+    @property
+    def conditioned_metric_values(self) -> MetricValues:
+        return AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+            attributed_metric_values=self.attributed_metric_values
         )
 
     def to_dict(self) -> dict:

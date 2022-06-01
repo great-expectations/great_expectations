@@ -7,7 +7,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     standardize_batch_request_display_ordering,
 )
-from great_expectations.render.renderer.suite_edit_notebook_renderer import (
+from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
 from great_expectations.util import deep_filter_properties_iterable
