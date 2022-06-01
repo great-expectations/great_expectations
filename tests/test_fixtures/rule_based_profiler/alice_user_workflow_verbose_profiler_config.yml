@@ -139,7 +139,7 @@ rules:
     domain_builder:
       class_name: CategoricalColumnDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
-      limit_mode: ONE
+      cardinality_limit_mode: ONE
     parameter_builders:
       - name: my_user_agent_value_set
         class_name: ValueSetMultiBatchParameterBuilder

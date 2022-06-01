@@ -122,12 +122,14 @@ Note: Splitter methods can be specified with or without a preceding underscore.
 
 Available `Sampling` methods and their configuration parameters:
 
+Note: Sampling methods can be specified with or without a preceding underscore.
+
 | Method               | Parameters                                                                           | Returned Batch Data                                                                                                         |
 |----------------------|--------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| _sample_using_random | `p=fraction`                                                                         | Rows selected at random, whose number amounts to selected fraction of total number of rows in batch                         |
-| _sample_using_mod    | `column_name='col', mod=<int>`                                                       | Take the mod of named column, and only keep rows that match the given value                                                 |
-| _sample_using_a_list | `column_name='col', value_list=<list[val]>`                                          | Match the values in the named column against value_list, and only keep the matches                                          |
-| _sample_using_hash   | `column_name='col', hash_digits=<int>, hash_value=<str>, hash_function_name=<'md5'>` | Hash the values in the named column (using specified has_function_name), and only keep rows that match the given hash_value |
+| sample_using_random | `p=fraction`                                                                         | Rows selected at random, whose number amounts to selected fraction of total number of rows in batch                         |
+| sample_using_mod    | `column_name='col', mod=<int>`                                                       | Take the mod of named column, and only keep rows that match the given value                                                 |
+| sample_using_a_list | `column_name='col', value_list=<list[val]>`                                          | Match the values in the named column against value_list, and only keep the matches                                          |
+| sample_using_hash   | `column_name='col', hash_digits=<int>, hash_value=<str>, hash_function_name=<'md5'>` | Hash the values in the named column (using specified has_function_name), and only keep rows that match the given hash_value |
 
 
 

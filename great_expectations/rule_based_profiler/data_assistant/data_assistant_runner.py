@@ -5,19 +5,26 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
-from great_expectations.rule_based_profiler.helpers.runtime_environment import (
-    RuntimeEnvironmentColumnDomainTypeDirectivesKeys,
-    RuntimeEnvironmentDomainTypeDirectives,
-    RuntimeEnvironmentDomainTypeDirectivesKeys,
-    build_domain_type_directives,
-)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
+from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
+
+from great_expectations.rule_based_profiler.helpers.runtime_environment import (  # isort:skip
+    RuntimeEnvironmentVariablesDirectives,
+    RuntimeEnvironmentTableDomainTypeDirectivesKeys,
+    RuntimeEnvironmentColumnDomainTypeDirectivesKeys,
+    RuntimeEnvironmentColumnPairDomainTypeDirectivesKeys,
+    RuntimeEnvironmentMulticolumnDomainTypeDirectivesKeys,
+    RuntimeEnvironmentDomainTypeDirectivesKeys,
+    RuntimeEnvironmentDomainTypeDirectives,
+    build_domain_type_directives,
+    build_variables_directives,
+)
 
 
 def augment_arguments(**extra_kwargs: dict) -> Callable:
@@ -50,6 +57,23 @@ def augment_arguments(**extra_kwargs: dict) -> Callable:
     return signature_modification_decorator
 
 
+def _build_enum_to_default_kwargs_map() -> Dict[str, Any]:
+    enum_to_default_kwargs_map: dict = {}
+
+    directives_keys_type: RuntimeEnvironmentDomainTypeDirectivesKeys
+    for directive_keys_type in [
+        RuntimeEnvironmentTableDomainTypeDirectivesKeys,
+        RuntimeEnvironmentColumnDomainTypeDirectivesKeys,
+        RuntimeEnvironmentColumnPairDomainTypeDirectivesKeys,
+        RuntimeEnvironmentMulticolumnDomainTypeDirectivesKeys,
+    ]:
+        enum_to_default_kwargs_map.update(
+            _enum_to_default_kwargs(enum_obj=directive_keys_type)
+        )
+
+    return enum_to_default_kwargs_map
+
+
 def _enum_to_default_kwargs(
     enum_obj: Type[RuntimeEnvironmentDomainTypeDirectivesKeys],
 ) -> dict:
@@ -65,9 +89,7 @@ class DataAssistantRunner:
     specified by "batch_request", loaded into memory.  Then, "DataAssistant.run()" is issued with given directives.
     """
 
-    RUNTIME_ENVIRONMENT_KWARGS: dict = _enum_to_default_kwargs(
-        enum_obj=RuntimeEnvironmentColumnDomainTypeDirectivesKeys
-    )
+    RUNTIME_ENVIRONMENT_KWARGS: dict = _build_enum_to_default_kwargs_map()
 
     def __init__(
         self,
@@ -112,17 +134,26 @@ class DataAssistantRunner:
             expectation_suite=None,
             expectation_suite_name=None,
             component_name=data_assistant_name,
+            persist=False,
         )
         data_assistant: DataAssistant = self._data_assistant_cls(
             name=data_assistant_name,
             validator=validator,
         )
+        directives: dict = deep_filter_properties_iterable(
+            properties=kwargs,
+        )
+
+        variables_directives_list: List[
+            RuntimeEnvironmentVariablesDirectives
+        ] = build_variables_directives(**directives)
         domain_type_directives_list: List[
             RuntimeEnvironmentDomainTypeDirectives
-        ] = build_domain_type_directives(**kwargs)
+        ] = build_domain_type_directives(**directives)
         data_assistant_result: DataAssistantResult = data_assistant.run(
             variables=variables,
             rules=rules,
+            variables_directives_list=variables_directives_list,
             domain_type_directives_list=domain_type_directives_list,
         )
         return data_assistant_result
