@@ -1,21 +1,14 @@
-import random
-import uuid
-from typing import Union
+from typing import Optional
 
-from great_expectations.data_context.store.configuration_store import ConfigurationStore
-from great_expectations.data_context.store.database_store_backend import (
-    DatabaseStoreBackend,
+from great_expectations.core.data_context_key import StringKey
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudStoreBackend,
 )
-from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
-from great_expectations.data_context.types.base import (
-    DatasourceConfig,
-    DatasourceConfigSchema,
+from great_expectations.data_context.store.inline_store_backend import (
+    InlineStoreBackend,
 )
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-    DatasourceIdentifier,
-    GeCloudIdentifier,
-)
+from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.types.base import DatasourceConfigSchema
 from great_expectations.util import (
     filter_properties_dict,
     load_class,
@@ -28,17 +21,15 @@ class DatasourceStore(Store):
     A DatasourceStore manages Datasources for the DataContext.
     """
 
-    _key_class = DatasourceIdentifier
+    _key_class = StringKey
 
     def __init__(
         self,
-        store_backend=None,
-        runtime_environment=None,
-        store_name=None,
-        data_context=None,
+        store_name: Optional[str] = None,
+        store_backend: Optional[dict] = None,
+        runtime_environment: Optional[dict] = None,
     ) -> None:
         self._schema = DatasourceConfigSchema()
-        self._data_context = data_context
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -52,19 +43,13 @@ class DatasourceStore(Store):
             )
 
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
-            if issubclass(store_backend_class, TupleStoreBackend):
+            if issubclass(store_backend_class, GeCloudStoreBackend):
                 # Provide defaults for this common case
                 store_backend["filepath_suffix"] = store_backend.get(
                     "filepath_suffix", ".json"
                 )
-            elif issubclass(store_backend_class, DatabaseStoreBackend):
-                # Provide defaults for this common case
-                store_backend["table_name"] = store_backend.get(
-                    "table_name", "ge_expectations_store"
-                )
-                store_backend["key_columns"] = store_backend.get(
-                    "key_columns", ["expectation_suite_name"]
-                )
+            elif issubclass(store_backend_class, InlineStoreBackend):
+                pass
 
         super().__init__(
             store_backend=store_backend,
@@ -82,20 +67,6 @@ class DatasourceStore(Store):
             "class_name": self.__class__.__name__,
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
-
-    # def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
-    #     """
-    #     This method takes full json response from GE cloud and outputs a dict appropriate for
-    #     deserialization into a GE object
-    #     """
-    #     ge_cloud_expectation_suite_id = response_json["data"]["id"]
-    #     expectation_suite_dict = response_json["data"]["attributes"]["suite"]
-    #     expectation_suite_dict["ge_cloud_id"] = ge_cloud_expectation_suite_id
-
-    #     return expectation_suite_dict
-
-    def get(self, key) -> DatasourceConfig:
-        return super().get(key)
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)

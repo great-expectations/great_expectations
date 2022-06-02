@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 
 class AbstractDataContext(ABC):
@@ -11,4 +11,6 @@ class AbstractDataContext(ABC):
     TODO: eventually the dependency on ConfigPeer will be removed and this will become a pure ABC.
     """
 
-    pass
+    @abstractmethod
+    def _init_datasource_store(self) -> None:
+        raise NotImplementedError

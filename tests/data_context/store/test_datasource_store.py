@@ -53,89 +53,219 @@ def datasource_config() -> DatasourceConfig:
     )
 
 
-def test_datasource_store_raises_error_with_invalid_value(
-    empty_datasource_store: DatasourceStore,
-):
+def test_expectations_store(datasource_config: DatasourceConfig):
+    context: DataContext = empty_data_context
+    my_store = DatasourceStore()
+
     with pytest.raises(TypeError):
-        empty_datasource_store.set(
-            key="my_first_datasource", value="this is not a datasource"
-        )
+        my_store.set(key="not_a_DatasourceIdentifier", value=datasource_config)
+
+    # ns_1 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.warning"))
+    # my_store.set(
+    #     ns_1,
+    #     ExpectationSuite(expectation_suite_name="a.b.c.warning", data_context=context),
+    # )
+
+    # ns_1_dict: dict = my_store.get(ns_1)
+    # ns_1_suite: ExpectationSuite = ExpectationSuite(**ns_1_dict, data_context=context)
+    # assert ns_1_suite == ExpectationSuite(
+    #     expectation_suite_name="a.b.c.warning", data_context=context
+    # )
+
+    # ns_2 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.failure"))
+    # my_store.set(
+    #     ns_2,
+    #     ExpectationSuite(expectation_suite_name="a.b.c.failure", data_context=context),
+    # )
+    # ns_2_dict: dict = my_store.get(ns_2)
+    # ns_2_suite: ExpectationSuite = ExpectationSuite(**ns_2_dict, data_context=context)
+    # assert ns_2_suite == ExpectationSuite(
+    #     expectation_suite_name="a.b.c.failure", data_context=context
+    # )
+
+    # assert set(my_store.list_keys()) == {
+    #     ns_1,
+    #     ns_2,
+    # }
 
 
-def test_datasource_store_set_adds_valid_key(
-    empty_datasource_store: DatasourceStore,
-    datasource_config: DatasourceConfig,
-    datasource_key: ConfigurationIdentifier,
-):
-    assert len(empty_datasource_store.list_keys()) == 0
-    empty_datasource_store.set(key=datasource_key, value=datasource_config)
-    assert len(empty_datasource_store.list_keys()) == 1
+# def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
+#     context: DataContext = empty_data_context
+#     # Use sqlite so we don't require postgres for this test.
+#     connection_kwargs = {"drivername": "sqlite"}
+
+#     # First, demonstrate that we pick up default configuration
+#     my_store = ExpectationsStore(
+#         store_backend={
+#             "class_name": "DatabaseStoreBackend",
+#             "credentials": connection_kwargs,
+#         }
+#     )
+#     with pytest.raises(TypeError):
+#         my_store.get("not_a_ExpectationSuiteIdentifier")
+
+#     # first suite to add to db
+#     default_suite = ExpectationSuite(
+#         expectation_suite_name="a.b.c.warning",
+#         meta={"test_meta_key": "test_meta_value"},
+#         expectations=[],
+#         data_context=context,
+#     )
+
+#     ns_1 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.warning"))
+#     # initial set and check if first suite exists
+#     my_store.set(ns_1, default_suite)
+#     ns_1_dict: dict = my_store.get(ns_1)
+#     ns_1_suite: ExpectationSuite = ExpectationSuite(**ns_1_dict, data_context=context)
+#     assert ns_1_suite == ExpectationSuite(
+#         expectation_suite_name="a.b.c.warning",
+#         meta={"test_meta_key": "test_meta_value"},
+#         expectations=[],
+#         data_context=context,
+#     )
+
+#     # update suite and check if new value exists
+#     updated_suite = ExpectationSuite(
+#         expectation_suite_name="a.b.c.warning",
+#         meta={"test_meta_key": "test_new_meta_value"},
+#         expectations=[],
+#         data_context=context,
+#     )
+#     my_store.set(ns_1, updated_suite)
+#     ns_1_dict: dict = my_store.get(ns_1)
+#     ns_1_suite: ExpectationSuite = ExpectationSuite(**ns_1_dict, data_context=context)
+#     assert ns_1_suite == ExpectationSuite(
+#         expectation_suite_name="a.b.c.warning",
+#         meta={"test_meta_key": "test_new_meta_value"},
+#         expectations=[],
+#         data_context=context,
+#     )
+
+#     ns_2 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.failure"))
+#     my_store.set(
+#         ns_2,
+#         ExpectationSuite(expectation_suite_name="a.b.c.failure", data_context=context),
+#     )
+#     ns_2_dict: dict = my_store.get(ns_2)
+#     ns_2_suite: ExpectationSuite = ExpectationSuite(**ns_2_dict, data_context=context)
+#     assert ns_2_suite == ExpectationSuite(
+#         expectation_suite_name="a.b.c.failure",
+#         data_context=context,
+#     )
+
+#     assert set(my_store.list_keys()) == {
+#         ns_1,
+#         ns_2,
+#     }
 
 
-@pytest.mark.integration
-def test_datasource_store_integration(
-    empty_data_context: DataContext,
-    datasource_store_name: str,
-    datasource_name: str,
-    datasource_config: DatasourceConfig,
-):
-    base_directory: str = str(Path(empty_data_context.root_directory) / "datasources")
+# def test_expectations_store_report_store_backend_id_in_memory_store_backend():
+#     """
+#     What does this test and why?
+#     A Store should be able to report it's store_backend_id
+#     which is set when the StoreBackend is instantiated.
+#     """
+#     in_memory_expectations_store = ExpectationsStore()
+#     # Check that store_backend_id exists can be read
+#     assert in_memory_expectations_store.store_backend_id is not None
+#     # Check that store_backend_id is a valid UUID
+#     assert test_utils.validate_uuid4(in_memory_expectations_store.store_backend_id)
 
-    datasource_store: DatasourceStore = build_datasource_store_using_filesystem(
-        store_name=datasource_store_name,
-        base_directory=base_directory,
-        overwrite_existing=True,
-    )
 
-    dir_tree: str
+# def test_expectations_store_report_same_id_with_same_configuration_TupleFilesystemStoreBackend(
+#     tmp_path_factory,
+# ):
+#     """
+#     What does this test and why?
+#     A store with the same config (must be persistent store) should report the same store_backend_id
+#     """
+#     path = "dummy_str"
+#     project_path = str(
+#         tmp_path_factory.mktemp(
+#             "test_expectations_store_report_same_id_with_same_configuration__dir"
+#         )
+#     )
 
-    dir_tree = gen_directory_tree_str(startpath=base_directory)
-    assert (
-        dir_tree
-        == """datasources/
-    .ge_store_backend_id
-"""
-    )
+#     assert (
+#         gen_directory_tree_str(project_path)
+#         == """\
+# test_expectations_store_report_same_id_with_same_configuration__dir0/
+# """
+#     )
 
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=datasource_name
-    )
-    datasource_store.set(key=key, value=datasource_config)
+#     # Check two stores with the same config
+#     persistent_expectations_store = ExpectationsStore(
+#         store_backend={
+#             "class_name": "TupleFilesystemStoreBackend",
+#             "base_directory": project_path,
+#         }
+#     )
+#     # Check successful initialization with a store_backend_id
+#     initialized_directory_tree_with_store_backend_id = """\
+# test_expectations_store_report_same_id_with_same_configuration__dir0/
+#     .ge_store_backend_id
+# """
+#     assert (
+#         gen_directory_tree_str(project_path)
+#         == initialized_directory_tree_with_store_backend_id
+#     )
+#     assert persistent_expectations_store.store_backend_id is not None
 
-    dir_tree = gen_directory_tree_str(startpath=base_directory)
-    assert (
-        dir_tree
-        == """datasources/
-    .ge_store_backend_id
-    my_first_datasource.yml
-"""
-    )
+#     # Check that a duplicate store reports the same store_backend_id
+#     persistent_expectations_store_duplicate = ExpectationsStore(
+#         store_backend={
+#             "class_name": "TupleFilesystemStoreBackend",
+#             "base_directory": project_path,
+#         }
+#     )
+#     assert persistent_expectations_store_duplicate.store_backend_id is not None
+#     assert (
+#         persistent_expectations_store.store_backend_id
+#         == persistent_expectations_store_duplicate.store_backend_id
+#     )
+#     # Check no change to filesystem
+#     assert (
+#         gen_directory_tree_str(project_path)
+#         == initialized_directory_tree_with_store_backend_id
+#     )
 
-    assert len(datasource_store.list_keys()) == 1
-    datasource_store.remove_key(key=key)
-    assert len(datasource_store.list_keys()) == 0
 
-    data: dict = datasource_store.self_check()
-    self_check_report: dict = convert_to_json_serializable(data=data)
+# @mock.patch(
+#     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+# )
+# def test_instantiation_with_test_yaml_config(
+#     mock_emit, caplog, empty_data_context_stats_enabled
+# ):
+#     empty_data_context_stats_enabled.test_yaml_config(
+#         yaml_config="""
+# module_name: great_expectations.data_context.store.expectations_store
+# class_name: ExpectationsStore
+# store_backend:
+#     module_name: great_expectations.data_context.store.store_backend
+#     class_name: InMemoryStoreBackend
+# """
+#     )
+#     assert mock_emit.call_count == 1
+#     # Substitute current anonymized name since it changes for each run
+#     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+#         "anonymized_name"
+#     ]
+#     assert mock_emit.call_args_list == [
+#         mock.call(
+#             {
+#                 "event": "data_context.test_yaml_config",
+#                 "event_payload": {
+#                     "anonymized_name": anonymized_name,
+#                     "parent_class": "ExpectationsStore",
+#                     "anonymized_store_backend": {
+#                         "parent_class": "InMemoryStoreBackend"
+#                     },
+#                 },
+#                 "success": True,
+#             }
+#         ),
+#     ]
 
-    # Drop dynamic value to ensure appropriate assert
-    self_check_report["config"]["store_backend"].pop("base_directory")
-
-    assert self_check_report == {
-        "config": {
-            "class_name": "DatasourceStore",
-            "module_name": "great_expectations.data_context.store.datasource_store",
-            "overwrite_existing": True,
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "filepath_suffix": ".yml",
-                "fixed_length_key": False,
-                "module_name": "great_expectations.data_context.store.tuple_store_backend",
-                "platform_specific_separator": True,
-                "suppress_store_backend_id": False,
-            },
-            "store_name": "datasource_store",
-        },
-        "keys": [],
-        "len_keys": 0,
-    }
+#     # Confirm that logs do not contain any exceptions or invalid messages
+#     assert not usage_stats_exceptions_exist(messages=caplog.messages)
+#     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)

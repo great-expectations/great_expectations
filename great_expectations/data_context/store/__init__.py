@@ -6,6 +6,7 @@ from .store_backend import (  # isort:skip
     InMemoryStoreBackend,
 )
 from .ge_cloud_store_backend import GeCloudStoreBackend  # isort:skip
+from .inline_store_backend import InlineStoreBackend  # isort: skip
 from .tuple_store_backend import (  # isort:skip
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
