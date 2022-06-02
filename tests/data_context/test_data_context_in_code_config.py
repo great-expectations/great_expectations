@@ -341,6 +341,7 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_env_var_GE_DATA
     )
 
     # Make sure the manually set data_context_id is propagated to all the appropriate places
+    # the data_context_stores doesn't propagate to the expectations_store_name because it comes too late
     assert (
         manually_created_uuid
         == in_code_data_context.data_context_id

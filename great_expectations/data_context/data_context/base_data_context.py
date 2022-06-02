@@ -2232,16 +2232,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
 
     @property
-    def evaluation_parameter_store(self):
-        return self.stores[self.evaluation_parameter_store_name]
-
-    # @property
-    # def evaluation_parameter_store_name(self):
-    #     return (
-    #         self.project_config_with_variables_substituted.evaluation_parameter_store_name
-    #     )
-
-    @property
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
 

@@ -25,6 +25,7 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispat
 from great_expectations.data_context.store import (  # isort:skip
     ExpectationsStore,
     ValidationsStore,
+    EvaluationParameterStore,
 )
 
 from great_expectations.data_context.store import Store  # isort:skip
@@ -140,19 +141,19 @@ class AbstractDataContext(ABC):
 
         # Init stores
         self._stores = {}
-        # the issue is that this is the current class, which is missing
         self._init_stores(self.project_config_with_variables_substituted.stores)
 
-        # TODO : Datasources
+        # TODO : Datasources and UsageStatistics
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
 
-    ### properties
+    # properties
 
     @property
     def config(self) -> DataContextConfig:
+        """Holder for current DataContextConfig that was passed into constructor"""
         return self._project_config
 
     @property
@@ -194,17 +195,27 @@ class AbstractDataContext(ABC):
         return dict(self._load_config_variables_file())
 
     @property
-    def evaluation_parameter_store_name(self):
+    def evaluation_parameter_store_name(self) -> str:
         return (
             self.project_config_with_variables_substituted.evaluation_parameter_store_name
         )
 
-    ### public methods
+    @property
+    def evaluation_parameter_store(self) -> EvaluationParameterStore:
+        return self.stores[self.evaluation_parameter_store_name]
 
-    def list_stores(self):
-        """List currently-configured Stores on this context"""
+    # public methods
 
-        stores = []
+    def list_stores(self) -> List[dict]:
+        """
+        Returns a list of stores that are configured as part of the project_config. Ensures passwords are masked
+
+        Returns:
+            List of dict, with each dict corresponding to a Store.
+        """
+        # TODO: investigate if this needs to be List[Store]
+
+        stores: List[dict] = []
         for (
             name,
             value,
@@ -219,11 +230,11 @@ class AbstractDataContext(ABC):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
-            store_name (str): a key for the new Store in in self._stores
+            store_name (str): a key for the new Store in self._stores
             store_config (dict): a config for the Store to add
 
         Returns:
-            store (Store)
+            Store that was added
         """
 
         self.config["stores"][store_name] = store_config
@@ -262,7 +273,7 @@ class AbstractDataContext(ABC):
             store for store in self.list_stores() if store["name"] in active_store_names
         ]
 
-    ### private methods
+    # private methods
 
     def _build_store_from_config(
         self,
@@ -334,6 +345,7 @@ class AbstractDataContext(ABC):
         """
         return {}
 
+    # TODO THIS NEEDS TO BE SPLIT UP
     def _apply_global_config_overrides(self) -> None:
         # check for global usage statistics opt out
         validation_errors = {}
@@ -345,6 +357,7 @@ class AbstractDataContext(ABC):
             self.config.anonymous_usage_statistics.enabled = False
 
         # check for global data_context_id
+        # this call would need to be broken up
         global_data_context_id = self._get_global_config_value(
             environment_variable="GE_DATA_CONTEXT_ID",
             conf_file_section="anonymous_usage_statistics",
@@ -431,7 +444,7 @@ class AbstractDataContext(ABC):
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
-    #### class method
+    # class method
     @classmethod
     def _get_global_config_value(
         cls,
@@ -439,6 +452,13 @@ class AbstractDataContext(ABC):
         conf_file_section=None,
         conf_file_option=None,
     ) -> Optional[str]:
+        """
+        Returns global config value from environment variable or None
+        Args:
+            environment_variable (str): variable to return
+        Returns:
+            value of env variable or None
+        """
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
         ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
@@ -457,22 +477,21 @@ class AbstractDataContext(ABC):
 
     def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
         """
+        Takes DataContextConfig that is passed into original constructor and substitutes variables from os.environ.
+
+        *Note* Called every time the property `config_with_variables_substituted` is accessed.
 
         Args:
-            config ():
-
+            config (DataContextConfig): Config with no substitutions (ie. passed into original constructor)
         Returns:
+            DataContextConfig with variables substituted from os.environ
 
         """
-        res = os.environ
         substituted_config_variables = substitute_all_config_variables(
-            # so this is actually a file that is loaded?
             self.config_variables,
             dict(os.environ),
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
-
-        # Substitutions should have already occurred for GE Cloud configs at this point
         substitutions = {
             **substituted_config_variables,
             **dict(os.environ),
