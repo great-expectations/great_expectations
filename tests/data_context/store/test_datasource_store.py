@@ -83,7 +83,7 @@ def test_datasource_store_retrieval(
     res: DatasourceConfig = store.get(key=key)
 
     assert isinstance(res, DatasourceConfig)
-    assert DatasourceConfigSchema().dump(res) == datasource_config.to_dict()
+    assert res.to_json_dict() == datasource_config.to_json_dict()
 
 
 def test_datasource_store_retrieval_cloud_mode(
