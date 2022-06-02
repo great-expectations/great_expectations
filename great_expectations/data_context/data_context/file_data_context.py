@@ -130,7 +130,7 @@ class FileDataContext(AbstractDataContext):
                         AbstractDataContext.FALSEY_STRINGS
                     )
                 )
-        for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
+        for config_path in FileDataContext.GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()
             states = config.BOOLEAN_STATES
             for falsey_string in AbstractDataContext.FALSEY_STRINGS:
@@ -165,7 +165,7 @@ class FileDataContext(AbstractDataContext):
         if environment_variable and os.environ.get(environment_variable, False):
             return os.environ.get(environment_variable)
         if conf_file_section and conf_file_option:
-            for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
+            for config_path in FileDataContext.GLOBAL_CONFIG_PATHS:
                 config = configparser.ConfigParser()
                 config.read(config_path)
                 config_value = config.get(

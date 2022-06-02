@@ -48,10 +48,6 @@ class AbstractDataContext(ABC):
 
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
-    GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser("~/.great_expectations/great_expectations.conf"),
-        "/etc/great_expectations.conf",
-    ]
 
     @classmethod
     def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
@@ -104,7 +100,6 @@ class AbstractDataContext(ABC):
         self._assistants = DataAssistantDispatcher(data_context=self)
 
     # properties
-
     @property
     def config(self) -> DataContextConfig:
         """Holder for current DataContextConfig that was passed into constructor"""
@@ -242,7 +237,7 @@ class AbstractDataContext(ABC):
         substituted_config_variables = substitute_all_config_variables(
             self.config_variables,
             dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
+            AbstractDataContext.DOLLAR_SIGN_ESCAPE_STRING,
         )
         substitutions = {
             **substituted_config_variables,
@@ -251,12 +246,11 @@ class AbstractDataContext(ABC):
         }
         return DataContextConfig(
             **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+                config, substitutions, AbstractDataContext.DOLLAR_SIGN_ESCAPE_STRING
             )
         )
 
     # private methods
-
     def _build_store_from_config(
         self,
         store_name: str,
