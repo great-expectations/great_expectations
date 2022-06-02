@@ -804,7 +804,6 @@ class BaseDataContext(
         Returns:
             None
         """
-        print("hi Chetan")
         config_variables = self._load_config_variables_file()
         value = self.escape_all_config_variables(
             value,
