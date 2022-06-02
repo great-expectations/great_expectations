@@ -1,8 +1,11 @@
-from typing import Optional
+from typing import Optional, Union
 
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
-from great_expectations.data_context.types.base import DatasourceConfigSchema
+from great_expectations.data_context.types.base import (
+    DatasourceConfig,
+    DatasourceConfigSchema,
+)
 from great_expectations.util import filter_properties_dict
 
 
@@ -37,16 +40,13 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def remove_key(self, key):
-        return self.store_backend.remove_key(key)
-
-    def serialize(self, key, value):
+    def serialize(self, _, value: DatasourceConfig) -> Union[str, dict]:
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._schema.dump(value)
         return self._schema.dumps(value, indent=2, sort_keys=True)
 
-    def deserialize(self, key, value):
+    def deserialize(self, _, value: Union[str, dict]) -> DatasourceConfig:
         if isinstance(value, dict):
             return self._schema.load(value)
         else:
