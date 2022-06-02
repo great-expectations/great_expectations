@@ -1,11 +1,11 @@
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+import functools
 import logging
 import os
 import random
 import re
 import shutil
 from abc import ABCMeta
-from functools import cached_property
 from typing import List, Tuple
 
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -1002,7 +1002,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self.container = container
         self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
 
-    @cached_property
+    @property
+    @functools.lru_cache
     def _container_client(self):
 
         from azure.identity import DefaultAzureCredential
