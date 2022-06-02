@@ -609,6 +609,7 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def get_interactive_detail_expect_column_values_to_be_between_chart(
+        expectation_type: str,
         column_dfs: List[ColumnDataFrame],
         metric_name: str,
         metric_type: alt.StandardType,
@@ -744,6 +745,7 @@ class DataAssistantResult(SerializableDictDot):
 
         if sequential:
             return DataAssistantResult._get_interactive_detail_expect_column_values_to_be_between_line_chart(
+                expectation_type=expectation_type,
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
@@ -756,6 +758,7 @@ class DataAssistantResult(SerializableDictDot):
             )
         else:
             return DataAssistantResult._get_interactive_detail_expect_column_values_to_be_between_bar_chart(
+                expectation_type=expectation_type,
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
@@ -1021,6 +1024,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
+        expectation_type: Optional[str] = None,
     ) -> alt.VConcatChart:
         detail_title_font_size: int = 14
         detail_title_font_weight: str = "bold"
@@ -1036,6 +1040,7 @@ class DataAssistantResult(SerializableDictDot):
         unselected_opacity: float = 0.4
 
         title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
             metric_plot_component=metric_component,
             batch_plot_component=batch_component,
             domain_plot_component=domain_component,
@@ -1275,8 +1280,10 @@ class DataAssistantResult(SerializableDictDot):
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
+        expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
             metric_plot_component=metric_component,
             batch_plot_component=batch_component,
             domain_plot_component=domain_component,
@@ -1329,6 +1336,7 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _get_interactive_detail_expect_column_values_to_be_between_line_chart(
+        expectation_type: str,
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
@@ -1356,6 +1364,7 @@ class DataAssistantResult(SerializableDictDot):
 
         interactive_detail_multi_line_chart: alt.VConcatChart = (
             DataAssistantResult._get_interactive_detail_multi_line_chart(
+                expectation_type=expectation_type,
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
@@ -1445,6 +1454,7 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _get_interactive_detail_expect_column_values_to_be_between_bar_chart(
+        expectation_type: str,
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
@@ -1470,6 +1480,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         bars: alt.Chart = DataAssistantResult._get_interactive_detail_multi_bar_chart(
+            expectation_type=expectation_type,
             df=df,
             metric_component=metric_component,
             batch_component=batch_component,
@@ -1641,15 +1652,17 @@ class DataAssistantResult(SerializableDictDot):
             Domain, Dict[str, ParameterNode]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
 
-        display_charts: List[alt.VConcatChart] = []
-        return_charts: List[alt.Chart] = []
+        display_charts: List[Optional[alt.VConcatChart]] = []
+        return_charts: List[Optional[alt.Chart]] = []
 
         for (
-            column_based_expectation_configurations
-        ) in column_based_expectation_configurations_by_type.values():
+            expectation_type,
+            column_based_expectation_configurations,
+        ) in column_based_expectation_configurations_by_type.items():
             display_charts_for_expectation: List[
-                alt.VConcatChart
+                Optional[alt.VConcatChart]
             ] = self._create_display_chart_for_column_domain_expectation(
+                expectation_type=expectation_type,
                 expectation_configurations=column_based_expectation_configurations,
                 attributed_metrics=attributed_metrics_by_column_domain,
                 plot_mode=plot_mode,
@@ -1727,8 +1740,8 @@ class DataAssistantResult(SerializableDictDot):
         subtitle: Optional[str],
     ) -> Optional[alt.Chart]:
         implemented_metrics: Set[str] = {
-            "table_row_count",
-            "column_distinct_values_count",
+            sanitize_parameter_name(metric)
+            for metric in self.EXPECTATION_METRIC_MAP.values()
         }
 
         plot_impl: Optional[
@@ -1762,11 +1775,12 @@ class DataAssistantResult(SerializableDictDot):
 
     def _create_display_chart_for_column_domain_expectation(
         self,
+        expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> List[alt.VConcatChart]:
+    ) -> List[Optional[alt.VConcatChart]]:
         column_dfs: List[ColumnDataFrame] = self._create_column_dfs_for_charting(
             attributed_metrics=attributed_metrics,
             expectation_configurations=expectation_configurations,
@@ -1774,9 +1788,12 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        metric_name: str = "column_distinct_values_count"
+        metric_name: Optional[str] = self.EXPECTATION_METRIC_MAP.get(expectation_type)
+        if metric_name:
+            metric_name = sanitize_parameter_name(metric_name)
 
         return self._chart_column_values(
+            expectation_type=expectation_type,
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
@@ -1842,39 +1859,32 @@ class DataAssistantResult(SerializableDictDot):
 
     def _chart_column_values(
         self,
+        expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        metric_name: Optional[str],
         metric_type: alt.StandardType,
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
-        plot_impl: Optional[
-            Callable[
-                [
-                    List[ColumnDataFrame],
-                    str,
-                    alt.StandardType,
-                ],
-                alt.VConcatChart,
-            ]
-        ] = None
+
         display_chart: Optional[alt.VConcatChart] = None
 
-        if metric_name == "column_distinct_values_count":
+        if metric_name:
             if plot_mode is PlotMode.PRESCRIPTIVE:
-                plot_impl = (
-                    self.get_interactive_detail_expect_column_values_to_be_between_chart
+                display_chart = self.get_interactive_detail_expect_column_values_to_be_between_chart(
+                    expectation_type=expectation_type,
+                    column_dfs=column_dfs,
+                    metric_name=metric_name,
+                    metric_type=metric_type,
+                    sequential=sequential,
                 )
             else:
-                plot_impl = self.get_interactive_detail_multi_chart
-
-        if plot_impl:
-            display_chart = plot_impl(
-                column_dfs=column_dfs,
-                metric_name=metric_name,
-                metric_type=metric_type,
-                sequential=sequential,
-            )
+                display_chart = self.get_interactive_detail_multi_chart(
+                    column_dfs=column_dfs,
+                    metric_name=metric_name,
+                    metric_type=metric_type,
+                    sequential=sequential,
+                )
 
         return [display_chart]
 
