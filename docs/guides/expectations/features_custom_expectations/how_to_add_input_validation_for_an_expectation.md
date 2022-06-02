@@ -100,7 +100,8 @@ If you now run your file, `print_diagnostic_checklist()` will attempt to execute
 If your input is successfully validated, and the rest the logic in your Custom Expectation is already complete, you will see the following in your Diagnostic Checklist:
 
 ```console
-✔ Has basic input validation and type checking
+ ✔ Has basic input validation and type checking
+    ✔ Custom 'assert' statements in validate_configuration
 ```
 
 <div style={{"text-align":"center"}}>
