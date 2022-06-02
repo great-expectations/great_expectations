@@ -2131,14 +2131,19 @@ class DataAssistantResult(SerializableDictDot):
         display_charts: List[Optional[alt.VConcatChart]] = []
         return_charts: List[Optional[alt.Chart]] = []
         expectation_type: str
-        for (
-            metric_name,
-            attributed_values,
-        ) in attributed_metrics_by_column_domain.items():
+        for metric_name in metric_expectation_map.keys():
             expectation_type = metric_expectation_map[metric_name]
             column_based_expectation_configurations = (
                 column_based_expectation_configurations_by_type[expectation_type]
             )
+
+            attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {}
+            for (
+                domain,
+                attributed_metrics,
+            ) in attributed_metrics_by_column_domain.items():
+                if metric_name in attributed_metrics.keys():
+                    attributed_metrics_by_domain[domain] = attributed_metrics
 
             display_charts_for_expectation: List[
                 Optional[alt.VConcatChart]
@@ -2146,29 +2151,18 @@ class DataAssistantResult(SerializableDictDot):
                 expectation_type=expectation_type,
                 expectation_configurations=column_based_expectation_configurations,
                 metric_name=metric_name,
-                attributed_values=attributed_values,
+                attributed_metrics_by_domain=attributed_metrics_by_domain,
                 plot_mode=plot_mode,
                 sequential=sequential,
             )
             display_charts.extend(display_charts_for_expectation)
 
-            profiler_details: dict = expectation_configuration.meta["profiler_details"]
-            metric_configuration: dict = profiler_details["metric_configuration"]
-            domain_kwargs: dict = metric_configuration["domain_kwargs"]
-            column_name: str = domain_kwargs["column"]
-
-            domain = domains_by_column_name[column_name]
-
-            attributed_values_by_metric_name: Dict[
-                str, ParameterNode
-            ] = attributed_metrics_by_column_domain[domain]
-
-            expectation_type = expectation_configuration.expectation_type
             return_chart: alt.Chart = (
-                self._create_return_chart_for_column_domain_expectation(
+                self._create_return_charts_for_column_domain_expectation(
                     expectation_type=expectation_type,
-                    expectation_configuration=expectation_configuration,
-                    attributed_metrics=attributed_metrics_by_column_domain,
+                    expectation_configurations=expectation_configurations,
+                    metric_name=metric_name,
+                    attributed_metrics_by_domain=attributed_metrics_by_domain,
                     plot_mode=plot_mode,
                     sequential=sequential,
                 )
@@ -2296,13 +2290,13 @@ class DataAssistantResult(SerializableDictDot):
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
         metric_name: str,
-        attributed_values: ParameterNode,
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
         column_dfs: List[ColumnDataFrame] = self._create_column_dfs_for_charting(
             metric_name=metric_name,
-            attributed_values=attributed_values,
+            attributed_metrics_by_domain=attributed_metrics_by_domain,
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
         )
@@ -2315,43 +2309,49 @@ class DataAssistantResult(SerializableDictDot):
             sequential=sequential,
         )
 
-    def _create_return_chart_for_column_domain_expectation(
+    def _create_return_charts_for_column_domain_expectation(
         self,
         expectation_type: str,
-        expectation_configuration: ExpectationConfiguration,
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        expectation_configurations: List[ExpectationConfiguration],
+        metric_name: str,
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
 
-        for metric_name in attributed_values_by_metric_name.keys():
-            type_: str = expectation_configuration.expectation_type
-            if metric_expectation_map.get(type_) == metric_name:
-                attributed_values: ParameterNode = attributed_values_by_metric_name[
-                    metric_name
-                ]
+        if len(attributed_metrics_by_domain) > 0:
+            expectation_configuration: ExpectationConfiguration
+            attributed_metrics: Dict[str, ParameterNode]
+            attributed_values: ParameterNode
+            for expectation_configuration in expectation_configurations:
+                if expectation_configuration.expectation_type == expectation_type:
+                    column_name: str = expectation_configuration.kwargs["column"]
+                    subtitle = f"Column: {column_name}"
 
-                df: pd.DataFrame = self._create_df_for_charting(
-                    metric_name=metric_name,
-                    attributed_values=attributed_values,
-                    expectation_configuration=expectation_configuration,
-                    plot_mode=plot_mode,
-                )
+                    attributed_metrics = [
+                        values
+                        for domain, values in attributed_metrics_by_domain.items()
+                        if domain.domain_kwargs.column == column_name
+                    ][0]
+                    attributed_values = attributed_metrics[metric_name]
 
-                column_name: str = expectation_configuration.kwargs["column"]
-                subtitle = f"Column: {column_name}"
+                    df: pd.DataFrame = self._create_df_for_charting(
+                        metric_name=metric_name,
+                        attributed_values=attributed_values,
+                        expectation_configuration=expectation_configuration,
+                        plot_mode=plot_mode,
+                    )
 
-                metric_name: str = sanitize_parameter_name(name=metric_name)
+                    metric_name: str = sanitize_parameter_name(name=metric_name)
 
-                return self._chart_domain_values(
-                    expectation_type=expectation_type,
-                    df=df,
-                    metric_name=metric_name,
-                    plot_mode=plot_mode,
-                    sequential=sequential,
-                    subtitle=subtitle,
-                )
+                    return self._chart_domain_values(
+                        expectation_type=expectation_type,
+                        df=df,
+                        metric_name=metric_name,
+                        plot_mode=plot_mode,
+                        sequential=sequential,
+                        subtitle=subtitle,
+                    )
 
     def _chart_column_values(
         self,
@@ -2465,13 +2465,15 @@ class DataAssistantResult(SerializableDictDot):
     def _create_column_dfs_for_charting(
         self,
         metric_name: str,
-        attributed_values: ParameterNode,
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> List[ColumnDataFrame]:
         metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
 
-        metric_names: List[str]
+        metric_domains: Set[Domain] = set(attributed_metrics_by_domain.keys())
+
+        column_domain: Domain
         column_dfs: List[ColumnDataFrame] = []
         for expectation_configuration in expectation_configurations:
             profiler_details: dict = expectation_configuration.meta["profiler_details"]
@@ -2479,11 +2481,13 @@ class DataAssistantResult(SerializableDictDot):
             domain_kwargs: dict = metric_configuration["domain_kwargs"]
             column_name: str = domain_kwargs["column"]
 
-            domain = domains_by_column_name[column_name]
+            column_domain = [
+                d for d in metric_domains if d.domain_kwargs.column == column_name
+            ][0]
 
             attributed_values_by_metric_name: Dict[
                 str, ParameterNode
-            ] = attributed_metrics[domain]
+            ] = attributed_metrics_by_domain[column_domain]
 
             for metric_name in attributed_values_by_metric_name.keys():
                 type_: str = expectation_configuration.expectation_type
