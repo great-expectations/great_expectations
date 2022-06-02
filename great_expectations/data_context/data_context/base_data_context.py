@@ -1,6 +1,5 @@
 import copy
 import datetime
-import errno
 import logging
 import os
 import sys
@@ -17,6 +16,7 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -133,12 +133,12 @@ except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 logger = logging.getLogger(__name__)
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml: YAMLHandler = YAMLHandler()
 
 
 # TODO: <WILL> Most of the logic here will be migrated to EphemeralDataContext
+# TODO: apply how does python super() work with multiple inheritances
+# https://stackoverflow.com/questions/3277367/how-does-pythons-super-work-with-multiple-inheritance
 class BaseDataContext(
     EphemeralDataContext, FileDataContext, CloudDataContext, ConfigPeer
 ):
@@ -271,39 +271,26 @@ class BaseDataContext(
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
 
-        if context_root_dir is not None:
-            context_root_dir = os.path.abspath(context_root_dir)
-        self._context_root_directory = context_root_dir
-
         # start splitting this up
-        # if self._ge_cloud_mode:
-        #     CloudDataContext.__init__(
-        #         project_config=project_config,
-        #         runtime_environment=runtime_environment,
-        #         ge_cloud_mode=ge_cloud_mode,
-        #         ge_cloud_config=ge_cloud_config
-        #     )
-        # elif self.root_directory:
-        #     FileDataContext.__init__(
-        #         project_config=project_config,
-        #         runtime_environment=runtime_environment,
-        #         context_root_dir=context_root_dir
-        #     )
-
-        # else:
-        super().__init__(
-            project_config=project_config, runtime_environment=runtime_environment
-        )
-
-        # self.runtime_environment = runtime_environment or {}
-
-        # file stuff exists here
-
-        # check for whether config_file_section / config_file_option exist?
-        # c
-        # self._apply_global_config_overrides()
-
-        self._apply_global_config_overrides()
+        if self._ge_cloud_mode:
+            CloudDataContext.__init__(
+                self,
+                project_config=project_config,
+                runtime_environment=runtime_environment,
+                ge_cloud_mode=ge_cloud_mode,
+                ge_cloud_config=ge_cloud_config,
+            )
+        elif context_root_dir is not None:
+            FileDataContext.__init__(
+                self,
+                project_config=project_config,
+                runtime_environment=runtime_environment,
+                context_root_dir=context_root_dir,
+            )
+        else:
+            super().__init__(
+                project_config=project_config, runtime_environment=runtime_environment
+            )
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -349,14 +336,6 @@ class BaseDataContext(
                     validation_operator_name,
                     validation_operator_config,
                 )
-
-    # @property
-    # def ge_cloud_config(self) -> Optional[GeCloudConfig]:
-    #     return self._ge_cloud_config
-    #
-    # @property
-    # def ge_cloud_mode(self) -> bool:
-    #     return self._ge_cloud_mode
 
     def _init_datasources(self, config: DataContextConfig) -> None:
         if not config.datasources:
@@ -436,16 +415,6 @@ class BaseDataContext(
             )
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
-
-    def _normalize_absolute_or_relative_path(
-        self, path: Optional[str]
-    ) -> Optional[str]:
-        if path is None:
-            return
-        if os.path.isabs(path):
-            return path
-        else:
-            return os.path.join(self.root_directory, path)
 
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
@@ -576,19 +545,6 @@ class BaseDataContext(
             if url is not None:
                 logger.debug(f"Opening Data Docs found here: {url}")
                 webbrowser.open(url)
-
-    @property
-    def root_directory(self):
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located."""
-        return self._context_root_directory
-
-    @property
-    def plugins_directory(self):
-        """The directory in which custom plugin modules should be placed."""
-        return self._normalize_absolute_or_relative_path(
-            self.project_config_with_variables_substituted.plugins_directory
-        )
 
     @property
     def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
@@ -747,40 +703,6 @@ class BaseDataContext(
     # Internal helper methods
     #
     #####
-
-    def _load_config_variables_file(self):
-        """
-        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
-        have already been interpolated before being sent from the Cloud API.
-        """
-        # this needs to be changed so that it is either cloud mode or if we are just not doing the file path stuff
-        # TODO this cleaned up so that we only handle the file_path
-        config: DataContextConfig = cast(DataContextConfig, self.get_config())
-        if (
-            hasattr(config, "config_variables_file_path")
-            and config.config_variables_file_path
-        ):
-            try:
-                # If the user specifies the config variable path with an environment variable, we want to substitute it
-                defined_path = substitute_config_variable(
-                    config.config_variables_file_path, dict(os.environ)
-                )
-                if not os.path.isabs(defined_path):
-                    # A BaseDataContext will not have a root directory; in that case use the current directory
-                    # for any non-absolute path
-                    root_directory = self.root_directory or os.curdir
-                else:
-                    root_directory = ""
-                var_path = os.path.join(root_directory, defined_path)
-                with open(var_path) as config_variables_file:
-                    return yaml.load(config_variables_file) or {}
-            except OSError as e:
-                if e.errno != errno.ENOENT:
-                    raise
-                logger.debug("Generating empty config variables file.")
-                return {}
-        else:
-            return super()._load_config_variables_file()
 
     def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
         """

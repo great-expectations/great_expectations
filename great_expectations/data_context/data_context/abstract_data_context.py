@@ -1,4 +1,3 @@
-import configparser
 import copy
 import json
 import logging
@@ -99,7 +98,6 @@ class AbstractDataContext(ABC):
         self._stores = {}
         self._init_stores(self.project_config_with_variables_substituted.stores)
 
-        # TODO : Datasources and UsageStatistics
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
@@ -229,6 +227,34 @@ class AbstractDataContext(ABC):
             store for store in self.list_stores() if store["name"] in active_store_names
         ]
 
+    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
+        """
+        Takes DataContextConfig that is passed into original constructor and substitutes variables from os.environ.
+
+        *Note* Called every time the property `config_with_variables_substituted` is accessed.
+
+        Args:
+            config (DataContextConfig): Config with no substitutions (ie. passed into original constructor)
+        Returns:
+            DataContextConfig with variables substituted from os.environ
+
+        """
+        substituted_config_variables = substitute_all_config_variables(
+            self.config_variables,
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+        return DataContextConfig(
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
+        )
+
     # private methods
 
     def _build_store_from_config(
@@ -267,6 +293,18 @@ class AbstractDataContext(ABC):
         self._stores[store_name] = new_store
         return new_store
 
+    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
+        """Initialize all Stores for this DataContext.
+
+        Stores are a good fit for reading/writing objects that:
+            1. follow a clear key-value pattern, and
+            2. are usually edited programmatically, using the Context
+
+        Note that stores do NOT manage plugins.
+        """
+        for store_name, store_config in store_configs.items():
+            self._build_store_from_config(store_name, store_config)
+
     def _construct_data_context_id(self) -> str:
         """
         Choose the id of the currently-configured expectations store, if available and a persistent store.
@@ -301,7 +339,7 @@ class AbstractDataContext(ABC):
         """
         return {}
 
-    # TODO THIS NEEDS TO BE SPLIT UP
+    @abstractmethod
     def _apply_global_config_overrides(self) -> None:
         # check for global usage statistics opt out
         validation_errors = {}
@@ -312,14 +350,8 @@ class AbstractDataContext(ABC):
             )
             self.config.anonymous_usage_statistics.enabled = False
 
-        # check for global data_context_id
-        # this call would need to be broken up
-        # TODO: see if we can get two versions of self._get_global_config_value()
-        # and move this method down to Base
         global_data_context_id = self._get_global_config_value(
             environment_variable="GE_DATA_CONTEXT_ID",
-            conf_file_section="anonymous_usage_statistics",
-            conf_file_option="data_context_id",
         )
         if global_data_context_id:
             data_context_id_errors = anonymizedUsageStatisticsSchema.validate(
@@ -329,8 +361,6 @@ class AbstractDataContext(ABC):
                 logger.info(
                     "data_context_id is defined globally. Applying override to project_config."
                 )
-                # this is the key line
-                # TODO: what is the global_data_context_id and usage_statistics_url before this step?
                 self.config.anonymous_usage_statistics.data_context_id = (
                     global_data_context_id
                 )
@@ -339,8 +369,6 @@ class AbstractDataContext(ABC):
         # check for global usage_statistics url
         global_usage_statistics_url = self._get_global_config_value(
             environment_variable="GE_USAGE_STATISTICS_URL",
-            conf_file_section="anonymous_usage_statistics",
-            conf_file_option="usage_statistics_url",
         )
         if global_usage_statistics_url:
             usage_statistics_url_errors = anonymizedUsageStatisticsSchema.validate(
@@ -365,7 +393,6 @@ class AbstractDataContext(ABC):
             )
 
     # static methods
-
     @staticmethod
     def _check_global_usage_statistics_opt_out() -> bool:
         if os.environ.get("GE_USAGE_STATS", False):
@@ -378,40 +405,12 @@ class AbstractDataContext(ABC):
                         AbstractDataContext.FALSEY_STRINGS
                     )
                 )
-        for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
-            config = configparser.ConfigParser()
-            states = config.BOOLEAN_STATES
-            for falsey_string in AbstractDataContext.FALSEY_STRINGS:
-                states[falsey_string] = False
-            states["TRUE"] = True
-            config.BOOLEAN_STATES = states
-            config.read(config_path)
-            try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
-                    return True
-            except (ValueError, configparser.Error):
-                pass
-
-    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
-        """Initialize all Stores for this DataContext.
-
-        Stores are a good fit for reading/writing objects that:
-            1. follow a clear key-value pattern, and
-            2. are usually edited programmatically, using the Context
-
-        Note that stores do NOT manage plugins.
-        """
-        for store_name, store_config in store_configs.items():
-            self._build_store_from_config(store_name, store_config)
 
     # class method
     @classmethod
     def _get_global_config_value(
         cls,
         environment_variable: Optional[str] = None,
-        conf_file_section=None,
-        conf_file_option=None,
     ) -> Optional[str]:
         """
         Returns global config value from environment variable or None
@@ -420,47 +419,6 @@ class AbstractDataContext(ABC):
         Returns:
             value of env variable or None
         """
-        assert (conf_file_section and conf_file_option) or (
-            not conf_file_section and not conf_file_option
-        ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
         if environment_variable and os.environ.get(environment_variable, False):
             return os.environ.get(environment_variable)
-        if conf_file_section and conf_file_option:
-            # this is actually now in the FileDataContext
-            for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
-                config = configparser.ConfigParser()
-                config.read(config_path)
-                config_value = config.get(
-                    conf_file_section, conf_file_option, fallback=None
-                )
-                if config_value:
-                    return config_value
         return None
-
-    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
-        """
-        Takes DataContextConfig that is passed into original constructor and substitutes variables from os.environ.
-
-        *Note* Called every time the property `config_with_variables_substituted` is accessed.
-
-        Args:
-            config (DataContextConfig): Config with no substitutions (ie. passed into original constructor)
-        Returns:
-            DataContextConfig with variables substituted from os.environ
-
-        """
-        substituted_config_variables = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-        substitutions = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
