@@ -27,5 +27,5 @@ class ColumnValuesLengthMax(ColumnAggregateMetricProvider):
         return sa.func.max(sa.func.length(column))
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine, filter_column_isnull=True)
-    def _spark(cls, column: str, **kwargs: dict):  # type: ignore[no-untyped-def]
-        return F.max(F.length(F.col(column)))
+    def _spark(cls, column, **kwargs: dict):  # type: ignore[no-untyped-def]
+        return F.max(F.length(column))

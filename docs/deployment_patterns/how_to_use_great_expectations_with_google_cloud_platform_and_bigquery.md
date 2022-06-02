@@ -167,6 +167,12 @@ Then, load your DataContext into memory using the `get_context()` method.
 
 Next, load the following Datasource configuration that will connect to data in BigQuery,
 
+:::note
+
+In order to support tables that are created as the result of queries in BigQuery, Great Expectations previously asked users to define a named permanent table to be used as a "temporary" table that could later be deleted, or set to expire by the database. This is no longer the case, and Great Expectations will automatically set tables that are created as the result of queries to expire after 1 day. 
+
+:::
+
 ```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L228-L242
 ```
 

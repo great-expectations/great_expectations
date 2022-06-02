@@ -139,8 +139,9 @@ def determine_plot_title(
     metric_plot_component: MetricPlotComponent,
     batch_plot_component: BatchPlotComponent,
     domain_plot_component: DomainPlotComponent,
+    expectation_type: Optional[str] = None,
 ) -> alt.TitleParams:
-    """Determines the appropriate title for a chart based on input componentsself.
+    """Determines the appropriate title for a chart based on input components.
 
     Conditionally renders a subtitle if relevant (specifically with column domain)
 
@@ -153,7 +154,13 @@ def determine_plot_title(
         An Altair TitleParam object
 
     """
-    contents: str = f"{metric_plot_component.title} per {batch_plot_component.title}"
+    contents: str
+    if expectation_type:
+        contents = expectation_type
+    else:
+        contents: str = (
+            f"{metric_plot_component.title} per {batch_plot_component.title}"
+        )
     subtitle: Optional[str] = domain_plot_component.subtitle
     domain_selector: Optional[str] = domain_plot_component.name
 
