@@ -281,6 +281,14 @@ local_tests = [
             BackendDependencies.MYSQL,
         ],
     ),
+      IntegrationTestFixture(
+        name="expect_column_values_to_be_in_solfege_scale_set",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py",
+    ),
+    IntegrationTestFixture(
+        name="expect_column_values_to_only_contain_vowels",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py",
+    ),
 ]
 
 
