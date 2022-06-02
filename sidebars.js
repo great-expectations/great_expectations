@@ -194,6 +194,7 @@ module.exports = {
           items: [
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database'
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler',
           ]
         },
         {
@@ -209,35 +210,6 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
             // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
-            {
-              type: 'category',
-              label: 'Core skills',
-              items: [
-                'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
-                'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
-                'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
-                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
-                { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
-                { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' }
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Configuring Profilers',
-              items: [
-                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
-                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Advanced skills',
-              items: [
-                'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
-                'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-                'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler',
-              ]
-            },
             {
               type: 'category',
               label: 'Adding Features to Custom Expectations',
