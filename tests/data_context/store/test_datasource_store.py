@@ -124,30 +124,8 @@ def test_datasource_store_retrieval_cloud_mode(
                     "type": "datasource",
                     "id": "foobarbaz",
                     "attributes": {
-                        "datasource_config": {
-                            "module_name": "great_expectations.datasource",
-                            "data_connectors": {
-                                "tripdata_monthly_configured": {
-                                    "module_name": "great_expectations.datasource.data_connector",
-                                    "base_directory": "/path/to/trip_data",
-                                    "assets": {
-                                        "yellow": {
-                                            "pattern": "yellow_tripdata_(\\d{4})-(\\d{2})\\.csv$",
-                                            "module_name": "great_expectations.datasource.data_connector.asset",
-                                            "group_names": ["year", "month"],
-                                            "class_name": "Asset",
-                                        }
-                                    },
-                                    "class_name": "ConfiguredAssetFilesystemDataConnector",
-                                }
-                            },
-                            "execution_engine": {
-                                "module_name": "great_expectations.execution_engine",
-                                "class_name": "PandasExecutionEngine",
-                            },
-                            "class_name": "Datasource",
-                        },
-                        "organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
+                        "datasource_config": datasource_config.to_dict(),
+                        "organization_id": ge_cloud_organization_id,
                     },
                 }
             },
