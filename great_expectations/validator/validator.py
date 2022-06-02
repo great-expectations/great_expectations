@@ -110,8 +110,8 @@ def _calc_validation_statistics(
     return ``ExpectationStatistics``.
     """
     # calc stats
-    successful_expectations = sum(exp.success for exp in validation_results)
     evaluated_expectations = len(validation_results)
+    successful_expectations = sum(exp.success for exp in validation_results)
     unsuccessful_expectations = evaluated_expectations - successful_expectations
     success = successful_expectations == evaluated_expectations
     try:

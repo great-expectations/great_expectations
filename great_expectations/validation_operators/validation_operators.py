@@ -286,7 +286,7 @@ class ActionListValidationOperator(ValidationOperator):
         catch_exceptions=None,
         result_format=None,
         checkpoint_identifier=None,
-    ):
+    ) -> ValidationOperatorResult:
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
