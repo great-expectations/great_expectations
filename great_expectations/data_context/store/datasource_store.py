@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
@@ -40,19 +40,25 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def serialize(self, _, value: DatasourceConfig) -> Union[str, dict]:
+    def serialize(
+        self, key: Optional[Any], value: DatasourceConfig
+    ) -> Union[str, dict]:
         """
         See parent 'Store.serialize()' for more information
         """
+        del key  # Unused arg but necessary as part of signature
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._schema.dump(value)
         return self._schema.dumps(value, indent=2, sort_keys=True)
 
-    def deserialize(self, _, value: Union[str, dict]) -> DatasourceConfig:
+    def deserialize(
+        self, key: Optional[Any], value: Union[str, dict]
+    ) -> DatasourceConfig:
         """
         See parent 'Store.deserialize()' for more information
         """
+        del key  # Unused arg but necessary as part of signature
         if isinstance(value, dict):
             return self._schema.load(value)
         else:
