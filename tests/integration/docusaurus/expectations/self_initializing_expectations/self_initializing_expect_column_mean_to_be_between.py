@@ -5,10 +5,10 @@ This example script is intended for use in documentation on how to use a self-in
 Assert statements are included to ensure that if the behaviour shown in this script breaks it will not pass
 tests and will be updated.  These statements can be ignored by users.
 
-Inline comments with the tags `<snippet>` and `</snippet>` are used to ensure that if this script is updated
+Comments with the tags `<snippet>` and `</snippet>` are used to ensure that if this script is updated
 the snippets that are specified for use in documentation are maintained.  These comments can be ignored by users.
 
-<relevant documentation>
+--documentation--
     https://docs.greatexpectations.io/docs/
 """
 
