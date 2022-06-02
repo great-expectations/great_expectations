@@ -1021,7 +1021,10 @@ def test_notebook_execution_with_pandas_backend(
         },
     ]
 
-    assert context.get_validation_result(expectation_suite_name="warning") == {}
+    assert (
+        context.get_validation_result(expectation_suite_name=expectation_suite_name)
+        == {}
+    )
 
     # Create notebook
     # do not want to actually send usage_message, since the function call is not the result of actual usage
@@ -1045,15 +1048,17 @@ def test_notebook_execution_with_pandas_backend(
     run_notebook(
         notebook_path=edit_notebook_path,
         notebook_dir=uncommitted_dir,
-        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
+        string_to_be_replaced="context.open_data_docs(resource_identifier=suite_identifier)",
         replacement_string="",
     )
 
     # Assertions about output
     context = DataContext(context_root_dir=root_dir)
-    obs_validation_result: ExpectationSuiteValidationResult = (
-        context.get_validation_result(expectation_suite_name="warning")
+    validator: Validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite_name=expectation_suite_name,
     )
+    obs_validation_result: ExpectationSuiteValidationResult = validator.validate()
     assert obs_validation_result.statistics == {
         "evaluated_expectations": 3,
         "successful_expectations": 2,

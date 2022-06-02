@@ -22,6 +22,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -158,7 +159,7 @@ def _determine_profile(profiler_name: Optional[str]) -> bool:
         if profiler_name:
             msg = "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
         else:
-            msg = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
+            msg = "Since you did not supply a profiler name, defaulting to the OnboardingDataAssistant"
         cli_message(string=f"<yellow>{msg}</yellow>")
 
     return profile
@@ -775,7 +776,7 @@ def _suite_edit_workflow(
         notebook_name: str = f"edit_{expectation_suite_name}.ipynb"
         notebook_path: str = _get_notebook_path(context, notebook_name)
 
-        renderer: SuiteProfileNotebookRenderer
+        renderer: BaseNotebookRenderer
         if profile:
             if not assume_yes:
                 toolkit.prompt_profile_to_create_a_suite(
@@ -791,11 +792,7 @@ def _suite_edit_workflow(
             renderer.render_to_disk(notebook_file_path=notebook_path)
         else:
             renderer = SuiteEditNotebookRenderer.from_data_context(data_context=context)
-            renderer.render_to_disk(
-                suite=suite,
-                notebook_file_path=notebook_path,
-                batch_request=batch_request,
-            )
+            renderer.render_to_disk(notebook_file_path=notebook_path, suite=suite)
 
         if no_jupyter:
             cli_message(
