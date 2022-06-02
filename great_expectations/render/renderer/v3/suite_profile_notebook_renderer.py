@@ -7,7 +7,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     standardize_batch_request_display_ordering,
 )
-from great_expectations.render.renderer.suite_edit_notebook_renderer import (
+from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
 from great_expectations.util import deep_filter_properties_iterable
@@ -209,10 +209,11 @@ validator.head(n_rows=5, fetch_all=False)
         self._add_profiler_instructions()
         self.add_code_cell(
             code=f"""\
-suite = context.run_profiler_with_dynamic_arguments(
+result = context.run_profiler_with_dynamic_arguments(
     name="{self._profiler_name}",
-    expectation_suite=validator.expectation_suite
+    batch_request=batch_request,
 )
+_ = validator.expectation_suite.add_expectation_configurations(expectation_configurations=result.expectation_configurations)
 """,
             lint=True,
         )
