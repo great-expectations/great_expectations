@@ -68,9 +68,29 @@ class AttributedResolvedMetrics(SerializableDictDot):
     metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
 
     @staticmethod
-    def get_metric_values_from_attributed_metric_values(
+    def get_conditioned_attributed_metric_values_from_attributed_metric_values(
+        attributed_metric_values: Dict[str, MetricValues]
+    ) -> Optional[Dict[str, MetricValues]]:
+        """
+        Converts "attributed_metric_values" to Numpy array for each "batch_id" key (recursively, wherever possible).
+        """
+        if attributed_metric_values is None:
+            return None
+
+        batch_id: str
+        metric_values: MetricValues
+        return {
+            batch_id: _condition_metric_values(metric_values=metric_values)
+            for batch_id, metric_values in attributed_metric_values.items()
+        }
+
+    @staticmethod
+    def get_conditioned_metric_values_from_attributed_metric_values(
         attributed_metric_values: Dict[str, MetricValue]
-    ) -> MetricValues:
+    ) -> Optional[MetricValues]:
+        """
+        Converts all "attributed_metric_values" as list (together) to Numpy array (recursively, wherever possible).
+        """
         if attributed_metric_values is None:
             return None
 
@@ -80,6 +100,9 @@ class AttributedResolvedMetrics(SerializableDictDot):
         return _condition_metric_values(metric_values=metric_values_all_batches)
 
     def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
+        """
+        Adds passed resolved metric "value" to list for corresponding "batch_id" key.
+        """
         if self.metric_values_by_batch_id is None:
             self.metric_values_by_batch_id = {}
 
@@ -102,15 +125,25 @@ class AttributedResolvedMetrics(SerializableDictDot):
         }
 
     @property
-    def metric_values(self) -> MetricValues:
-        return (
-            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
-                attributed_metric_values=self.attributed_metric_values
-            )
+    def conditioned_attributed_metric_values(self) -> Dict[str, MetricValues]:
+        return AttributedResolvedMetrics.get_conditioned_attributed_metric_values_from_attributed_metric_values(
+            attributed_metric_values=self.attributed_metric_values
+        )
+
+    @property
+    def conditioned_metric_values(self) -> MetricValues:
+        return AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+            attributed_metric_values=self.attributed_metric_values
         )
 
     def to_dict(self) -> dict:
+        """
+        Returns dictionary equivalent of this object.
+        """
         return asdict(self)
 
     def to_json_dict(self) -> dict:
+        """
+        Returns JSON dictionary equivalent of this object.
+        """
         return convert_to_json_serializable(data=self.to_dict())

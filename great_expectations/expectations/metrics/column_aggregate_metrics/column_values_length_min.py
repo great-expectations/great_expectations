@@ -27,5 +27,5 @@ class ColumnValuesLengthMin(ColumnAggregateMetricProvider):
         return sa.func.min(sa.func.length(column))
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine, filter_column_isnull=True)
-    def _spark(cls, column: str, **kwargs: dict):  # type: ignore[no-untyped-def]
-        return F.min(F.length(F.col(column)))
+    def _spark(cls, column, **kwargs: dict):  # type: ignore[no-untyped-def]
+        return F.min(F.length(column))
