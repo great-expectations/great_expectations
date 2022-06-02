@@ -1,19 +1,9 @@
 from typing import Optional
 
 from great_expectations.core.data_context_key import StringKey
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudStoreBackend,
-)
-from great_expectations.data_context.store.inline_store_backend import (
-    InlineStoreBackend,
-)
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import DatasourceConfigSchema
-from great_expectations.util import (
-    filter_properties_dict,
-    load_class,
-    verify_dynamic_loading_support,
-)
+from great_expectations.util import filter_properties_dict
 
 
 class DatasourceStore(Store):
