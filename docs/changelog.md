@@ -2,6 +2,24 @@
 title: Changelog
 ---
 
+### 0.15.8
+* [FEATURE] `OnboardingDataAssistant` plots for `expect_table_row_count_to_be_between` non-sequential batches (#5212)
+* [FEATURE] Limit sampling for spark and pandas (#5201)
+* [FEATURE] Groundwork for DataContext Refactor (#5203) (thanks @Shinnnyshinshin)
+* [FEATURE] Implement ability to change rule variable values through DataAssistant run() method arguments at runtime (#5218)
+* [FEATURE] Plot numeric column domains in `OnboardingDataAssistant` (#5189)
+* [BUGFIX] Repair "CLI Suite --Profile" Operation (#5230)
+* [DOCS] Remove leading underscore from sampling docs (#5214)
+* [MAINTENANCE] suppressing type hints in ill-defined situations (#5213)
+* [MAINTENANCE] Change CategoricalColumnDomainBuilder property name from "limit_mode" to "cardinality_limit_mode". (#5215)
+* [MAINTENANCE] Update Note in BigQuery Docs (#5197) (thanks @Shinnnyshinshin)
+* [MAINTENANCE] Sampling cleanup refactor (use BatchSpec in sampling methods) (#5217)
+* [MAINTENANCE] Globally increase Azure timeouts to 120 mins (#5222)
+* [MAINTENANCE] Comment out kl_divergence for build_gallery (#5196)
+* [MAINTENANCE] Fix docstring on expectation (#5204) (thanks @andyjessen)
+* [MAINTENANCE] Improve NaN handling in numeric ParameterBuilder implementations (#5226)
+* [MAINTENANCE] Update type hint and docstring linter thresholds (#5228)
+
 ### 0.15.7
 * [FEATURE] Add Rule for TEXT semantic domains within the Onboarding Assistant (#5144)
 * [FEATURE] Helper method to determine whether Expectation is self-initializing  (#5159)
