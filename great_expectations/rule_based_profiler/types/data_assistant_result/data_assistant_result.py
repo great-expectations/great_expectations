@@ -2473,13 +2473,17 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_domains: Set[Domain] = set(attributed_metrics_by_domain.keys())
 
+        profiler_details: dict
+        metric_configuration: dict
+        domain_kwargs: dict
+        column_name: str
         column_domain: Domain
         column_dfs: List[ColumnDataFrame] = []
         for expectation_configuration in expectation_configurations:
-            profiler_details: dict = expectation_configuration.meta["profiler_details"]
-            metric_configuration: dict = profiler_details["metric_configuration"]
-            domain_kwargs: dict = metric_configuration["domain_kwargs"]
-            column_name: str = domain_kwargs["column"]
+            profiler_details = expectation_configuration.meta["profiler_details"]
+            metric_configuration = profiler_details["metric_configuration"]
+            domain_kwargs = metric_configuration["domain_kwargs"]
+            column_name = domain_kwargs["column"]
 
             column_domain = [
                 d for d in metric_domains if d.domain_kwargs.column == column_name
@@ -2489,23 +2493,22 @@ class DataAssistantResult(SerializableDictDot):
                 str, ParameterNode
             ] = attributed_metrics_by_domain[column_domain]
 
-            for metric_name in attributed_values_by_metric_name.keys():
-                type_: str = expectation_configuration.expectation_type
-                if metric_expectation_map.get(type_) == metric_name:
-                    attributed_values: ParameterNode = attributed_values_by_metric_name[
-                        metric_name
-                    ]
+            type_: str = expectation_configuration.expectation_type
+            if metric_expectation_map.get(type_) == metric_name:
+                attributed_values: ParameterNode = attributed_values_by_metric_name[
+                    metric_name
+                ]
 
-                    df: pd.DataFrame = self._create_df_for_charting(
-                        metric_name=metric_name,
-                        attributed_values=attributed_values,
-                        expectation_configuration=expectation_configuration,
-                        plot_mode=plot_mode,
-                    )
+                df: pd.DataFrame = self._create_df_for_charting(
+                    metric_name=metric_name,
+                    attributed_values=attributed_values,
+                    expectation_configuration=expectation_configuration,
+                    plot_mode=plot_mode,
+                )
 
-                    column_name: str = expectation_configuration.kwargs["column"]
-                    column_df: ColumnDataFrame = ColumnDataFrame(column_name, df)
-                    column_dfs.append(column_df)
+                column_name: str = expectation_configuration.kwargs["column"]
+                column_df: ColumnDataFrame = ColumnDataFrame(column_name, df)
+                column_dfs.append(column_df)
 
         return column_dfs
 
