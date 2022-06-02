@@ -193,7 +193,8 @@ module.exports = {
           label: 'Advanced skills',
           items: [
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
-            'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database'
+            'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler',
           ]
         },
         {
@@ -204,10 +205,11 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations',
-            'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
+            'guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
+            'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
             // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
             {
               type: 'category',
