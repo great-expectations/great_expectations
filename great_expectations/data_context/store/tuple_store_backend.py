@@ -1003,7 +1003,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
 
     @property
-    @functools.lru_cache
+    @functools.lru_cache()
     def _container_client(self):
 
         from azure.identity import DefaultAzureCredential
