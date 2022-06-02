@@ -23,8 +23,11 @@ title: "Create Expectations: Index"
 - [Overview](../../guides/expectations/creating_custom_expectations/overview.md)
 - [How to create a Custom Column Aggregate Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md)
 - [How to create a Custom Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations.md)
+- [How to create a Custom Table Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations.md)
+- [How to use a Custom Expectation](../../guides/expectations/creating_custom_expectations/how_to_use_custom_expectations.md)
+- [How to create a Custom Regex-Based Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations.md)
+- [How to create a Custom Set-Based Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations.md)
 - [How to create custom parameterized Expectations](../../guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations.md)
-- [How to create a custom Metric](../../guides/expectations/creating_custom_expectations/how_to_create_custom_metrics.md)
 
 ### Adding Features to Custom Expectations
 - [How to add comments to Expectations and display them in Data Docs](../../guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs.md)
