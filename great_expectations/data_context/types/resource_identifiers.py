@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 from uuid import UUID
 
 from dateutil.parser import parse
@@ -24,28 +24,24 @@ class ExpectationSuiteIdentifier(DataContextKey):
         self._expectation_suite_name = expectation_suite_name
 
     @property
-    def expectation_suite_name(self) -> str:
+    def expectation_suite_name(self):
         return self._expectation_suite_name
 
-    def to_tuple(self) -> Tuple[str, ...]:
+    def to_tuple(self):
         return tuple(self.expectation_suite_name.split("."))
 
-    def to_fixed_length_tuple(self) -> Tuple[str]:
+    def to_fixed_length_tuple(self):
         return (self.expectation_suite_name,)
 
     @classmethod
-    def from_tuple(
-        cls, tuple_: Tuple[str, ...]
-    ) -> "ExpectationSuiteIdentifier":  # noqa: F821
+    def from_tuple(cls, tuple_):
         return cls(".".join(tuple_))
 
     @classmethod
-    def from_fixed_length_tuple(
-        cls, tuple_: Tuple[str, ...]
-    ) -> "ExpectationSuiteIdentifier":  # noqa: F821
+    def from_fixed_length_tuple(cls, tuple_):
         return cls(expectation_suite_name=tuple_[0])
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return f"{self.__class__.__name__}::{self._expectation_suite_name}"
 
 
