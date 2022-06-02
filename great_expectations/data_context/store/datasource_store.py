@@ -23,7 +23,7 @@ from great_expectations.util import (
 )
 
 
-class DatasourceStore(ConfigurationStore):
+class DatasourceStore(Store):
     """
     A DatasourceStore manages Datasources for the DataContext.
     """
