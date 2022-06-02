@@ -1015,6 +1015,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def run_profiler(
         data_context: "BaseDataContext",  # noqa: F821
         profiler_store: ProfilerStore,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
@@ -1030,8 +1032,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return profiler.run(
             variables=variables,
             rules=rules,
-            batch_list=None,
-            batch_request=None,
+            batch_list=batch_list,
+            batch_request=batch_request,
             recompute_existing_parameter_values=False,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )
