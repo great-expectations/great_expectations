@@ -1,9 +1,14 @@
+from unittest.mock import PropertyMock, patch
+
 import pytest
 
 from great_expectations.core.data_context_key import StringKey
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store.datasource_store import DatasourceStore
-from great_expectations.data_context.types.base import DatasourceConfig
+from great_expectations.data_context.types.base import (
+    DatasourceConfig,
+    DatasourceConfigSchema,
+)
+from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
 @pytest.fixture
@@ -23,20 +28,26 @@ def datasource_key(datasource_name: str) -> StringKey:
 
 @pytest.fixture
 def empty_datasource_store(datasource_store_name: str) -> DatasourceStore:
-    return DatasourceStore(datasource_store_name)
+    return DatasourceStore(store_name=datasource_store_name)
 
 
 @pytest.fixture
 def datasource_config() -> DatasourceConfig:
     return DatasourceConfig(
         class_name="Datasource",
-        execution_engine={"class_name": "PandasExecutionEngine"},
+        execution_engine={
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
         data_connectors={
             "tripdata_monthly_configured": {
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
                 "base_directory": "/path/to/trip_data",
                 "assets": {
                     "yellow": {
+                        "class_name": "Asset",
+                        "module_name": "great_expectations.datasource.data_connector.asset",
                         "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
                         "group_names": ["year", "month"],
                     }
@@ -44,3 +55,104 @@ def datasource_config() -> DatasourceConfig:
             }
         },
     )
+
+
+def test_datasource_store_with_bad_key_raises_error(
+    empty_datasource_store: DatasourceStore, datasource_config: DatasourceConfig
+) -> None:
+    store: DatasourceStore = empty_datasource_store
+
+    error_msg: str = "key must be an instance of StringKey"
+
+    with pytest.raises(TypeError) as e:
+        store.set(key="my_bad_key", value=datasource_config)
+    assert error_msg in str(e.value)
+
+    with pytest.raises(TypeError) as e:
+        store.get(key="my_bad_key")
+    assert error_msg in str(e.value)
+
+
+def test_datasource_store_retrieval(
+    empty_datasource_store: DatasourceStore, datasource_config: DatasourceConfig
+) -> None:
+    store: DatasourceStore = empty_datasource_store
+
+    key: StringKey = StringKey(key="my_datasource")
+    store.set(key=key, value=datasource_config)
+    res: DatasourceConfig = store.get(key=key)
+
+    assert isinstance(res, DatasourceConfig)
+    assert DatasourceConfigSchema().dump(res) == datasource_config.to_dict()
+
+
+def test_datasource_store_retrieval_cloud_mode(
+    datasource_config: DatasourceConfig,
+    ge_cloud_base_url: str,
+    ge_cloud_access_token: str,
+    ge_cloud_organization_id: str,
+) -> None:
+    ge_cloud_store_backend_config: dict = {
+        "class_name": "GeCloudStoreBackend",
+        "ge_cloud_base_url": ge_cloud_base_url,
+        "ge_cloud_resource_type": "datasource",
+        "ge_cloud_credentials": {
+            "access_token": ge_cloud_access_token,
+            "organization_id": ge_cloud_organization_id,
+        },
+        "suppress_store_backend_id": True,
+    }
+
+    store: DatasourceStore = DatasourceStore(
+        store_name="my_cloud_datasource_store",
+        store_backend=ge_cloud_store_backend_config,
+    )
+
+    key: GeCloudIdentifier = GeCloudIdentifier(
+        resource_type="datasource", ge_cloud_id="foobarbaz"
+    )
+
+    with patch("requests.patch", autospec=True) as mock_patch:
+        type(mock_patch.return_value).status_code = PropertyMock(return_value=200)
+
+        store.set(key=key, value=datasource_config)
+
+        mock_patch.assert_called_with(
+            "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/datasources/foobarbaz",
+            json={
+                "data": {
+                    "type": "datasource",
+                    "id": "foobarbaz",
+                    "attributes": {
+                        "datasource_config": {
+                            "module_name": "great_expectations.datasource",
+                            "data_connectors": {
+                                "tripdata_monthly_configured": {
+                                    "module_name": "great_expectations.datasource.data_connector",
+                                    "base_directory": "/path/to/trip_data",
+                                    "assets": {
+                                        "yellow": {
+                                            "pattern": "yellow_tripdata_(\\d{4})-(\\d{2})\\.csv$",
+                                            "module_name": "great_expectations.datasource.data_connector.asset",
+                                            "group_names": ["year", "month"],
+                                            "class_name": "Asset",
+                                        }
+                                    },
+                                    "class_name": "ConfiguredAssetFilesystemDataConnector",
+                                }
+                            },
+                            "execution_engine": {
+                                "module_name": "great_expectations.execution_engine",
+                                "class_name": "PandasExecutionEngine",
+                            },
+                            "class_name": "Datasource",
+                        },
+                        "organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
+                    },
+                }
+            },
+            headers={
+                "Content-Type": "application/vnd.api+json",
+                "Authorization": "Bearer 6bb5b6f5c7794892a4ca168c65c2603e",
+            },
+        )
