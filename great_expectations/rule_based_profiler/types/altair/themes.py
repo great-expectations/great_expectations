@@ -45,7 +45,7 @@ y_axis_title_x: int = -55
 
 # Legend
 legend_title_color: str = Colors.PURPLE.value
-legend_title_font_size: str = 12
+legend_title_font_size: int = 12
 
 #
 # Color Palettes

@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional
 
 import numpy as np
+import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -27,7 +28,9 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Median Implementation"""
-        return column.median()
+        column_null_elements_cond: pd.Series = column.isnull()
+        column_nonnull_elements: pd.Series = column[~column_null_elements_cond]
+        return column_nonnull_elements.median()
 
     @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     def _sqlalchemy(

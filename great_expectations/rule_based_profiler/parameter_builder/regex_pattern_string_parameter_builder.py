@@ -34,11 +34,11 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     CANDIDATE_REGEX: Set[str] = {
         r"\d+",  # whole number with 1 or more digits
         r"-?\d+",  # negative whole numbers
-        r"-?\d+(\.\d*)?",  # decimal numbers with . (period) separator
+        r"-?\d+(?:\.\d*)?",  # decimal numbers with . (period) separator
         r"[A-Za-z0-9\.,;:!?()\"'%\-]+",  # general text
         r"^\s+",  # leading space
         r"\s+$",  # trailing space
-        r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  #  Matching URL (including http(s) protocol)
+        r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  #  Matching URL (including http(s) protocol)
         r"<\/?(?:p|a|b|img)(?: \/)?>",  # HTML tags
         r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}",  # IPv4 IP address
         r"(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",  # IPv6 IP address,
@@ -148,7 +148,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         metric_values: MetricValues
 
-        metric_values = attributed_resolved_metrics.metric_values
+        metric_values = attributed_resolved_metrics.conditioned_metric_values
 
         if metric_values is None:
             raise ge_exceptions.ProfilerExecutionError(
@@ -209,7 +209,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             attributed_resolved_metrics
         ) in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
-            metric_values = attributed_resolved_metrics.metric_values[:, 0]
+            metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
             match_regex_unexpected_count: int = sum(metric_values)
             success_ratio: float = (

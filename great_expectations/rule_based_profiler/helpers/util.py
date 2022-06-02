@@ -715,6 +715,7 @@ def get_validator_with_expectation_suite(
     expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
     expectation_suite_name: Optional[str] = None,
     component_name: str = "test",
+    persist: bool = False,
 ) -> "Validator":  # noqa: F821
     """
     Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
@@ -729,6 +730,7 @@ def get_validator_with_expectation_suite(
         expectation_suite=expectation_suite,
         expectation_suite_name=expectation_suite_name,
         component_name=component_name,
+        persist=persist,
     )
 
     batch_request = materialize_batch_request(batch_request=batch_request)
@@ -745,6 +747,7 @@ def get_or_create_expectation_suite(
     expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
     expectation_suite_name: Optional[str] = None,
     component_name: Optional[str] = None,
+    persist: bool = False,
 ) -> "ExpectationSuite":  # noqa: F821
     """
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
@@ -777,17 +780,23 @@ def get_or_create_expectation_suite(
         expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"
 
     if create_expectation_suite:
-        try:
-            # noinspection PyUnusedLocal
-            expectation_suite = data_context.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-        except ge_exceptions.DataContextError:
-            expectation_suite = data_context.create_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-            logger.info(
-                f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
+        if persist:
+            try:
+                # noinspection PyUnusedLocal
+                expectation_suite = data_context.get_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                )
+            except ge_exceptions.DataContextError:
+                expectation_suite = data_context.create_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                )
+                logger.info(
+                    f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
+                )
+        else:
+            expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name,
+                data_context=data_context,
             )
 
     return expectation_suite
