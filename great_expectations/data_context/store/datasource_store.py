@@ -41,12 +41,18 @@ class DatasourceStore(Store):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def serialize(self, _, value: DatasourceConfig) -> Union[str, dict]:
+        """
+        See parent 'Store.serialize()' for more information
+        """
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._schema.dump(value)
         return self._schema.dumps(value, indent=2, sort_keys=True)
 
     def deserialize(self, _, value: Union[str, dict]) -> DatasourceConfig:
+        """
+        See parent 'Store.deserialize()' for more information
+        """
         if isinstance(value, dict):
             return self._schema.load(value)
         else:
