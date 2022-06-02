@@ -1060,6 +1060,10 @@ class ExpectationConfiguration(SerializableDictDot):
     def kwargs(self) -> dict:
         return self._kwargs
 
+    @kwargs.setter
+    def kwargs(self, value: dict) -> None:
+        self._kwargs = value
+
     def _get_default_custom_kwargs(self) -> dict:
         # NOTE: this is a holdover until class-first expectations control their
         # defaults, and so defaults are inherited.
