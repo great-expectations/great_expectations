@@ -260,6 +260,10 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py",
     ),
     IntegrationTestFixture(
+        name="expect_column_pair_values_to_have_a_difference_of_three",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py",
+    ),
+    IntegrationTestFixture(
         name="cross_table_comparisons_from_query",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
