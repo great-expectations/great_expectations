@@ -1818,11 +1818,7 @@ class DataAssistantResult(SerializableDictDot):
             for domain in list(attributed_metrics.keys())
         }
 
-        profiler_details: dict = expectation_configuration.meta["profiler_details"]
-        metric_configuration: dict = profiler_details["metric_configuration"]
-        domain_kwargs: dict = metric_configuration["domain_kwargs"]
-        column_name: str = domain_kwargs["column"]
-
+        column_name: str = expectation_configuration.kwargs["column"]
         domain = domains_by_column_name[column_name]
 
         attributed_values_by_metric_name: Dict[str, ParameterNode] = attributed_metrics[
@@ -1831,7 +1827,7 @@ class DataAssistantResult(SerializableDictDot):
 
         for metric_name in attributed_values_by_metric_name.keys():
             type_: str = expectation_configuration.expectation_type
-            if expectation_metric_map.get(type_) == metric_name:
+            if expectation_metric_map[type_] == metric_name:
                 attributed_values: ParameterNode = attributed_values_by_metric_name[
                     metric_name
                 ]
@@ -1843,7 +1839,6 @@ class DataAssistantResult(SerializableDictDot):
                     plot_mode=plot_mode,
                 )
 
-                column_name: str = expectation_configuration.kwargs["column"]
                 subtitle = f"Column: {column_name}"
 
                 metric_name: str = sanitize_parameter_name(name=metric_name)
@@ -1977,14 +1972,9 @@ class DataAssistantResult(SerializableDictDot):
             for domain in list(attributed_metrics.keys())
         }
 
-        metric_names: List[str]
         column_dfs: List[ColumnDataFrame] = []
         for expectation_configuration in expectation_configurations:
-            profiler_details: dict = expectation_configuration.meta["profiler_details"]
-            metric_configuration: dict = profiler_details["metric_configuration"]
-            domain_kwargs: dict = metric_configuration["domain_kwargs"]
-            column_name: str = domain_kwargs["column"]
-
+            column_name: str = expectation_configuration.kwargs["column"]
             domain = domains_by_column_name[column_name]
 
             attributed_values_by_metric_name: Dict[
@@ -1993,7 +1983,7 @@ class DataAssistantResult(SerializableDictDot):
 
             for metric_name in attributed_values_by_metric_name.keys():
                 type_: str = expectation_configuration.expectation_type
-                if expectation_metric_map.get(type_) == metric_name:
+                if expectation_metric_map[type_] == metric_name:
                     attributed_values: ParameterNode = attributed_values_by_metric_name[
                         metric_name
                     ]
@@ -2005,7 +1995,6 @@ class DataAssistantResult(SerializableDictDot):
                         plot_mode=plot_mode,
                     )
 
-                    column_name: str = expectation_configuration.kwargs["column"]
                     column_df: ColumnDataFrame = ColumnDataFrame(column_name, df)
                     column_dfs.append(column_df)
 
