@@ -1190,6 +1190,7 @@ def test_TupleGCSStoreBackend():
 
 def test_TupleAzureBlobStoreBackend_connection_string():
     pytest.importorskip("azure.storage.blob")
+    pytest.importorskip("azure.identity")
     """
     What does this test test and why?
     Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
