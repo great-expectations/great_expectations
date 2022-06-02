@@ -169,6 +169,10 @@ class InvalidExpectationConfigurationError(GreatExpectationsError):
     pass
 
 
+class ExpectationNotFoundError(GreatExpectationsError):
+    pass
+
+
 class InvalidValidationResultError(GreatExpectationsError):
     pass
 
@@ -374,6 +378,10 @@ class SorterError(DataContextError):
     def __init__(self, message) -> None:
         self.message = message
         super().__init__(self.message)
+
+
+class SamplerError(DataContextError):
+    pass
 
 
 class MetricError(GreatExpectationsError):

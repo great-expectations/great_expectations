@@ -137,16 +137,30 @@ def test_get_batch(data_context_with_simple_sql_datasource_for_testing_get_batch
         )
 
 
+def test_get_validator_bad_batch_request(
+    data_context_with_simple_sql_datasource_for_testing_get_batch,
+):
+    context: "DataContext" = (
+        data_context_with_simple_sql_datasource_for_testing_get_batch
+    )
+    context.create_expectation_suite("my_expectations")
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_sqlite_db",
+        data_connector_name="daily",
+        data_asset_name="i_dont_exist",
+        data_connector_query=IDDict(batch_filter_parameters={"date": "2020-01-15"}),
+    )
+    with pytest.raises(KeyError):
+        # as a result of introspection, the data_assets will already be loaded into the cache.
+        # an incorrect data_asset_name will result in a key error
+        context.get_validator(
+            batch_request=batch_request, expectation_suite_name="my_expectations"
+        )
+
+
 def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_batch):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
     context.create_expectation_suite("my_expectations")
-
-    print(
-        json.dumps(
-            context.datasources["my_sqlite_db"].get_available_data_asset_names(),
-            indent=4,
-        )
-    )
 
     # Successful specification using a typed BatchRequest
     context.get_validator(

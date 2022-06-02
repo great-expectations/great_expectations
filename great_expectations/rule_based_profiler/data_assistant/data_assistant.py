@@ -15,12 +15,19 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
 )
+from great_expectations.rule_based_profiler.helpers.runtime_environment import (
+    RuntimeEnvironmentDomainTypeDirectives,
+    RuntimeEnvironmentVariablesDirectives,
+)
 from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
     MeanUnexpectedMapMetricMultiBatchParameterBuilder,
     MetricMultiBatchParameterBuilder,
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
+    RegexPatternStringParameterBuilder,
 )
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
@@ -106,6 +113,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="table.row_count",
+                metric_domain_kwargs=None,
                 metric_value_kwargs=None,
                 json_serialize=json_serialize,
             )
@@ -241,6 +249,32 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 json_serialize=json_serialize,
             )
 
+        def get_column_min_length_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_numeric_metric_multi_batch_parameter_builder(
+                metric_name="column_values.length.min",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
+        def get_column_max_length_metric_multi_batch_parameter_builder(
+            self,
+            json_serialize: Union[str, bool] = True,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            return self.build_numeric_metric_multi_batch_parameter_builder(
+                metric_name="column_values.length.max",
+                metric_value_kwargs=None,
+                json_serialize=json_serialize,
+            )
+
         def get_column_median_metric_multi_batch_parameter_builder(
             self,
             json_serialize: Union[str, bool] = True,
@@ -283,6 +317,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_numeric_metric_multi_batch_parameter_builder(
             metric_name: str,
+            metric_domain_kwargs: Optional[
+                Union[str, dict]
+            ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
             json_serialize: Union[str, bool] = True,
         ) -> MetricMultiBatchParameterBuilder:
@@ -293,7 +330,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return MetricMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_domain_kwargs=metric_domain_kwargs,
                 metric_value_kwargs=metric_value_kwargs,
                 enforce_numeric_metric=True,
                 replace_nan_with_zero=True,
@@ -329,6 +366,25 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
                 truncate_values=f"{VARIABLES_KEY}truncate_values",
                 round_decimals=f"{VARIABLES_KEY}round_decimals",
+                evaluation_parameter_builder_configs=None,
+                json_serialize=json_serialize,
+                data_context=None,
+            )
+
+        @staticmethod
+        def build_regex_pattern_string_parameter_builder(
+            name: str,
+            json_serialize: Union[str, bool] = True,
+        ) -> RegexPatternStringParameterBuilder:
+            """
+            This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
+            """
+            return RegexPatternStringParameterBuilder(
+                name=name,
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                threshold=1.0,
+                candidate_regexes=None,
                 evaluation_parameter_builder_configs=None,
                 json_serialize=json_serialize,
                 data_context=None,
@@ -389,6 +445,12 @@ class DataAssistant(metaclass=MetaDataAssistant):
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        variables_directives_list: Optional[
+            List[RuntimeEnvironmentVariablesDirectives]
+        ] = None,
+        domain_type_directives_list: Optional[
+            List[RuntimeEnvironmentDomainTypeDirectives]
+        ] = None,
     ) -> DataAssistantResult:
         """
         Run the DataAssistant as it is currently configured.
@@ -396,6 +458,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         Args:
             variables: attribute name/value pairs (overrides), commonly-used in Builder objects
             rules: name/(configuration-dictionary) (overrides)
+            variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
+            domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
@@ -412,6 +476,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
             rules=rules,
             batch_list=list(self._batches.values()),
             batch_request=None,
+            variables_directives_list=variables_directives_list,
+            domain_type_directives_list=domain_type_directives_list,
         )
         return self._build_data_assistant_result(
             data_assistant_result=data_assistant_result
@@ -563,6 +629,12 @@ def run_profiler_on_data(
     rules: Optional[Dict[str, Dict[str, Any]]] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+    variables_directives_list: Optional[
+        List[RuntimeEnvironmentVariablesDirectives]
+    ] = None,
+    domain_type_directives_list: Optional[
+        List[RuntimeEnvironmentDomainTypeDirectives]
+    ] = None,
 ) -> None:
     """
     This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
@@ -575,6 +647,8 @@ def run_profiler_on_data(
         rules: name/(configuration-dictionary) (overrides)
         batch_list: Explicit list of Batch objects to supply data at runtime
         batch_request: Explicit batch_request used to supply data at runtime
+        variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
+        domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
     """
     if rules is None:
         rules = []
@@ -590,6 +664,8 @@ def run_profiler_on_data(
         batch_request=batch_request,
         recompute_existing_parameter_values=False,
         reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
+        variables_directives_list=variables_directives_list,
+        domain_type_directives_list=domain_type_directives_list,
     )
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config

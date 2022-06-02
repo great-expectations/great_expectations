@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import Dict, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -8,6 +8,50 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.types import MetricValue, MetricValues
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
+
+
+def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
+    def _detect_illegal_array_type_or_shape(values: MetricValues) -> bool:
+        # Python "None" is illegal as candidate for conversion into "numpy.ndarray" type.
+        if values is None:
+            return True
+
+        # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
+        if isinstance(values, (pd.DataFrame, pd.Series, set)):
+            return True
+
+        if isinstance(values, (list, tuple)):
+            value: MetricValue = values[0]
+            # Python "None" is illegal as candidate for conversion into "numpy.ndarray" type.
+            if value is None:
+                return True
+
+            # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
+            if isinstance(value, (pd.DataFrame, pd.Series, set)):
+                return True
+
+            if all(isinstance(value, list) for value in values):
+                # Components of different lengths cannot be packaged into "numpy.ndarray" type (due to undefined shape).
+                values_iterator: Iterator = iter(values)
+                first_value_length: int = len(next(values_iterator))
+                current_value: List[Any]
+                if not all(
+                    len(current_value) == first_value_length
+                    for current_value in values_iterator
+                ):
+                    return True
+
+            # Recursively evaluate each element of properly shaped iterable (list or tuple).
+            for value in values:
+                if _detect_illegal_array_type_or_shape(values=value):
+                    return True
+
+        return False
+
+    if _detect_illegal_array_type_or_shape(values=metric_values):
+        return metric_values
+    else:
+        return np.asarray(metric_values)
 
 
 @dataclass
@@ -24,19 +68,41 @@ class AttributedResolvedMetrics(SerializableDictDot):
     metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
 
     @staticmethod
-    def get_metric_values_from_attributed_metric_values(
-        attributed_metric_values: Dict[str, MetricValue]
-    ) -> MetricValues:
+    def get_conditioned_attributed_metric_values_from_attributed_metric_values(
+        attributed_metric_values: Dict[str, MetricValues]
+    ) -> Optional[Dict[str, MetricValues]]:
+        """
+        Converts "attributed_metric_values" to Numpy array for each "batch_id" key (recursively, wherever possible).
+        """
         if attributed_metric_values is None:
             return None
 
-        values: MetricValues = list(attributed_metric_values.values())[0]
-        if values is not None and isinstance(values, (pd.DataFrame, pd.Series)):
-            return list(attributed_metric_values.values())
+        batch_id: str
+        metric_values: MetricValues
+        return {
+            batch_id: _condition_metric_values(metric_values=metric_values)
+            for batch_id, metric_values in attributed_metric_values.items()
+        }
 
-        return np.array(list(attributed_metric_values.values()))
+    @staticmethod
+    def get_conditioned_metric_values_from_attributed_metric_values(
+        attributed_metric_values: Dict[str, MetricValue]
+    ) -> Optional[MetricValues]:
+        """
+        Converts all "attributed_metric_values" as list (together) to Numpy array (recursively, wherever possible).
+        """
+        if attributed_metric_values is None:
+            return None
+
+        metric_values_all_batches: MetricValues = list(
+            attributed_metric_values.values()
+        )
+        return _condition_metric_values(metric_values=metric_values_all_batches)
 
     def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
+        """
+        Adds passed resolved metric "value" to list for corresponding "batch_id" key.
+        """
         if self.metric_values_by_batch_id is None:
             self.metric_values_by_batch_id = {}
 
@@ -59,15 +125,25 @@ class AttributedResolvedMetrics(SerializableDictDot):
         }
 
     @property
-    def metric_values(self) -> MetricValues:
-        return (
-            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
-                attributed_metric_values=self.attributed_metric_values
-            )
+    def conditioned_attributed_metric_values(self) -> Dict[str, MetricValues]:
+        return AttributedResolvedMetrics.get_conditioned_attributed_metric_values_from_attributed_metric_values(
+            attributed_metric_values=self.attributed_metric_values
+        )
+
+    @property
+    def conditioned_metric_values(self) -> MetricValues:
+        return AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+            attributed_metric_values=self.attributed_metric_values
         )
 
     def to_dict(self) -> dict:
+        """
+        Returns dictionary equivalent of this object.
+        """
         return asdict(self)
 
     def to_json_dict(self) -> dict:
+        """
+        Returns JSON dictionary equivalent of this object.
+        """
         return convert_to_json_serializable(data=self.to_dict())
