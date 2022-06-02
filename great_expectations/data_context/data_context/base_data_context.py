@@ -17,10 +17,22 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.profile.base import (
+    PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND,
+    PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND,
+    PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+    PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
+)
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
@@ -100,7 +112,6 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import (
@@ -128,7 +139,9 @@ yaml.default_flow_style = False
 
 
 # TODO: <WILL> Most of the logic here will be migrated to EphemeralDataContext
-class BaseDataContext(EphemeralDataContext, ConfigPeer):
+class BaseDataContext(
+    EphemeralDataContext, FileDataContext, CloudDataContext, ConfigPeer
+):
     """
         This class implements most of the functionality of DataContext, with a few exceptions.
 
@@ -233,24 +246,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     --ge-feature-maturity-info--
     """
 
-    @classmethod
-    def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
-        """
-        Validation of the configuration against schema, performed as part of __init__()
-        Args:
-            project_config (DataContextConfig or Mapping): config to validate
-
-        Returns:
-            True if the validation is successful. Raises ValidationError if not.
-        """
-        if isinstance(project_config, DataContextConfig):
-            return True
-        try:
-            dataContextConfigSchema.load(project_config)
-        except ValidationError:
-            raise
-        return True
-
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__.value,
     )
@@ -273,11 +268,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if not BaseDataContext.validate_config(project_config):
-            raise ge_exceptions.InvalidConfigError(
-                "Your project_config is not valid. Try using the CLI check-config command."
-            )
-
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
 
@@ -285,11 +275,35 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
 
-        self.runtime_environment = runtime_environment or {}
+        # start splitting this up
+        # if self._ge_cloud_mode:
+        #     CloudDataContext.__init__(
+        #         project_config=project_config,
+        #         runtime_environment=runtime_environment,
+        #         ge_cloud_mode=ge_cloud_mode,
+        #         ge_cloud_config=ge_cloud_config
+        #     )
+        # elif self.root_directory:
+        #     FileDataContext.__init__(
+        #         project_config=project_config,
+        #         runtime_environment=runtime_environment,
+        #         context_root_dir=context_root_dir
+        #     )
 
+        # else:
         super().__init__(
             project_config=project_config, runtime_environment=runtime_environment
         )
+
+        # self.runtime_environment = runtime_environment or {}
+
+        # file stuff exists here
+
+        # check for whether config_file_section / config_file_option exist?
+        # c
+        # self._apply_global_config_overrides()
+
+        self._apply_global_config_overrides()
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -336,13 +350,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_config,
                 )
 
-    @property
-    def ge_cloud_config(self) -> Optional[GeCloudConfig]:
-        return self._ge_cloud_config
-
-    @property
-    def ge_cloud_mode(self) -> bool:
-        return self._ge_cloud_mode
+    # @property
+    # def ge_cloud_config(self) -> Optional[GeCloudConfig]:
+    #     return self._ge_cloud_config
+    #
+    # @property
+    # def ge_cloud_mode(self) -> bool:
+    #     return self._ge_cloud_mode
 
     def _init_datasources(self, config: DataContextConfig) -> None:
         if not config.datasources:
@@ -2232,6 +2246,19 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
 
     @property
+    def ge_cloud_config(self) -> Optional[GeCloudConfig]:
+        return self._ge_cloud_config
+
+    @property
+    def ge_cloud_mode(self) -> bool:
+        return self._ge_cloud_mode
+
+    @property
+    def config_variables(self):
+        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
+        return dict(self._load_config_variables_file())
+
+    @property
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
 
@@ -2538,7 +2565,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     profiling_results = {
                         "success": False,
                         "error": {
-                            "code": BaseDataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+                            "code": PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
                         },
                     }
                     return profiling_results
@@ -2553,7 +2580,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 profiling_results = {
                     "success": False,
                     "error": {
-                        "code": BaseDataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+                        "code": PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
                     },
                 }
                 return profiling_results
@@ -2592,7 +2619,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 profiling_results = {
                     "success": False,
                     "error": {
-                        "code": BaseDataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+                        "code": PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
                         "not_found_data_assets": not_found_data_assets,
                         "data_assets": available_data_asset_name_list,
                     },
@@ -2613,7 +2640,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     profiling_results = {
                         "success": False,
                         "error": {
-                            "code": BaseDataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
+                            "code": PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
                             "num_data_assets": total_data_assets,
                             "data_assets": available_data_asset_name_list,
                         },
@@ -3256,6 +3283,47 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         The returned object is determined by return_mode.
         """
+        test_yaml_config_supported_store_types: List[str] = [
+            "ExpectationsStore",
+            "ValidationsStore",
+            "HtmlSiteStore",
+            "EvaluationParameterStore",
+            "MetricStore",
+            "SqlAlchemyQueryStore",
+            "CheckpointStore",
+            "ProfilerStore",
+        ]
+        test_yaml_config_supported_datasource_types: List[str] = [
+            "Datasource",
+            "SimpleSqlalchemyDatasource",
+        ]
+        test_yaml_config_supported_data_connector_types: List[str] = [
+            "InferredAssetFilesystemDataConnector",
+            "ConfiguredAssetFilesystemDataConnector",
+            "InferredAssetS3DataConnector",
+            "ConfiguredAssetS3DataConnector",
+            "InferredAssetAzureDataConnector",
+            "ConfiguredAssetAzureDataConnector",
+            "InferredAssetGCSDataConnector",
+            "ConfiguredAssetGCSDataConnector",
+            "InferredAssetSqlDataConnector",
+            "ConfiguredAssetSqlDataConnector",
+        ]
+        test_yaml_config_supported_checkpoint_types: List[str] = [
+            "Checkpoint",
+            "SimpleCheckpoint",
+        ]
+        test_yaml_config_supported_profiler_types: List[str] = [
+            "RuleBasedProfiler",
+        ]
+        all_test_yaml_config_supported_types: List[str] = (
+            test_yaml_config_supported_store_types
+            + test_yaml_config_supported_datasource_types
+            + test_yaml_config_supported_data_connector_types
+            + test_yaml_config_supported_checkpoint_types
+            + test_yaml_config_supported_profiler_types
+        )
+
         if return_mode not in ["instantiated_class", "report_object"]:
             raise ValueError(f"Unknown return_mode: {return_mode}.")
 
@@ -3282,35 +3350,35 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if pretty_print:
             print("Attempting to instantiate class from config...")
         try:
-            if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
+            if class_name in test_yaml_config_supported_store_types:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_store_from_yaml_config(
                     name, class_name, config
                 )
-            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
+            elif class_name in test_yaml_config_supported_datasource_types:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_datasource_from_yaml_config(
                     name, class_name, config
                 )
-            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
+            elif class_name in test_yaml_config_supported_checkpoint_types:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_checkpoint_from_yaml_config(
                     name, class_name, config
                 )
-            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
+            elif class_name in test_yaml_config_supported_data_connector_types:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_data_connector_from_yaml_config(
                     name, class_name, config, runtime_environment
                 )
-            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
+            elif class_name in test_yaml_config_supported_profiler_types:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
@@ -3354,7 +3422,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 ]
             elif (
                 usage_stats_event_payload.get("parent_class") is None
-                and class_name in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+                and class_name in all_test_yaml_config_supported_types
             ):
                 # add parent_class if it doesn't exist and class_name is one of our supported core GE types
                 usage_stats_event_payload["parent_class"] = class_name

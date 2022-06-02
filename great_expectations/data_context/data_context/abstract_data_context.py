@@ -3,21 +3,22 @@ import copy
 import json
 import logging
 import os
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Dict, List, Mapping, Optional, Union
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    DataContextConfigDefaults,
     anonymizedUsageStatisticsSchema,
+    dataContextConfigSchema,
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
     substitute_all_config_variables,
 )
+from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
 )
@@ -46,80 +47,30 @@ class AbstractDataContext(ABC):
     TODO: eventually the dependency on ConfigPeer will be removed and this will become a pure ABC.
     """
 
-    PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
-    PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
-    PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
-    PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
-
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
-
-    TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
-        "ExpectationsStore",
-        "ValidationsStore",
-        "HtmlSiteStore",
-        "EvaluationParameterStore",
-        "MetricStore",
-        "SqlAlchemyQueryStore",
-        "CheckpointStore",
-        "ProfilerStore",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES = [
-        "Datasource",
-        "SimpleSqlalchemyDatasource",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES = [
-        "InferredAssetFilesystemDataConnector",
-        "ConfiguredAssetFilesystemDataConnector",
-        "InferredAssetS3DataConnector",
-        "ConfiguredAssetS3DataConnector",
-        "InferredAssetAzureDataConnector",
-        "ConfiguredAssetAzureDataConnector",
-        "InferredAssetGCSDataConnector",
-        "ConfiguredAssetGCSDataConnector",
-        "InferredAssetSqlDataConnector",
-        "ConfiguredAssetSqlDataConnector",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
-        "Checkpoint",
-        "SimpleCheckpoint",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
-        "RuleBasedProfiler",
-    ]
-    ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
-        "__substitution_error__",
-        "__yaml_parse_error__",
-        "__custom_subclass_not_core_ge__",
-        "__class_name_not_provided__",
-    ]
-    ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES = (
-        TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
-    )
-
-    UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
-    GE_UNCOMMITTED_DIR = "uncommitted"
-    BASE_DIRECTORIES = [
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
-        DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
-        DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
-        GE_UNCOMMITTED_DIR,
-    ]
-    GE_DIR = "great_expectations"
-    GE_YML = "great_expectations.yml"
-    GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
-
     GLOBAL_CONFIG_PATHS = [
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
 
-    _data_context = None
+    @classmethod
+    def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
+        """
+        Validation of the configuration against schema, performed as part of __init__()
+        Args:
+            project_config (DataContextConfig or Mapping): config to validate
+
+        Returns:
+            True if the validation is successful. Raises ValidationError if not.
+        """
+        if isinstance(project_config, DataContextConfig):
+            return True
+        try:
+            dataContextConfigSchema.load(project_config)
+        except ValidationError:
+            raise
+        return True
 
     def __init__(
         self,
@@ -134,6 +85,11 @@ class AbstractDataContext(ABC):
             project_config (DataContextConfig or Mapping): config for DataContext
             runtime_environment (dict): runtime environment parameters passed in as dict
         """
+        if not AbstractDataContext.validate_config(project_config):
+            raise ge_exceptions.InvalidConfigError(
+                "Your project_config is not valid. Try using the CLI check-config command."
+            )
+
         self._project_config = project_config
 
         self.runtime_environment = runtime_environment or {}
@@ -190,9 +146,9 @@ class AbstractDataContext(ABC):
         return self.project_config_with_variables_substituted.profiler_store_name
 
     @property
+    @abstractmethod
     def config_variables(self):
-        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
-        return dict(self._load_config_variables_file())
+        pass
 
     @property
     def evaluation_parameter_store_name(self) -> str:
@@ -358,6 +314,8 @@ class AbstractDataContext(ABC):
 
         # check for global data_context_id
         # this call would need to be broken up
+        # TODO: see if we can get two versions of self._get_global_config_value()
+        # and move this method down to Base
         global_data_context_id = self._get_global_config_value(
             environment_variable="GE_DATA_CONTEXT_ID",
             conf_file_section="anonymous_usage_statistics",
@@ -371,6 +329,8 @@ class AbstractDataContext(ABC):
                 logger.info(
                     "data_context_id is defined globally. Applying override to project_config."
                 )
+                # this is the key line
+                # TODO: what is the global_data_context_id and usage_statistics_url before this step?
                 self.config.anonymous_usage_statistics.data_context_id = (
                     global_data_context_id
                 )
@@ -390,6 +350,7 @@ class AbstractDataContext(ABC):
                 logger.info(
                     "usage_statistics_url is defined globally. Applying override to project_config."
                 )
+                # this is the key line
                 self.config.anonymous_usage_statistics.usage_statistics_url = (
                     global_usage_statistics_url
                 )
@@ -465,6 +426,7 @@ class AbstractDataContext(ABC):
         if environment_variable and os.environ.get(environment_variable, False):
             return os.environ.get(environment_variable)
         if conf_file_section and conf_file_option:
+            # this is actually now in the FileDataContext
             for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
                 config = configparser.ConfigParser()
                 config.read(config_path)

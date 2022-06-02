@@ -43,6 +43,12 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
+from great_expectations.profile.base import (
+    PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND,
+    PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND,
+    PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+    PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
+)
 from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
@@ -1564,7 +1570,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         while not do_exit:
             if (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
+                == PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
             ):
                 cli_message(
                     msg_some_data_assets_not_found.format(
@@ -1573,7 +1579,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 )
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS
+                == PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS
             ):
                 cli_message(
                     msg_too_many_data_assets.format(
@@ -1582,13 +1588,13 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 )
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+                == PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
             ):
                 cli_message(msg_error_multiple_generators_found.format(datasource_name))
                 sys.exit(1)
             elif (
                 profiling_results["error"]["code"]
-                == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+                == PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
             ):
                 cli_message(msg_error_no_generators_found.format(datasource_name))
                 sys.exit(1)

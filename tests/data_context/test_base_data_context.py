@@ -178,7 +178,7 @@ def test_get_config_with_variables_substituted(
     """
 
     context: BaseDataContext = basic_in_memory_data_context_just_stores
-    assert type(context.get_config()) == DataContextConfig
+    assert isinstance(context.get_config(), DataContextConfig)
 
     # override the project config to use the $ escaped variable
     context._project_config["validations_store_name"] = "${replace_me}"
@@ -189,7 +189,5 @@ def test_get_config_with_variables_substituted(
             context.get_config_with_variables_substituted().validations_store_name
             == "value_from_env_var"
         )
-    except Exception:
-        raise
     finally:
         del os.environ["replace_me"]

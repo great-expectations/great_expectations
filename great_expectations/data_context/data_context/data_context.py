@@ -12,6 +12,9 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -103,18 +106,18 @@ class DataContext(BaseDataContext):
                 "to initialize a new DataContext"
             )
 
-        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
+        ge_dir = os.path.join(project_root_dir, FileDataContext.GE_DIR)
         os.makedirs(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
-        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
-            message = f"""Warning. An existing `{cls.GE_YML}` was found here: {ge_dir}.
+        if os.path.isfile(os.path.join(ge_dir, FileDataContext.GE_YML)):
+            message = f"""Warning. An existing `{FileDataContext.GE_YML}` was found here: {ge_dir}.
     - No action was taken."""
             warnings.warn(message)
         else:
             cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
 
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(ge_dir, FileDataContext.GE_UNCOMMITTED_DIR)
         if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
     - No action was taken.""".format(
@@ -129,8 +132,8 @@ class DataContext(BaseDataContext):
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir: str) -> bool:
         """Check if all uncommitted directories exist."""
-        uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
-        for directory in cls.UNCOMMITTED_DIRECTORIES:
+        uncommitted_dir = os.path.join(ge_dir, FileDataContext.GE_UNCOMMITTED_DIR)
+        for directory in FileDataContext.UNCOMMITTED_DIRECTORIES:
             if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
                 return False
 
@@ -139,7 +142,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def config_variables_yml_exist(cls, ge_dir: str) -> bool:
         """Check if all config_variables.yml exists."""
-        path_to_yml = os.path.join(ge_dir, cls.GE_YML)
+        path_to_yml = os.path.join(ge_dir, FileDataContext.GE_YML)
 
         # TODO this is so brittle and gross
         with open(path_to_yml) as f:
@@ -159,7 +162,7 @@ class DataContext(BaseDataContext):
     def write_project_template_to_disk(
         cls, ge_dir: str, usage_statistics_enabled: bool = True
     ) -> None:
-        file_path = os.path.join(ge_dir, cls.GE_YML)
+        file_path = os.path.join(ge_dir, FileDataContext.GE_YML)
         with open(file_path, "w") as template:
             if usage_statistics_enabled:
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
@@ -173,7 +176,7 @@ class DataContext(BaseDataContext):
         with open(os.path.join(base_dir, ".gitignore"), "w") as f:
             f.write("uncommitted/")
 
-        for directory in cls.BASE_DIRECTORIES:
+        for directory in FileDataContext.BASE_DIRECTORIES:
             if directory == "plugins":
                 plugins_dir = os.path.join(base_dir, directory)
                 os.makedirs(plugins_dir, exist_ok=True)
@@ -196,9 +199,9 @@ class DataContext(BaseDataContext):
             else:
                 os.makedirs(os.path.join(base_dir, directory), exist_ok=True)
 
-        uncommitted_dir = os.path.join(base_dir, cls.GE_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(base_dir, FileDataContext.GE_UNCOMMITTED_DIR)
 
-        for new_directory in cls.UNCOMMITTED_DIRECTORIES:
+        for new_directory in FileDataContext.UNCOMMITTED_DIRECTORIES:
             new_directory_path = os.path.join(uncommitted_dir, new_directory)
             os.makedirs(new_directory_path, exist_ok=True)
 
@@ -294,11 +297,11 @@ class DataContext(BaseDataContext):
         if len(missing_keys) > 0:
             missing_keys_str = [f'"{key}"' for key in missing_keys]
             global_config_path_str = [
-                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
+                f'"{path}"' for path in FileDataContext.GLOBAL_CONFIG_PATHS
             ]
             raise DataContextError(
-                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
-                f"environment or in global configs ({(', ').join(global_config_path_str)})."
+                f"{', '.join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
+                f"environment or in global configs ({', '.join(global_config_path_str)})."
             )
 
         return GeCloudConfig(**ge_cloud_config_dict)
@@ -404,7 +407,7 @@ class DataContext(BaseDataContext):
             config = self._retrieve_data_context_config_from_ge_cloud()
             return config
 
-        path_to_yml = os.path.join(self.root_directory, self.GE_YML)
+        path_to_yml = os.path.join(self.root_directory, FileDataContext.GE_YML)
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
@@ -439,7 +442,7 @@ class DataContext(BaseDataContext):
             return
         logger.debug("Starting DataContext._save_project_config")
 
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+        config_filepath = os.path.join(self.root_directory, FileDataContext.GE_YML)
         with open(config_filepath, "w") as outfile:
             self.config.to_yaml(outfile)
 
@@ -550,10 +553,10 @@ class DataContext(BaseDataContext):
                 f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
-            potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
+            potential_ge_dir = os.path.join(search_start_dir, FileDataContext.GE_DIR)
 
             if os.path.isdir(potential_ge_dir):
-                potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
+                potential_yml = os.path.join(potential_ge_dir, FileDataContext.GE_YML)
                 if os.path.isfile(potential_yml):
                     yml_path = potential_yml
                     logger.debug(f"Found config file at {str(yml_path)}")
@@ -566,7 +569,7 @@ class DataContext(BaseDataContext):
     @classmethod
     def does_config_exist_on_disk(cls, context_root_dir):
         """Return True if the great_expectations.yml exists on disk."""
-        return os.path.isfile(os.path.join(context_root_dir, cls.GE_YML))
+        return os.path.isfile(os.path.join(context_root_dir, FileDataContext.GE_YML))
 
     @classmethod
     def is_project_initialized(cls, ge_dir):

@@ -17,6 +17,12 @@ from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
+# profiling constants moved here
+PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
+PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
+PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
+PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
+
 
 class OrderedEnum(Enum):
     def __ge__(self, other):
