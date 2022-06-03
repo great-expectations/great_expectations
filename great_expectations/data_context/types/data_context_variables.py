@@ -3,10 +3,11 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, Optional
 
-import requests
+from great_expectations.core.data_context_key import StringKey
+from great_expectations.data_context.store.variables_store import VariablesStore
 
 
-class VariableSchema(enum.Enum):
+class VariablesSchema(enum.Enum):
     CONFIG_VERSION = "config_version"
     DATASOURCES = "datasources"
     EXPECTATIONS_STORE_NAME = "expectations_store_name"
@@ -46,66 +47,90 @@ class DataContextVariables:
     concurrency: Optional[dict] = None
     progress_bars: Optional[dict] = None
 
-    @abstractmethod
-    def _write_to_backend(self, attr: VariableSchema, value: Any) -> None:
-        raise NotImplementedError
+    def __post_init__(self) -> None:
+        self._store = None
+
+    @property
+    def store(self) -> VariablesStore:
+        if self._store is None:
+            self._store = self._init_store()
+        return self._store
 
     @abstractmethod
-    def _read_from_backend(self, attr: VariableSchema) -> Any:
+    def _init_store(self) -> VariablesStore:
         raise NotImplementedError
 
-    def _set(self, attr: VariableSchema, value: Any) -> None:
+    @staticmethod
+    def _get_key(attr: VariablesSchema) -> StringKey:
+        key: StringKey = StringKey(key=attr.value)
+        return key
+
+    def _set(self, attr: VariablesSchema, value: Any) -> None:
         setattr(self, attr.value, value)
-        self._write_to_backend(attr, value)
+        key: StringKey = DataContextVariables._get_key(attr)
+        self.store.set(key=key, value=value)
 
-    def _get(self, attr: VariableSchema) -> Any:
-        val: Any = self._read_from_backend(attr)
+    def _get(self, attr: VariablesSchema) -> Any:
+        key: StringKey = DataContextVariables._get_key(attr)
+        val: Any = self.store.get(key=key)
         return val
 
     def set_config_version(self, config_version: float) -> None:
-        self._set(VariableSchema.CONFIG_VERSION, config_version)
+        self._set(VariablesSchema.CONFIG_VERSION, config_version)
 
     def get_config_version(self) -> Optional[float]:
-        return self._get(VariableSchema.CONFIG_VERSION)
+        return self._get(VariablesSchema.CONFIG_VERSION)
 
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
-    def _write_to_backend(self, attr: VariableSchema, value: Any) -> None:
-        pass  # Changes are only made in memory so no side effects need to occur
-
-    def _read_from_backend(self, attr: VariableSchema) -> Any:
-        val: Any = getattr(self, attr.value)
-        return val
+    def _init_store(self) -> VariablesStore:
+        store: VariablesStore = VariablesStore(
+            store_name="ephemeral_data_context_variables_store",
+            store_backend=None,  # Defaults to InMemoryStoreBackend
+            runtime_environment=None,
+        )
+        return store
 
 
 @dataclass
 class FileDataContextVariables(DataContextVariables):
-    def __post_init__(self, base_data_context: "BaseDataContext") -> None:  # noqa: F821
-        self.base_data_context = base_data_context
-
-    def _write_to_backend(self, attr: VariableSchema, value: Any) -> None:
-        self.base_data_context.save_config_variable(
-            config_variable_name=attr.value, value=value
+    def _init_store(self) -> VariablesStore:
+        store_backend: dict = {"class_name": "InlineStoreBackend"}  # TBD
+        store: VariablesStore = VariablesStore(
+            store_name="file_data_context_variables_store",
+            store_backend=store_backend,
+            runtime_environment=None,
         )
-
-    def _read_from_backend(self, attr: VariableSchema) -> Any:
-        val: Any = getattr(
-            self.base_data_context.project_config_with_variables_substituted, attr.value
-        )
-        return val
+        return store
 
 
 @dataclass
 class CloudDataContextVariables(DataContextVariables):
-    def __post_init__(self, base_url: str) -> None:
-        self.base_url = base_url
+    def __post_init__(
+        self,
+        ge_cloud_runtime_base_url: str,
+        ge_cloud_runtime_organization_id: str,
+        ge_cloud_runtime_access_token: str,
+    ) -> None:
+        self._ge_cloud_runtime_base_url = ge_cloud_runtime_base_url
+        self._ge_cloud_runtime_organization_id = ge_cloud_runtime_organization_id
+        self._ge_cloud_runtime_access_token = ge_cloud_runtime_access_token
 
-    def _write_to_backend(self, attr: VariableSchema, value: Any) -> None:
-        endpoint: str = f"{self.base_url}/{attr.value}"
-        requests.put(endpoint)
-
-    def _read_from_backend(self, attr: VariableSchema) -> Any:
-        endpoint: str = f"{self.base_url}/{attr.value}"
-        response = requests.get(endpoint)
-        return response
+    def _init_store(self) -> VariablesStore:
+        store_backend: dict = {
+            "class_name": "GeCloudStoreBackend",
+            "ge_cloud_base_url": self._ge_cloud_runtime_base_url,
+            "ge_cloud_resource_type": "variables",
+            "ge_cloud_credentials": {
+                "access_token": self._ge_cloud_runtime_access_token,
+                "organization_id": self._ge_cloud_runtime_organization_id,
+            },
+            "suppress_store_backend_id": True,
+        }
+        store: VariablesStore = VariablesStore(
+            store_name="cloud_data_context_variables_store",
+            store_backend=store_backend,
+            runtime_environment=None,
+        )
+        return store
