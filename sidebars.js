@@ -352,6 +352,33 @@ module.exports = {
       items: [
         {
           type: 'category',
+          label: 'Supplemental documentation',
+          items: [
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+            { type: 'doc', id: 'reference/customize_your_deployment' },
+            { type: 'doc', id: 'reference/data_discovery' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'API documentation',
+          items: [
+            {
+              type: 'category',
+              label: 'Class DataContext',
+              link: { type: 'doc', id: 'api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext' },
+              items: [
+                { label: '  .create(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create' },
+                { label: '  .test_yaml_config(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config' }
+              ]
+            }
+          ]
+        },
+        'glossary',
+        {
+          type: 'category',
           label: 'Glossary of Terms',
           link: { type: 'doc', id: 'glossary' },
           items: [
