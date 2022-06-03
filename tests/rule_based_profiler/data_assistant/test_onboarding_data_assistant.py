@@ -270,6 +270,25 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
         batch_request=batch_request,
+        # include_column_names=include_column_names,
+        # exclude_column_names=exclude_column_names,
+        # include_column_name_suffixes=include_column_name_suffixes,
+        # exclude_column_name_suffixes=exclude_column_name_suffixes,
+        # semantic_type_filter_module_name=semantic_type_filter_module_name,
+        # semantic_type_filter_class_name=semantic_type_filter_class_name,
+        # include_semantic_types=include_semantic_types,
+        # exclude_semantic_types=exclude_semantic_types,
+        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+        # cardinality_limit_mode=CardinalityLimitMode.REL_100,
+        # max_unique_values=max_unique_values,
+        # max_proportion_unique=max_proportion_unique,
+        # column_value_uniqueness_rule={
+        #     "success_ratio": 0.8,
+        # },
+        # column_value_nullity_rule={
+        # },
+        # column_value_nonnullity_rule={
+        # },
         numeric_columns_rule={
             "false_positive_rate": 0.1,
             "random_seed": 43792,
@@ -288,6 +307,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         },
         categorical_columns_rule={
             "false_positive_rate": 0.1,
+            # "round_decimals": 3,
         },
     )
     assert (

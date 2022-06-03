@@ -18,13 +18,18 @@ title: "Create Expectations: Index"
 ## Advanced skills
 - [How to create Expectations that span multiple Batches using Evaluation Parameters](../../guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.md)
 - [How to dynamically load evaluation parameters from a database](../../guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.md)
+- [How to compare two tables with the UserConfigurableProfiler](../../guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler.md)
 
 ## Creating Custom Expectations
 - [Overview](../../guides/expectations/creating_custom_expectations/overview.md)
 - [How to create a Custom Column Aggregate Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md)
 - [How to create a Custom Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations.md)
+- [How to create a Custom Table Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations.md)
+- [How to create a Custom Column Pair Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations.md)
+- [How to create a Custom Regex-Based Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations.md)
+- [How to create a Custom Set-Based Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations.md)
 - [How to create custom parameterized Expectations](../../guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations.md)
-- [How to create a custom Metric](../../guides/expectations/creating_custom_expectations/how_to_create_custom_metrics.md)
+- [How to use a Custom Expectation](../../guides/expectations/creating_custom_expectations/how_to_use_custom_expectations.md)
 
 ### Adding Features to Custom Expectations
 - [How to add comments to Expectations and display them in Data Docs](../../guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs.md)
