@@ -11,7 +11,6 @@ from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 from dateutil.parser import parse
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
@@ -90,8 +89,6 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     GeCloudConfig,
     ProgressBarsConfig,
-    dataContextConfigSchema,
-    datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
@@ -106,7 +103,6 @@ from great_expectations.data_context.util import (
     load_class,
     parse_substitution_variable,
     substitute_all_config_variables,
-    substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -137,11 +133,8 @@ yaml: YAMLHandler = YAMLHandler()
 
 
 # TODO: <WILL> Most of the logic here will be migrated to EphemeralDataContext
-# TODO: apply how does python super() work with multiple inheritances
 # https://stackoverflow.com/questions/3277367/how-does-pythons-super-work-with-multiple-inheritance
-class BaseDataContext(
-    EphemeralDataContext, FileDataContext, CloudDataContext, ConfigPeer
-):
+class BaseDataContext(EphemeralDataContext, ConfigPeer):
     """
         This class implements most of the functionality of DataContext, with a few exceptions.
 
@@ -271,6 +264,7 @@ class BaseDataContext(
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
 
+        #########################
         # start splitting this up
         if self._ge_cloud_mode:
             CloudDataContext.__init__(
