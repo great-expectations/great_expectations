@@ -59,6 +59,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-snowflake.txt"]
         | req_set_dict["requirements-dev-teradata.txt"]
         | req_set_dict["requirements-dev-trino.txt"]
+        | req_set_dict["requirements-dev-hive.txt"]
     ) == req_set_dict["requirements-dev-sqlalchemy.txt"]
 
     assert (

@@ -2072,6 +2072,13 @@ set as active.
     def expectation_suite(self) -> ExpectationSuite:
         return self._expectation_suite
 
+    @expectation_suite.setter
+    def expectation_suite(self, value: ExpectationSuite) -> None:
+        self._initialize_expectations(
+            expectation_suite=value,
+            expectation_suite_name=value.expectation_suite_name,
+        )
+
     @property
     def expectation_suite_name(self) -> str:
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
