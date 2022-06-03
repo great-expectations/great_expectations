@@ -1048,7 +1048,7 @@ def test_notebook_execution_with_pandas_backend(
     run_notebook(
         notebook_path=edit_notebook_path,
         notebook_dir=uncommitted_dir,
-        string_to_be_replaced="context.open_data_docs(resource_identifier=suite_identifier)",
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
         replacement_string="",
     )
 

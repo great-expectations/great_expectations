@@ -348,6 +348,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         """
         Render a notebook dict from an expectation suite.
         """
+        # noinspection PyTypeChecker
         suite: ExpectationSuite = kwargs.get("suite")
         batch_request: Optional[Union[str, Dict[str, Any]]] = kwargs.get(
             "batch_request"
