@@ -69,13 +69,13 @@ class BaseNotebookRenderer(Renderer):
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
-    def render(self, **kwargs) -> nbformat.NotebookNode:
+    def render(self, **kwargs: dict) -> nbformat.NotebookNode:
         """
         Render a notebook from parameters.
         """
         raise NotImplementedError
 
-    def render_to_disk(self, notebook_file_path: str, **kwargs) -> None:
+    def render_to_disk(self, notebook_file_path: str, **kwargs: dict) -> None:
         """
         Render a notebook to disk from arguments
         """
