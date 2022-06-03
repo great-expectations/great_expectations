@@ -462,8 +462,8 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_standard_deviation_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_standard_deviation_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_standard_deviation_to_be_between",
+        expect_column_stdev_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_column_stdev_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
             min_value=f"{column_standard_deviation_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
@@ -516,7 +516,7 @@ class OnboardingDataAssistant(DataAssistant):
             expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder,
             expect_column_median_to_be_between_expectation_configuration_builder,
             expect_column_mean_to_be_between_expectation_configuration_builder,
-            expect_column_standard_deviation_to_be_between_expectation_configuration_builder,
+            expect_column_stdev_to_be_between_expectation_configuration_builder,
         ]
         rule: Rule = Rule(
             name="numeric_columns_rule",
@@ -844,7 +844,7 @@ class OnboardingDataAssistant(DataAssistant):
                 include_semantic_types=None,
                 exclude_semantic_types=None,
                 allowed_semantic_types_passthrough=None,
-                limit_mode=CardinalityLimitMode.FEW,
+                cardinality_limit_mode=CardinalityLimitMode.FEW,
                 max_unique_values=None,
                 max_proportion_unique=None,
                 data_context=None,
@@ -968,7 +968,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "lower_bound": 0.0,
                 "upper_bound": None,
             },
-            "round_decimals": 1,
+            "round_decimals": 4,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,

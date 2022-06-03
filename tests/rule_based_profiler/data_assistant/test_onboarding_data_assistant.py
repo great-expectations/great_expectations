@@ -145,6 +145,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="onboarding_data_assistant",
+        persist=False,
     )
 
     data_assistant: DataAssistant = OnboardingDataAssistant(
@@ -253,6 +254,97 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
         for batch_id in parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
         ].keys()
+    )
+
+
+def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        batch_request=batch_request,
+        # include_column_names=include_column_names,
+        # exclude_column_names=exclude_column_names,
+        # include_column_name_suffixes=include_column_name_suffixes,
+        # exclude_column_name_suffixes=exclude_column_name_suffixes,
+        # semantic_type_filter_module_name=semantic_type_filter_module_name,
+        # semantic_type_filter_class_name=semantic_type_filter_class_name,
+        # include_semantic_types=include_semantic_types,
+        # exclude_semantic_types=exclude_semantic_types,
+        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+        # cardinality_limit_mode=CardinalityLimitMode.REL_100,
+        # max_unique_values=max_unique_values,
+        # max_proportion_unique=max_proportion_unique,
+        # column_value_uniqueness_rule={
+        #     "success_ratio": 0.8,
+        # },
+        # column_value_nullity_rule={
+        # },
+        # column_value_nonnullity_rule={
+        # },
+        numeric_columns_rule={
+            "false_positive_rate": 0.1,
+            "random_seed": 43792,
+        },
+        datetime_columns_rule={
+            "truncate_values": {
+                "lower_bound": 0,
+                "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+            },
+            "round_decimals": 0,
+        },
+        text_columns_rule={
+            "strict_min": True,
+            "strict_max": True,
+            "success_ratio": 0.8,
+        },
+        categorical_columns_rule={
+            "false_positive_rate": 0.1,
+            # "round_decimals": 3,
+        },
+    )
+    assert (
+        data_assistant_result.profiler_config.rules["numeric_columns_rule"][
+            "variables"
+        ]["false_positive_rate"]
+        == 1.0e-1
+    )
+    assert data_assistant_result.profiler_config.rules["datetime_columns_rule"][
+        "variables"
+    ]["truncate_values"] == {
+        "lower_bound": 0,
+        "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+    }
+    assert (
+        data_assistant_result.profiler_config.rules["datetime_columns_rule"][
+            "variables"
+        ]["round_decimals"]
+        == 0
+    )
+    assert data_assistant_result.profiler_config.rules["text_columns_rule"][
+        "variables"
+    ]["strict_min"]
+    assert data_assistant_result.profiler_config.rules["text_columns_rule"][
+        "variables"
+    ]["strict_max"]
+    assert (
+        data_assistant_result.profiler_config.rules["text_columns_rule"]["variables"][
+            "success_ratio"
+        ]
+        == 8.0e-1
+    )
+    assert (
+        data_assistant_result.profiler_config.rules["categorical_columns_rule"][
+            "variables"
+        ]["false_positive_rate"]
+        == 1.0e-1
     )
 
 
@@ -381,7 +473,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics()
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 10  # One for each low cardinality column
+    assert len(column_domain_charts) == 40  # One for each low cardinality column
 
     columns: List[str] = [
         "VendorID",
@@ -401,13 +493,13 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
 def test_onboarding_data_assistant_plot_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
-    include_column_names: List[str] = ["VendorID", "passenger_count"]
+    include_column_names: List[str] = ["passenger_count", "trip_distance"]
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics(
         include_column_names=include_column_names
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 2  # Normally 10 without filtering
+    assert len(column_domain_charts) == 6  # Normally 40 without filtering
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
@@ -420,7 +512,7 @@ def test_onboarding_data_assistant_plot_exclude_column_names_filters_output(
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 8  # Normally 10 without filtering
+    assert len(column_domain_charts) == 38
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
@@ -569,9 +661,9 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         ),
         alt.Tooltip(
             **{
-                "field": "column_distinct_values_count",
+                "field": "column_min",
                 "format": ",",
-                "title": "Column Distinct Values Count",
+                "title": "Column Min",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
         ),
@@ -584,7 +676,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
     assert actual_tooltip == expected_tooltip
 
 
-def test_onboarding_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -604,7 +696,7 @@ def test_onboarding_data_assistant_plot_descriptive_non_sequential_notebook_exec
     )
 
 
-def test_onboarding_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
