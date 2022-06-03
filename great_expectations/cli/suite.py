@@ -792,7 +792,11 @@ def _suite_edit_workflow(
             renderer.render_to_disk(notebook_file_path=notebook_path)
         else:
             renderer = SuiteEditNotebookRenderer.from_data_context(data_context=context)
-            renderer.render_to_disk(notebook_file_path=notebook_path, suite=suite)
+            renderer.render_to_disk(
+                notebook_file_path=notebook_path,
+                suite=suite,
+                batch_request=batch_request,
+            )
 
         if no_jupyter:
             cli_message(
