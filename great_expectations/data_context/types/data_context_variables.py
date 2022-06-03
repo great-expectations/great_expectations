@@ -28,7 +28,7 @@ class VariablesSchema(enum.Enum):
     @classmethod
     def has_value(cls, value: str) -> bool:
         """
-        TBD
+        Checks whether or not a string is a value from the possible enum pairs.
         """
         return value in cls._value2member_map_
 
@@ -77,8 +77,7 @@ class DataContextVariables:
         self.store.set(key=key, value=value)
 
     def _get(self, attr: VariablesSchema) -> Any:
-        key: StringKey = DataContextVariables._get_key(attr)
-        val: Any = self.store.get(key=key)
+        val: Any = getattr(self, attr.value)
         return val
 
     def set_config_version(self, config_version: float) -> None:
