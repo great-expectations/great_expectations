@@ -62,14 +62,21 @@ class InlineStoreBackend(StoreBackend):
         )
 
     def list_keys(self, prefix=()) -> List[str]:
+        """
+        See `StoreBackend.list_keys` for more information.
+        """
         keys: List[str] = list(
             key for key in self._data_context.config_variables.keys()
         )
         return keys
 
     def remove_key(self, key) -> None:
+        """
+        Not relevant to this StoreBackend due to reliance on the DataContext but necessary to fulfill contract set by parent.
+        See `StoreBackend.remove_key` for more information.
+        """
         raise StoreBackendError(
-            "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"
+            "InlineStoreBackend does not support the deletion of keys; the DataContext's config variables schema is immutable"
         )
 
     def _has_key(self, key) -> bool:
