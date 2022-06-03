@@ -453,7 +453,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics()
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 40  # One for each low cardinality column
+    assert len(column_domain_charts) == 85
 
     columns: List[str] = [
         "VendorID",
@@ -671,15 +671,15 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         ),
         alt.Tooltip(
             **{
-                "field": "column_min",
+                "field": "column_distinct_values_count",
                 "format": ",",
-                "title": "Column Min",
+                "title": "Column Distinct Values Count",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
         ),
     ]
 
-    single_column_return_chart: alt.LayerChart = plot_result.charts[2]
+    single_column_return_chart: alt.LayerChart = plot_result.charts[3]
     layer_1: alt.Chart = single_column_return_chart.layer[1]
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
