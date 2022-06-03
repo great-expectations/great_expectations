@@ -83,7 +83,7 @@ assert isinstance(validator, Validator)
 
 # Profile the data with the OnboardingDataAssistant and save resulting ExpectationSuite
 # <snippet>
-ignored_columns = [
+exclude_column_names = [
     "vendor_id",
     "pickup_datetime",
     "dropoff_datetime",
