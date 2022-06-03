@@ -243,7 +243,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         expectations_by_column: Dict[str, List[ExpectationConfiguration]],
         batch_request: Optional[Union[str, Dict[str, Any]]] = None,
-    ):
+    ) -> None:
         if not expectations_by_column["table_expectations"]:
             markdown: str = self.render_with_overwrite(
                 notebook_config=self.table_expectations_not_found_markdown,
@@ -274,7 +274,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         expectations_by_column: Dict[str, List[ExpectationConfiguration]],
         batch_request: Optional[Union[str, Dict[str, Any]]] = None,
-    ):
+    ) -> None:
         if not expectations_by_column:
             markdown: str = self.render_with_overwrite(
                 notebook_config=self.column_expectations_not_found_markdown,
@@ -344,7 +344,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         return ""
 
-    def render(self, **kwargs) -> nbformat.NotebookNode:
+    def render(self, **kwargs: dict) -> nbformat.NotebookNode:
         """
         Render a notebook dict from an expectation suite.
         """
@@ -380,7 +380,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         return self._notebook
 
-    def render_to_disk(self, notebook_file_path: str, **kwargs) -> None:
+    def render_to_disk(self, notebook_file_path: str, **kwargs: dict) -> None:
         """
         Render a notebook to disk from an expectation suite.
 

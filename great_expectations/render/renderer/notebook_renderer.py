@@ -77,6 +77,6 @@ class BaseNotebookRenderer(Renderer):
 
     def render_to_disk(self, notebook_file_path: str, **kwargs: dict) -> None:
         """
-        Render a notebook to disk from arguments
+        Render a notebook to disk from arguments.
         """
         raise NotImplementedError

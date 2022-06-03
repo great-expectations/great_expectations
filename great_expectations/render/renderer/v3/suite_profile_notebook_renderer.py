@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Union
 import nbformat
 
 from great_expectations import DataContext
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     BatchRequest,
     standardize_batch_request_display_ordering,
