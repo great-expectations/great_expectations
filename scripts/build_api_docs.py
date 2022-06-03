@@ -74,7 +74,8 @@ def is_included_in_public_api(docstring: str) -> bool:
         False if the docstring is not marked as being part of the Public API.
 
     """
-    return bool(re.search("^ *# Public API *$", docstring, re.MULTILINE))
+    search_string = f"^ *{WHITELISTED_TAG}*$"
+    return bool(re.search(search_string, docstring, re.MULTILINE))
 
 
 def _escape_markdown_special_characters(string_to_escape: str) -> str:
@@ -660,9 +661,11 @@ def build_class_document(
 
     # Build the sidebar category entry for this class.
     sidebar_class_id = f"{API_CLASSES_FOLDER}{output_file}".replace("/docs/", "")
-    sidebar_entry = [f"{{ type: 'category',\n label: 'Class {class_name}',\n items: ["]
+    sidebar_entry = [
+        f"{{ type: 'category',\n label: 'Class {class_name}',\n link: {{type: 'doc', id: '{sidebar_class_id}'}},\n items: ["
+    ]
     sidebar_items = [
-        f"{{ type: 'doc', label: '{class_name} (Overview)', id: '{sidebar_class_id}' }}"
+        # f"{{ type: 'doc', label: '{class_name} (Overview)', id: '{sidebar_class_id}' }}"
     ]
     sidebar_items.extend(sorted(sidebar_method_items))
     sidebar_entry.append(",\n".join(sidebar_items))
@@ -824,9 +827,12 @@ if __name__ == "__main__":
                 f"{str(source_file_path).replace('..', '')}"
             )
             if check_file_for_whitelisted_elements(source_file_path):
+                print(source_file_path)
                 import_path = convert_to_import_path(source_file_path)
                 whitelisted_classes = gather_classes_to_document(import_path)
+                print(whitelisted_classes)
                 for class_name, whitelisted_class in whitelisted_classes:
+                    print(class_name)
                     snippet_path_update, sidebar_update = build_class_document(
                         class_name, whitelisted_class, import_path, github_path
                     )
@@ -861,7 +867,7 @@ if __name__ == "__main__":
                 print(_)
         else:
             print(
-                "\n\nAkk of the importable snippet files that were removed at the start of the script were replaced"
+                "\n\nAll of the importable snippet files that were removed at the start of the script were replaced"
                 "\nby new snippets; they should already be imported in the relevant documentation."
             )
 
