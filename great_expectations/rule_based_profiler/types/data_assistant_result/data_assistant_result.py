@@ -2111,6 +2111,11 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
         metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
+        column_based_metrics: List[str] = [
+            metric
+            for metric in metric_expectation_map.keys()
+            if metric.startswith("column")
+        ]
 
         column_based_expectation_configurations_by_type: Dict[
             str, List[ExpectationConfiguration]
@@ -2122,52 +2127,45 @@ class DataAssistantResult(SerializableDictDot):
             Domain, Dict[str, ParameterNode]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
 
-        domains_by_column_name: Dict[str, Domain] = {
-            domain.domain_kwargs["column"]: domain
-            for domain in list(attributed_metrics_by_column_domain.keys())
-        }
-
         column_based_expectation_configurations: List[ExpectationConfiguration]
+        metric_display_charts: List[Optional[alt.VConcatChart]]
         display_charts: List[Optional[alt.VConcatChart]] = []
+        metric_return_charts: Optional[alt.Chart]
         return_charts: List[Optional[alt.Chart]] = []
         expectation_type: str
-        for metric_name in metric_expectation_map.keys():
+        for metric_name in column_based_metrics:
             expectation_type = metric_expectation_map[metric_name]
             column_based_expectation_configurations = (
                 column_based_expectation_configurations_by_type[expectation_type]
             )
 
-            attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {}
-            for (
-                domain,
-                attributed_metrics,
-            ) in attributed_metrics_by_column_domain.items():
-                if metric_name in attributed_metrics.keys():
-                    attributed_metrics_by_domain[domain] = attributed_metrics
-
-            display_charts_for_expectation: List[
-                Optional[alt.VConcatChart]
-            ] = self._create_display_chart_for_column_domain_expectation(
-                expectation_type=expectation_type,
-                expectation_configurations=column_based_expectation_configurations,
-                metric_name=metric_name,
-                attributed_metrics_by_domain=attributed_metrics_by_domain,
-                plot_mode=plot_mode,
-                sequential=sequential,
-            )
-            display_charts.extend(display_charts_for_expectation)
-
-            return_chart: alt.Chart = (
-                self._create_return_charts_for_column_domain_expectation(
+            metric_display_charts = (
+                self._create_display_chart_for_column_domain_expectation(
                     expectation_type=expectation_type,
-                    expectation_configurations=expectation_configurations,
+                    expectation_configurations=column_based_expectation_configurations,
                     metric_name=metric_name,
-                    attributed_metrics_by_domain=attributed_metrics_by_domain,
+                    attributed_metrics_by_domain=attributed_metrics_by_column_domain,
+                    include_column_names=include_column_names,
+                    exclude_column_names=exclude_column_names,
                     plot_mode=plot_mode,
                     sequential=sequential,
                 )
             )
-            return_charts.append(return_chart)
+            display_charts.extend(metric_display_charts)
+
+            metric_return_charts = (
+                self._create_return_charts_for_column_domain_expectation(
+                    expectation_type=expectation_type,
+                    expectation_configurations=expectation_configurations,
+                    metric_name=metric_name,
+                    attributed_metrics_by_domain=attributed_metrics_by_column_domain,
+                    include_column_names=include_column_names,
+                    exclude_column_names=exclude_column_names,
+                    plot_mode=plot_mode,
+                    sequential=sequential,
+                )
+            )
+            return_charts.extend(metric_return_charts)
 
         display_charts = list(filter(None, display_charts))
         return_charts = list(filter(None, return_charts))
@@ -2291,6 +2289,8 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration],
         metric_name: str,
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
+        include_column_names: Optional[List[str]],
+        exclude_column_names: Optional[List[str]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
@@ -2315,43 +2315,65 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration],
         metric_name: str,
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
+        include_column_names: Optional[List[str]],
+        exclude_column_names: Optional[List[str]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
+        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
 
-        if len(attributed_metrics_by_domain) > 0:
-            expectation_configuration: ExpectationConfiguration
-            attributed_metrics: Dict[str, ParameterNode]
-            attributed_values: ParameterNode
-            for expectation_configuration in expectation_configurations:
-                if expectation_configuration.expectation_type == expectation_type:
-                    column_name: str = expectation_configuration.kwargs["column"]
-                    subtitle = f"Column: {column_name}"
+        expectation_configuration: ExpectationConfiguration
+        attributed_metrics: Dict[str, ParameterNode]
+        attributed_values: ParameterNode
+        return_charts: List[alt.Chart] = []
+        for domain, attributed_metrics in attributed_metrics_by_domain.items():
+            if (
+                metric_name in attributed_metrics.keys()
+                and metric_expectation_map[metric_name] == expectation_type
+            ):
+                attributed_values = attributed_metrics[metric_name]
 
-                    attributed_metrics = [
-                        values
-                        for domain, values in attributed_metrics_by_domain.items()
-                        if domain.domain_kwargs.column == column_name
-                    ][0]
-                    attributed_values = attributed_metrics[metric_name]
+                for expectation_configuration in expectation_configurations:
+                    if (
+                        expectation_configuration.expectation_type == expectation_type
+                        and (
+                            (
+                                include_column_names
+                                and expectation_configuration.kwargs["column"]
+                                in include_column_names
+                            )
+                            or (
+                                exclude_column_names
+                                and expectation_configuration.kwargs["column"]
+                                not in exclude_column_names
+                            )
+                            or (not include_column_names and not exclude_column_names)
+                        )
+                    ):
+                        df: pd.DataFrame = self._create_df_for_charting(
+                            metric_name=metric_name,
+                            attributed_values=attributed_values,
+                            expectation_configuration=expectation_configuration,
+                            plot_mode=plot_mode,
+                        )
 
-                    df: pd.DataFrame = self._create_df_for_charting(
-                        metric_name=metric_name,
-                        attributed_values=attributed_values,
-                        expectation_configuration=expectation_configuration,
-                        plot_mode=plot_mode,
-                    )
+                        metric_name: str = sanitize_parameter_name(name=metric_name)
 
-                    metric_name: str = sanitize_parameter_name(name=metric_name)
+                        column_name: str = expectation_configuration.kwargs["column"]
+                        subtitle = f"Column: {column_name}"
 
-                    return self._chart_domain_values(
-                        expectation_type=expectation_type,
-                        df=df,
-                        metric_name=metric_name,
-                        plot_mode=plot_mode,
-                        sequential=sequential,
-                        subtitle=subtitle,
-                    )
+                        return_chart = self._chart_domain_values(
+                            expectation_type=expectation_type,
+                            df=df,
+                            metric_name=metric_name,
+                            plot_mode=plot_mode,
+                            sequential=sequential,
+                            subtitle=subtitle,
+                        )
+
+                        return_charts.append(return_chart)
+
+        return return_charts
 
     def _chart_column_values(
         self,

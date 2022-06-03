@@ -479,7 +479,7 @@ def test_onboarding_data_assistant_plot_metrics_include_column_names_filters_out
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 6  # Normally 40 without filtering
+    assert len(column_domain_charts) == 11  # Normally 85 without filtering
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
