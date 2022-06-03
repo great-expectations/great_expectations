@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 from great_expectations.core.data_context_key import StringKey
-from great_expectations.data_context.store.variables_store import VariablesStore
 
 
 class VariablesSchema(enum.Enum):
@@ -25,6 +24,13 @@ class VariablesSchema(enum.Enum):
     STORE_BACKEND_DEFAULTS = "store_backend_defaults"
     CONCURRENCY = "concurrency"
     PROGRESS_BARS = "progress_bars"
+
+    @classmethod
+    def has_value(cls, value: str) -> bool:
+        """
+        TBD
+        """
+        return value in cls._value2member_map_
 
 
 @dataclass
@@ -51,13 +57,13 @@ class DataContextVariables:
         self._store = None
 
     @property
-    def store(self) -> VariablesStore:
+    def store(self) -> "VariablesStore":  # noqa: F821
         if self._store is None:
             self._store = self._init_store()
         return self._store
 
     @abstractmethod
-    def _init_store(self) -> VariablesStore:
+    def _init_store(self) -> "VariablesStore":  # noqa: F821
         raise NotImplementedError
 
     @staticmethod
@@ -76,15 +82,23 @@ class DataContextVariables:
         return val
 
     def set_config_version(self, config_version: float) -> None:
+        """
+        TBD
+        """
         self._set(VariablesSchema.CONFIG_VERSION, config_version)
 
     def get_config_version(self) -> Optional[float]:
+        """
+        TBD
+        """
         return self._get(VariablesSchema.CONFIG_VERSION)
 
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
-    def _init_store(self) -> VariablesStore:
+    def _init_store(self) -> "VariablesStore":  # noqa: F821
+        from great_expectations.data_context.store.variables_store import VariablesStore
+
         store: VariablesStore = VariablesStore(
             store_name="ephemeral_data_context_variables_store",
             store_backend=None,  # Defaults to InMemoryStoreBackend
@@ -95,7 +109,9 @@ class EphemeralDataContextVariables(DataContextVariables):
 
 @dataclass
 class FileDataContextVariables(DataContextVariables):
-    def _init_store(self) -> VariablesStore:
+    def _init_store(self) -> "VariablesStore":  # noqa: F821
+        from great_expectations.data_context.store.variables_store import VariablesStore
+
         store_backend: dict = {"class_name": "InlineStoreBackend"}  # TBD
         store: VariablesStore = VariablesStore(
             store_name="file_data_context_variables_store",
@@ -117,7 +133,9 @@ class CloudDataContextVariables(DataContextVariables):
         self._ge_cloud_runtime_organization_id = ge_cloud_runtime_organization_id
         self._ge_cloud_runtime_access_token = ge_cloud_runtime_access_token
 
-    def _init_store(self) -> VariablesStore:
+    def _init_store(self) -> "VariablesStore":  # noqa: F821
+        from great_expectations.data_context.store.variables_store import VariablesStore
+
         store_backend: dict = {
             "class_name": "GeCloudStoreBackend",
             "ge_cloud_base_url": self._ge_cloud_runtime_base_url,

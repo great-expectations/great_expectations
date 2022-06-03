@@ -35,10 +35,13 @@ class VariablesStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def _validate_key(self, key: str) -> None:
+    def _validate_key(self, key: StringKey) -> None:
         from great_expectations.data_context.types.data_context_variables import (
             VariablesSchema,
         )
 
-        if key not in VariablesSchema.__members__:
-            raise TypeError(f"key must be an instance of {VariablesSchema.__name__}")
+        attr: str = key.to_tuple()[0]
+        if not VariablesSchema.has_value(attr):
+            raise TypeError(
+                f"{key} key must be an member of {VariablesSchema.__name__} (not {type(key)})"
+            )
