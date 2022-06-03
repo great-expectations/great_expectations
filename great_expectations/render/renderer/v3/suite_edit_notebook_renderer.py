@@ -386,6 +386,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         If batch_request dictionary is passed, its properties will override any found in suite citations.
         """
+        # noinspection PyTypeChecker
         suite: ExpectationSuite = kwargs.get("suite")
         batch_request: Optional[Union[str, Dict[str, Any]]] = kwargs.get(
             "batch_request"
@@ -395,6 +396,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             properties=batch_request,
             inplace=True,
         )
+        # noinspection PyTypeChecker
         self.render(
             suite=suite,
             batch_request=batch_request,

@@ -792,6 +792,7 @@ def _suite_edit_workflow(
             renderer.render_to_disk(notebook_file_path=notebook_path)
         else:
             renderer = SuiteEditNotebookRenderer.from_data_context(data_context=context)
+            # noinspection PyTypeChecker
             renderer.render_to_disk(
                 notebook_file_path=notebook_path,
                 suite=suite,
