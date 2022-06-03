@@ -37,6 +37,7 @@ from great_expectations.core.util import (
 )
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.exceptions.exceptions import (
+    InvalidExpectationConfigurationError,
     MetricProviderError,
     MetricResolutionError,
 )
@@ -306,6 +307,11 @@ except (ImportError, KeyError):
     TRINO_TYPES = {}
 
 import tempfile
+
+# from tests.rule_based_profiler.conftest import ATOL, RTOL
+# RTOL: float = 1.0e-7
+RTOL: float = 1.0e-5
+ATOL: float = 5.0e-2
 
 SQL_DIALECT_NAMES = (
     "sqlite",
@@ -2088,8 +2094,13 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
         else:
             runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
             runtime_kwargs.update(kwargs)
-            result = getattr(validator, expectation_type)(**runtime_kwargs)
-    except (MetricProviderError, MetricResolutionError) as e:
+            validator_thing = getattr(validator, expectation_type)
+            result = validator_thing(**runtime_kwargs)
+    except (
+        MetricProviderError,
+        MetricResolutionError,
+        InvalidExpectationConfigurationError,
+    ) as e:
         if raise_exception:
             raise
         error_message = str(e)
@@ -2165,14 +2176,14 @@ def check_json_test_result(test, result, data_asset=None) -> None:
             # Apply our great expectations-specific test logic
 
             if key == "success":
-                assert result["success"] == value
+                assert result["success"] == value, f"{result['success']} != {value}"
 
             elif key == "observed_value":
                 if "tolerance" in test:
                     if isinstance(value, dict):
                         assert set(result["result"]["observed_value"].keys()) == set(
                             value.keys()
-                        )
+                        ), f"{set(result['result']['observed_value'].keys())} != {set(value.keys())}"
                         for k, v in value.items():
                             assert np.allclose(
                                 result["result"]["observed_value"][k],
@@ -2186,7 +2197,23 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                             rtol=test["tolerance"],
                         )
                 else:
-                    assert result["result"]["observed_value"] == value
+                    if isinstance(value, dict) and "values" in value:
+                        try:
+                            assert np.testing.assert_allclose(
+                                actual=result["result"]["observed_value"]["values"],
+                                desired=value["values"],
+                                rtol=RTOL,
+                                atol=ATOL,
+                            ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']['values']} not np.allclose to {value['values']}"
+                        except TypeError as e:
+                            print(e)
+                            assert (
+                                result["result"]["observed_value"] == value
+                            ), f"{result['result']['observed_value']} != {value}"
+                    else:
+                        assert (
+                            result["result"]["observed_value"] == value
+                        ), f"{result['result']['observed_value']} != {value}"
 
             # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
             # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
