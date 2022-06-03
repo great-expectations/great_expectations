@@ -262,7 +262,7 @@ stages:
 
       - job: comprehensive
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 90
+        timeoutInMinutes: 120
 
         services:
           postgres: postgres
@@ -402,7 +402,7 @@ stages:
     jobs:
       - job: mysql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 75
+        timeoutInMinutes: 120
 
         services:
           mysql: mysql
@@ -453,7 +453,7 @@ stages:
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 75
+        timeoutInMinutes: 120
 
         services:
           mssql: mssql
@@ -493,7 +493,7 @@ stages:
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 75
+        timeoutInMinutes: 120
 
         services:
           trino: trino

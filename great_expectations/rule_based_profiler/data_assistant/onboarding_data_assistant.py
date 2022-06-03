@@ -844,7 +844,7 @@ class OnboardingDataAssistant(DataAssistant):
                 include_semantic_types=None,
                 exclude_semantic_types=None,
                 allowed_semantic_types_passthrough=None,
-                limit_mode=CardinalityLimitMode.FEW,
+                cardinality_limit_mode=CardinalityLimitMode.FEW,
                 max_unique_values=None,
                 max_proportion_unique=None,
                 data_context=None,
@@ -968,7 +968,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "lower_bound": 0.0,
                 "upper_bound": None,
             },
-            "round_decimals": 1,
+            "round_decimals": 4,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,
