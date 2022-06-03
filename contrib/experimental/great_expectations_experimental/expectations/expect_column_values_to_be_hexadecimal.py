@@ -14,18 +14,23 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
-
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeHexadecimal(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.is_hexadecimal"
-
+    filter_column_isnull = False
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         def is_hex(x):
+            if not x:
+                return False
+            if x is None:
+                return False
+            if not isinstance(x, str):
+                return False
             try:
                 int(x, 16)
                 return True
@@ -56,8 +61,12 @@ class ExpectColumnValuesToBeHexadecimal(ColumnMapExpectation):
             "data": {
                 "a": ["3", "aa", "ba", "5A", "60F", "Gh"],
                 "b": ["Verify", "String", "3Z", "X", "yy", "sun"],
-                "c": ["8", "BB", "21D", "ca", "20", "1521D"],
+                "c": ["0", "BB", "21D", "ca", "20", "1521D"],
                 "d": ["c8", "ffB", "11x", "apple", "ran", "woven"],
+                "e": ["a8", "21", 2.0, "1B", "4AA", "31"],
+                "f": ["a8", "41", "ca", 46, "4AA", "31"],
+                "g": ["a8", "41", "ca", "", "0", "31"],
+                "h": ["a8", "41", "ca", None, "0", "31"],
             },
             "tests": [
                 {
@@ -102,6 +111,50 @@ class ExpectColumnValuesToBeHexadecimal(ColumnMapExpectation):
                         "success": False,
                         "unexpected_index_list": [2, 3, 4, 5],
                         "unexpected_list": ["11x", "apple", "ran", "woven"],
+                    },
+                },
+                {
+                    "title": "negative_test_with_float",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "e"},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [2],
+                        "unexpected_list": [2.0],
+                    },
+                },
+                {
+                    "title": "negative_test_with_int",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "f"},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": [46],
+                    },
+                },
+                {
+                    "title": "negative_test_with_empty_value",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "g"},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": [""],
+                    },
+                },
+                {
+                    "title": "negative_test_with_none_value",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "h"},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": [None],
                     },
                 },
             ],
