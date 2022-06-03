@@ -1,6 +1,9 @@
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
+from great_expectations.data_context.types.data_context_variables import (
+    FileDataContextVariables,
+)
 
 
 class FileDataContext(AbstractDataContext):
@@ -11,4 +14,5 @@ class FileDataContext(AbstractDataContext):
     class will exist only for backwards-compatibility reasons.
     """
 
-    pass
+    def _init_variables(self) -> FileDataContextVariables:
+        pass
