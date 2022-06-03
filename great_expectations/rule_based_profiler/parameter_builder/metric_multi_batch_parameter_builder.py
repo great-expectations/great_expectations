@@ -6,16 +6,14 @@ from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
-    MetricComputationDetails,
-    MetricComputationResult,
-    ParameterBuilder,
-)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     Domain,
+    MetricComputationDetails,
+    MetricComputationResult,
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
@@ -149,24 +147,24 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                 and isinstance(
                     metric_computation_result.attributed_resolved_metrics[
                         0
-                    ].metric_values,
+                    ].conditioned_metric_values,
                     np.ndarray,
                 )
                 and metric_computation_result.attributed_resolved_metrics[
                     0
-                ].metric_values.shape[1]
+                ].conditioned_metric_values.shape[1]
                 == 1
             ):
                 return Attributes(
                     {
                         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                             0
-                        ].metric_values[
+                        ].conditioned_metric_values[
                             :, 0
                         ],
                         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                             0
-                        ].attributed_metric_values,
+                        ].conditioned_attributed_metric_values,
                         FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
                     }
                 )
@@ -175,10 +173,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                 {
                     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                         0
-                    ].metric_values,
+                    ].conditioned_metric_values,
                     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                         0
-                    ].attributed_metric_values,
+                    ].conditioned_attributed_metric_values,
                     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
                 }
             )

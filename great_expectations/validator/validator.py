@@ -6,7 +6,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import defaultdict, namedtuple
+from collections import OrderedDict, defaultdict, namedtuple
 from collections.abc import Hashable
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
@@ -110,8 +110,8 @@ def _calc_validation_statistics(
     return ``ExpectationStatistics``.
     """
     # calc stats
-    successful_expectations = sum(exp.success for exp in validation_results)
     evaluated_expectations = len(validation_results)
+    successful_expectations = sum(exp.success for exp in validation_results)
     unsuccessful_expectations = evaluated_expectations - successful_expectations
     success = successful_expectations == evaluated_expectations
     try:
@@ -1415,6 +1415,9 @@ aborting graph resolution.
     @property
     def batches(self) -> Dict[str, Batch]:
         """Getter for batches"""
+        if not isinstance(self._batches, OrderedDict):
+            self._batches = OrderedDict(self._batches)
+
         return self._batches
 
     @property
@@ -2068,6 +2071,13 @@ set as active.
     @property
     def expectation_suite(self) -> ExpectationSuite:
         return self._expectation_suite
+
+    @expectation_suite.setter
+    def expectation_suite(self, value: ExpectationSuite) -> None:
+        self._initialize_expectations(
+            expectation_suite=value,
+            expectation_suite_name=value.expectation_suite_name,
+        )
 
     @property
     def expectation_suite_name(self) -> str:

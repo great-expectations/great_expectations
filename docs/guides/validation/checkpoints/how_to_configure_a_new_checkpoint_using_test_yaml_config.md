@@ -40,7 +40,7 @@ In the [Additional Information](#additional-information) section at the end of t
 After you make edits to the `yaml_config` variable, don't forget to re-run the cell that contains it!
 :::
 
-### 3. Use `test_yamal_config()` to validate your Checkpoint configuration
+### 3. Use `test_yaml_config()` to validate your Checkpoint configuration
 
 Once you have made changes to the `yaml_config` in your Jupyter Notebook, you can verify that the updated configuration is valid by running the following code:
 

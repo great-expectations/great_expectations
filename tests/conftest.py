@@ -70,7 +70,10 @@ from great_expectations.self_check.util import (
     get_dataset,
 )
 from great_expectations.util import is_library_loadable
-from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
+from tests.rule_based_profiler.parameter_builder.conftest import (
+    RANDOM_SEED,
+    RANDOM_STATE,
+)
 
 yaml = YAML()
 ###
@@ -2236,17 +2239,17 @@ def data_context_with_query_store(
 
 
 @pytest.fixture
-def ge_cloud_base_url():
+def ge_cloud_base_url() -> str:
     return "https://app.test.greatexpectations.io"
 
 
 @pytest.fixture
-def ge_cloud_organization_id():
+def ge_cloud_organization_id() -> str:
     return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
 
 
 @pytest.fixture
-def ge_cloud_access_token():
+def ge_cloud_access_token() -> str:
     return "6bb5b6f5c7794892a4ca168c65c2603e"
 
 
@@ -3080,7 +3083,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                     "include_semantic_types": None,
                     "exclude_column_name_suffixes": None,
                     "include_column_names": None,
-                    "limit_mode": "ONE",
+                    "cardinality_limit_mode": "ONE",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
                     "semantic_type_filter_module_name": None,
                 },
@@ -4213,9 +4216,9 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "enforce_numeric_metric": True,
                         "reduce_scalar_metric": True,
                         "estimator": "$variables.estimator",
-                        "num_bootstrap_samples": None,
-                        "bootstrap_random_seed": None,
-                        "include_bootstrap_samples_histogram_in_details": False,
+                        "n_resamples": None,
+                        "random_seed": None,
+                        "include_estimator_samples_histogram_in_details": False,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
                         "truncate_values": {"lower_bound": 0},
@@ -4265,9 +4268,9 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "replace_nan_with_zero": True,
                         "reduce_scalar_metric": True,
                         "estimator": "$variables.estimator",
-                        "num_bootstrap_samples": None,
-                        "bootstrap_random_seed": None,
-                        "include_bootstrap_samples_histogram_in_details": False,
+                        "n_resamples": None,
+                        "random_seed": None,
+                        "include_estimator_samples_histogram_in_details": False,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
@@ -4286,9 +4289,9 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "replace_nan_with_zero": True,
                         "reduce_scalar_metric": True,
                         "estimator": "$variables.estimator",
-                        "num_bootstrap_samples": None,
-                        "bootstrap_random_seed": None,
-                        "include_bootstrap_samples_histogram_in_details": False,
+                        "n_resamples": None,
+                        "random_seed": None,
+                        "include_estimator_samples_histogram_in_details": False,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
@@ -4432,7 +4435,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "exclude_column_name_suffixes": None,
                     "max_unique_values": None,
                     "exclude_semantic_types": ["binary", "currency", "identifier"],
-                    "limit_mode": "VERY_FEW",
+                    "cardinality_limit_mode": "VERY_FEW",
                     "semantic_type_filter_class_name": None,
                     "allowed_semantic_types_passthrough": ["logic"],
                     "max_proportion_unique": None,
@@ -5639,6 +5642,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
 
 @pytest.fixture
 def bobby_columnar_table_multi_batch_deterministic_data_context(
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     tmp_path_factory,
     monkeypatch,
 ) -> DataContext:
@@ -5844,10 +5848,13 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     file_name_list = sorted(file_name_list)
     num_files: int = len(file_name_list)
 
+    random_state: np.random.Generator = RANDOM_STATE
     rnd_num_sample: np.float64
     output_file_lenths: List[int] = [
         round(rnd_num_sample)
-        for rnd_num_sample in np.random.normal(loc=5.0e3, scale=1.0e3, size=num_files)
+        for rnd_num_sample in random_state.normal(
+            loc=5.0e3, scale=1.0e3, size=num_files
+        )
     ]
 
     idx: int
@@ -5909,6 +5916,9 @@ def quentin_columnar_table_multi_batch():
         "quentin_columnar_table_multi_batch"
     )
 
+    """
+    [[8.276101187, 11.420814914], [11.29625, 14.8625], [16.766350257, 21.32575015]]
+    """
     return {
         "profiler_config": verbose_profiler_config,
         "test_configuration": {
@@ -5934,7 +5944,7 @@ def quentin_columnar_table_multi_batch():
                         6.5,
                     ],
                     [
-                        8.522670697,
+                        8.4375,
                         9.5625,
                     ],
                     [
@@ -5966,8 +5976,8 @@ def quentin_columnar_table_multi_batch():
                         14.8625,
                     ],
                     [
-                        16.758025632,
-                        21.327228225,
+                        16.766350257,
+                        21.32575015,
                     ],
                 ],
             },
@@ -6260,9 +6270,9 @@ def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builde
     """
     monkeypatch.setattr(
         NumericMetricRangeMultiBatchParameterBuilder,
-        "bootstrap_random_seed",
+        "random_seed",
         RANDOM_SEED,
     )
     logger.info(
-        "Set the bootstrap_random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
+        "Set the random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
     )

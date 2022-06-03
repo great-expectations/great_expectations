@@ -128,7 +128,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "json_serialize": True,
                 },
             ],
@@ -193,7 +193,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
                     "json_serialize": True,
                 },
@@ -376,7 +376,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
                     "quantile_statistic_interpolation_method": "auto",
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "json_serialize": True,
                 },
             ],
@@ -412,7 +412,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
                     "quantile_statistic_interpolation_method": "auto",
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
                     "json_serialize": True,
                 },
@@ -575,7 +575,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "json_serialize": True,
                 },
             ],
@@ -640,7 +640,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
                     "json_serialize": True,
                 },
@@ -716,7 +716,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "json_serialize": True,
                 },
             ],
@@ -757,7 +757,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
                     "json_serialize": True,
                 },
@@ -824,7 +824,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "json_serialize": True,
                 },
             ],
@@ -889,7 +889,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
-                    "include_bootstrap_samples_histogram_in_details": False,
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
                     "json_serialize": True,
                 },
@@ -1164,6 +1164,7 @@ def test_add_profiler(
     )
 
 
+@pytest.mark.cloud
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
 def test_add_profiler_ge_cloud_mode(
     mock_data_context: mock.MagicMock,
@@ -1321,6 +1322,7 @@ def test_list_profilers(mock_profiler_store: mock.MagicMock):
     assert store.list_keys.called
 
 
+@pytest.mark.cloud
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
 def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
     store = mock_profiler_store()

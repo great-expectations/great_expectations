@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import Dict, List, Optional
 
 TYPE_HINT_ERROR_THRESHOLD: int = (
-    2568  # This number is to be reduced as we annotate more functions!
+    2546  # This number is to be reduced as we annotate more functions!
 )
 
 

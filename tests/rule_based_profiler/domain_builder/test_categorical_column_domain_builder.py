@@ -10,6 +10,9 @@ from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (
     CategoricalColumnDomainBuilder,
 )
+from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
+    CardinalityLimitMode,
+)
 from great_expectations.rule_based_profiler.types import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
@@ -17,7 +20,7 @@ from great_expectations.rule_based_profiler.types import (
 )
 
 
-def test_instantiate_with_cardinality_limit_modes(
+def test_instantiate_with_cardinality_limit_modes_from_class_variable(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -30,7 +33,71 @@ def test_instantiate_with_cardinality_limit_modes(
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         exclude_column_name_suffixes="_id",
-        limit_mode=CategoricalColumnDomainBuilder.cardinality_limit_modes.VERY_FEW,
+        cardinality_limit_mode=CategoricalColumnDomainBuilder.cardinality_limit_modes.VERY_FEW,
+        data_context=data_context,
+    )
+
+    domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
+
+
+def test_instantiate_with_cardinality_limit_modes_from_enum(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="alice_columnar_table_single_batch_datasource",
+        data_connector_name="alice_columnar_table_single_batch_data_connector",
+        data_asset_name="alice_columnar_table_single_batch_data_asset",
+    )
+
+    domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
+        exclude_column_name_suffixes="_id",
+        cardinality_limit_mode=CardinalityLimitMode.VERY_FEW,
+        data_context=data_context,
+    )
+
+    domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
+
+
+def test_instantiate_with_cardinality_limit_modes_from_string(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="alice_columnar_table_single_batch_datasource",
+        data_connector_name="alice_columnar_table_single_batch_data_connector",
+        data_asset_name="alice_columnar_table_single_batch_data_asset",
+    )
+
+    domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
+        exclude_column_name_suffixes="_id",
+        cardinality_limit_mode="very_few",
+        data_context=data_context,
+    )
+
+    domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
+
+
+def test_instantiate_with_cardinality_limit_modes_from_dictionary(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="alice_columnar_table_single_batch_datasource",
+        data_connector_name="alice_columnar_table_single_batch_data_connector",
+        data_asset_name="alice_columnar_table_single_batch_data_asset",
+    )
+
+    domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
+        exclude_column_name_suffixes="_id",
+        cardinality_limit_mode={
+            "name": "very_few",
+            "max_proportion_unique": 10,
+            "metric_name_defining_limit": "column.distinct_values.count",
+        },
         data_context=data_context,
     )
 
@@ -48,7 +115,7 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         exclude_column_name_suffixes="_id",
-        limit_mode="very_few",
+        cardinality_limit_mode="very_few",
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(
@@ -94,7 +161,7 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        limit_mode="ONE",
+        cardinality_limit_mode="ONE",
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(
@@ -126,7 +193,7 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
     assert domains == alice_all_column_domains
 
 
-def test_unsupported_cardinality_limit(
+def test_unsupported_cardinality_limit_from_string(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -140,7 +207,34 @@ def test_unsupported_cardinality_limit(
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
         domains: List[Domain] = CategoricalColumnDomainBuilder(
-            limit_mode="&*#$&INVALID&*#$*&",
+            cardinality_limit_mode="&*#$&INVALID&*#$*&",
+            data_context=data_context,
+        ).get_domains(rule_name="my_rule", batch_request=batch_request)
+
+    assert "specify a supported cardinality mode" in str(excinfo.value)
+    assert "REL_1" in str(excinfo.value)
+    assert "MANY" in str(excinfo.value)
+
+
+def test_unsupported_cardinality_limit_from_dictionary(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="alice_columnar_table_single_batch_datasource",
+        data_connector_name="alice_columnar_table_single_batch_data_connector",
+        data_asset_name="alice_columnar_table_single_batch_data_asset",
+    )
+
+    with pytest.raises(ProfilerConfigurationError) as excinfo:
+        # noinspection PyUnusedLocal,PyArgumentList
+        domains: List[Domain] = CategoricalColumnDomainBuilder(
+            cardinality_limit_mode={
+                "name": "&*#$&INVALID&*#$*&",
+                "max_proportion_unique": 10,
+                "metric_name_defining_limit": "column.distinct_values.count",
+            },
             data_context=data_context,
         ).get_domains(rule_name="my_rule", batch_request=batch_request)
 
@@ -180,7 +274,7 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        limit_mode="VERY_FEW",
+        cardinality_limit_mode="VERY_FEW",
         exclude_column_names=[
             "id",
             "event_type",
@@ -230,7 +324,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        limit_mode="VERY_FEW",
+        cardinality_limit_mode="VERY_FEW",
         exclude_column_names=[],
         data_context=data_context,
     )
@@ -241,7 +335,6 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
     alice_all_column_names: List[str] = [
         "id",
         "event_type",
-        "user_id",
         "event_ts",
         "server_ts",
         "device_ts",
@@ -259,7 +352,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
         )
         for column_name in alice_all_column_names
     ]
-    assert len(domains) == 7
+    assert len(domains) == 6
 
     # Unit Tests for "inferred_semantic_domain_type" are provided separately.
     domain: Domain
@@ -283,7 +376,7 @@ def test_multi_batch_very_few_cardinality(
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        limit_mode="very_few",
+        cardinality_limit_mode="very_few",
         data_context=data_context,
     )
     observed_domains: List[Domain] = domain_builder.get_domains(
@@ -407,7 +500,7 @@ def test_multi_batch_one_cardinality(
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        limit_mode="ONE",
+        cardinality_limit_mode="ONE",
         data_context=data_context,
     )
     observed_domains: List[Domain] = domain_builder.get_domains(

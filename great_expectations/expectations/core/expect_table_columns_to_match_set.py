@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -8,10 +8,22 @@ from great_expectations.expectations.util import render_evaluation_parameter_str
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import substitute_none_for_missing
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
+    VARIABLES_KEY,
+)
 
 
 class ExpectTableColumnsToMatchSet(TableExpectation):
-    """Expect the columns to exactly match an *unordered* set.
+    """Expect the columns to match an *unordered* set.
 
     expect_table_columns_to_match_set is a :func:`expectation \
     <great_expectations.validator.validator.Validator.expectation>`, not a
@@ -19,7 +31,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
 
     Args:
         column_set (list of str): \
-            The column names, in the correct order.
+            The column names, in any order.
         exact_match (boolean): \
             Whether the list of columns must exactly match the observed columns.
 
@@ -60,13 +72,62 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
     success_keys = (
         "column_set",
         "exact_match",
+        "auto",
+        "profiler_config",
     )
+
+    mean_table_columns_set_match_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="MeanTableColumnsSetMatchMultiBatchParameterBuilder",
+        name="column_names_set_estimator",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
+    )
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        mean_table_columns_set_match_multi_batch_parameter_builder_config,
+    ]
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_table_columns_to_match_set",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        variables={},
+        rules={
+            "expect_table_columns_to_match_set": {
+                "variables": {
+                    "exact_match": None,
+                    "success_ratio": 1.0,
+                },
+                "domain_builder": {
+                    "class_name": "TableDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_table_columns_to_match_set",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "condition": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
+                        "column_set": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+                        "exact_match": f"{VARIABLES_KEY}exact_match",
+                        "meta": {
+                            "profiler_details": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                        },
+                    },
+                ],
+            },
+        },
+    )
+
     default_kwarg_values = {
         "column_set": None,
         "exact_match": True,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "column_set",

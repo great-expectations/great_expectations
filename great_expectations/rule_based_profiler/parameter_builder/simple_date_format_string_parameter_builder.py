@@ -6,16 +6,14 @@ from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
-    AttributedResolvedMetrics,
-    MetricComputationResult,
-    MetricValues,
-    ParameterBuilder,
-)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    AttributedResolvedMetrics,
     Domain,
+    MetricComputationResult,
+    MetricValues,
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
@@ -201,7 +199,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         metric_values: MetricValues
 
-        metric_values = attributed_resolved_metrics.metric_values
+        metric_values = attributed_resolved_metrics.conditioned_metric_values
 
         if metric_values is None:
             raise ge_exceptions.ProfilerExecutionError(
@@ -260,7 +258,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             attributed_resolved_metrics
         ) in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
-            metric_values = attributed_resolved_metrics.metric_values[:, 0]
+            metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
             match_strftime_unexpected_count: int = sum(metric_values)
             success_ratio: float = (

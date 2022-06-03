@@ -259,6 +259,40 @@ local_tests = [
         name="expect_table_columns_to_be_unique",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py",
     ),
+    IntegrationTestFixture(
+        name="expect_column_pair_values_to_have_a_difference_of_three",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py",
+    ),
+    IntegrationTestFixture(
+        name="cross_table_comparisons_from_query",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        util_script="tests/test_utils.py",
+        extra_backend_dependencies=[
+            BackendDependencies.POSTGRESQL,
+            BackendDependencies.MYSQL,
+        ],
+    ),
+    IntegrationTestFixture(
+        name="cross_table_comparisons",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        util_script="tests/test_utils.py",
+        extra_backend_dependencies=[
+            BackendDependencies.POSTGRESQL,
+            BackendDependencies.MYSQL,
+        ],
+    ),
+    IntegrationTestFixture(
+        name="expect_column_values_to_be_in_solfege_scale_set",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py",
+    ),
+    IntegrationTestFixture(
+        name="expect_column_values_to_only_contain_vowels",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py",
+    ),
 ]
 
 
@@ -837,7 +871,35 @@ aws_integration_tests = [
         user_flow_script="tests/integration/db/awsathena.py",
         extra_backend_dependencies=BackendDependencies.AWS,
         util_script="tests/test_utils.py",
-    )
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
+    IntegrationTestFixture(
+        name="sample_data_using_limit_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
 ]
 
 # populate integration_test_matrix with sub-lists

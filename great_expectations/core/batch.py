@@ -628,7 +628,6 @@ class Batch(SerializableDictDot):
         return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
 
 
-# TODO: <Alex>ALEX -- Make this helper utility of general use.</Alex>
 def materialize_batch_request(
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
 ) -> Optional[BatchRequestBase]:
@@ -873,50 +872,53 @@ def get_batch_request_from_acceptable_arguments(
 def standardize_batch_request_display_ordering(
     batch_request: Dict[str, Union[str, int, Dict[str, Any]]]
 ) -> Dict[str, Union[str, Dict[str, Any]]]:
-    datasource_name: str = batch_request["datasource_name"]
-    data_connector_name: str = batch_request["data_connector_name"]
-    data_asset_name: str = batch_request["data_asset_name"]
-    runtime_parameters: str = batch_request.get("runtime_parameters")
-    batch_identifiers: str = batch_request.get("batch_identifiers")
-    batch_request.pop("datasource_name")
-    batch_request.pop("data_connector_name")
-    batch_request.pop("data_asset_name")
+    batch_request_as_dict: Union[str, Dict[str, Any]] = safe_deep_copy(
+        data=batch_request
+    )
+    datasource_name: str = batch_request_as_dict["datasource_name"]
+    data_connector_name: str = batch_request_as_dict["data_connector_name"]
+    data_asset_name: str = batch_request_as_dict["data_asset_name"]
+    runtime_parameters: str = batch_request_as_dict.get("runtime_parameters")
+    batch_identifiers: str = batch_request_as_dict.get("batch_identifiers")
+    batch_request_as_dict.pop("datasource_name")
+    batch_request_as_dict.pop("data_connector_name")
+    batch_request_as_dict.pop("data_asset_name")
     # NOTE: AJB 20211217 The below conditionals should be refactored
     if runtime_parameters is not None:
-        batch_request.pop("runtime_parameters")
+        batch_request_as_dict.pop("runtime_parameters")
     if batch_identifiers is not None:
-        batch_request.pop("batch_identifiers")
+        batch_request_as_dict.pop("batch_identifiers")
     if runtime_parameters is not None and batch_identifiers is not None:
-        batch_request = {
+        batch_request_as_dict = {
             "datasource_name": datasource_name,
             "data_connector_name": data_connector_name,
             "data_asset_name": data_asset_name,
             "runtime_parameters": runtime_parameters,
             "batch_identifiers": batch_identifiers,
-            **batch_request,
+            **batch_request_as_dict,
         }
     elif runtime_parameters is not None and batch_identifiers is None:
-        batch_request = {
+        batch_request_as_dict = {
             "datasource_name": datasource_name,
             "data_connector_name": data_connector_name,
             "data_asset_name": data_asset_name,
             "runtime_parameters": runtime_parameters,
-            **batch_request,
+            **batch_request_as_dict,
         }
     elif runtime_parameters is None and batch_identifiers is not None:
-        batch_request = {
+        batch_request_as_dict = {
             "datasource_name": datasource_name,
             "data_connector_name": data_connector_name,
             "data_asset_name": data_asset_name,
             "batch_identifiers": batch_identifiers,
-            **batch_request,
+            **batch_request_as_dict,
         }
     else:
-        batch_request = {
+        batch_request_as_dict = {
             "datasource_name": datasource_name,
             "data_connector_name": data_connector_name,
             "data_asset_name": data_asset_name,
-            **batch_request,
+            **batch_request_as_dict,
         }
 
-    return batch_request
+    return batch_request_as_dict

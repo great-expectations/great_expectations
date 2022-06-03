@@ -4,9 +4,10 @@ import logging
 import re
 import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import scipy.stats as stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -19,6 +20,7 @@ from great_expectations.core.batch import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     INFERRED_SEMANTIC_TYPE_KEY,
     VARIABLES_PREFIX,
     Domain,
@@ -486,7 +488,77 @@ def compute_quantiles(
     )
     return NumericRangeEstimationResult(
         estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
-        value_range=np.array([lower_quantile, upper_quantile]),
+        value_range=np.asarray([lower_quantile, upper_quantile]),
+    )
+
+
+def compute_kde_quantiles_point_estimate(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    quantile_statistic_interpolation_method: str,
+    n_resamples: int,
+    bw_method: Union[str, float, Callable],
+    random_seed: Optional[int] = None,
+) -> NumericRangeEstimationResult:
+    """
+    ML Flow Experiment: parameter_builders_bootstrap/kde_quantiles
+    ML Flow Experiment ID: 721280826919117
+
+    An internal implementation of the "kernel density estimation" estimator method, returning a point estimate for a
+    population parameter of interest (lower and upper quantiles in this case).
+
+    Overview: https://en.wikipedia.org/wiki/Kernel_density_estimation
+    Bandwidth Effect: https://en.wikipedia.org/wiki/Kernel_density_estimation#Bandwidth_selection
+    Bandwidth Method: https://stats.stackexchange.com/questions/90656/kernel-bandwidth-scotts-vs-silvermans-rules
+
+    Args:
+        false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
+            identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
+        quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
+            statistic, used for confidence intervals.
+        n_resamples: A positive integer indicating the sample size resulting from the sampling with replacement
+            procedure.
+        bw_method: The estimator bandwidth as described in:
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
+        random_seed: An optional random_seed to pass to "np.random.Generator(np.random.PCG64(random_seed))"
+            for making probabilistic sampling deterministic.
+    """
+    lower_quantile_pct: float = false_positive_rate / 2.0
+    upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
+
+    metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
+        metric_values, bw_method=bw_method
+    )
+    metric_values_gaussian_sample: float
+    if random_seed:
+        metric_values_gaussian_sample = metric_values_density_estimate.resample(
+            n_resamples,
+            seed=random_seed,
+        )
+    else:
+        metric_values_gaussian_sample = metric_values_density_estimate.resample(
+            n_resamples,
+        )
+
+    lower_quantile_point_estimate: float = np.quantile(
+        metric_values_gaussian_sample,
+        q=lower_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
+    upper_quantile_point_estimate: float = np.quantile(
+        metric_values_gaussian_sample,
+        q=upper_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
+
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(
+            a=metric_values_gaussian_sample, bins=NUM_HISTOGRAM_BINS
+        )[0],
+        value_range=[
+            lower_quantile_point_estimate,
+            upper_quantile_point_estimate,
+        ],
     )
 
 
@@ -643,6 +715,7 @@ def get_validator_with_expectation_suite(
     expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
     expectation_suite_name: Optional[str] = None,
     component_name: str = "test",
+    persist: bool = False,
 ) -> "Validator":  # noqa: F821
     """
     Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
@@ -657,6 +730,7 @@ def get_validator_with_expectation_suite(
         expectation_suite=expectation_suite,
         expectation_suite_name=expectation_suite_name,
         component_name=component_name,
+        persist=persist,
     )
 
     batch_request = materialize_batch_request(batch_request=batch_request)
@@ -673,6 +747,7 @@ def get_or_create_expectation_suite(
     expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
     expectation_suite_name: Optional[str] = None,
     component_name: Optional[str] = None,
+    persist: bool = False,
 ) -> "ExpectationSuite":  # noqa: F821
     """
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
@@ -705,17 +780,30 @@ def get_or_create_expectation_suite(
         expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"
 
     if create_expectation_suite:
-        try:
-            # noinspection PyUnusedLocal
-            expectation_suite = data_context.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-        except ge_exceptions.DataContextError:
-            expectation_suite = data_context.create_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-            logger.info(
-                f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
+        if persist:
+            try:
+                # noinspection PyUnusedLocal
+                expectation_suite = data_context.get_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                )
+            except ge_exceptions.DataContextError:
+                expectation_suite = data_context.create_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                )
+                logger.info(
+                    f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
+                )
+        else:
+            expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name,
+                data_context=data_context,
             )
 
     return expectation_suite
+
+
+def sanitize_parameter_name(name: str) -> str:
+    """
+    This method provides display-friendly version of "name" argument.
+    """
+    return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
