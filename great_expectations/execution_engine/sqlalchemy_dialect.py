@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from typing import List
+from typing import Any, List
 
 
 class GESqlDialect(enum.Enum):
@@ -20,7 +20,7 @@ class GESqlDialect(enum.Enum):
     TRINO = "trino"
 
     @classmethod
-    def _missing_(cls, value) -> None:
+    def _missing_(cls, value: Any) -> None:
         try:
             # Sometimes `value` is a byte string, e.g. `b"hive"`, it should be converted
             return cls(value.decode())
