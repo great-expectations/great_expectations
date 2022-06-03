@@ -3,6 +3,8 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, Optional
 
+import requests
+
 
 class VariableSchema(enum.Enum):
     CONFIG_VERSION = "config_version"
@@ -45,17 +47,20 @@ class DataContextVariables:
     progress_bars: Optional[dict] = None
 
     @abstractmethod
-    def _persist_change(self, attr: VariableSchema, value: Any) -> None:
+    def _write_to_backend(self, attr: VariableSchema, value: Any) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def _read_from_backend(self, attr: VariableSchema) -> Any:
         raise NotImplementedError
 
     def _set(self, attr: VariableSchema, value: Any) -> None:
         setattr(self, attr.value, value)
-        self._persist_change(attr, value)
+        self._write_to_backend(attr, value)
 
     def _get(self, attr: VariableSchema) -> Any:
-        res: Any = getattr(self, attr.value)
-        self._persist_change(attr, res)
-        return res
+        val: Any = self._read_from_backend(attr)
+        return val
 
     def set_config_version(self, config_version: float) -> None:
         self._set(VariableSchema.CONFIG_VERSION, config_version)
@@ -66,8 +71,12 @@ class DataContextVariables:
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
-    def _persist_change(self, attr: VariableSchema, value: Any) -> None:
+    def _write_to_backend(self, attr: VariableSchema, value: Any) -> None:
         pass  # Changes are only made in memory so no side effects need to occur
+
+    def _read_from_backend(self, attr: VariableSchema) -> Any:
+        val: Any = getattr(self, attr.value)
+        return val
 
 
 @dataclass
@@ -75,10 +84,16 @@ class FileDataContextVariables(DataContextVariables):
     def __post_init__(self, base_data_context: "BaseDataContext") -> None:  # noqa: F821
         self.base_data_context = base_data_context
 
-    def _persist_change(self, attr: VariableSchema, value: Any) -> None:
+    def _write_to_backend(self, attr: VariableSchema, value: Any) -> None:
         self.base_data_context.save_config_variable(
             config_variable_name=attr.value, value=value
         )
+
+    def _read_from_backend(self, attr: VariableSchema) -> Any:
+        val: Any = getattr(
+            self.base_data_context.project_config_with_variables_substituted, attr.value
+        )
+        return val
 
 
 @dataclass
@@ -86,5 +101,11 @@ class CloudDataContextVariables(DataContextVariables):
     def __post_init__(self, base_url: str) -> None:
         self.base_url = base_url
 
-    def _persist_change(self, attr: VariableSchema, value: Any) -> None:
+    def _write_to_backend(self, attr: VariableSchema, value: Any) -> None:
         endpoint: str = f"{self.base_url}/{attr.value}"
+        requests.put(endpoint)
+
+    def _read_from_backend(self, attr: VariableSchema) -> Any:
+        endpoint: str = f"{self.base_url}/{attr.value}"
+        response = requests.get(endpoint)
+        return response
