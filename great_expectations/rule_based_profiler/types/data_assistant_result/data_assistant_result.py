@@ -1,4 +1,5 @@
 import copy
+from collections import defaultdict, namedtuple
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
 
@@ -6,10 +7,13 @@ import altair as alt
 import pandas as pd
 from IPython.display import HTML, display
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_or_create_expectation_suite,
+    sanitize_parameter_name,
+)
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
@@ -34,6 +38,8 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_res
     PlotResult,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
+
+ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
 
 
 @dataclass
@@ -67,6 +73,286 @@ class DataAssistantResult(SerializableDictDot):
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
     execution_time: Optional[float] = None  # Execution time (in seconds).
+
+    def to_dict(self) -> dict:
+        """
+        Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
+        """
+        domain: Domain
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        expectation_configuration: ExpectationConfiguration
+        return {
+            "batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
+                data=self.batch_id_to_batch_identifier_display_name_map
+            ),
+            "profiler_config": self.profiler_config.to_json_dict(),
+            "metrics_by_domain": [
+                {
+                    "domain_id": domain.id,
+                    "domain": domain.to_json_dict(),
+                    "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(
+                        data=parameter_values_for_fully_qualified_parameter_names
+                    ),
+                }
+                for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
+            ],
+            "expectation_configurations": [
+                expectation_configuration.to_json_dict()
+                for expectation_configuration in self.expectation_configurations
+            ],
+            "execution_time": convert_to_json_serializable(data=self.execution_time),
+        }
+
+    def to_json_dict(self) -> dict:
+        """
+        Returns: This DataAssistantResult as JSON-serializable dictionary.
+        """
+        return self.to_dict()
+
+    def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
+        """
+        Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
+        """
+        expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
+            data_context=None,
+            expectation_suite=None,
+            expectation_suite_name=expectation_suite_name,
+            component_name=self.__class__.__name__,
+            persist=False,
+        )
+        expectation_suite.add_expectation_configurations(
+            expectation_configurations=self.expectation_configurations,
+            send_usage_event=False,
+            match_type="domain",
+            overwrite_existing=True,
+        )
+        expectation_suite.add_citation(
+            **self.citation,
+        )
+        return expectation_suite
+
+    def get_attributed_metrics_by_domain(
+        self,
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+        domain: Domain
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        fully_qualified_parameter_name: str
+        parameter_value: ParameterNode
+        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
+            domain: {
+                parameter_value[
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                ].metric_configuration.metric_name: parameter_value[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
+                for fully_qualified_parameter_name, parameter_value in parameter_values_for_fully_qualified_parameter_names.items()
+            }
+            for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
+        }
+
+        return metrics_attributed_values_by_domain
+
+    def plot_metrics(
+        self,
+        sequential: bool = True,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        """
+        Use contents of "DataAssistantResult" object to display metrics for visualization purposes.
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            sequential: Whether the batches are sequential or not
+            theme: Altair top-level chart configuration dictionary
+            include_column_names: Columns to include in metrics plot
+            exclude_column_names: Columns to exclude from metrics plot
+
+        Returns:
+            PlotResult wrapper object around Altair charts.
+        """
+        return self._plot(
+            plot_mode=PlotMode.DESCRIPTIVE,
+            sequential=sequential,
+            theme=theme,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+        )
+
+    def plot_expectations_and_metrics(
+        self,
+        sequential: bool = True,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        """
+        Use contents of "DataAssistantResult" object to display metrics and expectations for visualization purposes.
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            sequential: Whether the batches are sequential or not
+            theme: Altair top-level chart configuration dictionary
+            include_column_names: Columns to include in expectations and metrics plot
+            exclude_column_names: Columns to exclude from expectations and metrics plot
+
+        Returns:
+            PlotResult wrapper object around Altair charts.
+        """
+        return self._plot(
+            plot_mode=PlotMode.PRESCRIPTIVE,
+            sequential=sequential,
+            theme=theme,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+        )
+
+    def _plot(
+        self,
+        plot_mode: PlotMode,
+        sequential: bool,
+        theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
+    ) -> PlotResult:
+        """
+        VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
+        Display Charts are condensed and interactive while Return Charts are separated into an individual chart for
+        each metric-domain/expectation-domain combination.
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            plot_mode: Type of plot to generate, prescriptive or descriptive
+            sequential: Whether batches are sequential in nature
+            theme: Altair top-level chart configuration dictionary
+            include_column_names: A list of columns to chart
+            exclude_column_names: A list of columns not to chart
+
+        Returns:
+            A PlotResult object consisting of an individual chart for each metric-domain/expectation-domain
+        """
+        if include_column_names is not None and exclude_column_names is not None:
+            raise ValueError(
+                "You may either use `include_column_names` or `exclude_column_names` (but not both)."
+            )
+
+        display_charts: Union[
+            List[alt.Chart], List[alt.LayerChart], List[alt.VConcatChart]
+        ] = []
+        return_charts: Union[List[alt.Chart], List[alt.LayerChart]] = []
+
+        expectation_configurations: List[
+            ExpectationConfiguration
+        ] = self.expectation_configurations
+
+        table_domain_charts: List[
+            Union[List[alt.Chart], List[alt.LayerChart]]
+        ] = self._plot_table_domain_charts(
+            expectation_configurations=expectation_configurations,
+            plot_mode=plot_mode,
+            sequential=sequential,
+        )
+        display_charts.extend(table_domain_charts)
+        return_charts.extend(table_domain_charts)
+
+        column_domain_display_chart: List[alt.VConcatChart]
+        column_domain_return_charts: List[alt.Chart]
+        (
+            column_domain_display_charts,
+            column_domain_return_charts,
+        ) = self._plot_column_domain_charts(
+            expectation_configurations=expectation_configurations,
+            plot_mode=plot_mode,
+            sequential=sequential,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+        )
+        display_charts.extend(column_domain_display_charts)
+        return_charts.extend(column_domain_return_charts)
+
+        self.display(charts=display_charts, theme=theme)
+
+        return_charts = self.apply_theme(charts=return_charts, theme=theme)
+        return PlotResult(charts=return_charts)
+
+    @staticmethod
+    def display(
+        charts: Union[List[alt.Chart], List[alt.VConcatChart]],
+        theme: Optional[Dict[str, Any]],
+    ) -> None:
+        """
+        Display each chart passed by DataAssistantResult.plot()
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            charts: A list of Altair chart objects to display
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the default theme
+        """
+        altair_theme: Dict[str, Any]
+        if theme:
+            altair_theme = DataAssistantResult._get_theme(theme=theme)
+        else:
+            altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
+
+        themed_charts: List[alt.chart] = DataAssistantResult.apply_theme(
+            charts=charts, theme=altair_theme
+        )
+
+        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+        dropdown_title_color: str = altair_theme["legend"]["titleColor"]
+        dropdown_title_font: str = altair_theme["font"]
+        dropdown_css: str = f"""
+            <style>
+            span.vega-bind-name {{
+                color: {dropdown_title_color};
+                font-family: "{dropdown_title_font}";
+                font-weight: bold;
+            }}
+            form.vega-bindings {{
+              position: absolute;
+              left: 75px;
+              top: 30px;
+            }}
+            </style>
+        """
+        display(HTML(dropdown_css))
+
+        # max rows for Altair charts is set to 5,000 without this
+        alt.data_transformers.disable_max_rows()
+
+        chart: alt.Chart
+        for chart in themed_charts:
+            chart.display()
+
+    @staticmethod
+    def apply_theme(
+        charts: List[alt.Chart],
+        theme: Optional[Dict[str, Any]],
+    ) -> List[alt.Chart]:
+        """
+        Apply the Great Expectations default theme and any user-provided theme overrides to each chart
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            charts: A list of Altair chart objects to apply a theme to
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
+
+        Returns:
+            A list of Altair charts with the theme applied
+        """
+        theme = DataAssistantResult._get_theme(theme=theme)
+        return [chart.configure(**theme) for chart in charts]
 
     @staticmethod
     def get_quantitative_metric_chart(
@@ -123,79 +409,6 @@ class DataAssistantResult(SerializableDictDot):
             )
 
     @staticmethod
-    def _get_line_chart(
-        df: pd.DataFrame,
-        metric_component: MetricPlotComponent,
-        batch_component: BatchPlotComponent,
-        domain_component: DomainPlotComponent,
-    ) -> alt.Chart:
-        title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_component,
-            batch_plot_component=batch_component,
-            domain_plot_component=domain_component,
-        )
-
-        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            metric_component.generate_tooltip(format=","),
-        ]
-
-        line: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_line()
-            .encode(
-                x=batch_component.plot_on_axis(),
-                y=metric_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-        )
-
-        points: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_point()
-            .encode(
-                x=batch_component.plot_on_axis(),
-                y=metric_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-        )
-
-        return line + points
-
-    @staticmethod
-    def _get_bar_chart(
-        df: pd.DataFrame,
-        metric_component: MetricPlotComponent,
-        batch_component: BatchPlotComponent,
-        domain_component: DomainPlotComponent,
-    ) -> alt.Chart:
-        title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_component,
-            batch_plot_component=batch_component,
-            domain_plot_component=domain_component,
-        )
-
-        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            metric_component.generate_tooltip(format=","),
-        ]
-
-        bars: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_bar()
-            .encode(
-                x=alt.X(
-                    batch_component.name,
-                    type=batch_component.alt_type,
-                    title=batch_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=metric_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-        )
-
-        return bars
-
-    @staticmethod
     def get_expect_domain_values_to_be_between_chart(
         df: pd.DataFrame,
         metric_name: str,
@@ -230,7 +443,7 @@ class DataAssistantResult(SerializableDictDot):
             column
             for column in df.columns
             if column
-            not in [
+            not in {
                 metric_name,
                 batch_name,
                 column_name,
@@ -238,7 +451,7 @@ class DataAssistantResult(SerializableDictDot):
                 min_value,
                 strict_min,
                 strict_max,
-            ]
+            }
         ]
         batch_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
@@ -333,6 +546,302 @@ class DataAssistantResult(SerializableDictDot):
                     tooltip=tooltip,
                 )
             )
+
+    @staticmethod
+    def get_interactive_detail_multi_chart(
+        column_dfs: List[ColumnDataFrame],
+        metric_name: str,
+        metric_type: alt.StandardType,
+        sequential: bool,
+    ) -> Union[alt.Chart, alt.VConcatChart]:
+        """
+        Args:
+            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
+            metric_name: The name of the metric as it exists in the pandas dataframe
+            metric_type: The altair data type for the metric being plotted
+            sequential: Whether batches are sequential in nature
+
+        Returns:
+            A interactive detail altair multi-chart
+        """
+        batch_name: str = "batch"
+        batch_identifiers: List[str] = [
+            column
+            for column in column_dfs[0].df.columns
+            if column not in [metric_name, batch_name]
+        ]
+        batch_component: BatchPlotComponent = BatchPlotComponent(
+            name=batch_name,
+            alt_type=AltairDataTypes.NOMINAL.value,
+            batch_identifiers=batch_identifiers,
+        )
+        metric_component: MetricPlotComponent = MetricPlotComponent(
+            name=metric_name, alt_type=metric_type
+        )
+
+        domain_name: str = "column"
+        domain_component: DomainPlotComponent = DomainPlotComponent(
+            name=domain_name,
+            alt_type=AltairDataTypes.NOMINAL.value,
+        )
+
+        df: pd.DataFrame = pd.DataFrame(
+            columns=[batch_name, metric_name] + batch_identifiers
+        )
+        for column, column_df in column_dfs:
+            column_df[domain_name] = column
+            df = pd.concat([df, column_df], axis=0)
+
+        if sequential:
+            return DataAssistantResult._get_interactive_detail_multi_line_chart(
+                df=df,
+                metric_component=metric_component,
+                batch_component=batch_component,
+                domain_component=domain_component,
+            )
+        else:
+            return DataAssistantResult._get_interactive_detail_multi_bar_chart(
+                df=df,
+                metric_component=metric_component,
+                batch_component=batch_component,
+                domain_component=domain_component,
+            )
+
+    @staticmethod
+    def get_interactive_detail_expect_column_values_to_be_between_chart(
+        expectation_type: str,
+        column_dfs: List[ColumnDataFrame],
+        metric_name: str,
+        metric_type: alt.StandardType,
+        sequential: bool,
+    ) -> alt.VConcatChart:
+        """
+        Args:
+            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
+            metric_name: The name of the metric as it exists in the pandas dataframe
+            metric_type: The altair data type for the metric being plotted
+            sequential: Whether batches are sequential in nature
+
+        Returns:
+            An interactive detail multi line expect_column_values_to_be_between chart
+        """
+        column_name: str = "column"
+        min_value: str = "min_value"
+        max_value: str = "max_value"
+        strict_min: str = "strict_min"
+        strict_max: str = "strict_max"
+
+        batch_name: str = "batch"
+        batch_identifiers: List[str] = [
+            column
+            for column in column_dfs[0].df.columns
+            if column
+            not in {
+                metric_name,
+                batch_name,
+                column_name,
+                min_value,
+                max_value,
+                strict_min,
+                strict_max,
+            }
+        ]
+        batch_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+        batch_component: BatchPlotComponent = BatchPlotComponent(
+            name=batch_name,
+            alt_type=batch_type,
+            batch_identifiers=batch_identifiers,
+        )
+        metric_component: MetricPlotComponent = MetricPlotComponent(
+            name=metric_name, alt_type=metric_type
+        )
+
+        domain_component: DomainPlotComponent = DomainPlotComponent(
+            name="column",
+            alt_type=AltairDataTypes.NOMINAL.value,
+        )
+
+        min_value_component: ExpectationKwargPlotComponent = (
+            ExpectationKwargPlotComponent(
+                name=min_value,
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                metric_plot_component=metric_component,
+            )
+        )
+        max_value_component: ExpectationKwargPlotComponent = (
+            ExpectationKwargPlotComponent(
+                name=max_value,
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                metric_plot_component=metric_component,
+            )
+        )
+        strict_min_component: ExpectationKwargPlotComponent = (
+            ExpectationKwargPlotComponent(
+                name=strict_min,
+                alt_type=AltairDataTypes.NOMINAL.value,
+                metric_plot_component=metric_component,
+            )
+        )
+        strict_max_component: ExpectationKwargPlotComponent = (
+            ExpectationKwargPlotComponent(
+                name=strict_max,
+                alt_type=AltairDataTypes.NOMINAL.value,
+                metric_plot_component=metric_component,
+            )
+        )
+
+        df: pd.DataFrame = pd.DataFrame(
+            columns=[
+                batch_name,
+            ]
+            + batch_identifiers
+            + [
+                metric_name,
+                column_name,
+                min_value,
+                max_value,
+                strict_min,
+                strict_max,
+            ]
+        )
+
+        for _, column_df in column_dfs:
+            df = pd.concat([df, column_df], axis=0)
+
+        # encode point color based on anomalies
+        predicate: Union[bool, int]
+        if strict_min and strict_max:
+            predicate = (
+                (alt.datum.min_value > alt.datum[metric_component.name])
+                & (alt.datum.max_value > alt.datum[metric_component.name])
+            ) | (
+                (alt.datum.min_value < alt.datum[metric_component.name])
+                & (alt.datum.max_value < alt.datum[metric_component.name])
+            )
+        elif strict_min:
+            predicate = (
+                (alt.datum.min_value > alt.datum[metric_component.name])
+                & (alt.datum.max_value >= alt.datum[metric_component.name])
+            ) | (
+                (alt.datum.min_value < alt.datum[metric_component.name])
+                & (alt.datum.max_value <= alt.datum[metric_component.name])
+            )
+        elif strict_max:
+            predicate = (
+                (alt.datum.min_value >= alt.datum[metric_component.name])
+                & (alt.datum.max_value > alt.datum[metric_component.name])
+            ) | (
+                (alt.datum.min_value <= alt.datum[metric_component.name])
+                & (alt.datum.max_value < alt.datum[metric_component.name])
+            )
+        else:
+            predicate = (
+                (alt.datum.min_value >= alt.datum[metric_component.name])
+                & (alt.datum.max_value >= alt.datum[metric_component.name])
+            ) | (
+                (alt.datum.min_value <= alt.datum[metric_component.name])
+                & (alt.datum.max_value <= alt.datum[metric_component.name])
+            )
+
+        if sequential:
+            return DataAssistantResult._get_interactive_detail_expect_column_values_to_be_between_line_chart(
+                expectation_type=expectation_type,
+                df=df,
+                metric_component=metric_component,
+                batch_component=batch_component,
+                domain_component=domain_component,
+                min_value_component=min_value_component,
+                max_value_component=max_value_component,
+                strict_min_component=strict_min_component,
+                strict_max_component=strict_max_component,
+                predicate=predicate,
+            )
+        else:
+            return DataAssistantResult._get_interactive_detail_expect_column_values_to_be_between_bar_chart(
+                expectation_type=expectation_type,
+                df=df,
+                metric_component=metric_component,
+                batch_component=batch_component,
+                domain_component=domain_component,
+                min_value_component=min_value_component,
+                max_value_component=max_value_component,
+                strict_min_component=strict_min_component,
+                strict_max_component=strict_max_component,
+                predicate=predicate,
+            )
+
+    @staticmethod
+    def _get_line_chart(
+        df: pd.DataFrame,
+        metric_component: MetricPlotComponent,
+        batch_component: BatchPlotComponent,
+        domain_component: DomainPlotComponent,
+    ) -> alt.Chart:
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_component=metric_component,
+            batch_plot_component=batch_component,
+            domain_plot_component=domain_component,
+        )
+
+        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
+            metric_component.generate_tooltip(format=","),
+        ]
+
+        line: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_line()
+            .encode(
+                x=batch_component.plot_on_axis(),
+                y=metric_component.plot_on_axis(),
+                tooltip=tooltip,
+            )
+        )
+
+        points: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_point()
+            .encode(
+                x=batch_component.plot_on_axis(),
+                y=metric_component.plot_on_axis(),
+                tooltip=tooltip,
+            )
+        )
+
+        return line + points
+
+    @staticmethod
+    def _get_bar_chart(
+        df: pd.DataFrame,
+        metric_component: MetricPlotComponent,
+        batch_component: BatchPlotComponent,
+        domain_component: DomainPlotComponent,
+    ) -> alt.Chart:
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_component=metric_component,
+            batch_plot_component=batch_component,
+            domain_plot_component=domain_component,
+        )
+
+        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
+            metric_component.generate_tooltip(format=","),
+        ]
+
+        bars: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_bar()
+            .encode(
+                x=alt.X(
+                    batch_component.name,
+                    type=batch_component.alt_type,
+                    title=batch_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
+                ),
+                y=metric_component.plot_on_axis(),
+                tooltip=tooltip,
+            )
+        )
+
+        return bars
 
     @staticmethod
     def _get_expect_domain_values_to_be_between_line_chart(
@@ -510,71 +1019,12 @@ class DataAssistantResult(SerializableDictDot):
         return band + lower_limit + upper_limit + anomaly_coded_bars
 
     @staticmethod
-    def get_interactive_detail_multi_chart(
-        column_dfs: List[Tuple[str, pd.DataFrame]],
-        metric_name: str,
-        metric_type: alt.StandardType,
-        sequential: bool,
-    ) -> Union[alt.Chart, alt.VConcatChart]:
-        """
-        Args:
-            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
-            metric_type: The altair data type for the metric being plotted
-            sequential: Whether batches are sequential in nature
-
-        Returns:
-            A interactive detail altair multi-chart
-        """
-        batch_name: str = "batch"
-        batch_identifiers: List[str] = [
-            column
-            for column in column_dfs[0][1].columns
-            if column not in [metric_name, batch_name]
-        ]
-        batch_component: BatchPlotComponent = BatchPlotComponent(
-            name=batch_name,
-            alt_type=AltairDataTypes.NOMINAL.value,
-            batch_identifiers=batch_identifiers,
-        )
-        metric_component: MetricPlotComponent = MetricPlotComponent(
-            name=metric_name, alt_type=metric_type
-        )
-
-        domain_name: str = "column"
-        domain_component: DomainPlotComponent = DomainPlotComponent(
-            name=domain_name,
-            alt_type=AltairDataTypes.NOMINAL.value,
-        )
-
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[batch_name, metric_name] + batch_identifiers
-        )
-        for column, column_df in column_dfs:
-            column_df[domain_name] = column
-            df = pd.concat([df, column_df], axis=0)
-
-        if sequential:
-            return DataAssistantResult._get_interactive_detail_multi_line_chart(
-                df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-            )
-        else:
-            return DataAssistantResult._get_interactive_detail_multi_bar_chart(
-                df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-            )
-
-    @staticmethod
     def _get_interactive_detail_multi_line_chart(
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
+        expectation_type: Optional[str] = None,
     ) -> alt.VConcatChart:
         detail_title_font_size: int = 14
         detail_title_font_weight: str = "bold"
@@ -590,6 +1040,7 @@ class DataAssistantResult(SerializableDictDot):
         unselected_opacity: float = 0.4
 
         title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
             metric_plot_component=metric_component,
             batch_plot_component=batch_component,
             domain_plot_component=domain_component,
@@ -829,8 +1280,10 @@ class DataAssistantResult(SerializableDictDot):
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
         domain_component: DomainPlotComponent,
+        expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
             metric_plot_component=metric_component,
             batch_plot_component=batch_component,
             domain_plot_component=domain_component,
@@ -857,9 +1310,9 @@ class DataAssistantResult(SerializableDictDot):
             options=columns, name="Select Column: "
         )
         selection: alt.selection_single = alt.selection_single(
+            empty="none",
             bind=input_dropdown,
             fields=[domain_component.name],
-            init={domain_component.name: " "},
         )
 
         bars: alt.Chart = (
@@ -882,167 +1335,8 @@ class DataAssistantResult(SerializableDictDot):
         return bars
 
     @staticmethod
-    def get_interactive_detail_expect_column_values_to_be_between_chart(
-        column_dfs: List[Tuple[str, pd.DataFrame]],
-        metric_name: str,
-        metric_type: alt.StandardType,
-        sequential: bool,
-    ) -> alt.VConcatChart:
-        """
-        Args:
-            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
-            metric_type: The altair data type for the metric being plotted
-            sequential: Whether batches are sequential in nature
-
-        Returns:
-            An interactive detail multi line expect_column_values_to_be_between chart
-        """
-        column_name: str = "column"
-        min_value: str = "min_value"
-        max_value: str = "max_value"
-        strict_min: str = "strict_min"
-        strict_max: str = "strict_max"
-
-        batch_name: str = "batch"
-        batch_identifiers: List[str] = [
-            column
-            for column in column_dfs[0][1].columns
-            if column
-            not in [
-                metric_name,
-                batch_name,
-                column_name,
-                min_value,
-                max_value,
-                strict_min,
-                strict_max,
-            ]
-        ]
-        batch_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-        batch_component: BatchPlotComponent = BatchPlotComponent(
-            name=batch_name,
-            alt_type=batch_type,
-            batch_identifiers=batch_identifiers,
-        )
-        metric_component: MetricPlotComponent = MetricPlotComponent(
-            name=metric_name, alt_type=metric_type
-        )
-
-        domain_component: DomainPlotComponent = DomainPlotComponent(
-            name="column",
-            alt_type=AltairDataTypes.NOMINAL.value,
-        )
-
-        min_value_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=min_value,
-                alt_type=AltairDataTypes.QUANTITATIVE.value,
-                metric_plot_component=metric_component,
-            )
-        )
-        max_value_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=max_value,
-                alt_type=AltairDataTypes.QUANTITATIVE.value,
-                metric_plot_component=metric_component,
-            )
-        )
-        strict_min_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=strict_min,
-                alt_type=AltairDataTypes.NOMINAL.value,
-                metric_plot_component=metric_component,
-            )
-        )
-        strict_max_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=strict_max,
-                alt_type=AltairDataTypes.NOMINAL.value,
-                metric_plot_component=metric_component,
-            )
-        )
-
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[
-                batch_name,
-            ]
-            + batch_identifiers
-            + [
-                metric_name,
-                column_name,
-                min_value,
-                max_value,
-                strict_min,
-                strict_max,
-            ]
-        )
-
-        for _, column_df in column_dfs:
-            df = pd.concat([df, column_df], axis=0)
-
-        # encode point color based on anomalies
-        predicate: Union[bool, int]
-        if strict_min and strict_max:
-            predicate = (
-                (alt.datum.min_value > alt.datum[metric_component.name])
-                & (alt.datum.max_value > alt.datum[metric_component.name])
-            ) | (
-                (alt.datum.min_value < alt.datum[metric_component.name])
-                & (alt.datum.max_value < alt.datum[metric_component.name])
-            )
-        elif strict_min:
-            predicate = (
-                (alt.datum.min_value > alt.datum[metric_component.name])
-                & (alt.datum.max_value >= alt.datum[metric_component.name])
-            ) | (
-                (alt.datum.min_value < alt.datum[metric_component.name])
-                & (alt.datum.max_value <= alt.datum[metric_component.name])
-            )
-        elif strict_max:
-            predicate = (
-                (alt.datum.min_value >= alt.datum[metric_component.name])
-                & (alt.datum.max_value > alt.datum[metric_component.name])
-            ) | (
-                (alt.datum.min_value <= alt.datum[metric_component.name])
-                & (alt.datum.max_value < alt.datum[metric_component.name])
-            )
-        else:
-            predicate = (
-                (alt.datum.min_value >= alt.datum[metric_component.name])
-                & (alt.datum.max_value >= alt.datum[metric_component.name])
-            ) | (
-                (alt.datum.min_value <= alt.datum[metric_component.name])
-                & (alt.datum.max_value <= alt.datum[metric_component.name])
-            )
-
-        if sequential:
-            return DataAssistantResult._get_interactive_detail_expect_column_values_to_be_between_line_chart(
-                df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-                min_value_component=min_value_component,
-                max_value_component=max_value_component,
-                strict_min_component=strict_min_component,
-                strict_max_component=strict_max_component,
-                predicate=predicate,
-            )
-        else:
-            return DataAssistantResult._get_interactive_detail_expect_column_values_to_be_between_bar_chart(
-                df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-                min_value_component=min_value_component,
-                max_value_component=max_value_component,
-                strict_min_component=strict_min_component,
-                strict_max_component=strict_max_component,
-                predicate=predicate,
-            )
-
-    @staticmethod
     def _get_interactive_detail_expect_column_values_to_be_between_line_chart(
+        expectation_type: str,
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
@@ -1070,6 +1364,7 @@ class DataAssistantResult(SerializableDictDot):
 
         interactive_detail_multi_line_chart: alt.VConcatChart = (
             DataAssistantResult._get_interactive_detail_multi_line_chart(
+                expectation_type=expectation_type,
                 df=df,
                 metric_component=metric_component,
                 batch_component=batch_component,
@@ -1159,6 +1454,7 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _get_interactive_detail_expect_column_values_to_be_between_bar_chart(
+        expectation_type: str,
         df: pd.DataFrame,
         metric_component: MetricPlotComponent,
         batch_component: BatchPlotComponent,
@@ -1184,6 +1480,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         bars: alt.Chart = DataAssistantResult._get_interactive_detail_multi_bar_chart(
+            expectation_type=expectation_type,
             df=df,
             metric_component=metric_component,
             batch_component=batch_component,
@@ -1289,134 +1586,6 @@ class DataAssistantResult(SerializableDictDot):
 
         return band + lower_limit + upper_limit + anomaly_coded_bars
 
-    def to_dict(self) -> dict:
-        """
-        Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
-        """
-        domain: Domain
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
-        expectation_configuration: ExpectationConfiguration
-        return {
-            "batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
-                data=self.batch_id_to_batch_identifier_display_name_map
-            ),
-            "profiler_config": self.profiler_config.to_json_dict(),
-            "metrics_by_domain": [
-                {
-                    "domain_id": domain.id,
-                    "domain": domain.to_json_dict(),
-                    "parameter_values_for_fully_qualified_parameter_names": convert_to_json_serializable(
-                        data=parameter_values_for_fully_qualified_parameter_names
-                    ),
-                }
-                for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-            ],
-            "expectation_configurations": [
-                expectation_configuration.to_json_dict()
-                for expectation_configuration in self.expectation_configurations
-            ],
-            "execution_time": convert_to_json_serializable(data=self.execution_time),
-        }
-
-    def to_json_dict(self) -> dict:
-        """
-        Returns: This DataAssistantResult as JSON-serializable dictionary.
-        """
-        return self.to_dict()
-
-    def get_attributed_metrics_by_domain(
-        self,
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        domain: Domain
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
-        fully_qualified_parameter_name: str
-        parameter_value: ParameterNode
-        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
-            domain: {
-                parameter_value[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ].metric_configuration.metric_name: parameter_value[
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-                for fully_qualified_parameter_name, parameter_value in parameter_values_for_fully_qualified_parameter_names.items()
-            }
-            for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-        }
-
-        return metrics_attributed_values_by_domain
-
-    @staticmethod
-    def display(
-        charts: Union[List[alt.Chart], List[alt.VConcatChart]],
-        theme: Optional[Dict[str, Any]],
-    ) -> None:
-        """
-        Display each chart passed by DataAssistantResult.plot()
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            charts: A list of Altair chart objects to display
-            theme: An Optional Altair top-level chart configuration dictionary to apply over the default theme
-        """
-        altair_theme: Dict[str, Any]
-        if theme:
-            altair_theme = DataAssistantResult._get_theme(theme=theme)
-        else:
-            altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
-
-        themed_charts: List[alt.chart] = DataAssistantResult.apply_theme(
-            charts=charts, theme=altair_theme
-        )
-
-        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
-        dropdown_title_color: str = altair_theme["legend"]["titleColor"]
-        dropdown_title_font: str = altair_theme["font"]
-        dropdown_css: str = f"""
-            <style>
-            span.vega-bind-name {{
-                color: {dropdown_title_color};
-                font-family: "{dropdown_title_font}";
-                font-weight: bold;
-            }}
-            form.vega-bindings {{
-              position: absolute;
-              left: 75px;
-              top: 30px;
-            }}
-            </style>
-        """
-        display(HTML(dropdown_css))
-
-        # max rows for Altair charts is set to 5,000 without this
-        alt.data_transformers.disable_max_rows()
-
-        chart: alt.Chart
-        for chart in themed_charts:
-            chart.display()
-
-    @staticmethod
-    def apply_theme(
-        charts: List[alt.Chart],
-        theme: Optional[Dict[str, Any]],
-    ) -> List[alt.Chart]:
-        """
-        Apply the Great Expectations default theme and any user-provided theme overrides to each chart
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            charts: A list of Altair chart objects to apply a theme to
-            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
-
-        Returns:
-            A list of Altair charts with the theme applied
-        """
-        theme: Dict[str, Any] = DataAssistantResult._get_theme(theme=theme)
-        return [chart.configure(**theme) for chart in charts]
-
     @staticmethod
     def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         default_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
@@ -1430,10 +1599,17 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> Union[List[alt.Chart], List[alt.LayerChart]]:
-        table_based_expectations: List[ExpectationConfiguration] = list(
+    ) -> List[Union[List[alt.Chart], List[alt.LayerChart]]]:
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+
+        table_based_expectations: List[str] = [
+            expectation
+            for expectation in expectation_metric_map.keys()
+            if expectation.startswith("expect_table_")
+        ]
+        table_based_expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
-                lambda e: e.expectation_type == "expect_table_row_count_to_be_between",
+                lambda e: e.expectation_type in table_based_expectations,
                 expectation_configurations,
             )
         )
@@ -1445,7 +1621,7 @@ class DataAssistantResult(SerializableDictDot):
         charts: List[alt.Chart] = []
 
         expectation_configuration: ExpectationConfiguration
-        for expectation_configuration in table_based_expectations:
+        for expectation_configuration in table_based_expectation_configurations:
             table_domain_chart: alt.Chart = (
                 self._create_chart_for_table_domain_expectation(
                     expectation_configuration=expectation_configuration,
@@ -1466,8 +1642,68 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
-        def _filter(e: ExpectationConfiguration) -> bool:
-            if e.expectation_type != "expect_column_unique_value_count_to_be_between":
+        column_based_expectation_configurations_by_type: Dict[
+            str, List[ExpectationConfiguration]
+        ] = self._filter_expectation_configurations_by_column_type(
+            expectation_configurations, include_column_names, exclude_column_names
+        )
+
+        attributed_metrics_by_column_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
+
+        display_charts: List[Optional[alt.VConcatChart]] = []
+        return_charts: List[Optional[alt.Chart]] = []
+
+        for (
+            expectation_type,
+            column_based_expectation_configurations,
+        ) in column_based_expectation_configurations_by_type.items():
+            display_charts_for_expectation: List[
+                Optional[alt.VConcatChart]
+            ] = self._create_display_chart_for_column_domain_expectation(
+                expectation_type=expectation_type,
+                expectation_configurations=column_based_expectation_configurations,
+                attributed_metrics=attributed_metrics_by_column_domain,
+                plot_mode=plot_mode,
+                sequential=sequential,
+            )
+            display_charts.extend(display_charts_for_expectation)
+
+            for expectation_configuration in column_based_expectation_configurations:
+                return_chart: alt.Chart = (
+                    self._create_return_chart_for_column_domain_expectation(
+                        expectation_configuration=expectation_configuration,
+                        attributed_metrics=attributed_metrics_by_column_domain,
+                        plot_mode=plot_mode,
+                        sequential=sequential,
+                    )
+                )
+                return_charts.append(return_chart)
+
+        display_charts = list(filter(None, display_charts))
+        return_charts = list(filter(None, return_charts))
+
+        return display_charts, return_charts
+
+    def _filter_expectation_configurations_by_column_type(
+        self,
+        expectation_configurations: List[ExpectationConfiguration],
+        include_column_names: Optional[List[str]],
+        exclude_column_names: Optional[List[str]],
+    ) -> Dict[str, List[ExpectationConfiguration]]:
+        expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
+
+        column_based_expectations: Set[str] = {
+            expectation
+            for expectation in expectation_metric_map.keys()
+            if expectation.startswith("expect_column_")
+        }
+
+        def _filter(
+            e: ExpectationConfiguration, column_based_expectations: Set[str]
+        ) -> bool:
+            if e.expectation_type not in column_based_expectations:
                 return False
             column_name: str = e.kwargs["column"]
             if exclude_column_names and column_name in exclude_column_names:
@@ -1478,39 +1714,21 @@ class DataAssistantResult(SerializableDictDot):
 
         column_based_expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
-                lambda e: _filter(e),
+                lambda e: _filter(e, column_based_expectations),
                 expectation_configurations,
             )
         )
 
-        attributed_metrics_by_column_domain: Dict[
-            Domain, Dict[str, ParameterNode]
-        ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
-
-        display_charts: List[
-            alt.VConcatChart
-        ] = self._create_display_chart_for_column_domain_expectation(
-            expectation_configurations=column_based_expectation_configurations,
-            attributed_metrics=attributed_metrics_by_column_domain,
-            plot_mode=plot_mode,
-            sequential=sequential,
-        )
-
-        return_charts: List[alt.Chart] = []
+        column_based_expectation_configurations_by_type: Dict[
+            str, List[ExpectationConfiguration]
+        ] = defaultdict(list)
         for expectation_configuration in column_based_expectation_configurations:
-            return_chart: alt.Chart = (
-                self._create_return_chart_for_column_domain_expectation(
-                    expectation_configuration=expectation_configuration,
-                    attributed_metrics=attributed_metrics_by_column_domain,
-                    plot_mode=plot_mode,
-                    sequential=sequential,
-                )
+            type_: str = expectation_configuration.expectation_type
+            column_based_expectation_configurations_by_type[type_].append(
+                expectation_configuration
             )
-            return_charts.append(return_chart)
 
-        return [chart for chart in display_charts if chart is not None], [
-            chart for chart in return_charts if chart is not None
-        ]
+        return column_based_expectation_configurations_by_type
 
     def _chart_domain_values(
         self,
@@ -1520,48 +1738,62 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
         subtitle: Optional[str],
-    ) -> alt.Chart:
-        plot_impl: Callable[
-            [
-                pd.DataFrame,
-                str,
-                alt.StandardType,
-                bool,
-                Optional[str],
-            ],
-            alt.Chart,
-        ]
-        if plot_mode is PlotMode.PRESCRIPTIVE:
-            plot_impl = self.get_expect_domain_values_to_be_between_chart
-        elif plot_mode is PlotMode.DESCRIPTIVE:
-            plot_impl = self.get_quantitative_metric_chart
+    ) -> Optional[alt.Chart]:
+        implemented_metrics: Set[str] = {
+            sanitize_parameter_name(metric)
+            for metric in self.EXPECTATION_METRIC_MAP.values()
+        }
 
-        chart: alt.Chart = plot_impl(
-            df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            sequential=sequential,
-            subtitle=subtitle,
-        )
+        plot_impl: Optional[
+            Callable[
+                [
+                    pd.DataFrame,
+                    str,
+                    alt.StandardType,
+                    bool,
+                    Optional[str],
+                ],
+                alt.Chart,
+            ]
+        ] = None
+        chart: Optional[alt.Chart] = None
+        if metric_name in implemented_metrics:
+            if plot_mode is PlotMode.PRESCRIPTIVE:
+                plot_impl = self.get_expect_domain_values_to_be_between_chart
+            elif plot_mode is PlotMode.DESCRIPTIVE:
+                plot_impl = self.get_quantitative_metric_chart
+
+        if plot_impl:
+            chart = plot_impl(
+                df=df,
+                metric_name=metric_name,
+                metric_type=metric_type,
+                sequential=sequential,
+                subtitle=subtitle,
+            )
         return chart
 
     def _create_display_chart_for_column_domain_expectation(
         self,
+        expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> List[alt.VConcatChart]:
-        column_dfs: List[pd.DataFrame] = self._create_column_dfs_for_charting(
+    ) -> List[Optional[alt.VConcatChart]]:
+        column_dfs: List[ColumnDataFrame] = self._create_column_dfs_for_charting(
             attributed_metrics=attributed_metrics,
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
         )
 
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        metric_name: str = "column_distinct_values_count"
+        metric_name: Optional[str] = self.EXPECTATION_METRIC_MAP.get(expectation_type)
+        if metric_name:
+            metric_name = sanitize_parameter_name(metric_name)
 
         return self._chart_column_values(
+            expectation_type=expectation_type,
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
@@ -1586,25 +1818,20 @@ class DataAssistantResult(SerializableDictDot):
             for domain in list(attributed_metrics.keys())
         }
 
-        metric_configuration: dict = expectation_configuration.meta["profiler_details"][
-            "metric_configuration"
-        ]
+        profiler_details: dict = expectation_configuration.meta["profiler_details"]
+        metric_configuration: dict = profiler_details["metric_configuration"]
         domain_kwargs: dict = metric_configuration["domain_kwargs"]
+        column_name: str = domain_kwargs["column"]
 
-        domain = domains_by_column_name[domain_kwargs["column"]]
+        domain = domains_by_column_name[column_name]
 
         attributed_values_by_metric_name: Dict[str, ParameterNode] = attributed_metrics[
             domain
         ]
 
         for metric_name in attributed_values_by_metric_name.keys():
-            if (
-                expectation_configuration.expectation_type
-                in expectation_metric_map.keys()
-            ) and (
-                metric_name
-                == expectation_metric_map[expectation_configuration.expectation_type]
-            ):
+            type_: str = expectation_configuration.expectation_type
+            if expectation_metric_map.get(type_) == metric_name:
                 attributed_values: ParameterNode = attributed_values_by_metric_name[
                     metric_name
                 ]
@@ -1632,38 +1859,34 @@ class DataAssistantResult(SerializableDictDot):
 
     def _chart_column_values(
         self,
-        column_dfs: List[Tuple[str, pd.DataFrame]],
-        metric_name: str,
+        expectation_type: str,
+        column_dfs: List[ColumnDataFrame],
+        metric_name: Optional[str],
         metric_type: alt.StandardType,
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> List[alt.VConcatChart]:
-        plot_impl: Callable[
-            [
-                List[Tuple[str, pd.DataFrame]],
-                str,
-                alt.StandardType,
-            ],
-            alt.VConcatChart,
-        ]
-        if len(column_dfs) > 0:
+    ) -> List[Optional[alt.VConcatChart]]:
+
+        display_chart: Optional[alt.VConcatChart] = None
+
+        if metric_name:
             if plot_mode is PlotMode.PRESCRIPTIVE:
-                plot_impl = (
-                    self.get_interactive_detail_expect_column_values_to_be_between_chart
+                display_chart = self.get_interactive_detail_expect_column_values_to_be_between_chart(
+                    expectation_type=expectation_type,
+                    column_dfs=column_dfs,
+                    metric_name=metric_name,
+                    metric_type=metric_type,
+                    sequential=sequential,
                 )
             else:
-                plot_impl = self.get_interactive_detail_multi_chart
+                display_chart = self.get_interactive_detail_multi_chart(
+                    column_dfs=column_dfs,
+                    metric_name=metric_name,
+                    metric_type=metric_type,
+                    sequential=sequential,
+                )
 
-            display_chart: alt.VConcatChart = plot_impl(
-                column_dfs=column_dfs,
-                metric_name=metric_name,
-                metric_type=metric_type,
-                sequential=sequential,
-            )
-
-            return [display_chart]
-        else:
-            return []
+        return [display_chart]
 
     def _create_df_for_charting(
         self,
@@ -1673,7 +1896,10 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
     ) -> pd.DataFrame:
         batch_ids: KeysView[str] = attributed_values.keys()
-        metric_values: MetricValues = [value[0] for value in attributed_values.values()]
+        metric_values: MetricValues = [
+            value[0] if len(value) == 1 else value
+            for value in attributed_values.values()
+        ]
 
         df: pd.DataFrame = pd.DataFrame(
             {sanitize_parameter_name(name=metric_name): metric_values}
@@ -1742,7 +1968,7 @@ class DataAssistantResult(SerializableDictDot):
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
-    ) -> List[pd.DataFrame]:
+    ) -> List[ColumnDataFrame]:
         expectation_metric_map: Dict[str, str] = self.EXPECTATION_METRIC_MAP
 
         domain: Domain
@@ -1752,29 +1978,22 @@ class DataAssistantResult(SerializableDictDot):
         }
 
         metric_names: List[str]
-        column_dfs: List[Tuple[str, pd.DataFrame]] = []
+        column_dfs: List[ColumnDataFrame] = []
         for expectation_configuration in expectation_configurations:
-            metric_configuration: dict = expectation_configuration.meta[
-                "profiler_details"
-            ]["metric_configuration"]
+            profiler_details: dict = expectation_configuration.meta["profiler_details"]
+            metric_configuration: dict = profiler_details["metric_configuration"]
             domain_kwargs: dict = metric_configuration["domain_kwargs"]
+            column_name: str = domain_kwargs["column"]
 
-            domain = domains_by_column_name[domain_kwargs["column"]]
+            domain = domains_by_column_name[column_name]
 
             attributed_values_by_metric_name: Dict[
                 str, ParameterNode
             ] = attributed_metrics[domain]
 
             for metric_name in attributed_values_by_metric_name.keys():
-                if (
-                    expectation_configuration.expectation_type
-                    in expectation_metric_map.keys()
-                ) and (
-                    metric_name
-                    == expectation_metric_map[
-                        expectation_configuration.expectation_type
-                    ]
-                ):
+                type_: str = expectation_configuration.expectation_type
+                if expectation_metric_map.get(type_) == metric_name:
                     attributed_values: ParameterNode = attributed_values_by_metric_name[
                         metric_name
                     ]
@@ -1787,7 +2006,8 @@ class DataAssistantResult(SerializableDictDot):
                     )
 
                     column_name: str = expectation_configuration.kwargs["column"]
-                    column_dfs.append((column_name, df))
+                    column_df: ColumnDataFrame = ColumnDataFrame(column_name, df)
+                    column_dfs.append(column_df)
 
         return column_dfs
 
@@ -1838,133 +2058,3 @@ class DataAssistantResult(SerializableDictDot):
                     sequential=sequential,
                     subtitle=None,
                 )
-
-    def plot_metrics(
-        self,
-        sequential: bool = True,
-        theme: Optional[Dict[str, Any]] = None,
-        include_column_names: Optional[List[str]] = None,
-        exclude_column_names: Optional[List[str]] = None,
-    ) -> PlotResult:
-        """
-        Use contents of "DataAssistantResult" object to display metrics for visualization purposes.
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            sequential: Whether the batches are sequential or not
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: Columns to include in metrics plot
-            exclude_column_names: Columns to exclude from metrics plot
-
-        Returns:
-            PlotResult wrapper object around Altair charts.
-        """
-        return self._plot(
-            plot_mode=PlotMode.DESCRIPTIVE,
-            sequential=sequential,
-            theme=theme,
-            include_column_names=include_column_names,
-            exclude_column_names=exclude_column_names,
-        )
-
-    def plot_expectations_and_metrics(
-        self,
-        sequential: bool = True,
-        theme: Optional[Dict[str, Any]] = None,
-        include_column_names: Optional[List[str]] = None,
-        exclude_column_names: Optional[List[str]] = None,
-    ) -> PlotResult:
-        """
-        Use contents of "DataAssistantResult" object to display metrics and expectations for visualization purposes.
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            sequential: Whether the batches are sequential or not
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: Columns to include in expectations and metrics plot
-            exclude_column_names: Columns to exclude from expectations and metrics plot
-
-        Returns:
-            PlotResult wrapper object around Altair charts.
-        """
-        return self._plot(
-            plot_mode=PlotMode.PRESCRIPTIVE,
-            sequential=sequential,
-            theme=theme,
-            include_column_names=include_column_names,
-            exclude_column_names=exclude_column_names,
-        )
-
-    def _plot(
-        self,
-        plot_mode: PlotMode,
-        sequential: bool,
-        theme: Optional[Dict[str, Any]] = None,
-        include_column_names: Optional[List[str]] = None,
-        exclude_column_names: Optional[List[str]] = None,
-    ) -> PlotResult:
-        """
-        VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
-        Display Charts are condensed and interactive while Return Charts are separated into an individual chart for
-        each metric-domain/expectation-domain combination.
-
-        Altair theme configuration reference:
-            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
-
-        Args:
-            plot_mode: Type of plot to generate, prescriptive or descriptive
-            sequential: Whether batches are sequential in nature
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: A list of columns to chart
-            exclude_column_names: A list of columns not to chart
-
-        Returns:
-            A PlotResult object consisting of an individual chart for each metric-domain/expectation-domain
-        """
-        if include_column_names is not None and exclude_column_names is not None:
-            raise ValueError(
-                "You may either use `include_column_names` or `exclude_column_names` (but not both)."
-            )
-
-        display_charts: Union[
-            List[alt.Chart], List[alt.LayerChart], List[alt.VConcatChart]
-        ] = []
-        return_charts: Union[List[alt.Chart], List[alt.LayerChart]] = []
-
-        expectation_configurations: List[
-            ExpectationConfiguration
-        ] = self.expectation_configurations
-
-        table_domain_chart: Union[
-            List[alt.Chart], List[alt.LayerChart]
-        ] = self._plot_table_domain_charts(
-            expectation_configurations=expectation_configurations,
-            plot_mode=plot_mode,
-            sequential=sequential,
-        )
-        display_charts.extend(table_domain_chart)
-        return_charts.extend(table_domain_chart)
-
-        column_domain_display_chart: List[alt.VConcatChart]
-        column_domain_return_charts: List[alt.Chart]
-        (
-            column_domain_display_charts,
-            column_domain_return_charts,
-        ) = self._plot_column_domain_charts(
-            expectation_configurations=expectation_configurations,
-            plot_mode=plot_mode,
-            sequential=sequential,
-            include_column_names=include_column_names,
-            exclude_column_names=exclude_column_names,
-        )
-        display_charts.extend(column_domain_display_charts)
-        return_charts.extend(column_domain_return_charts)
-
-        self.display(charts=display_charts, theme=theme)
-
-        return_charts = self.apply_theme(charts=return_charts, theme=theme)
-        return PlotResult(charts=return_charts)
