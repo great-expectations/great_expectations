@@ -4,6 +4,18 @@
 Changelog
 #########
 
+0.15.9
+-----------------
+* [FEATURE] Add new expectation: expect column values to match powers of a base g… (#5219) (thanks @rifatKomodoDragon)
+* [FEATURE] Replace UserConfigurableProfiler with OnboardingDataAssistant in "CLI suite new --profile" Jupyter Notebooks (#5236)
+* [FEATURE] `DatasourceStore` (#5206)
+* [FEATURE] add new expectation on validating hexadecimals (#5188) (thanks @andrewsx)
+* [BUGFIX] Hive temporary tables creation fix (#4956) (thanks @jaume-ferrarons)
+* [DOCS] How to compare two tables with the UserConfigurableProfiler (#5050)
+* [DOCS] How to create a Custom Column Pair Map Expectation w/ supporting template & example (#4926)
+* [DOCS] Auto API documentation script (#4964)
+* [MAINTENANCE] Add CodeSee architecture diagram workflow to repository (#5235) (thanks @codesee-maps[bot])
+
 0.15.8
 -----------------
 * [FEATURE] `OnboardingDataAssistant` plots for `expect_table_row_count_to_be_between` non-sequential batches (#5212)
