@@ -2151,6 +2151,10 @@ class DataContextConfig(BaseYamlConfig):
     def config_version(self):
         return self._config_version
 
+    @config_version.setter
+    def config_version(self, config_version: float) -> None:
+        self._config_version = config_version
+
     def to_json_dict(self) -> dict:
         """
         # TODO: <Alex>2/4/2022</Alex>
