@@ -1549,7 +1549,60 @@ def test_GeCloudStoreBackend():
             )
 
 
-def test_InlineStoreBackend(empty_data_context: BaseDataContext) -> None:
-    my_store_backend: InlineStoreBackend = InlineStoreBackend(
+def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
+    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
     )
+    new_config_version: float = 5.0
+
+    # test invalid .set
+    with pytest.raises(TypeError) as e:
+        inline_store_backend.set(("my_fake_variable", ""), "a_random_string_value")
+
+    assert (
+        "Keys in InlineStoreBackend must adhere to the schema defined by DataContextConfig"
+        in str(e.value)
+    )
+
+    # test valid .set
+    with patch(
+        "great_expectations.data_context.DataContext._save_project_config"
+    ) as mock_save:
+        inline_store_backend.set(("config_version",), new_config_version)
+
+    assert empty_data_context.config.config_version == new_config_version
+    assert mock_save.call_count == 1
+
+    # test .get
+    ret = inline_store_backend.get(("config_version",))
+    assert ret == new_config_version
+
+    # test .list_keys
+    assert sorted(inline_store_backend.list_keys()) == [
+        "anonymous_usage_statistics",
+        "checkpoint_store_name",
+        "concurrency",
+        "config_variables_file_path",
+        "config_version",
+        "data_docs_sites",
+        "datasources",
+        "evaluation_parameter_store_name",
+        "expectations_store_name",
+        "notebooks",
+        "plugins_directory",
+        "progress_bars",
+        "stores",
+        "validations_store_name",
+    ]
+
+    # test .move
+    with pytest.raises(StoreBackendError) as e:
+        inline_store_backend.move(("config_version",), ("stores",))
+
+    assert "InlineStoreBackend does not support moving of keys" in str(e.value)
+
+    # test .remove_key
+    with pytest.raises(StoreBackendError) as e:
+        inline_store_backend.remove_key(("progress_bars",))
+
+    assert "InlineStoreBackend does not support the deletion of keys" in str(e.value)
