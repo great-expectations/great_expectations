@@ -27,7 +27,6 @@ from .query_store import SqlAlchemyQueryStore  # isort:skip
 from .html_site_store import HtmlSiteStore  # isort:skip
 from .profiler_store import ProfilerStore  # isort:skip
 from .datasource_store import DatasourceStore  # isort:skip
-from .variables_store import VariablesStore  # isort:skip
 
 
 for module_name in (
@@ -39,7 +38,6 @@ for module_name in (
     ".profiler_store",
     ".metric_store",
     ".datasource_store",
-    ".variables_store",
     ".checkpoint_store",
     ".store_backend",
     ".tuple_store_backend",
