@@ -5,7 +5,7 @@ on:
       - closed
 
 jobs:
-  prep:
+  cut:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.title, 'RELEASE')
     runs-on: ubuntu-latest
     steps:
