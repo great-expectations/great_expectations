@@ -23,6 +23,9 @@ from great_expectations.data_context.store import (
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
+from great_expectations.data_context.store.inline_store_backend import (
+    InlineStoreBackend,
+)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
@@ -1544,3 +1547,9 @@ def test_GeCloudStoreBackend():
                     "Authorization": "Bearer 1234",
                 },
             )
+
+
+def test_InlineStoreBackend(empty_data_context: BaseDataContext) -> None:
+    my_store_backend: InlineStoreBackend = InlineStoreBackend(
+        data_context=empty_data_context,
+    )

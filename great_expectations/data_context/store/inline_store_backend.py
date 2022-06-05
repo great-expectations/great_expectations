@@ -84,3 +84,7 @@ class InlineStoreBackend(StoreBackend):
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
         return key in self._data_context.config_variables
+
+    # def _validate_key(self, key: Tuple[str, ...]) -> None:
+    #     super()._validate_key(key)
+    #     for attr in key:
