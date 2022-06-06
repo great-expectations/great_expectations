@@ -635,7 +635,7 @@ def build_class_document(
         abbreviated_method, cross_links, sidebar_id = build_method_document(
             method_name, whitelisted_method, qualified_class_path, github_path
         )
-        in_progress_methods.append(abbreviated_method)
+        in_progress_methods.append(f"- {abbreviated_method}")
         all_edited_cross_link_files.update(cross_links)
         sidebar_method_items.append(
             f"{{ label: '  .{method_name}(...)', type: 'doc', id: '{sidebar_id}' }}"
