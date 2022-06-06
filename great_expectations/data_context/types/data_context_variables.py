@@ -1,3 +1,4 @@
+import abc
 import enum
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -7,32 +8,37 @@ from great_expectations.core.data_context_key import StringKey
 
 
 @dataclass
-class DataContextVariables:
+class DataContextVariables(abc.ABC):
     """
-    TBD
+    Wrapper object around data context variables set in the `great_expectations.yml` config file.
+
+    Child classes should instantiate their own stores to ensure that changes made to this object
+    are persisted for future usage (i.e. filesystem I/O or HTTP request to a Cloud endpoint).
+
+    Should maintain parity with the `DataContextConfig`.
     """
 
-    config_version: Optional[float] = None
-    datasources: Optional[dict] = None
-    expectations_store_name: Optional[str] = None
-    validations_store_name: Optional[str] = None
-    evaluation_parameter_store_name: Optional[str] = None
-    checkpoint_store_name: Optional[str] = None
-    profiler_store_name: Optional[str] = None
-    plugins_directory: Optional[str] = None
-    validation_operators: Optional[dict] = None
-    stores: Optional[dict] = None
-    data_docs_sites: Optional[dict] = None
-    notebooks: Optional[dict] = None
-    config_variables_file_path: Optional[str] = None
-    anonymous_usage_statistics: Optional[dict] = None
-    store_backend_defaults: Optional[dict] = None
-    concurrency: Optional[dict] = None
-    progress_bars: Optional[dict] = None
+    config_version: Optional[float]
+    datasources: Optional[dict]
+    expectations_store_name: Optional[str]
+    validations_store_name: Optional[str]
+    evaluation_parameter_store_name: Optional[str]
+    checkpoint_store_name: Optional[str]
+    profiler_store_name: Optional[str]
+    plugins_directory: Optional[str]
+    validation_operators: Optional[dict]
+    stores: Optional[dict]
+    data_docs_sites: Optional[dict]
+    notebooks: Optional[dict]
+    config_variables_file_path: Optional[str]
+    anonymous_usage_statistics: Optional[dict]
+    store_backend_defaults: Optional[dict]
+    concurrency: Optional[dict]
+    progress_bars: Optional[dict]
 
     class DataContextVariablesSchema(enum.Enum):
         """
-        TBD
+        Internal helper to ensure usage of `getattr/setattr` adheres to a strict schema.
         """
 
         CONFIG_VERSION = "config_version"
@@ -89,13 +95,13 @@ class DataContextVariables:
 
     def set_config_version(self, config_version: float) -> None:
         """
-        TBD
+        Setter for `config_version`.
         """
         self._set(self.DataContextVariablesSchema.CONFIG_VERSION, config_version)
 
     def get_config_version(self) -> Optional[float]:
         """
-        TBD
+        Getter for `config_version`.
         """
         return self._get(self.DataContextVariablesSchema.CONFIG_VERSION)
 
@@ -133,15 +139,9 @@ class FileDataContextVariables(DataContextVariables):
 
 @dataclass
 class CloudDataContextVariables(DataContextVariables):
-    def __post_init__(
-        self,
-        ge_cloud_runtime_base_url: str,
-        ge_cloud_runtime_organization_id: str,
-        ge_cloud_runtime_access_token: str,
-    ) -> None:
-        self._ge_cloud_runtime_base_url = ge_cloud_runtime_base_url
-        self._ge_cloud_runtime_organization_id = ge_cloud_runtime_organization_id
-        self._ge_cloud_runtime_access_token = ge_cloud_runtime_access_token
+    ge_cloud_runtime_base_url: str
+    ge_cloud_runtime_organization_id: str
+    ge_cloud_runtime_access_token: str
 
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         from great_expectations.data_context.store.data_context_variables_store import (
@@ -150,11 +150,11 @@ class CloudDataContextVariables(DataContextVariables):
 
         store_backend: dict = {
             "class_name": "GeCloudStoreBackend",
-            "ge_cloud_base_url": self._ge_cloud_runtime_base_url,
+            "ge_cloud_base_url": self.ge_cloud_runtime_base_url,
             "ge_cloud_resource_type": "variables",
             "ge_cloud_credentials": {
-                "access_token": self._ge_cloud_runtime_access_token,
-                "organization_id": self._ge_cloud_runtime_organization_id,
+                "access_token": self.ge_cloud_runtime_access_token,
+                "organization_id": self.ge_cloud_runtime_organization_id,
             },
             "suppress_store_backend_id": True,
         }
