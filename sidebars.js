@@ -353,6 +353,7 @@ module.exports = {
         {
           type: 'category',
           label: 'Supplemental documentation',
+          link: { type: 'doc', id: 'reference/supplemental_documentation' },
           items: [
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
@@ -364,6 +365,7 @@ module.exports = {
         {
           type: 'category',
           label: 'API documentation',
+          link: { type: 'doc', id: 'reference/api_reference' },
           items: [
             {
               type: 'category',
@@ -376,7 +378,6 @@ module.exports = {
             }
           ]
         },
-        'glossary',
         {
           type: 'category',
           label: 'Glossary of Terms',
@@ -430,18 +431,6 @@ module.exports = {
             'terms/supporting_resource',
             'terms/validator',
             'terms/validation_result'
-          ]
-        },
-        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
-        {
-          type: 'category',
-          label: 'Supplemental documentation',
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
-            { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/data_discovery' },
-            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         }
       ]
