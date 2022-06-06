@@ -26,8 +26,8 @@ from great_expectations.dataset.util import (
 from great_expectations.util import (
     generate_temporary_table_name,
     get_pyathena_potential_type,
-    get_trino_potential_type,
     get_sqlalchemy_inspector,
+    get_trino_potential_type,
     import_library_module,
 )
 
@@ -163,10 +163,12 @@ try:
 except ImportError:
     teradatasqlalchemy = None
 try:
-    import trino.sqlalchemy.dialect
     import trino.sqlalchemy.datatype as trinotypes
+    import trino.sqlalchemy.dialect
 except ImportError:
     trino = None
+
+
 class SqlAlchemyBatchReference:
     def __init__(self, engine, table_name=None, schema=None, query=None) -> None:
         self._engine = engine
@@ -596,7 +598,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
-
         elif dialect_name == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
@@ -623,7 +624,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
         elif dialect_name == "trino":
             # WARNING: Trino Support is experimental, functionality is not fully under test
-            self.dialect = import_library_module( module_name="trino.sqlalchemy.dialect")
+            self.dialect = import_library_module(module_name="trino.sqlalchemy.dialect")
 
         else:
             self.dialect = None
@@ -875,7 +876,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def get_column_median(self, column):
         # AWS Athena and presto have an special function that can be used to retrieve the median
-        if self.sql_engine_dialect.name.lower() == "awsathena" or self.sql_engine_dialect.name.lower() == "trino":
+        if (
+            self.sql_engine_dialect.name.lower() == "awsathena"
+            or self.sql_engine_dialect.name.lower() == "trino"
+        ):
             element_values = self.engine.execute(
                 f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
             )
@@ -916,14 +920,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ) -> list:
         if self.sql_engine_dialect.name.lower() == "mssql":
             return self._get_column_quantiles_mssql(column=column, quantiles=quantiles)
-        elif self.sql_engine_dialect.name.lower() == "awsathena" or self.sql_engine_dialect.name.lower() == "trino":
+        elif (
+            self.sql_engine_dialect.name.lower() == "awsathena"
+            or self.sql_engine_dialect.name.lower() == "trino"
+        ):
             return self._get_column_quantiles_awsathena(
                 column=column, quantiles=quantiles
             )
         elif self.sql_engine_dialect.name.lower() == "trino":
-            return self._get_column_quantiles_trino(
-                column=column, quantiles=quantiles
-            )
+            return self._get_column_quantiles_trino(column=column, quantiles=quantiles)
         elif self.sql_engine_dialect.name.lower() == "bigquery":
             return self._get_column_quantiles_bigquery(
                 column=column, quantiles=quantiles
@@ -1197,7 +1202,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             try:
                 result = float(res[0])
             except:
-                logger.warning(f"Having issue with stddev_samp on {column}, schema: {self._table.schema} table: {self._table.name}")
+                logger.warning(
+                    f"Having issue with stddev_samp on {column}, schema: {self._table.schema} table: {self._table.name}"
+                )
                 result = 0.0
         return result
 
