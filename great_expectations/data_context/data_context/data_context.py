@@ -45,8 +45,7 @@ class DataContext(BaseDataContext):
     Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GE Cloud
     (coming soon). Please refer to our documentation for more details.
 
-    DataContexts use Data Sources and Execution Engines that you're already familiar with to interact with data. You
-    can Validate data or generate Expectations using Execution Engines including:
+    You can Validate data or generate Expectations using Execution Engines including:
 
      * SQL (multiple dialects supported)
      * Spark
