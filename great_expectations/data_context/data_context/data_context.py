@@ -57,8 +57,8 @@ class DataContext(BaseDataContext):
     Please see our documentation for examples on how to set up Great Expectations, connect to your data,
     create Expectations, and Validate data.
 
-    Other configuration options you can apply to a DataContext besides how to access data includes things like where to
-    store Expectations, Profilers, Checkpoints, Metrics, Validation Results and Data Docs and how those stores are
+    Other configuration options you can apply to a DataContext besides how to access data include things like where to
+    store Expectations, Profilers, Checkpoints, Metrics, Validation Results and Data Docs and how those Stores are
     configured. Take a look at our documentation for more configuration options.
 
     You can create or load a DataContext from disk via the following:
