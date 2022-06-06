@@ -47,13 +47,17 @@ class DataContext(BaseDataContext):
 
     DataContexts use Data Sources and Execution Engines that you're already familiar with to interact with data. You
     can Validate data or generate Expectations using Execution Engines including:
+
      * SQL (multiple dialects supported)
      * Spark
      * Pandas
+
     Your data can be stored in common locations including:
+
      * databases / data warehouses
      * files in s3, GCS, Azure, local storage
      * dataframes (spark and pandas) loaded into memory
+
     Please see our documentation for examples on how to set up Great Expectations, connect to your data,
     create Expectations, and Validate data.
 

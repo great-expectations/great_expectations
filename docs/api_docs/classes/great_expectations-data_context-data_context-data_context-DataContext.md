@@ -6,38 +6,39 @@ title: class DataContext
 
 ## Synopsis
 
-A DataContext represents a Great Expectations project. It organizes storage and access for
-expectation suites, datasources, notification settings, and data fixtures.
+A DataContext represents a Great Expectations project. It is the primary entry point for a Great Expectations
+deployment, with configurations and methods for all supporting components.
 
-The DataContext is configured via a yml file stored in a directory called great_expectations; the configuration file
-as well as managed expectation suites should be stored in version control.
+The DataContext is configured via a yml file stored in a directory called great_expectations; this configuration
+file as well as managed Expectation Suites should be stored in version control. There are other ways to create a
+Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GE Cloud
+(coming soon). Please refer to our documentation for more details.
 
-Use the `create` classmethod to create a new empty config, or instantiate the DataContext
-by passing the path to an existing data context root directory.
+DataContexts use Data Sources and Execution Engines that you're already familiar with to interact with data. You
+can Validate data or generate Expectations using Execution Engines including:
 
-DataContexts use data sources you're already familiar with. BatchKwargGenerators help introspect data stores and data execution
-frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
-enables fetching, validation, profiling, and documentation of your data in a way that is meaningful within your
-existing infrastructure and work environment.
+* SQL (multiple dialects supported)
+* Spark
+* Pandas
 
-DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
-normalized *data_asset_name*, consisting of *datasource/generator/data_asset_name*.
+Your data can be stored in common locations including:
 
-- The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets connected to a compute environment and ready for validation.
+* databases / data warehouses
+* files in s3, GCS, Azure, local storage
+* dataframes (spark and pandas) loaded into memory
 
-- The BatchKwargGenerator knows how to introspect datasources and produce identifying "batch_kwargs" that define particular slices of data.
+Please see our documentation for examples on how to set up Great Expectations, connect to your data,
+create Expectations, and Validate data.
 
-- The data_asset_name is a specific name -- often a table name or other name familiar to users -- that batch kwargs generators can slice into batches.
+Other configuration options you can apply to a DataContext besides how to access data include things like where to
+store Expectations, Profilers, Checkpoints, Metrics, Validation Results and Data Docs and how those Stores are
+configured. Take a look at our documentation for more configuration options.
 
-An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
-in many projects it is useful to have different expectations evaluate in different contexts--profiling
-vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
-option for selecting which expectations a DataContext returns.
-
-In many simple projects, the datasource or batch kwargs generator name may be omitted and the DataContext will infer
-the correct name when there is no ambiguity.
-
-Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
+You can create or load a DataContext from disk via the following:
+```
+import great_expectations as ge
+ge.get_context()
+```
 
 
 ## Import statement
@@ -49,10 +50,9 @@ from great_expectations.data_context.data_context.data_context import DataContex
 
 ## Public Methods (API documentation links)
 
-*[.create(...):](../methods/great_expectations-data_context-data_context-data_context-DataContext-create)* Build a new great_expectations directory and DataContext object in the provided project_root_dir.
-*[.test_yaml_config(...):](../methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config)* Convenience method for testing yaml configs
-
+- *[.create(...):](/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create)* Build a new great_expectations directory and DataContext object in the provided project_root_dir.
+- *[.test_yaml_config(...):](/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config)* Convenience method for testing yaml configs
 
 ## Relevant documentation (links)
 
-- [Data Context](../../terms/data_context)
+- [Data Context](/docs/terms/data_context)
