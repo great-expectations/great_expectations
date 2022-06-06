@@ -6,35 +6,12 @@ from typing import Any, Optional
 from great_expectations.core.data_context_key import StringKey
 
 
-class VariablesSchema(enum.Enum):
-    CONFIG_VERSION = "config_version"
-    DATASOURCES = "datasources"
-    EXPECTATIONS_STORE_NAME = "expectations_store_name"
-    VALIDATIONS_STORE_NAME = "validations_store_name"
-    EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store_name"
-    CHECKPOINT_STORE_NAME = "checkpoint_store_name"
-    PROFILER_STORE_NAME = "profiler_store_name"
-    PLUGINS_DIRECTORY = "plugins_directory"
-    VALIDATION_OPERATORS = "validation_operators"
-    STORES = "stores"
-    DATA_DOCS_SITES = "data_docs_sites"
-    NOTEBOOKS = "notebooks"
-    CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
-    ANONYMIZED_USAGE_STATISTICS = "anonymous_usage_statistics"
-    STORE_BACKEND_DEFAULTS = "store_backend_defaults"
-    CONCURRENCY = "concurrency"
-    PROGRESS_BARS = "progress_bars"
-
-    @classmethod
-    def has_value(cls, value: str) -> bool:
-        """
-        Checks whether or not a string is a value from the possible enum pairs.
-        """
-        return value in cls._value2member_map_
-
-
 @dataclass
 class DataContextVariables:
+    """
+    TBD
+    """
+
     config_version: Optional[float] = None
     datasources: Optional[dict] = None
     expectations_store_name: Optional[str] = None
@@ -53,30 +30,60 @@ class DataContextVariables:
     concurrency: Optional[dict] = None
     progress_bars: Optional[dict] = None
 
+    class DataContextVariablesSchema(enum.Enum):
+        """
+        TBD
+        """
+
+        CONFIG_VERSION = "config_version"
+        DATASOURCES = "datasources"
+        EXPECTATIONS_STORE_NAME = "expectations_store_name"
+        VALIDATIONS_STORE_NAME = "validations_store_name"
+        EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store_name"
+        CHECKPOINT_STORE_NAME = "checkpoint_store_name"
+        PROFILER_STORE_NAME = "profiler_store_name"
+        PLUGINS_DIRECTORY = "plugins_directory"
+        VALIDATION_OPERATORS = "validation_operators"
+        STORES = "stores"
+        DATA_DOCS_SITES = "data_docs_sites"
+        NOTEBOOKS = "notebooks"
+        CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
+        ANONYMIZED_USAGE_STATISTICS = "anonymous_usage_statistics"
+        STORE_BACKEND_DEFAULTS = "store_backend_defaults"
+        CONCURRENCY = "concurrency"
+        PROGRESS_BARS = "progress_bars"
+
+        @classmethod
+        def has_value(cls, value: str) -> bool:
+            """
+            Checks whether or not a string is a value from the possible enum pairs.
+            """
+            return value in cls._value2member_map_
+
     def __post_init__(self) -> None:
         self._store = None
 
     @property
-    def store(self) -> "VariablesStore":  # noqa: F821
+    def store(self) -> "DataContextVariablesStore":  # noqa: F821
         if self._store is None:
             self._store = self._init_store()
         return self._store
 
     @abstractmethod
-    def _init_store(self) -> "VariablesStore":  # noqa: F821
+    def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         raise NotImplementedError
 
     @staticmethod
-    def _get_key(attr: VariablesSchema) -> StringKey:
+    def _get_key(attr: DataContextVariablesSchema) -> StringKey:
         key: StringKey = StringKey(key=attr.value)
         return key
 
-    def _set(self, attr: VariablesSchema, value: Any) -> None:
+    def _set(self, attr: DataContextVariablesSchema, value: Any) -> None:
         setattr(self, attr.value, value)
         key: StringKey = DataContextVariables._get_key(attr)
         self.store.set(key=key, value=value)
 
-    def _get(self, attr: VariablesSchema) -> Any:
+    def _get(self, attr: DataContextVariablesSchema) -> Any:
         val: Any = getattr(self, attr.value)
         return val
 
@@ -84,21 +91,23 @@ class DataContextVariables:
         """
         TBD
         """
-        self._set(VariablesSchema.CONFIG_VERSION, config_version)
+        self._set(self.DataContextVariablesSchema.CONFIG_VERSION, config_version)
 
     def get_config_version(self) -> Optional[float]:
         """
         TBD
         """
-        return self._get(VariablesSchema.CONFIG_VERSION)
+        return self._get(self.DataContextVariablesSchema.CONFIG_VERSION)
 
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
-    def _init_store(self) -> "VariablesStore":  # noqa: F821
-        from great_expectations.data_context.store.variables_store import VariablesStore
+    def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
+        from great_expectations.data_context.store.data_context_variables_store import (
+            DataContextVariablesStore,
+        )
 
-        store: VariablesStore = VariablesStore(
+        store: DataContextVariablesStore = DataContextVariablesStore(
             store_name="ephemeral_data_context_variables_store",
             store_backend=None,  # Defaults to InMemoryStoreBackend
             runtime_environment=None,
@@ -108,11 +117,13 @@ class EphemeralDataContextVariables(DataContextVariables):
 
 @dataclass
 class FileDataContextVariables(DataContextVariables):
-    def _init_store(self) -> "VariablesStore":  # noqa: F821
-        from great_expectations.data_context.store.variables_store import VariablesStore
+    def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
+        from great_expectations.data_context.store.data_context_variables_store import (
+            DataContextVariablesStore,
+        )
 
         store_backend: dict = {"class_name": "InlineStoreBackend"}  # TBD
-        store: VariablesStore = VariablesStore(
+        store: DataContextVariablesStore = DataContextVariablesStore(
             store_name="file_data_context_variables_store",
             store_backend=store_backend,
             runtime_environment=None,
@@ -132,8 +143,10 @@ class CloudDataContextVariables(DataContextVariables):
         self._ge_cloud_runtime_organization_id = ge_cloud_runtime_organization_id
         self._ge_cloud_runtime_access_token = ge_cloud_runtime_access_token
 
-    def _init_store(self) -> "VariablesStore":  # noqa: F821
-        from great_expectations.data_context.store.variables_store import VariablesStore
+    def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
+        from great_expectations.data_context.store.data_context_variables_store import (
+            DataContextVariablesStore,
+        )
 
         store_backend: dict = {
             "class_name": "GeCloudStoreBackend",
@@ -145,7 +158,7 @@ class CloudDataContextVariables(DataContextVariables):
             },
             "suppress_store_backend_id": True,
         }
-        store: VariablesStore = VariablesStore(
+        store: DataContextVariablesStore = DataContextVariablesStore(
             store_name="cloud_data_context_variables_store",
             store_backend=store_backend,
             runtime_environment=None,

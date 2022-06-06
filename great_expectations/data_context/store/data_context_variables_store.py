@@ -5,7 +5,7 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.util import filter_properties_dict
 
 
-class VariablesStore(Store):
+class DataContextVariablesStore(Store):
     """
     A VariablesStore manages config variables for the DataContext.
     """
@@ -36,12 +36,10 @@ class VariablesStore(Store):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def _validate_key(self, key: StringKey) -> None:
-        from great_expectations.data_context.types.data_context_variables import (
-            VariablesSchema,
-        )
+        from great_expectations.data_context.types.base import DataContextConfig
 
         attr: str = key.to_tuple()[0]
-        if not VariablesSchema.has_value(attr):
+        if not hasattr(DataContextConfig, attr):
             raise TypeError(
-                f"{key} key must be an member of {VariablesSchema.__name__} (not {type(key)})"
+                f"{key} key must be an member of {DataContextConfig.__name__} (not {type(key)})"
             )
