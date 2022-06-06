@@ -49,9 +49,10 @@ from great_expectations.data_context.data_context.data_context import DataContex
 
 ## Public Methods (API documentation links)
 
-*[.create(...):](/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create)* Build a new great_expectations directory and DataContext object in the provided project_root_dir.
-*[.test_yaml_config(...):](/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config)* Convenience method for testing yaml configs
+*[.create(...):](../methods/great_expectations-data_context-data_context-data_context-DataContext-create)* Build a new great_expectations directory and DataContext object in the provided project_root_dir.
+*[.test_yaml_config(...):](../methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config)* Convenience method for testing yaml configs
+
 
 ## Relevant documentation (links)
 
-- [Data Context](/docs/terms/data_context)
+- [Data Context](../../terms/data_context)

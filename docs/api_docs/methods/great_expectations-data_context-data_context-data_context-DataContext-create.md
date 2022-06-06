@@ -1,7 +1,7 @@
 ---
 title: DataContext.create
 ---
-[Back to class documentation](/docs/api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext)
+[Back to class documentation](../classes/great_expectations-data_context-data_context-data_context-DataContext)
 
 ### Fully qualified path
 
@@ -28,4 +28,4 @@ DataContext
 
 ## Relevant documentation (links)
 
-- [Data Context](/docs/terms/data_context)
+- [Data Context](../../terms/data_context)
