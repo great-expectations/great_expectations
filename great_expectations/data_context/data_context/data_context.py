@@ -41,7 +41,7 @@ class DataContext(BaseDataContext):
     deployment, with configurations and methods for all supporting components.
 
     The DataContext is configured via a yml file stored in a directory called great_expectations; this configuration
-    file as well as managed expectation suites should be stored in version control. There are other ways to create a
+    file as well as managed Expectation Suites should be stored in version control. There are other ways to create a
     Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GE Cloud
     (coming soon), please refer to our documentation for more details.
 
