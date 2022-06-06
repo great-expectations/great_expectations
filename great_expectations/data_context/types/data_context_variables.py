@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 from great_expectations.core.data_context_key import StringKey
+from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
 @dataclass
@@ -78,14 +79,13 @@ class DataContextVariables(ABC):
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         raise NotImplementedError
 
-    @staticmethod
-    def _get_key(attr: DataContextVariablesSchema) -> StringKey:
+    def _get_key(self, attr: DataContextVariablesSchema) -> StringKey:
         key: StringKey = StringKey(key=attr.value)
         return key
 
     def _set(self, attr: DataContextVariablesSchema, value: Any) -> None:
         setattr(self, attr.value, value)
-        key: StringKey = DataContextVariables._get_key(attr)
+        key: StringKey = self._get_key(attr)
         self.store.set(key=key, value=value)
 
     def _get(self, attr: DataContextVariablesSchema) -> Any:
@@ -168,3 +168,11 @@ class CloudDataContextVariables(DataContextVariables):
             runtime_environment=None,
         )
         return store
+
+    def _get_key(
+        self, attr: "DataContextVariablesSchema"
+    ) -> GeCloudIdentifier:  # noqa: F821
+        key: GeCloudIdentifier = GeCloudIdentifier(
+            resource_type=attr.value, ge_cloud_id="foobarbaz"
+        )
+        return key

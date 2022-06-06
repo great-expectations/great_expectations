@@ -95,12 +95,30 @@ def test_data_context_variables_set(
 
     # FileDataContextVariables
     with mock.patch(
-        "great_expectations.data_context.DataContext._save_project_config"
+        "great_expectations.data_context.DataContext._save_project_config",
+        autospec=True,
     ) as mock_save:
         _test_variables_set(file_data_context_variables)
         assert mock_save.call_count == 1
 
     # CloudDataContextVariables
-    with mock.patch("requests.post") as mock_post:
+    with mock.patch("requests.patch", autospec=True) as mock_patch:
+        type(mock_patch.return_value).status_code = mock.PropertyMock(return_value=200)
+
         _test_variables_set(cloud_data_context_variables)
-        assert mock_post.call_count == 1
+        assert mock_patch.call_count == 1
+
+        mock_patch.assert_called_with(
+            "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/variables/foobarbaz",
+            json={
+                "data": {
+                    "type": "variable",
+                    "id": "foobarbaz",
+                    "attributes": {},
+                }
+            },
+            headers={
+                "Content-Type": "application/vnd.api+json",
+                "Authorization": "Bearer 6bb5b6f5c7794892a4ca168c65c2603e",
+            },
+        )
