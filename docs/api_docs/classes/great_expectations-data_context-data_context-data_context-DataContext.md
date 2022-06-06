@@ -14,8 +14,7 @@ file as well as managed Expectation Suites should be stored in version control. 
 Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GE Cloud
 (coming soon). Please refer to our documentation for more details.
 
-You
-can Validate data or generate Expectations using Execution Engines including:
+You can Validate data or generate Expectations using Execution Engines including:
 
 * SQL (multiple dialects supported)
 * Spark
