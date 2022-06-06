@@ -1483,7 +1483,7 @@
     },
     "anonymized_get_or_edit_or_save_expectation_suite_payload": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "title": "anonymized-save-or-edit-expectation-suite-payload",
+      "title": "anonymized-get-or-edit-or-save-expectation-suite-payload",
       "definitions": {
         "anonymized_string": {
           "$schema": "http://json-schema.org/draft-04/schema#",

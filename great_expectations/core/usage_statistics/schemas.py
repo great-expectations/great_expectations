@@ -518,7 +518,7 @@ anonymized_validations_list_schema = {
 
 anonymized_get_or_edit_or_save_expectation_suite_payload_schema = {
     "$schema": SCHEMA,
-    "title": "anonymized-save-or-edit-expectation-suite-payload",
+    "title": "anonymized-get-or-edit-or-save-expectation-suite-payload",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
