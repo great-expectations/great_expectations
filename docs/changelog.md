@@ -19,7 +19,7 @@ title: Changelog
 * [MAINTENANCE] Fix docstring on expectation (#5204) (thanks @andyjessen)
 * [MAINTENANCE] Improve NaN handling in numeric ParameterBuilder implementations (#5226)
 * [MAINTENANCE] Update type hint and docstring linter thresholds (#5228)
-* [FEATURE] Improve Trino support and enable test
+* [FEATURE] Improve Trino support and enable test (#5245)
 
 ### 0.15.7
 * [FEATURE] Add Rule for TEXT semantic domains within the Onboarding Assistant (#5144)
