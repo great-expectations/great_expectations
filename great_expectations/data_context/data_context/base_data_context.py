@@ -3485,34 +3485,28 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         test_yaml_config is mainly intended for use within notebooks and tests.
 
-        Parameters
-        ----------
-        yaml_config : str
-            A string containing the yaml config to be tested
+        --Public API--
 
-        name: str
-            (Optional) A string containing the name of the component to instantiate
+        --Documentation--
+            https://docs.greatexpectations.io/docs/terms/data_context
+            https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
-        pretty_print : bool
-            Determines whether to print human-readable output
+        Args:
+            yaml_config: A string containing the yaml config to be tested
+            name: (Optional) A string containing the name of the component to instantiate
+            pretty_print: Determines whether to print human-readable output
+            return_mode: Determines what type of object test_yaml_config will return.
+                Valid modes are "instantiated_class" and "report_object"
+            shorten_tracebacks:If true, catch any errors during instantiation and print only the
+                last element of the traceback stack. This can be helpful for
+                rapid iteration on configs in a notebook, because it can remove
+                the need to scroll up and down a lot.
 
-        return_mode : str
-            Determines what type of object test_yaml_config will return
-            Valid modes are "instantiated_class" and "report_object"
-
-        shorten_tracebacks : bool
-            If true, catch any errors during instantiation and print only the
-            last element of the traceback stack. This can be helpful for
-            rapid iteration on configs in a notebook, because it can remove
-            the need to scroll up and down a lot.
-
-        Returns
-        -------
-        The instantiated component (e.g. a Datasource)
-        OR
-        a json object containing metadata from the component's self_check method
-
-        The returned object is determined by return_mode.
+        Returns:
+            The instantiated component (e.g. a Datasource)
+            OR
+            a json object containing metadata from the component's self_check method.
+            The returned object is determined by return_mode.
         """
         if return_mode not in ["instantiated_class", "report_object"]:
             raise ValueError(f"Unknown return_mode: {return_mode}.")
