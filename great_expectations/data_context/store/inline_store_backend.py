@@ -1,6 +1,5 @@
 from typing import Any, List, Optional, Tuple
 
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions.exceptions import StoreBackendError
 from great_expectations.util import filter_properties_dict
@@ -9,7 +8,7 @@ from great_expectations.util import filter_properties_dict
 class InlineStoreBackend(StoreBackend):
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: "DataContext",  # noqa: F821
         runtime_environment: Optional[dict] = None,
         fixed_length_key: bool = False,
         suppress_store_backend_id: bool = False,
