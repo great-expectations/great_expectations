@@ -1,5 +1,6 @@
 import os
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from unittest import mock
 
 import altair as alt
 import nbconvert
@@ -10,6 +11,7 @@ from freezegun import freeze_time
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import (
@@ -2337,6 +2339,31 @@ def test_volume_data_assistant_result_serialization(
     assert (
         bobby_volume_data_assistant_result.to_json_dict()
         == volume_data_assistant_result_as_dict
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_volume_data_assistant_result_get_expectation_suite(
+    mock_emit,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
+):
+    expectation_suite_name: str = "my_suite"
+
+    suite: ExpectationSuite = bobby_volume_data_assistant_result.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    assert suite is not None and len(suite.expectations) > 0
+
+    assert mock_emit.call_count == 1
+
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert (
+        actual_events[-1][0][0]["event"]
+        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
     )
 
 

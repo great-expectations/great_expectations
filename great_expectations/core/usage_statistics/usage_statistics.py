@@ -143,7 +143,8 @@ class UsageStatisticsHandler:
         )
         return anonymized_init_payload
 
-    def _get_serialized_dependencies(self) -> List[dict]:
+    @staticmethod
+    def _get_serialized_dependencies() -> List[dict]:
         """Get the serialized dependencies from the GEExecutionEnvironment."""
         ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
@@ -253,6 +254,7 @@ def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHa
             "Unrecognized error when trying to find usage_statistics_handler: " + str(e)
         )
         handler = None
+
     return handler
 
 
@@ -369,33 +371,33 @@ def save_expectation_suite_usage_statistics(
     expectation_suite_name: Optional[str] = None,
     **kwargs,
 ) -> dict:
-    try:
-        data_context_id = data_context.data_context_id
-    except AttributeError:
-        data_context_id = None
-    anonymizer = _anonymizers.get(data_context_id, None)
-    if anonymizer is None:
-        anonymizer = Anonymizer(data_context_id)
-        _anonymizers[data_context_id] = anonymizer
-    payload = {}
+    """
+    Event handler for saving expectation suite with either "ExpectationSuite" object or "expectation_suite_name" string.
+    """
+    return _handle_expectation_suite_usage_statistics(
+        data_context=data_context,
+        event_arguments_payload_handler_name="save_expectation_suite_usage_statistics",
+        expectation_suite=expectation_suite,
+        expectation_suite_name=expectation_suite_name,
+        **kwargs,
+    )
 
-    if expectation_suite_name is None:
-        if isinstance(expectation_suite, ExpectationSuite):
-            expectation_suite_name = expectation_suite.expectation_suite_name
-        elif isinstance(expectation_suite, dict):
-            expectation_suite_name = expectation_suite.get("expectation_suite_name")
 
-    # noinspection PyBroadException
-    try:
-        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
-            obj=expectation_suite_name
-        )
-    except Exception as e:
-        logger.debug(
-            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
-        )
-
-    return payload
+def get_expectation_suite_usage_statistics(
+    data_context: "DataContext",  # noqa: F821
+    expectation_suite_name: str,
+    **kwargs,
+) -> dict:
+    """
+    Event handler for obtaining expectation suite with "expectation_suite_name" string.
+    """
+    return _handle_expectation_suite_usage_statistics(
+        data_context=data_context,
+        event_arguments_payload_handler_name="get_expectation_suite_usage_statistics",
+        expectation_suite=None,
+        expectation_suite_name=expectation_suite_name,
+        **kwargs,
+    )
 
 
 def edit_expectation_suite_usage_statistics(
@@ -407,6 +409,7 @@ def edit_expectation_suite_usage_statistics(
         data_context_id = data_context.data_context_id
     except AttributeError:
         data_context_id = None
+
     anonymizer = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
@@ -600,3 +603,44 @@ def send_usage_message(
             handler.emit(message)
     except Exception:
         pass
+
+
+# noinspection SpellCheckingInspection
+# noinspection PyUnusedLocal
+def _handle_expectation_suite_usage_statistics(
+    data_context: "DataContext",  # noqa: F821
+    event_arguments_payload_handler_name: str,
+    expectation_suite: Optional[ExpectationSuite] = None,
+    expectation_suite_name: Optional[str] = None,
+    **kwargs,
+) -> dict:
+    data_context_id: Optional[str]
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+
+    anonymizer: Anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+
+    payload: dict = {}
+
+    if expectation_suite_name is None:
+        if isinstance(expectation_suite, ExpectationSuite):
+            expectation_suite_name = expectation_suite.expectation_suite_name
+        elif isinstance(expectation_suite, dict):
+            expectation_suite_name = expectation_suite.get("expectation_suite_name")
+
+    # noinspection PyBroadException
+    try:
+        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
+            obj=expectation_suite_name
+        )
+    except Exception as e:
+        logger.debug(
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, {event_arguments_payload_handler_name}: Unable to create anonymized_expectation_suite_name payload field."
+        )
+
+    return payload
