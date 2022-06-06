@@ -84,6 +84,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "expectation_validation_result": "expectation_validation_results",
     "contract": "contracts",
     "rendered_data_doc": "rendered_data_docs",
+    "variable": "variables",
 }
 
 PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
@@ -97,6 +98,7 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "expectation_validation_results": "expectation_validation_result",
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
+    "variables": "variable",
 }
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
