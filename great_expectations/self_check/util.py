@@ -665,7 +665,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
-            table_name = generate_test_table_name()
+            table_name = generate_test_table_name().lower()
 
         df.to_sql(
             name=table_name,
@@ -673,6 +673,7 @@ def get_dataset(
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
+            method = "multi"
         )
 
         # Build a SqlAlchemyDataset using that database

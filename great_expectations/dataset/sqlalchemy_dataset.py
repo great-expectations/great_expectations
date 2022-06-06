@@ -536,8 +536,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
-            # TODO: aezo to check
-            # schema = None
+            if self.engine.dialect.name.lower() != "trino":
+                schema = None
             table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
@@ -566,7 +566,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
             temp_table_schema_name = None
         if self.engine.dialect.name.lower() == "trino":
-            # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
             temp_table_schema_name = schema
         else:
@@ -917,8 +916,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ) -> list:
         if self.sql_engine_dialect.name.lower() == "mssql":
             return self._get_column_quantiles_mssql(column=column, quantiles=quantiles)
-        elif self.sql_engine_dialect.name.lower() == "awsathena" or self.sql_engine_dialect.name.lower() == "trino":
+        elif self.sql_engine_dialect.name.lower() == "awsathena":
             return self._get_column_quantiles_awsathena(
+                column=column, quantiles=quantiles
+            )
+        elif self.sql_engine_dialect.name.lower() == "trino":
+            return self._get_column_quantiles_trino(
                 column=column, quantiles=quantiles
             )
         elif self.sql_engine_dialect.name.lower() == "bigquery":
@@ -993,6 +996,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
             quantiles_results_list = ast.literal_eval(quantiles_results)
             return quantiles_results_list
+
+        except ProgrammingError as pe:
+            self._treat_quantiles_exception(pe)
+
+    def _get_column_quantiles_trino(self, column: str, quantiles: Iterable) -> list:
+        # take note trino seem to be rounding up for approx_percentile
+        quantiles_list = list(quantiles)
+        quantiles_query = (
+            f"SELECT approx_percentile({column}, ARRAY{str(quantiles_list)}) as quantiles "
+            f"from (SELECT {column} from {self._table})"
+        )
+        try:
+            quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
+            return quantiles_results
 
         except ProgrammingError as pe:
             self._treat_quantiles_exception(pe)

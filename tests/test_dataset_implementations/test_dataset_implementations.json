@@ -83,6 +83,22 @@
                     "c": "INTEGER"
                 }
             }
+        },
+        "d4": {
+            "data": {
+                "a": [0, 0, 0, 0, 0]
+            },
+            "schemas": {
+                "SparkDFDataset": {
+                    "a": "IntegerType"
+                },
+                "mysql": {
+                    "a": "INTEGER"
+                },
+                "mssql": {
+                    "a": "INTEGER"
+                }
+            }
         }
     },
     "tests": [
@@ -408,6 +424,15 @@
             "expected": 0.8366600265340755
         },
         {
+            "func": "get_column_stdev",
+            "dataset": "d4",
+            "tolerance": 0,
+            "kwargs": {
+                "column": "a"
+            },
+            "expected": 0
+        },
+        {
             "func": "get_column_hist",
             "dataset": "d2",
             "kwargs": {
@@ -527,7 +552,7 @@
                 "n_bins": 2
             },
             "expected": [1.0, 5.0, 10.0],
-            "suppress_test_for": ["sqlite"]
+            "suppress_test_for": ["sqlite", "trino"]
         }
     ]
 }
