@@ -18,8 +18,14 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_mode: bool = False,
         ge_cloud_config: Optional[GeCloudConfig] = None,
     ) -> None:
+
+        self._ge_cloud_mode = ge_cloud_mode
+        self._ge_cloud_config = ge_cloud_config
+
+        # config overrides with cloud configs
+        self._project_config = project_config
+        # TODO: this is actually unnecessary technically speaking. see if it can actually be removed
+        super()._apply_global_config_overrides()
         super().__init__(
             project_config=project_config, runtime_environment=runtime_environment
         )
-        self._ge_cloud_mode = ge_cloud_mode
-        self._ge_cloud_config = ge_cloud_config

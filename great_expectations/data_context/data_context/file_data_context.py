@@ -3,6 +3,7 @@ import errno
 import json
 import logging
 import os
+import sys
 from typing import Mapping, Optional, Union, cast
 
 from ruamel.yaml import YAML
@@ -10,6 +11,7 @@ from ruamel.yaml import YAML
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
+from great_expectations.data_context.store import Store
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
@@ -56,6 +58,16 @@ class FileDataContext(AbstractDataContext):
         context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
         self._context_root_dir = context_root_dir
+
+        self._project_config = project_config
+        self._apply_global_config_overrides()
+
+        # Init plugin support
+        if self.plugins_directory is not None and os.path.exists(
+            self.plugins_directory
+        ):
+            sys.path.append(self.plugins_directory)
+
         super().__init__(
             project_config=project_config, runtime_environment=runtime_environment
         )
@@ -175,6 +187,21 @@ class FileDataContext(AbstractDataContext):
                     return config_value
         return None
 
+    def _build_store_from_config(
+        self,
+        store_name: str,
+        store_config: dict,
+        runtime_environment: Optional[dict] = None,
+    ) -> Optional[Store]:
+        runtime_environment: dict = {
+            "root_directory": self.root_directory,
+        }
+        return super()._build_store_from_config(
+            store_name=store_name,
+            store_config=store_config,
+            runtime_environment=runtime_environment,
+        )
+
     def _load_config_variables_file(self):
         """
         Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
@@ -221,6 +248,11 @@ class FileDataContext(AbstractDataContext):
         return self._normalize_absolute_or_relative_path(
             self.project_config_with_variables_substituted.plugins_directory
         )
+
+    @property
+    def config_variables(self):
+        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
+        return dict(self._load_config_variables_file())
 
     # private methods
     def _normalize_absolute_or_relative_path(

@@ -264,33 +264,39 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
 
-        #########################
+        self._data_context: "AbstractDataContext"
+
         # start splitting this up
         if self._ge_cloud_mode:
-            CloudDataContext.__init__(
-                self,
+            self._data_context = CloudDataContext(
                 project_config=project_config,
                 runtime_environment=runtime_environment,
                 ge_cloud_mode=ge_cloud_mode,
                 ge_cloud_config=ge_cloud_config,
             )
+            # this is only here until we are able to pull this out
+            self._project_config = self._data_context.config
+            self._stores = self._data_context.stores
+            self.runtime_environment = self._data_context.runtime_environment
         elif context_root_dir is not None:
-            FileDataContext.__init__(
-                self,
+            self._data_context = FileDataContext(
                 project_config=project_config,
                 runtime_environment=runtime_environment,
                 context_root_dir=context_root_dir,
             )
+            # this is only here until we are able to pull this out
+            self._project_config = self._data_context.config
+            self._stores = self._data_context.stores
+            self.runtime_environment = self._data_context.runtime_environment
+
         else:
-            super().__init__(
+            self._data_context = EphemeralDataContext(
                 project_config=project_config, runtime_environment=runtime_environment
             )
-
-        # Init plugin support
-        if self.plugins_directory is not None and os.path.exists(
-            self.plugins_directory
-        ):
-            sys.path.append(self.plugins_directory)
+            # temporary until we can pull this out
+            self._project_config = self._data_context.config
+            self._stores = self._data_context.stores
+            self.runtime_environment = self._data_context.runtime_environment
 
         # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
         self._in_memory_instance_id = (
@@ -1702,21 +1708,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
-
-    def _build_store_from_config(
-        self,
-        store_name: str,
-        store_config: dict,
-        runtime_environment: Optional[dict] = None,
-    ) -> Optional[Store]:
-        runtime_environment: dict = {
-            "root_directory": self.root_directory,
-        }
-        return super()._build_store_from_config(
-            store_name=store_name,
-            store_config=store_config,
-            runtime_environment=runtime_environment,
-        )
 
     def _build_datasource_from_config(
         self, name: str, config: Union[dict, DatasourceConfig]

@@ -85,10 +85,11 @@ class AbstractDataContext(ABC):
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
 
-        self._project_config = project_config
-
         self.runtime_environment = runtime_environment or {}
-        self._apply_global_config_overrides()
+
+        if not hasattr(self, "_project_config"):
+            self._project_config = project_config
+            self._apply_global_config_overrides()
 
         # Init stores
         self._stores = {}
@@ -137,11 +138,6 @@ class AbstractDataContext(ABC):
     @property
     def profiler_store_name(self) -> str:
         return self.project_config_with_variables_substituted.profiler_store_name
-
-    @property
-    @abstractmethod
-    def config_variables(self):
-        pass
 
     @property
     def evaluation_parameter_store_name(self) -> str:
@@ -234,21 +230,29 @@ class AbstractDataContext(ABC):
             DataContextConfig with variables substituted from os.environ
 
         """
-        substituted_config_variables = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            AbstractDataContext.DOLLAR_SIGN_ESCAPE_STRING,
-        )
+        if not config:
+            config = self.config
+        if hasattr(self, "config_variables"):
+            substituted_config_variables = substitute_all_config_variables(
+                self.config_variables,
+                dict(os.environ),
+                AbstractDataContext.DOLLAR_SIGN_ESCAPE_STRING,
+            )
+        else:
+            substituted_config_variables = substitute_all_config_variables(
+                {},
+                dict(os.environ),
+                AbstractDataContext.DOLLAR_SIGN_ESCAPE_STRING,
+            )
         substitutions = {
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
         }
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, AbstractDataContext.DOLLAR_SIGN_ESCAPE_STRING
-            )
+        final_config = substitute_all_config_variables(
+            config, substitutions, AbstractDataContext.DOLLAR_SIGN_ESCAPE_STRING
         )
+        return DataContextConfig(**final_config)
 
     # private methods
     def _build_store_from_config(
@@ -333,7 +337,6 @@ class AbstractDataContext(ABC):
         """
         return {}
 
-    @abstractmethod
     def _apply_global_config_overrides(self) -> None:
         # check for global usage statistics opt out
         validation_errors = {}
