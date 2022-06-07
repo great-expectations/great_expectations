@@ -429,7 +429,7 @@ class DataAssistantResult(SerializableDictDot):
                 column_set = None
                 # filter only on batches that do not contain every possible column
                 unique_columns: np.ndarray = np.unique(
-                    np.unique(df[metric_name].explode(metric_name))
+                    df[metric_name].explode(metric_name)
                 )
                 df = df[df[metric_name].apply(set) != set(unique_columns)]
                 # record containing all columns to be compared against
