@@ -72,6 +72,10 @@ class DataContextVariables(ABC):
         raise NotImplementedError
 
     def _get_key(self, attr: DataContextVariableSchema) -> DataContextVariableKey:
+        # Chetan - 20220607 - As it stands, DataContextVariables can only perform CRUD on entire objects.
+        # The DataContextVariablesKey, when used with an appropriate Store and StoreBackend, gives the ability to modify
+        # individual elements of nested config objects.
+
         key: DataContextVariableKey = DataContextVariableKey(resource_type=attr.value)
         return key
 
@@ -195,8 +199,8 @@ class CloudDataContextVariables(DataContextVariables):
         return store
 
     def _get_key(
-        self, attr: "DataContextVariablesSchema"
-    ) -> GeCloudIdentifier:  # noqa: F821
+        self, attr: "DataContextVariablesSchema"  # noqa: F821
+    ) -> GeCloudIdentifier:
         key: GeCloudIdentifier = GeCloudIdentifier(
             resource_type=attr.value, ge_cloud_id="foobarbaz"
         )
