@@ -13,9 +13,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: bash -c "until cat provision.mssql | /opt/mssql-tools/bin/sqlcmd -S db -U sa -P $DB_PASS -i /dev/stdin; do sleep 1; done; pytest -vv test_ge.py"
+    command: bash -c "until cat provision.mssql | /opt/mssql-tools/bin/sqlcmd -S db -U sa -P $DB_PASS -i /dev/stdin; do sleep 1; done;" && pytest -vv test_ge.py
     environment:
       DB_URL: ${DB_URL}
-      DB_PASS: ${DB_PASS}
     depends_on:
       - db
