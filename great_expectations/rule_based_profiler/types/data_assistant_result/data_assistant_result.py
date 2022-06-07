@@ -437,7 +437,7 @@ class DataAssistantResult(SerializableDictDot):
                 all_columns_record: pd.DataFrame = pd.DataFrame(
                     data=[[unique_columns] + empty_columns], columns=df.columns
                 )
-                df = all_columns_record.append(df)
+                df = all_columns_record.concat(df, axis=0)
                 df[batch_name] = df[batch_name].fillna(value="All Columns")
 
             metric_component = MetricPlotComponent(
