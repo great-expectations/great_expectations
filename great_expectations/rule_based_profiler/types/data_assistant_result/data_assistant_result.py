@@ -9,6 +9,12 @@ import pandas as pd
 from IPython.display import HTML, display
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+    get_expectation_suite_usage_statistics,
+    usage_statistics_enabled_method,
+)
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -70,6 +76,7 @@ class DataAssistantResult(SerializableDictDot):
         "metrics_by_domain",
         "expectation_configurations",
         "execution_time",
+        "usage_statistics_handler",
     }
 
     batch_id_to_batch_identifier_display_name_map: Optional[
@@ -80,6 +87,7 @@ class DataAssistantResult(SerializableDictDot):
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
     execution_time: Optional[float] = None  # Execution time (in seconds).
+    usage_statistics_handler: Optional[UsageStatisticsHandler] = None
 
     def to_dict(self) -> dict:
         """
@@ -108,6 +116,7 @@ class DataAssistantResult(SerializableDictDot):
                 for expectation_configuration in self.expectation_configurations
             ],
             "execution_time": convert_to_json_serializable(data=self.execution_time),
+            "usage_statistics_handler": self.usage_statistics_handler.__class__.__name__,
         }
 
     def to_json_dict(self) -> dict:
@@ -116,6 +125,17 @@ class DataAssistantResult(SerializableDictDot):
         """
         return self.to_dict()
 
+    @property
+    def _usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
+        """
+        Returns: "UsageStatisticsHandler" object for this DataAssistantResult object (if configured).
+        """
+        return self.usage_statistics_handler
+
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value,
+        args_payload_fn=get_expectation_suite_usage_statistics,
+    )
     def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
         """
         Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
