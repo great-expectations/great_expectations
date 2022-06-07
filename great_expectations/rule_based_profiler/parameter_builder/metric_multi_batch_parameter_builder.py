@@ -141,15 +141,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         )
 
         if len(metric_computation_result.attributed_resolved_metrics) == 1:
-            # TODO: <Alex>ALEX</Alex>
-            # a = metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values
-            # print(f'\n[ALEX_TEST] [WOUTPUT] CONDITIONED_METRIC_VALUES:\n{a} ; TYPE: {str(type(a))}')
-            # b = metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.shape
-            # print(f'\n[ALEX_TEST] [WOUTPUT] CONDITIONED_METRIC_VALUES.SHAPE:\n{b} ; TYPE: {str(type(b))}')
-            # c = metric_computation_result.attributed_resolved_metrics[0].conditioned_metric_values.ndim
-            # print(f'\n[ALEX_TEST] [WOUTPUT] CONDITIONED_METRIC_VALUES.NDIM:\n{c} ; TYPE: {str(type(c))}')
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
             # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
             if (
                 reduce_scalar_metric
@@ -159,12 +150,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                     ].conditioned_metric_values,
                     np.ndarray,
                 )
-                # TODO: <Alex>ALEX</Alex>
                 and metric_computation_result.attributed_resolved_metrics[
                     0
                 ].conditioned_metric_values.ndim
                 > 1
-                # TODO: <Alex>ALEX</Alex>
                 and metric_computation_result.attributed_resolved_metrics[
                     0
                 ].conditioned_metric_values.shape[1]
