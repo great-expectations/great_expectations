@@ -1,6 +1,6 @@
 from typing import Any, Optional, Union
 
-from great_expectations.core.data_context_key import StringKey
+from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
@@ -14,7 +14,7 @@ class DatasourceStore(Store):
     A DatasourceStore manages Datasources for the DataContext.
     """
 
-    _key_class = StringKey
+    _key_class = DataContextVariableKey
 
     def __init__(
         self,
