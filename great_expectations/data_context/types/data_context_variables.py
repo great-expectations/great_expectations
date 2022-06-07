@@ -1,10 +1,9 @@
 import enum
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from os import wait
 from typing import Any, Optional
 
-from great_expectations.core.data_context_key import StringKey
+from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
@@ -45,20 +44,17 @@ class DataContextVariables(ABC):
     """
 
     config_version: Optional[float] = None
-    datasources: Optional[dict] = None
     expectations_store_name: Optional[str] = None
     validations_store_name: Optional[str] = None
     evaluation_parameter_store_name: Optional[str] = None
     checkpoint_store_name: Optional[str] = None
     profiler_store_name: Optional[str] = None
     plugins_directory: Optional[str] = None
-    validation_operators: Optional[dict] = None
     stores: Optional[dict] = None
     data_docs_sites: Optional[dict] = None
     notebooks: Optional[dict] = None
     config_variables_file_path: Optional[str] = None
     anonymous_usage_statistics: Optional[dict] = None
-    store_backend_defaults: Optional[dict] = None
     concurrency: Optional[dict] = None
     progress_bars: Optional[dict] = None
 
@@ -75,13 +71,13 @@ class DataContextVariables(ABC):
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         raise NotImplementedError
 
-    def _get_key(self, attr: DataContextVariableSchema) -> StringKey:
-        key: StringKey = StringKey(key=attr.value)
+    def _get_key(self, attr: DataContextVariableSchema) -> DataContextVariableKey:
+        key: DataContextVariableKey = DataContextVariableKey(resource_type=attr.value)
         return key
 
     def _set(self, attr: DataContextVariableSchema, value: Any) -> None:
         setattr(self, attr.value, value)
-        key: StringKey = self._get_key(attr)
+        key: DataContextVariableKey = self._get_key(attr)
         self.store.set(key=key, value=value)
 
     def _get(self, attr: DataContextVariableSchema) -> Any:

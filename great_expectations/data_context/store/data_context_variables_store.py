@@ -1,6 +1,6 @@
 from typing import Optional
 
-from great_expectations.core.data_context_key import StringKey
+from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.store.store import Store
 from great_expectations.util import filter_properties_dict
 
@@ -10,7 +10,7 @@ class DataContextVariablesStore(Store):
     A VariablesStore manages config variables for the DataContext.
     """
 
-    _key_class = StringKey
+    _key_class = DataContextVariableKey
 
     def __init__(
         self,
@@ -34,12 +34,3 @@ class DataContextVariablesStore(Store):
             "class_name": self.__class__.__name__,
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
-
-    def _validate_key(self, key: StringKey) -> None:
-        from great_expectations.data_context.types.base import DataContextConfig
-
-        attr: str = key.to_tuple()[0]
-        if not hasattr(DataContextConfig, attr):
-            raise TypeError(
-                f"{key} key must be an member of {DataContextConfig.__name__} (not {type(key)})"
-            )
