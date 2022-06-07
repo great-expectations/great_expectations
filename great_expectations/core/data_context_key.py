@@ -1,4 +1,9 @@
 from abc import ABCMeta, abstractmethod
+from typing import Optional, Tuple
+
+from great_expectations.data_context.types.data_context_variables import (
+    DataContextVariableSchema,
+)
 
 
 class DataContextKey(metaclass=ABCMeta):
@@ -73,4 +78,35 @@ class StringKey(DataContextKey):
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
+        return cls.from_tuple(tuple_)
+
+
+class DataContextVariableKey(DataContextKey):
+    def __init__(
+        self,
+        resource_type: DataContextVariableSchema,
+        resource_name: Optional[str] = None,
+    ) -> None:
+        self._resource_type = resource_type
+        self._resource_name = resource_name
+
+    def to_tuple(self) -> Tuple[str, Optional[str]]:
+        """
+        See parent `DataContextKey.to_tuple` for more information.
+        """
+        return (self._resource_type, self._resource_name)
+
+    def to_fixed_length_tuple(self) -> Tuple[str, Optional[str]]:
+        """
+        See parent `DataContextKey.to_fixed_length_tuple` for more information.
+        """
+        return self.to_tuple()
+
+    @classmethod
+    def from_fixed_length_tuple(
+        cls, tuple_: tuple
+    ) -> "DataContextVariableKey":  # noqa: F821
+        """
+        See parent `DataContextKey.from_fixed_length_tuple` for more information.
+        """
         return cls.from_tuple(tuple_)
