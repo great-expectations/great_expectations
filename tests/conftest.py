@@ -2239,17 +2239,17 @@ def data_context_with_query_store(
 
 
 @pytest.fixture
-def ge_cloud_base_url():
+def ge_cloud_base_url() -> str:
     return "https://app.test.greatexpectations.io"
 
 
 @pytest.fixture
-def ge_cloud_organization_id():
+def ge_cloud_organization_id() -> str:
     return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
 
 
 @pytest.fixture
-def ge_cloud_access_token():
+def ge_cloud_access_token() -> str:
     return "6bb5b6f5c7794892a4ca168c65c2603e"
 
 
