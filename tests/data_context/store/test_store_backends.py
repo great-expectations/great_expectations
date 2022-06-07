@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 from collections import OrderedDict
+from typing import Optional, Tuple
 from unittest.mock import patch
 
 import boto3
@@ -10,6 +11,7 @@ import pytest
 from moto import mock_s3
 
 import tests.test_utils as test_utils
+from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import DataContext
@@ -1556,8 +1558,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     new_config_version: float = 5.0
 
     # test invalid .set
+    key = DataContextVariableKey(resource_type="my_fake_variable")
+    tuple_ = key.to_tuple()
     with pytest.raises(TypeError) as e:
-        inline_store_backend.set(("my_fake_variable", ""), "a_random_string_value")
+        inline_store_backend.set(tuple_, "a_random_string_value")
 
     assert (
         "Keys in InlineStoreBackend must adhere to the schema defined by DataContextConfig"
@@ -1565,16 +1569,20 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     )
 
     # test valid .set
+    key = DataContextVariableKey(resource_type="config_version")
+    tuple_ = key.to_tuple()
     with patch(
         "great_expectations.data_context.DataContext._save_project_config"
     ) as mock_save:
-        inline_store_backend.set(("config_version",), new_config_version)
+        inline_store_backend.set(tuple_, new_config_version)
 
     assert empty_data_context.config.config_version == new_config_version
     assert mock_save.call_count == 1
 
     # test .get
-    ret = inline_store_backend.get(("config_version",))
+    key = DataContextVariableKey(resource_type="config_version")
+    tuple_ = key.to_tuple()
+    ret = inline_store_backend.get(tuple_)
     assert ret == new_config_version
 
     # test .list_keys
@@ -1596,13 +1604,21 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     ]
 
     # test .move
+    key1 = DataContextVariableKey(resource_type="config_version")
+    tuple1 = key1.to_tuple()
+
+    key2 = DataContextVariableKey(resource_type="stores")
+    tuple2 = key2.to_tuple()
+
     with pytest.raises(StoreBackendError) as e:
-        inline_store_backend.move(("config_version",), ("stores",))
+        inline_store_backend.move(tuple1, tuple2)
 
     assert "InlineStoreBackend does not support moving of keys" in str(e.value)
 
     # test .remove_key
+    key = DataContextVariableKey(resource_type="progress_bars")
+    tuple_ = key.to_tuple()
     with pytest.raises(StoreBackendError) as e:
-        inline_store_backend.remove_key(("progress_bars",))
+        inline_store_backend.remove_key(tuple_)
 
     assert "InlineStoreBackend does not support the deletion of keys" in str(e.value)

@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Optional, Tuple
 
 
 class DataContextKey(metaclass=ABCMeta):
@@ -73,4 +74,22 @@ class StringKey(DataContextKey):
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
+        return cls.from_tuple(tuple_)
+
+
+class DataContextVariableKey(DataContextKey):
+    def __init__(self, resource_type: str, resource_name: Optional[str] = None) -> None:
+        self._resource_type = resource_type
+        self._resource_name = resource_name
+
+    def to_tuple(self) -> Tuple[str, Optional[str]]:
+        return (self._resource_type, self._resource_name)
+
+    def to_fixed_length_tuple(self) -> Tuple[str, Optional[str]]:
+        return self.to_tuple()
+
+    @classmethod
+    def from_fixed_length_tuple(
+        cls, tuple_: tuple
+    ) -> "DataContextVariableKey":  # noqa: F821
         return cls.from_tuple(tuple_)

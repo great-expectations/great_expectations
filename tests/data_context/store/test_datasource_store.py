@@ -2,12 +2,10 @@ from unittest.mock import PropertyMock, patch
 
 import pytest
 
-from great_expectations.core.data_context_key import StringKey
+from great_expectations.core.data_context_key import DataContextVariableKey, StringKey
+from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.store.datasource_store import DatasourceStore
-from great_expectations.data_context.types.base import (
-    DatasourceConfig,
-    DatasourceConfigSchema,
-)
+from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
@@ -62,7 +60,7 @@ def test_datasource_store_with_bad_key_raises_error(
 ) -> None:
     store: DatasourceStore = empty_datasource_store
 
-    error_msg: str = "key must be an instance of StringKey"
+    error_msg: str = "key must be an instance of DataContextVariableKey"
 
     with pytest.raises(TypeError) as e:
         store.set(key="my_bad_key", value=datasource_config)
@@ -78,7 +76,9 @@ def test_datasource_store_retrieval(
 ) -> None:
     store: DatasourceStore = empty_datasource_store
 
-    key: StringKey = StringKey(key="my_datasource")
+    key: DataContextVariableKey = DataContextVariableKey(
+        type_="datasource", resource_name="my_datasource"
+    )
     store.set(key=key, value=datasource_config)
     res: DatasourceConfig = store.get(key=key)
 
@@ -134,3 +134,28 @@ def test_datasource_store_retrieval_cloud_mode(
                 "Authorization": "Bearer 6bb5b6f5c7794892a4ca168c65c2603e",
             },
         )
+
+
+def test_datasource_store_with_inline_store_backend(
+    datasource_config: DatasourceConfig, empty_data_context: DataContext
+) -> None:
+    inline_store_backend_config: dict = {
+        "class_name": "InlineStoreBackend",
+        "data_context": empty_data_context,
+        "suppress_store_backend_id": True,
+    }
+
+    store: DatasourceStore = DatasourceStore(
+        store_name="my_datasource_store",
+        store_backend=inline_store_backend_config,
+    )
+
+    key: DataContextVariableKey = DataContextVariableKey(
+        resource_type="datasources", resource_name="my_datasource"
+    )
+
+    store.set(key=key, value=datasource_config)
+    res: DatasourceConfig = store.get(key=key)
+
+    assert isinstance(res, DatasourceConfig)
+    assert res.to_json_dict() == datasource_config.to_json_dict()
