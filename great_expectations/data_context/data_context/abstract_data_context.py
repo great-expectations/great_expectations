@@ -2,7 +2,7 @@ import copy
 import json
 import logging
 import os
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Dict, List, Mapping, Optional, Union
 
 import great_expectations.exceptions.exceptions as ge_exceptions
