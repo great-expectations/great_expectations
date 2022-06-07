@@ -2,7 +2,7 @@ import copy
 import itertools
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -29,6 +29,7 @@ from great_expectations.rule_based_profiler.types import (
     Builder,
     Domain,
     MetricComputationResult,
+    MetricValue,
     MetricValues,
     ParameterContainer,
     build_parameter_container,
@@ -460,8 +461,10 @@ specified (empty "metric_name" value detected)."""
             attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
             if (
-                isinstance(attributed_resolved_metrics.metric_values, np.ndarray)
-                and attributed_resolved_metrics.metric_values.ndim == 1
+                isinstance(
+                    attributed_resolved_metrics.conditioned_metric_values, np.ndarray
+                )
+                and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
             ):
                 attributed_resolved_metrics.metric_values_by_batch_id = {
                     batch_id: [resolved_metric_value]
@@ -542,55 +545,53 @@ specified (empty "metric_name" value detected)."""
         if not (enforce_numeric_metric or replace_nan_with_zero):
             return attributed_resolved_metrics
 
-        metric_values: MetricValues = attributed_resolved_metrics.metric_values
+        metric_values_by_batch_id: Dict[str, MetricValue] = {}
 
-        # Outer-most dimension is data samples (e.g., one per Batch); the rest are dimensions of the actual metric.
-        metric_value_shape: tuple = metric_values.shape[1:]
-
-        # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
-        metric_value_shape_idx: int
-        axes: List[np.ndarray] = [
-            np.indices(dimensions=(metric_value_shape_idx,))[0]
-            for metric_value_shape_idx in metric_value_shape
-        ]
-        metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
-
-        # Generate all permutations of indexes for accessing estimates of every element of the multi-dimensional metric.
-        # Prefixing multi-dimensional index with "(slice(None, None, None),)" is equivalent to "[:,]" access.
-        metric_value_idx: tuple
-        metric_value_vector_indices: List[tuple] = [
-            (slice(None, None, None),) + metric_value_idx
-            for metric_value_idx in metric_value_indices
-        ]
-
-        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
-        metric_value_vector: np.ndarray
         batch_id: str
-        resolved_metric_value: Any
-        for metric_value_idx in metric_value_vector_indices:
-            # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
-            metric_value_vector = cast(np.ndarray, metric_values)[metric_value_idx]
-            if enforce_numeric_metric:
-                if not np.issubdtype(metric_value_vector.dtype, np.number):
-                    raise ge_exceptions.ProfilerExecutionError(
-                        message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(metric_value_vector.dtype)}" was computed).
-"""
-                    )
+        metric_values: MetricValues
+        for (
+            batch_id,
+            metric_values,
+        ) in attributed_resolved_metrics.conditioned_attributed_metric_values.items():
+            batch_metric_values: MetricValues = []
 
-                if np.any(np.isnan(metric_value_vector)):
-                    if not replace_nan_with_zero:
-                        raise ValueError(
-                            f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
+            metric_value_shape: tuple = metric_values.shape
+
+            # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
+            metric_value_shape_idx: int
+            axes: List[np.ndarray] = [
+                np.indices(dimensions=(metric_value_shape_idx,))[0]
+                for metric_value_shape_idx in metric_value_shape
+            ]
+            metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
+
+            metric_value_idx: tuple
+            for metric_value_idx in metric_value_indices:
+                metric_value: MetricValue = metric_values[metric_value_idx]
+                if enforce_numeric_metric:
+                    if not np.issubdtype(metric_value.dtype, np.number):
+                        raise ge_exceptions.ProfilerExecutionError(
+                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
+(value of type "{str(metric_value.dtype)}" was computed).
 """
                         )
 
-                    attributed_resolved_metrics.metric_values_by_batch_id = {
-                        batch_id: np.nan_to_num(
-                            metric_value_vector, copy=False, nan=0.0
-                        )
-                        for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
-                    }
+                    if np.isnan(metric_value):
+                        if not replace_nan_with_zero:
+                            raise ValueError(
+                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
+"""
+                            )
+
+                        batch_metric_values.append(0.0)
+                    else:
+                        batch_metric_values.append(metric_value)
+
+            metric_values_by_batch_id[batch_id] = batch_metric_values
+
+        attributed_resolved_metrics.metric_values_by_batch_id = (
+            metric_values_by_batch_id
+        )
 
         return attributed_resolved_metrics
 

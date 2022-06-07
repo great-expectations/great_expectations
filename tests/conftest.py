@@ -2239,17 +2239,17 @@ def data_context_with_query_store(
 
 
 @pytest.fixture
-def ge_cloud_base_url():
+def ge_cloud_base_url() -> str:
     return "https://app.test.greatexpectations.io"
 
 
 @pytest.fixture
-def ge_cloud_organization_id():
+def ge_cloud_organization_id() -> str:
     return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
 
 
 @pytest.fixture
-def ge_cloud_access_token():
+def ge_cloud_access_token() -> str:
     return "6bb5b6f5c7794892a4ca168c65c2603e"
 
 
@@ -3083,7 +3083,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                     "include_semantic_types": None,
                     "exclude_column_name_suffixes": None,
                     "include_column_names": None,
-                    "limit_mode": "ONE",
+                    "cardinality_limit_mode": "ONE",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
                     "semantic_type_filter_module_name": None,
                 },
@@ -4435,7 +4435,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "exclude_column_name_suffixes": None,
                     "max_unique_values": None,
                     "exclude_semantic_types": ["binary", "currency", "identifier"],
-                    "limit_mode": "VERY_FEW",
+                    "cardinality_limit_mode": "VERY_FEW",
                     "semantic_type_filter_class_name": None,
                     "allowed_semantic_types_passthrough": ["logic"],
                     "max_proportion_unique": None,
