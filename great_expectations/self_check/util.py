@@ -2281,12 +2281,19 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                     ), f"{result['result']['unexpected_index_list']} != {value}"
 
             elif key == "unexpected_list":
-                assert result["result"]["unexpected_list"] == value, (
-                    "expected "
-                    + str(value)
-                    + " but got "
-                    + str(result["result"]["unexpected_list"])
-                )
+                try:
+                    assert result["result"]["unexpected_list"] == value, (
+                        "expected "
+                        + str(value)
+                        + " but got "
+                        + str(result["result"]["unexpected_list"])
+                    )
+                except AssertionError as e:
+                    if type(result["result"]["unexpected_list"][0]) == list:
+                        unexpected_list_tup = [tuple(x) for x in result["result"]["unexpected_list"]]
+                        assert unexpected_list_tup == value, f"{unexpected_list_tup} != {value}"
+                    else:
+                        raise
 
             elif key == "partial_unexpected_list":
                 assert result["result"]["partial_unexpected_list"] == value, (
