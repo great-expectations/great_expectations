@@ -1,6 +1,7 @@
 import copy
 import logging
-from typing import Any, Dict
+import traceback
+from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
@@ -18,10 +19,39 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
 )
-from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
+from great_expectations.expectations.metrics.import_manager import (
+    Bucketizer,
+    F,
+    sa,
+    sparktypes,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 logger = logging.getLogger(__name__)
+
+try:
+    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql import Select
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    ProgrammingError = None
+    Select = None
+
+try:
+    from sqlalchemy.engine.row import Row
+except ImportError:
+    try:
+        from sqlalchemy.engine.row import RowProxy
+
+        Row = RowProxy
+    except ImportError:
+        logger.debug(
+            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
+        )
+        RowProxy = None
+        Row = None
 
 
 class ColumnHistogram(ColumnAggregateMetricProvider):
@@ -69,10 +99,32 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
 
+        """return a list of counts corresponding to bins"""
         case_conditions = []
         idx = 0
         if isinstance(bins, np.ndarray):
             bins = bins.tolist()
+        elif isinstance(bins, int):
+            sqlalchemy_engine = execution_engine.engine
+            query: Select = (
+                sa.select(sa.column(column))
+                .distinct()
+                .where(sa.column(column) != None)
+                .order_by(sa.column(column).asc())
+                .select_from(selectable)
+            )
+            try:
+                rows: List[Row] = sqlalchemy_engine.execute(query).fetchall()
+                row: Row
+                column_values: np.ndarray = np.asarray([row[0] for row in rows])
+                bins = np.histogram_bin_edges(column_values, bins=bins)
+                bins = bins.tolist()
+            except ProgrammingError as pe:
+                exception_message: str = "An SQL syntax Exception occurred."
+                exception_traceback: str = traceback.format_exc()
+                exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+                logger.error(exception_message)
+                raise pe
         else:
             bins = list(bins)
 
@@ -173,10 +225,27 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
-        bins = metric_value_kwargs["bins"]
         column = metric_domain_kwargs["column"]
+        bins = metric_value_kwargs["bins"]
 
         """return a list of counts corresponding to bins"""
+        if isinstance(bins, np.ndarray):
+            bins = bins.tolist()
+        elif isinstance(bins, int):
+            rows: List[sparktypes.Row] = (
+                df.select(column)
+                .distinct()
+                .where(F.col(column).isNotNull())
+                .orderBy(F.col(column).asc())
+                .collect()
+            )
+            row: sparktypes.Row
+            column_values: np.ndarray = np.asarray([row[column] for row in rows])
+            bins = np.histogram_bin_edges(column_values, bins=bins)
+            bins = bins.tolist()
+        else:
+            bins = list(bins)
+
         bins = list(
             copy.deepcopy(bins)
         )  # take a copy since we are inserting and popping
