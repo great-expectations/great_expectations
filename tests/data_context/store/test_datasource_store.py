@@ -77,7 +77,7 @@ def test_datasource_store_retrieval(
     store: DatasourceStore = empty_datasource_store
 
     key: DataContextVariableKey = DataContextVariableKey(
-        type_="datasource", resource_name="my_datasource"
+        resource_type="datasource", resource_name="my_datasource"
     )
     store.set(key=key, value=datasource_config)
     res: DatasourceConfig = store.get(key=key)

@@ -46,11 +46,7 @@ class InlineStoreBackend(StoreBackend):
         config_var_type: str = key[0]
         config_var_name: Optional[str] = key[1]
 
-        variable_config: Any = (
-            self._data_context.project_config_with_variables_substituted[
-                config_var_type
-            ]
-        )
+        variable_config: Any = self._data_context.config[config_var_type]
 
         if config_var_name:
             return variable_config[config_var_name]
