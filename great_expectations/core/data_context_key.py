@@ -91,13 +91,22 @@ class DataContextVariableKey(DataContextKey):
         self._resource_name = resource_name
 
     def to_tuple(self) -> Tuple[str, Optional[str]]:
+        """
+        See parent `DataContextKey.to_tuple` for more information.
+        """
         return (self._resource_type, self._resource_name)
 
     def to_fixed_length_tuple(self) -> Tuple[str, Optional[str]]:
+        """
+        See parent `DataContextKey.to_fixed_length_tuple` for more information.
+        """
         return self.to_tuple()
 
     @classmethod
     def from_fixed_length_tuple(
         cls, tuple_: tuple
     ) -> "DataContextVariableKey":  # noqa: F821
+        """
+        See parent `DataContextKey.from_fixed_length_tuple` for more information.
+        """
         return cls.from_tuple(tuple_)
