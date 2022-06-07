@@ -1030,7 +1030,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             return {}
 
-    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
+    def get_config_with_variables_substituted(
+        self, config: Optional[DataContextConfig] = None
+    ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
         in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,

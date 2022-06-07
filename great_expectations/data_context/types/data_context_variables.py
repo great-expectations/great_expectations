@@ -1,10 +1,36 @@
 import enum
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from os import wait
 from typing import Any, Optional
 
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+
+
+class DataContextVariableSchema(str, enum.Enum):
+    CONFIG_VERSION = "config_version"
+    DATASOURCES = "datasources"
+    EXPECTATIONS_STORE_NAME = "expectations_store_name"
+    VALIDATIONS_STORE_NAME = "validations_store_name"
+    EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store_name"
+    CHECKPOINT_STORE_NAME = "checkpoint_store_name"
+    PROFILER_STORE_NAME = "profiler_store_name"
+    PLUGINS_DIRECTORY = "plugins_directory"
+    STORES = "stores"
+    DATA_DOCS_SITES = "data_docs_sites"
+    NOTEBOOKS = "notebooks"
+    CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
+    ANONYMIZED_USAGE_STATISTICS = "anonymous_usage_statistics"
+    CONCURRENCY = "concurrency"
+    PROGRESS_BARS = "progress_bars"
+
+    @classmethod
+    def has_value(cls, value: str) -> bool:
+        """
+        Checks whether or not a string is a value from the possible enum pairs.
+        """
+        return value in cls._value2member_map_
 
 
 @dataclass
@@ -36,36 +62,6 @@ class DataContextVariables(ABC):
     concurrency: Optional[dict] = None
     progress_bars: Optional[dict] = None
 
-    class DataContextVariablesSchema(enum.Enum):
-        """
-        Internal helper to ensure usage of `getattr/setattr` adheres to a strict schema.
-        """
-
-        CONFIG_VERSION = "config_version"
-        DATASOURCES = "datasources"
-        EXPECTATIONS_STORE_NAME = "expectations_store_name"
-        VALIDATIONS_STORE_NAME = "validations_store_name"
-        EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store_name"
-        CHECKPOINT_STORE_NAME = "checkpoint_store_name"
-        PROFILER_STORE_NAME = "profiler_store_name"
-        PLUGINS_DIRECTORY = "plugins_directory"
-        VALIDATION_OPERATORS = "validation_operators"
-        STORES = "stores"
-        DATA_DOCS_SITES = "data_docs_sites"
-        NOTEBOOKS = "notebooks"
-        CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
-        ANONYMIZED_USAGE_STATISTICS = "anonymous_usage_statistics"
-        STORE_BACKEND_DEFAULTS = "store_backend_defaults"
-        CONCURRENCY = "concurrency"
-        PROGRESS_BARS = "progress_bars"
-
-        @classmethod
-        def has_value(cls, value: str) -> bool:
-            """
-            Checks whether or not a string is a value from the possible enum pairs.
-            """
-            return value in cls._value2member_map_
-
     def __post_init__(self) -> None:
         self._store = None
 
@@ -79,16 +75,16 @@ class DataContextVariables(ABC):
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         raise NotImplementedError
 
-    def _get_key(self, attr: DataContextVariablesSchema) -> StringKey:
+    def _get_key(self, attr: DataContextVariableSchema) -> StringKey:
         key: StringKey = StringKey(key=attr.value)
         return key
 
-    def _set(self, attr: DataContextVariablesSchema, value: Any) -> None:
+    def _set(self, attr: DataContextVariableSchema, value: Any) -> None:
         setattr(self, attr.value, value)
         key: StringKey = self._get_key(attr)
         self.store.set(key=key, value=value)
 
-    def _get(self, attr: DataContextVariablesSchema) -> Any:
+    def _get(self, attr: DataContextVariableSchema) -> Any:
         val: Any = getattr(self, attr.value)
         return val
 
@@ -96,13 +92,13 @@ class DataContextVariables(ABC):
         """
         Setter for `config_version`.
         """
-        self._set(self.DataContextVariablesSchema.CONFIG_VERSION, config_version)
+        self._set(DataContextVariableSchema.CONFIG_VERSION, config_version)
 
     def get_config_version(self) -> Optional[float]:
         """
         Getter for `config_version`.
         """
-        return self._get(self.DataContextVariablesSchema.CONFIG_VERSION)
+        return self._get(DataContextVariableSchema.CONFIG_VERSION)
 
 
 @dataclass
@@ -123,6 +119,13 @@ class EphemeralDataContextVariables(DataContextVariables):
 @dataclass
 class FileDataContextVariables(DataContextVariables):
     data_context: Optional["DataContext"] = None  # noqa: F821
+
+    def __post_init__(self) -> None:
+        # Chetan - 20220607 - Add comment!
+        if self.data_context is None:
+            raise ValueError(
+                f"A reference to a data context is required for {self.__class__.__name__}"
+            )
 
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         from great_expectations.data_context.store.data_context_variables_store import (
@@ -146,6 +149,20 @@ class CloudDataContextVariables(DataContextVariables):
     ge_cloud_base_url: Optional[str] = None
     ge_cloud_organization_id: Optional[str] = None
     ge_cloud_access_token: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        # Chetan - 20220607 - Add comment!
+        if any(
+            attr is None
+            for attr in (
+                self.ge_cloud_base_url,
+                self.ge_cloud_organization_id,
+                self.ge_cloud_access_token,
+            )
+        ):
+            raise ValueError(
+                f"All of the following attributes are required for{ self.__class__.__name__}:\n  self.ge_cloud_base_url\n  self.ge_cloud_organization_id\n  self.ge_cloud_access_token"
+            )
 
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         from great_expectations.data_context.store.data_context_variables_store import (
