@@ -140,10 +140,20 @@ def _add_gx_args(
 
 class PandasReaderDatasource(Datasource):
     """
-    This class is enables very simple syntax for users who are just getting started with Great Expectations, and have not configured (or learned about) Datasources and DataConnectors. To do so, it provides thin wrapper methods for all 20 of pandas' `read_*` methods. It's based on a RuntimeDataConnector, so no DataConnector configuration is reauired.
+    This class is enables very simple syntax for users who are just getting started with Great Expectations, and have not configured (or learned about) Datasources and DataConnectors. To do so, it provides thin wrapper methods for all 20 of pandas' `read_*` methods.
+    
+    From a LiteDataContext, it can be invoked as follows: `my_context.datasources.pandas_readers.read_csv`
 
-    From a LiteDataContext, it can be invoked as follows:
-        my_context.datasources.pandas_readers.read_csv
+    Note on limitations:
+
+        This class is based on a RuntimeDataConnector, so no DataConnector configuration is required. This comes with some serious limitations:
+            * All dataframes must be read one at a time, with no wildcards within filenames or globbing of filepaths.
+            * All dataframes will appear as a single Data Asset in your Data Docs.
+            * Can't be profiled with a multibatch Data Assistants
+            * ......
+            * This DataConnector can't They haven't set up a way to reference this data for recurring validation (e.g. set up a Checkpoint containing a BatchRequest.)
+            * No separate concept of Assets
+
 
     Notes on pandas read_* methods:
 
