@@ -28,25 +28,3 @@ from .html_site_store import HtmlSiteStore  # isort:skip
 from .profiler_store import ProfilerStore  # isort:skip
 from .datasource_store import DatasourceStore  # isort:skip
 from .data_context_variables_store import DataContextVariablesStore  # isort:skip
-
-
-for module_name in (
-    ".store",
-    ".validations_store",
-    ".configuration_store",
-    ".expectations_store",
-    ".html_site_store",
-    ".profiler_store",
-    ".metric_store",
-    ".datasource_store",
-    ".data_context_variables_store",
-    ".checkpoint_store",
-    ".store_backend",
-    ".tuple_store_backend",
-    ".database_store_backend",
-    ".ge_cloud_store_backend",
-    ".inline_store_backend",
-):
-    verify_dynamic_loading_support(
-        module_name=module_name, package_name="great_expectations.data_context.store"
-    )
