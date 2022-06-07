@@ -57,9 +57,7 @@ class DataContextVariables(ABC):
     anonymous_usage_statistics: Optional[dict] = None
     concurrency: Optional[dict] = None
     progress_bars: Optional[dict] = None
-
-    def __post_init__(self) -> None:
-        self._store = None
+    _store: Optional["DataContextVariablesStore"] = None  # noqa: F821
 
     @property
     def store(self) -> "DataContextVariablesStore":  # noqa: F821

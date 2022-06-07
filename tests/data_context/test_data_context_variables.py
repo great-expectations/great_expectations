@@ -13,24 +13,56 @@ from great_expectations.data_context.types.data_context_variables import (
 
 
 @pytest.fixture
+def data_context_config_dict() -> dict:
+    config: dict = {
+        "config_version": 2.0,
+        "plugins_directory": "plugins/",
+        "evaluation_parameter_store_name": "evaluation_parameter_store",
+        "validations_store_name": "does_not_have_to_be_real",
+        "expectations_store_name": "expectations_store",
+        "config_variables_file_path": "uncommitted/config_variables.yml",
+        "stores": {
+            "expectations_store": {
+                "class_name": "ExpectationsStore",
+                "store_backend": {
+                    "class_name": "TupleFilesystemStoreBackend",
+                    "base_directory": "expectations/",
+                },
+            },
+            "evaluation_parameter_store": {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "EvaluationParameterStore",
+            },
+        },
+        "data_docs_sites": {},
+        "anonymous_usage_statistics": {
+            "enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
+            "usage_statistics_url": "https://www.my_usage_stats_url/test",
+        },
+    }
+    return config
+
+
+@pytest.fixture
 def ephemeral_data_context_variables(
-    basic_data_context_config_dict: dict,
+    data_context_config_dict: dict,
 ) -> EphemeralDataContextVariables:
-    return EphemeralDataContextVariables(**basic_data_context_config_dict)
+    return EphemeralDataContextVariables(**data_context_config_dict)
 
 
 @pytest.fixture
 def file_data_context_variables(
-    basic_data_context_config_dict: dict, empty_data_context: DataContext
+    data_context_config_dict: dict, empty_data_context: DataContext
 ) -> FileDataContextVariables:
     return FileDataContextVariables(
-        data_context=empty_data_context, **basic_data_context_config_dict
+        data_context=empty_data_context, **data_context_config_dict
     )
 
 
 @pytest.fixture
 def cloud_data_context_variables(
-    basic_data_context_config_dict: dict,
+    data_context_config_dict: dict,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
@@ -40,7 +72,7 @@ def cloud_data_context_variables(
         ge_cloud_base_url=base_url,
         ge_cloud_organization_id=ge_cloud_organization_id,
         ge_cloud_access_token=ge_cloud_access_token,
-        **basic_data_context_config_dict,
+        **data_context_config_dict,
     )
 
 

@@ -90,7 +90,7 @@ class DataContextVariableKey(DataContextKey):
         """
         See parent `DataContextKey.to_tuple` for more information.
         """
-        return (self._resource_type, self._resource_name)
+        return (self._resource_type, self._resource_name or "")
 
     def to_fixed_length_tuple(self) -> Tuple[str, Optional[str]]:
         """
