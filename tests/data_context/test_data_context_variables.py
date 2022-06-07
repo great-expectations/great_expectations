@@ -67,9 +67,8 @@ def cloud_data_context_variables(
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
 ) -> CloudDataContextVariables:
-    base_url: str = f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}"
     return CloudDataContextVariables(
-        ge_cloud_base_url=base_url,
+        ge_cloud_base_url=ge_cloud_base_url,
         ge_cloud_organization_id=ge_cloud_organization_id,
         ge_cloud_access_token=ge_cloud_access_token,
         **data_context_config_dict,
@@ -114,6 +113,9 @@ def test_data_context_variables_set(
     crud_method: str,
     input_value: Any,
     target_attr: str,
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+    ge_cloud_access_token: str,
 ) -> None:
     def _test_variables_set(type_: DataContextVariables) -> None:
         method: Callable = getattr(type_, crud_method)
@@ -135,22 +137,24 @@ def test_data_context_variables_set(
         assert mock_save.call_count == 1
 
     # CloudDataContextVariables
-    with mock.patch("requests.patch", autospec=True) as mock_patch:
-        type(mock_patch.return_value).status_code = mock.PropertyMock(return_value=200)
+    with mock.patch("requests.post", autospec=True) as mock_post:
         _test_variables_set(cloud_data_context_variables)
 
-        assert mock_patch.call_count == 1
-        mock_patch.assert_called_with(
-            "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/variables/foobarbaz",
+        assert mock_post.call_count == 1
+        mock_post.assert_called_with(
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
             json={
                 "data": {
-                    "type": "variable",
-                    "id": "foobarbaz",
-                    "attributes": {},
+                    "type": "data_context_variable",
+                    "attributes": {
+                        "organization_id": ge_cloud_organization_id,
+                        "value": input_value,
+                        "variable_type": target_attr,
+                    },
                 }
             },
             headers={
                 "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 6bb5b6f5c7794892a4ca168c65c2603e",
+                "Authorization": f"Bearer {ge_cloud_access_token}",
             },
         )

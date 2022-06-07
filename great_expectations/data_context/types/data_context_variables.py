@@ -182,7 +182,7 @@ class CloudDataContextVariables(DataContextVariables):
         store_backend: dict = {
             "class_name": "GeCloudStoreBackend",
             "ge_cloud_base_url": self.ge_cloud_base_url,
-            "ge_cloud_resource_type": "variable",
+            "ge_cloud_resource_type": "data_context_variable",
             "ge_cloud_credentials": {
                 "access_token": self.ge_cloud_access_token,
                 "organization_id": self.ge_cloud_organization_id,
@@ -199,7 +199,10 @@ class CloudDataContextVariables(DataContextVariables):
     def _get_key(
         self, attr: "DataContextVariablesSchema"  # noqa: F821
     ) -> GeCloudIdentifier:
-        key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type=attr.value, ge_cloud_id="foobarbaz"
-        )
+        key: GeCloudIdentifier = GeCloudIdentifier(resource_type=attr.value)
         return key
+
+    def _set(self, attr: DataContextVariableSchema, value: Any) -> None:
+        setattr(self, attr.value, value)
+        key: GeCloudIdentifier = self._get_key(attr)
+        self.store.set(key=key, value=value, variable_type=attr.value)
