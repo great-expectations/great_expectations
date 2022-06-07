@@ -494,7 +494,7 @@ class DataAssistantResult(SerializableDictDot):
             )
 
     @staticmethod
-    def get_expect_domain_values_to_match_set(
+    def get_expect_domain_values_to_match_set_chart(
         expectation_type: str,
         df: pd.DataFrame,
         metric_name: str,
@@ -2360,7 +2360,7 @@ class DataAssistantResult(SerializableDictDot):
                     subtitle=subtitle,
                 )
             elif metric_name in nominal_metrics:
-                chart = self.get_expect_domain_values_to_match_set(
+                chart = self.get_expect_domain_values_to_match_set_chart(
                     expectation_type=expectation_type,
                     df=df,
                     metric_name=metric_name,
