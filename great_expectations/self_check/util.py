@@ -2171,24 +2171,10 @@ def check_json_test_result(test, result, data_asset=None) -> None:
     # Some temporary stuff to see if test["output"]["result"] and result can be extracted consistently
     actual_val = result
     expected_val = test["output"]
+    try_allclose = False
     if "observed_value" in expected_val:
-        print(
-            f"    - observed in expected ({type(expected_val['observed_value'])}) -> {expected_val['observed_value']}"
-        )
         if RX_FLOAT.match(repr(expected_val["observed_value"])):
-            print(
-                f"    - a FLOAT is in there... should attempt np.testing.assert_allclose or np.allclose for comparison"
-            )
-        if (
-            isinstance(expected_val["observed_value"], dict)
-            and "values" in expected_val["observed_value"]
-        ):
-            print(f"    - 'values' key in test['output']")
-
-    if not expected_val:
-        print(f" - test['output'] is an empty dict; {test}")
-        if "catch_exceptions" in test["input"] and test["input"]["catch_exceptions"]:
-            print(f" - catch_exceptions is True")
+            try_allclose = True
 
     ##################################################################################################
 
@@ -2196,11 +2182,11 @@ def check_json_test_result(test, result, data_asset=None) -> None:
     if test["exact_match_out"] is True:
         if "result" in result and "observed_value" in result["result"]:
             if isinstance(result["result"]["observed_value"], (np.floating, float)):
-                assert np.testing.assert_allclose(
-                    actual=result["result"]["observed_value"],
-                    desired=expectationValidationResultSchema.load(test["output"])[
-                        "result"
-                    ]["observed_value"],
+                assert np.allclose(
+                    result["result"]["observed_value"],
+                    expectationValidationResultSchema.load(test["output"])["result"][
+                        "observed_value"
+                    ],
                     rtol=RTOL,
                     atol=ATOL,
                 ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {expectationValidationResultSchema.load(test['output'])['result']['observed_value']}"
@@ -2223,9 +2209,9 @@ def check_json_test_result(test, result, data_asset=None) -> None:
             if key == "success":
                 if isinstance(value, (np.floating, float)):
                     try:
-                        assert np.testing.assert_allclose(
-                            actual=result["success"],
-                            desired=value,
+                        assert np.allclose(
+                            result["success"],
+                            value,
                             rtol=RTOL,
                             atol=ATOL,
                         ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['success']} not np.allclose to {value}"
@@ -2256,9 +2242,9 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                 else:
                     if isinstance(value, dict) and "values" in value:
                         try:
-                            assert np.testing.assert_allclose(
-                                actual=result["result"]["observed_value"]["values"],
-                                desired=value["values"],
+                            assert np.allclose(
+                                result["result"]["observed_value"]["values"],
+                                value["values"],
                                 rtol=RTOL,
                                 atol=ATOL,
                             ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']['values']} not np.allclose to {value['values']}"
@@ -2267,6 +2253,13 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                             assert (
                                 result["result"]["observed_value"] == value
                             ), f"{result['result']['observed_value']} != {value}"
+                    elif try_allclose:
+                        assert np.allclose(
+                            result["result"]["observed_value"],
+                            value,
+                            rtol=RTOL,
+                            atol=ATOL,
+                        ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {value}"
                     else:
                         assert (
                             result["result"]["observed_value"] == value
@@ -2302,6 +2295,9 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                     + " but got "
                     + str(result["result"]["partial_unexpected_list"])
                 )
+
+            elif key == "unexpected_count":
+                pass
 
             elif key == "details":
                 assert result["result"]["details"] == value
