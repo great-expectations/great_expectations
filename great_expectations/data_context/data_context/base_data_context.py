@@ -88,6 +88,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     GeCloudConfig,
     ProgressBarsConfig,
+    datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
@@ -287,6 +288,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._project_config = self._data_context.config
             self._stores = self._data_context.stores
             self.runtime_environment = self._data_context.runtime_environment
+            self.root_directory = self._data_context.root_directory
 
         else:
             self._data_context = EphemeralDataContext(
