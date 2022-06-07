@@ -196,9 +196,10 @@ class SqlAlchemyBatchData(BatchData):
         :param query:
         """
         dialect_name: str = self.sql_engine_dialect.name.lower()
-        if dialect_name in GESqlDialect.get_all_dialect_names():
+
+        try:
             dialect: Union[GESqlDialect, str] = GESqlDialect(dialect_name)
-        else:
+        except ValueError:
             dialect: Union[GESqlDialect, str] = dialect_name
 
         if dialect == GESqlDialect.BIGQUERY:
@@ -218,9 +219,9 @@ class SqlAlchemyBatchData(BatchData):
 
             stmt = f"CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}"
         elif dialect == GESqlDialect.MYSQL:
-            # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the
-            # generic case.
             stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS {query}"
+        elif dialect == GESqlDialect.HIVE:
+            stmt = f"CREATE TEMPORARY TABLE `{temp_table_name}` AS {query}"
         elif dialect == GESqlDialect.MSSQL:
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.

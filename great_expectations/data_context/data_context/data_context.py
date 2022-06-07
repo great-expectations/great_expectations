@@ -35,6 +35,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
+# TODO: <WILL> Most of the logic here will be migrated to FileDataContext
 class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
     expectation suites, datasources, notification settings, and data fixtures.
@@ -71,6 +72,11 @@ class DataContext(BaseDataContext):
     the correct name when there is no ambiguity.
 
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
+
+    --Public API--
+
+    --Documentation--
+        https://docs.greatexpectations.io/docs/terms/data_context
     """
 
     @classmethod
@@ -86,11 +92,16 @@ class DataContext(BaseDataContext):
         `create` will not create a new "great_expectations" directory in the provided folder, provided one does not
         already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
 
+        --Public API--
+
+        --Documentation--
+            https://docs.greatexpectations.io/docs/terms/data_context
+
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
             usage_statistics_enabled: boolean directive specifying whether or not to gather usage statistics
-            runtime_environment: a dictionary of config variables that
-            override both those set in config_variables.yml and the environment
+            runtime_environment: a dictionary of config variables that override both those set in
+                config_variables.yml and the environment
 
         Returns:
             DataContext
@@ -267,7 +278,7 @@ class DataContext(BaseDataContext):
             "access_token": ge_cloud_access_token,
         }
 
-    # TODO: deprecate ge_cloud_ascount_id
+    # TODO: deprecate ge_cloud_account_id
     def get_ge_cloud_config(
         self,
         ge_cloud_base_url: Optional[str] = None,
