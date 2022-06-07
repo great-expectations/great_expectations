@@ -8,7 +8,6 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 def test_ge():
 
-
     CONNECTION_STRING = os.environ.get("DB_URL")
 
     context = ge.get_context()
@@ -19,7 +18,7 @@ def test_ge():
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
             "connection_string": CONNECTION_STRING,
-            "create_temp_table": False
+            "create_temp_table": False,
         },
         "data_connectors": {
             "default_runtime_data_connector_name": {
@@ -48,9 +47,7 @@ def test_ge():
         data_asset_name="default_name",  # this can be anything that identifies this data
         runtime_parameters={"query": "SELECT TOP 10 * from dbo.taxi_data"},
         batch_identifiers={"default_identifier_name": "default_identifier"},
-        batch_spec_passthrough={
-            "create_temp_table": False
-        }
+        batch_spec_passthrough={"create_temp_table": False},
     )
 
     context.create_expectation_suite(
@@ -64,5 +61,5 @@ def test_ge():
     # NOTE: The following code is only for testing and can be ignored by users.
 
     assert isinstance(validator, ge.validator.validator.Validator)
-    
+
     # TODO Run additional tests for your datasource
