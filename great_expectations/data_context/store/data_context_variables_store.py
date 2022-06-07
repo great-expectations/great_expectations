@@ -7,7 +7,7 @@ from great_expectations.util import filter_properties_dict
 
 class DataContextVariablesStore(Store):
     """
-    A VariablesStore manages config variables for the DataContext.
+    A DataContextVariablesStore manages config variables for the DataContext.
     """
 
     _key_class = DataContextVariableKey
