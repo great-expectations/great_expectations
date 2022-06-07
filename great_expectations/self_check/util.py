@@ -673,7 +673,7 @@ def get_dataset(
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
-            method = "multi"
+            method="multi",
         )
 
         # Build a SqlAlchemyDataset using that database
