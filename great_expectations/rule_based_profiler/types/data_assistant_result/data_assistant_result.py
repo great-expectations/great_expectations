@@ -1007,7 +1007,7 @@ class DataAssistantResult(SerializableDictDot):
             A interactive detail altair multi-chart
         """
         batch_name: str = "batch"
-        all_columns: List[str] = [column_df.column for column_df in column_dfs]
+        all_columns: List[str] = list(column_dfs[0].df.columns)
         batch_identifiers: List[str] = [
             column for column in all_columns if column not in {metric_name, batch_name}
         ]
@@ -1078,7 +1078,7 @@ class DataAssistantResult(SerializableDictDot):
         strict_max: str = "strict_max"
 
         batch_name: str = "batch"
-        all_columns: List[str] = [column_df.column for column_df in column_dfs]
+        all_columns: List[str] = list(column_dfs[0].df.columns)
         batch_identifiers: List[str] = [
             column
             for column in all_columns
