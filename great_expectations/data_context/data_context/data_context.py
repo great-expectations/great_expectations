@@ -330,6 +330,8 @@ class DataContext(BaseDataContext):
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = None
         ge_cloud_config = None
+        # for backwards compatibility
+        self.GE_YML = FileDataContext.GE_YML
 
         if ge_cloud_mode:
             ge_cloud_config = self.get_ge_cloud_config(
