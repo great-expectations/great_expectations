@@ -28,6 +28,8 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
+import numpy as np
+import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
@@ -75,6 +77,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "batch": "batches",
     "checkpoint": "checkpoints",
     "data_asset": "data_assets",
+    "datasource": "datasources",
     "expectation": "expectations",
     "expectation_suite": "expectation_suites",
     "suite_validation_result": "suite_validation_results",
@@ -87,6 +90,7 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "batches": "batch",
     "checkpoints": "checkpoint",
     "data_assets": "data_asset",
+    "datasources": "datasource",
     "expectations": "expectation",
     "expectation_suites": "expectation_suite",
     "suite_validation_results": "suite_validation_result",
@@ -175,26 +179,49 @@ def profile(func: Callable = None) -> Callable:
 
 
 def measure_execution_time(
-    pretty_print: bool = False,
+    execution_time_holder_object_reference_name: str = "execution_time_holder",
+    execution_time_property_name: str = "execution_time",
+    pretty_print: bool = True,
 ) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
-        func.execution_duration_milliseconds = 0
-
         @wraps(func)
         def compute_delta_t(*args, **kwargs) -> Any:
-            time_begin: int = int(round(time.time() * 1000))
+            """
+            Computes return value of decorated function, calls back "execution_time_holder_object_reference_name", and
+            saves execution time (in seconds) into specified "execution_time_property_name" of passed object reference.
+            Settable "{execution_time_holder_object_reference_name}.{execution_time_property_name}" property must exist.
+
+            Args:
+                args: Positional arguments of original function being decorated.
+                kwargs: Keyword arguments of original function being decorated.
+
+            Returns:
+                Any (output value of original function being decorated).
+            """
+            time_begin: float = time.perf_counter()
             try:
                 return func(*args, **kwargs)
             finally:
-                time_end: int = int(round(time.time() * 1000))
-                delta_t: int = time_end - time_begin
-                func.execution_duration_milliseconds = delta_t
+                time_end: float = time.perf_counter()
+                delta_t: float = time_end - time_begin
+                if kwargs is None:
+                    kwargs = {}
+
+                execution_time_holder: type = kwargs.get(
+                    execution_time_holder_object_reference_name
+                )
+                if execution_time_holder is not None and hasattr(
+                    execution_time_holder, execution_time_property_name
+                ):
+                    setattr(
+                        execution_time_holder, execution_time_property_name, delta_t
+                    )
 
                 if pretty_print:
                     bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
                     call_args: OrderedDict = bound_args.arguments
                     print(
-                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
+                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} seconds."
                     )
 
         return compute_delta_t
@@ -1303,6 +1330,33 @@ def is_nan(value: Any) -> bool:
         return True
 
 
+def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
+    """
+    This method checks whether or not candidate object is subset of target object.
+    """
+    if isinstance(candidate, dict):
+        key: Any  # must be "hashable"
+        value: Any
+        return all(
+            key in target
+            and is_candidate_subset_of_target(candidate=val, target=target[key])
+            for key, val in candidate.items()
+        )
+
+    if isinstance(candidate, (list, set, tuple)):
+        subitem: Any
+        superitem: Any
+        return all(
+            any(
+                is_candidate_subset_of_target(subitem, superitem)
+                for superitem in target
+            )
+            for subitem in candidate
+        )
+
+    return candidate == target
+
+
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
         # noinspection PyUnusedLocal
@@ -1377,11 +1431,16 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this
     conversion takes place.
 
+    For versions of SQLAlchemy < 1.4 the implicit conversion to a subquery may not always work, so that
+    also needs to be handled here, using the old equivalent method.
+
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if version.parse(sa.__version__) >= version.parse("1.4"):
-        if isinstance(selectable, Select):
+    if isinstance(selectable, Select):
+        if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
+        else:
+            selectable = selectable.alias()
     return selectable
 
 
@@ -1418,3 +1477,43 @@ def get_pyathena_potential_type(type_module, type_):
         potential_type = type_module._TYPE_MAPPINGS.get(type_)
 
     return potential_type
+
+
+def pandas_series_between_inclusive(
+    series: pd.Series, min_value: int, max_value: int
+) -> pd.Series:
+    """
+    As of Pandas 1.3.0, the 'inclusive' arg in between() is an enum: {"left", "right", "neither", "both"}
+    """
+    metric_series: pd.Series
+    if version.parse(pd.__version__) >= version.parse("1.3.0"):
+        metric_series = series.between(min_value, max_value, inclusive="both")
+    else:
+        metric_series = series.between(min_value, max_value, inclusive=True)
+
+    return metric_series
+
+
+def numpy_quantile(
+    a: np.ndarray, q: float, method: str, axis: Optional[int] = None
+) -> np.ndarray:
+    """
+    As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
+    Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
+    """
+    quantile: np.ndarray
+    if version.parse(np.__version__) >= version.parse("1.22.0"):
+        quantile = np.quantile(
+            a=a,
+            q=q,
+            axis=axis,
+            method=method,
+        )
+    else:
+        quantile = np.quantile(
+            a=a,
+            q=q,
+            axis=axis,
+            interpolation=method,
+        )
+    return quantile

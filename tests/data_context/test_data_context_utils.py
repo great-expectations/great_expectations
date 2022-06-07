@@ -244,12 +244,12 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     temp_dir.mkdir()
     monkeypatch.chdir(temp_dir)
     assert (
-        PasswordMasker.mask_db_url(f"sqlite:///something/foo.db")
-        == f"sqlite:///something/foo.db"
+        PasswordMasker.mask_db_url("sqlite:///something/foo.db")
+        == "sqlite:///something/foo.db"
     )
     assert (
-        PasswordMasker.mask_db_url(f"sqlite:///something/foo.db", use_urlparse=True)
-        == f"sqlite:///something/foo.db"
+        PasswordMasker.mask_db_url("sqlite:///something/foo.db", use_urlparse=True)
+        == "sqlite:///something/foo.db"
     )
 
     # absolute path
@@ -310,6 +310,7 @@ def test_sanitize_config_doesnt_change_config_without_datasources(
     assert config_without_creds == basic_data_context_config_dict
 
 
+@pytest.mark.cloud
 def test_sanitize_config_masks_cloud_store_backend_access_tokens(
     data_context_config_dict_with_cloud_backed_stores, ge_cloud_access_token
 ):
@@ -458,6 +459,7 @@ def test_sanitize_config_regardless_of_parent_key():
     )
 
 
+@pytest.mark.cloud
 def test_sanitize_config_masks_cloud_access_token(ge_cloud_access_token):
 
     # expect the access token to be found and masked

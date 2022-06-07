@@ -10,7 +10,7 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import substitute_none_for_missing
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: F401
 except ImportError:
     pass
 
@@ -48,7 +48,7 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert "like_pattern" in configuration.kwargs, "Must provide like_pattern"
@@ -62,7 +62,6 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -74,7 +73,7 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs
-    ):
+    ) -> None:
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (

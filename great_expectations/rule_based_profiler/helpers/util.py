@@ -1,31 +1,41 @@
 import copy
 import itertools
 import logging
+import re
 import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-from scipy import stats
+import scipy.stats as stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     materialize_batch_request,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    INFERRED_SEMANTIC_TYPE_KEY,
     VARIABLES_PREFIX,
-    Builder,
     Domain,
+    NumericRangeEstimationResult,
     ParameterContainer,
+    ParameterNode,
+    SemanticDomainTypes,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
+from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
+)
+from great_expectations.types import safe_deep_copy
+from great_expectations.util import numpy_quantile
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -33,13 +43,19 @@ logger.setLevel(logging.INFO)
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
+TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX: str = "tmp"
+TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
+TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN: re.Pattern = re.compile(
+    rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\.\w{8}"
+)
+
 
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -88,13 +104,15 @@ def get_validator(
             batch_list=batch_list,
         )
 
+    # Always disabled for RBP and DataAssistants due to volume of metric calculations
+    validator.show_progress_bars = False
     return validator
 
 
 def get_batch_ids(
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -126,7 +144,7 @@ def get_batch_ids(
 
 
 def build_batch_request(
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -136,11 +154,11 @@ def build_batch_request(
 
     # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
     effective_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest, dict]
+        Union[BatchRequestBase, dict]
     ] = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=batch_request,
-        expected_return_type=(BatchRequest, RuntimeBatchRequest, dict),
+        expected_return_type=(BatchRequestBase, dict),
         variables=variables,
         parameters=parameters,
     )
@@ -189,7 +207,7 @@ def get_parameter_value_and_validate_return_type(
     or as a fully-qualified parameter name.  In either case, it can optionally validate the type of the return value.
     """
     if isinstance(parameter_reference, dict):
-        parameter_reference = dict(copy.deepcopy(parameter_reference))
+        parameter_reference = safe_deep_copy(data=parameter_reference)
 
     parameter_reference = get_parameter_value(
         domain=domain,
@@ -228,6 +246,20 @@ def get_parameter_value(
                 variables=variables,
                 parameters=parameters,
             )
+    elif isinstance(parameter_reference, (list, set, tuple)):
+        parameter_reference_type: type = type(parameter_reference)
+        element: Any
+        return parameter_reference_type(
+            [
+                get_parameter_value(
+                    domain=domain,
+                    parameter_reference=element,
+                    variables=variables,
+                    parameters=parameters,
+                )
+                for element in parameter_reference
+            ]
+        )
     elif isinstance(
         parameter_reference, str
     ) and is_fully_qualified_parameter_name_literal_string_format(
@@ -239,25 +271,12 @@ def get_parameter_value(
             variables=variables,
             parameters=parameters,
         )
-        if isinstance(parameter_reference, dict):
-            for key, value in parameter_reference.items():
-                parameter_reference[key] = get_parameter_value(
-                    domain=domain,
-                    parameter_reference=value,
-                    variables=variables,
-                    parameters=parameters,
-                )
-        elif isinstance(
-            parameter_reference, str
-        ) and is_fully_qualified_parameter_name_literal_string_format(
-            fully_qualified_parameter_name=parameter_reference
-        ):
-            parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
-                fully_qualified_parameter_name=parameter_reference,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        parameter_reference = get_parameter_value(
+            domain=domain,
+            parameter_reference=parameter_reference,
+            variables=variables,
+            parameters=parameters,
+        )
 
     return parameter_reference
 
@@ -353,15 +372,21 @@ def get_resolved_metrics_by_key(
     return resolved_metrics_by_key
 
 
-def build_simple_domains_from_column_names(
+def build_domains_from_column_names(
+    rule_name: str,
     column_names: List[str],
-    domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN,
+    domain_type: MetricDomainTypes,
+    table_column_name_to_inferred_semantic_domain_type_map: Optional[
+        Dict[str, SemanticDomainTypes]
+    ] = None,
 ) -> List[Domain]:
     """
     This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
 
+    :param rule_name: name of Rule object, for which "Domain" objects are obtained.
     :param column_names: list of column names to serve as values for "column" keys in "domain_kwargs" dictionary
     :param domain_type: type of Domain objects (same "domain_type" must be applicable to all Domain objects returned)
+    :param table_column_name_to_inferred_semantic_domain_type_map: map from column name to inferred semantic type
     :return: list of resulting Domain objects
     """
     column_name: str
@@ -371,6 +396,16 @@ def build_simple_domains_from_column_names(
             domain_kwargs={
                 "column": column_name,
             },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    column_name: table_column_name_to_inferred_semantic_domain_type_map[
+                        column_name
+                    ],
+                }
+                if table_column_name_to_inferred_semantic_domain_type_map
+                else None,
+            },
+            rule_name=rule_name,
         )
         for column_name in column_names
     ]
@@ -381,184 +416,163 @@ def build_simple_domains_from_column_names(
 def convert_variables_to_dict(
     variables: Optional[ParameterContainer] = None,
 ) -> Dict[str, Any]:
-    variables: Optional[Dict[str, Any]] = get_parameter_value_and_validate_return_type(
+    variables_as_dict: Optional[
+        Union[ParameterNode, Dict[str, Any]]
+    ] = get_parameter_value_and_validate_return_type(
         domain=None,
         parameter_reference=VARIABLES_PREFIX,
         expected_return_type=None,
         variables=variables,
         parameters=None,
     )
+    if isinstance(variables_as_dict, ParameterNode):
+        return variables_as_dict.to_dict()
 
-    return variables or {}
+    if variables_as_dict is None:
+        return {}
 
-
-def init_rule_parameter_builders(
-    parameter_builder_configs: Optional[List[dict]] = None,
-    data_context: Optional["DataContext"] = None,  # noqa: F821
-) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
-    if parameter_builder_configs is None:
-        return None
-
-    return [
-        init_parameter_builder(
-            parameter_builder_config=parameter_builder_config,
-            data_context=data_context,
-        )
-        for parameter_builder_config in parameter_builder_configs
-    ]
+    return variables_as_dict
 
 
-def init_parameter_builder(
-    parameter_builder_config: Union["ParameterBuilderConfig", dict],  # noqa: F821
-    data_context: Optional["DataContext"] = None,  # noqa: F821
-) -> "ParameterBuilder":  # noqa: F821
-    if not isinstance(parameter_builder_config, dict):
-        parameter_builder_config = parameter_builder_config.to_dict()
+def integer_semantic_domain_type(domain: Domain) -> bool:
+    """
+    This method examines "INFERRED_SEMANTIC_TYPE_KEY" attribute of "Domain" argument to check whether or not underlying
+    "SemanticDomainTypes" enum value is an "integer".  Because explicitly designated "SemanticDomainTypes.INTEGER" type
+    is unavaiable, "SemanticDomainTypes.LOGIC" and "SemanticDomainTypes.IDENTIFIER" are intepreted as "integer" values.
 
-    parameter_builder: "ParameterBuilder" = instantiate_class_from_config(  # noqa: F821
-        config=parameter_builder_config,
-        runtime_environment={"data_context": data_context},
-        config_defaults={
-            "module_name": "great_expectations.rule_based_profiler.parameter_builder"
-        },
+    This method can be used "NumericMetricRangeMultiBatchParameterBuilder._get_round_decimals_using_heuristics()".
+
+    Note: Inability to assess underlying "SemanticDomainTypes" details of "Domain" object produces "False" return value.
+
+    Args:
+        domain: "Domain" object to inspect for underlying "SemanticDomainTypes" details
+
+    Returns:
+        Boolean value indicating whether or not specified "Domain" is inferred to denote "integer" values
+
+    """
+
+    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
+        INFERRED_SEMANTIC_TYPE_KEY
     )
-    return parameter_builder
 
-
-def init_rule_expectation_configuration_builders(
-    expectation_configuration_builder_configs: List[dict],
-    data_context: Optional["DataContext"] = None,  # noqa: F821
-) -> List["ExpectationConfigurationBuilder"]:  # noqa: F821
-    expectation_configuration_builder_config: dict
-    return [
-        init_expectation_configuration_builder(
-            expectation_configuration_builder_config=expectation_configuration_builder_config,
-            data_context=data_context,
-        )
-        for expectation_configuration_builder_config in expectation_configuration_builder_configs
-    ]
-
-
-def init_expectation_configuration_builder(
-    expectation_configuration_builder_config: Union[
-        "ExpectationConfigurationBuilder", dict  # noqa: F821
-    ],
-    data_context: Optional["DataContext"] = None,  # noqa: F821
-) -> "ExpectationConfigurationBuilder":  # noqa: F821
-    if not isinstance(expectation_configuration_builder_config, dict):
-        expectation_configuration_builder_config = (
-            expectation_configuration_builder_config.to_dict()
-        )
-
-    expectation_configuration_builder: "ExpectationConfigurationBuilder" = instantiate_class_from_config(  # noqa: F821
-        config=expectation_configuration_builder_config,
-        runtime_environment={"data_context": data_context},
-        config_defaults={
-            "class_name": "DefaultExpectationConfigurationBuilder",
-            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-        },
+    semantic_domain_type: SemanticDomainTypes
+    return inferred_semantic_domain_type and all(
+        [
+            semantic_domain_type
+            in [
+                SemanticDomainTypes.LOGIC,
+                SemanticDomainTypes.IDENTIFIER,
+            ]
+            for semantic_domain_type in (inferred_semantic_domain_type.values())
+        ]
     )
-    return expectation_configuration_builder
-
-
-def set_batch_list_or_batch_request_on_builder(
-    builder: Builder,
-    batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
-    force_batch_data: bool = False,
-) -> None:
-    if force_batch_data or builder.batch_request is None:
-        builder.set_batch_data(
-            batch_list=batch_list,
-            batch_request=batch_request,
-        )
 
 
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-) -> Tuple[Number, Number]:
-    lower_quantile = np.quantile(
-        metric_values,
+    quantile_statistic_interpolation_method: str,
+) -> NumericRangeEstimationResult:
+    lower_quantile = numpy_quantile(
+        a=metric_values,
         q=(false_positive_rate / 2),
         axis=0,
+        method=quantile_statistic_interpolation_method,
     )
-    upper_quantile = np.quantile(
-        metric_values,
+    upper_quantile = numpy_quantile(
+        a=metric_values,
         q=1.0 - (false_positive_rate / 2),
         axis=0,
+        method=quantile_statistic_interpolation_method,
     )
-    return lower_quantile, upper_quantile
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
+        value_range=np.asarray([lower_quantile, upper_quantile]),
+    )
+
+
+def compute_kde_quantiles_point_estimate(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    quantile_statistic_interpolation_method: str,
+    n_resamples: int,
+    bw_method: Union[str, float, Callable],
+    random_seed: Optional[int] = None,
+) -> NumericRangeEstimationResult:
+    """
+    ML Flow Experiment: parameter_builders_bootstrap/kde_quantiles
+    ML Flow Experiment ID: 721280826919117
+
+    An internal implementation of the "kernel density estimation" estimator method, returning a point estimate for a
+    population parameter of interest (lower and upper quantiles in this case).
+
+    Overview: https://en.wikipedia.org/wiki/Kernel_density_estimation
+    Bandwidth Effect: https://en.wikipedia.org/wiki/Kernel_density_estimation#Bandwidth_selection
+    Bandwidth Method: https://stats.stackexchange.com/questions/90656/kernel-bandwidth-scotts-vs-silvermans-rules
+
+    Args:
+        false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
+            identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
+        quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
+            statistic, used for confidence intervals.
+        n_resamples: A positive integer indicating the sample size resulting from the sampling with replacement
+            procedure.
+        bw_method: The estimator bandwidth as described in:
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
+        random_seed: An optional random_seed to pass to "np.random.Generator(np.random.PCG64(random_seed))"
+            for making probabilistic sampling deterministic.
+    """
+    lower_quantile_pct: float = false_positive_rate / 2.0
+    upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
+
+    metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
+        metric_values, bw_method=bw_method
+    )
+    metric_values_gaussian_sample: float
+    if random_seed:
+        metric_values_gaussian_sample = metric_values_density_estimate.resample(
+            n_resamples,
+            seed=random_seed,
+        )
+    else:
+        metric_values_gaussian_sample = metric_values_density_estimate.resample(
+            n_resamples,
+        )
+
+    lower_quantile_point_estimate: float = np.quantile(
+        metric_values_gaussian_sample,
+        q=lower_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
+    upper_quantile_point_estimate: float = np.quantile(
+        metric_values_gaussian_sample,
+        q=upper_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
+
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(
+            a=metric_values_gaussian_sample, bins=NUM_HISTOGRAM_BINS
+        )[0],
+        value_range=[
+            lower_quantile_point_estimate,
+            upper_quantile_point_estimate,
+        ],
+    )
 
 
 def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
+    quantile_statistic_interpolation_method: str,
     n_resamples: int,
     random_seed: Optional[int] = None,
-) -> Tuple[Number, Number]:
-    """The winner of our performance testing is selected from the possible candidates:
-    - _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method
-    - _compute_bootstrap_quantiles_point_estimate_custom_mean_method
-    - _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method"""
-    return _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
-        metric_values=metric_values,
-        false_positive_rate=false_positive_rate,
-        n_resamples=n_resamples,
-        random_seed=random_seed,
-    )
-
-
-def _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
-    metric_values: np.ndarray,
-    false_positive_rate: np.float64,
-    n_resamples: int,
-    random_seed: Optional[int] = None,
-) -> Tuple[Number, Number]:
+) -> NumericRangeEstimationResult:
     """
-    An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
-    parameter of interest (lower and upper quantiles in this case). See
-    https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+    ML Flow Experiment: parameter_builders_bootstrap/bootstrap_quantiles
+    ML Flow Experiment ID: 4129654509298109
 
-    This implementation has been replaced by "_compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method"
-    and only remains to demonstrate the performance improvement achieved by correcting for bias. Upon the implementation
-    of a Machine Learning Lifecycle framework, the performance improvement can be documented and this legacy method can
-    be removed from the codebase.
-    """
-    if random_seed:
-        random_state: np.random.Generator = np.random.Generator(
-            np.random.PCG64(random_seed)
-        )
-        bootstraps: np.ndarray = random_state.choice(
-            metric_values, size=(n_resamples, metric_values.size)
-        )
-    else:
-        bootstraps: np.ndarray = np.random.choice(
-            metric_values, size=(n_resamples, metric_values.size)
-        )
-
-    lower_quantiles: Union[np.ndarray, Number] = np.quantile(
-        bootstraps,
-        q=false_positive_rate / 2,
-        axis=1,
-    )
-    lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
-    upper_quantiles: Union[np.ndarray, Number] = np.quantile(
-        bootstraps,
-        q=1.0 - (false_positive_rate / 2),
-        axis=1,
-    )
-    upper_quantile_point_estimate: Number = np.mean(upper_quantiles)
-    return lower_quantile_point_estimate, upper_quantile_point_estimate
-
-
-def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
-    metric_values: np.ndarray,
-    false_positive_rate: np.float64,
-    n_resamples: int,
-    random_seed: Optional[int] = None,
-) -> Tuple[Number, Number]:
-    """
     An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
     parameter of interest (lower and upper quantiles in this case). See
     https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
@@ -612,165 +626,184 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
     lower_quantile_pct: float = false_positive_rate / 2
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2
 
-    sample_lower_quantile: np.ndarray = np.quantile(metric_values, q=lower_quantile_pct)
-    sample_upper_quantile: np.ndarray = np.quantile(metric_values, q=upper_quantile_pct)
+    sample_lower_quantile: np.ndarray = numpy_quantile(
+        a=metric_values,
+        q=lower_quantile_pct,
+        method=quantile_statistic_interpolation_method,
+    )
+    sample_upper_quantile: np.ndarray = numpy_quantile(
+        a=metric_values,
+        q=upper_quantile_pct,
+        method=quantile_statistic_interpolation_method,
+    )
 
+    bootstraps: np.ndarray
     if random_seed:
         random_state: np.random.Generator = np.random.Generator(
             np.random.PCG64(random_seed)
         )
-        bootstraps: np.ndarray = random_state.choice(
+        bootstraps = random_state.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
     else:
-        bootstraps: np.ndarray = np.random.choice(
+        bootstraps = np.random.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
-    bootstrap_lower_quantiles: Union[np.ndarray, Number] = np.quantile(
+    lower_quantile_bias_corrected_point_estimate: Number = _determine_quantile_bias_corrected_point_estimate(
+        bootstraps=bootstraps,
+        quantile_pct=lower_quantile_pct,
+        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        sample_quantile=sample_lower_quantile,
+    )
+
+    upper_quantile_bias_corrected_point_estimate: Number = _determine_quantile_bias_corrected_point_estimate(
+        bootstraps=bootstraps,
+        quantile_pct=upper_quantile_pct,
+        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        sample_quantile=sample_upper_quantile,
+    )
+
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(
+            a=bootstraps.flatten(), bins=NUM_HISTOGRAM_BINS
+        )[0],
+        value_range=[
+            lower_quantile_bias_corrected_point_estimate,
+            upper_quantile_bias_corrected_point_estimate,
+        ],
+    )
+
+
+def _determine_quantile_bias_corrected_point_estimate(
+    bootstraps: np.ndarray,
+    quantile_pct: float,
+    quantile_statistic_interpolation_method: str,
+    sample_quantile: np.ndarray,
+) -> Number:
+    bootstrap_quantiles: Union[np.ndarray, Number] = numpy_quantile(
         bootstraps,
-        q=lower_quantile_pct,
+        q=quantile_pct,
         axis=1,
+        method=quantile_statistic_interpolation_method,
     )
-    bootstrap_lower_quantile_point_estimate: float = np.mean(bootstrap_lower_quantiles)
-    bootstrap_lower_quantile_standard_error: float = np.std(bootstrap_lower_quantiles)
-    bootstrap_lower_quantile_bias: float = (
-        bootstrap_lower_quantile_point_estimate - sample_lower_quantile
-    )
+    bootstrap_quantile_point_estimate: np.ndarray = np.mean(bootstrap_quantiles)
+    bootstrap_quantile_standard_error: np.ndarray = np.std(bootstrap_quantiles)
+    bootstrap_quantile_bias: float = bootstrap_quantile_point_estimate - sample_quantile
 
     # Bias / Standard Error > 0.25 is a rule of thumb for when to apply bias correction.
     # See:
     # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
     #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
-    lower_quantile_bias_corrected_point_estimate: Number
-    if bootstrap_lower_quantile_bias / bootstrap_lower_quantile_standard_error <= 0.25:
-        lower_quantile_bias_corrected_point_estimate = (
-            bootstrap_lower_quantile_point_estimate
-        )
+    quantile_bias_corrected_point_estimate: Number
+
+    if (
+        bootstrap_quantile_standard_error > 0
+        and bootstrap_quantile_bias / bootstrap_quantile_standard_error <= 0.25
+    ):
+        quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate
     else:
-        lower_quantile_bias_corrected_point_estimate = (
-            bootstrap_lower_quantile_point_estimate - bootstrap_lower_quantile_bias
+        quantile_bias_corrected_point_estimate = (
+            bootstrap_quantile_point_estimate - bootstrap_quantile_bias
         )
-
-    bootstrap_upper_quantiles: Union[np.ndarray, Number] = np.quantile(
-        bootstraps,
-        q=upper_quantile_pct,
-        axis=1,
-    )
-    bootstrap_upper_quantile_point_estimate: np.ndarray = np.mean(
-        bootstrap_upper_quantiles
-    )
-    bootstrap_upper_quantile_standard_error: np.ndarray = np.std(
-        bootstrap_upper_quantiles
-    )
-    bootstrap_upper_quantile_bias: float = (
-        bootstrap_upper_quantile_point_estimate - sample_upper_quantile
-    )
-
-    # Bias / Standard Error > 0.25 is a rule of thumb for when to apply bias correction.
-    # See:
-    # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
-    #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
-    upper_quantile_bias_corrected_point_estimate: Number
-    if bootstrap_upper_quantile_bias / bootstrap_upper_quantile_standard_error <= 0.25:
-        upper_quantile_bias_corrected_point_estimate = (
-            bootstrap_upper_quantile_point_estimate
-        )
-    else:
-        upper_quantile_bias_corrected_point_estimate = (
-            bootstrap_upper_quantile_point_estimate - bootstrap_upper_quantile_bias
-        )
-
-    return (
-        lower_quantile_bias_corrected_point_estimate,
-        upper_quantile_bias_corrected_point_estimate,
-    )
+    return quantile_bias_corrected_point_estimate
 
 
-def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method(
-    metric_values: np.ndarray,
-    false_positive_rate: np.float64,
-    n_resamples: int,
-    method: Optional[str] = "BCa",
-    random_seed: Optional[int] = None,
-):
+def get_validator_with_expectation_suite(
+    batch_request: Union[BatchRequestBase, dict],
+    data_context: "BaseDataContext",  # noqa: F821
+    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    expectation_suite_name: Optional[str] = None,
+    component_name: str = "test",
+    persist: bool = False,
+) -> "Validator":  # noqa: F821
     """
-    SciPy implementation of the BCa confidence interval for the population quantile. Unfortunately, as of
-    March 4th, 2022, this implementation has two issues:
-        1) it only returns a confidence interval and not a point estimate for the population parameter of interest,
-           which is what we require for our use cases (the attempt below tries to "back out" the statistic from the
-           confidece interval by taking the midpoint of the interval).
-        2) It can not handle multi-dimensional statistics and correct for bias simultaneously. You must either use
-           one feature or the other.
-
-    This implementation could only be used if Great Expectations drops support for Python 3.6, thereby enabling us
-    to use a more up-to-date version of the "scipy" Python package (the currently used version does not have
-    "bootstrap"). Also, as discussed above, two contributions would need to be made to the SciPy package to enable
-    1) bias correction for multi-dimensional statistics and 2) a return value of a point estimate for the population
-    parameter of interest (lower and upper quantiles in this case).
+    Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
+    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
     """
-    bootstraps: tuple = (metric_values,)  # bootstrap samples must be in a sequence
+    assert expectation_suite is None or isinstance(expectation_suite, ExpectationSuite)
+    assert expectation_suite_name is None or isinstance(expectation_suite_name, str)
 
-    if random_seed:
-        random_state = np.random.Generator(np.random.PCG64(random_seed))
+    expectation_suite = get_or_create_expectation_suite(
+        data_context=data_context,
+        expectation_suite=expectation_suite,
+        expectation_suite_name=expectation_suite_name,
+        component_name=component_name,
+        persist=persist,
+    )
+
+    batch_request = materialize_batch_request(batch_request=batch_request)
+    validator: "Validator" = data_context.get_validator(  # noqa: F821
+        batch_request=batch_request,
+        expectation_suite=expectation_suite,
+    )
+
+    return validator
+
+
+def get_or_create_expectation_suite(
+    data_context: "BaseDataContext",  # noqa: F821
+    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    expectation_suite_name: Optional[str] = None,
+    component_name: Optional[str] = None,
+    persist: bool = False,
+) -> "ExpectationSuite":  # noqa: F821
+    """
+    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
+    """
+    generate_temp_expectation_suite_name: bool
+    create_expectation_suite: bool
+
+    if expectation_suite is not None and expectation_suite_name is not None:
+        if expectation_suite.expectation_suite_name != expectation_suite_name:
+            raise ValueError(
+                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
+            )
+
+        return expectation_suite
+    elif expectation_suite is None and expectation_suite_name is not None:
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = True
+    elif expectation_suite is not None and expectation_suite_name is None:
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = False
     else:
-        random_state = None
+        generate_temp_expectation_suite_name = True
+        create_expectation_suite = True
 
-    lower_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
-        bootstraps,
-        lambda data: np.quantile(
-            data,
-            q=false_positive_rate / 2,
-        ),
-        vectorized=False,
-        confidence_level=1.0 - false_positive_rate,
-        n_resamples=n_resamples,
-        method=method,
-        random_state=random_state,
-    )
-    upper_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
-        bootstraps,
-        lambda data: np.quantile(
-            data,
-            q=1.0 - (false_positive_rate / 2),
-        ),
-        vectorized=False,
-        confidence_level=1.0 - false_positive_rate,
-        n_resamples=n_resamples,
-        method=method,
-        random_state=random_state,
-    )
+    if generate_temp_expectation_suite_name:
+        if not component_name:
+            component_name = "test"
 
-    # The idea that we can take the midpoint of the confidence interval is based on the fact that we think the
-    # confidence interval was built from a symmetrical distribution. We think the distribution is normal due to
-    # the implications of the Central Limit Theorem (CLT) (https://en.wikipedia.org/wiki/Central_limit_theorem) on
-    # the bootstrap samples.
-    # Unfortunately, the assumption that the CLT applies, does not hold in all cases. The bias-corrected and accelerated
-    # (BCa) confidence interval computed using scipy.stats.bootstrap attempts to compute the "acceleration" as a
-    # correction, because the standard normal approximation (CLT) assumes that the standard error of the bootstrap
-    # quantiles (theta-hat) is the same for all parameters (theta). The acceleration (which is the rate of change of
-    # the standard error of the quantile point estimate) is not a perfect correction, and therefore the assumption that
-    # this interval is built from a normal distribution does not always hold.
-    # See:
-    #
-    # Efron, B., & Tibshirani, R. J. (1993). The BCa method. An Introduction to the Bootstrap (pp. 184-188).
-    #     Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
-    #
-    # For an in-depth look at how the BCa interval is constructed and you will find the points made above on page 186.
-    lower_quantile_confidence_interval: stats._bootstrap.BootstrapResult.ConfidenceInterval = (
-        lower_quantile_bootstrap_result.confidence_interval
-    )
-    lower_quantile_point_estimate: np.float64 = np.mean(
-        [
-            lower_quantile_confidence_interval.low,
-            lower_quantile_confidence_interval.high,
-        ]
-    )
-    upper_quantile_confidence_interal: stats._bootstrap.BootstrapResult.ConfidenceInterval = (
-        upper_quantile_bootstrap_result.confidence_interval
-    )
-    upper_quantile_point_estimate: np.float64 = np.mean(
-        [upper_quantile_confidence_interal.low, upper_quantile_confidence_interal.high]
-    )
+        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"
 
-    return lower_quantile_point_estimate, upper_quantile_point_estimate
+    if create_expectation_suite:
+        if persist:
+            try:
+                # noinspection PyUnusedLocal
+                expectation_suite = data_context.get_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                )
+            except ge_exceptions.DataContextError:
+                expectation_suite = data_context.create_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                )
+                logger.info(
+                    f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
+                )
+        else:
+            expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name,
+                data_context=data_context,
+            )
+
+    return expectation_suite
+
+
+def sanitize_parameter_name(name: str) -> str:
+    """
+    This method provides display-friendly version of "name" argument.
+    """
+    return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")

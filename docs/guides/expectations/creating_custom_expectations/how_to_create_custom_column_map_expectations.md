@@ -18,7 +18,7 @@ This guide will walk you through the process of creating a custom `ColumnMapExpe
 
 ### 1. Choose a name for your Expectation
 
-First, decide on a name for your own Expectation. By convention, `ColumnMapExpectations` always start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](/docs/contributing/style_guides/code_style#expectations)  of the code Style Guide.
+First, decide on a name for your own Expectation. By convention, `ColumnMapExpectations` always start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](../../../contributing/style_guides/code_style.md#expectations)  of the code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
@@ -68,7 +68,7 @@ The template file is set up so that this will run the Expectation's `print_diagn
 
 ```
 Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
@@ -120,7 +120,7 @@ At this point you can re-run your diagnostic checklist. You should see something
 $ python expect_column_values_to_equal_three.py
 
 Completeness checklist for ExpectColumnValuesToEqualThree:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
@@ -160,7 +160,7 @@ However, you should see that the tests you've written are now being caught and r
 $ python expect_column_values_to_equal_three.py
 
 Completeness checklist for ExpectColumnValuesToEqualThree:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
@@ -248,7 +248,7 @@ Running your diagnostic checklist at this point should return something like thi
 $ python expect_column_values_to_equal_three.py
 
 Completeness checklist for ExpectColumnValuesToEqualThree:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine

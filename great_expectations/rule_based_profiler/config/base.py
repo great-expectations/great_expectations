@@ -9,6 +9,7 @@ from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
+    ValidationError,
     fields,
     post_dump,
     post_load,
@@ -101,22 +102,15 @@ class NotNullSchema(Schema):
         return cleaned_output
 
 
-class DomainBuilderConfig(DictDot):
+class DomainBuilderConfig(SerializableDictDot):
     def __init__(
         self,
         class_name: str,
         module_name: Optional[str] = None,
-        batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
-    ):
-        if module_name is not None:
-            self.module_name = module_name
-
-        if class_name is not None:
-            self.class_name = class_name
-
-        if batch_request is not None:
-            self.batch_request = batch_request
+    ) -> None:
+        self.module_name = module_name
+        self.class_name = class_name
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -126,6 +120,49 @@ class DomainBuilderConfig(DictDot):
                 v,
                 self.__class__.__name__,
             )
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class DomainBuilderConfigSchema(NotNullSchema):
@@ -143,34 +180,26 @@ class DomainBuilderConfigSchema(NotNullSchema):
         required=True,
         allow_none=False,
     )
-    batch_request = fields.Raw(
-        required=False,
-        allow_none=True,
-    )
 
 
-class ParameterBuilderConfig(DictDot):
+class ParameterBuilderConfig(SerializableDictDot):
     def __init__(
         self,
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
+        evaluation_parameter_builder_configs: Optional[list] = None,
         json_serialize: bool = True,
-        batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
-    ):
+    ) -> None:
+        self.module_name = module_name
+        self.class_name = class_name
+
         self.name = name
 
-        if module_name is not None:
-            self.module_name = module_name
-
-        if class_name is not None:
-            self.class_name = class_name
+        self.evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
 
         self.json_serialize = json_serialize
-
-        if batch_request is not None:
-            self.batch_request = batch_request
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -180,6 +209,49 @@ class ParameterBuilderConfig(DictDot):
                 v,
                 self.__class__.__name__,
             )
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class ParameterBuilderConfigSchema(NotNullSchema):
@@ -201,40 +273,40 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=True,
         allow_none=False,
     )
+    evaluation_parameter_builder_configs = fields.List(
+        cls_or_instance=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
     json_serialize = fields.Boolean(
         required=False,
         allow_none=True,
         missing=True,
     )
-    batch_request = fields.Raw(
-        required=False,
-        allow_none=True,
-    )
 
 
-class ExpectationConfigurationBuilderConfig(DictDot):
+class ExpectationConfigurationBuilderConfig(SerializableDictDot):
     def __init__(
         self,
         expectation_type: str,
         class_name: str,
         module_name: Optional[str] = None,
         meta: Optional[dict] = None,
-        batch_request: Optional[Union[dict, str]] = None,
+        validation_parameter_builder_configs: Optional[list] = None,
         **kwargs,
-    ):
+    ) -> None:
+        self.module_name = module_name
+        self.class_name = class_name
+
         self.expectation_type = expectation_type
 
-        if module_name is not None:
-            self.module_name = module_name
+        self.meta = meta
 
-        if class_name is not None:
-            self.class_name = class_name
-
-        if meta is not None:
-            self.meta = meta
-
-        if batch_request is not None:
-            self.batch_request = batch_request
+        self.validation_parameter_builder_configs = validation_parameter_builder_configs
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -244,6 +316,49 @@ class ExpectationConfigurationBuilderConfig(DictDot):
                 v,
                 self.__class__.__name__,
             )
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
@@ -275,7 +390,12 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
         required=False,
         allow_none=True,
     )
-    batch_request = fields.Raw(
+    validation_parameter_builder_configs = fields.List(
+        cls_or_instance=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
+            required=True,
+            allow_none=False,
+        ),
         required=False,
         allow_none=True,
     )
@@ -284,12 +404,14 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
 class RuleConfig(SerializableDictDot):
     def __init__(
         self,
-        expectation_configuration_builders: List[
-            dict
-        ],  # see ExpectationConfigurationBuilderConfig
+        variables: Optional[Dict[str, Any]] = None,
         domain_builder: Optional[dict] = None,  # see DomainBuilderConfig
         parameter_builders: Optional[List[dict]] = None,  # see ParameterBuilderConfig
-    ):
+        expectation_configuration_builders: Optional[
+            List[dict]
+        ] = None,  # see ExpectationConfigurationBuilderConfig
+    ) -> None:
+        self.variables = variables
         self.domain_builder = domain_builder
         self.parameter_builders = parameter_builders
         self.expectation_configuration_builders = expectation_configuration_builders
@@ -344,6 +466,14 @@ class RuleConfigSchema(NotNullSchema):
 
     __config_class__ = RuleConfig
 
+    variables = fields.Dict(
+        keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
     domain_builder = fields.Nested(
         DomainBuilderConfigSchema,
         required=False,
@@ -364,8 +494,8 @@ class RuleConfigSchema(NotNullSchema):
             required=True,
             allow_none=False,
         ),
-        required=True,
-        allow_none=False,
+        required=False,
+        allow_none=True,
     )
 
 
@@ -375,21 +505,41 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
-        class_name: Optional[str] = None,
-        module_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
-    ):
+    ) -> None:
+        self.module_name = "great_expectations.rule_based_profiler"
+        self.class_name = "RuleBasedProfiler"
+
         self.name = name
+
         self.config_version = config_version
-        self.rules = rules
-        if class_name is not None:
-            self.class_name = class_name
-        if module_name is not None:
-            self.module_name = module_name
+
         self.variables = variables
+        self.rules = rules
 
         super().__init__(commented_map=commented_map)
+
+    @classmethod
+    def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
+        """Override parent implementation to pop unnecessary attrs from config.
+
+        Please see parent BaseYamlConfig for more details.
+        """
+        try:
+            schema_instance: Any = cls._get_schema_instance()
+            config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
+            config.pop("class_name", None)
+            config.pop("module_name", None)
+            if isinstance(config, dict):
+                return cls.get_config_class()(commented_map=commented_map, **config)
+
+            return config
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading config.  See ValidationError for more details."
+            )
+            raise
 
     @classmethod
     def get_config_class(cls) -> Type["RuleBasedProfilerConfig"]:  # noqa: F821
@@ -489,8 +639,6 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         }
 
         return cls(
-            class_name=profiler.__class__.__name__,
-            module_name=profiler.__class__.__module__,
             name=profiler.config.name,
             config_version=profiler.config.config_version,
             variables=runtime_variables,

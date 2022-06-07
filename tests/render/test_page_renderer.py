@@ -1,7 +1,5 @@
 import json
-import os
 import re
-from collections import OrderedDict
 
 import mistune
 import pytest

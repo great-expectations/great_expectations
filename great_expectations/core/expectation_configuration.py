@@ -65,7 +65,7 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
 
 
 class ExpectationContext(SerializableDictDot):
-    def __init__(self, description: Optional[str] = None):
+    def __init__(self, description: Optional[str] = None) -> None:
         self._description = description
 
     @property
@@ -73,7 +73,7 @@ class ExpectationContext(SerializableDictDot):
         return self._description
 
     @description.setter
-    def description(self, value):
+    def description(self, value) -> None:
         self._description = value
 
 
@@ -950,7 +950,7 @@ class ExpectationConfiguration(SerializableDictDot):
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
-    ):
+    ) -> None:
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
                 "expectation_type must be a string"
@@ -1059,6 +1059,10 @@ class ExpectationConfiguration(SerializableDictDot):
     @property
     def kwargs(self) -> dict:
         return self._kwargs
+
+    @kwargs.setter
+    def kwargs(self, value: dict) -> None:
+        self._kwargs = value
 
     def _get_default_custom_kwargs(self) -> dict:
         # NOTE: this is a holdover until class-first expectations control their

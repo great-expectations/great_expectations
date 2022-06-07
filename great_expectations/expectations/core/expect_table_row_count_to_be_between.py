@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
@@ -11,7 +11,18 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
+    VARIABLES_KEY,
+)
 
 
 class ExpectTableRowCountToBeBetween(TableExpectation):
@@ -77,57 +88,63 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "profiler_config",
     )
 
+    table_row_count_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="NumericMetricRangeMultiBatchParameterBuilder",
+        name="table_row_count_range_estimator",
+        metric_name="table.row_count",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        enforce_numeric_metric=True,
+        replace_nan_with_zero=True,
+        reduce_scalar_metric=True,
+        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        estimator=f"{VARIABLES_KEY}estimator",
+        n_resamples=f"{VARIABLES_KEY}n_resamples",
+        random_seed=f"{VARIABLES_KEY}random_seed",
+        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
+        truncate_values=f"{VARIABLES_KEY}truncate_values",
+        round_decimals=f"{VARIABLES_KEY}round_decimals",
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
+    )
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        table_row_count_range_estimator_parameter_builder_config,
+    ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
-        class_name="RuleBasedProfilerConfig",
-        module_name="great_expectations.rule_based_profiler",
-        variables={
-            "false_positive_rate": 0.05,
-            "estimator": "bootstrap",
-            "num_bootstrap_samples": 9999,
-            "bootstrap_random_seed": None,
-            "round_decimals": 0,
-            "truncate_values": {
-                "lower_bound": 0,
-                "upper_bound": None,
-            },
-        },
+        variables={},
         rules={
             "default_expect_table_row_count_to_be_between_rule": {
+                "variables": {
+                    "false_positive_rate": 0.05,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "estimator": "bootstrap",
+                    "n_resamples": 9999,
+                    "random_seed": None,
+                    "include_estimator_samples_histogram_in_details": False,
+                    "truncate_values": {
+                        "lower_bound": 0,
+                        "upper_bound": None,
+                    },
+                    "round_decimals": 0,
+                },
                 "domain_builder": {
                     "class_name": "TableDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 },
-                "parameter_builders": [
-                    {
-                        "name": "row_count_range",
-                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "table.row_count",
-                        "metric_domain_kwargs": None,
-                        "metric_value_kwargs": None,
-                        "enforce_numeric_metric": True,
-                        "replace_nan_with_zero": True,
-                        "reduce_scalar_metric": True,
-                        "false_positive_rate": "$variables.false_positive_rate",
-                        "estimator": "$variables.estimator",
-                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                        "round_decimals": "$variables.round_decimals",
-                        "truncate_values": "$variables.truncate_values",
-                        "json_serialize": True,
-                    },
-                ],
                 "expectation_configuration_builders": [
                     {
                         "expectation_type": "expect_table_row_count_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "min_value": "$parameter.row_count_range.value.value_range[0]",
-                        "max_value": "$parameter.row_count_range.value.value_range[1]",
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "min_value": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+                        "max_value": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
                         "meta": {
-                            "profiler_details": "$parameter.row_count_range.details",
+                            "profiler_details": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     }
                 ],
@@ -152,7 +169,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -161,14 +178,12 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         # Setting up a configuration
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
-
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(

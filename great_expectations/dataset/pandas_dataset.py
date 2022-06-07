@@ -36,7 +36,7 @@ class MetaPandasDataset(Dataset):
     and PandasDataset implements the expectation methods themselves.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -409,7 +409,7 @@ Notes:
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False

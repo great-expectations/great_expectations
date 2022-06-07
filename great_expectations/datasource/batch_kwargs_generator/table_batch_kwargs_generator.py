@@ -37,7 +37,7 @@ class AssetConfigurationSchema(Schema):
 
 
 class AssetConfiguration:
-    def __init__(self, table, schema=None):
+    def __init__(self, table, schema=None) -> None:
         self.__table = table
         self.__schema = schema
 
@@ -83,7 +83,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         "query_parameters",
     }
 
-    def __init__(self, name="default", datasource=None, assets=None):
+    def __init__(self, name="default", datasource=None, assets=None) -> None:
         super().__init__(name=name, datasource=datasource)
         if not assets:
             assets = {}
@@ -288,7 +288,9 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         )
 
     # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
+    def get_available_partition_ids(
+        self, generator_asset=None, data_asset_name=None
+    ) -> None:
         assert (generator_asset and not data_asset_name) or (
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."

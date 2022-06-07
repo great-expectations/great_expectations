@@ -4,19 +4,20 @@ title: How to add SQLAlchemy support for Custom Expectations
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you implement native SQLAlchemy support for your [Custom Expectation](../creating_custom_expectations/overview.md). 
+This guide will help you implement native SQLAlchemy support for your <TechnicalTag tag="custom_expectation" text="Custom Expectation" />.
 
 <Prerequisites>
 
- - Created a [Custom Expectation](../creating_custom_expectations/overview.md)
+ - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
 
 </Prerequisites>
 
-Great Expectations supports a number of [Execution Engines](../../../reference/execution_engine.md), including a SQLAlchemy Execution Engine. 
-These Execution Engines provide the computing resources used to calculate the [Metrics](../../../reference/metrics.md) defined in the Metric class of your Custom Expectation.
+Great Expectations supports a number of <TechnicalTag tag="execution_engine" text="Execution Engines" />, including a SQLAlchemy Execution Engine. 
+These Execution Engines provide the computing resources used to calculate the <TechnicalTag tag="metric" text="Metrics" /> defined in the `Metric` class of your Custom Expectation.
 
-If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Execution Engines that it supports.
+If you decide to contribute your <TechnicalTag tag="expectation" text="Expectation" />, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Execution Engines that it supports.
 
 We will add SQLAlchemy support for the Custom Expectations implemented in our guides on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
 and [how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
@@ -41,9 +42,10 @@ If not specified, Great Expectations will attempt to determine the implemented b
 
 ### 2. Implement the SQLAlchemy logic for your Custom Expectation
 
-Great Expectations provides a variety of ways to implement an Expectation in SQLAlchemy. Two of the most common include: 
-1.  Defining a partial function that takes a SQLAlchemy column as input
-2.  Directly executing queries using SQLAlchemy objects to determine the value of your Expectation's metric directly 
+Great Expectations provides a variety of ways to implement an Expectation in SQLAlchemy. Two of the most common include:  
+
+1. Defining a partial function that takes a SQLAlchemy column as input
+2. Directly executing queries using SQLAlchemy objects to determine the value of your Expectation's metric directly 
 
 <Tabs
   groupId="metric-type"
@@ -147,7 +149,7 @@ and the Spark backend covered in our guide on [how to add Spark support for Cust
 you should see the following in your Diagnostic Checklist:
 
 ```console
-✔ Has core logic that passes tests for all applicable Execution Engines
+✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 ```
 
 <div style={{"text-align":"center"}}>
@@ -162,7 +164,7 @@ This guide will leave you with core functionality sufficient for [contribution](
 
 If you're interested in having your contribution accepted at a Beta level, your Custom Expectation will need to support SQLAlchemy, Spark, and Pandas.
 
-For full acceptance into the Great Expectations codebase at a Production level, we require that your Custom Expectation meets our code standards, including linting, test coverage, and style. 
+For full acceptance into the Great Expectations codebase at a Production level, we require that your Custom Expectation meets our code standards, test coverage and style. 
 If you believe your Custom Expectation is otherwise ready for contribution at a Production level, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls), and we will work with you to ensure your Custom Expectation meets these standards.
 
 :::note

@@ -71,7 +71,7 @@ This guide will walk you through the first four steps, the minimum for a functio
 
 ```
 Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
@@ -117,7 +117,7 @@ At this point you can re-run your diagnostic checklist. You should see something
 $ python expect_table_columns_to_be_unique.py
 
 Completeness checklist for ExpectTableColumnsToBeUnique:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
@@ -160,7 +160,7 @@ However, you should see that the tests you've written are now being caught and r
 $ python expect_table_columns_to_be_unique.py
 
 Completeness checklist for ExpectTableColumnsToBeUnique:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
@@ -272,7 +272,7 @@ Running your diagnostic checklist at this point should return something like thi
 $ python expect_table_columns_to_be_unique.py
 
 Completeness checklist for ExpectTableColumnsToBeUnique:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
@@ -296,7 +296,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L203-L208
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L203-L206
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

@@ -14,6 +14,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import ExecutionEngineError
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -69,6 +70,42 @@ def basic_data_context_v013_config():
             },
         }
     )
+
+
+@pytest.fixture
+def data_context_with_runtime_sql_datasource_for_testing_get_batch(
+    sa,
+    empty_data_context,
+):
+    context: DataContext = empty_data_context
+    db_file_path: str = file_relative_path(
+        __file__,
+        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    datasource_config: str = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SqlAlchemyExecutionEngine
+            connection_string: sqlite:///{db_file_path}
+
+        data_connectors:
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                batch_identifiers:
+                    - pipeline_stage_name
+                    - airflow_run_id
+    """
+
+    context.test_yaml_config(
+        name="my_runtime_sql_datasource", yaml_config=datasource_config
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+    return context
 
 
 def test_ConfigOnlyDataContext_v013__initialization(
@@ -203,10 +240,13 @@ def test_config_variables(empty_data_context):
     assert set(context.config_variables.keys()) == {"instance_id"}
 
 
+@pytest.mark.filterwarnings(
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+)
 def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
     context = empty_data_context
 
-    yaml_config = f"""
+    yaml_config = """
         class_name: Datasource
 
         execution_engine:
@@ -243,6 +283,9 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
     assert my_batch.data.dataframe.equals(test_df)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+)
 def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas_execution_engine(
     empty_data_context, test_df, tmp_path_factory
 ):
@@ -343,6 +386,9 @@ data_connectors:
     assert df_data.drop("belongs_in_split", axis=1).shape == (4, 10)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+)
 def test_relative_data_connector_default_and_relative_asset_base_directory_paths(
     empty_data_context, test_df, tmp_path_factory
 ):
@@ -359,7 +405,7 @@ def test_relative_data_connector_default_and_relative_asset_base_directory_paths
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    yaml_config = f"""
+    yaml_config = """
 class_name: Datasource
 
 execution_engine:
@@ -420,7 +466,7 @@ def test__get_data_context_version(empty_data_context, titanic_data_context):
     assert not context._get_data_context_version("some_datasource_name", **{})
     assert not context._get_data_context_version(arg1="some_datasource_name", **{})
 
-    yaml_config = f"""
+    yaml_config = """
 class_name: Datasource
 
 execution_engine:
@@ -506,6 +552,9 @@ def test_in_memory_data_context_configuration(
     assert my_validator.expect_table_column_count_to_equal(7)["success"]
 
 
+@pytest.mark.filterwarnings(
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+)
 def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector(
     sa,
     data_context_with_runtime_sql_datasource_for_testing_get_batch,
@@ -596,6 +645,9 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
     assert len(validator.batches) == 1
 
 
+@pytest.mark.filterwarnings(
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+)
 def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     sa,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,

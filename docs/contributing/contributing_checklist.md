@@ -18,7 +18,7 @@ Once your code is ready, please go through the following checklist before submit
 
 #### 2. Have you followed the Style Guide for code and comments?
 
-* The [Style Guide](/docs/contributing/style_guides/code_style) is here.
+* The [Style Guide](./style_guides/code_style.md) is here.
 
 * Thanks for helping us keep the codebase and documentation clean and consistent, so that it’s easier to maintain it as a community!
 
@@ -48,9 +48,9 @@ Once your code is ready, please go through the following checklist before submit
 If your PR contains **only** changes to `contrib` directory (community contributed Expectations), please skip this step - the tests that you included in the Expectation itself are sufficient and you do not need to run pytest.
 :::
 
-* See [Writing unit and integration tests](/docs/contributing/contributing_test) for details on how to write unit tests in Great Expectations.
+* See [Writing unit and integration tests](./contributing_test.md) for details on how to write unit tests in Great Expectations.
 
-* Please make certain to run `pytest` to verify that all tests pass locally. See [Running tests](/docs/contributing/contributing_test) for details.
+* Please make certain to run `pytest` to verify that all tests pass locally. See [Running tests](./contributing_test.md) for details.
 
 #### 5. Have you documented all the changes in your PR?
 
@@ -77,21 +77,25 @@ When you’re done with your work…
 
 * Provide background for reviewers so they can understand and approve your PR more quickly:
 
-	* Choose a short title which sums up the changes that you have made.
+    * Choose a short title which sums up the changes that you have made.
 
-	* Add a tag to help categorize the PR:
+    * Add a tag to help categorize the PR:
 
-		* [BUGFIX] for PRs that address minor bugs without changing behavior,
+        * [BUGFIX] for PRs that address minor bugs without changing behavior,
 
-		* [FEATURE] for significant PRs that add a new feature likely to require being added to our feature maturity matrix,
+        * [FEATURE] for significant PRs that add a new feature likely to require being added to our feature maturity matrix,
 
-		* [DOCS] for PRs that focus on improving documentation, or
+        * [DOCS] for PRs that focus on improving documentation, or
 
-		* [MAINTENANCE] for PRs that focus on updating repository settings or related chores.
+        * [MAINTENANCE] for PRs that focus on updating repository settings or related chores.
+		
+        * [CONTRIB] for the contribution of Custom Expectations & supporting work into our `contrib/` directory.
+      
+        * [HACKATHON] for submissions to an active Great Expectations Hackathon.
+    
+    * Summarize your changes using a few clear sentences (sometimes screenshots are nice too!). A good guide is to aim for a collection of commit message summaries that provide more details about what your changes do, like “Fixed handling of malformed datasource configuration” or “Improved docstrings for store module”
 
-		* Summarize your changes using a few clear sentences (sometimes screenshots are nice too!). A good guide is to aim for a collection of commit message summaries that provide more details about what your changes do, like “Fixed handling of malformed datasource configuration” or “Improved docstrings for store module”
-
-		* Finally, in the section for design review, include a description of any prior discussion or coordination on the features in the PR, such as mentioning the number of the issue where discussion has taken place, e.g. “Closes #123”, linking to a relevant discuss or slack article, citing a team meeting, or even noting that no discussion is relevant because the issue is small.
+    * Finally, in the section for design review, include a description of any prior discussion or coordination on the features in the PR, such as mentioning the number of the issue where discussion has taken place, e.g. “Closes #123”, linking to a relevant discuss or slack article, citing a team meeting, or even noting that no discussion is relevant because the issue is small.
 
 #### 2. Confirm the contributor license agreement (CLA)
 
