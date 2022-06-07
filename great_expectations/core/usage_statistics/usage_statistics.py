@@ -614,6 +614,9 @@ def _handle_expectation_suite_usage_statistics(
     expectation_suite_name: Optional[str] = None,
     **kwargs,
 ) -> dict:
+    """
+    This method anonymizes "expectation_suite_name" for events that utilize this property.
+    """
     data_context_id: Optional[str]
     try:
         data_context_id = data_context.data_context_id
