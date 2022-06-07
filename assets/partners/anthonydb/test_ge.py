@@ -5,6 +5,7 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
+
 def test_ge():
 
 
@@ -13,7 +14,7 @@ def test_ge():
     context = ge.get_context()
 
     datasource_config = {
-        "name": "my_redshift_datasource",
+        "name": "my_datasource",
         "class_name": "Datasource",
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
@@ -42,7 +43,7 @@ def test_ge():
 
     # First test for RuntimeBatchRequest using a query
     batch_request = RuntimeBatchRequest(
-        datasource_name="my_redshift_datasource",
+        datasource_name="my_datasource",
         data_connector_name="default_runtime_data_connector_name",
         data_asset_name="default_name",  # this can be anything that identifies this data
         runtime_parameters={"query": "SELECT TOP 10 * from dbo.taxi_data"},
@@ -63,3 +64,5 @@ def test_ge():
     # NOTE: The following code is only for testing and can be ignored by users.
 
     assert isinstance(validator, ge.validator.validator.Validator)
+    
+    # TODO Run additional tests for your datasource
