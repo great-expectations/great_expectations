@@ -369,7 +369,7 @@ def save_expectation_suite_usage_statistics(
     data_context: "DataContext",  # noqa: F821
     expectation_suite: ExpectationSuite,
     expectation_suite_name: Optional[str] = None,
-    **kwargs,
+    **kwargs: dict,
 ) -> dict:
     """
     Event handler for saving expectation suite with either "ExpectationSuite" object or "expectation_suite_name" string.
@@ -379,6 +379,7 @@ def save_expectation_suite_usage_statistics(
         event_arguments_payload_handler_name="save_expectation_suite_usage_statistics",
         expectation_suite=expectation_suite,
         expectation_suite_name=expectation_suite_name,
+        interactive_mode=None,
         **kwargs,
     )
 
@@ -386,7 +387,7 @@ def save_expectation_suite_usage_statistics(
 def get_expectation_suite_usage_statistics(
     data_context: "DataContext",  # noqa: F821
     expectation_suite_name: str,
-    **kwargs,
+    **kwargs: dict,
 ) -> dict:
     """
     Event handler for obtaining expectation suite with "expectation_suite_name" string.
@@ -396,6 +397,7 @@ def get_expectation_suite_usage_statistics(
         event_arguments_payload_handler_name="get_expectation_suite_usage_statistics",
         expectation_suite=None,
         expectation_suite_name=expectation_suite_name,
+        interactive_mode=None,
         **kwargs,
     )
 
@@ -404,33 +406,19 @@ def edit_expectation_suite_usage_statistics(
     data_context: "DataContext",  # noqa: F821
     expectation_suite_name: str,
     interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
+    **kwargs: dict,
 ) -> dict:
-    try:
-        data_context_id = data_context.data_context_id
-    except AttributeError:
-        data_context_id = None
-
-    anonymizer = _anonymizers.get(data_context_id, None)
-    if anonymizer is None:
-        anonymizer = Anonymizer(data_context_id)
-        _anonymizers[data_context_id] = anonymizer
-
-    if interactive_mode is None:
-        payload = {}
-    else:
-        payload = copy.deepcopy(interactive_mode.value)
-
-    # noinspection PyBroadException
-    try:
-        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
-            obj=expectation_suite_name
-        )
-    except Exception as e:
-        logger.debug(
-            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
-        )
-
-    return payload
+    """
+    Event handler for editing expectation suite with "expectation_suite_name" string.
+    """
+    return _handle_expectation_suite_usage_statistics(
+        data_context=data_context,
+        event_arguments_payload_handler_name="edit_expectation_suite_usage_statistics",
+        expectation_suite=None,
+        expectation_suite_name=expectation_suite_name,
+        interactive_mode=interactive_mode,
+        **kwargs,
+    )
 
 
 def add_datasource_usage_statistics(
@@ -538,12 +526,13 @@ def get_checkpoint_run_usage_statistics(
     return payload
 
 
+# noinspection PyUnusedLocal
 def get_profiler_run_usage_statistics(
     profiler: "RuleBasedProfiler",  # noqa: F821
     variables: Optional[dict] = None,
     rules: Optional[dict] = None,
-    *args,
-    **kwargs,
+    *args: tuple,
+    **kwargs: dict,
 ) -> dict:
     usage_statistics_handler: Optional[
         UsageStatisticsHandler
@@ -612,6 +601,7 @@ def _handle_expectation_suite_usage_statistics(
     event_arguments_payload_handler_name: str,
     expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
+    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
     **kwargs,
 ) -> dict:
     """
@@ -628,7 +618,12 @@ def _handle_expectation_suite_usage_statistics(
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
 
-    payload: dict = {}
+    payload: dict
+
+    if interactive_mode is None:
+        payload = {}
+    else:
+        payload = copy.deepcopy(interactive_mode.value)
 
     if expectation_suite_name is None:
         if isinstance(expectation_suite, ExpectationSuite):
