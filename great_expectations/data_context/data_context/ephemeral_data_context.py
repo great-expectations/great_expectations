@@ -16,4 +16,4 @@ class EphemeralDataContext(AbstractDataContext):
     """
 
     def _init_variables(self) -> EphemeralDataContextVariables:
-        pass
+        raise NotImplementedError

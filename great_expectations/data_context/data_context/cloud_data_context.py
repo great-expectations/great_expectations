@@ -12,4 +12,4 @@ class CloudDataContext(AbstractDataContext):
     """
 
     def _init_variables(self) -> CloudDataContextVariables:
-        pass
+        raise NotImplementedError

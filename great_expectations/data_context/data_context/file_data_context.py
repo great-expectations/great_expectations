@@ -15,4 +15,4 @@ class FileDataContext(AbstractDataContext):
     """
 
     def _init_variables(self) -> FileDataContextVariables:
-        pass
+        raise NotImplementedError
