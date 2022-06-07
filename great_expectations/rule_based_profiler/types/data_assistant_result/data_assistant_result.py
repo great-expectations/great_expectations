@@ -2143,7 +2143,7 @@ class DataAssistantResult(SerializableDictDot):
             column_based_expectation_configurations = (
                 column_based_expectation_configurations_by_type[expectation_type]
             )
-            attributed_metrics_by_domain = (
+            filtered_attributed_metrics_by_domain = (
                 self._filter_attributed_metrics_by_metric_name(
                     attributed_metrics_by_domain,
                     metric_name,
@@ -2155,7 +2155,7 @@ class DataAssistantResult(SerializableDictDot):
                     expectation_type=expectation_type,
                     expectation_configurations=column_based_expectation_configurations,
                     metric_name=metric_name,
-                    attributed_metrics_by_domain=attributed_metrics_by_domain,
+                    attributed_metrics_by_domain=filtered_attributed_metrics_by_domain,
                     plot_mode=plot_mode,
                     sequential=sequential,
                 )
@@ -2167,7 +2167,7 @@ class DataAssistantResult(SerializableDictDot):
                     expectation_type=expectation_type,
                     expectation_configurations=column_based_expectation_configurations,
                     metric_name=metric_name,
-                    attributed_metrics_by_domain=attributed_metrics_by_domain,
+                    attributed_metrics_by_domain=filtered_attributed_metrics_by_domain,
                     plot_mode=plot_mode,
                     sequential=sequential,
                 )
@@ -2313,17 +2313,20 @@ class DataAssistantResult(SerializableDictDot):
                 )
         elif plot_mode is PlotMode.DESCRIPTIVE:
             if metric_name in quantitative_metrics:
-                plot_impl = self.get_quantitative_metric_chart
+                chart = self.get_quantitative_metric_chart(
+                    df=df,
+                    metric_name=metric_name,
+                    sequential=sequential,
+                    subtitle=subtitle,
+                )
             elif metric_name in nominal_metrics:
-                plot_impl = self.get_nominal_metric_chart
+                chart = self.get_nominal_metric_chart(
+                    df=df,
+                    metric_name=metric_name,
+                    sequential=sequential,
+                    subtitle=subtitle,
+                )
 
-        if plot_impl:
-            chart = plot_impl(
-                df=df,
-                metric_name=metric_name,
-                sequential=sequential,
-                subtitle=subtitle,
-            )
         return chart
 
     def _create_display_chart_for_column_domain_expectation(
@@ -2373,28 +2376,34 @@ class DataAssistantResult(SerializableDictDot):
                 attributed_values = attributed_metrics[metric_name]
 
                 for expectation_configuration in expectation_configurations:
-                    df: pd.DataFrame = self._create_df_for_charting(
-                        metric_name=metric_name,
-                        attributed_values=attributed_values,
-                        expectation_configuration=expectation_configuration,
-                        plot_mode=plot_mode,
-                    )
+                    if (
+                        expectation_configuration.kwargs["column"]
+                        == domain.domain_kwargs.column
+                    ):
+                        df: pd.DataFrame = self._create_df_for_charting(
+                            metric_name=metric_name,
+                            attributed_values=attributed_values,
+                            expectation_configuration=expectation_configuration,
+                            plot_mode=plot_mode,
+                        )
 
-                    metric_name: str = sanitize_parameter_name(name=metric_name)
+                        sanitized_metric_name: str = sanitize_parameter_name(
+                            name=metric_name
+                        )
 
-                    column_name: str = domain.domain_kwargs.column
-                    subtitle = f"Column: {column_name}"
+                        column_name: str = domain.domain_kwargs.column
+                        subtitle = f"Column: {column_name}"
 
-                    return_chart = self._chart_domain_values(
-                        expectation_type=expectation_type,
-                        df=df,
-                        metric_name=metric_name,
-                        plot_mode=plot_mode,
-                        sequential=sequential,
-                        subtitle=subtitle,
-                    )
+                        return_chart = self._chart_domain_values(
+                            expectation_type=expectation_type,
+                            df=df,
+                            metric_name=sanitized_metric_name,
+                            plot_mode=plot_mode,
+                            sequential=sequential,
+                            subtitle=subtitle,
+                        )
 
-                    return_charts.append(return_chart)
+                        return_charts.append(return_chart)
 
         return return_charts
 
@@ -2538,8 +2547,10 @@ class DataAssistantResult(SerializableDictDot):
                 str, ParameterNode
             ] = attributed_metrics_by_domain[column_domain]
 
-            type_: str = expectation_configuration.expectation_type
-            if metric_expectation_map.get(type_) == metric_name:
+            if (
+                metric_expectation_map.get(metric_name)
+                == expectation_configuration.expectation_type
+            ):
                 attributed_values: ParameterNode = attributed_values_by_metric_name[
                     metric_name
                 ]
