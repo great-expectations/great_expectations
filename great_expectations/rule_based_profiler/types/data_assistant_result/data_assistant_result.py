@@ -402,10 +402,23 @@ class DataAssistantResult(SerializableDictDot):
         metric_component: MetricPlotComponent
         if metric_name == "table_columns":
             table_column: str = "table_column"
-            if len(np.unique(df[metric_name])) == 1:
+            unique_column_sets: np.ndarray = np.unique(df[metric_name])
+            if len(unique_column_sets) == 1:
                 column_set = df[metric_name].iloc[0]
             else:
                 column_set = None
+                # filter only on batches that do not contain every possible column
+                unique_columns: np.ndarray = np.unique(
+                    np.unique(df[metric_name].explode(metric_name))
+                )
+                df = df[df[metric_name].apply(set) != set(unique_columns)]
+                # record containing all columns to be compared against
+                empty_columns: List[None] = [None] * (len(batch_identifiers) + 1)
+                all_columns_record: pd.DataFrame = pd.DataFrame(
+                    data=[[unique_columns] + empty_columns], columns=df.columns
+                )
+                df = all_columns_record.append(df)
+                df[batch_name] = df[batch_name].fillna(value="All Columns")
 
             metric_component = MetricPlotComponent(
                 name=table_column,
@@ -501,10 +514,23 @@ class DataAssistantResult(SerializableDictDot):
         metric_component: MetricPlotComponent
         if metric_name == "table_columns":
             table_column: str = "table_column"
-            if len(np.unique(df[metric_name])) == 1:
+            unique_column_sets: np.ndarray = np.unique(df[metric_name])
+            if len(unique_column_sets) == 1:
                 column_set = df[metric_name].iloc[0]
             else:
                 column_set = None
+                # filter only on batches that do not contain every possible column
+                unique_columns: np.ndarray = np.unique(
+                    np.unique(df[metric_name].explode(metric_name))
+                )
+                df = df[df[metric_name].apply(set) != set(unique_columns)]
+                # record containing all columns to be compared against
+                empty_columns: List[None] = [None] * (len(batch_identifiers) + 1)
+                all_columns_record: pd.DataFrame = pd.DataFrame(
+                    data=[[unique_columns] + empty_columns], columns=df.columns
+                )
+                df = all_columns_record.append(df)
+                df[batch_name] = df[batch_name].fillna(value="All Columns")
 
             metric_component = MetricPlotComponent(
                 name=table_column,
