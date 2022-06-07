@@ -519,18 +519,6 @@ class DataAssistantResult(SerializableDictDot):
                 column_set = df[metric_name].iloc[0]
             else:
                 column_set = None
-                # filter only on batches that do not contain every possible column
-                unique_columns: np.ndarray = np.unique(
-                    np.unique(df[metric_name].explode(metric_name))
-                )
-                df = df[df[metric_name].apply(set) != set(unique_columns)]
-                # record containing all columns to be compared against
-                empty_columns: List[None] = [None] * (len(batch_identifiers) + 1)
-                all_columns_record: pd.DataFrame = pd.DataFrame(
-                    data=[[unique_columns] + empty_columns], columns=df.columns
-                )
-                df = all_columns_record.append(df)
-                df[batch_name] = df[batch_name].fillna(value="All Columns")
 
             metric_component = MetricPlotComponent(
                 name=table_column,
@@ -2099,30 +2087,42 @@ class DataAssistantResult(SerializableDictDot):
         attributed_values: ParameterNode
         expectation_type: str
         expectation_configuration: ExpectationConfiguration
-        metric_expectation_configuration: Optional[ExpectationConfiguration] = None
         for (
             metric_name,
             attributed_values,
         ) in attributed_metrics_by_table_domain.items():
             expectation_type = metric_expectation_map[metric_name]
 
-            for expectation_configuration in table_based_expectation_configurations:
-                if expectation_configuration.expectation_type == expectation_type:
-                    metric_expectation_configuration = expectation_configuration
-
-            table_domain_chart: alt.Chart = (
-                self._create_chart_for_table_domain_expectation(
-                    expectation_type=expectation_type,
-                    expectation_configuration=metric_expectation_configuration,
-                    metric_name=metric_name,
-                    attributed_values=attributed_values,
-                    include_column_names=include_column_names,
-                    exclude_column_names=exclude_column_names,
-                    plot_mode=plot_mode,
-                    sequential=sequential,
+            if plot_mode == PlotMode.PRESCRIPTIVE:
+                for expectation_configuration in table_based_expectation_configurations:
+                    if expectation_configuration.expectation_type == expectation_type:
+                        table_domain_chart: alt.Chart = (
+                            self._create_chart_for_table_domain_expectation(
+                                expectation_type=expectation_type,
+                                expectation_configuration=expectation_configuration,
+                                metric_name=metric_name,
+                                attributed_values=attributed_values,
+                                include_column_names=include_column_names,
+                                exclude_column_names=exclude_column_names,
+                                plot_mode=plot_mode,
+                                sequential=sequential,
+                            )
+                        )
+                        charts.append(table_domain_chart)
+            else:
+                table_domain_chart: alt.Chart = (
+                    self._create_chart_for_table_domain_expectation(
+                        expectation_type=expectation_type,
+                        expectation_configuration=None,
+                        metric_name=metric_name,
+                        attributed_values=attributed_values,
+                        include_column_names=include_column_names,
+                        exclude_column_names=exclude_column_names,
+                        plot_mode=plot_mode,
+                        sequential=sequential,
+                    )
                 )
-            )
-            charts.append(table_domain_chart)
+                charts.append(table_domain_chart)
 
         return [chart for chart in charts if chart is not None]
 
@@ -2597,7 +2597,7 @@ class DataAssistantResult(SerializableDictDot):
     def _create_chart_for_table_domain_expectation(
         self,
         expectation_type: str,
-        expectation_configuration: ExpectationConfiguration,
+        expectation_configuration: Optional[ExpectationConfiguration],
         metric_name: str,
         attributed_values: ParameterNode,
         include_column_names: Optional[List[str]],
