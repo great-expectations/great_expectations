@@ -4,6 +4,7 @@ import logging
 import os
 import platform
 import random
+import re
 import string
 import threading
 import traceback
@@ -312,6 +313,8 @@ import tempfile
 # RTOL: float = 1.0e-7
 RTOL: float = 1.0e-5
 ATOL: float = 5.0e-2
+
+RX_FLOAT = re.compile(r".*\d\.\d+.*")
 
 SQL_DIALECT_NAMES = (
     "sqlite",
@@ -2163,6 +2166,31 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                 test["output"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
             )
+
+    ##################################################################################################
+    # Some temporary stuff to see if test["output"]["result"] and result can be extracted consistently
+    actual_val = result
+    expected_val = test["output"]
+    if "observed_value" in expected_val:
+        print(
+            f"    - observed in expected ({type(expected_val['observed_value'])}) -> {expected_val['observed_value']}"
+        )
+        if RX_FLOAT.match(repr(expected_val["observed_value"])):
+            print(
+                f"    - a FLOAT is in there... should attempt np.testing.assert_allclose or np.allclose for comparison"
+            )
+        if (
+            isinstance(expected_val["observed_value"], dict)
+            and "values" in expected_val["observed_value"]
+        ):
+            print(f"    - 'values' key in test['output']")
+
+    if not expected_val:
+        print(f" - test['output'] is an empty dict; {test}")
+        if "catch_exceptions" in test["input"] and test["input"]["catch_exceptions"]:
+            print(f" - catch_exceptions is True")
+
+    ##################################################################################################
 
     # Check results
     if test["exact_match_out"] is True:
