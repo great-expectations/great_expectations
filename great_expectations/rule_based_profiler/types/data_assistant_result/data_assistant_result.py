@@ -665,7 +665,7 @@ class DataAssistantResult(SerializableDictDot):
                     y=alt.Y(
                         column_number_component.name,
                         type=column_number_component.alt_type,
-                        title=None,
+                        title=" ",
                         axis=alt.Axis(labels=False, ticks=False),
                     ),
                 )
@@ -748,7 +748,7 @@ class DataAssistantResult(SerializableDictDot):
                     y=alt.Y(
                         column_number_component.name,
                         type=column_number_component.alt_type,
-                        title=None,
+                        title=" ",
                         axis=alt.Axis(labels=False, ticks=False),
                     ),
                 )
