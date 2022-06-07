@@ -418,20 +418,21 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._batches = self._validator.batches
 
-        variables: Optional[Dict[str, Any]] = self.get_variables() or {}
-        rules: Optional[List[Rule]] = self.get_rules() or []
+        self._data_context = self._validator.data_context
 
+        variables: Optional[Dict[str, Any]] = self.get_variables() or {}
         self._profiler = RuleBasedProfiler(
             name=self.name,
             config_version=1.0,
             variables=variables,
-            data_context=self._validator.data_context,
+            data_context=self._data_context,
         )
 
         self._metrics_parameter_builders_by_domain = {}
 
-        rule: Rule
+        rules: Optional[List[Rule]] = self.get_rules() or []
 
+        rule: Rule
         for rule in rules:
             self.profiler.add_rule(rule=rule)
             self._metrics_parameter_builders_by_domain[
@@ -467,6 +468,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         data_assistant_result: DataAssistantResult = DataAssistantResult(
             batch_id_to_batch_identifier_display_name_map=self.batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
+            usage_statistics_handler=self._data_context._usage_statistics_handler,
         )
         run_profiler_on_data(
             data_assistant=self,

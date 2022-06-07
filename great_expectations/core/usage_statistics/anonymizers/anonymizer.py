@@ -62,6 +62,7 @@ class Anonymizer(BaseAnonymizer):
             StoreBackendAnonymizer,
         ]
 
+        # noinspection PyArgumentList
         self._anonymizers: Dict[Type[BaseAnonymizer], BaseAnonymizer] = {
             strategy: strategy(salt=self._salt, aggregate_anonymizer=self)
             for strategy in self._strategies
@@ -82,7 +83,7 @@ class Anonymizer(BaseAnonymizer):
         )
 
     def can_handle(self, obj: object, **kwargs) -> bool:
-        return Anonymizer._get_anonymizer(obj=obj, **kwargs) is not None
+        return self._get_anonymizer(obj=obj, **kwargs) is not None
 
     def _get_anonymizer(self, obj: object, **kwargs) -> Optional[BaseAnonymizer]:
         for anonymizer in self._anonymizers.values():
