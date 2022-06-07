@@ -6,6 +6,9 @@ from great_expectations.core.data_context_key import DataContextVariableKey, Str
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.store.datasource_store import DatasourceStore
 from great_expectations.data_context.types.base import DatasourceConfig
+from great_expectations.data_context.types.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
@@ -77,7 +80,8 @@ def test_datasource_store_retrieval(
     store: DatasourceStore = empty_datasource_store
 
     key: DataContextVariableKey = DataContextVariableKey(
-        resource_type="datasource", resource_name="my_datasource"
+        resource_type=DataContextVariableSchema.DATASOURCES,
+        resource_name="my_datasource",
     )
     store.set(key=key, value=datasource_config)
     res: DatasourceConfig = store.get(key=key)
@@ -151,7 +155,8 @@ def test_datasource_store_with_inline_store_backend(
     )
 
     key: DataContextVariableKey = DataContextVariableKey(
-        resource_type="datasources", resource_name="my_datasource"
+        resource_type=DataContextVariableSchema.DATASOURCES,
+        resource_name="my_datasource",
     )
 
     store.set(key=key, value=datasource_config)

@@ -2,6 +2,9 @@ from typing import Any, List, Optional, Tuple
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.exceptions.exceptions import StoreBackendError
 from great_expectations.util import filter_properties_dict
 
@@ -42,8 +45,8 @@ class InlineStoreBackend(StoreBackend):
     def config(self) -> dict:
         return self._config
 
-    def _get(self, key: Tuple[str, ...]) -> Any:
-        config_var_type: str = key[0]
+    def _get(self, key: Tuple[DataContextVariableSchema, str]) -> Any:
+        config_var_type: DataContextVariableSchema = key[0]
         config_var_name: Optional[str] = key[1]
 
         variable_config: Any = self._data_context.config[config_var_type]
@@ -52,8 +55,10 @@ class InlineStoreBackend(StoreBackend):
             return variable_config[config_var_name]
         return variable_config
 
-    def _set(self, key: Tuple[str, ...], value: Any, **kwargs: dict) -> None:
-        config_var_type: str = key[0]
+    def _set(
+        self, key: Tuple[DataContextVariableSchema, str], value: Any, **kwargs: dict
+    ) -> None:
+        config_var_type: DataContextVariableSchema = key[0]
         config_var_name: Optional[str] = key[1]
 
         project_config: DataContextConfig = self._data_context.config
@@ -92,8 +97,6 @@ class InlineStoreBackend(StoreBackend):
         return key in self._data_context.config
 
     def _validate_key(self, key: Tuple[str, ...]) -> None:
-        from great_expectations.data_context.types.base import DataContextConfig
-
         if len(key) != 2:
             raise TypeError(
                 f"Keys used in {self.__class__.__name__} must be composed of two parts: a variable type and an optional name"
@@ -101,12 +104,9 @@ class InlineStoreBackend(StoreBackend):
 
         type_, _ = key
 
-        if not isinstance(type_, str):
+        if not isinstance(
+            type_, DataContextVariableSchema
+        ) or not DataContextVariableSchema.has_value(type_):
             raise TypeError(
-                f"The resource type used in {self.__class__.__name__} keys must be of type {str} and not type {type(type_)}"
-            )
-
-        if type_ not in self._data_context.config:
-            raise TypeError(
-                f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextConfig.__name__}"
+                f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextVariableSchema.__name__}; invalid type {type(type_)} found"
             )

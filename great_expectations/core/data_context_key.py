@@ -1,6 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Tuple
 
+from great_expectations.data_context.types.data_context_variables import (
+    DataContextVariableSchema,
+)
+
 
 class DataContextKey(metaclass=ABCMeta):
     """DataContextKey objects are used to uniquely identify resources used by the DataContext.
@@ -78,7 +82,11 @@ class StringKey(DataContextKey):
 
 
 class DataContextVariableKey(DataContextKey):
-    def __init__(self, resource_type: str, resource_name: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        resource_type: DataContextVariableSchema,
+        resource_name: Optional[str] = None,
+    ) -> None:
         self._resource_type = resource_type
         self._resource_name = resource_name
 
