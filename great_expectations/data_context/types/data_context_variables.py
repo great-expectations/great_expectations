@@ -10,13 +10,11 @@ class DataContextVariableSchema(str, enum.Enum):
     CHECKPOINT_STORE_NAME = "checkpoint_store_name"
     PROFILER_STORE_NAME = "profiler_store_name"
     PLUGINS_DIRECTORY = "plugins_directory"
-    VALIDATION_OPERATORS = "validation_operators"
     STORES = "stores"
     DATA_DOCS_SITES = "data_docs_sites"
     NOTEBOOKS = "notebooks"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
     ANONYMIZED_USAGE_STATISTICS = "anonymous_usage_statistics"
-    STORE_BACKEND_DEFAULTS = "store_backend_defaults"
     CONCURRENCY = "concurrency"
     PROGRESS_BARS = "progress_bars"
 

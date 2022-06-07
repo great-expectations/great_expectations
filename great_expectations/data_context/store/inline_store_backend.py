@@ -10,6 +10,13 @@ from great_expectations.util import filter_properties_dict
 
 
 class InlineStoreBackend(StoreBackend):
+    """
+    The InlineStoreBackend enables CRUD behavior with the fields noted in a user's project config (`great_expectations.yml`).
+
+    It performs these actions through a reference to a DataContext instance.
+    Please note that is it only to be used with file-backed DataContexts (DataContext and FileDataContext).
+    """
+
     def __init__(
         self,
         data_context: "DataContext",  # noqa: F821
