@@ -167,6 +167,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                 # TODO: <Alex>ALEX</Alex>
                 and metric_computation_result.attributed_resolved_metrics[
                     0
+                ].conditioned_metric_values.ndim
+                > 1
+                and metric_computation_result.attributed_resolved_metrics[
+                    0
                 ].conditioned_metric_values.shape[1]
                 == 1
             ):
