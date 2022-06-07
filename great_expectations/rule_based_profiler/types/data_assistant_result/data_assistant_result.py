@@ -626,7 +626,12 @@ class DataAssistantResult(SerializableDictDot):
                         title=batch_component.title,
                         axis=alt.Axis(grid=False),
                     ),
-                    y=column_number_component.plot_on_y_axis(),
+                    y=alt.Y(
+                        column_number_component.name,
+                        type=column_number_component.alt_type,
+                        title=column_number_component.title,
+                        axis=alt.Axis(grid=True),
+                    ),
                     tooltip=tooltip,
                 )
             )
@@ -704,7 +709,12 @@ class DataAssistantResult(SerializableDictDot):
                         title=batch_component.title,
                         axis=alt.Axis(labels=False, grid=False),
                     ),
-                    y=column_number_component.plot_on_y_axis(),
+                    y=alt.Y(
+                        column_number_component.name,
+                        type=column_number_component.alt_type,
+                        title=column_number_component.title,
+                        axis=alt.Axis(grid=True),
+                    ),
                     tooltip=tooltip,
                 )
             )

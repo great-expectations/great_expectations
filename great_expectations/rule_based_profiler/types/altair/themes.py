@@ -41,6 +41,7 @@ x_axis_label_flush: bool = True
 x_axis_grid: bool = True
 
 # Y-Axis Only
+y_axis_title_x: int = -55
 
 # Legend
 legend_title_color: str = Colors.PURPLE.value
@@ -107,6 +108,9 @@ class AltairThemes(Enum):
             "titlePadding": axis_title_padding,
             "labelFontSize": axis_label_font_size,
             "labelColor": axis_label_color,
+        },
+        "axisY": {
+            "titleX": y_axis_title_x,
         },
         "axisX": {
             "titleY": x_axis_title_y,
