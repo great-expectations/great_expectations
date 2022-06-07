@@ -147,8 +147,8 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     #     "round_decimals": 3,
     # },
 )
-_ = validator.expectation_suite.add_expectation_configurations(
-    expectation_configurations=data_assistant_result.expectation_configurations
+validator.expectation_suite = data_assistant_result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
 )
 validator.save_expectation_suite(discard_failed_expectations=False)
 
