@@ -21,12 +21,12 @@ from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
+logger = logging.getLogger(__name__)
+
 try:
     from trino.exceptions import TrinoUserError
 except ImportError:
     TrinoUserError = None
-
-logger = logging.getLogger(__name__)
 
 try:
     from sqlalchemy.exc import ProgrammingError
