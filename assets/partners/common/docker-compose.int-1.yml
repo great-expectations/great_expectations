@@ -4,6 +4,6 @@ version: "3"
 services:
   integration_test:
     image: integration_test:latest
-    command: pytest -vvv test_ge.py;
+    command: pytest -vvv run.py;
     environment:
       DB_URL: ${DB_URL}

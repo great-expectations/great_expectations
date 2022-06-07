@@ -19,4 +19,4 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . /app/
 RUN great_expectations -y init
-CMD pytest test_ge.py -vvv
+CMD pytest run.py -vvv
