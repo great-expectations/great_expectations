@@ -13,6 +13,7 @@ import tests.test_utils as test_utils
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.data_context import BaseDataContext
 from great_expectations.data_context.store import (
@@ -42,6 +43,8 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.self_check.util import expectationSuiteSchema
 from great_expectations.util import gen_directory_tree_str, is_library_loadable
+
+yaml = YAMLHandler()
 
 
 @pytest.fixture()
@@ -1626,3 +1629,73 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
         inline_store_backend.remove_key(tuple_)
 
     assert "InlineStoreBackend does not support the deletion of keys" in str(e.value)
+
+
+@pytest.mark.integration
+def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
+    path_to_great_expectations_yml: str = os.path.join(
+        empty_data_context.root_directory, empty_data_context.GE_YML
+    )
+
+    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
+        data_context=empty_data_context,
+    )
+
+    # 1. Set simple string config value and confirm it persists in the GE.yml
+
+    with open(path_to_great_expectations_yml) as data:
+        config_commented_map_from_yaml = yaml.load(data)
+
+    assert config_commented_map_from_yaml["config_version"] == 3.0
+
+    new_config_version: float = 5.0
+    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+    tuple_ = key.to_tuple()
+
+    inline_store_backend.set(tuple_, new_config_version)
+
+    with open(path_to_great_expectations_yml) as data:
+        config_commented_map_from_yaml = yaml.load(data)
+
+    assert config_commented_map_from_yaml["config_version"] == new_config_version
+
+    # 2. Set nested dictionary config value and confirm it persists in the GE.yml
+
+    with open(path_to_great_expectations_yml) as data:
+        config_commented_map_from_yaml = yaml.load(data)
+
+    assert config_commented_map_from_yaml["datasources"] == {}
+
+    datasource_config_string: str = """
+        class_name: Datasource
+
+        execution_engine:
+            class_name: PandasExecutionEngine
+
+        data_connectors:
+            my_other_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: my/base/dir/
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+        """
+    datasource_config: dict = yaml.load(datasource_config_string)
+
+    key = DataContextVariableKey(
+        resource_type=DataContextVariableSchema.DATASOURCES,
+        resource_name="my_datasource",
+    )
+    tuple_ = key.to_tuple()
+
+    inline_store_backend.set(tuple_, datasource_config)
+
+    with open(path_to_great_expectations_yml) as data:
+        config_commented_map_from_yaml = yaml.load(data)
+
+    datasources: dict = config_commented_map_from_yaml["datasources"]
+    assert len(datasources) == 1
+    assert datasources["my_datasource"] == datasource_config
