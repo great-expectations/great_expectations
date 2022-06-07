@@ -1,7 +1,7 @@
 ---
 title: DataContext.create
 ---
-[Back to class documentation](../classes/great_expectations-data_context-data_context-data_context-DataContext)
+[Back to class documentation](/docs/api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext)
 
 ### Fully qualified path
 
@@ -11,7 +11,7 @@ title: DataContext.create
 
 Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
-`create` will not create a new "great_expectations" directory in the provided folder, provided one does not
+`create` will create a new "great_expectations" directory in the provided folder, provided one does not
 already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
 
 ### Parameters
@@ -28,4 +28,4 @@ DataContext
 
 ## Relevant documentation (links)
 
-- [Data Context](../../terms/data_context)
+- [Data Context](/docs/terms/data_context)
