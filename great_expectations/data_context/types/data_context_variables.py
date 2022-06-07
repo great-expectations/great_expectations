@@ -121,7 +121,13 @@ class FileDataContextVariables(DataContextVariables):
     data_context: Optional["DataContext"] = None  # noqa: F821
 
     def __post_init__(self) -> None:
-        # Chetan - 20220607 - Add comment!
+        # Chetan - 20220607 - Although the above argument is not truly optional, we are
+        # required to use default values because the parent class defines arguments with default values
+        # ("Fields without default values cannot appear after fields with default values").
+        #
+        # Python 3.10 resolves this issue around dataclass inheritance using `kw_only=True` (https://docs.python.org/3/library/dataclasses.html)
+        # This should be modified once our lowest supported version is 3.10.
+
         if self.data_context is None:
             raise ValueError(
                 f"A reference to a data context is required for {self.__class__.__name__}"
@@ -151,7 +157,13 @@ class CloudDataContextVariables(DataContextVariables):
     ge_cloud_access_token: Optional[str] = None
 
     def __post_init__(self) -> None:
-        # Chetan - 20220607 - Add comment!
+        # Chetan - 20220607 - Although the above arguments are not truly optional, we are
+        # required to use default values because the parent class defines arguments with default values
+        # ("Fields without default values cannot appear after fields with default values").
+        #
+        # Python 3.10 resolves this issue around dataclass inheritance using `kw_only=True` (https://docs.python.org/3/library/dataclasses.html)
+        # This should be modified once our lowest supported version is 3.10.
+
         if any(
             attr is None
             for attr in (
