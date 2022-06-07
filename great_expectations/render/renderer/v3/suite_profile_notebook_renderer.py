@@ -254,8 +254,8 @@ result = context.run_profiler_with_dynamic_arguments(
     name="{self._profiler_name}",
     batch_request=batch_request,
 )
-_ = validator.expectation_suite.add_expectation_configurations(
-    expectation_configurations=result.expectation_configurations
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
 )
 """,
             lint=True,
