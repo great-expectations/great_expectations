@@ -1,11 +1,22 @@
 from typing import Any, List, Optional, Tuple
 
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.exceptions.exceptions import StoreBackendError
 from great_expectations.util import filter_properties_dict
 
 
 class InlineStoreBackend(StoreBackend):
+    """
+    The InlineStoreBackend enables CRUD behavior with the fields noted in a user's project config (`great_expectations.yml`).
+
+    It performs these actions through a reference to a DataContext instance.
+    Please note that is it only to be used with file-backed DataContexts (DataContext and FileDataContext).
+    """
+
     def __init__(
         self,
         data_context: "DataContext",  # noqa: F821
@@ -41,16 +52,29 @@ class InlineStoreBackend(StoreBackend):
     def config(self) -> dict:
         return self._config
 
-    def _get(self, key: Tuple[str, ...]) -> Any:
-        config_var: str = key[0]
-        val: Any = self._data_context.project_config_with_variables_substituted[
-            config_var
-        ]
-        return val
+    def _get(self, key: Tuple[DataContextVariableSchema, str]) -> Any:
+        config_var_type: DataContextVariableSchema = key[0]
+        config_var_name: Optional[str] = key[1]
 
-    def _set(self, key: Tuple[str, ...], value: Any, **kwargs: dict) -> None:
-        config_var: str = key[0]
-        self._data_context.config[config_var] = value
+        variable_config: Any = self._data_context.config[config_var_type]
+
+        if config_var_name:
+            return variable_config[config_var_name]
+        return variable_config
+
+    def _set(
+        self, key: Tuple[DataContextVariableSchema, str], value: Any, **kwargs: dict
+    ) -> None:
+        config_var_type: DataContextVariableSchema = key[0]
+        config_var_name: Optional[str] = key[1]
+
+        project_config: DataContextConfig = self._data_context.config
+
+        if config_var_name:
+            project_config[config_var_type][config_var_name] = value
+        else:
+            project_config[config_var_type] = value
+
         self._data_context._save_project_config()
 
     def _move(
@@ -80,12 +104,16 @@ class InlineStoreBackend(StoreBackend):
         return key in self._data_context.config
 
     def _validate_key(self, key: Tuple[str, ...]) -> None:
-        super()._validate_key(key)
+        if len(key) != 2:
+            raise TypeError(
+                f"Keys used in {self.__class__.__name__} must be composed of two parts: a variable type and an optional name"
+            )
 
-        from great_expectations.data_context.types.base import DataContextConfig
+        type_, _ = key
 
-        for attr in key:
-            if attr not in self._data_context.config:
-                raise TypeError(
-                    f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextConfig.__name__}"
-                )
+        if not isinstance(
+            type_, DataContextVariableSchema
+        ) or not DataContextVariableSchema.has_value(type_):
+            raise TypeError(
+                f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextVariableSchema.__name__}; invalid type {type(type_)} found"
+            )
