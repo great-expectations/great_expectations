@@ -22,6 +22,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         if obj and isinstance(obj, RuleBasedProfiler):
             return self._anonymize_profiler_info(**kwargs)
+
         return self._anonymize_profiler_run(obj=obj, **kwargs)
 
     def _anonymize_profiler_info(self, name: str, config: dict) -> dict:
