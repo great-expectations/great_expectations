@@ -212,7 +212,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return domain_builder
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.PROFILER_RUN.value,
+        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN.value,
         args_payload_fn=get_profiler_run_usage_statistics,
     )
     def run(
@@ -327,6 +327,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     "rules": effective_rules_configs,
                 },
             },
+            usage_statistics_handler=self._usage_statistics_handler,
         )
 
     def get_expectation_configurations(self) -> List[ExpectationConfiguration]:

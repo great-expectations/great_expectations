@@ -3387,7 +3387,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
     )
     def run_profiler_with_dynamic_arguments(
         self,
@@ -3427,7 +3427,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_PROFILER_ON_DATA.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA.value,
     )
     def run_profiler_on_data(
         self,
