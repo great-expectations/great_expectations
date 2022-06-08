@@ -538,7 +538,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
-            if self.engine.dialect.name.lower() != "trino":
+            if engine.dialect.name.lower() != "trino":
                 schema = None
             table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
