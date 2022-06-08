@@ -77,7 +77,7 @@ def cloud_data_context_variables(
 
 @pytest.mark.parametrize(
     "crud_method,expected_value",
-    [pytest.param("get_config_version", 2.0)],
+    [pytest.param("get_config_version", 2.0, id="config_version getter")],
 )
 def test_data_context_variables_get(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
@@ -104,7 +104,7 @@ def test_data_context_variables_get(
 
 @pytest.mark.parametrize(
     "crud_method,input_value,target_attr",
-    [pytest.param("set_config_version", 5.0, "config_version")],
+    [pytest.param("set_config_version", 5.0, id="config_version setter")],
 )
 def test_data_context_variables_set(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
@@ -113,6 +113,7 @@ def test_data_context_variables_set(
     crud_method: str,
     input_value: Any,
     target_attr: str,
+    # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
