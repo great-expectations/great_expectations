@@ -192,7 +192,8 @@
             "kwargs": {
                 "column": "a"
             },
-            "expected": 5.5
+            "expected": 5.5,
+            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_median",
@@ -379,7 +380,8 @@
             "kwargs": {
                 "column": "y"
             },
-            "expected": [5]
+            "expected": [5],
+            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_modes",
@@ -387,7 +389,8 @@
             "kwargs": {
                 "column": "b"
             },
-            "expected": ["d"]
+            "expected": ["d"],
+            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_modes",
@@ -395,7 +398,8 @@
             "kwargs": {
                 "column": "d"
             },
-            "expected": ["a", "b", "c", "d", "e", "f", "g"]
+            "expected": ["a", "b", "c", "d", "e", "f", "g"],
+            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_modes",
@@ -403,7 +407,8 @@
             "kwargs": {
                 "column": "c"
             },
-            "expected": [2, 3]
+            "expected": [2, 3],
+            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_stdev",
