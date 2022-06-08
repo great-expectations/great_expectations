@@ -98,6 +98,18 @@ class DataContextVariables(ABC):
         """
         return self._get(DataContextVariableSchema.CONFIG_VERSION)
 
+    def set_stores(self, stores: dict) -> None:
+        """
+        Setter for `stores`.
+        """
+        self._set(DataContextVariableSchema.STORES, stores)
+
+    def get_stores(self) -> Optional[float]:
+        """
+        Getter for `stores`.
+        """
+        return self._get(DataContextVariableSchema.STORES)
+
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
