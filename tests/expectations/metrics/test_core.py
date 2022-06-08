@@ -539,7 +539,7 @@ def test_column_histogram_metric_pd():
         metric_name="column.histogram",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "bins": 10,
+            "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
         },
         metric_dependencies={
             "table.columns": table_columns_metric,
@@ -567,7 +567,7 @@ def test_column_histogram_metric_sa(sa):
         metric_name="column.histogram",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "bins": 10,
+            "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
         },
         metric_dependencies={
             "table.columns": table_columns_metric,
@@ -599,7 +599,7 @@ def test_column_histogram_metric_spark(spark_session):
         metric_name="column.histogram",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
-            "bins": 10,
+            "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
         },
         metric_dependencies={
             "table.columns": table_columns_metric,

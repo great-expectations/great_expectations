@@ -220,7 +220,7 @@ def build_gallery(
                     importlib.import_module(f"expectations.{expectation}", group)
                 else:
                     importlib.import_module(f"{group}.expectations")
-            except ModuleNotFoundError as e:
+            except (ModuleNotFoundError, ImportError) as e:
                 logger.error(f"Failed to load expectation: {expectation}")
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
