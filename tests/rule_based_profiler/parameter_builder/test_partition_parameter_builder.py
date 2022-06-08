@@ -271,12 +271,6 @@ def test_partition_parameter_builder_alice_continuous_check_serialized_keys(
         "module_name",
         "name",
         "bucketize_data",
-        "metric_name",
-        "metric_domain_kwargs",
-        "metric_value_kwargs",
-        "enforce_numeric_metric",
-        "replace_nan_with_zero",
-        "reduce_scalar_metric",
         "evaluation_parameter_builder_configs",
         "json_serialize",
     }
