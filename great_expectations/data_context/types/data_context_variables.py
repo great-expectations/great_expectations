@@ -86,17 +86,80 @@ class DataContextVariables(ABC):
         val: Any = getattr(self, attr.value)
         return val
 
-    def set_config_version(self, config_version: float) -> None:
+    def set_expectations_store_name(self, expectations_store_name: str) -> None:
         """
-        Setter for `config_version`.
+        Setter for `expectations_store_name`.
         """
-        self._set(DataContextVariableSchema.CONFIG_VERSION, config_version)
+        self._set(
+            DataContextVariableSchema.EXPECTATIONS_STORE_NAME, expectations_store_name
+        )
 
-    def get_config_version(self) -> Optional[float]:
+    def get_expectations_store_name(self) -> Optional[str]:
         """
-        Getter for `config_version`.
+        Getter for `expectations_store_name`.
         """
-        return self._get(DataContextVariableSchema.CONFIG_VERSION)
+        return self._get(DataContextVariableSchema.EXPECTATIONS_STORE_NAME)
+
+    def set_validations_store_name(self, validations_store_name: str) -> None:
+        """
+        Setter for `validations_store_name`.
+        """
+        self._set(
+            DataContextVariableSchema.VALIDATIONS_STORE_NAME, validations_store_name
+        )
+
+    def get_validations_store_name(self) -> Optional[str]:
+        """
+        Getter for `validations_store_name`.
+        """
+        return self._get(DataContextVariableSchema.VALIDATIONS_STORE_NAME)
+
+    def set_evaluation_parameter_store_name(
+        self, evaluation_parameter_store_name: str
+    ) -> None:
+        """
+        Setter for `evaluation_parameter_store_name`.
+        """
+        self._set(
+            DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
+            evaluation_parameter_store_name,
+        )
+
+    def get_evaluation_parameter_store_name(self) -> Optional[str]:
+        """
+        Getter for `evaluation_parameter_store_name`.
+        """
+        return self._get(DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME)
+
+    def set_checkpoint_store_name(self, checkpoint_store_name: str) -> None:
+        """
+        Setter for `checkpoint_store_name`.
+        """
+        self._set(
+            DataContextVariableSchema.CHECKPOINT_STORE_NAME,
+            checkpoint_store_name,
+        )
+
+    def get_checkpoint_store_name(self) -> Optional[str]:
+        """
+        Getter for `checkpoint_store_name`.
+        """
+        return self._get(DataContextVariableSchema.CHECKPOINT_STORE_NAME)
+
+    def set_profiler_store_name(self, profiler_store_name: str) -> None:
+        """
+        Setter for `profiler_store_name`.
+        """
+        self._set(
+            DataContextVariableSchema.PROFILER_STORE_NAME,
+            profiler_store_name,
+        )
+
+    def get_profiler_store_name(self) -> Optional[str]:
+        """
+        Getter for `profiler_store_name`.
+        """
+        return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
 
 
 @dataclass

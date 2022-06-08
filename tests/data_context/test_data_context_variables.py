@@ -7,6 +7,7 @@ from great_expectations.data_context.data_context.data_context import DataContex
 from great_expectations.data_context.types.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariables,
+    DataContextVariableSchema,
     EphemeralDataContextVariables,
     FileDataContextVariables,
 )
@@ -18,8 +19,10 @@ def data_context_config_dict() -> dict:
         "config_version": 2.0,
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name": "evaluation_parameter_store",
-        "validations_store_name": "does_not_have_to_be_real",
+        "validations_store_name": "validations_store",
         "expectations_store_name": "expectations_store",
+        "checkpoint_store_name": "checkpoint_store",
+        "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
@@ -77,7 +80,31 @@ def cloud_data_context_variables(
 
 @pytest.mark.parametrize(
     "crud_method,expected_value",
-    [pytest.param("get_config_version", 2.0, id="config_version getter")],
+    [
+        pytest.param(
+            "get_expectations_store_name",
+            "expectations_store",
+            id="expectations_store getter",
+        ),
+        pytest.param(
+            "get_validations_store_name",
+            "validations_store",
+            id="validations_store getter",
+        ),
+        pytest.param(
+            "get_evaluation_parameter_store_name",
+            "evaluation_parameter_store",
+            id="evaluation_parameter_store getter",
+        ),
+        pytest.param(
+            "get_checkpoint_store_name",
+            "checkpoint_store",
+            id="checkpoint_store getter",
+        ),
+        pytest.param(
+            "get_profiler_store_name", "profiler_store", id="profiler_store getter"
+        ),
+    ],
 )
 def test_data_context_variables_get(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
@@ -106,8 +133,35 @@ def test_data_context_variables_get(
     "crud_method,input_value,target_attr",
     [
         pytest.param(
-            "set_config_version", 5.0, "config_version", id="config_version setter"
-        )
+            "set_expectations_store_name",
+            "my_expectations_store",
+            DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
+            id="expectations_store setter",
+        ),
+        pytest.param(
+            "set_validations_store_name",
+            "my_validations_store",
+            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
+            id="validations_store setter",
+        ),
+        pytest.param(
+            "set_evaluation_parameter_store_name",
+            "my_evaluation_parameter_store",
+            DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
+            id="evaluation_parameter_store setter",
+        ),
+        pytest.param(
+            "set_checkpoint_store_name",
+            "my_checkpoint_store",
+            DataContextVariableSchema.CHECKPOINT_STORE_NAME,
+            id="checkpoint_store setter",
+        ),
+        pytest.param(
+            "set_profiler_store_name",
+            "my_profiler_store",
+            DataContextVariableSchema.PROFILER_STORE_NAME,
+            id="profiler_store setter",
+        ),
     ],
 )
 def test_data_context_variables_set(
