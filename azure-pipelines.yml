@@ -52,6 +52,7 @@ resources:
 
 # The pipeline is run under two primary conditions: if cutting a release or as scheduled by the above cron job.
 variables:
+  isReleasePrep: $[contains(variables['Build.SourceBranch'], 'release')]
   isRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
@@ -64,7 +65,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -86,7 +87,7 @@ stages:
 
     jobs:
     - job: type_hint_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
           pip install mypy # Prereq for type hint script
@@ -94,13 +95,13 @@ stages:
         name: TypeHintChecker
 
     - job: docstring_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
 
     - job: unused_import_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
           pip install flake8
@@ -114,7 +115,7 @@ stages:
       vmImage: 'ubuntu-18.04'
     jobs:
       - job: import_ge
-        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
 
         strategy:
          matrix:
@@ -150,8 +151,8 @@ stages:
 
     jobs:
       - job: compatibility_matrix
-        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 75
+        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 120
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
@@ -234,8 +235,8 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
-        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 90
+        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 120
 
         services:
           postgres: postgres
@@ -306,7 +307,7 @@ stages:
 
     jobs:
       - job: test_usage_stats_messages
-        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
         variables:
           python.version: '3.8'
 
@@ -338,8 +339,8 @@ stages:
 
     jobs:
       - job: mysql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 75
+        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 120
 
         services:
           mysql: mysql
@@ -382,8 +383,8 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 75
+        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 120
 
         services:
           mssql: mssql
@@ -415,8 +416,8 @@ stages:
             displayName: 'pytest'
 
       - job: trino
-        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 75
+        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        timeoutInMinutes: 120
 
         services:
           trino: trino
@@ -460,7 +461,7 @@ stages:
 
     jobs:
       - job: test_cli
-        condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
 
         services:
           postgres: postgres

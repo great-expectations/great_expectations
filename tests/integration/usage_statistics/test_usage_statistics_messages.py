@@ -1299,6 +1299,36 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
+    "profiler.result.get_expectation_suite": [
+        {
+            "event": "profiler.result.get_expectation_suite",
+            "event_payload": {
+                "anonymized_expectation_suite_name": "4b6bf73298fcc2db6da929a8f18173f7"
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:23.570Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+    ],
+    "data_assistant.result.get_expectation_suite": [
+        {
+            "event": "data_assistant.result.get_expectation_suite",
+            "event_payload": {
+                "anonymized_expectation_suite_name": "4b6bf73298fcc2db6da929a8f18173f7"
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:23.570Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+    ],
     # BaseDataContext.test_yaml_config() MESSAGES
     "data_context.test_yaml_config": generate_messages_with_defaults(
         defaults={

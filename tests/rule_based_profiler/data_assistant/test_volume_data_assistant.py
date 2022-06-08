@@ -1,5 +1,6 @@
 import os
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from unittest import mock
 
 import altair as alt
 import nbconvert
@@ -10,11 +11,15 @@ from freezegun import freeze_time
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
+)
+from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
+    CardinalityLimitMode,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
@@ -1538,7 +1543,10 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
 
 @pytest.fixture
 def quentin_expected_rule_based_profiler_configuration() -> Callable:
-    def _profiler_config(name: str) -> RuleBasedProfilerConfig:
+    def _profiler_config(
+        name: str, exclude_column_names: Optional[List[str]] = None
+    ) -> RuleBasedProfilerConfig:
+        exclude_column_names = exclude_column_names or []
         expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
             config_version=1.0,
             name=name,
@@ -1624,13 +1632,18 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     "domain_builder": {
                         "allowed_semantic_types_passthrough": ["logic"],
                         "class_name": "CategoricalColumnDomainBuilder",
-                        "limit_mode": {
+                        "cardinality_limit_mode": {
                             "name": "REL_100",
                             "max_proportion_unique": 1.0,
                             "metric_name_defining_limit": "column.unique_proportion",
                         },
                         "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
-                        "exclude_column_names": ["id"],
+                        "exclude_column_names": sorted(
+                            [
+                                "id",
+                            ]
+                            + exclude_column_names
+                        ),
                         "exclude_column_name_suffixes": ["_id"],
                         "exclude_semantic_types": ["binary", "currency", "identifier"],
                     },
@@ -2329,6 +2342,31 @@ def test_volume_data_assistant_result_serialization(
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_volume_data_assistant_result_get_expectation_suite(
+    mock_emit,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
+):
+    expectation_suite_name: str = "my_suite"
+
+    suite: ExpectationSuite = bobby_volume_data_assistant_result.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    assert suite is not None and len(suite.expectations) > 0
+
+    assert mock_emit.call_count == 1
+
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert (
+        actual_events[-1][0][0]["event"]
+        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
+    )
+
+
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
@@ -2352,7 +2390,7 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     )
 
 
-def test_get_metrics_and_expectations_using_explicit_instantiation(
+def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_instantiation(
     quentin_explicit_instantiation_result_frozen_time,
     quentin_expected_metrics_by_domain,
     quentin_expected_expectation_suite,
@@ -2387,7 +2425,7 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
         delete_fields={"random_seed"},
     ) == deep_filter_properties_iterable(
         properties=quentin_expected_rule_based_profiler_configuration(
-            name=data_assistant_name
+            name=data_assistant_name,
         ).to_json_dict(),
         delete_fields={"random_seed"},
     )
@@ -2413,7 +2451,7 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
 
 
 @freeze_time("09/26/2019 13:42:41")
-def test_get_metrics_and_expectations_using_implicit_invocation(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
     quentin_expected_metrics_by_domain,
     quentin_expected_expectation_suite,
@@ -2474,7 +2512,7 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
 
 
 @freeze_time("09/26/2019 13:42:41")
-def test_get_metrics_and_expectations_using_implicit_invocation_with_exclude_column_names_directive(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     quentin_expected_metrics_by_domain,
@@ -2497,7 +2535,45 @@ def test_get_metrics_and_expectations_using_implicit_invocation_with_exclude_col
     ]
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
+        # include_column_names=include_column_names,
         exclude_column_names=exclude_column_names,
+        # include_column_name_suffixes=include_column_name_suffixes,
+        # exclude_column_name_suffixes=exclude_column_name_suffixes,
+        # semantic_type_filter_module_name=semantic_type_filter_module_name,
+        # semantic_type_filter_class_name=semantic_type_filter_class_name,
+        # include_semantic_types=include_semantic_types,
+        # exclude_semantic_types=exclude_semantic_types,
+        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+        cardinality_limit_mode=CardinalityLimitMode.REL_100,
+        # max_unique_values=max_unique_values,
+        # max_proportion_unique=max_proportion_unique,
+        # column_value_uniqueness_rule={
+        #     "success_ratio": 0.8,
+        # },
+        # column_value_nullity_rule={
+        # },
+        # column_value_nonnullity_rule={
+        # },
+        # numeric_columns_rule={
+        #     "false_positive_rate": 0.1,
+        #     "random_seed": 43792,
+        # },
+        # datetime_columns_rule={
+        #     "truncate_values": {
+        #         "lower_bound": 0,
+        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+        #     },
+        #     "round_decimals": 0,
+        # },
+        # text_columns_rule={
+        #     "strict_min": True,
+        #     "strict_max": True,
+        #     "success_ratio": 0.8,
+        # },
+        # categorical_columns_rule={
+        #     "false_positive_rate": 0.1,
+        #     "round_decimals": 3,
+        # },
     )
 
     column_name: str
@@ -2554,14 +2630,38 @@ def test_get_metrics_and_expectations_using_implicit_invocation_with_exclude_col
         == expected_expectation_suite.expectations
     )
 
-    assert deep_filter_properties_iterable(
-        properties=data_assistant_result.profiler_config.to_json_dict(),
-        delete_fields={"random_seed"},
-    ) == deep_filter_properties_iterable(
-        properties=quentin_expected_rule_based_profiler_configuration(
-            name=registered_data_assistant_name
-        ).to_json_dict(),
-        delete_fields={"random_seed"},
+    data_assistant_result_profiler_config_as_json_dict: dict = (
+        deep_filter_properties_iterable(
+            properties=data_assistant_result.profiler_config.to_json_dict(),
+            delete_fields={"random_seed"},
+        )
+    )
+    quentin_expected_rule_based_profiler_configuration_as_json_dict: dict = (
+        deep_filter_properties_iterable(
+            properties=quentin_expected_rule_based_profiler_configuration(
+                name=registered_data_assistant_name,
+                exclude_column_names=exclude_column_names,
+            ).to_json_dict(),
+            delete_fields={"random_seed"},
+        )
+    )
+    data_assistant_result_profiler_config_as_json_dict["rules"][
+        "categorical_columns_rule"
+    ]["domain_builder"]["exclude_column_names"] = sorted(
+        data_assistant_result_profiler_config_as_json_dict["rules"][
+            "categorical_columns_rule"
+        ]["domain_builder"]["exclude_column_names"]
+    )
+    quentin_expected_rule_based_profiler_configuration_as_json_dict["rules"][
+        "categorical_columns_rule"
+    ]["domain_builder"]["exclude_column_names"] = sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict["rules"][
+            "categorical_columns_rule"
+        ]["domain_builder"]["exclude_column_names"]
+    )
+    assert (
+        data_assistant_result_profiler_config_as_json_dict
+        == quentin_expected_rule_based_profiler_configuration_as_json_dict
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
@@ -2584,7 +2684,68 @@ def test_get_metrics_and_expectations_using_implicit_invocation_with_exclude_col
     assert actual_expectation_suite == expected_expectation_suite
 
 
-def test_execution_time_within_proper_bounds_using_explicit_instantiation(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
+        # include_column_names=include_column_names,
+        # exclude_column_names=exclude_column_names,
+        # include_column_name_suffixes=include_column_name_suffixes,
+        # exclude_column_name_suffixes=exclude_column_name_suffixes,
+        # semantic_type_filter_module_name=semantic_type_filter_module_name,
+        # semantic_type_filter_class_name=semantic_type_filter_class_name,
+        # include_semantic_types=include_semantic_types,
+        # exclude_semantic_types=exclude_semantic_types,
+        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+        # cardinality_limit_mode=CardinalityLimitMode.REL_100,
+        # max_unique_values=max_unique_values,
+        # max_proportion_unique=max_proportion_unique,
+        # column_value_uniqueness_rule={
+        #     "success_ratio": 0.8,
+        # },
+        # column_value_nullity_rule={
+        # },
+        # column_value_nonnullity_rule={
+        # },
+        # numeric_columns_rule={
+        #     "false_positive_rate": 0.1,
+        #     "random_seed": 43792,
+        # },
+        # datetime_columns_rule={
+        #     "truncate_values": {
+        #         "lower_bound": 0,
+        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+        #     },
+        #     "round_decimals": 0,
+        # },
+        # text_columns_rule={
+        #     "strict_min": True,
+        #     "strict_max": True,
+        #     "success_ratio": 0.8,
+        # },
+        categorical_columns_rule={
+            "false_positive_rate": 0.1,
+            # "round_decimals": 3,
+        },
+    )
+    assert (
+        data_assistant_result.profiler_config.rules["categorical_columns_rule"][
+            "variables"
+        ]["false_positive_rate"]
+        == 1.0e-1
+    )
+
+
+def test_volume_data_assistant_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
     validator: Validator
@@ -2595,7 +2756,7 @@ def test_execution_time_within_proper_bounds_using_explicit_instantiation(
     assert data_assistant_result.execution_time > 0.0
 
 
-def test_execution_time_within_proper_bounds_using_implicit_invocation(
+def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
 ):
     data_assistant_result: DataAssistantResult = (
@@ -2606,7 +2767,7 @@ def test_execution_time_within_proper_bounds_using_implicit_invocation(
     assert data_assistant_result.execution_time > 0.0
 
 
-def test_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
+def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
     validator: Validator
@@ -2896,7 +3057,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "month",
                 "format": "",
                 "title": "Month",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -2904,7 +3065,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "name",
                 "format": "",
                 "title": "Name",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -2912,7 +3073,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "year",
                 "format": "",
                 "title": "Year",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -2964,7 +3125,7 @@ def test_volume_data_assistant_plot_return_tooltip(
     assert actual_tooltip == expected_tooltip
 
 
-def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -2984,7 +3145,7 @@ def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_executio
     )
 
 
-def test_volume_data_assistant_plot_descriptive_non_sequential_notebook_execution(
+def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context

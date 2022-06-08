@@ -1617,6 +1617,94 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             ]
         )
 
+    assert mock_emit.call_count == 1
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
+                    "config_version": 1,
+                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_action_list": [
+                        {
+                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                            "parent_class": "StoreValidationResultAction",
+                        },
+                        {
+                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                            "parent_class": "StoreEvaluationParametersAction",
+                        },
+                        {
+                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                            "parent_class": "UpdateDataDocsAction",
+                        },
+                    ],
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                                    "anonymized_data_asset_name": "7e60092b1b9b96327196fdba39029b9e",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_identifiers",
+                                    "runtime_parameters",
+                                ],
+                                "runtime_parameters_keys": ["batch_data"],
+                            },
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                                }
+                            },
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                    ],
+                },
+                "event": "checkpoint.run",
+                "success": False,
+            }
+        )
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert actual_events == expected_events
+
     assert len(context.validations_store.list_keys()) == 0
 
     context.create_expectation_suite("my_expectation_suite")
@@ -1868,6 +1956,13 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert actual_events == expected_events
+
+    # Since there are two validations, confirming there should be two "data_asset.validate" events
+    num_data_asset_validate_events = 0
+    for event in actual_events:
+        if event[0][0]["event"] == "data_asset.validate":
+            num_data_asset_validate_events += 1
+    assert num_data_asset_validate_events == 2
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
