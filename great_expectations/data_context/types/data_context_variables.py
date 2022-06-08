@@ -98,6 +98,33 @@ class DataContextVariables(ABC):
         """
         return self._get(DataContextVariableSchema.CONFIG_VERSION)
 
+    def set_config_variables_file_path(self, config_variables_file_path: str) -> None:
+        """
+        Setter for `config_variables_file_path`.
+        """
+        self._set(
+            DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH,
+            config_variables_file_path,
+        )
+
+    def get_config_variables_file_path(self) -> Optional[str]:
+        """
+        Getter for `config_version`.
+        """
+        return self._get(DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH)
+
+    def set_plugins_directory(self, plugins_directory: str) -> None:
+        """
+        Setter for `plugins_directory`.
+        """
+        self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
+
+    def get_plugins_directory(self) -> Optional[str]:
+        """
+        Getter for `plugins_directory`.
+        """
+        return self._get(DataContextVariableSchema.PLUGINS_DIRECTORY)
+
     def set_expectations_store_name(self, expectations_store_name: str) -> None:
         """
         Setter for `expectations_store_name`.

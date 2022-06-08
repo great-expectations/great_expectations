@@ -160,9 +160,9 @@ stages:
               targetFolder: 'static/gallery/'
               filesAcl: 'public-read'
 
-          - bash: |
-              echo "About to trigger webhook: $GALLERY_BUILD_HOOK"
-              curl -X POST -d {} $GALLERY_BUILD_HOOK
-            displayName: 'Trigger gallery build'
-            env:
-              GALLERY_BUILD_HOOK: $(gallerywebhook)
+#         - bash: |
+#             echo "About to trigger webhook: $GALLERY_BUILD_HOOK"
+#             curl -X POST -d {} $GALLERY_BUILD_HOOK
+#           displayName: 'Trigger gallery build'
+#           env:
+#             GALLERY_BUILD_HOOK: $(gallerywebhook)
