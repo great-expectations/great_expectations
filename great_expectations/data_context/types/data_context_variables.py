@@ -119,7 +119,7 @@ class DataContextVariables(ABC):
         """
         self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
 
-    def get_plugins_directory(self) -> Optional[float]:
+    def get_plugins_directory(self) -> Optional[str]:
         """
         Getter for `plugins_directory`.
         """
