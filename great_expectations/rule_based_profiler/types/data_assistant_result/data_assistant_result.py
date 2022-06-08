@@ -450,16 +450,20 @@ class DataAssistantResult(SerializableDictDot):
                 alt_type=metric_type,
             )
 
+        # explode list of column names into separate rows for each name in list
         df = df.explode(metric_name).reset_index(drop=True)
 
+        # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
         df[column_number] = pd.factorize(df[metric_name])[0] + 1
 
+        # rename table_columns to table_column
         df_columns = [
             table_column if column == "table_columns" else column
             for column in list(df.columns)
         ]
         df.columns = df_columns
 
+        # we need at least one record to plot the column_set as text
         if column_set is not None:
             df = df.iloc[:1]
 
@@ -550,16 +554,20 @@ class DataAssistantResult(SerializableDictDot):
                 alt_type=metric_type,
             )
 
+        # explode list of column names into separate rows for each name in list
         df = df.explode(metric_name).reset_index(drop=True)
 
+        # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
         df[column_number] = pd.factorize(df[metric_name])[0] + 1
 
+        # rename table_columns to table_column
         df_columns = [
             table_column if column == "table_columns" else column
             for column in list(df.columns)
         ]
         df.columns = df_columns
 
+        # we need at least one record to plot the column_set as text
         if column_set is not None:
             df = df.iloc[:1]
 
