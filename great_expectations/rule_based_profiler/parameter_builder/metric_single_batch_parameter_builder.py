@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,

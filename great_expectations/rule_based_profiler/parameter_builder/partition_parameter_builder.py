@@ -15,6 +15,7 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
     Domain,
+    MetricValue,
     ParameterContainer,
     ParameterNode,
 )
@@ -77,7 +78,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=None,
-            json_serialize=False,
+            json_serialize=True,
         )
         self._column_value_counts_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -167,7 +168,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        bins: list = column_partition_parameter_node[
+        bins: MetricValue = column_partition_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
