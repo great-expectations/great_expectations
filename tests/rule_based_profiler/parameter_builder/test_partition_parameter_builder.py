@@ -57,6 +57,8 @@ def test_partition_parameter_builder_alice_continuous(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
         data_context=data_context,
     )
 
@@ -124,6 +126,8 @@ def test_partition_parameter_builder_alice_categorical(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=False,
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
         data_context=data_context,
     )
 
@@ -190,6 +194,8 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
         data_context=data_context,
     )
 
@@ -254,6 +260,8 @@ def test_partition_parameter_builder_alice_continuous_check_serialized_keys(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
         data_context=data_context,
     )
 

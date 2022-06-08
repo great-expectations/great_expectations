@@ -390,6 +390,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return PartitionParameterBuilder(
                 name=name,
                 bucketize_data=bucketize_data,
+                evaluation_parameter_builder_configs=None,
                 json_serialize=json_serialize,
                 data_context=None,
             )
