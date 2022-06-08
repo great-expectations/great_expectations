@@ -86,6 +86,18 @@ class DataContextVariables(ABC):
         val: Any = getattr(self, attr.value)
         return val
 
+    def set_config_version(self, config_version: float) -> None:
+        """
+        Setter for `config_version`.
+        """
+        self._set(DataContextVariableSchema.CONFIG_VERSION, config_version)
+
+    def get_config_version(self) -> Optional[float]:
+        """
+        Getter for `config_version`.
+        """
+        return self._get(DataContextVariableSchema.CONFIG_VERSION)
+
     def set_expectations_store_name(self, expectations_store_name: str) -> None:
         """
         Setter for `expectations_store_name`.
