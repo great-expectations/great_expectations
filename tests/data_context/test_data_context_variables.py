@@ -79,19 +79,6 @@ def cloud_data_context_variables(
 
 
 @pytest.fixture
-def stores() -> dict:
-    return {
-        "profiler_store": {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "profilers/",
-            },
-        },
-    }
-
-
-@pytest.fixture
 def data_docs_sites() -> dict:
     return {
         "local_site": {
