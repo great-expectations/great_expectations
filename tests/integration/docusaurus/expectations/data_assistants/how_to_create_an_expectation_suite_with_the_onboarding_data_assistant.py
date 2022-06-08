@@ -26,6 +26,7 @@ context: ge.DataContext = ge.get_context()
 
 # Configure your datasource (if you aren't using one that already exists)
 
+# <snippet>
 datasource_config = {
     "name": "taxi_multi_batch_datasource",
     "class_name": "Datasource",
@@ -45,6 +46,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -61,34 +63,30 @@ try:
 except ValueError:
     context.add_datasource(**datasource_config)
 
-
 # Prepare an Expectation Suite
 
+# <snippet>
 expectation_suite_name = "my_onboarding_assistant_suite"
 
 suite = context.create_expectation_suite(
     expectation_suite_name=expectation_suite_name, overwrite_existing=True
 )
+# </snippet>
 
 # Prepare a Batch Request
 
+# <snippet>
 multi_batch_all_years_batch_request: BatchRequest = BatchRequest(
     datasource_name="taxi_multi_batch_datasource",
     data_connector_name="inferred_data_connector_all_years",
     data_asset_name="yellow_tripdata_sample",
     limit=1000,
 )
-
-# Prepare a Validator
-
-validator = context.get_validator(
-    batch_request=multi_batch_all_years_batch_request,
-    expectation_suite_name=expectation_suite_name,
-)
-
+# </snippet>
 
 # Run the Onboarding Assistant
 
+# <snippet>
 exclude_column_names = [
     "vendor_id",
     "pickup_datetime",
@@ -109,7 +107,9 @@ exclude_column_names = [
     "total_amount",
     "congestion_surcharge",
 ]
+# </snippet>
 
+# <snippet>
 onboarding_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     batch_request=multi_batch_all_years_batch_request,
     # include_column_names=include_column_names,
@@ -152,18 +152,32 @@ onboarding_assistant_result: DataAssistantResult = context.assistants.onboarding
     #     "round_decimals": 3,
     # },
 )
+# </snippet>
 
+# Prepare a Validator
+
+# <snippet>
+validator = context.get_validator(
+    batch_request=multi_batch_all_years_batch_request,
+    expectation_suite_name=expectation_suite_name,
+)
+# </snippet>
 
 # Save your Expectation Suite
 
+# <snippet>
 validator.expectation_suite = onboarding_assistant_result.get_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )
-validator.save_expectation_suite(discard_failed_expectations=False)
+# </snippet>
 
+# <snippet>
+validator.save_expectation_suite(discard_failed_expectations=False)
+# </snippet>
 
 # Use a SimpleCheckpoint to verify that your new Expectation Suite works.
 
+# <snippet>
 checkpoint_config = {
     "class_name": "SimpleCheckpoint",
     "validations": [
@@ -173,12 +187,19 @@ checkpoint_config = {
         }
     ],
 }
+# </snippet>
+
+# <snippet>
 checkpoint = SimpleCheckpoint(
     f"_tmp_checkpoint_{expectation_suite_name}", context, **checkpoint_config
 )
 checkpoint_result = checkpoint.run()
 
 assert checkpoint_result["success"] is True
+# </snippet>
+
+# If you are using code from this script as part of a Jupyter Notebook, uncommenting and running the
+# following lines will open your Data Docs for the `checkpoint`'s results:
 
 # context.build_data_docs()
 # validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
