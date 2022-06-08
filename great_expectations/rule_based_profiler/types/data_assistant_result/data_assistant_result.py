@@ -70,6 +70,18 @@ class DataAssistantResult(SerializableDictDot):
         "column.standard_deviation": "expect_column_stdev_to_be_between",
     }
 
+    # A mapping is defined for the Altair data type associated with each metric
+    METRIC_TYPES = {
+        "table.columns": AltairDataTypes.NOMINAL,
+        "table.row_count": AltairDataTypes.QUANTITATIVE,
+        "column.distinct_values.count": AltairDataTypes.QUANTITATIVE,
+        "column.min": AltairDataTypes.QUANTITATIVE,
+        "column.max": AltairDataTypes.QUANTITATIVE,
+        "column.mean": AltairDataTypes.QUANTITATIVE,
+        "column.median": AltairDataTypes.QUANTITATIVE,
+        "column.standard_deviation": AltairDataTypes.QUANTITATIVE,
+    }
+
     ALLOWED_KEYS = {
         "batch_id_to_batch_identifier_display_name_map",
         "profiler_config",
@@ -2350,18 +2362,18 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
         subtitle: Optional[str],
     ) -> Optional[alt.Chart]:
-        nominal_metrics: Set[str] = {"table_columns"}
+        metric_types: Dict[str, AltairDataTypes] = self.METRIC_TYPES
+
+        nominal_metrics: Set[str] = {
+            sanitize_parameter_name(name=metric)
+            for metric in metric_types.keys()
+            if metric_types[metric] == AltairDataTypes.NOMINAL
+        }
 
         quantitative_metrics: Set[str] = {
-            "table_row_count",
-            "column_distinct_values_count",
-            "column_min",
-            "column_max",
-            "column_values_between",
-            "column_mean",
-            "column_median",
-            "column_quantile_values",
-            "column_standard_deviation",
+            sanitize_parameter_name(name=metric)
+            for metric in metric_types.keys()
+            if metric_types[metric] == AltairDataTypes.QUANTITATIVE
         }
 
         plot_impl: Optional[

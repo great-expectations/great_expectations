@@ -17,6 +17,7 @@ class OnboardingDataAssistantResult(DataAssistantResult):
         "column.standard_deviation": "expect_column_stdev_to_be_between",
     }
 
+    # A mapping is defined for the Altair data type associated with each metric
     METRIC_TYPES = {
         "table.columns": AltairDataTypes.NOMINAL,
         "table.row_count": AltairDataTypes.QUANTITATIVE,
