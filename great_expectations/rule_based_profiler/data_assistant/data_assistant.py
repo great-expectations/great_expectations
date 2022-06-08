@@ -25,6 +25,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
+    PartitionParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
     RegexPatternStringParameterBuilder,
@@ -189,21 +190,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column_values.null.unexpected_count",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
-            )
-
-        def get_column_histogram_metric_multi_batch_parameter_builder(
-            self,
-            json_serialize: Union[str, bool] = True,
-        ) -> ParameterBuilder:
-            """
-            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
-            """
-            return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name="column.histogram",
-                metric_value_kwargs={
-                    "bins": f"{VARIABLES_KEY}bins",
-                },
                 json_serialize=json_serialize,
             )
 
@@ -379,12 +365,31 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
             """
+            name: str = sanitize_parameter_name(name=f"{name}")
             return RegexPatternStringParameterBuilder(
                 name=name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
                 threshold=1.0,
                 candidate_regexes=None,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=json_serialize,
+                data_context=None,
+            )
+
+        @staticmethod
+        def build_partition_parameter_builder(
+            name: str,
+            bucketize_data: Union[str, bool] = True,
+            json_serialize: Union[str, bool] = True,
+        ) -> PartitionParameterBuilder:
+            """
+            This method instantiates "PartitionParameterBuilder" class with specific arguments for given purpose.
+            """
+            name: str = sanitize_parameter_name(name=f"{name}")
+            return PartitionParameterBuilder(
+                name=name,
+                bucketize_data=bucketize_data,
                 evaluation_parameter_builder_configs=None,
                 json_serialize=json_serialize,
                 data_context=None,
