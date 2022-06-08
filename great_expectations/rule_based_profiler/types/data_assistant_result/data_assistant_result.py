@@ -384,6 +384,44 @@ class DataAssistantResult(SerializableDictDot):
         return [chart.configure(**theme) for chart in charts]
 
     @staticmethod
+    def _transform_table_column_list_to_rows(
+        df: pd.DataFrame, metric_name: str
+    ) -> pd.DataFrame:
+        # explode list of column names into separate rows for each name in list
+        df = df.explode(metric_name).reset_index(drop=True)
+
+        # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
+        df["column_number"] = pd.factorize(df[metric_name])[0] + 1
+
+        # rename table_columns to table_column
+        df_columns = [
+            "table_column" if column == "table_columns" else column
+            for column in list(df.columns)
+        ]
+        df.columns = df_columns
+        return df
+
+    @staticmethod
+    def _get_column_set_text(column_set: List[str]) -> Tuple[str, int]:
+        dy: int
+        if len(column_set) > 50:
+            text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
+            dy = 0
+        else:
+            column_set_text: str = ""
+            idx: int = 1
+            for column in column_set:
+                # line break for every 4 column names
+                if idx % 4 == 0:
+                    column_set_text += f"{column},$"
+                else:
+                    column_set_text += f"{column}, "
+                idx += 1
+            text = f"All batches have columns matching the set:${column_set_text[:-2]}."
+            dy = -100
+        return text, dy
+
+    @staticmethod
     def get_nominal_metric_chart(
         df: pd.DataFrame,
         metric_name: str,
@@ -418,7 +456,7 @@ class DataAssistantResult(SerializableDictDot):
         column_number: str = "column_number"
 
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-        column_set: List[str]
+        column_set: Optional[List[str]]
         metric_component: MetricPlotComponent
         if metric_name == "table_columns":
             table_column: str = "table_column"
@@ -439,6 +477,9 @@ class DataAssistantResult(SerializableDictDot):
                 )
                 df = pd.concat([all_columns_record, df], axis=0)
                 df[batch_name] = df[batch_name].fillna(value="All Columns")
+                df = DataAssistantResult._transform_table_column_list_to_rows(
+                    df=df, metric_name=metric_name
+                )
 
             metric_component = MetricPlotComponent(
                 name=table_column,
@@ -449,19 +490,6 @@ class DataAssistantResult(SerializableDictDot):
                 name=metric_name,
                 alt_type=metric_type,
             )
-
-        # explode list of column names into separate rows for each name in list
-        df = df.explode(metric_name).reset_index(drop=True)
-
-        # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
-        df[column_number] = pd.factorize(df[metric_name])[0] + 1
-
-        # rename table_columns to table_column
-        df_columns = [
-            table_column if column == "table_columns" else column
-            for column in list(df.columns)
-        ]
-        df.columns = df_columns
 
         # we need at least one record to plot the column_set as text
         if column_set is not None:
@@ -534,7 +562,7 @@ class DataAssistantResult(SerializableDictDot):
         column_number: str = "column_number"
 
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-        column_set: List[str]
+        column_set: Optional[List[str]]
         metric_component: MetricPlotComponent
         if metric_name == "table_columns":
             table_column: str = "table_column"
@@ -543,6 +571,10 @@ class DataAssistantResult(SerializableDictDot):
                 column_set = df[metric_name].iloc[0]
             else:
                 column_set = None
+
+            df = DataAssistantResult._transform_table_column_list_to_rows(
+                df=df, metric_name=metric_name
+            )
 
             metric_component = MetricPlotComponent(
                 name=table_column,
@@ -553,19 +585,6 @@ class DataAssistantResult(SerializableDictDot):
                 name=metric_name,
                 alt_type=metric_type,
             )
-
-        # explode list of column names into separate rows for each name in list
-        df = df.explode(metric_name).reset_index(drop=True)
-
-        # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
-        df[column_number] = pd.factorize(df[metric_name])[0] + 1
-
-        # rename table_columns to table_column
-        df_columns = [
-            table_column if column == "table_columns" else column
-            for column in list(df.columns)
-        ]
-        df.columns = df_columns
 
         # we need at least one record to plot the column_set as text
         if column_set is not None:
@@ -645,21 +664,7 @@ class DataAssistantResult(SerializableDictDot):
             )
         else:
             dy: int
-            if len(column_set) > 50:
-                text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
-                dy = 0
-            else:
-                column_set_text: str = ""
-                idx: int = 1
-                for column in column_set:
-                    # line break for every 4 column names
-                    if idx % 4 == 0:
-                        column_set_text += f"{column},$"
-                    else:
-                        column_set_text += f"{column}, "
-                    idx += 1
-                text = f"All batches have columns matching the set:${column_set_text[:-2]}."
-                dy = -100
+            text, dy = DataAssistantResult._get_column_set_text(column_set=column_set)
 
             chart = (
                 alt.Chart(data=df, title=title)
@@ -729,20 +734,7 @@ class DataAssistantResult(SerializableDictDot):
             )
         else:
             dy: int
-            if len(column_set) > 50:
-                text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
-                dy = 0
-            else:
-                column_set_text: str = ""
-                idx: int = 1
-                for column in column_set:
-                    if idx % 4 == 0:
-                        column_set_text += f"{column},$"
-                    else:
-                        column_set_text += f"{column}, "
-                    idx += 1
-                text = f"All batches have columns matching the set:${column_set_text[:-2]}."
-                dy = -100
+            text, dy = DataAssistantResult._get_column_set_text(column_set=column_set)
 
             chart = (
                 alt.Chart(data=df, title=title)
