@@ -388,7 +388,16 @@ class DataAssistantResult(SerializableDictDot):
         df: pd.DataFrame, metric_name: str
     ) -> pd.DataFrame:
         # explode list of column names into separate rows for each name in list
-        df = df.explode(metric_name).reset_index(drop=True)
+        # flatten columns of lists
+        col_flat: List[str] = [item for sublist in df[metric_name] for item in sublist]
+        # row numbers to repeat
+        ilocations: np.ndarray = np.repeat(
+            range(df.shape[0]), df[metric_name].apply(len)
+        )
+        # replicate rows and add flattened column of lists
+        cols: List[int] = [i for i, c in enumerate(df.columns) if c != metric_name]
+        df = df.iloc[ilocations, cols]
+        df[metric_name] = col_flat
 
         # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
         df["column_number"] = pd.factorize(df[metric_name])[0] + 1
@@ -466,10 +475,10 @@ class DataAssistantResult(SerializableDictDot):
             else:
                 column_set = None
                 # filter only on batches that do not contain every possible column
-                unique_columns: np.ndarray = np.unique(
-                    df[metric_name].explode(metric_name)
-                )
-                df = df[df[metric_name].apply(set) != set(unique_columns)]
+                unique_columns: set = {
+                    column for column_list in df[metric_name] for column in column_list
+                }
+                df = df[df[metric_name].apply(set) != unique_columns]
                 # record containing all columns to be compared against
                 empty_columns: List[None] = [None] * (len(batch_identifiers) + 1)
                 all_columns_record: pd.DataFrame = pd.DataFrame(
