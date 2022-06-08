@@ -113,7 +113,7 @@ class InlineStoreBackend(StoreBackend):
 
         if not isinstance(
             type_, DataContextVariableSchema
-        ) or not DataContextVariableSchema.has_value(type_):
+        ) and not DataContextVariableSchema.has_value(type_):
             raise TypeError(
                 f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextVariableSchema.__name__}; invalid type {type(type_)} found"
             )
