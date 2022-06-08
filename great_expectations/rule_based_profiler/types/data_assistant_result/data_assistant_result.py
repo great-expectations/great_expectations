@@ -562,15 +562,13 @@ class DataAssistantResult(SerializableDictDot):
         column_number: str = "column_number"
 
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
-        column_set: Optional[List[str]]
+        column_set: Optional[List[str]] = None
         metric_component: MetricPlotComponent
         if metric_name == "table_columns":
             table_column: str = "table_column"
             unique_column_sets: np.ndarray = np.unique(df[metric_name])
             if len(unique_column_sets) == 1:
                 column_set = df[metric_name].iloc[0]
-            else:
-                column_set = None
 
             df = DataAssistantResult._transform_table_column_list_to_rows(
                 df=df, metric_name=metric_name
