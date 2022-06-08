@@ -644,6 +644,7 @@ class DataAssistantResult(SerializableDictDot):
                 column_set_text: str = ""
                 idx: int = 1
                 for column in column_set:
+                    # line break for every 4 column names
                     if idx % 4 == 0:
                         column_set_text += f"{column},$"
                     else:
