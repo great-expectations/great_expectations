@@ -145,7 +145,7 @@ class BaseYamlConfig(SerializableDictDot):
         raise NotImplementedError
 
 
-class AssetConfig(DictDot):
+class AssetConfig(SerializableDictDot):
     def __init__(
         self,
         name: Optional[str] = None,
@@ -200,6 +200,18 @@ class AssetConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
 
 class AssetConfigSchema(Schema):
@@ -345,7 +357,7 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class DataConnectorConfig(DictDot):
+class DataConnectorConfig(SerializableDictDot):
     def __init__(
         self,
         class_name,
@@ -435,6 +447,18 @@ class DataConnectorConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
 
 class DataConnectorConfigSchema(Schema):
@@ -799,7 +823,7 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(DictDot):
+class DatasourceConfig(SerializableDictDot):
     def __init__(
         self,
         class_name=None,
@@ -882,6 +906,18 @@ class DatasourceConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
 
 class DatasourceConfigSchema(Schema):
@@ -2114,6 +2150,10 @@ class DataContextConfig(BaseYamlConfig):
     @property
     def config_version(self):
         return self._config_version
+
+    @config_version.setter
+    def config_version(self, config_version: float) -> None:
+        self._config_version = config_version
 
     def to_json_dict(self) -> dict:
         """

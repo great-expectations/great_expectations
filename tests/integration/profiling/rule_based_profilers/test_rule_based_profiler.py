@@ -4,7 +4,9 @@ from unittest import mock
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -166,4 +168,64 @@ def test_profile_includes_citations(
         payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
     )
-    assert mock_emit.call_args_list[-1][0][0]["event"] == "profiler.run"
+
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert (
+        actual_events[-1][0][0]["event"]
+        == UsageStatsEvents.RULE_BASED_PROFILER_RUN.value
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_profile_get_expectation_suite(
+    mock_emit,
+    alice_columnar_table_single_batch_context,
+    alice_columnar_table_single_batch,
+):
+    # Load data context
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    # Load profiler configs & loop (run tests for each one)
+    yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
+
+    # Instantiate Profiler
+    profiler_config = yaml.load(yaml_config)
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    profiler_config.pop("class_name")
+
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        **profiler_config,
+        data_context=data_context,
+    )
+
+    # BatchRequest yielding exactly one batch
+    alice_single_batch_data_batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    result: RuleBasedProfilerResult = profiler.run(
+        batch_request=alice_single_batch_data_batch_request
+    )
+
+    expectation_suite_name: str = "my_suite"
+
+    suite: ExpectationSuite = result.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    assert suite is not None and len(suite.expectations) > 0
+
+    assert mock_emit.call_count == 55
+
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert (
+        actual_events[-1][0][0]["event"]
+        == UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE.value
+    )

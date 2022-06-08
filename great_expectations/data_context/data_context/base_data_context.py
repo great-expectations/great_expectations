@@ -997,7 +997,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     #
     #####
 
-    def _load_config_variables_file(self):
+    def _load_config_variables_file(self) -> dict:
         """
         Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
         have already been interpolated before being sent from the Cloud API.
@@ -1030,7 +1030,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             return {}
 
-    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
+    def get_config_with_variables_substituted(
+        self, config: Optional[DataContextConfig] = None
+    ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
         in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
@@ -1120,7 +1122,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             return value.replace("$", dollar_sign_escape_string)
 
     def save_config_variable(
-        self, config_variable_name, value, skip_if_substitution_variable: bool = True
+        self,
+        config_variable_name: str,
+        value: Any,
+        skip_if_substitution_variable: bool = True,
     ) -> None:
         r"""Save config variable value
         Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
@@ -3387,7 +3392,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
     )
     def run_profiler_with_dynamic_arguments(
         self,
@@ -3427,7 +3432,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_PROFILER_ON_DATA.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA.value,
     )
     def run_profiler_on_data(
         self,
@@ -3485,34 +3490,28 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         test_yaml_config is mainly intended for use within notebooks and tests.
 
-        Parameters
-        ----------
-        yaml_config : str
-            A string containing the yaml config to be tested
+        --Public API--
 
-        name: str
-            (Optional) A string containing the name of the component to instantiate
+        --Documentation--
+            https://docs.greatexpectations.io/docs/terms/data_context
+            https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
-        pretty_print : bool
-            Determines whether to print human-readable output
+        Args:
+            yaml_config: A string containing the yaml config to be tested
+            name: (Optional) A string containing the name of the component to instantiate
+            pretty_print: Determines whether to print human-readable output
+            return_mode: Determines what type of object test_yaml_config will return.
+                Valid modes are "instantiated_class" and "report_object"
+            shorten_tracebacks:If true, catch any errors during instantiation and print only the
+                last element of the traceback stack. This can be helpful for
+                rapid iteration on configs in a notebook, because it can remove
+                the need to scroll up and down a lot.
 
-        return_mode : str
-            Determines what type of object test_yaml_config will return
-            Valid modes are "instantiated_class" and "report_object"
-
-        shorten_tracebacks : bool
-            If true, catch any errors during instantiation and print only the
-            last element of the traceback stack. This can be helpful for
-            rapid iteration on configs in a notebook, because it can remove
-            the need to scroll up and down a lot.
-
-        Returns
-        -------
-        The instantiated component (e.g. a Datasource)
-        OR
-        a json object containing metadata from the component's self_check method
-
-        The returned object is determined by return_mode.
+        Returns:
+            The instantiated component (e.g. a Datasource)
+            OR
+            a json object containing metadata from the component's self_check method.
+            The returned object is determined by return_mode.
         """
         if return_mode not in ["instantiated_class", "report_object"]:
             raise ValueError(f"Unknown return_mode: {return_mode}.")

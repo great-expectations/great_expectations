@@ -212,7 +212,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return domain_builder
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.PROFILER_RUN.value,
+        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN.value,
         args_payload_fn=get_profiler_run_usage_statistics,
     )
     def run(
@@ -327,6 +327,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     "rules": effective_rules_configs,
                 },
             },
+            usage_statistics_handler=self._usage_statistics_handler,
         )
 
     def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
@@ -1000,13 +1001,19 @@ class BaseRuleBasedProfiler(ConfigPeer):
     ) -> Optional[Any]:
         # Property values of collections types must be unique (use set for "list"/"tuple" and "update" for dictionary).
 
-        if isinstance(dest_property_value, list):
+        if isinstance(dest_property_value, list) and isinstance(
+            source_property_value, list
+        ):
             return list(set(dest_property_value + source_property_value))
 
-        if isinstance(dest_property_value, tuple):
+        if isinstance(dest_property_value, tuple) and isinstance(
+            source_property_value, tuple
+        ):
             return tuple(set(dest_property_value + source_property_value))
 
-        if isinstance(dest_property_value, dict):
+        if isinstance(dest_property_value, dict) and isinstance(
+            source_property_value, dict
+        ):
             return dict(dest_property_value, **source_property_value)
 
         return dest_property_value

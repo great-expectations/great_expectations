@@ -1,5 +1,6 @@
 import os
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from unittest import mock
 
 import altair as alt
 import nbconvert
@@ -10,6 +11,7 @@ from freezegun import freeze_time
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import (
@@ -2340,6 +2342,31 @@ def test_volume_data_assistant_result_serialization(
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_volume_data_assistant_result_get_expectation_suite(
+    mock_emit,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
+):
+    expectation_suite_name: str = "my_suite"
+
+    suite: ExpectationSuite = bobby_volume_data_assistant_result.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    assert suite is not None and len(suite.expectations) > 0
+
+    assert mock_emit.call_count == 1
+
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert (
+        actual_events[-1][0][0]["event"]
+        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
+    )
+
+
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
@@ -2508,8 +2535,45 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     ]
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
+        # include_column_names=include_column_names,
         exclude_column_names=exclude_column_names,
+        # include_column_name_suffixes=include_column_name_suffixes,
+        # exclude_column_name_suffixes=exclude_column_name_suffixes,
+        # semantic_type_filter_module_name=semantic_type_filter_module_name,
+        # semantic_type_filter_class_name=semantic_type_filter_class_name,
+        # include_semantic_types=include_semantic_types,
+        # exclude_semantic_types=exclude_semantic_types,
+        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
         cardinality_limit_mode=CardinalityLimitMode.REL_100,
+        # max_unique_values=max_unique_values,
+        # max_proportion_unique=max_proportion_unique,
+        # column_value_uniqueness_rule={
+        #     "success_ratio": 0.8,
+        # },
+        # column_value_nullity_rule={
+        # },
+        # column_value_nonnullity_rule={
+        # },
+        # numeric_columns_rule={
+        #     "false_positive_rate": 0.1,
+        #     "random_seed": 43792,
+        # },
+        # datetime_columns_rule={
+        #     "truncate_values": {
+        #         "lower_bound": 0,
+        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+        #     },
+        #     "round_decimals": 0,
+        # },
+        # text_columns_rule={
+        #     "strict_min": True,
+        #     "strict_max": True,
+        #     "success_ratio": 0.8,
+        # },
+        # categorical_columns_rule={
+        #     "false_positive_rate": 0.1,
+        #     "round_decimals": 3,
+        # },
     )
 
     column_name: str
@@ -2633,8 +2697,44 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
+        # include_column_names=include_column_names,
+        # exclude_column_names=exclude_column_names,
+        # include_column_name_suffixes=include_column_name_suffixes,
+        # exclude_column_name_suffixes=exclude_column_name_suffixes,
+        # semantic_type_filter_module_name=semantic_type_filter_module_name,
+        # semantic_type_filter_class_name=semantic_type_filter_class_name,
+        # include_semantic_types=include_semantic_types,
+        # exclude_semantic_types=exclude_semantic_types,
+        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+        # cardinality_limit_mode=CardinalityLimitMode.REL_100,
+        # max_unique_values=max_unique_values,
+        # max_proportion_unique=max_proportion_unique,
+        # column_value_uniqueness_rule={
+        #     "success_ratio": 0.8,
+        # },
+        # column_value_nullity_rule={
+        # },
+        # column_value_nonnullity_rule={
+        # },
+        # numeric_columns_rule={
+        #     "false_positive_rate": 0.1,
+        #     "random_seed": 43792,
+        # },
+        # datetime_columns_rule={
+        #     "truncate_values": {
+        #         "lower_bound": 0,
+        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+        #     },
+        #     "round_decimals": 0,
+        # },
+        # text_columns_rule={
+        #     "strict_min": True,
+        #     "strict_max": True,
+        #     "success_ratio": 0.8,
+        # },
         categorical_columns_rule={
             "false_positive_rate": 0.1,
+            # "round_decimals": 3,
         },
     )
     assert (
@@ -2957,7 +3057,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "month",
                 "format": "",
                 "title": "Month",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -2965,7 +3065,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "name",
                 "format": "",
                 "title": "Name",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -2973,7 +3073,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "year",
                 "format": "",
                 "title": "Year",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(

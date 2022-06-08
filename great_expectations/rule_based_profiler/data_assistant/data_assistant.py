@@ -418,20 +418,21 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._batches = self._validator.batches
 
-        variables: Optional[Dict[str, Any]] = self.get_variables() or {}
-        rules: Optional[List[Rule]] = self.get_rules() or []
+        self._data_context = self._validator.data_context
 
+        variables: Optional[Dict[str, Any]] = self.get_variables() or {}
         self._profiler = RuleBasedProfiler(
             name=self.name,
             config_version=1.0,
             variables=variables,
-            data_context=self._validator.data_context,
+            data_context=self._data_context,
         )
 
         self._metrics_parameter_builders_by_domain = {}
 
-        rule: Rule
+        rules: Optional[List[Rule]] = self.get_rules() or []
 
+        rule: Rule
         for rule in rules:
             self.profiler.add_rule(rule=rule)
             self._metrics_parameter_builders_by_domain[
@@ -467,6 +468,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         data_assistant_result: DataAssistantResult = DataAssistantResult(
             batch_id_to_batch_identifier_display_name_map=self.batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
+            usage_statistics_handler=self._data_context._usage_statistics_handler,
         )
         run_profiler_on_data(
             data_assistant=self,
@@ -767,18 +769,21 @@ def build_map_metric_rule(
             **column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.to_json_dict()
         ),
     ]
-    max_column_attribute_metric_mean_unexpected_value_ratio: float = 1.0e-2
     expect_column_values_to_be_attribute_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
         expectation_type=expectation_type,
         validation_parameter_builder_configs=validation_parameter_builder_configs,
         column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-        condition=f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {max_column_attribute_metric_mean_unexpected_value_ratio}",
+        condition=f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= 1.0 - {VARIABLES_KEY}success_ratio",
         meta={
             "profiler_details": f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
         },
     )
 
     # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+
+    variables: dict = {
+        "success_ratio": 7.5e-1,
+    }
 
     parameter_builders: List[ParameterBuilder] = [
         column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,
@@ -790,7 +795,7 @@ def build_map_metric_rule(
     ]
     rule: Rule = Rule(
         name=rule_name,
-        variables=None,
+        variables=variables,
         domain_builder=map_metric_column_domain_builder,
         parameter_builders=parameter_builders,
         expectation_configuration_builders=expectation_configuration_builders,
