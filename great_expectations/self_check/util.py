@@ -310,8 +310,7 @@ except (ImportError, KeyError):
 import tempfile
 
 # from tests.rule_based_profiler.conftest import ATOL, RTOL
-# RTOL: float = 1.0e-7
-RTOL: float = 1.0e-5
+RTOL: float = 1.0e-7
 ATOL: float = 5.0e-2
 
 RX_FLOAT = re.compile(r".*\d\.\d+.*")
@@ -2097,8 +2096,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
         else:
             runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
             runtime_kwargs.update(kwargs)
-            validator_thing = getattr(validator, expectation_type)
-            result = validator_thing(**runtime_kwargs)
+            result = getattr(validator, expectation_type)(**runtime_kwargs)
     except (
         MetricProviderError,
         MetricResolutionError,
@@ -2167,16 +2165,11 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                 result["result"]["partial_unexpected_list"],
             )
 
-    ##################################################################################################
-    # Some temporary stuff to see if test["output"]["result"] and result can be extracted consistently
-    actual_val = result
-    expected_val = test["output"]
+    # Determine if np.allclose(..) might be needed for float comparison
     try_allclose = False
-    if "observed_value" in expected_val:
-        if RX_FLOAT.match(repr(expected_val["observed_value"])):
+    if "observed_value" in test["output"]:
+        if RX_FLOAT.match(repr(test["output"]["observed_value"])):
             try_allclose = True
-
-    ##################################################################################################
 
     # Check results
     if test["exact_match_out"] is True:
