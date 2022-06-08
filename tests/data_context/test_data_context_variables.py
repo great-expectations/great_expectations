@@ -77,11 +77,22 @@ def cloud_data_context_variables(
 
 
 @pytest.mark.parametrize(
-    "crud_method,expected_value",
+    "crud_method,target_attr",
     [
-        pytest.param("get_config_version", 2.0, id="config_version getter"),
         pytest.param(
-            "get_plugins_directory", "plugins/", id="plugins_directory getter"
+            "get_config_version",
+            DataContextVariableSchema.CONFIG_VERSION,
+            id="config_version getter",
+        ),
+        pytest.param(
+            "get_config_variables_file_path",
+            DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH,
+            id="config_variables_file_path getter",
+        ),
+        pytest.param(
+            "get_plugins_directory",
+            DataContextVariableSchema.PLUGINS_DIRECTORY,
+            id="plugins_directory getter",
         ),
     ],
 )
@@ -89,13 +100,15 @@ def test_data_context_variables_get(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
+    data_context_config_dict: dict,
     crud_method: str,
-    expected_value: Any,
+    target_attr: DataContextVariableSchema,
 ) -> None:
     def _test_variables_get(type_: DataContextVariables) -> None:
         method: Callable = getattr(type_, crud_method)
         res: Any = method()
 
+        expected_value: Any = data_context_config_dict[target_attr.value]
         assert res == expected_value
 
     # EphemeralDataContextVariables
@@ -116,6 +129,12 @@ def test_data_context_variables_get(
             5.0,
             DataContextVariableSchema.CONFIG_VERSION,
             id="config_version setter",
+        ),
+        pytest.param(
+            "set_config_variables_file_path",
+            "uncommitted/my_config_file.yml",
+            DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH,
+            id="config_variables_file_path setter",
         ),
         pytest.param(
             "set_plugins_directory",
