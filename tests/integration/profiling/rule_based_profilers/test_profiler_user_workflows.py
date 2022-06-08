@@ -259,7 +259,7 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"].expectations
     )
 
-    assert mock_emit.call_count == 54
+    assert mock_emit.call_count == 43
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"

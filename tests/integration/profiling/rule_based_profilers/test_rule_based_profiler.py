@@ -163,7 +163,7 @@ def test_profile_includes_citations(
 
     assert result.citation is not None and len(result.citation.keys()) > 0
 
-    assert mock_emit.call_count == 54
+    assert mock_emit.call_count == 43
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
@@ -221,7 +221,7 @@ def test_profile_get_expectation_suite(
 
     assert suite is not None and len(suite.expectations) > 0
 
-    assert mock_emit.call_count == 55
+    assert mock_emit.call_count == 44
 
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
