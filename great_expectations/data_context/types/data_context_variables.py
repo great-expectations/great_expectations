@@ -110,6 +110,18 @@ class DataContextVariables(ABC):
         """
         return self._get(DataContextVariableSchema.STORES)
 
+    def set_data_docs_sites(self, data_docs_sites: dict) -> None:
+        """
+        Setter for `data_docs_sites`.
+        """
+        self._set(DataContextVariableSchema.DATA_DOCS_SITES, data_docs_sites)
+
+    def get_data_docs_sites(self) -> Optional[dict]:
+        """
+        Getter for `data_docs_sites`.
+        """
+        return self._get(DataContextVariableSchema.DATA_DOCS_SITES)
+
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
