@@ -7,6 +7,7 @@ from great_expectations.data_context.data_context.data_context import DataContex
 from great_expectations.data_context.types.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariables,
+    DataContextVariableSchema,
     EphemeralDataContextVariables,
     FileDataContextVariables,
 )
@@ -77,7 +78,12 @@ def cloud_data_context_variables(
 
 @pytest.mark.parametrize(
     "crud_method,expected_value",
-    [pytest.param("get_config_version", 2.0, id="config_version getter")],
+    [
+        pytest.param("get_config_version", 2.0, id="config_version getter"),
+        pytest.param(
+            "get_plugins_directory", "plugins/", id="plugins_directory getter"
+        ),
+    ],
 )
 def test_data_context_variables_get(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
@@ -106,8 +112,17 @@ def test_data_context_variables_get(
     "crud_method,input_value,target_attr",
     [
         pytest.param(
-            "set_config_version", 5.0, "config_version", id="config_version setter"
-        )
+            "set_config_version",
+            5.0,
+            DataContextVariableSchema.CONFIG_VERSION,
+            id="config_version setter",
+        ),
+        pytest.param(
+            "set_plugins_directory",
+            "other_plugins/",
+            DataContextVariableSchema.PLUGINS_DIRECTORY,
+            id="plugins_directory setter",
+        ),
     ],
 )
 def test_data_context_variables_set(
@@ -116,7 +131,7 @@ def test_data_context_variables_set(
     cloud_data_context_variables: CloudDataContextVariables,
     crud_method: str,
     input_value: Any,
-    target_attr: str,
+    target_attr: DataContextVariableSchema,
     # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -125,7 +140,7 @@ def test_data_context_variables_set(
     def _test_variables_set(type_: DataContextVariables) -> None:
         method: Callable = getattr(type_, crud_method)
         method(input_value)
-        res: Any = getattr(type_, target_attr)
+        res: Any = getattr(type_, target_attr.value)
 
         assert res == input_value
 
@@ -154,7 +169,7 @@ def test_data_context_variables_set(
                     "attributes": {
                         "organization_id": ge_cloud_organization_id,
                         "value": input_value,
-                        "variable_type": target_attr,
+                        "variable_type": target_attr.value,
                     },
                 }
             },

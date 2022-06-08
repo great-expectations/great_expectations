@@ -98,6 +98,18 @@ class DataContextVariables(ABC):
         """
         return self._get(DataContextVariableSchema.CONFIG_VERSION)
 
+    def set_plugins_directory(self, plugins_directory: str) -> None:
+        """
+        Setter for `plugins_directory`.
+        """
+        self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
+
+    def get_plugins_directory(self) -> Optional[float]:
+        """
+        Getter for `plugins_directory`.
+        """
+        return self._get(DataContextVariableSchema.PLUGINS_DIRECTORY)
+
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
