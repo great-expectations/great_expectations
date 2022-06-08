@@ -9,7 +9,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
     CLISuiteInteractiveFlagCombinations,
 )
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context import FileDataContext
 from tests.integration.usage_statistics.example_events.data_context_run_validation_operator import (
     data_context_run_validation_operator_events,
 )
@@ -18,6 +18,47 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
 )
 from tests.integration.usage_statistics.usage_stats_event_examples import (
     data_context_init_with_dependencies,
+)
+
+test_yaml_config_supported_store_types: List[str] = [
+    "ExpectationsStore",
+    "ValidationsStore",
+    "HtmlSiteStore",
+    "EvaluationParameterStore",
+    "MetricStore",
+    "SqlAlchemyQueryStore",
+    "CheckpointStore",
+    "ProfilerStore",
+]
+test_yaml_config_supported_datasource_types: List[str] = [
+    "Datasource",
+    "SimpleSqlalchemyDatasource",
+]
+test_yaml_config_supported_data_connector_types: List[str] = [
+    "InferredAssetFilesystemDataConnector",
+    "ConfiguredAssetFilesystemDataConnector",
+    "InferredAssetS3DataConnector",
+    "ConfiguredAssetS3DataConnector",
+    "InferredAssetAzureDataConnector",
+    "ConfiguredAssetAzureDataConnector",
+    "InferredAssetGCSDataConnector",
+    "ConfiguredAssetGCSDataConnector",
+    "InferredAssetSqlDataConnector",
+    "ConfiguredAssetSqlDataConnector",
+]
+test_yaml_config_supported_checkpoint_types: List[str] = [
+    "Checkpoint",
+    "SimpleCheckpoint",
+]
+test_yaml_config_supported_profiler_types: List[str] = [
+    "RuleBasedProfiler",
+]
+test_yaml_config_supported_types: List[str] = (
+    test_yaml_config_supported_store_types
+    + test_yaml_config_supported_datasource_types
+    + test_yaml_config_supported_data_connector_types
+    + test_yaml_config_supported_checkpoint_types
+    + test_yaml_config_supported_profiler_types
 )
 
 
@@ -1318,7 +1359,7 @@ valid_usage_statistics_messages = {
                 },
                 "ge_version": "0.13.20.manual_testing",
             }
-            for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+            for class_name in test_yaml_config_supported_types
         ]
         + [
             {
@@ -1331,7 +1372,7 @@ valid_usage_statistics_messages = {
                 },
                 "ge_version": "0.13.20.manual_testing",
             }
-            for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+            for class_name in test_yaml_config_supported_types
         ]
         # Diagnostic Message Types
         + [

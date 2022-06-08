@@ -10,6 +10,7 @@ from ruamel.yaml import YAML
 
 import great_expectations as ge
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import FileDataContext
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
@@ -949,7 +950,7 @@ def empty_context(tmp_path_factory):
     DataContext.create(project_path)
     ge_dir = os.path.join(project_path, "great_expectations")
     assert os.path.isdir(ge_dir)
-    assert os.path.isfile(os.path.join(ge_dir, DataContext.GE_YML))
+    assert os.path.isfile(os.path.join(ge_dir, FileDataContext.GE_YML))
     context = DataContext(ge_dir)
     assert isinstance(context, DataContext)
     return context
@@ -1004,7 +1005,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    with open(os.path.join(ge_dir, DataContext.GE_YML), "w") as yml:
+    with open(os.path.join(ge_dir, empty_context.GE_YML), "w") as yml:
         yml.write("this file: is not a valid ge config")
     assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
 

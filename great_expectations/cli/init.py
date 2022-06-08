@@ -4,7 +4,7 @@ import warnings
 
 import click
 
-from great_expectations import DataContext
+from great_expectations import DataContext, FileDataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import (
@@ -61,9 +61,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
     cli_message(GREETING)
 
     if DataContext.does_config_exist_on_disk(ge_dir):
-        message = (
-            f"""Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}."""
-        )
+        message = f"""Warning. An existing `{FileDataContext.GE_YML}` was found here: {ge_dir}."""
         warnings.warn(message)
         try:
             project_file_structure_exists = (

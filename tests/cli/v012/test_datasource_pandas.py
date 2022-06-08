@@ -2,7 +2,7 @@ import os
 
 from click.testing import CliRunner
 
-from great_expectations import DataContext
+from great_expectations import DataContext, FileDataContext
 from great_expectations.cli.v012 import cli
 from tests.cli.v012.test_cli import yaml
 from tests.cli.v012.utils import (
@@ -104,7 +104,7 @@ def test_cli_datasource_new(caplog, empty_data_context, filesystem_csv_2):
 
     assert result.exit_code == 0
 
-    config_path = os.path.join(project_root_dir, DataContext.GE_YML)
+    config_path = os.path.join(project_root_dir, FileDataContext.GE_YML)
     config = yaml.load(open(config_path))
     datasources = config["datasources"]
     assert "mynewsource" in datasources.keys()

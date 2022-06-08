@@ -85,7 +85,7 @@ class AbstractDataContext(ABC):
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
 
-        self.runtime_environment = runtime_environment or {}
+        # self.runtime_environment = runtime_environment or {}
 
         if not hasattr(self, "_project_config"):
             self._project_config = project_config

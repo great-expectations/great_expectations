@@ -20,6 +20,7 @@ class EphemeralDataContext(AbstractDataContext):
         project_config: Union[DataContextConfig, Mapping],
         runtime_environment: Optional[dict] = None,
     ):
+        self.runtime_environment = runtime_environment or {}
         super().__init__(
             project_config=project_config, runtime_environment=runtime_environment
         )

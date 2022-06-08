@@ -39,7 +39,7 @@ yaml.default_flow_style = False
 
 
 # TODO: <WILL> Most of the logic here will be migrated to FileDataContext
-class DataContext(BaseDataContext):
+class DataContext(BaseDataContext, FileDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
     expectation suites, datasources, notification settings, and data fixtures.
 
@@ -330,8 +330,6 @@ class DataContext(BaseDataContext):
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = None
         ge_cloud_config = None
-        # for backwards compatibility
-        self.GE_YML = FileDataContext.GE_YML
 
         if ge_cloud_mode:
             ge_cloud_config = self.get_ge_cloud_config(
@@ -415,6 +413,7 @@ class DataContext(BaseDataContext):
 
         :return: the configuration object read from the file or template
         """
+        # TODO: this should go away
         if self.ge_cloud_mode:
             config = self._retrieve_data_context_config_from_ge_cloud()
             return config

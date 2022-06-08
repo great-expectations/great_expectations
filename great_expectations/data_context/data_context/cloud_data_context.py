@@ -21,6 +21,7 @@ class CloudDataContext(AbstractDataContext):
 
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
+        self.runtime_environment = runtime_environment or {}
 
         # config overrides with cloud configs
         self._project_config = project_config

@@ -3,6 +3,7 @@ import itertools
 import json
 import os
 import tempfile
+from typing import List
 from unittest import mock
 
 import pytest
@@ -1444,35 +1445,75 @@ def test_rule_based_profiler_integration(
 
 
 def test_test_yaml_config_supported_types_have_self_check():
+    # TODO: ask for feedback on these changes
+    test_yaml_config_supported_store_types: List[str] = [
+        "ExpectationsStore",
+        "ValidationsStore",
+        "HtmlSiteStore",
+        "EvaluationParameterStore",
+        "MetricStore",
+        "SqlAlchemyQueryStore",
+        "CheckpointStore",
+        "ProfilerStore",
+    ]
+    test_yaml_config_supported_datasource_types: List[str] = [
+        "Datasource",
+        "SimpleSqlalchemyDatasource",
+    ]
+    test_yaml_config_supported_data_connector_types: List[str] = [
+        "InferredAssetFilesystemDataConnector",
+        "ConfiguredAssetFilesystemDataConnector",
+        "InferredAssetS3DataConnector",
+        "ConfiguredAssetS3DataConnector",
+        "InferredAssetAzureDataConnector",
+        "ConfiguredAssetAzureDataConnector",
+        "InferredAssetGCSDataConnector",
+        "ConfiguredAssetGCSDataConnector",
+        "InferredAssetSqlDataConnector",
+        "ConfiguredAssetSqlDataConnector",
+    ]
+    test_yaml_config_supported_checkpoint_types: List[str] = [
+        "Checkpoint",
+        "SimpleCheckpoint",
+    ]
+    test_yaml_config_supported_profiler_types: List[str] = [
+        "RuleBasedProfiler",
+    ]
+    all_test_yaml_config_supported_types: List[str] = (
+        test_yaml_config_supported_store_types
+        + test_yaml_config_supported_datasource_types
+        + test_yaml_config_supported_data_connector_types
+        + test_yaml_config_supported_checkpoint_types
+        + test_yaml_config_supported_profiler_types
+    )
+
     # Each major category of test_yaml_config supported types has its own origin module_name
     supported_types = [
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES,
+            test_yaml_config_supported_store_types,
             "great_expectations.data_context.store",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES,
+            test_yaml_config_supported_datasource_types,
             "great_expectations.datasource",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES,
+            test_yaml_config_supported_data_connector_types,
             "great_expectations.datasource.data_connector",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES,
+            test_yaml_config_supported_checkpoint_types,
             "great_expectations.checkpoint",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES,
+            test_yaml_config_supported_profiler_types,
             "great_expectations.rule_based_profiler",
         ),
     ]
 
     # Quick sanity check to ensure that we are testing ALL supported types herein
     all_types = list(itertools.chain.from_iterable(t[0] for t in supported_types))
-    assert sorted(all_types) == sorted(
-        BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
-    )
+    assert sorted(all_types) == sorted(all_test_yaml_config_supported_types)
 
     # Use class_name and module_name to get the class type and introspect to confirm adherence to self_check requirement
     for category, module_name in supported_types:

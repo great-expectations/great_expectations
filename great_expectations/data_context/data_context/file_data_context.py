@@ -58,6 +58,7 @@ class FileDataContext(AbstractDataContext):
         context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
         self._context_root_dir = context_root_dir
+        self.runtime_environment = runtime_environment or {}
 
         self._project_config = project_config
         self._apply_global_config_overrides()

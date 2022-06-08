@@ -14,7 +14,7 @@ except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext, rtd_url_ge_version
+from great_expectations import FileDataContext, rtd_url_ge_version
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_messages import NO_DATASOURCES_FOUND
 from great_expectations.cli.v012.docs import build_docs
@@ -611,7 +611,7 @@ After you connect to the datasource, run great_expectations init to continue.
 
 """.format(
                         datasource_name,
-                        DataContext.GE_YML,
+                        FileDataContext.GE_YML,
                         context.get_config()["config_variables_file_path"],
                         rtd_url_ge_version,
                         selected_database.value.lower(),

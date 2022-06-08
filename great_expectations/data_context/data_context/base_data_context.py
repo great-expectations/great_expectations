@@ -278,6 +278,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._project_config = self._data_context.config
             self._stores = self._data_context.stores
             self.runtime_environment = self._data_context.runtime_environment
+            self._evaluation_parameter_dependencies_compiled = (
+                self._data_context._evaluation_parameter_dependencies_compiled
+            )
+            self._evaluation_parameter_dependencies = (
+                self._data_context._evaluation_parameter_dependencies
+            )
+            self._assistants = self._data_context._assistants
+
         elif context_root_dir is not None:
             self._data_context = FileDataContext(
                 project_config=project_config,
@@ -288,16 +296,26 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._project_config = self._data_context.config
             self._stores = self._data_context.stores
             self.runtime_environment = self._data_context.runtime_environment
-            self.root_directory = self._data_context.root_directory
+            self._context_root_directory = self._data_context.root_directory
+            self._evaluation_parameter_dependencies_compiled = (
+                self._data_context._evaluation_parameter_dependencies_compiled
+            )
+            self._evaluation_parameter_dependencies = (
+                self._data_context._evaluation_parameter_dependencies
+            )
+            self._assistants = self._data_context._assistants
 
         else:
-            self._data_context = EphemeralDataContext(
+            super().__init__(
                 project_config=project_config, runtime_environment=runtime_environment
             )
-            # temporary until we can pull this out
-            self._project_config = self._data_context.config
-            self._stores = self._data_context.stores
-            self.runtime_environment = self._data_context.runtime_environment
+            # self._data_context = EphemeralDataContext(
+            #     project_config=project_config, runtime_environment=runtime_environment
+            # )
+            # # temporary until we can pull this out
+            # self._project_config = self._data_context.config
+            # self._stores = self._data_context.stores
+            # self.runtime_environment = self._data_context.runtime_environment
 
         # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
         self._in_memory_instance_id = (
@@ -2139,6 +2157,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
 
+    # this is somethign that needs to be done!
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None
     ) -> None:
