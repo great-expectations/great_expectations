@@ -104,7 +104,11 @@ def test_data_context_variables_get(
 
 @pytest.mark.parametrize(
     "crud_method,input_value,target_attr",
-    [pytest.param("set_config_version", 5.0, id="config_version setter")],
+    [
+        pytest.param(
+            "set_config_version", 5.0, "config_version", id="config_version setter"
+        )
+    ],
 )
 def test_data_context_variables_set(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
