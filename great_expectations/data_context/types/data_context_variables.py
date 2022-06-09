@@ -4,7 +4,10 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
+from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
+    NotebookConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
@@ -243,6 +246,21 @@ class DataContextVariables(ABC):
         Getter for `anonymous_usage_statistics`.
         """
         return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
+
+    def set_notebooks(self, notebooks: NotebookConfig) -> None:
+        """
+        Setter for `notebooks`.
+        """
+        self._set(
+            DataContextVariableSchema.NOTEBOOKS,
+            notebooks,
+        )
+
+    def get_notebooks(self) -> Optional[NotebookConfig]:
+        """
+        Getter for `notebooks`.
+        """
+        return self._get(DataContextVariableSchema.NOTEBOOKS)
 
 
 @dataclass

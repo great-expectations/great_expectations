@@ -4,7 +4,11 @@ from unittest import mock
 import pytest
 
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
+from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
+    NotebookConfig,
+    NotebookTemplateConfig,
+)
 from great_expectations.data_context.types.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariables,
@@ -44,6 +48,7 @@ def data_context_config_dict() -> dict:
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
             usage_statistics_url="https://www.my_usage_stats_url/test",
         ),
+        "notebooks": None,
     }
     return config
 
@@ -112,6 +117,17 @@ def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
     )
 
 
+@pytest.fixture
+def notebooks() -> NotebookConfig:
+    return NotebookConfig(
+        class_name="SuiteEditNotebookRenderer",
+        module_name="great_expectations.render.renderer.v3.suite_edit_notebook_renderer",
+        header_markdown=NotebookTemplateConfig(
+            file_name="my_notebook_template.md",
+        ),
+    )
+
+
 @pytest.mark.parametrize(
     "crud_method,target_attr",
     [
@@ -167,6 +183,11 @@ def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
             "get_anonymous_usage_statistics",
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics getter",
+        ),
+        pytest.param(
+            "get_notebooks",
+            DataContextVariableSchema.NOTEBOOKS,
+            id="notebooks getter",
         ),
     ],
 )
@@ -260,6 +281,12 @@ def test_data_context_variables_get(
             anonymous_usage_statistics,
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics setter",
+        ),
+        pytest.param(
+            "set_notebooks",
+            notebooks,
+            DataContextVariableSchema.NOTEBOOKS,
+            id="notebooks setter",
         ),
     ],
 )
