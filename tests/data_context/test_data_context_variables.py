@@ -79,6 +79,32 @@ def cloud_data_context_variables(
     )
 
 
+def stores() -> dict:
+    return {
+        "profiler_store": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "profilers/",
+            },
+        },
+    }
+
+
+@pytest.fixture
+def data_docs_sites() -> dict:
+    return {
+        "local_site": {
+            "class_name": "SiteBuilder",
+            "show_how_to_buttons": True,
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "uncommitted/data_docs/local_site/",
+            },
+        }
+    }
+
+
 @pytest.fixture
 def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
     return AnonymizedUsageStatisticsConfig(
@@ -128,6 +154,14 @@ def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
             "get_profiler_store_name",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store getter",
+        ),
+        pytest.param(
+            "get_stores", DataContextVariableSchema.STORES, id="stores getter"
+        ),
+        pytest.param(
+            "get_data_docs_sites",
+            DataContextVariableSchema.DATA_DOCS_SITES,
+            id="data_docs_sites getter",
         ),
         pytest.param(
             "get_anonymous_usage_statistics",
@@ -211,6 +245,15 @@ def test_data_context_variables_get(
             "my_profiler_store",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store setter",
+        ),
+        pytest.param(
+            "set_stores", stores, DataContextVariableSchema.STORES, id="stores setter"
+        ),
+        pytest.param(
+            "set_data_docs_sites",
+            data_docs_sites,
+            DataContextVariableSchema.DATA_DOCS_SITES,
+            id="data_docs_sites setter",
         ),
         pytest.param(
             "set_anonymous_usage_statistics",

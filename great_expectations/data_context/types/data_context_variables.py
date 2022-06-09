@@ -201,6 +201,30 @@ class DataContextVariables(ABC):
         """
         return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
 
+    def set_stores(self, stores: dict) -> None:
+        """
+        Setter for `stores`.
+        """
+        self._set(DataContextVariableSchema.STORES, stores)
+
+    def get_stores(self) -> Optional[dict]:
+        """
+        Getter for `stores`.
+        """
+        return self._get(DataContextVariableSchema.STORES)
+
+    def set_data_docs_sites(self, data_docs_sites: dict) -> None:
+        """
+        Setter for `data_docs_sites`.
+        """
+        self._set(DataContextVariableSchema.DATA_DOCS_SITES, data_docs_sites)
+
+    def get_data_docs_sites(self) -> Optional[dict]:
+        """
+        Getter for `data_docs_sites`.
+        """
+        return self._get(DataContextVariableSchema.DATA_DOCS_SITES)
+
     def set_anonymous_usage_statistics(
         self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig
     ) -> None:
