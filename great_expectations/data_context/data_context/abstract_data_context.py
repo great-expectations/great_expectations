@@ -1,13 +1,16 @@
+import configparser
 import copy
 import json
 import logging
 import os
+import uuid
 from abc import ABC
 from typing import Dict, List, Mapping, Optional, Union
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
@@ -20,6 +23,10 @@ from great_expectations.data_context.util import (
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
+)
+
+from great_expectations.core.usage_statistics.usage_statistics import (  # isort:skip
+    UsageStatisticsHandler,
 )
 
 from great_expectations.data_context.store import (  # isort:skip
@@ -46,8 +53,13 @@ class AbstractDataContext(ABC):
     TODO: eventually the dependency on ConfigPeer will be removed and this will become a pure ABC.
     """
 
-    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
-    FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
+    DOLLAR_SIGN_ESCAPE_STRING: str = r"\$"
+    FALSEY_STRINGS: List[str] = ["FALSE", "false", "False", "f", "F", "0"]
+    # A test that describes why this should be here: test_opt_out_etc()
+    GLOBAL_CONFIG_PATHS: List[str] = [
+        os.path.expanduser("~/.great_expectations/great_expectations.conf"),
+        "/etc/great_expectations.conf",
+    ]
 
     @classmethod
     def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
@@ -99,6 +111,11 @@ class AbstractDataContext(ABC):
         self._evaluation_parameter_dependencies = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
+
+        # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
+        self._in_memory_instance_id = (
+            None  # This variable *may* be used in case we cannot save an instance id
+        )
 
     # properties
     @property
@@ -423,6 +440,27 @@ class AbstractDataContext(ABC):
             )
 
     # static methods
+    # @staticmethod
+    # def _check_global_usage_statistics_opt_out() -> bool:
+    #     if os.environ.get("GE_USAGE_STATS", False):
+    #         ge_usage_stats = os.environ.get("GE_USAGE_STATS")
+    #         if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
+    #             return True
+    #         else:
+    #             logger.warning(
+    #                 "GE_USAGE_STATS environment variable must be one of: {}".format(
+    #                     AbstractDataContext.FALSEY_STRINGS
+    #                 )
+    #             )
+
+    @property
+    def instance_id(self):
+        if self._in_memory_instance_id is not None:
+            return self._in_memory_instance_id
+        instance_id = str(uuid.uuid4())
+        self._in_memory_instance_id = instance_id
+        return instance_id
+
     @staticmethod
     def _check_global_usage_statistics_opt_out() -> bool:
         if os.environ.get("GE_USAGE_STATS", False):
@@ -435,6 +473,22 @@ class AbstractDataContext(ABC):
                         AbstractDataContext.FALSEY_STRINGS
                     )
                 )
+        # behavior for where this lives is in the test_opt_out_etc() test. Keeping here because we want to preserve previous behavior
+        # this might actually be a FileDataContext behavior
+        for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
+            config = configparser.ConfigParser()
+            states = config.BOOLEAN_STATES
+            for falsey_string in AbstractDataContext.FALSEY_STRINGS:
+                states[falsey_string] = False
+            states["TRUE"] = True
+            config.BOOLEAN_STATES = states
+            config.read(config_path)
+            try:
+                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
+                    # If stats are disabled, then opt out is true
+                    return True
+            except (ValueError, configparser.Error):
+                pass
 
     # class method
     @classmethod
@@ -452,3 +506,10 @@ class AbstractDataContext(ABC):
         if environment_variable and os.environ.get(environment_variable, False):
             return os.environ.get(environment_variable)
         return None
+
+    def set_config(self, project_config: DataContextConfig) -> None:
+        # currently not called from Base
+        self._project_config = project_config
+
+
+# public API

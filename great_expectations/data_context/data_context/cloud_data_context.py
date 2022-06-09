@@ -5,9 +5,6 @@ from typing import Mapping, Optional, Union
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     DataContextConfig,
@@ -40,6 +37,13 @@ class CloudDataContext(AbstractDataContext):
         self._project_config = project_config
         # TODO: this is actually unnecessary technically speaking. see if it can actually be removed
         # super()._apply_global_config_overrides()
+        # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
+        self._in_memory_instance_id = (
+            None  # This variable *may* be used in case we cannot save an instance id
+        )
+        # Init data_context_id
+        self._data_context_id = self._construct_data_context_id()
+
         super().__init__(
             project_config=project_config, runtime_environment=runtime_environment
         )
@@ -47,6 +51,14 @@ class CloudDataContext(AbstractDataContext):
     @property
     def config(self) -> DataContextConfig:
         return self._project_config
+
+    @property
+    def ge_cloud_config(self) -> Optional[GeCloudConfig]:
+        return self._ge_cloud_config
+
+    @property
+    def ge_cloud_mode(self) -> bool:
+        return self._ge_cloud_mode
 
     @staticmethod
     def _normalize_absolute_or_relative_path(path: Optional[str]) -> Optional[str]:
@@ -99,7 +111,7 @@ class CloudDataContext(AbstractDataContext):
             if substitutions.get(config_variable) is None:
                 logger.info(
                     f'Config variable "{config_variable}" was not found in environment or global config ('
-                    f'{FileDataContext.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
+                    f'{AbstractDataContext.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
                     f"like to "
                     f"use a different value, please specify it in an environment variable or in a "
                     f"great_expectations.conf file located at one of the above paths, in a section named "
@@ -112,3 +124,11 @@ class CloudDataContext(AbstractDataContext):
                 config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
             )
         )
+
+    def _construct_data_context_id(self) -> str:
+        """
+        Choose the id in the currently-configured ge_cloud_config
+        Returns:
+            UUID to use as the data_context_id
+        """
+        return self.ge_cloud_config.organization_id

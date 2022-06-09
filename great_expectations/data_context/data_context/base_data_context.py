@@ -10,11 +10,11 @@ from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 from dateutil.parser import parse
+from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -77,9 +77,8 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store import Store
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
-from great_expectations.data_context.types.base import (
+from great_expectations.data_context.types.base import (  # DEFAULT_USAGE_STATISTICS_URL,
     CURRENT_GE_CONFIG_VERSION,
-    DEFAULT_USAGE_STATISTICS_URL,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     ConcurrencyConfig,
@@ -129,7 +128,10 @@ except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 logger = logging.getLogger(__name__)
-yaml: YAMLHandler = YAMLHandler()
+# TODO: keeping YAMLHandler out of this for now. It was causing some representation errors.
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 # TODO: <WILL> Most of the logic here will be migrated to EphemeralDataContext
@@ -261,9 +263,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
+        # TODO: these should eventually go away, but we are still accessing the _ge_cloud_mode variable at the BaseDataContext level
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
 
+        # TODO: check if there is a naming collision with data assistant
         self._data_context: "AbstractDataContext" = None
 
         # start splitting this up
@@ -274,7 +278,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 ge_cloud_mode=ge_cloud_mode,
                 ge_cloud_config=ge_cloud_config,
             )
-            # this is only here until we are able to pull this out
+            # TODO: only here until we are able to move the logic to the respective classes
             self._project_config = self._data_context.config
             self._stores = self._data_context.stores
             self.runtime_environment = self._data_context.runtime_environment
@@ -306,16 +310,23 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._assistants = self._data_context._assistants
 
         else:
-            super().__init__(
+            # super().__init__(
+            #    project_config=project_config, runtime_environment=runtime_environment
+            # )
+            self._data_context = EphemeralDataContext(
                 project_config=project_config, runtime_environment=runtime_environment
             )
-            # self._data_context = EphemeralDataContext(
-            #     project_config=project_config, runtime_environment=runtime_environment
-            # )
-            # # temporary until we can pull this out
-            # self._project_config = self._data_context.config
-            # self._stores = self._data_context.stores
-            # self.runtime_environment = self._data_context.runtime_environment
+            # temporary until we can pull this out
+            self._project_config = self._data_context.config
+            self._stores = self._data_context.stores
+            self.runtime_environment = self._data_context.runtime_environment
+            self._evaluation_parameter_dependencies_compiled = (
+                self._data_context._evaluation_parameter_dependencies_compiled
+            )
+            self._evaluation_parameter_dependencies = (
+                self._data_context._evaluation_parameter_dependencies
+            )
+            self._assistants = self._data_context._assistants
 
         # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
         self._in_memory_instance_id = (
@@ -326,7 +337,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._data_context_id = self._construct_data_context_id()
 
         # Override the project_config data_context_id if an expectations_store was already set up
-        self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
+        # self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
         self._initialize_usage_statistics(
             # how can we do this?
             self.project_config_with_variables_substituted.anonymous_usage_statistics
@@ -372,34 +383,35 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 # caught at the context.get_batch() step. So we just pass here.
                 pass
 
-    def _construct_data_context_id(self) -> str:
-        """
-        Choose the id of the currently-configured expectations store, if available and a persistent store.
-        If not, it should choose the id stored in DataContextConfig.
-        Returns:
-            UUID to use as the data_context_id
-        """
+    # def _construct_data_context_id(self) -> str:
+    #     """
+    #     Choose the id of the currently-configured expectations store, if available and a persistent store.
+    #     If not, it should choose the id stored in DataContextConfig.
+    #     Returns:
+    #         UUID to use as the data_context_id
+    #     """
+    #
+    #     # if in ge_cloud_mode, use ge_cloud_organization_id
+    #     if hasattr(self, "ge_cloud_mode") and self.ge_cloud_mode:
+    #         return self.ge_cloud_config.organization_id
+    #     else:
+    #         return super()._construct_data_context_id()
 
-        # if in ge_cloud_mode, use ge_cloud_organization_id
-        if hasattr(self, "ge_cloud_mode") and self.ge_cloud_mode:
-            return self.ge_cloud_config.organization_id
-        else:
-            return super()._construct_data_context_id()
-
-    def _initialize_usage_statistics(
-        self, usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ) -> None:
-        """Initialize the usage statistics system."""
-        if not usage_statistics_config.enabled:
-            logger.info("Usage statistics is disabled; skipping initialization.")
-            self._usage_statistics_handler = None
-            return
-
-        self._usage_statistics_handler = UsageStatisticsHandler(
-            data_context=self,
-            data_context_id=self._data_context_id,
-            usage_statistics_url=usage_statistics_config.usage_statistics_url,
-        )
+    # TODO: delete once we confirm it has been migrated to abstract_data_context
+    # def _initialize_usage_statistics(
+    #     self, usage_statistics_config: AnonymizedUsageStatisticsConfig
+    # ) -> None:
+    #     """Initialize the usage statistics system."""
+    #     if not usage_statistics_config.enabled:
+    #         logger.info("Usage statistics is disabled; skipping initialization.")
+    #         self._usage_statistics_handler = None
+    #         return
+    #
+    #     self._usage_statistics_handler = UsageStatisticsHandler(
+    #         data_context=self,
+    #         data_context_id=self._data_context_id,
+    #         usage_statistics_url=usage_statistics_config.usage_statistics_url,
+    #     )
 
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
@@ -717,58 +729,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     #     # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
     #     return dict(self._load_config_variables_file())
 
-    @property
-    def config(self) -> DataContextConfig:
-        return self._project_config
-
     #####
     #
     # Internal helper methods
     #
     #####
-
-    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
-        """
-        Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
-        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
-        be optional in GE Cloud mode).
-        """
-        if not config:
-            config = self.config
-        # environment level changes are handled at the AbstractDataContext
-        # calls parent for os.environment-level changes.
-        config: DataContextConfig = super().get_config_with_variables_substituted(
-            config=config
-        )
-        substitutions: dict = {}
-        if self.ge_cloud_mode:
-            ge_cloud_config_variable_defaults = {
-                "plugins_directory": self._normalize_absolute_or_relative_path(
-                    DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
-                ),
-                "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
-            }
-            for config_variable, value in ge_cloud_config_variable_defaults.items():
-                if substitutions.get(config_variable) is None:
-                    logger.info(
-                        f'Config variable "{config_variable}" was not found in environment or global config ('
-                        f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
-                        f"like to "
-                        f"use a different value, please specify it in an environment variable or in a "
-                        f"great_expectations.conf file located at one of the above paths, in a section named "
-                        f'"ge_cloud_config".'
-                    )
-                    substitutions[config_variable] = value
-
-        if len(substitutions) == 0:
-            return config
-        else:
-            return DataContextConfig(
-                **substitute_all_config_variables(
-                    config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-                )
-            )
 
     def escape_all_config_variables(
         self,
@@ -1728,9 +1693,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         return generator
 
-    def set_config(self, project_config: DataContextConfig) -> None:
-        self._project_config = project_config
-
     def _build_datasource_from_config(
         self, name: str, config: Union[dict, DatasourceConfig]
     ):
@@ -2179,12 +2141,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             target_store_name,
         )
 
+    # TODO: do the full migration to CloudDataContext
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
+        print("Accessing ge_cloud_config from BaseDataContext")
         return self._ge_cloud_config
 
+    # TODO: do the full migration to CloudDataContext
     @property
     def ge_cloud_mode(self) -> bool:
+        print("Accessing ge_cloud_mode from BaseDataContext")
         return self._ge_cloud_mode
 
     @property
@@ -3752,7 +3718,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         return metric_configurations_list
 
-    # methods and properties included for backwards compatibility
+    # METHODS AND PROPERTIES FOR BACKWARDS COMPATIBILITY
     def _load_config_variables_file(self) -> dict:
         # we dont "normally" have this method here, but we are keeping it
         if self._data_context and isinstance(self._data_context, FileDataContext):
@@ -3797,3 +3763,42 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             # if we are calling this method, then we know that self._data_context is FileDataContext
             # we can even add a check
             return os.path.join(self._data_context.root_directory, path)
+
+    # TODO clean this up will
+    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
+        if self._data_context:
+            return self._data_context.get_config_with_variables_substituted(
+                config=config
+            )
+        else:
+            return super().get_config_with_variables_substituted(config=config)
+
+    def set_config(self, project_config: DataContextConfig) -> None:
+        if self._data_context:
+            self._data_context._project_config = project_config
+            # self._project_config = project_config
+        else:
+            self._project_config = project_config
+
+    @property
+    def config(self) -> DataContextConfig:
+        # this would actually depend on which one it is.. usage stats isn't handled by the other DataContexts yet
+        # if self._data_context:
+        #     return self._data_context._project_config
+        # else:
+        return self._project_config
+
+    def _initialize_usage_statistics(
+        self, usage_statistics_config: AnonymizedUsageStatisticsConfig
+    ) -> None:
+        """Initialize the usage statistics system."""
+        if not usage_statistics_config.enabled:
+            logger.info("Usage statistics is disabled; skipping initialization.")
+            self._usage_statistics_handler = None
+            return
+
+        self._usage_statistics_handler = UsageStatisticsHandler(
+            data_context=self,
+            data_context_id=self._data_context_id,
+            usage_statistics_url=usage_statistics_config.usage_statistics_url,
+        )

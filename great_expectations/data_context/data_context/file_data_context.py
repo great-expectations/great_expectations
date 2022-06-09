@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import sys
+import uuid
 from typing import Mapping, Optional, Union, cast
 
 from ruamel.yaml import YAML
@@ -35,10 +36,6 @@ class FileDataContext(AbstractDataContext):
     class will exist only for backwards-compatibility reasons.
     """
 
-    GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser("~/.great_expectations/great_expectations.conf"),
-        "/etc/great_expectations.conf",
-    ]
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
     BASE_DIRECTORIES = [
@@ -138,32 +135,15 @@ class FileDataContext(AbstractDataContext):
                 )
             )
 
-    @staticmethod
-    def _check_global_usage_statistics_opt_out() -> bool:
-        if os.environ.get("GE_USAGE_STATS", False):
-            ge_usage_stats = os.environ.get("GE_USAGE_STATS")
-            if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
-                return True
-            else:
-                logger.warning(
-                    "GE_USAGE_STATS environment variable must be one of: {}".format(
-                        AbstractDataContext.FALSEY_STRINGS
-                    )
-                )
-        for config_path in FileDataContext.GLOBAL_CONFIG_PATHS:
-            config = configparser.ConfigParser()
-            states = config.BOOLEAN_STATES
-            for falsey_string in AbstractDataContext.FALSEY_STRINGS:
-                states[falsey_string] = False
-            states["TRUE"] = True
-            config.BOOLEAN_STATES = states
-            config.read(config_path)
-            try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
-                    return True
-            except (ValueError, configparser.Error):
-                pass
+    @property
+    def instance_id(self):
+        instance_id = self._load_config_variables_file().get("instance_id")
+        if instance_id is None:
+            if self._in_memory_instance_id is not None:
+                return self._in_memory_instance_id
+            instance_id = str(uuid.uuid4())
+            self._in_memory_instance_id = instance_id
+        return instance_id
 
     @classmethod
     def _get_global_config_value(
@@ -185,7 +165,7 @@ class FileDataContext(AbstractDataContext):
         if environment_variable and os.environ.get(environment_variable, False):
             return os.environ.get(environment_variable)
         if conf_file_section and conf_file_option:
-            for config_path in FileDataContext.GLOBAL_CONFIG_PATHS:
+            for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
                 config = configparser.ConfigParser()
                 config.read(config_path)
                 config_value = config.get(

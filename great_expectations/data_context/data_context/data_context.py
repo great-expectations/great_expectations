@@ -39,7 +39,7 @@ yaml.default_flow_style = False
 
 
 # TODO: <WILL> Most of the logic here will be migrated to FileDataContext
-class DataContext(BaseDataContext, FileDataContext):
+class DataContext(BaseDataContext):
     """A DataContext represents a Great Expectations project. It organizes storage and access for
     expectation suites, datasources, notification settings, and data fixtures.
 
@@ -306,9 +306,7 @@ class DataContext(BaseDataContext, FileDataContext):
                 missing_keys.append(key)
         if len(missing_keys) > 0:
             missing_keys_str = [f'"{key}"' for key in missing_keys]
-            global_config_path_str = [
-                f'"{path}"' for path in FileDataContext.GLOBAL_CONFIG_PATHS
-            ]
+            global_config_path_str = [f'"{path}"' for path in self.GLOBAL_CONFIG_PATHS]
             raise DataContextError(
                 f"{', '.join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
                 f"environment or in global configs ({', '.join(global_config_path_str)})."
