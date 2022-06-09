@@ -2516,21 +2516,14 @@ class DataAssistantResult(SerializableDictDot):
         metric_name = sanitize_parameter_name(metric_name)
 
         if plot_mode is PlotMode.PRESCRIPTIVE:
-            plot_impl: Optional[
-                Callable[
-                    [
-                        pd.DataFrame,
-                        str,
-                        bool,
-                        Optional[str],
-                    ],
-                    alt.Chart,
-                ]
-            ] = None
-
-            plot_impl = (
-                self.get_interactive_detail_expect_column_values_to_be_between_chart
-            )
+            plot_impl: Callable[
+                [
+                    List[ColumnDataFrame],
+                    str,
+                    bool,
+                ],
+                alt.Chart,
+            ] = self.get_interactive_detail_expect_column_values_to_be_between_chart
 
             return [
                 plot_impl(
@@ -2541,19 +2534,14 @@ class DataAssistantResult(SerializableDictDot):
                 )
             ]
         else:
-            plot_impl: Optional[
-                Callable[
-                    [
-                        pd.DataFrame,
-                        str,
-                        bool,
-                        Optional[str],
-                    ],
-                    alt.Chart,
-                ]
-            ] = None
-
-            plot_impl = self.get_interactive_detail_multi_chart
+            plot_impl: Callable[
+                [
+                    List[ColumnDataFrame],
+                    str,
+                    bool,
+                ],
+                alt.Chart,
+            ] = self.get_interactive_detail_multi_chart
 
             return [
                 plot_impl(
