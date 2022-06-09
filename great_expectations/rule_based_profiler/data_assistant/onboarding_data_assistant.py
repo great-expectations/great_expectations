@@ -118,7 +118,13 @@ class OnboardingDataAssistant(DataAssistant):
             max_unexpected_ratio=None,
             min_max_unexpected_values_proportion=9.75e-1,
         )
-        numeric_columns_rule: Rule = self._build_numeric_columns_rule()
+        numeric_columns_low_precision_rule: Rule = (
+            self._build_numeric_columns_low_precision_rule()
+        )
+        numeric_columns_high_precision_rule: Rule = (
+            self._build_numeric_columns_high_precision_rule()
+        )
+
         datetime_columns_rule: Rule = self._build_datetime_columns_rule()
         text_columns_rule: Rule = self._build_text_columns_rule()
         categorical_columns_rule: Rule = self._build_categorical_columns_rule()
@@ -128,7 +134,7 @@ class OnboardingDataAssistant(DataAssistant):
             column_value_uniqueness_rule,
             column_value_nullity_rule,
             column_value_nonnullity_rule,
-            numeric_columns_rule,
+            numeric_columns_low_precision_rule,
             datetime_columns_rule,
             text_columns_rule,
             categorical_columns_rule,
@@ -253,7 +259,7 @@ class OnboardingDataAssistant(DataAssistant):
         return rule
 
     @staticmethod
-    def _build_numeric_columns_rule() -> Rule:
+    def _build_numeric_columns_low_precision_rule() -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for numeric columns.
         """
@@ -297,12 +303,6 @@ class OnboardingDataAssistant(DataAssistant):
         column_median_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_median_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
-        column_mean_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_mean_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
-        column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_standard_deviation_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
@@ -326,16 +326,6 @@ class OnboardingDataAssistant(DataAssistant):
         )
         column_median_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name="column.median",
-            metric_value_kwargs=None,
-            json_serialize=True,
-        )
-        column_mean_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name="column.mean",
-            metric_value_kwargs=None,
-            json_serialize=True,
-        )
-        column_standard_deviation_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name="column.standard_deviation",
             metric_value_kwargs=None,
             json_serialize=True,
         )
@@ -442,6 +432,106 @@ class OnboardingDataAssistant(DataAssistant):
             },
         )
 
+        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+
+        variables: dict = {
+            "mostly": 1.0,
+            "strict_min": False,
+            "strict_max": False,
+            "quantiles": [
+                0.25,
+                0.5,
+                0.75,
+            ],
+            "allow_relative_error": "linear",
+            "false_positive_rate": 0.05,
+            "quantile_statistic_interpolation_method": "auto",
+            "estimator": "bootstrap",
+            "n_resamples": 9999,
+            "random_seed": None,
+            "include_estimator_samples_histogram_in_details": False,
+            "truncate_values": {
+                "lower_bound": None,
+                "upper_bound": None,
+            },
+            "round_decimals": 1,
+        }
+        parameter_builders: List[ParameterBuilder] = [
+            column_partition_parameter_builder_for_metrics,
+            column_column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,
+            column_min_metric_multi_batch_parameter_builder_for_metrics,
+            column_max_metric_multi_batch_parameter_builder_for_metrics,
+            column_median_metric_multi_batch_parameter_builder_for_metrics,
+        ]
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
+            expect_column_min_to_be_between_expectation_configuration_builder,
+            expect_column_max_to_be_between_expectation_configuration_builder,
+            expect_column_values_to_be_between_expectation_configuration_builder,
+            expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder,
+            expect_column_median_to_be_between_expectation_configuration_builder,
+        ]
+        rule: Rule = Rule(
+            name="numeric_columns_low_precision_rule",
+            variables=variables,
+            domain_builder=numeric_column_type_domain_builder,
+            parameter_builders=parameter_builders,
+            expectation_configuration_builders=expectation_configuration_builders,
+        )
+
+        return rule
+
+    @staticmethod
+    def _build_numeric_columns_high_precision_rule() -> Rule:
+        """
+        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for numeric columns.
+        """
+
+        # Step-1: Instantiate "ColumnDomainBuilder" for selecting numeric columns (but not "ID-type" columns).
+
+        numeric_column_type_domain_builder: ColumnDomainBuilder = ColumnDomainBuilder(
+            include_column_names=None,
+            exclude_column_names=None,
+            include_column_name_suffixes=None,
+            exclude_column_name_suffixes=[
+                "_id",
+            ],
+            semantic_type_filter_module_name=None,
+            semantic_type_filter_class_name=None,
+            include_semantic_types=[
+                SemanticDomainTypes.NUMERIC,
+            ],
+            exclude_semantic_types=[
+                SemanticDomainTypes.IDENTIFIER,
+            ],
+            data_context=None,
+        )
+
+        # Step-2: Declare "ParameterBuilder" for every metric of interest.
+
+        column_mean_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_mean_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
+        column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_standard_deviation_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
+
+        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
+
+        column_mean_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name="column.mean",
+            metric_value_kwargs=None,
+            json_serialize=True,
+        )
+        column_standard_deviation_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name="column.standard_deviation",
+            metric_value_kwargs=None,
+            json_serialize=True,
+        )
+
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+
+        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_mean_values_range_parameter_builder_for_validations.to_json_dict(),
@@ -503,25 +593,15 @@ class OnboardingDataAssistant(DataAssistant):
             "round_decimals": 1,
         }
         parameter_builders: List[ParameterBuilder] = [
-            column_partition_parameter_builder_for_metrics,
-            column_column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,
-            column_min_metric_multi_batch_parameter_builder_for_metrics,
-            column_max_metric_multi_batch_parameter_builder_for_metrics,
-            column_median_metric_multi_batch_parameter_builder_for_metrics,
             column_mean_metric_multi_batch_parameter_builder_for_metrics,
             column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics,
         ]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
-            expect_column_min_to_be_between_expectation_configuration_builder,
-            expect_column_max_to_be_between_expectation_configuration_builder,
-            expect_column_values_to_be_between_expectation_configuration_builder,
-            expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder,
-            expect_column_median_to_be_between_expectation_configuration_builder,
             expect_column_mean_to_be_between_expectation_configuration_builder,
             expect_column_stdev_to_be_between_expectation_configuration_builder,
         ]
         rule: Rule = Rule(
-            name="numeric_columns_rule",
+            name="numeric_columns_high_precision_rule",
             variables=variables,
             domain_builder=numeric_column_type_domain_builder,
             parameter_builders=parameter_builders,
