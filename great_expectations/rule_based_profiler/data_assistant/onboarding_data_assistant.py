@@ -590,7 +590,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "lower_bound": None,
                 "upper_bound": None,
             },
-            "round_decimals": 1,
+            "round_decimals": 4,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_mean_metric_multi_batch_parameter_builder_for_metrics,
