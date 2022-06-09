@@ -78,6 +78,19 @@ def cloud_data_context_variables(
     )
 
 
+@pytest.fixture
+def stores() -> dict:
+    return {
+        "profiler_store": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "profilers/",
+            },
+        },
+    }
+
+
 @pytest.mark.parametrize(
     "crud_method,target_attr",
     [
@@ -120,6 +133,9 @@ def cloud_data_context_variables(
             "get_profiler_store_name",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store getter",
+        ),
+        pytest.param(
+            "get_stores", DataContextVariableSchema.STORES, id="stores getter"
         ),
     ],
 )
@@ -198,6 +214,9 @@ def test_data_context_variables_get(
             "my_profiler_store",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store setter",
+        ),
+        pytest.param(
+            "set_stores", stores, DataContextVariableSchema.STORES, id="stores setter"
         ),
     ],
 )

@@ -200,6 +200,18 @@ class DataContextVariables(ABC):
         """
         return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
 
+    def set_stores(self, stores: dict) -> None:
+        """
+        Setter for `stores`.
+        """
+        self._set(DataContextVariableSchema.STORES, stores)
+
+    def get_stores(self) -> Optional[dict]:
+        """
+        Getter for `stores`.
+        """
+        return self._get(DataContextVariableSchema.STORES)
+
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
