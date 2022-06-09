@@ -632,3 +632,10 @@ class DataContext(BaseDataContext, FileDataContext):
             ge_exceptions.InvalidDataContextConfigError,
         ) as e:
             logger.debug(e)
+
+    # properties
+    @property
+    def root_directory(self):
+        """The root directory for configuration objects in the data context; the location in which
+        ``great_expectations.yml`` is located."""
+        return self._context_root_directory

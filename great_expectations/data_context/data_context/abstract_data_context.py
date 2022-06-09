@@ -85,7 +85,7 @@ class AbstractDataContext(ABC):
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
 
-        # self.runtime_environment = runtime_environment or {}
+        self.runtime_environment = runtime_environment or {}
 
         if not hasattr(self, "_project_config"):
             self._project_config = project_config
@@ -119,6 +119,7 @@ class AbstractDataContext(ABC):
     def expectations_store(self) -> ExpectationsStore:
         return self.stores[self.expectations_store_name]
 
+    # <WILL> marker
     @property
     def project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
@@ -220,6 +221,36 @@ class AbstractDataContext(ABC):
 
     def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
         """
+        Substitute vars in config of form ${var} or $(var) with values found in the following places,
+        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        be optional in GE Cloud mode).
+        """
+        if not config:
+            config = self.config
+
+        substituted_config_variables = substitute_all_config_variables(
+            self.config,
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        # Substitutions should have already occurred for GE Cloud configs at this point
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+        return DataContextConfig(
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
+        )
+
+    def get_config_with_variables_substituted_old(
+        self, config=None
+    ) -> DataContextConfig:
+        """
         Takes DataContextConfig that is passed into original constructor and substitutes variables from os.environ.
 
         *Note* Called every time the property `config_with_variables_substituted` is accessed.
@@ -244,6 +275,8 @@ class AbstractDataContext(ABC):
                 dict(os.environ),
                 AbstractDataContext.DOLLAR_SIGN_ESCAPE_STRING,
             )
+
+        # TO SPLIT THIS UP
         substitutions = {
             **substituted_config_variables,
             **dict(os.environ),

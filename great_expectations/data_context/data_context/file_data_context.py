@@ -17,7 +17,10 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     anonymizedUsageStatisticsSchema,
 )
-from great_expectations.data_context.util import substitute_config_variable
+from great_expectations.data_context.util import (
+    substitute_all_config_variables,
+    substitute_config_variable,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +58,11 @@ class FileDataContext(AbstractDataContext):
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
-        context_root_dir = os.path.abspath(context_root_dir)
+
+        # since default is None
+        if context_root_dir:
+            context_root_dir = os.path.abspath(context_root_dir)
+
         self._context_root_directory = context_root_dir
         self._context_root_dir = context_root_dir
         self.runtime_environment = runtime_environment or {}
@@ -265,3 +272,32 @@ class FileDataContext(AbstractDataContext):
             return path
         else:
             return os.path.join(self.root_directory, path)
+
+    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
+        """
+        Substitute vars in config of form ${var} or $(var) with values found in the following places,
+        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        be optional in GE Cloud mode).
+        """
+        if not config:
+            config = self.config
+
+        substituted_config_variables = substitute_all_config_variables(
+            self.config_variables,
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        # Substitutions should have already occurred for GE Cloud configs at this point
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
+        return DataContextConfig(
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
+        )

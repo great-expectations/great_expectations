@@ -264,7 +264,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
 
-        self._data_context: "AbstractDataContext"
+        self._data_context: "AbstractDataContext" = None
 
         # start splitting this up
         if self._ge_cloud_mode:
@@ -328,6 +328,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # Override the project_config data_context_id if an expectations_store was already set up
         self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
         self._initialize_usage_statistics(
+            # how can we do this?
             self.project_config_with_variables_substituted.anonymous_usage_statistics
         )
 
@@ -569,8 +570,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
         return self._usage_statistics_handler
 
+    # <WILL> marker
     @property
     def project_config_with_variables_substituted(self) -> DataContextConfig:
+        if self._data_context:
+            return self._data_context.project_config_with_variables_substituted
         return self.get_config_with_variables_substituted()
 
     @property
@@ -598,18 +602,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def checkpoint_store_name(self):
         try:
             return super().checkpoint_store_name
-
         except AttributeError:
             from great_expectations.data_context.store.checkpoint_store import (
                 CheckpointStore,
             )
 
-            if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory
-            ):
-                return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-            if self.root_directory:
-                error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+            if self._data_context and isinstance(self._data_context, FileDataContext):
+                if CheckpointStore.default_checkpoints_exist(
+                    directory_path=self.root_directory
+                ):
+                    return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+                if self.root_directory:
+                    error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
             else:
                 error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create a `checkpoints` directory in your Great Expectations project " f"directory.\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
             raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
@@ -1692,7 +1696,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
         # context provides. Datasources should not see unsubstituted variables in their config.
-
         try:
             datasource: Union[
                 LegacyDatasource, BaseDatasource
@@ -1740,7 +1743,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             "BaseDatasource",
             "Datasource",
         ]:
-            config.update({"data_context_root_directory": self.root_directory})
+            # TODO : clean this part up as we migrate the logic to file_data_source
+            if hasattr(self, "_context_root_directory"):
+                root_directory: Optional[str] = self._context_root_directory
+                config.update({"data_context_root_directory": root_directory})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
@@ -3745,3 +3751,48 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                         )
 
         return metric_configurations_list
+
+    # methods and properties included for backwards compatibility
+    def _load_config_variables_file(self) -> dict:
+        # we dont "normally" have this method here, but we are keeping it
+        if self._data_context and isinstance(self._data_context, FileDataContext):
+            return self._data_context._load_config_variables_file()
+        # another option would be to return {} directly
+        return super()._load_config_variables_file()
+
+    @property
+    def root_directory(self):
+        """The root directory for configuration objects in the data context; the location in which
+        ``great_expectations.yml`` is located."""
+        # TODO : only here for backwards compatibility
+        if self._data_context and isinstance(self._data_context, FileDataContext):
+            return self._context_root_directory
+        else:
+            raise TypeError(
+                f"This class shouldn't have a root directory. I am of type {self.__class__.__name__}"
+            )
+
+    @property
+    def plugins_directory(self):
+        # TODO : only here for backwards compatiblity
+        """The directory in which custom plugin modules should be placed."""
+        if self._data_context and isinstance(self._data_context, FileDataContext):
+            return self._normalize_absolute_or_relative_path(
+                self._data_context.project_config_with_variables_substituted.plugins_directory
+            )
+        else:
+            return None
+
+    # private methods
+    def _normalize_absolute_or_relative_path(
+        self, path: Optional[str]
+    ) -> Optional[str]:
+        # TODO: only here for backwards compatibility
+        if path is None:
+            return
+        if os.path.isabs(path):
+            return path
+        else:
+            # if we are calling this method, then we know that self._data_context is FileDataContext
+            # we can even add a check
+            return os.path.join(self._data_context.root_directory, path)

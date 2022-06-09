@@ -116,7 +116,7 @@ def test_opt_out_etc(
             disabled_config.write(configfile)
 
         with mock.patch(
-            "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
+            "great_expectations.data_context.FileDataContext.GLOBAL_CONFIG_PATHS",
             config_dirs,
         ):
             assert (
@@ -159,7 +159,7 @@ def test_opt_out_home_folder(
             disabled_config.write(configfile)
 
         with mock.patch(
-            "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
+            "great_expectations.data_context.FileDataContext.GLOBAL_CONFIG_PATHS",
             config_dirs,
         ):
             assert (
@@ -366,7 +366,7 @@ def test_opt_out_home_folder_overrides_etc(
         enabled_config.write(configfile)
 
     with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
+        "great_expectations.data_context.FileDataContext.GLOBAL_CONFIG_PATHS",
         config_dirs,
     ):
         assert (
@@ -420,7 +420,7 @@ def test_opt_out_home_folder_overrides_yml(tmp_path_factory, monkeypatch):
     )
 
     with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
+        "great_expectations.data_context.FileDataContext.GLOBAL_CONFIG_PATHS",
         config_dirs,
     ):
         context = DataContext(context_root_dir=context_path)
@@ -470,7 +470,7 @@ def test_opt_out_home_folder_overrides_yml_v013(tmp_path_factory, monkeypatch):
     )
 
     with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
+        "great_expectations.data_context.FileDataContext.GLOBAL_CONFIG_PATHS",
         config_dirs,
     ):
         context = DataContext(context_root_dir=context_path)
@@ -520,7 +520,7 @@ def test_opt_out_etc_overrides_yml(tmp_path_factory, monkeypatch):
     )
 
     with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
+        "great_expectations.data_context.FileDataContext.GLOBAL_CONFIG_PATHS",
         config_dirs,
     ):
         context = DataContext(context_root_dir=context_path)
@@ -570,7 +570,7 @@ def test_opt_out_etc_overrides_yml_v013(tmp_path_factory, monkeypatch):
     )
 
     with mock.patch(
-        "great_expectations.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
+        "great_expectations.data_context.FileDataContext.GLOBAL_CONFIG_PATHS",
         config_dirs,
     ):
         context = DataContext(context_root_dir=context_path)

@@ -786,8 +786,8 @@ def test_ConfigOnlyDataContext__initialization(
         tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
     )
     context = BaseDataContext(
-        basic_data_context_config,
-        config_path,
+        project_config=basic_data_context_config,
+        context_root_dir=config_path,
     )
 
     assert (
@@ -1329,7 +1329,10 @@ def test_load_config_variables_file(
         # We should be able to load different files based on an environment variable
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
+        # so we aren't doign the substitutions correctly
         config_vars = context._load_config_variables_file()
+        print(config_vars)
+        print("hell will")
         assert config_vars["env"] == "dev"
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
