@@ -33,7 +33,7 @@ Changelog
 * [MAINTENANCE] Don't use jupyter-client 7.3.2 (#5252)
 * [MAINTENANCE] Re-introduce jupyter-client 7.3.2 (#5253)
 * [MAINTENANCE] Add `cloud` mark to `pytest.ini` (#5254)
-* [MAINTENANCE] add partner integration framework (#5132) (thanks @rreinoldsc)
+* [MAINTENANCE] add partner integration framework (#5132)
 * [MAINTENANCE] `DataContextVariableKey` for use in Stores (#5255)
 * [MAINTENANCE] Clarification of events in test with multiple checkpoint validations (#5257)
 * [MAINTENANCE] Misc updates to improve security and automation of the weekly release process (#5244)
