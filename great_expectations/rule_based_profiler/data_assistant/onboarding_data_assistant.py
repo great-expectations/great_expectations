@@ -135,6 +135,7 @@ class OnboardingDataAssistant(DataAssistant):
             column_value_nullity_rule,
             column_value_nonnullity_rule,
             numeric_columns_low_precision_rule,
+            numeric_columns_high_precision_rule,
             datetime_columns_rule,
             text_columns_rule,
             categorical_columns_rule,
