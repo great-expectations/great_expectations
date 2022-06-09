@@ -124,7 +124,6 @@ class OnboardingDataAssistant(DataAssistant):
         numeric_columns_high_precision_rule: Rule = (
             self._build_numeric_columns_high_precision_rule()
         )
-
         datetime_columns_rule: Rule = self._build_datetime_columns_rule()
         text_columns_rule: Rule = self._build_text_columns_rule()
         categorical_columns_rule: Rule = self._build_categorical_columns_rule()
