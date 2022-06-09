@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
@@ -20,7 +21,7 @@ class DataContextVariableSchema(str, enum.Enum):
     DATA_DOCS_SITES = "data_docs_sites"
     NOTEBOOKS = "notebooks"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
-    ANONYMIZED_USAGE_STATISTICS = "anonymous_usage_statistics"
+    ANONYMOUS_USAGE_STATISTICS = "anonymous_usage_statistics"
     CONCURRENCY = "concurrency"
     PROGRESS_BARS = "progress_bars"
 
@@ -223,6 +224,25 @@ class DataContextVariables(ABC):
         Getter for `data_docs_sites`.
         """
         return self._get(DataContextVariableSchema.DATA_DOCS_SITES)
+
+    def set_anonymous_usage_statistics(
+        self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig
+    ) -> None:
+        """
+        Setter for `anonymous_usage_statistics`.
+        """
+        self._set(
+            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+            anonymous_usage_statistics,
+        )
+
+    def get_anonymous_usage_statistics(
+        self,
+    ) -> Optional[AnonymizedUsageStatisticsConfig]:
+        """
+        Getter for `anonymous_usage_statistics`.
+        """
+        return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
 
 
 @dataclass
