@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -83,19 +82,6 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        num_batch_ids: int = len(batch_ids)
-        if num_batch_ids != 1:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Utilizing a {self.__class__.__name__} requires exactly one Batch of data to be available
-({num_batch_ids} Batch identifiers found).
-"""
-            )
-
         # Compute metric value for one Batch object (expressed as list of Batch objects).
         super().build_parameters(
             domain=domain,
