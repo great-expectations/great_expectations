@@ -2376,52 +2376,56 @@ class DataAssistantResult(SerializableDictDot):
             if metric_types[metric] == AltairDataTypes.QUANTITATIVE
         }
 
-        plot_impl: Optional[
-            Callable[
-                [
-                    pd.DataFrame,
-                    str,
-                    bool,
-                    Optional[str],
-                ],
-                alt.Chart,
-            ]
-        ] = None
-        chart: Optional[alt.Chart] = None
         if plot_mode is PlotMode.PRESCRIPTIVE:
-            if metric_name in quantitative_metrics:
-                chart = self.get_expect_domain_values_to_be_between_chart(
-                    expectation_type=expectation_type,
-                    df=df,
-                    metric_name=metric_name,
-                    sequential=sequential,
-                    subtitle=subtitle,
-                )
-            elif metric_name in nominal_metrics:
-                chart = self.get_expect_domain_values_to_match_set_chart(
-                    expectation_type=expectation_type,
-                    df=df,
-                    metric_name=metric_name,
-                    sequential=sequential,
-                    subtitle=subtitle,
-                )
-        elif plot_mode is PlotMode.DESCRIPTIVE:
-            if metric_name in quantitative_metrics:
-                chart = self.get_quantitative_metric_chart(
-                    df=df,
-                    metric_name=metric_name,
-                    sequential=sequential,
-                    subtitle=subtitle,
-                )
-            elif metric_name in nominal_metrics:
-                chart = self.get_nominal_metric_chart(
-                    df=df,
-                    metric_name=metric_name,
-                    sequential=sequential,
-                    subtitle=subtitle,
-                )
+            plot_impl: Optional[
+                Callable[
+                    [
+                        pd.DataFrame,
+                        str,
+                        bool,
+                        Optional[str],
+                    ],
+                    alt.Chart,
+                ]
+            ] = None
 
-        return chart
+            if metric_name in quantitative_metrics:
+                plot_impl = self.get_expect_domain_values_to_be_between_chart
+            elif metric_name in nominal_metrics:
+                plot_impl = self.get_expect_domain_values_to_match_set_chart
+
+            return plot_impl(
+                expectation_type=expectation_type,
+                df=df,
+                metric_name=metric_name,
+                sequential=sequential,
+                subtitle=subtitle,
+            )
+        else:
+            plot_impl: Optional[
+                Callable[
+                    [
+                        str,
+                        pd.DataFrame,
+                        str,
+                        bool,
+                        Optional[str],
+                    ],
+                    alt.Chart,
+                ]
+            ] = None
+
+            if metric_name in quantitative_metrics:
+                plot_impl = self.get_quantitative_metric_chart
+            elif metric_name in nominal_metrics:
+                plot_impl = self.get_nominal_metric_chart
+
+            return plot_impl(
+                df=df,
+                metric_name=metric_name,
+                sequential=sequential,
+                subtitle=subtitle,
+            )
 
     def _create_display_chart_for_column_domain_expectation(
         self,
@@ -2511,24 +2515,53 @@ class DataAssistantResult(SerializableDictDot):
     ) -> List[Optional[alt.VConcatChart]]:
         metric_name = sanitize_parameter_name(metric_name)
 
-        display_chart: Optional[alt.VConcatChart]
         if plot_mode is PlotMode.PRESCRIPTIVE:
-            display_chart = (
-                self.get_interactive_detail_expect_column_values_to_be_between_chart(
+            plot_impl: Optional[
+                Callable[
+                    [
+                        pd.DataFrame,
+                        str,
+                        bool,
+                        Optional[str],
+                    ],
+                    alt.Chart,
+                ]
+            ] = None
+
+            plot_impl = (
+                self.get_interactive_detail_expect_column_values_to_be_between_chart
+            )
+
+            return [
+                plot_impl(
                     expectation_type=expectation_type,
                     column_dfs=column_dfs,
                     metric_name=metric_name,
                     sequential=sequential,
                 )
-            )
+            ]
         else:
-            display_chart = self.get_interactive_detail_multi_chart(
-                column_dfs=column_dfs,
-                metric_name=metric_name,
-                sequential=sequential,
-            )
+            plot_impl: Optional[
+                Callable[
+                    [
+                        pd.DataFrame,
+                        str,
+                        bool,
+                        Optional[str],
+                    ],
+                    alt.Chart,
+                ]
+            ] = None
 
-        return [display_chart]
+            plot_impl = self.get_interactive_detail_multi_chart
+
+            return [
+                plot_impl(
+                    column_dfs=column_dfs,
+                    metric_name=metric_name,
+                    sequential=sequential,
+                )
+            ]
 
     def _create_df_for_charting(
         self,
