@@ -4,6 +4,7 @@ from unittest import mock
 import pytest
 
 from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.data_context.types.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariables,
@@ -43,6 +44,7 @@ def data_context_config_dict() -> dict:
             "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
             "usage_statistics_url": "https://www.my_usage_stats_url/test",
         },
+        "concurrency": None,
     }
     return config
 
@@ -76,6 +78,11 @@ def cloud_data_context_variables(
         ge_cloud_access_token=ge_cloud_access_token,
         **data_context_config_dict,
     )
+
+
+@pytest.fixture
+def concurrency() -> ConcurrencyConfig:
+    return ConcurrencyConfig(enabled=True)
 
 
 @pytest.mark.parametrize(
@@ -120,6 +127,11 @@ def cloud_data_context_variables(
             "get_profiler_store_name",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store getter",
+        ),
+        pytest.param(
+            "get_concurrency",
+            DataContextVariableSchema.CONCURRENCY,
+            id="concurrency getter",
         ),
     ],
 )
@@ -198,6 +210,12 @@ def test_data_context_variables_get(
             "my_profiler_store",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store setter",
+        ),
+        pytest.param(
+            "set_concurrency",
+            concurrency,
+            DataContextVariableSchema.CONCURRENCY,
+            id="concurrency setter",
         ),
     ],
 )
