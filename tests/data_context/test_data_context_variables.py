@@ -4,6 +4,7 @@ from unittest import mock
 import pytest
 
 from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.types.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariables,
@@ -38,11 +39,11 @@ def data_context_config_dict() -> dict:
             },
         },
         "data_docs_sites": {},
-        "anonymous_usage_statistics": {
-            "enabled": True,
-            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-            "usage_statistics_url": "https://www.my_usage_stats_url/test",
-        },
+        "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
+            enabled=True,
+            data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
+            usage_statistics_url="https://www.my_usage_stats_url/test",
+        ),
     }
     return config
 
@@ -75,6 +76,13 @@ def cloud_data_context_variables(
         ge_cloud_organization_id=ge_cloud_organization_id,
         ge_cloud_access_token=ge_cloud_access_token,
         **data_context_config_dict,
+    )
+
+
+@pytest.fixture
+def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
+    return AnonymizedUsageStatisticsConfig(
+        enabled=False,
     )
 
 
@@ -120,6 +128,11 @@ def cloud_data_context_variables(
             "get_profiler_store_name",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store getter",
+        ),
+        pytest.param(
+            "get_anonymous_usage_statistics",
+            DataContextVariableSchema.ANONYMIZED_USAGE_STATISTICS,
+            id="anonymous_usage_statistics getter",
         ),
     ],
 )
@@ -198,6 +211,12 @@ def test_data_context_variables_get(
             "my_profiler_store",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store setter",
+        ),
+        pytest.param(
+            "set_anonymous_usage_statistics",
+            anonymous_usage_statistics,
+            DataContextVariableSchema.ANONYMIZED_USAGE_STATISTICS,
+            id="anonymous_usage_statistics setter",
         ),
     ],
 )

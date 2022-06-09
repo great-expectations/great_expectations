@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
@@ -199,6 +200,25 @@ class DataContextVariables(ABC):
         Getter for `profiler_store_name`.
         """
         return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
+
+    def set_anonymous_usage_statistics(
+        self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig
+    ) -> None:
+        """
+        Setter for `anonymous_usage_statistics`.
+        """
+        self._set(
+            DataContextVariableSchema.ANONYMIZED_USAGE_STATISTICS,
+            anonymous_usage_statistics,
+        )
+
+    def get_anonymous_usage_statistics(
+        self,
+    ) -> Optional[AnonymizedUsageStatisticsConfig]:
+        """
+        Getter for `anonymous_usage_statistics`.
+        """
+        return self._get(DataContextVariableSchema.ANONYMIZED_USAGE_STATISTICS)
 
 
 @dataclass
