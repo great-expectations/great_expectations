@@ -118,8 +118,7 @@ class OnboardingDataAssistant(DataAssistant):
             max_unexpected_ratio=None,
             min_max_unexpected_values_proportion=9.75e-1,
         )
-        numeric_columns_low_precision_rule: Rule = self._build_numeric_columns_rule()
-        numeric_columns_high_precision_rule: Rule = self._build_numeric_columns_rule()
+        numeric_columns_rule: Rule = self._build_numeric_columns_rule()
 
         datetime_columns_rule: Rule = self._build_datetime_columns_rule()
         text_columns_rule: Rule = self._build_text_columns_rule()
@@ -130,7 +129,7 @@ class OnboardingDataAssistant(DataAssistant):
             column_value_uniqueness_rule,
             column_value_nullity_rule,
             column_value_nonnullity_rule,
-            numeric_columns_low_precision_rule,
+            numeric_columns_rule,
             datetime_columns_rule,
             text_columns_rule,
             categorical_columns_rule,
