@@ -131,7 +131,7 @@ def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
         ),
         pytest.param(
             "get_anonymous_usage_statistics",
-            DataContextVariableSchema.ANONYMIZED_USAGE_STATISTICS,
+            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics getter",
         ),
     ],
@@ -215,7 +215,7 @@ def test_data_context_variables_get(
         pytest.param(
             "set_anonymous_usage_statistics",
             anonymous_usage_statistics,
-            DataContextVariableSchema.ANONYMIZED_USAGE_STATISTICS,
+            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics setter",
         ),
     ],
