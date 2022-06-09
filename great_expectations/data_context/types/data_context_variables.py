@@ -98,6 +98,108 @@ class DataContextVariables(ABC):
         """
         return self._get(DataContextVariableSchema.CONFIG_VERSION)
 
+    def set_config_variables_file_path(self, config_variables_file_path: str) -> None:
+        """
+        Setter for `config_variables_file_path`.
+        """
+        self._set(
+            DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH,
+            config_variables_file_path,
+        )
+
+    def get_config_variables_file_path(self) -> Optional[str]:
+        """
+        Getter for `config_version`.
+        """
+        return self._get(DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH)
+
+    def set_plugins_directory(self, plugins_directory: str) -> None:
+        """
+        Setter for `plugins_directory`.
+        """
+        self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
+
+    def get_plugins_directory(self) -> Optional[str]:
+        """
+        Getter for `plugins_directory`.
+        """
+        return self._get(DataContextVariableSchema.PLUGINS_DIRECTORY)
+
+    def set_expectations_store_name(self, expectations_store_name: str) -> None:
+        """
+        Setter for `expectations_store_name`.
+        """
+        self._set(
+            DataContextVariableSchema.EXPECTATIONS_STORE_NAME, expectations_store_name
+        )
+
+    def get_expectations_store_name(self) -> Optional[str]:
+        """
+        Getter for `expectations_store_name`.
+        """
+        return self._get(DataContextVariableSchema.EXPECTATIONS_STORE_NAME)
+
+    def set_validations_store_name(self, validations_store_name: str) -> None:
+        """
+        Setter for `validations_store_name`.
+        """
+        self._set(
+            DataContextVariableSchema.VALIDATIONS_STORE_NAME, validations_store_name
+        )
+
+    def get_validations_store_name(self) -> Optional[str]:
+        """
+        Getter for `validations_store_name`.
+        """
+        return self._get(DataContextVariableSchema.VALIDATIONS_STORE_NAME)
+
+    def set_evaluation_parameter_store_name(
+        self, evaluation_parameter_store_name: str
+    ) -> None:
+        """
+        Setter for `evaluation_parameter_store_name`.
+        """
+        self._set(
+            DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
+            evaluation_parameter_store_name,
+        )
+
+    def get_evaluation_parameter_store_name(self) -> Optional[str]:
+        """
+        Getter for `evaluation_parameter_store_name`.
+        """
+        return self._get(DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME)
+
+    def set_checkpoint_store_name(self, checkpoint_store_name: str) -> None:
+        """
+        Setter for `checkpoint_store_name`.
+        """
+        self._set(
+            DataContextVariableSchema.CHECKPOINT_STORE_NAME,
+            checkpoint_store_name,
+        )
+
+    def get_checkpoint_store_name(self) -> Optional[str]:
+        """
+        Getter for `checkpoint_store_name`.
+        """
+        return self._get(DataContextVariableSchema.CHECKPOINT_STORE_NAME)
+
+    def set_profiler_store_name(self, profiler_store_name: str) -> None:
+        """
+        Setter for `profiler_store_name`.
+        """
+        self._set(
+            DataContextVariableSchema.PROFILER_STORE_NAME,
+            profiler_store_name,
+        )
+
+    def get_profiler_store_name(self) -> Optional[str]:
+        """
+        Getter for `profiler_store_name`.
+        """
+        return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
+
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):

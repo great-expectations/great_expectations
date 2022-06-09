@@ -4,6 +4,7 @@ import logging
 import os
 import platform
 import random
+import re
 import string
 import threading
 import traceback
@@ -37,6 +38,7 @@ from great_expectations.core.util import (
 )
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.exceptions.exceptions import (
+    InvalidExpectationConfigurationError,
     MetricProviderError,
     MetricResolutionError,
 )
@@ -306,6 +308,12 @@ except (ImportError, KeyError):
     TRINO_TYPES = {}
 
 import tempfile
+
+# from tests.rule_based_profiler.conftest import ATOL, RTOL
+RTOL: float = 1.0e-7
+ATOL: float = 5.0e-2
+
+RX_FLOAT = re.compile(r".*\d\.\d+.*")
 
 SQL_DIALECT_NAMES = (
     "sqlite",
@@ -2089,7 +2097,11 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
             runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)
-    except (MetricProviderError, MetricResolutionError) as e:
+    except (
+        MetricProviderError,
+        MetricResolutionError,
+        InvalidExpectationConfigurationError,
+    ) as e:
         if raise_exception:
             raise
         error_message = str(e)
@@ -2153,9 +2165,32 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                 result["result"]["partial_unexpected_list"],
             )
 
+    # Determine if np.allclose(..) might be needed for float comparison
+    try_allclose = False
+    if "observed_value" in test["output"]:
+        if RX_FLOAT.match(repr(test["output"]["observed_value"])):
+            try_allclose = True
+
     # Check results
     if test["exact_match_out"] is True:
-        assert result == expectationValidationResultSchema.load(test["output"])
+        if "result" in result and "observed_value" in result["result"]:
+            if isinstance(result["result"]["observed_value"], (np.floating, float)):
+                assert np.allclose(
+                    result["result"]["observed_value"],
+                    expectationValidationResultSchema.load(test["output"])["result"][
+                        "observed_value"
+                    ],
+                    rtol=RTOL,
+                    atol=ATOL,
+                ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {expectationValidationResultSchema.load(test['output'])['result']['observed_value']}"
+            else:
+                assert result == expectationValidationResultSchema.load(
+                    test["output"]
+                ), f"{result} != {expectationValidationResultSchema.load(test['output'])}"
+        else:
+            assert result == expectationValidationResultSchema.load(
+                test["output"]
+            ), f"{result} != {expectationValidationResultSchema.load(test['output'])}"
     else:
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
@@ -2165,14 +2200,26 @@ def check_json_test_result(test, result, data_asset=None) -> None:
             # Apply our great expectations-specific test logic
 
             if key == "success":
-                assert result["success"] == value
+                if isinstance(value, (np.floating, float)):
+                    try:
+                        assert np.allclose(
+                            result["success"],
+                            value,
+                            rtol=RTOL,
+                            atol=ATOL,
+                        ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['success']} not np.allclose to {value}"
+
+                    except TypeError:
+                        assert (
+                            result["success"] == value
+                        ), f"{result['success']} != {value}"
 
             elif key == "observed_value":
                 if "tolerance" in test:
                     if isinstance(value, dict):
                         assert set(result["result"]["observed_value"].keys()) == set(
                             value.keys()
-                        )
+                        ), f"{set(result['result']['observed_value'].keys())} != {set(value.keys())}"
                         for k, v in value.items():
                             assert np.allclose(
                                 result["result"]["observed_value"][k],
@@ -2186,7 +2233,30 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                             rtol=test["tolerance"],
                         )
                 else:
-                    assert result["result"]["observed_value"] == value
+                    if isinstance(value, dict) and "values" in value:
+                        try:
+                            assert np.allclose(
+                                result["result"]["observed_value"]["values"],
+                                value["values"],
+                                rtol=RTOL,
+                                atol=ATOL,
+                            ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']['values']} not np.allclose to {value['values']}"
+                        except TypeError as e:
+                            print(e)
+                            assert (
+                                result["result"]["observed_value"] == value
+                            ), f"{result['result']['observed_value']} != {value}"
+                    elif try_allclose:
+                        assert np.allclose(
+                            result["result"]["observed_value"],
+                            value,
+                            rtol=RTOL,
+                            atol=ATOL,
+                        ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {value}"
+                    else:
+                        assert (
+                            result["result"]["observed_value"] == value
+                        ), f"{result['result']['observed_value']} != {value}"
 
             # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
             # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
@@ -2199,15 +2269,28 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                 elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
                     pass
                 else:
-                    assert result["result"]["unexpected_index_list"] == value
+                    assert (
+                        result["result"]["unexpected_index_list"] == value
+                    ), f"{result['result']['unexpected_index_list']} != {value}"
 
             elif key == "unexpected_list":
-                assert result["result"]["unexpected_list"] == value, (
-                    "expected "
-                    + str(value)
-                    + " but got "
-                    + str(result["result"]["unexpected_list"])
-                )
+                try:
+                    assert result["result"]["unexpected_list"] == value, (
+                        "expected "
+                        + str(value)
+                        + " but got "
+                        + str(result["result"]["unexpected_list"])
+                    )
+                except AssertionError as e:
+                    if type(result["result"]["unexpected_list"][0]) == list:
+                        unexpected_list_tup = [
+                            tuple(x) for x in result["result"]["unexpected_list"]
+                        ]
+                        assert (
+                            unexpected_list_tup == value
+                        ), f"{unexpected_list_tup} != {value}"
+                    else:
+                        raise
 
             elif key == "partial_unexpected_list":
                 assert result["result"]["partial_unexpected_list"] == value, (
@@ -2216,6 +2299,9 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                     + " but got "
                     + str(result["result"]["partial_unexpected_list"])
                 )
+
+            elif key == "unexpected_count":
+                pass
 
             elif key == "details":
                 assert result["result"]["details"] == value
@@ -2250,7 +2336,9 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                     )
 
             elif key == "traceback_substring":
-                assert result["exception_info"]["raised_exception"]
+                assert result["exception_info"][
+                    "raised_exception"
+                ], f"{result['exception_info']['raised_exception']}"
                 assert value in result["exception_info"]["exception_traceback"], (
                     "expected to find "
                     + value

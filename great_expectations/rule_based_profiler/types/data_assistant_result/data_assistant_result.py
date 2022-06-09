@@ -176,15 +176,16 @@ class DataAssistantResult(SerializableDictDot):
         domain: Domain
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         fully_qualified_parameter_name: str
-        parameter_value: ParameterNode
+        parameter_node: ParameterNode
         metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
             domain: {
-                parameter_value[
+                parameter_node[
                     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ].metric_configuration.metric_name: parameter_value[
+                ].metric_configuration.metric_name: parameter_node[
                     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
                 ]
-                for fully_qualified_parameter_name, parameter_value in parameter_values_for_fully_qualified_parameter_names.items()
+                for fully_qualified_parameter_name, parameter_node in parameter_values_for_fully_qualified_parameter_names.items()
+                if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
             }
             for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
         }
@@ -2623,6 +2624,7 @@ class DataAssistantResult(SerializableDictDot):
     def _determine_attributed_metrics_by_domain_type(
         self, metric_domain_type: MetricDomainTypes
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
+        # noinspection PyTypeChecker
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
             filter(
                 lambda element: element[0].domain_type == metric_domain_type,
