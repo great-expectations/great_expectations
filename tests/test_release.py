@@ -33,7 +33,7 @@ def release_schedule(
     parsed_schedule: Dict[dt.datetime, version.Version] = {}
     for date, release_version in release_schedule.items():
         parsed_date = dateutil.parser.parse(date)
-        parsed_date = parsed_date.astimezone(timezone)
+        parsed_date = timezone.localize(parsed_date)
         parsed_version = cast(version.Version, version.parse(release_version))
         parsed_schedule[parsed_date] = parsed_version
 
@@ -48,6 +48,7 @@ def test_release_schedule_adheres_to_schema(
     prev_date: Optional[dt.datetime] = None
     prev_version: Optional[version.Version] = None
 
+    print(release_schedule)
     for timestamp, release_version in release_schedule.items():
 
         # No old releases should exist within the release schedule (deleted during release process)
