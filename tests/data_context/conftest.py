@@ -567,7 +567,7 @@ def data_context_with_incomplete_global_config_in_dot_dir_only(
 ):
     # missing access_token
     with patch(
-        "great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
+        "great_expectations.data_context.data_context.FileDataContext.GLOBAL_CONFIG_PATHS",
         new_callable=PropertyMock,
     ) as mock:
         (

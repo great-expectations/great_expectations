@@ -3768,9 +3768,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if self._data_context and isinstance(self._data_context, FileDataContext):
             return self._context_root_directory
         else:
-            raise TypeError(
-                f"This class shouldn't have a root directory. I am of type {self.__class__.__name__}"
-            )
+            return ""
+            # raise TypeError(
+            #    f"This class shouldn't have a root directory. I am of type {self.__class__.__name__}"
+            # )
 
     @property
     def plugins_directory(self):
