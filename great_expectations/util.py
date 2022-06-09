@@ -64,7 +64,6 @@ try:
     from sqlalchemy import Table
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql import Select
-    from sqlalchemy.sql.type_api import TypeEngine
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
@@ -1480,7 +1479,7 @@ def get_pyathena_potential_type(type_module, type_):
     return potential_type
 
 
-def get_trino_potential_type(type_module: ModuleType, type_: str) -> TypeEngine:
+def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
     """
     Leverage on Trino Package to return sqlalchemy sql type
     """
