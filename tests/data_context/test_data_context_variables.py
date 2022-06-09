@@ -5,6 +5,7 @@ import pytest
 
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
     NotebookConfig,
     NotebookTemplateConfig,
     NotebookTemplateConfigSchema,
@@ -43,11 +44,11 @@ def data_context_config_dict() -> dict:
             },
         },
         "data_docs_sites": {},
-        "anonymous_usage_statistics": {
-            "enabled": True,
-            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-            "usage_statistics_url": "https://www.my_usage_stats_url/test",
-        },
+        "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
+            enabled=True,
+            data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
+            usage_statistics_url="https://www.my_usage_stats_url/test",
+        ),
         "notebooks": None,
     }
     return config
@@ -81,6 +82,39 @@ def cloud_data_context_variables(
         ge_cloud_organization_id=ge_cloud_organization_id,
         ge_cloud_access_token=ge_cloud_access_token,
         **data_context_config_dict,
+    )
+
+
+def stores() -> dict:
+    return {
+        "profiler_store": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "profilers/",
+            },
+        },
+    }
+
+
+@pytest.fixture
+def data_docs_sites() -> dict:
+    return {
+        "local_site": {
+            "class_name": "SiteBuilder",
+            "show_how_to_buttons": True,
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "uncommitted/data_docs/local_site/",
+            },
+        }
+    }
+
+
+@pytest.fixture
+def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
+    return AnonymizedUsageStatisticsConfig(
+        enabled=False,
     )
 
 
@@ -137,6 +171,19 @@ def notebooks() -> NotebookConfig:
             "get_profiler_store_name",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store getter",
+        ),
+        pytest.param(
+            "get_stores", DataContextVariableSchema.STORES, id="stores getter"
+        ),
+        pytest.param(
+            "get_data_docs_sites",
+            DataContextVariableSchema.DATA_DOCS_SITES,
+            id="data_docs_sites getter",
+        ),
+        pytest.param(
+            "get_anonymous_usage_statistics",
+            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+            id="anonymous_usage_statistics getter",
         ),
         pytest.param(
             "get_notebooks",
@@ -220,6 +267,21 @@ def test_data_context_variables_get(
             "my_profiler_store",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store setter",
+        ),
+        pytest.param(
+            "set_stores", stores, DataContextVariableSchema.STORES, id="stores setter"
+        ),
+        pytest.param(
+            "set_data_docs_sites",
+            data_docs_sites,
+            DataContextVariableSchema.DATA_DOCS_SITES,
+            id="data_docs_sites setter",
+        ),
+        pytest.param(
+            "set_anonymous_usage_statistics",
+            anonymous_usage_statistics,
+            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+            id="anonymous_usage_statistics setter",
         ),
         pytest.param(
             "set_notebooks",
