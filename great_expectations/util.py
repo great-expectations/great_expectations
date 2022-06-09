@@ -60,6 +60,7 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 try:
+    import sqlalchemy
     import sqlalchemy as sa
     from sqlalchemy import Table
     from sqlalchemy.engine import reflection
@@ -1479,7 +1480,7 @@ def get_pyathena_potential_type(type_module, type_):
     return potential_type
 
 
-def get_trino_potential_type(type_module: ModuleType, type_: str) -> sa.sql.sqltypes:
+def get_trino_potential_type(type_module: ModuleType, type_: str) -> sqlalchemy.types:
     """
     Leverage on Trino Package to return sqlalchemy sql type
     """
