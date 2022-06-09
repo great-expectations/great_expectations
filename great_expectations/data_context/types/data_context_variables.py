@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
@@ -199,6 +200,21 @@ class DataContextVariables(ABC):
         Getter for `profiler_store_name`.
         """
         return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
+
+    def set_progress_bars(self, progress_bars: ProgressBarsConfig) -> None:
+        """
+        Setter for `progress_bars`.
+        """
+        self._set(
+            DataContextVariableSchema.PROGRESS_BARS,
+            progress_bars,
+        )
+
+    def get_progress_bars(self) -> Optional[ProgressBarsConfig]:
+        """
+        Getter for `progress_bars`.
+        """
+        return self._get(DataContextVariableSchema.PROGRESS_BARS)
 
 
 @dataclass
