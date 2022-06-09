@@ -6,6 +6,7 @@ import dateutil.parser
 import pytest
 import pytz
 from packaging import version
+from pytz.tzinfo import DstTzInfo
 
 from great_expectations.data_context.util import file_relative_path
 
@@ -17,15 +18,15 @@ def release_file() -> str:
 
 
 @pytest.fixture
-def timezone() -> Any:
+def timezone() -> DstTzInfo:
     # Since releases are cut based on an EST schedule, let's ensure our validation matches that
-    tz = pytz.timezone("US/Eastern")
+    tz: DstTzInfo = cast(DstTzInfo, pytz.timezone("US/Eastern"))
     return tz
 
 
 @pytest.fixture
 def release_schedule(
-    release_file: str, timezone: Any
+    release_file: str, timezone: DstTzInfo
 ) -> Dict[dt.datetime, version.Version]:
     with open(release_file) as f:
         release_schedule: Dict[str, str] = json.loads(f.read())
@@ -42,13 +43,12 @@ def release_schedule(
 
 def test_release_schedule_adheres_to_schema(
     release_schedule: Dict[dt.datetime, version.Version],
-    timezone: Any,
+    timezone: DstTzInfo,
 ) -> None:
     today: dt.datetime = dt.datetime.now(timezone)
     prev_date: Optional[dt.datetime] = None
     prev_version: Optional[version.Version] = None
 
-    print(release_schedule)
     for timestamp, release_version in release_schedule.items():
 
         # No old releases should exist within the release schedule (deleted during release process)
