@@ -170,28 +170,6 @@ class DataAssistantResult(SerializableDictDot):
         )
         return expectation_suite
 
-    def get_attributed_metrics_by_domain(
-        self,
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        domain: Domain
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
-        fully_qualified_parameter_name: str
-        parameter_node: ParameterNode
-        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
-            domain: {
-                parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ].metric_configuration.metric_name: parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-                for fully_qualified_parameter_name, parameter_node in parameter_values_for_fully_qualified_parameter_names.items()
-                if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
-            }
-            for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-        }
-
-        return metrics_attributed_values_by_domain
-
     def plot_metrics(
         self,
         sequential: bool = True,
@@ -321,7 +299,7 @@ class DataAssistantResult(SerializableDictDot):
 
         self.display(charts=display_charts, theme=theme)
 
-        return_charts = self.apply_theme(charts=return_charts, theme=theme)
+        return_charts = self._apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
 
     @staticmethod
@@ -345,7 +323,7 @@ class DataAssistantResult(SerializableDictDot):
         else:
             altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
 
-        themed_charts: List[alt.chart] = DataAssistantResult.apply_theme(
+        themed_charts: List[alt.Chart] = DataAssistantResult._apply_theme(
             charts=charts, theme=altair_theme
         )
 
@@ -376,7 +354,7 @@ class DataAssistantResult(SerializableDictDot):
             chart.display()
 
     @staticmethod
-    def apply_theme(
+    def _apply_theme(
         charts: List[alt.Chart],
         theme: Optional[Dict[str, Any]],
     ) -> List[alt.Chart]:
@@ -2621,18 +2599,6 @@ class DataAssistantResult(SerializableDictDot):
 
         return df
 
-    def _determine_attributed_metrics_by_domain_type(
-        self, metric_domain_type: MetricDomainTypes
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        # noinspection PyTypeChecker
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
-            filter(
-                lambda element: element[0].domain_type == metric_domain_type,
-                self.get_attributed_metrics_by_domain().items(),
-            )
-        )
-        return attributed_metrics_by_domain
-
     def _create_column_dfs_for_charting(
         self,
         metric_name: str,
@@ -2735,3 +2701,37 @@ class DataAssistantResult(SerializableDictDot):
             sequential=sequential,
             subtitle=None,
         )
+
+    def _get_attributed_metrics_by_domain(
+        self,
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+        domain: Domain
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        fully_qualified_parameter_name: str
+        parameter_node: ParameterNode
+        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
+            domain: {
+                parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                ].metric_configuration.metric_name: parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
+                for fully_qualified_parameter_name, parameter_node in parameter_values_for_fully_qualified_parameter_names.items()
+                if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
+            }
+            for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
+        }
+
+        return metrics_attributed_values_by_domain
+
+    def _determine_attributed_metrics_by_domain_type(
+        self, metric_domain_type: MetricDomainTypes
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+        # noinspection PyTypeChecker
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
+            filter(
+                lambda element: element[0].domain_type == metric_domain_type,
+                self._get_attributed_metrics_by_domain().items(),
+            )
+        )
+        return attributed_metrics_by_domain
