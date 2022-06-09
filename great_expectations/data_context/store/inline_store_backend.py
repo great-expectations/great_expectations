@@ -75,6 +75,8 @@ class InlineStoreBackend(StoreBackend):
         else:
             project_config[config_var_type] = value
 
+        project_config.commented_map[config_var_type]  # Update something!
+
         self._data_context._save_project_config()
 
     def _move(

@@ -2148,6 +2148,10 @@ class DataContextConfig(BaseYamlConfig):
         return DataContextConfigSchema
 
     @property
+    def commented_map(self) -> CommentedMap:
+        return self._commented_map
+
+    @property
     def config_version(self):
         return self._config_version
 
