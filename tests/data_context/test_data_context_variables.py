@@ -78,7 +78,6 @@ def cloud_data_context_variables(
     )
 
 
-@pytest.fixture
 def stores() -> dict:
     return {
         "profiler_store": {
@@ -88,6 +87,20 @@ def stores() -> dict:
                 "base_directory": "profilers/",
             },
         },
+    }
+
+
+@pytest.fixture
+def data_docs_sites() -> dict:
+    return {
+        "local_site": {
+            "class_name": "SiteBuilder",
+            "show_how_to_buttons": True,
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "uncommitted/data_docs/local_site/",
+            },
+        }
     }
 
 
@@ -136,6 +149,11 @@ def stores() -> dict:
         ),
         pytest.param(
             "get_stores", DataContextVariableSchema.STORES, id="stores getter"
+        ),
+        pytest.param(
+            "get_data_docs_sites",
+            DataContextVariableSchema.DATA_DOCS_SITES,
+            id="data_docs_sites getter",
         ),
     ],
 )
@@ -217,6 +235,12 @@ def test_data_context_variables_get(
         ),
         pytest.param(
             "set_stores", stores, DataContextVariableSchema.STORES, id="stores setter"
+        ),
+        pytest.param(
+            "set_data_docs_sites",
+            data_docs_sites,
+            DataContextVariableSchema.DATA_DOCS_SITES,
+            id="data_docs_sites setter",
         ),
     ],
 )
