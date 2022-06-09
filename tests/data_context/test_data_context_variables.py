@@ -8,7 +8,6 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     NotebookConfig,
     NotebookTemplateConfig,
-    NotebookTemplateConfigSchema,
 )
 from great_expectations.data_context.types.data_context_variables import (
     CloudDataContextVariables,
