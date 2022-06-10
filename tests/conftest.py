@@ -2239,6 +2239,12 @@ def data_context_with_query_store(
 
 
 @pytest.fixture
+def ge_cloud_id():
+    # Fake id but adheres to the format required of a UUID
+    return "731ee1bd-604a-4851-9ee8-bca8ffb32bce"
+
+
+@pytest.fixture
 def ge_cloud_base_url() -> str:
     return "https://app.test.greatexpectations.io"
 

@@ -1249,10 +1249,14 @@ class Expectation(metaclass=MetaExpectation):
                 test=exp_test["test"],
                 raise_exception=False,
             )
+            print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
             if error_message is None:
+                print(f"  PASSED")
                 test_passed = True
                 error_diagnostics = None
             else:
+                print(f"  ERROR: {repr(error_message)}")
+                print(f"{stack_trace[0]}")
                 error_diagnostics = ExpectationErrorDiagnostics(
                     error_msg=error_message,
                     stack_trace=stack_trace,

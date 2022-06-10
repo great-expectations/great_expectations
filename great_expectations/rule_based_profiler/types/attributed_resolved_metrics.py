@@ -21,30 +21,31 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
             return True
 
         if isinstance(values, (list, tuple)):
-            value: MetricValue = values[0]
-            # Python "None" is illegal as candidate for conversion into "numpy.ndarray" type.
-            if value is None:
-                return True
+            if len(values) > 0:
+                value: MetricValue = values[0]
+                # Python "None" is illegal as candidate for conversion into "numpy.ndarray" type.
+                if value is None:
+                    return True
 
-            # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
-            if isinstance(value, (pd.DataFrame, pd.Series, set)):
-                return True
+                # Pandas "DataFrame" and "Series" are illegal as candidates for conversion into "numpy.ndarray" type.
+                if isinstance(value, (pd.DataFrame, pd.Series, set)):
+                    return True
 
-            if all(isinstance(value, list) for value in values):
                 # Components of different lengths cannot be packaged into "numpy.ndarray" type (due to undefined shape).
-                values_iterator: Iterator = iter(values)
-                first_value_length: int = len(next(values_iterator))
-                current_value: List[Any]
-                if not all(
-                    len(current_value) == first_value_length
-                    for current_value in values_iterator
-                ):
-                    return True
+                if all(isinstance(value, list) for value in values):
+                    values_iterator: Iterator = iter(values)
+                    first_value_length: int = len(next(values_iterator))
+                    current_value: List[Any]
+                    if not all(
+                        len(current_value) == first_value_length
+                        for current_value in values_iterator
+                    ):
+                        return True
 
-            # Recursively evaluate each element of properly shaped iterable (list or tuple).
-            for value in values:
-                if _detect_illegal_array_type_or_shape(values=value):
-                    return True
+                # Recursively evaluate each element of properly shaped iterable (list or tuple).
+                for value in values:
+                    if _detect_illegal_array_type_or_shape(values=value):
+                        return True
 
         return False
 
@@ -70,12 +71,12 @@ class AttributedResolvedMetrics(SerializableDictDot):
     @staticmethod
     def get_conditioned_attributed_metric_values_from_attributed_metric_values(
         attributed_metric_values: Dict[str, MetricValues]
-    ) -> Optional[Dict[str, MetricValues]]:
+    ) -> Dict[str, MetricValues]:
         """
         Converts "attributed_metric_values" to Numpy array for each "batch_id" key (recursively, wherever possible).
         """
         if attributed_metric_values is None:
-            return None
+            return {}
 
         batch_id: str
         metric_values: MetricValues
