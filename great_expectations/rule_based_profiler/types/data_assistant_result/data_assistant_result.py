@@ -308,7 +308,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def display(
         charts: Union[List[alt.Chart], List[alt.VConcatChart]],
-        theme: Optional[Dict[str, Any]],
+        theme: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Display each chart passed by DataAssistantResult.plot()
