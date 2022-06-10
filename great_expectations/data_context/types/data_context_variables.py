@@ -6,7 +6,9 @@ from typing import Any, Optional
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
+    ConcurrencyConfig,
     NotebookConfig,
+    ProgressBarsConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
@@ -56,11 +58,11 @@ class DataContextVariables(ABC):
     plugins_directory: Optional[str] = None
     stores: Optional[dict] = None
     data_docs_sites: Optional[dict] = None
-    notebooks: Optional[dict] = None
+    notebooks: Optional[NotebookConfig] = None
     config_variables_file_path: Optional[str] = None
-    anonymous_usage_statistics: Optional[dict] = None
-    concurrency: Optional[dict] = None
-    progress_bars: Optional[dict] = None
+    anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None
+    concurrency: Optional[ConcurrencyConfig] = None
+    progress_bars: Optional[ProgressBarsConfig] = None
     _store: Optional["DataContextVariablesStore"] = None  # noqa: F821
 
     @property
@@ -261,6 +263,21 @@ class DataContextVariables(ABC):
         Getter for `notebooks`.
         """
         return self._get(DataContextVariableSchema.NOTEBOOKS)
+
+    def set_concurrency(self, concurrency: ConcurrencyConfig) -> None:
+        """
+        Setter for `concurrency`.
+        """
+        self._set(
+            DataContextVariableSchema.CONCURRENCY,
+            concurrency,
+        )
+
+    def get_concurrency(self) -> Optional[ConcurrencyConfig]:
+        """
+        Getter for `concurrency`.
+        """
+        return self._get(DataContextVariableSchema.CONCURRENCY)
 
 
 @dataclass

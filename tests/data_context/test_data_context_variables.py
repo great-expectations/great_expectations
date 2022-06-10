@@ -6,6 +6,7 @@ import pytest
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
+    ConcurrencyConfig,
     NotebookConfig,
     NotebookTemplateConfig,
 )
@@ -49,6 +50,7 @@ def data_context_config_dict() -> dict:
             usage_statistics_url="https://www.my_usage_stats_url/test",
         ),
         "notebooks": None,
+        "concurrency": None,
     }
     return config
 
@@ -128,6 +130,11 @@ def notebooks() -> NotebookConfig:
     )
 
 
+@pytest.fixture
+def concurrency() -> ConcurrencyConfig:
+    return ConcurrencyConfig(enabled=True)
+
+
 @pytest.mark.parametrize(
     "crud_method,target_attr",
     [
@@ -188,6 +195,11 @@ def notebooks() -> NotebookConfig:
             "get_notebooks",
             DataContextVariableSchema.NOTEBOOKS,
             id="notebooks getter",
+        ),
+        pytest.param(
+            "get_concurrency",
+            DataContextVariableSchema.CONCURRENCY,
+            id="concurrency getter",
         ),
     ],
 )
@@ -287,6 +299,12 @@ def test_data_context_variables_get(
             notebooks,
             DataContextVariableSchema.NOTEBOOKS,
             id="notebooks setter",
+        ),
+        pytest.param(
+            "set_concurrency",
+            concurrency,
+            DataContextVariableSchema.CONCURRENCY,
+            id="concurrency setter",
         ),
     ],
 )
