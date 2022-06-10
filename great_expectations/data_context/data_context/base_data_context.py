@@ -1,8 +1,6 @@
-import configparser
 import copy
 import datetime
 import errno
-import json
 import logging
 import os
 import sys
