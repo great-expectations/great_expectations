@@ -129,7 +129,8 @@ module.exports = {
             'guides/connecting_to_your_data/database/postgres',
             'guides/connecting_to_your_data/database/redshift',
             'guides/connecting_to_your_data/database/snowflake',
-            'guides/connecting_to_your_data/database/sqlite'
+            'guides/connecting_to_your_data/database/sqlite',
+            'guides/connecting_to_your_data/database/trino'
           ]
         },
         {
@@ -331,6 +332,13 @@ module.exports = {
             },
             { type: 'doc', id: 'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations' },
             { type: 'doc', id: 'contributing/contributing_package' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Datasources',
+          items: [
+            { type: 'doc', id: 'contributing/datasources/sqlalchemy_compatible' }
           ]
         },
         {
