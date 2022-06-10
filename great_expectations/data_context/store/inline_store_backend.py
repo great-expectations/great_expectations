@@ -88,7 +88,22 @@ class InlineStoreBackend(StoreBackend):
         """
         See `StoreBackend.list_keys` for more information.
         """
-        keys: List[str] = list(key for key in self._data_context.config.to_dict())
+        ptr: Optional[str] = None
+        if prefix:
+            ptr = prefix[0]
+
+        keys: List[str]
+        config_dict: dict = self._data_context.config.to_dict()
+        if ptr is None:
+            keys = list(key for key in config_dict.keys())
+        else:
+            obj: dict = config_dict[ptr]
+            if not isinstance(obj, dict):
+                raise StoreBackendError(
+                    "Cannot list keys in a non-iterable section of a project config"
+                )
+            keys = list(key for key in obj.keys())
+
         return keys
 
     def remove_key(self, key: Tuple[str, ...]) -> None:
@@ -101,7 +116,19 @@ class InlineStoreBackend(StoreBackend):
         )
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
-        return key in self._data_context.config
+        resource_type: str = key[0]
+        resource_name: Optional[str] = None
+
+        if len(key) == 1:
+            return resource_type in self._data_context.config
+        if len(key) == 2:
+            resource_name = key[1]
+            return (
+                resource_type in self._data_context.config
+                and resource_name in self._data_context.config[resource_type]
+            )
+
+        return False
 
     def _validate_key(self, key: Tuple[str, ...]) -> None:
         if len(key) != 2:

@@ -2,6 +2,7 @@ from typing import Any, Optional, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
@@ -40,6 +41,20 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+    def list_keys(self):
+        from great_expectations.data_context.types.data_context_variables import (
+            DataContextVariableSchema,
+        )
+
+        datasource_key: str = DataContextVariableSchema.DATASOURCES.value
+
+        keys_without_store_backend_id = [
+            key
+            for key in self._store_backend.list_keys(prefix=(datasource_key,))
+            if not key == StoreBackend.STORE_BACKEND_ID_KEY
+        ]
+        return [key for key in keys_without_store_backend_id]
+
     def serialize(
         self, key: Optional[Any], value: DatasourceConfig
     ) -> Union[str, dict]:
@@ -53,13 +68,15 @@ class DatasourceStore(Store):
         return self._schema.dumps(value, indent=2, sort_keys=True)
 
     def deserialize(
-        self, key: Optional[Any], value: Union[str, dict]
+        self, key: Optional[Any], value: Union[dict, DatasourceConfig]
     ) -> DatasourceConfig:
         """
         See parent 'Store.deserialize()' for more information
         """
         del key  # Unused arg but necessary as part of signature
-        if isinstance(value, dict):
+        if isinstance(value, DatasourceConfig):
+            return value
+        elif isinstance(value, dict):
             return self._schema.load(value)
         else:
             return self._schema.loads(value)

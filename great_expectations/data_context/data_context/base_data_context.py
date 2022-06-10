@@ -18,9 +18,13 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
+)
+from great_expectations.data_context.types.data_context_variables import (
+    DataContextVariableSchema,
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
@@ -479,9 +483,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
 
     def _init_datasources(self, config: DataContextConfig) -> None:
-        if not config.datasources:
-            return
-        for datasource_name in config.datasources:
+        for datasource_name in self.datasource_store.list_keys():
             try:
                 self._cached_datasources[datasource_name] = self.get_datasource(
                     datasource_name=datasource_name
@@ -878,6 +880,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
+
+    @property
+    def datasource_store_name(self) -> str:
+        return "datasource_store"
+
+    @property
+    def datasource_store(self) -> "DatasourceStore":  # noqa: F821
+        datasource_store_name: str = self.datasource_store_name
+        return self.stores[datasource_store_name]
 
     @property
     def checkpoint_store_name(self):
@@ -2084,14 +2095,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         if datasource_name in self._cached_datasources:
             return self._cached_datasources[datasource_name]
-        if (
-            datasource_name
-            in self.project_config_with_variables_substituted.datasources
-        ):
+
+        datasource_key = DataContextVariableKey(
+            resource_type=DataContextVariableSchema.DATASOURCES,
+            resource_name=datasource_name,
+        )
+
+        if self.datasource_store.has_key(datasource_key):
             datasource_config: DatasourceConfig = copy.deepcopy(
-                self.project_config_with_variables_substituted.datasources[
-                    datasource_name
-                ]
+                self.datasource_store.get(datasource_key)
             )
         else:
             raise ValueError(
