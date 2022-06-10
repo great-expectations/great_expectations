@@ -1067,18 +1067,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         if not config:
             config = self.config
 
-        substituted_config_variables = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-
-        # Substitutions should have already occurred for GE Cloud configs at this point
-        substitutions = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
+        substitutions: dict = self._determine_substitutions()
 
         if self.ge_cloud_mode:
             ge_cloud_config_variable_defaults = {
@@ -1104,6 +1093,22 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
             )
         )
+
+    def _determine_substitutions(self) -> dict:
+        substituted_config_variables = substitute_all_config_variables(
+            self.config_variables,
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        # Substitutions should have already occurred for GE Cloud configs at this point
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
+        return substitutions
 
     def escape_all_config_variables(
         self,
@@ -2111,7 +2116,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
+
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        substitutions: dict = self._determine_substitutions()
+        config = substitute_all_config_variables(
+            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        )
+
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = self._instantiate_datasource_from_config(
