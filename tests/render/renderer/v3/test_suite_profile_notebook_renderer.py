@@ -96,7 +96,7 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     #     "random_seed": 43792,
     # },
     # numeric_columns_high_precision_rule={
-    #     "round_decimals": 4,   # parameters will be rounded to 4 decimal places for metrics that increase precision
+    #     "round_decimals": 5,   # parameters will be rounded to 5 decimal places for metrics that increase precision
     #     "false_positive_rate": 0.1,
     #     "random_seed": 43792,
     # },
