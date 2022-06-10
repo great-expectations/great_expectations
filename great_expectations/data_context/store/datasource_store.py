@@ -80,7 +80,7 @@ class DatasourceStore(Store):
         """
         del key  # Unused arg but necessary as part of signature
 
-        # When using the InlineStoreBackend, objects are already converted to their respective confit types.
+        # When using the InlineStoreBackend, objects are already converted to their respective config types.
         if isinstance(value, DatasourceConfig):
             return value
         elif isinstance(value, dict):

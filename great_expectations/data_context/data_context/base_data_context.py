@@ -1101,7 +1101,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
-        # Substitutions should have already occurred for GE Cloud configs at this point
         substitutions = {
             **substituted_config_variables,
             **dict(os.environ),
