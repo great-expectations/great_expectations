@@ -1,4 +1,8 @@
-from abc import ABC
+from abc import ABC, abstractmethod
+
+from great_expectations.data_context.types.data_context_variables import (
+    DataContextVariables,
+)
 
 
 class AbstractDataContext(ABC):
@@ -11,4 +15,10 @@ class AbstractDataContext(ABC):
     TODO: eventually the dependency on ConfigPeer will be removed and this will become a pure ABC.
     """
 
-    pass
+    @abstractmethod
+    def _init_variables(self) -> None:
+        raise NotImplementedError
+
+    @property
+    def variables(self) -> DataContextVariables:
+        return self._variables

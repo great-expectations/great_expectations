@@ -27,3 +27,4 @@ from .query_store import SqlAlchemyQueryStore  # isort:skip
 from .html_site_store import HtmlSiteStore  # isort:skip
 from .profiler_store import ProfilerStore  # isort:skip
 from .datasource_store import DatasourceStore  # isort:skip
+from .data_context_variables_store import DataContextVariablesStore  # isort:skip

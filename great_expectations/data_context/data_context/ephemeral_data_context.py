@@ -1,6 +1,9 @@
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
+from great_expectations.data_context.types.data_context_variables import (
+    EphemeralDataContextVariables,
+)
 
 
 class EphemeralDataContext(AbstractDataContext):
@@ -12,4 +15,5 @@ class EphemeralDataContext(AbstractDataContext):
     compatibility reasons.
     """
 
-    pass
+    def _init_variables(self) -> EphemeralDataContextVariables:
+        raise NotImplementedError
