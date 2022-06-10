@@ -2336,19 +2336,18 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
         subtitle: Optional[str],
     ) -> Optional[alt.Chart]:
-        metric_types: Dict[str, AltairDataTypes] = self.METRIC_TYPES
-
-        nominal_metrics: Set[str] = {
-            sanitize_parameter_name(name=metric)
-            for metric in metric_types.keys()
-            if metric_types[metric] == AltairDataTypes.NOMINAL
-        }
-
-        quantitative_metrics: Set[str] = {
-            sanitize_parameter_name(name=metric)
-            for metric in metric_types.keys()
-            if metric_types[metric] == AltairDataTypes.QUANTITATIVE
-        }
+        nominal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+            altair_type=AltairDataTypes.NOMINAL
+        )
+        ordinal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+            altair_type=AltairDataTypes.ORDINAL
+        )
+        quantitative_metrics: Set[str] = self._get_metric_types_from_altair_type(
+            altair_type=AltairDataTypes.QUANTITATIVE
+        )
+        temporal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+            altair_type=AltairDataTypes.ORDINAL
+        )
 
         if plot_mode is PlotMode.PRESCRIPTIVE:
             plot_impl: Optional[
@@ -2364,10 +2363,14 @@ class DataAssistantResult(SerializableDictDot):
                 ]
             ] = None
 
-            if metric_name in quantitative_metrics:
-                plot_impl = self._get_expect_domain_values_to_be_between_chart
-            elif metric_name in nominal_metrics:
+            if metric_name in nominal_metrics:
                 plot_impl = self._get_expect_domain_values_to_match_set_chart
+            elif metric_name in ordinal_metrics:
+                plot_impl = self._get_expect_domain_values_ordinal_chart
+            elif metric_name in quantitative_metrics:
+                plot_impl = self._get_expect_domain_values_to_be_between_chart
+            elif metric_name in temporal_metrics:
+                plot_impl = self._get_expect_domain_values_temporal_chart
 
             return plot_impl(
                 expectation_type=expectation_type,
@@ -2389,10 +2392,14 @@ class DataAssistantResult(SerializableDictDot):
                 ]
             ] = None
 
-            if metric_name in quantitative_metrics:
-                plot_impl = self._get_quantitative_metric_chart
-            elif metric_name in nominal_metrics:
+            if metric_name in nominal_metrics:
                 plot_impl = self._get_nominal_metric_chart
+            elif metric_name in ordinal_metrics:
+                plot_impl = None
+            elif metric_name in quantitative_metrics:
+                plot_impl = self._get_quantitative_metric_chart
+            elif metric_name in temporal_metrics:
+                plot_impl = None
 
             return plot_impl(
                 df=df,
@@ -2489,16 +2496,42 @@ class DataAssistantResult(SerializableDictDot):
     ) -> List[Optional[alt.VConcatChart]]:
         metric_name = sanitize_parameter_name(metric_name)
 
+        nominal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+            altair_type=AltairDataTypes.NOMINAL
+        )
+        ordinal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+            altair_type=AltairDataTypes.ORDINAL
+        )
+        quantitative_metrics: Set[str] = self._get_metric_types_from_altair_type(
+            altair_type=AltairDataTypes.QUANTITATIVE
+        )
+        temporal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+            altair_type=AltairDataTypes.ORDINAL
+        )
+
         if plot_mode is PlotMode.PRESCRIPTIVE:
-            plot_impl: Callable[
-                [
-                    str,
-                    List[ColumnDataFrame],
-                    str,
-                    bool,
-                ],
-                alt.VConcatChart,
-            ] = self._get_interactive_detail_expect_column_values_to_be_between_chart
+            plot_impl: Optional[
+                Callable[
+                    [
+                        str,
+                        List[ColumnDataFrame],
+                        str,
+                        bool,
+                    ],
+                    alt.VConcatChart,
+                ]
+            ] = None
+
+            if metric_name in nominal_metrics:
+                plot_impl = None
+            elif metric_name in ordinal_metrics:
+                plot_impl = None
+            elif metric_name in quantitative_metrics:
+                plot_impl = (
+                    self._get_interactive_detail_expect_column_values_to_be_between_chart
+                )
+            elif metric_name in temporal_metrics:
+                plot_impl = None
 
             return [
                 plot_impl(
@@ -2509,14 +2542,25 @@ class DataAssistantResult(SerializableDictDot):
                 )
             ]
         else:
-            plot_impl: Callable[
-                [
-                    List[ColumnDataFrame],
-                    str,
-                    bool,
-                ],
-                alt.Chart,
-            ] = self._get_interactive_detail_multi_chart
+            plot_impl: Optional[
+                Callable[
+                    [
+                        List[ColumnDataFrame],
+                        str,
+                        bool,
+                    ],
+                    alt.Chart,
+                ]
+            ] = None
+
+            if metric_name in nominal_metrics:
+                plot_impl = self._get_
+            elif metric_name in ordinal_metrics:
+                plot_impl = None
+            elif metric_name in quantitative_metrics:
+                plot_impl = self._get_interactive_detail_multi_chart
+            elif metric_name in temporal_metrics:
+                plot_impl = None
 
             return [
                 plot_impl(
@@ -2731,3 +2775,13 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
         return attributed_metrics_by_domain
+
+    def _get_metric_types_from_altair_type(
+        self, altair_type: AltairDataTypes
+    ) -> Set[str]:
+        metric_types: Dict[str, AltairDataTypes] = self.METRIC_TYPES
+        return {
+            sanitize_parameter_name(name=metric)
+            for metric in metric_types.keys()
+            if metric_types[metric] == altair_type
+        }
