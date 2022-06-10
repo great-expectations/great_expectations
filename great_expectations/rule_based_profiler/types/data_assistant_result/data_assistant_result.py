@@ -2878,3 +2878,27 @@ class DataAssistantResult(SerializableDictDot):
             metric_name=metric_name,
             sequential=sequential,
         )
+
+    def _get_interactive_ordinal_metric_chart(
+        self,
+        column_dfs: List[ColumnDataFrame],
+        metric_name: str,
+        sequential: bool,
+    ) -> alt.VConcatChart:
+        return self._get_interactive_detail_multi_chart(
+            column_dfs=column_dfs,
+            metric_name=metric_name,
+            sequential=sequential,
+        )
+
+    def _get_interactive_temporal_metric_chart(
+        self,
+        column_dfs: List[ColumnDataFrame],
+        metric_name: str,
+        sequential: bool,
+    ) -> alt.VConcatChart:
+        return self._get_interactive_detail_multi_chart(
+            column_dfs=column_dfs,
+            metric_name=metric_name,
+            sequential=sequential,
+        )
