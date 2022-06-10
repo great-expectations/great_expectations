@@ -56,8 +56,48 @@ Using v3 (Batch Request) API\x1b[0m
     assert stdout == expected_output
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
+    anonymized_name: str = mock_emit.call_args_list[3][0][0]["event_payload"][
+        "anonymized_name"
+    ]
 
     expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.list.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "SqlAlchemyDatasource",
+                },
+                "event": "data_context.add_datasource",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "datasource.sqlalchemy.connect",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "sqlalchemy_dialect": "sqlite",
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),

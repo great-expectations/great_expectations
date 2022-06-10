@@ -499,7 +499,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
                 pass
-
     def _construct_data_context_id(self) -> str:
         """
         Choose the id of the currently-configured expectations store, if available and a persistent store.

@@ -126,12 +126,6 @@ def test_cli_datasource_new(
     empty_data_context_stats_enabled,
     filesystem_csv_2,
 ):
-    # mock_check_global_usage_statistics_opt_out.return_value = False
-    # This fricken line. should have an effect
-    #
-    # monkeypatch.delenv(
-    #     "GE_USAGE_STATS", raising=False
-    # )  # Undo the project-wide test default
     context = empty_data_context_stats_enabled
     root_dir = context.root_directory
     assert context.list_datasources() == []
