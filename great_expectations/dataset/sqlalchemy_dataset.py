@@ -1196,13 +1196,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 .select_from(self._table)
                 .where(sa.column(column) is not None)
             ).fetchone()
-            try:
-                result = float(res[0])
-            except:
-                logger.warning(
-                    f"Having issue with stddev_samp on {column}, schema: {self._table.schema} table: {self._table.name}"
-                )
-                result = 0.0
+        try:
+            result = float(res[0])
+        except TypeError:
+            logger.warning(
+                f"Having issue with stddev_samp on {column}, schema: {self._table.schema} table: {self._table.name}"
+            )
+            result = 0.0
         return result
 
     def get_column_hist(self, column, bins):
