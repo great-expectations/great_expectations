@@ -273,7 +273,7 @@ after this initial step gets you started on the path towards what you want.**
 
 This is highly configurable depending on your goals.
 You can ignore columns, specify cardinality of categorical columns, configure semantic types for columns, even adjust thresholds and/or different estimator parameters, etc.
-You can find more information about OnboardingDataAssistant and other DataAssistant components (please see documentation for the complete set of DataAssistant controls) [how to choose and control the behavior of the DataAssistant tailored to your goals](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.html).
+You can find more information about OnboardingDataAssistant and other DataAssistant components (please see documentation for the complete set of DataAssistant controls) [how to choose and control the behavior of the DataAssistant tailored to your goals](https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).
 
 """
         )
