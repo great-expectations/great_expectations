@@ -389,7 +389,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._cached_datasources = {}
 
         # Build the datasources we know about and have access to
-        self._init_datasources(self.project_config_with_variables_substituted)
+        self._init_datasources()
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -484,7 +484,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             store_name=store_name, store_config=datasource_store_config
         )
 
-    def _init_datasources(self, config: DataContextConfig) -> None:
+    def _init_datasources(self) -> None:
         for datasource_name in self.datasource_store.list_keys():
             try:
                 self._cached_datasources[datasource_name] = self.get_datasource(
