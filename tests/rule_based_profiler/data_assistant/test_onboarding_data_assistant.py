@@ -203,7 +203,7 @@ def test_onboarding_data_assistant_result_serialization(
         bobby_onboarding_data_assistant_result.to_json_dict()
         == onboarding_data_assistant_result_as_dict
     )
-    assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 8
+    assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 9
 
 
 @mock.patch(
@@ -321,7 +321,13 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         # },
         # column_value_nonnullity_rule={
         # },
-        numeric_columns_rule={
+        numeric_columns_low_precision_rule={
+            "round_decimals": 1,
+            "false_positive_rate": 0.1,
+            "random_seed": 43792,
+        },
+        numeric_columns_high_precision_rule={
+            "round_decimals": 4,
             "false_positive_rate": 0.1,
             "random_seed": 43792,
         },
@@ -343,9 +349,27 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         },
     )
     assert (
-        data_assistant_result.profiler_config.rules["numeric_columns_rule"][
-            "variables"
-        ]["false_positive_rate"]
+        data_assistant_result.profiler_config.rules[
+            "numeric_columns_low_precision_rule"
+        ]["variables"]["round_decimals"]
+        == 1
+    )
+    assert (
+        data_assistant_result.profiler_config.rules[
+            "numeric_columns_low_precision_rule"
+        ]["variables"]["false_positive_rate"]
+        == 1.0e-1
+    )
+    assert (
+        data_assistant_result.profiler_config.rules[
+            "numeric_columns_high_precision_rule"
+        ]["variables"]["round_decimals"]
+        == 4
+    )
+    assert (
+        data_assistant_result.profiler_config.rules[
+            "numeric_columns_high_precision_rule"
+        ]["variables"]["false_positive_rate"]
         == 1.0e-1
     )
     assert data_assistant_result.profiler_config.rules["datetime_columns_rule"][
