@@ -335,6 +335,13 @@ module.exports = {
         },
         {
           type: 'category',
+          label: 'Datasources',
+          items: [
+            { type: 'doc', id: 'contributing/datasources/sqlalchemy_compatible' }
+          ]
+        },
+        {
+          type: 'category',
           label: 'Style guides',
           items: [
             { type: 'doc', id: 'contributing/style_guides/docs_style' },
