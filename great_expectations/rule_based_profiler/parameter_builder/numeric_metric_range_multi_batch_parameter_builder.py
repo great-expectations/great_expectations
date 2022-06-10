@@ -1,5 +1,6 @@
 import copy
 import itertools
+import math
 import warnings
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Union, cast
@@ -547,12 +548,29 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                 metric_value_idx
             ] = numeric_range_estimation_result.estimation_histogram
             # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
-            metric_value_range[metric_value_range_min_idx] = round(
-                cast(float, min_value), round_decimals
-            )
-            metric_value_range[metric_value_range_max_idx] = round(
-                cast(float, max_value), round_decimals
-            )
+            if len(metric_values) == 1 and round_decimals != 0:
+                # If a range wasn't created due to only having one batch,
+                # create a range of precision greater than the metric value
+                print(min_value)
+                print(max_value)
+                order_of_magnitude: int = 10**round_decimals
+                metric_value_range[metric_value_range_min_idx] = (
+                    math.floor(cast(float, min_value) * order_of_magnitude)
+                    / order_of_magnitude
+                )
+                metric_value_range[metric_value_range_max_idx] = (
+                    math.ceil(cast(float, max_value) * order_of_magnitude)
+                    / order_of_magnitude
+                )
+                print(metric_value_range[metric_value_range_min_idx])
+                print(metric_value_range[metric_value_range_max_idx])
+            else:
+                metric_value_range[metric_value_range_min_idx] = round(
+                    cast(float, min_value), round_decimals
+                )
+                metric_value_range[metric_value_range_max_idx] = round(
+                    cast(float, max_value), round_decimals
+                )
 
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
         if metric_value_range.shape[0] == 1:
