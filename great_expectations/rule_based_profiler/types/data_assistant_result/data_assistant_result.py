@@ -1981,7 +1981,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        bars: alt.Chart = DataAssistantResult._get_interactive_multi_bar_chart(
+        bars: alt.Chart = DataAssistantResult._get_interactive_bar_chart(
             expectation_type=expectation_type,
             df=df,
             metric_plot_component=metric_plot_component,
