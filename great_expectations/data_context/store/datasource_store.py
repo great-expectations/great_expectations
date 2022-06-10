@@ -42,6 +42,9 @@ class DatasourceStore(Store):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def list_keys(self) -> List[str]:
+        """
+        See parent 'Store.list_keys()' for more information
+        """
         from great_expectations.data_context.types.data_context_variables import (
             DataContextVariableSchema,
         )
