@@ -581,7 +581,7 @@ class OnboardingDataAssistant(DataAssistant):
             ],
             "allow_relative_error": "linear",
             "false_positive_rate": 0.05,
-            "quantile_statistic_interpolation_method": "auto",
+            "quantile_statistic_interpolation_method": "linear",
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
@@ -590,7 +590,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "lower_bound": None,
                 "upper_bound": None,
             },
-            "round_decimals": 6,
+            "round_decimals": None,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_mean_metric_multi_batch_parameter_builder_for_metrics,
