@@ -52,7 +52,7 @@ resources:
 
 # The pipeline is run under two primary conditions: if cutting a release or as scheduled by the above cron job.
 variables:
-  isReleasePrep: $[contains(variables['Build.SourceBranchName'], 'release')]
+  isReleasePrep: $[startsWith(variables['Build.SourceBranch'], 'release')]
   isRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
