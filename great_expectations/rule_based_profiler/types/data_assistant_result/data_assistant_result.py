@@ -2395,11 +2395,11 @@ class DataAssistantResult(SerializableDictDot):
             if metric_name in nominal_metrics:
                 plot_impl = self._get_nominal_metric_chart
             elif metric_name in ordinal_metrics:
-                plot_impl = None
+                plot_impl = self._get_ordinal_metric_chart
             elif metric_name in quantitative_metrics:
                 plot_impl = self._get_quantitative_metric_chart
             elif metric_name in temporal_metrics:
-                plot_impl = None
+                plot_impl = self._get_temporal_metric_chart
 
             return plot_impl(
                 df=df,
@@ -2523,15 +2523,15 @@ class DataAssistantResult(SerializableDictDot):
             ] = None
 
             if metric_name in nominal_metrics:
-                plot_impl = None
+                plot_impl = self._get_interactive_expect_column_values_nominal_chart
             elif metric_name in ordinal_metrics:
-                plot_impl = None
+                plot_impl = self._get_interactive_expect_column_values_ordinal_chart
             elif metric_name in quantitative_metrics:
                 plot_impl = (
                     self._get_interactive_detail_expect_column_values_to_be_between_chart
                 )
             elif metric_name in temporal_metrics:
-                plot_impl = None
+                plot_impl = self._get_interactive_expect_column_values_temporal_chart
 
             return [
                 plot_impl(
