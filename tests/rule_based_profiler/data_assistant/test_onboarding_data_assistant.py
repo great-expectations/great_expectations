@@ -327,7 +327,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
             "random_seed": 43792,
         },
         numeric_columns_high_precision_rule={
-            "round_decimals": 5,
+            "round_decimals": 6,
             "false_positive_rate": 0.1,
             "random_seed": 43792,
         },
@@ -364,7 +364,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         data_assistant_result.profiler_config.rules[
             "numeric_columns_high_precision_rule"
         ]["variables"]["round_decimals"]
-        == 5
+        == 6
     )
     assert (
         data_assistant_result.profiler_config.rules[
