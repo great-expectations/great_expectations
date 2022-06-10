@@ -19,6 +19,7 @@ context = ge.get_context()
 assert context
 
 # First configure a new Datasource and add to DataContext
+
 # <snippet>
 datasource_yaml = f"""
 name: getting_started_datasource
