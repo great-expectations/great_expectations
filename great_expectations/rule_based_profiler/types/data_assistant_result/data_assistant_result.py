@@ -2381,13 +2381,13 @@ class DataAssistantResult(SerializableDictDot):
             if_true=alt.value(Colors.PINK.value),
         )
 
-        anomaly_coded_points = (
+        anomaly_coded_points: alt.Chart = (
             points.encode(color=point_color_condition, tooltip=tooltip)
             .add_selection(selection)
             .transform_filter(selection)
         )
 
-        line = line.add_selection(selection).transform_filter(selection)
+        line = line.transform_filter(selection)
 
         return band + lower_limit + upper_limit + line + anomaly_coded_points
 
@@ -3342,7 +3342,7 @@ class DataAssistantResult(SerializableDictDot):
         column_dfs: List[ColumnDataFrame],
         metric_name: str,
         sequential: bool,
-    ) -> alt.VConcatChart:
+    ) -> alt.LayerChart:
         return DataAssistantResult._get_interactive_metric_chart(
             column_dfs=column_dfs,
             metric_name=metric_name,
@@ -3354,7 +3354,7 @@ class DataAssistantResult(SerializableDictDot):
         column_dfs: List[ColumnDataFrame],
         metric_name: str,
         sequential: bool,
-    ) -> alt.VConcatChart:
+    ) -> alt.LayerChart:
         return DataAssistantResult._get_interactive_metric_chart(
             column_dfs=column_dfs,
             metric_name=metric_name,
