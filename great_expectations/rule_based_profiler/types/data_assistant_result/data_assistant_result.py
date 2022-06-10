@@ -1076,7 +1076,7 @@ class DataAssistantResult(SerializableDictDot):
                 domain_plot_component=domain_plot_component,
             )
         else:
-            return DataAssistantResult._get_interactive_detail_multi_bar_chart(
+            return DataAssistantResult._get_interactive_bar_chart(
                 df=df,
                 metric_plot_component=metric_plot_component,
                 batch_plot_component=batch_plot_component,
@@ -1237,7 +1237,7 @@ class DataAssistantResult(SerializableDictDot):
                 predicate=predicate,
             )
         else:
-            return DataAssistantResult._get_interactive_detail_expect_column_values_to_be_between_bar_chart(
+            return DataAssistantResult._get_interactive_expect_column_values_to_be_between_bar_chart(
                 expectation_type=expectation_type,
                 df=df,
                 metric_plot_component=metric_plot_component,
@@ -1775,7 +1775,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
     @staticmethod
-    def _get_interactive_detail_multi_bar_chart(
+    def _get_interactive_bar_chart(
         df: pd.DataFrame,
         metric_plot_component: MetricPlotComponent,
         batch_plot_component: BatchPlotComponent,
@@ -1955,7 +1955,7 @@ class DataAssistantResult(SerializableDictDot):
         return interactive_detail_multi_line_chart
 
     @staticmethod
-    def _get_interactive_detail_expect_column_values_to_be_between_bar_chart(
+    def _get_interactive_expect_column_values_to_be_between_bar_chart(
         expectation_type: str,
         df: pd.DataFrame,
         metric_plot_component: MetricPlotComponent,
@@ -1981,7 +1981,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        bars: alt.Chart = DataAssistantResult._get_interactive_detail_multi_bar_chart(
+        bars: alt.Chart = DataAssistantResult._get_interactive_multi_bar_chart(
             expectation_type=expectation_type,
             df=df,
             metric_plot_component=metric_plot_component,
@@ -2859,7 +2859,7 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
     ) -> alt.VConcatChart:
         raise NotImplementedError(
-            "Nominal expectation charts have not been implemented for column domain."
+            "Nominal expectation charts have not been implemented for the column domain type."
         )
 
     def _get_interactive_expect_column_values_ordinal_chart(
@@ -2897,7 +2897,7 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
     ) -> alt.VConcatChart:
         raise NotImplementedError(
-            "Nominal metric charts have not been implemented for column domain."
+            "Nominal metric charts have not been implemented for the column domain type."
         )
 
     def _get_interactive_ordinal_metric_chart(
