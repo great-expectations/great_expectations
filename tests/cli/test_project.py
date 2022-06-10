@@ -66,7 +66,7 @@ def titanic_data_context_clean_usage_stats_enabled(
 
 @pytest.fixture
 def titanic_data_context_upgraded_with_v2_datasource_usage_stats_enabled(
-    tmp_path_factory, monkeypatch
+    tmp_path_factory, monkeypatch, titanic_data_context
 ) -> DataContext:
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
@@ -155,9 +155,12 @@ def test_project_check_on_project_with_v2_datasources_and_validation_operators(
     mock_emit,
     caplog,
     monkeypatch,
-    titanic_data_context_upgraded_with_v2_datasource_usage_stats_enabled,
+    titanic_data_context,
 ):
-    context = titanic_data_context_upgraded_with_v2_datasource_usage_stats_enabled
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    context = titanic_data_context
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
