@@ -152,14 +152,8 @@ def test_project_check_on_valid_project_says_so(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_project_check_on_project_with_v2_datasources_and_validation_operators(
-    mock_emit,
-    caplog,
-    monkeypatch,
-    titanic_data_context,
+    mock_emit, caplog, monkeypatch, titanic_data_context
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     context = titanic_data_context
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -188,13 +182,7 @@ def test_project_check_on_project_with_v2_datasources_and_validation_operators(
         in result.output
     )
     assert result.exit_code == 1
-
-    assert mock_emit.call_count == 1
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-    ]
+    assert mock_emit.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
