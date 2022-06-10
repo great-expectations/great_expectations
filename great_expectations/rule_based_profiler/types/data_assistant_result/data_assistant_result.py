@@ -244,7 +244,7 @@ class DataAssistantResult(SerializableDictDot):
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
         """
-        VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
+        VolumeDataAssistant-specific plots are defined with Altair and passed to "_display()" for presentation.
         Display Charts are condensed and interactive while Return Charts are separated into an individual chart for
         each metric-domain/expectation-domain combination.
 
@@ -300,13 +300,13 @@ class DataAssistantResult(SerializableDictDot):
         display_charts.extend(column_domain_display_charts)
         return_charts.extend(column_domain_return_charts)
 
-        self.display(charts=display_charts, theme=theme)
+        self._display(charts=display_charts, theme=theme)
 
         return_charts = self._apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
 
     @staticmethod
-    def display(
+    def _display(
         charts: Union[List[alt.Chart], List[alt.VConcatChart]],
         theme: Optional[Dict[str, Any]] = None,
     ) -> None:
