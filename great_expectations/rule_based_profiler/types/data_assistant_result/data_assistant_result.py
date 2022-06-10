@@ -2854,7 +2854,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_ordinal_chart(
         self,
         expectation_type: str,
-        column_dfs: ColumnDataFrame,
+        column_dfs: List[ColumnDataFrame],
         metric_name: str,
         sequential: bool,
     ) -> alt.VConcatChart:
@@ -2868,7 +2868,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_temporal_chart(
         self,
         expectation_type: str,
-        column_dfs: ColumnDataFrame,
+        column_dfs: List[ColumnDataFrame],
         metric_name: str,
         sequential: bool,
     ) -> alt.VConcatChart:
