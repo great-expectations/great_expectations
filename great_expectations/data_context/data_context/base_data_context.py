@@ -475,7 +475,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._init_datasource_store()
 
     def _init_datasource_store(self) -> None:
-        store_name: str = "datasource_store"
+        store_name: str = self.datasource_store_name
         datasource_store_config = {
             "class_name": "DatasourceStore",
             "store_backend": {"class_name": "InlineStoreBackend", "data_context": self},
