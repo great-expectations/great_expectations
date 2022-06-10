@@ -14,12 +14,12 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_cli_datasource_list_on_project_with_no_datasources(
-    mock_emit, caplog, monkeypatch, empty_data_context, filesystem_csv_2
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled, filesystem_csv_2
 ):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    context: DataContext = empty_data_context
+    # monkeypatch.delenv(
+    #     "GE_USAGE_STATS", raising=False
+    # )  # Undo the project-wide test default
+    context: DataContext = empty_data_context_stats_enabled
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -111,6 +111,9 @@ def test_cli_datasource_list_on_project_with_one_datasource(
     assert mock_emit.call_args_list == expected_call_args_list
 
 
+# @mock.patch(
+#     "great_expectations.data_context.data_context.abstract_data_context.AbstractDataContext._check_global_usage_statistics_opt_out",
+# )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -120,13 +123,16 @@ def test_cli_datasource_new(
     mock_emit,
     caplog,
     monkeypatch,
-    empty_data_context,
+    empty_data_context_stats_enabled,
     filesystem_csv_2,
 ):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    context = empty_data_context
+    # mock_check_global_usage_statistics_opt_out.return_value = False
+    # This fricken line. should have an effect
+    #
+    # monkeypatch.delenv(
+    #     "GE_USAGE_STATS", raising=False
+    # )  # Undo the project-wide test default
+    context = empty_data_context_stats_enabled
     root_dir = context.root_directory
     assert context.list_datasources() == []
 
@@ -207,7 +213,7 @@ def test_cli_datasource_new(
                         "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
-                    "base_directory": "../../filesystem_csv_2",
+                    "base_directory": "../../test_cli_datasource_new0/filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
                 },
                 "default_runtime_data_connector_name": {
@@ -232,13 +238,13 @@ def test_cli_datasource_new_no_jupyter_writes_notebook(
     mock_emit,
     caplog,
     monkeypatch,
-    empty_data_context,
+    empty_data_context_stats_enabled,
     filesystem_csv_2,
 ):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
-    context = empty_data_context
+    # monkeypatch.delenv(
+    #     "GE_USAGE_STATS", raising=False
+    # )  # Undo the project-wide test default
+    context = empty_data_context_stats_enabled
     root_dir = context.root_directory
     assert context.list_datasources() == []
 

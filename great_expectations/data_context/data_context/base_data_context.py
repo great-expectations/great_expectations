@@ -17,9 +17,6 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.data_context.data_context.ephemeral_data_context import (
-    EphemeralDataContext,
-)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -64,6 +61,15 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.store.profiler_store import ProfilerStore
@@ -132,6 +138,8 @@ yaml.default_flow_style = False
 
 
 # TODO: <WILL> Most of the logic here will be migrated to EphemeralDataContext
+
+
 class BaseDataContext(EphemeralDataContext, ConfigPeer):
     """
         This class implements most of the functionality of DataContext, with a few exceptions.
@@ -342,16 +350,32 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
 
-        self._project_config = self._apply_global_config_overrides(
-            config=project_config
-        )
-
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
 
         self.runtime_environment = runtime_environment or {}
 
+        if self._ge_cloud_mode:
+            self._data_context = CloudDataContext(
+                project_config=project_config,
+                runtime_environment=runtime_environment,
+                ge_cloud_mode=ge_cloud_mode,
+                ge_cloud_config=ge_cloud_config,
+            )
+        elif self._context_root_directory:
+            self._data_context = FileDataContext(
+                project_config=project_config,
+                context_root_dir=context_root_dir,
+                runtime_environment=runtime_environment,
+            )
+        else:
+            self._data_context = EphemeralDataContext(
+                project_config=project_config, runtime_environment=runtime_environment
+            )
+        # HERE IS CODE THAT WILL GO AWAY EVENTUALLY
+        self._project_config = self._data_context._project_config
+        # self._project_config = project_config
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
             self.plugins_directory
@@ -928,7 +952,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         if not config:
             config = self.config
-
+        # THIS FRICKEN CODE RIGHT HERE
         substituted_config_variables = substitute_all_config_variables(
             self.config_variables,
             dict(os.environ),
