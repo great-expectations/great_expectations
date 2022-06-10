@@ -2554,13 +2554,13 @@ class DataAssistantResult(SerializableDictDot):
             ] = None
 
             if metric_name in nominal_metrics:
-                plot_impl = self._get_
+                plot_impl = self._get_interactive_nominal_metric_chart
             elif metric_name in ordinal_metrics:
-                plot_impl = None
+                plot_impl = self._get_interactive_ordinal_metric_chart
             elif metric_name in quantitative_metrics:
                 plot_impl = self._get_interactive_detail_multi_chart
             elif metric_name in temporal_metrics:
-                plot_impl = None
+                plot_impl = self._get_interactive_temporal_metric_chart
 
             return [
                 plot_impl(
