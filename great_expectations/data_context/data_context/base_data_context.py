@@ -348,8 +348,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
-        self._project_config = project_config
-        self._apply_global_config_overrides()
+        self._project_config = self._apply_global_config_overrides(
+            config=project_config
+        )
 
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
@@ -481,15 +482,21 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 # caught at the context.get_batch() step. So we just pass here.
                 pass
 
-    def _apply_global_config_overrides(self) -> None:
+    def _apply_global_config_overrides(
+        self, config: DataContextConfig
+    ) -> DataContextConfig:
         # check for global usage statistics opt out
         validation_errors = {}
+
+        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
 
         if self._check_global_usage_statistics_opt_out():
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
-            self.config.anonymous_usage_statistics.enabled = False
+            config_with_global_config_overrides.anonymous_usage_statistics.enabled = (
+                False
+            )
 
         # check for global data_context_id
         global_data_context_id = self._get_global_config_value(
@@ -505,7 +512,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 logger.info(
                     "data_context_id is defined globally. Applying override to project_config."
                 )
-                self.config.anonymous_usage_statistics.data_context_id = (
+                config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = (
                     global_data_context_id
                 )
             else:
@@ -524,7 +531,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 logger.info(
                     "usage_statistics_url is defined globally. Applying override to project_config."
                 )
-                self.config.anonymous_usage_statistics.usage_statistics_url = (
+                config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = (
                     global_usage_statistics_url
                 )
             else:
@@ -536,6 +543,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     json.dumps(validation_errors, indent=2)
                 )
             )
+        return config_with_global_config_overrides
 
     @classmethod
     def _get_global_config_value(
