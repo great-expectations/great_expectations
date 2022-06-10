@@ -2326,7 +2326,6 @@ class DataAssistantResult(SerializableDictDot):
                     batch_plot_component.name,
                     type=batch_plot_component.alt_type,
                     title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
                 ),
                 y=alt.Y(
                     min_value_plot_component.name,
@@ -2345,7 +2344,6 @@ class DataAssistantResult(SerializableDictDot):
                     batch_plot_component.name,
                     type=batch_plot_component.alt_type,
                     title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
                 ),
                 y=alt.Y(
                     max_value_plot_component.name,
@@ -2364,7 +2362,6 @@ class DataAssistantResult(SerializableDictDot):
                     batch_plot_component.name,
                     type=batch_plot_component.alt_type,
                     title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
                 ),
                 y=alt.Y(
                     min_value_plot_component.name,
