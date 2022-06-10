@@ -466,6 +466,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
+        self._init_datasource_store()
+
+    def _init_datasource_store(self) -> None:
+        store_name: str = "datasource_store"
+        datasource_store_config = {
+            "class_name": "DatasourceStore",
+            "store_backend": {"class_name": "InlineStoreBackend", "data_context": self},
+        }
+        self._build_store_from_config(
+            store_name=store_name, store_config=datasource_store_config
+        )
+
     def _init_datasources(self, config: DataContextConfig) -> None:
         if not config.datasources:
             return
