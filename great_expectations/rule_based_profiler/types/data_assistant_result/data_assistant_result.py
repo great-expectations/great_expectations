@@ -2790,3 +2790,91 @@ class DataAssistantResult(SerializableDictDot):
             for metric in metric_types.keys()
             if metric_types[metric] == altair_type
         }
+
+    def _get_expect_domain_values_ordinal_chart(
+        self,
+        expectation_type: str,
+        df: pd.DataFrame,
+        metric_name: str,
+        sequential: bool,
+        subtitle: Optional[str],
+    ) -> alt.Chart:
+        return self._get_expect_domain_values_to_be_between_chart(
+            expectation_type=expectation_type,
+            df=df,
+            metric_name=metric_name,
+            sequential=sequential,
+            subtitle=subtitle,
+        )
+
+    def _get_expect_domain_values_temporal_chart(
+        self,
+        expectation_type: str,
+        df: pd.DataFrame,
+        metric_name: str,
+        sequential: bool,
+        subtitle: Optional[str],
+    ) -> alt.Chart:
+        return self._get_expect_domain_values_to_be_between_chart(
+            expectation_type=expectation_type,
+            df=df,
+            metric_name=metric_name,
+            sequential=sequential,
+            subtitle=subtitle,
+        )
+
+    def _get_ordinal_metric_chart(
+        self,
+        df: pd.DataFrame,
+        metric_name: str,
+        sequential: bool,
+        subtitle: Optional[str],
+    ) -> alt.Chart:
+        return self._get_quantitative_metric_chart(
+            df=df,
+            metric_name=metric_name,
+            sequential=sequential,
+            subtitle=subtitle,
+        )
+
+    def _get_temporal_metric_chart(
+        self,
+        df: pd.DataFrame,
+        metric_name: str,
+        sequential: bool,
+        subtitle: Optional[str],
+    ) -> alt.Chart:
+        return self._get_quantitative_metric_chart(
+            df=df,
+            metric_name=metric_name,
+            sequential=sequential,
+            subtitle=subtitle,
+        )
+
+    def _get_interactive_expect_column_values_ordinal_chart(
+        self,
+        expectation_type: str,
+        column_dfs: ColumnDataFrame,
+        metric_name: str,
+        sequential: bool,
+    ) -> alt.VConcatChart:
+        return self._get_interactive_detail_expect_column_values_to_be_between_chart(
+            expectation_type=expectation_type,
+            column_dfs=column_dfs,
+            metric_name=metric_name,
+            sequential=sequential,
+        )
+
+    def _get_interactive_expect_column_values_temporal_chart(
+        self,
+        expectation_type: str,
+        column_dfs: ColumnDataFrame,
+        metric_name: str,
+        sequential: bool,
+    ) -> alt.VConcatChart:
+        return self._get_interactive_detail_expect_column_values_to_be_between_chart(
+            expectation_type=expectation_type,
+            column_dfs=column_dfs,
+            metric_name=metric_name,
+            sequential=sequential,
+        )
