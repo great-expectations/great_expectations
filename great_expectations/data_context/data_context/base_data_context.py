@@ -470,6 +470,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
+        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
+        # As such, it must be instantiated separately.
         self._init_datasource_store()
 
     def _init_datasource_store(self) -> None:

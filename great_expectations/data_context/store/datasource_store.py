@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.store.store import Store
@@ -41,7 +41,7 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def list_keys(self):
+    def list_keys(self) -> List[str]:
         from great_expectations.data_context.types.data_context_variables import (
             DataContextVariableSchema,
         )
@@ -76,6 +76,8 @@ class DatasourceStore(Store):
         See parent 'Store.deserialize()' for more information
         """
         del key  # Unused arg but necessary as part of signature
+
+        # When using the InlineStoreBackend, objects are already converted to their respective confit types.
         if isinstance(value, DatasourceConfig):
             return value
         elif isinstance(value, dict):
