@@ -2851,6 +2851,17 @@ class DataAssistantResult(SerializableDictDot):
             subtitle=subtitle,
         )
 
+    def _get_interactive_expect_column_values_nominal_chart(
+        self,
+        expectation_type: str,
+        column_dfs: List[ColumnDataFrame],
+        metric_name: str,
+        sequential: bool,
+    ) -> alt.VConcatChart:
+        raise NotImplementedError(
+            "Nominal expectation charts have not been implemented for column domain."
+        )
+
     def _get_interactive_expect_column_values_ordinal_chart(
         self,
         expectation_type: str,
@@ -2877,6 +2888,16 @@ class DataAssistantResult(SerializableDictDot):
             column_dfs=column_dfs,
             metric_name=metric_name,
             sequential=sequential,
+        )
+
+    def _get_interactive_nominal_metric_chart(
+        self,
+        column_dfs: List[ColumnDataFrame],
+        metric_name: str,
+        sequential: bool,
+    ) -> alt.VConcatChart:
+        raise NotImplementedError(
+            "Nominal metric charts have not been implemented for column domain."
         )
 
     def _get_interactive_ordinal_metric_chart(
