@@ -1025,7 +1025,7 @@ class DataAssistantResult(SerializableDictDot):
         column_dfs: List[ColumnDataFrame],
         metric_name: str,
         sequential: bool,
-    ) -> Union[alt.Chart, alt.VConcatChart]:
+    ) -> Union[alt.Chart, alt.LayerChart]:
         """
         Args:
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
@@ -2011,7 +2011,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         expectation_type: Optional[str] = None,
-    ) -> alt.Chart:
+    ) -> alt.LayerChart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
             metric_plot_component=metric_plot_component,
@@ -2276,16 +2276,22 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        line: alt.Chart = DataAssistantResult._get_interactive_line_chart(
-            expectation_type=expectation_type,
-            df=df,
-            metric_plot_component=metric_plot_component,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
+        line_and_points: alt.LayerChart = (
+            DataAssistantResult._get_interactive_line_chart(
+                expectation_type=expectation_type,
+                df=df,
+                metric_plot_component=metric_plot_component,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+            )
         )
 
+        line: alt.Chart = line_and_points.layer[0]
+        points: alt.Chart = line_and_points.layer[1]
+
+        line_and_points.transform = alt.Undefined
         line.selection = alt.Undefined
-        line.transform = alt.Undefined
+        points.selection = alt.Undefined
 
         input_dropdown_initial_state: pd.DataFrame = (
             df.groupby([batch_plot_component.name]).max().reset_index()
@@ -2376,12 +2382,14 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         anomaly_coded_points = (
-            line.encode(color=point_color_condition, tooltip=tooltip)
+            points.encode(color=point_color_condition, tooltip=tooltip)
             .add_selection(selection)
             .transform_filter(selection)
         )
 
-        return band + lower_limit + upper_limit + anomaly_coded_points
+        line = line.add_selection(selection).transform_filter(selection)
+
+        return band + lower_limit + upper_limit + line + anomaly_coded_points
 
     @staticmethod
     def _get_interactive_expect_column_values_to_be_between_bar_chart(
