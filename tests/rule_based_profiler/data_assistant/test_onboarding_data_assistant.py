@@ -322,10 +322,12 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         # column_value_nonnullity_rule={
         # },
         numeric_columns_low_precision_rule={
+            "round_decimals": 1,
             "false_positive_rate": 0.1,
             "random_seed": 43792,
         },
         numeric_columns_high_precision_rule={
+            "round_decimals": 4,
             "false_positive_rate": 0.1,
             "random_seed": 43792,
         },
