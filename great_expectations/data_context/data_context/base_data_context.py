@@ -475,17 +475,25 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._init_datasource_store()
 
     def _init_datasource_store(self) -> None:
-        store_name: str = self.datasource_store_name
-        datasource_store_config = {
-            "class_name": "DatasourceStore",
-            "store_backend": {"class_name": "InlineStoreBackend", "data_context": self},
-        }
-        self._build_store_from_config(
-            store_name=store_name, store_config=datasource_store_config
+        from great_expectations.data_context.store.datasource_store import (
+            DatasourceStore,
         )
 
+        store_name: str = "datasource_store"
+        store_backend: dict = {"class_name": "InlineStoreBackend", "data_context": self}
+        runtime_environment: dict = {
+            "root_directory": self.root_directory,
+        }
+
+        datasource_store: DatasourceStore = DatasourceStore(
+            store_name=store_name,
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+        )
+        self._datasource_store = datasource_store
+
     def _init_datasources(self) -> None:
-        for datasource_name in self.datasource_store.list_keys():
+        for datasource_name in self._datasource_store.list_keys():
             try:
                 self._cached_datasources[datasource_name] = self.get_datasource(
                     datasource_name=datasource_name
@@ -882,15 +890,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
-
-    @property
-    def datasource_store_name(self) -> str:
-        return "datasource_store"
-
-    @property
-    def datasource_store(self) -> "DatasourceStore":  # noqa: F821
-        datasource_store_name: str = self.datasource_store_name
-        return self.stores[datasource_store_name]
 
     @property
     def checkpoint_store_name(self):
@@ -2107,9 +2106,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             resource_name=datasource_name,
         )
 
-        if self.datasource_store.has_key(datasource_key):
+        if self._datasource_store.has_key(datasource_key):
             datasource_config: DatasourceConfig = copy.deepcopy(
-                self.datasource_store.get(datasource_key)
+                self._datasource_store.get(datasource_key)
             )
         else:
             raise ValueError(

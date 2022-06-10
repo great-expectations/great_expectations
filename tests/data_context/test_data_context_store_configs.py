@@ -57,7 +57,7 @@ def test_create(tmp_path_factory):
 
 
 def test_add_store(totally_empty_data_context):
-    assert len(totally_empty_data_context.stores.keys()) == 2
+    assert len(totally_empty_data_context.stores.keys()) == 1
 
     totally_empty_data_context.add_store(
         "my_new_store",
@@ -67,7 +67,7 @@ def test_add_store(totally_empty_data_context):
         },
     )
     assert "my_new_store" in totally_empty_data_context.stores.keys()
-    assert len(totally_empty_data_context.stores.keys()) == 3
+    assert len(totally_empty_data_context.stores.keys()) == 2
 
 
 def test_default_config_yml_stores(tmp_path_factory):
@@ -75,17 +75,15 @@ def test_default_config_yml_stores(tmp_path_factory):
     context = ge.data_context.DataContext.create(project_path)
 
     assert set(context.stores.keys()) == {
-        "checkpoint_store",
-        "datasource_store",
-        "evaluation_parameter_store",
         "expectations_store",
-        "profiler_store",
         "validations_store",
+        "evaluation_parameter_store",
+        "profiler_store",
+        "checkpoint_store",
     }
 
-    new_store_name: str = "my_new_validations_store"
     context.add_store(
-        new_store_name,
+        "my_new_validations_store",
         {
             "module_name": "great_expectations.data_context.store",
             "class_name": "ValidationsStore",
@@ -94,10 +92,9 @@ def test_default_config_yml_stores(tmp_path_factory):
 
     assert set(context.stores.keys()) == {
         "checkpoint_store",
-        "datasource_store",
-        "evaluation_parameter_store",
         "expectations_store",
-        "profiler_store",
         "validations_store",
-        new_store_name,
+        "evaluation_parameter_store",
+        "profiler_store",
+        "my_new_validations_store",
     }
