@@ -36,8 +36,9 @@ data_connectors:
           pattern: (.*)
     default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
-        batch_identifiers:
-            - default_identifier_name
+        assets:
+            default_asset_name:
+                - default_identifier_name
 """
 # </snippet>
 

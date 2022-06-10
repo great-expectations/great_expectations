@@ -85,7 +85,7 @@ When you completed those last few steps, you told Great Expectations that:
 
 Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the `datasources` header:
 
-```yaml file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L24-L41
+```yaml file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L24-L42
 ```
 
 Please note that due to how data is serialized, the entry in your ```great_expectations.yml``` file may not have these key/value pairs in the same order as the above example.  However, they will all have been added.
