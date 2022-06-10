@@ -56,6 +56,11 @@ def run_mypy(directory: str) -> List[str]:
         universal_newlines=True,
     )
 
+    # Check to make sure `mypy` actually ran
+    err: str = raw_results.stderr
+    if "command not found" in err:
+        raise ValueError(err)
+
     filtered_results: List[str] = _filter_mypy_results(raw_results)
     return filtered_results
 
