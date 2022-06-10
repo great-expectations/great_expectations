@@ -351,8 +351,20 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
     assert (
         data_assistant_result.profiler_config.rules[
             "numeric_columns_low_precision_rule"
+        ]["variables"]["round_decimals"]
+        == 1
+    )
+    assert (
+        data_assistant_result.profiler_config.rules[
+            "numeric_columns_low_precision_rule"
         ]["variables"]["false_positive_rate"]
         == 1.0e-1
+    )
+    assert (
+        data_assistant_result.profiler_config.rules[
+            "numeric_columns_high_precision_rule"
+        ]["variables"]["round_decimals"]
+        == 4
     )
     assert (
         data_assistant_result.profiler_config.rules[
