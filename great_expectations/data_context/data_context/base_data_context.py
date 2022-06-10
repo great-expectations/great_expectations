@@ -2098,7 +2098,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         if datasource_name in self._cached_datasources:
             return self._cached_datasources[datasource_name]
 
-        datasource_key = DataContextVariableKey(
+        datasource_key: DataContextVariableKey = DataContextVariableKey(
             resource_type=DataContextVariableSchema.DATASOURCES,
             resource_name=datasource_name,
         )

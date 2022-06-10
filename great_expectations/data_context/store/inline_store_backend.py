@@ -87,6 +87,13 @@ class InlineStoreBackend(StoreBackend):
     def list_keys(self, prefix: Tuple[str, ...] = ()) -> List[str]:
         """
         See `StoreBackend.list_keys` for more information.
+
+        Args:
+            prefix: If supplied, allows for a more granular listing of nested values within the config.
+                    Example: prefix=(datasources,) will list all datasource configs instead of top level keys.
+
+        Returns:
+            A list of string keys from the user's project config.
         """
         config_section: Optional[str] = None
         if prefix:

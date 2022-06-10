@@ -53,7 +53,7 @@ class DatasourceStore(Store):
             DataContextVariableSchema.DATASOURCES
         )
 
-        keys_without_store_backend_id = [
+        keys_without_store_backend_id: List[str] = [
             key
             for key in self._store_backend.list_keys(prefix=(datasource_key,))
             if not key == StoreBackend.STORE_BACKEND_ID_KEY
