@@ -15,10 +15,13 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_cli_datasource_list(
-    mock_emit, empty_data_context_stats_enabled, empty_sqlite_db, caplog, monkeypatch
+    mock_emit, empty_data_context, empty_sqlite_db, caplog, monkeypatch
 ):
     """Test an empty project and after adding a single datasource."""
-    context: DataContext = empty_data_context_stats_enabled
+    # TODO Look at this test more closely
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
+    context: DataContext = empty_data_context
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -76,6 +79,8 @@ Using v3 (Batch Request) API\x1b[0m
             }
         ),
     ]
+    print(f"args_list: {mock_emit.call_args_list}")
+    print(f"call_count: {mock_emit.call_count}")
 
     assert mock_emit.call_count == len(expected_call_args_list)
     assert mock_emit.call_args_list == expected_call_args_list
