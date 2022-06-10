@@ -88,21 +88,21 @@ class InlineStoreBackend(StoreBackend):
         """
         See `StoreBackend.list_keys` for more information.
         """
-        ptr: Optional[str] = None
+        config_section: Optional[str] = None
         if prefix:
-            ptr = prefix[0]
+            config_section = prefix[0]
 
         keys: List[str]
         config_dict: dict = self._data_context.config.to_dict()
-        if ptr is None:
+        if config_section is None:
             keys = list(key for key in config_dict.keys())
         else:
-            obj: dict = config_dict[ptr]
-            if not isinstance(obj, dict):
+            config_values: dict = config_dict[config_section]
+            if not isinstance(config_values, dict):
                 raise StoreBackendError(
                     "Cannot list keys in a non-iterable section of a project config"
                 )
-            keys = list(key for key in obj.keys())
+            keys = list(key for key in config_values.keys())
 
         return keys
 
@@ -121,7 +121,7 @@ class InlineStoreBackend(StoreBackend):
 
         if len(key) == 1:
             return resource_type in self._data_context.config
-        if len(key) == 2:
+        elif len(key) == 2:
             resource_name = key[1]
             return (
                 resource_type in self._data_context.config

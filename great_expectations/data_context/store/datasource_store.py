@@ -46,7 +46,9 @@ class DatasourceStore(Store):
             DataContextVariableSchema,
         )
 
-        datasource_key: str = DataContextVariableSchema.DATASOURCES.value
+        datasource_key: DataContextVariableSchema = (
+            DataContextVariableSchema.DATASOURCES
+        )
 
         keys_without_store_backend_id = [
             key
