@@ -18,6 +18,11 @@ class OnboardingDataAssistantResult(DataAssistantResult):
     }
 
     # A mapping is defined for the Altair data type associated with each metric
+    # Altair data types can be one of:
+    #     - Nominal: Metric is a discrete unordered category
+    #     - Ordinal: Metric is a discrete ordered quantity
+    #     - Quantitative: Metric is a continuous real-valued quantity
+    #     - Temporal: Metric is a time or date value
     METRIC_TYPES = {
         "table.columns": AltairDataTypes.NOMINAL,
         "table.row_count": AltairDataTypes.QUANTITATIVE,
