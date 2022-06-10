@@ -3135,7 +3135,11 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # },
     # column_value_nonnullity_rule={
     # },
-    # numeric_columns_rule={
+    # numeric_columns_low_precision_rule={
+    #     "false_positive_rate": 0.1,
+    #     "random_seed": 43792,
+    # },
+    # numeric_columns_high_precision_rule={
     #     "false_positive_rate": 0.1,
     #     "random_seed": 43792,
     # },
@@ -3436,7 +3440,11 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # },
     # column_value_nonnullity_rule={
     # },
-    # numeric_columns_rule={
+    # numeric_columns_low_precision_rule={
+    #     "false_positive_rate": 0.1,
+    #     "random_seed": 43792,
+    # },
+    # numeric_columns_high_precision_rule={
     #     "false_positive_rate": 0.1,
     #     "random_seed": 43792,
     # },
