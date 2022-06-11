@@ -211,9 +211,15 @@ def test_cli_datasource_new(
                     "class_name": "InferredAssetFilesystemDataConnector",
                 },
                 "default_runtime_data_connector_name": {
-                    "module_name": "great_expectations.datasource.data_connector",
-                    "batch_identifiers": ["default_identifier_name"],
                     "class_name": "RuntimeDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "assets": {
+                        "default": {
+                            "batch_identifiers": [
+                                "default_identifier_name",
+                            ],
+                        },
+                    },
                 },
             },
             "name": "my_datasource",
@@ -356,9 +362,15 @@ def test_cli_datasource_new_with_name_param(
                     "base_directory": "../../filesystem_csv_2",
                 },
                 "default_runtime_data_connector_name": {
-                    "batch_identifiers": ["default_identifier_name"],
-                    "module_name": "great_expectations.datasource.data_connector",
                     "class_name": "RuntimeDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "assets": {
+                        "default": {
+                            "batch_identifiers": [
+                                "default_identifier_name",
+                            ],
+                        },
+                    },
                 },
             },
             "class_name": "Datasource",
@@ -431,9 +443,15 @@ def test_cli_datasource_new_from_misc_directory(
                     },
                 },
                 "default_runtime_data_connector_name": {
-                    "module_name": "great_expectations.datasource.data_connector",
-                    "batch_identifiers": ["default_identifier_name"],
                     "class_name": "RuntimeDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "assets": {
+                        "default": {
+                            "batch_identifiers": [
+                                "default_identifier_name",
+                            ],
+                        },
+                    },
                 },
             },
             "name": "my_datasource",

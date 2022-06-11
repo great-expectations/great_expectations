@@ -138,7 +138,7 @@ context.list_datasources()""",
     def render_to_disk(
         self,
         notebook_file_path: str,
-        **kwargs,
+        **kwargs: dict,
     ) -> None:
         self.render()
         self.write_notebook_to_disk(self._notebook, notebook_file_path)
