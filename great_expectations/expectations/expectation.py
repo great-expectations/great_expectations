@@ -1706,8 +1706,12 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         # Checking if mean lies between thresholds
 
         metric_value = np.float64(metric_value)
-        min_value = np.float64(min_value)
-        max_value = np.float64(max_value)
+
+        if min_value is not None:
+            min_value = np.float64(min_value)
+
+        if max_value is not None:
+            max_value = np.float64(max_value)
 
         if min_value is not None:
             if strict_min:
