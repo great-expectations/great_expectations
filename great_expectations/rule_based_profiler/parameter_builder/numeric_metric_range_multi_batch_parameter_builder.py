@@ -550,7 +550,7 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
             if len(metric_values) == 1 and round_decimals != 0:
                 # If a range wasn't created due to only having one batch,
-                # create a range of precision greater than the metric value
+                # create a range with precision less than the metric value
                 metric_precision: float = float(str(metric_values[0])[::-1].find("."))
                 order_of_magnitude: float = 10.0 ** (metric_precision - 1)
                 metric_value_range[metric_value_range_min_idx] = (
