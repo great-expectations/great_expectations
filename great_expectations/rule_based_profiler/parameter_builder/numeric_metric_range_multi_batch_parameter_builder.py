@@ -551,9 +551,8 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             if len(metric_values) == 1 and round_decimals != 0:
                 # If a range wasn't created due to only having one batch,
                 # create a range of precision greater than the metric value
-                print(min_value)
-                print(max_value)
-                order_of_magnitude: int = 10**round_decimals
+                metric_precision: float = float(str(metric_values[0])[::-1].find("."))
+                order_of_magnitude: float = 10.0 ** (metric_precision - 1)
                 metric_value_range[metric_value_range_min_idx] = (
                     math.floor(cast(float, min_value) * order_of_magnitude)
                     / order_of_magnitude
@@ -562,8 +561,6 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                     math.ceil(cast(float, max_value) * order_of_magnitude)
                     / order_of_magnitude
                 )
-                print(metric_value_range[metric_value_range_min_idx])
-                print(metric_value_range[metric_value_range_max_idx])
             else:
                 metric_value_range[metric_value_range_min_idx] = round(
                     cast(float, min_value), round_decimals

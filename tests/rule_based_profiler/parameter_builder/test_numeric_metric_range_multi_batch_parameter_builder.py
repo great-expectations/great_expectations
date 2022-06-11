@@ -21,6 +21,93 @@ from great_expectations.rule_based_profiler.types import (
 )
 
 
+def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_alice(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    metric_domain_kwargs = {"column": "user_id"}
+
+    numeric_metric_range_parameter_builder: ParameterBuilder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="standard_deviation_range",
+            metric_name="column.standard_deviation",
+            metric_domain_kwargs=metric_domain_kwargs,
+            estimator="bootstrap",
+            false_positive_rate=1.0e-2,
+            quantile_statistic_interpolation_method="linear",
+            round_decimals=None,
+            json_serialize=False,
+            data_context=data_context,
+        )
+    )
+
+    variables: Optional[ParameterContainer] = None
+
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
+    )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
+    assert parameter_container.parameter_nodes is None
+
+    numeric_metric_range_parameter_builder.build_parameters(
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
+        batch_request=batch_request,
+    )
+
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
+        parameter_container.parameter_nodes or {}
+    )
+    assert len(parameter_nodes) == 1
+
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.standard_deviation_range"
+    )
+    expected_value_dict: dict = {
+        "value": None,
+        "details": {
+            "metric_configuration": {
+                "domain_kwargs": {"column": "user_id"},
+                "metric_name": "column.standard_deviation",
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
+            },
+            "num_batches": 1,
+        },
+    }
+
+    parameter_node: ParameterNode = (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+            parameters=parameters,
+        )
+    )
+
+    actual_value: np.ndarray = parameter_node.pop("value")
+    parameter_node["value"] = None
+
+    assert parameter_node == expected_value_dict
+
+    expected_value: np.ndarray = np.array([4778829.80082512, 4778829.80082513])
+
+    assert expected_value == actual_value
+
+
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
