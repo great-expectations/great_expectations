@@ -337,8 +337,10 @@ data_connectors:
       pattern: (.*)
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+        default:
+            batch_identifiers:
+              - default_identifier_name
 """'''
 
     def prompt(self) -> None:
@@ -446,8 +448,10 @@ execution_engine:
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+        default:
+            batch_identifiers:
+              - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''

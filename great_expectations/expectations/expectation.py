@@ -10,6 +10,7 @@ from copy import deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple, Union
 
+import numpy as np
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
@@ -1699,12 +1700,22 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 except TypeError:
                     pass
 
+        if np.isnan(metric_value):
+            return {"success": False, "result": {"observed_value": None}}
+
         # Checking if mean lies between thresholds
+
+        metric_value = np.float64(metric_value)
+        min_value = np.float64(min_value)
+        max_value = np.float64(max_value)
+
         if min_value is not None:
             if strict_min:
                 above_min = metric_value > min_value
             else:
-                above_min = metric_value >= min_value
+                above_min = (
+                    np.isclose(metric_value, min_value) or metric_value >= min_value
+                )
         else:
             above_min = True
 
@@ -1712,7 +1723,9 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 below_max = metric_value < max_value
             else:
-                below_max = metric_value <= max_value
+                below_max = (
+                    np.isclose(metric_value, min_value) or metric_value <= max_value
+                )
         else:
             below_max = True
 

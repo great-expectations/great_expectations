@@ -291,16 +291,10 @@ class OnboardingDataAssistant(DataAssistant):
             bucketize_data=True,
             json_serialize=True,
         )
-        column_column_quantile_values_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_quantile_values_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
         column_min_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_min_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
         column_max_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_max_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
-        column_median_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_median_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
 
@@ -313,19 +307,6 @@ class OnboardingDataAssistant(DataAssistant):
         )
         column_max_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name="column.max",
-            metric_value_kwargs=None,
-            json_serialize=True,
-        )
-        column_quantile_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name="column.quantile_values",
-            metric_value_kwargs={
-                "quantiles": f"{VARIABLES_KEY}quantiles",
-                "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
-            },
-            json_serialize=True,
-        )
-        column_median_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name="column.median",
             metric_value_kwargs=None,
             json_serialize=True,
         )
@@ -395,55 +376,12 @@ class OnboardingDataAssistant(DataAssistant):
             },
         )
 
-        validation_parameter_builder_configs = [
-            ParameterBuilderConfig(
-                **column_quantile_values_range_parameter_builder_for_validations.to_json_dict(),
-            ),
-        ]
-        expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_quantile_values_to_be_between",
-            validation_parameter_builder_configs=validation_parameter_builder_configs,
-            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-            quantile_ranges={
-                "quantiles": f"{VARIABLES_KEY}quantiles",
-                "value_ranges": f"{column_quantile_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-            },
-            allow_relative_error=f"{VARIABLES_KEY}allow_relative_error",
-            meta={
-                "profiler_details": f"{column_max_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-            },
-        )
-
-        validation_parameter_builder_configs = [
-            ParameterBuilderConfig(
-                **column_median_values_range_parameter_builder_for_validations.to_json_dict(),
-            ),
-        ]
-        expect_column_median_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_median_to_be_between",
-            validation_parameter_builder_configs=validation_parameter_builder_configs,
-            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-            min_value=f"{column_median_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-            max_value=f"{column_median_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
-            strict_min=f"{VARIABLES_KEY}strict_min",
-            strict_max=f"{VARIABLES_KEY}strict_max",
-            meta={
-                "profiler_details": f"{column_median_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-            },
-        )
-
         # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
         variables: dict = {
             "mostly": 1.0,
             "strict_min": False,
             "strict_max": False,
-            "quantiles": [
-                0.25,
-                0.5,
-                0.75,
-            ],
-            "allow_relative_error": "linear",
             "false_positive_rate": 0.05,
             "quantile_statistic_interpolation_method": "auto",
             "estimator": "bootstrap",
@@ -458,17 +396,13 @@ class OnboardingDataAssistant(DataAssistant):
         }
         parameter_builders: List[ParameterBuilder] = [
             column_partition_parameter_builder_for_metrics,
-            column_column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,
             column_min_metric_multi_batch_parameter_builder_for_metrics,
             column_max_metric_multi_batch_parameter_builder_for_metrics,
-            column_median_metric_multi_batch_parameter_builder_for_metrics,
         ]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
             expect_column_min_to_be_between_expectation_configuration_builder,
             expect_column_max_to_be_between_expectation_configuration_builder,
             expect_column_values_to_be_between_expectation_configuration_builder,
-            expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder,
-            expect_column_median_to_be_between_expectation_configuration_builder,
         ]
         rule: Rule = Rule(
             name="numeric_columns_low_precision_rule",
@@ -508,6 +442,12 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
+        column_column_quantile_values_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_quantile_values_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
+        column_median_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_median_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
         column_mean_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_mean_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
@@ -517,6 +457,19 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
+        column_quantile_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name="column.quantile_values",
+            metric_value_kwargs={
+                "quantiles": f"{VARIABLES_KEY}quantiles",
+                "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
+            },
+            json_serialize=True,
+        )
+        column_median_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name="column.median",
+            metric_value_kwargs=None,
+            json_serialize=True,
+        )
         column_mean_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name="column.mean",
             metric_value_kwargs=None,
@@ -531,6 +484,43 @@ class OnboardingDataAssistant(DataAssistant):
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **column_quantile_values_range_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
+        expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_column_quantile_values_to_be_between",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            quantile_ranges={
+                "quantiles": f"{VARIABLES_KEY}quantiles",
+                "value_ranges": f"{column_quantile_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+            },
+            allow_relative_error=f"{VARIABLES_KEY}allow_relative_error",
+            meta={
+                "profiler_details": f"{column_quantile_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
+
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **column_median_values_range_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
+        expect_column_median_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_column_median_to_be_between",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            min_value=f"{column_median_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+            max_value=f"{column_median_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+            strict_min=f"{VARIABLES_KEY}strict_min",
+            strict_max=f"{VARIABLES_KEY}strict_max",
+            meta={
+                "profiler_details": f"{column_median_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -590,13 +580,17 @@ class OnboardingDataAssistant(DataAssistant):
                 "lower_bound": None,
                 "upper_bound": None,
             },
-            "round_decimals": 4,
+            "round_decimals": 12,
         }
         parameter_builders: List[ParameterBuilder] = [
+            column_column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,
+            column_median_metric_multi_batch_parameter_builder_for_metrics,
             column_mean_metric_multi_batch_parameter_builder_for_metrics,
             column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics,
         ]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
+            expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder,
+            expect_column_median_to_be_between_expectation_configuration_builder,
             expect_column_mean_to_be_between_expectation_configuration_builder,
             expect_column_stdev_to_be_between_expectation_configuration_builder,
         ]
