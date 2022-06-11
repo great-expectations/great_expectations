@@ -131,6 +131,7 @@ except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 logger = logging.getLogger(__name__)
+
 # TODO: check if this can be refactored to use YAMLHandler class
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -138,8 +139,6 @@ yaml.default_flow_style = False
 
 
 # TODO: <WILL> Most of the logic here will be migrated to EphemeralDataContext
-
-
 class BaseDataContext(EphemeralDataContext, ConfigPeer):
     """
         This class implements most of the functionality of DataContext, with a few exceptions.
@@ -373,9 +372,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._data_context = EphemeralDataContext(
                 project_config=project_config, runtime_environment=runtime_environment
             )
-        # HERE IS CODE THAT WILL GO AWAY EVENTUALLY
+        # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
         self._project_config = self._data_context._project_config
-        # self._project_config = project_config
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
             self.plugins_directory
@@ -952,7 +950,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         if not config:
             config = self.config
-        # THIS FRICKEN CODE RIGHT HERE
         substituted_config_variables = substitute_all_config_variables(
             self.config_variables,
             dict(os.environ),
