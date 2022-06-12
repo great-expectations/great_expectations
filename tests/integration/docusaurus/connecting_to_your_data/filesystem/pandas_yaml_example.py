@@ -15,8 +15,10 @@ execution_engine:
 data_connectors:
     default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
-        batch_identifiers:
-            - default_identifier_name
+        assets:
+            default:
+                batch_identifiers:
+                  - default_identifier_name
     default_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>

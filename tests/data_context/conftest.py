@@ -245,9 +245,17 @@ def data_context_config_with_datasources(conn_string_password):
                     "class_name": "Datasource",
                     "data_connectors": {
                         "default_runtime_data_connector": {
-                            "batch_identifiers": ["col"],
-                            "batch_spec_passthrough": {"sample": "value"},
                             "class_name": "RuntimeDataConnector",
+                            "assets": {
+                                "default": {
+                                    "module_name": "great_expectations.datasource.data_connector.asset",
+                                    "class_name": "Asset",
+                                    "batch_identifiers": [
+                                        "col",
+                                    ],
+                                },
+                            },
+                            "batch_spec_passthrough": {"sample": "value"},
                         }
                     },
                     "execution_engine": {"class_name": "PandasExecutionEngine"},
@@ -277,9 +285,19 @@ def data_context_config_with_datasources(conn_string_password):
                     "class_name": "Datasource",
                     "data_connectors": {
                         "default_runtime_data_connector": {
-                            "batch_identifiers": ["batch", "identifiers", "here"],
-                            "batch_spec_passthrough": {"sample": "value"},
                             "class_name": "RuntimeDataConnector",
+                            "assets": {
+                                "default": {
+                                    "module_name": "great_expectations.datasource.data_connector.asset",
+                                    "class_name": "Asset",
+                                    "batch_identifiers": [
+                                        "batch",
+                                        "identifiers",
+                                        "here",
+                                    ],
+                                },
+                            },
+                            "batch_spec_passthrough": {"sample": "value"},
                         }
                     },
                     "execution_engine": {"class_name": "SparkDFExecutionEngine"},

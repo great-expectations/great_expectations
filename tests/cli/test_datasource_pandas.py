@@ -215,6 +215,8 @@ def test_cli_datasource_new(
                     "module_name": "great_expectations.datasource.data_connector",
                     "assets": {
                         "default": {
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "class_name": "Asset",
                             "batch_identifiers": [
                                 "default_identifier_name",
                             ],
@@ -366,6 +368,8 @@ def test_cli_datasource_new_with_name_param(
                     "module_name": "great_expectations.datasource.data_connector",
                     "assets": {
                         "default": {
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "class_name": "Asset",
                             "batch_identifiers": [
                                 "default_identifier_name",
                             ],
@@ -447,6 +451,8 @@ def test_cli_datasource_new_from_misc_directory(
                     "module_name": "great_expectations.datasource.data_connector",
                     "assets": {
                         "default": {
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "class_name": "Asset",
                             "batch_identifiers": [
                                 "default_identifier_name",
                             ],

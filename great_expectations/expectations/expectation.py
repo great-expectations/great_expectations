@@ -1,3 +1,4 @@
+import datetime
 import glob
 import json
 import logging
@@ -8,6 +9,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
+from numbers import Number
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -1700,25 +1702,17 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 except TypeError:
                     pass
 
-        if np.isnan(metric_value):
+        if not isinstance(metric_value, datetime.datetime) and np.isnan(metric_value):
             return {"success": False, "result": {"observed_value": None}}
 
         # Checking if mean lies between thresholds
-
-        metric_value = np.float64(metric_value)
-
-        if min_value is not None:
-            min_value = np.float64(min_value)
-
-        if max_value is not None:
-            max_value = np.float64(max_value)
-
         if min_value is not None:
             if strict_min:
                 above_min = metric_value > min_value
             else:
                 above_min = (
-                    np.isclose(metric_value, min_value) or metric_value >= min_value
+                    self._isclose(operand_a=metric_value, operand_b=min_value)
+                    or metric_value >= min_value
                 )
         else:
             above_min = True
@@ -1728,7 +1722,8 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 below_max = metric_value < max_value
             else:
                 below_max = (
-                    np.isclose(metric_value, min_value) or metric_value <= max_value
+                    self._isclose(operand_a=metric_value, operand_b=min_value)
+                    or metric_value <= max_value
                 )
         else:
             below_max = True
@@ -1736,6 +1731,25 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         success = above_min and below_max
 
         return {"success": success, "result": {"observed_value": metric_value}}
+
+    @staticmethod
+    def _isclose(
+        operand_a: Union[datetime.datetime, Number],
+        operand_b: Union[datetime.datetime, Number],
+    ) -> bool:
+        """
+        Checks whether or not two numbers (or timestamps) are approximately close to one another.
+        """
+        operand_a_as_number: np.float64
+        operand_b_as_number: np.float64
+        if isinstance(operand_a, datetime.datetime):
+            operand_a_as_number = np.float64(int(operand_a.strftime("%Y%m%d%H%M%S")))
+            operand_b_as_number = np.float64(int(operand_b.strftime("%Y%m%d%H%M%S")))
+        else:
+            operand_a_as_number = np.float64(operand_a)
+            operand_b_as_number = np.float64(operand_b)
+
+        return np.isclose(operand_a_as_number, operand_b_as_number)
 
 
 class ColumnExpectation(TableExpectation, ABC):

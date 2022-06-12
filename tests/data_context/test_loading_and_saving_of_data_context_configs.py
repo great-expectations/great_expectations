@@ -62,7 +62,18 @@ def test_add_datasource(empty_data_context):
             "data_connectors": {
                 "test_runtime_data_connector": {
                     "class_name": "RuntimeDataConnector",
-                    "batch_identifiers": ["run_id", "y", "m", "d"],
+                    "assets": {
+                        "default": {
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "class_name": "Asset",
+                            "batch_identifiers": [
+                                "run_id",
+                                "y",
+                                "m",
+                                "d",
+                            ],
+                        },
+                    },
                 }
             },
         },

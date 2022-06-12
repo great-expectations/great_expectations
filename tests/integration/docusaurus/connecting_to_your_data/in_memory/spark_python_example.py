@@ -36,7 +36,15 @@ datasource_config = {
     "data_connectors": {
         "default_runtime_data_connector_name": {
             "class_name": "RuntimeDataConnector",
-            "batch_identifiers": ["batch_id"],
+            "assets": {
+                "default": {
+                    "module_name": "great_expectations.datasource.data_connector.asset",
+                    "class_name": "Asset",
+                    "batch_identifiers": [
+                        "batch_id",
+                    ],
+                },
+            },
         }
     },
 }

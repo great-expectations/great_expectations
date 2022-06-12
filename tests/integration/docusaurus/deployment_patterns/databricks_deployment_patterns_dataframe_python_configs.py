@@ -77,11 +77,17 @@ my_spark_datasource_config = {
         "insert_your_data_connector_name_here": {
             "module_name": "great_expectations.datasource.data_connector",
             "class_name": "RuntimeDataConnector",
-            "batch_identifiers": [
-                "some_key_maybe_pipeline_stage",
-                "some_other_key_maybe_run_id",
-            ],
-        }
+            "assets": {
+                "default": {
+                    "module_name": "great_expectations.datasource.data_connector.asset",
+                    "class_name": "Asset",
+                    "batch_identifiers": [
+                        "some_key_maybe_pipeline_stage",
+                        "some_other_key_maybe_run_id",
+                    ],
+                },
+            },
+        },
     },
 }
 

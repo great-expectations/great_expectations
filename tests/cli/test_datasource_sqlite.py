@@ -274,6 +274,8 @@ def test_cli_datasource_new_connection_string(
                     "module_name": "great_expectations.datasource.data_connector",
                     "assets": {
                         "default": {
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "class_name": "Asset",
                             "batch_identifiers": [
                                 "default_identifier_name",
                             ],

@@ -37,8 +37,10 @@ execution_engine:
 data_connectors:
     default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
-        batch_identifiers:
-            - batch_id
+        assets:
+            default:
+                batch_identifiers:
+                  - batch_id
 """
 
 context.test_yaml_config(datasource_yaml)

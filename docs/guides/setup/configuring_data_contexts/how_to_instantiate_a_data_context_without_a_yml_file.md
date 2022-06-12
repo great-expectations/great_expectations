@@ -51,7 +51,15 @@ data_context_config = DataContextConfig(
             data_connectors={
                 "default_runtime_data_connector_name": {
                     "class_name": "RuntimeDataConnector",
-                    "batch_identifiers": ["default_identifier_name"],
+                    "assets": {
+                        "default": {
+                            'module_name': 'great_expectations.datasource.data_connector.asset',
+                            'class_name': 'Asset',
+                            "batch_identifiers": [
+                                "default_identifier_name",
+                            ],
+                        },
+                    },
                 },
                 "default_inferred_data_connector_name": {
                     "class_name": "InferredAssetSqlDataConnector",
@@ -117,7 +125,15 @@ data_context_config = DataContextConfig(
             data_connectors={
                 "default_runtime_data_connector_name": {
                     "class_name": "RuntimeDataConnector",
-                    "batch_identifiers": ["default_identifier_name"],
+                    "assets": {
+                        "default": {
+                            'module_name': 'great_expectations.datasource.data_connector.asset',
+                            'class_name': 'Asset',
+                            "batch_identifiers": [
+                                "default_identifier_name",
+                            ],
+                        },
+                    },
                 },
                 "default_inferred_data_connector_name": {
                     "class_name": "InferredAssetSqlDataConnector",

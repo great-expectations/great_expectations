@@ -33,9 +33,11 @@ datasources:
         my_runtime_data_connector:
             module_name: great_expectations.datasource.data_connector  # optional
             class_name: RuntimeDataConnector
-            batch_identifiers:
-                - pipeline_stage_name
-                - airflow_run_id
+            assets:
+                default:
+                    batch_identifiers:
+                      - pipeline_stage_name
+                      - airflow_run_id
 
 plugins_directory: plugins/
 
