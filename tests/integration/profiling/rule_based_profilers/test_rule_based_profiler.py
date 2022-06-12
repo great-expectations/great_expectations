@@ -6,9 +6,8 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
-)
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -158,29 +157,30 @@ def test_profile_includes_citations(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    profiler.run(batch_request=alice_single_batch_data_batch_request)
-
-    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
-        expectation_suite_name=alice_columnar_table_single_batch[
-            "expected_expectation_suite_name"
-        ],
-        include_citation=True,
+    result: RuleBasedProfilerResult = profiler.run(
+        batch_request=alice_single_batch_data_batch_request
     )
 
-    assert len(expectation_suite.meta["citations"]) > 0
+    assert result.citation is not None and len(result.citation.keys()) > 0
 
     assert mock_emit.call_count == 43
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
     )
-    assert mock_emit.call_args_list[-1][0][0]["event"] == "profiler.run"
+
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert (
+        actual_events[-1][0][0]["event"]
+        == UsageStatsEvents.RULE_BASED_PROFILER_RUN.value
+    )
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_profile_excludes_citations(
+def test_profile_get_expectation_suite(
     mock_emit,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
@@ -192,19 +192,13 @@ def test_profile_excludes_citations(
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
     # Instantiate Profiler
-    profiler_config: dict = yaml.load(yaml_config)
-
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
-    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
-
+    profiler_config = yaml.load(yaml_config)
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
     # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    serialized_config.pop("class_name")
-    serialized_config.pop("module_name")
+    profiler_config.pop("class_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        **serialized_config,
+        **profiler_config,
         data_context=data_context,
     )
 
@@ -215,20 +209,23 @@ def test_profile_excludes_citations(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    profiler.run(batch_request=alice_single_batch_data_batch_request)
-
-    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
-        expectation_suite_name=alice_columnar_table_single_batch[
-            "expected_expectation_suite_name"
-        ],
-        include_citation=False,
+    result: RuleBasedProfilerResult = profiler.run(
+        batch_request=alice_single_batch_data_batch_request
     )
 
-    assert expectation_suite.meta.get("citations") is None
+    expectation_suite_name: str = "my_suite"
 
-    assert mock_emit.call_count == 43
-    assert all(
-        payload[0][0]["event"] == "data_context.get_batch_list"
-        for payload in mock_emit.call_args_list[:-1]
+    suite: ExpectationSuite = result.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
     )
-    assert mock_emit.call_args_list[-1][0][0]["event"] == "profiler.run"
+
+    assert suite is not None and len(suite.expectations) > 0
+
+    assert mock_emit.call_count == 44
+
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert (
+        actual_events[-1][0][0]["event"]
+        == UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE.value
+    )

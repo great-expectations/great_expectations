@@ -473,6 +473,7 @@ anonymized_run_validation_operator_payload_schema = {
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_batch": anonymized_batch_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
     },
     "type": "object",
     "properties": {
@@ -515,9 +516,9 @@ anonymized_validations_list_schema = {
     "items": {"$ref": "#/definitions/anonymized_validation"},
 }
 
-anonymized_save_or_edit_expectation_suite_payload_schema = {
+anonymized_get_or_edit_or_save_expectation_suite_payload_schema = {
     "$schema": SCHEMA,
-    "title": "anonymized-save-or-edit-expectation-suite-payload",
+    "title": "anonymized-get-or-edit-or-save-expectation-suite-payload",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
@@ -924,7 +925,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_batch_request": anonymized_batch_request_schema,
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
-        "anonymized_save_or_edit_expectation_suite_payload": anonymized_save_or_edit_expectation_suite_payload_schema,
+        "anonymized_get_or_edit_or_save_expectation_suite_payload": anonymized_get_or_edit_or_save_expectation_suite_payload_schema,
         "anonymized_cli_suite_expectation_suite_payload": anonymized_cli_suite_expectation_suite_payload_schema,
         "anonymized_cli_suite_new_expectation_suite_payload": anonymized_cli_suite_new_expectation_suite_payload_schema,
         "anonymized_cli_suite_edit_expectation_suite_payload": anonymized_cli_suite_edit_expectation_suite_payload_schema,
@@ -960,15 +961,6 @@ anonymized_usage_statistics_record_schema = {
             "properties": {
                 "event": {"enum": ["data_context.__init__"]},
                 "event_payload": {"$ref": "#/definitions/anonymized_init_payload"},
-            },
-        },
-        {
-            "type": "object",
-            "properties": {
-                "event": {"enum": ["data_context.save_expectation_suite"]},
-                "event_payload": {
-                    "$ref": "#/definitions/anonymized_save_or_edit_expectation_suite_payload"
-                },
             },
         },
         {
@@ -1038,6 +1030,21 @@ anonymized_usage_statistics_record_schema = {
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": [
+                        "data_context.save_expectation_suite",
+                        "profiler.result.get_expectation_suite",
+                        "data_assistant.result.get_expectation_suite",
+                    ],
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_get_or_edit_or_save_expectation_suite_payload"
+                },
             },
         },
         {
@@ -1188,8 +1195,27 @@ anonymized_usage_statistics_record_schema = {
     ],
 }
 
-if __name__ == "__main__":
-    import json
 
-    with open("usage_statistics_record_schema.json", "w") as outfile:
+def write_schema_to_file(target_dir: str) -> None:
+    """Utility to write schema to disk.
+
+    The file name will always be "usage_statistics_record_schema.json" but the target directory can be specified.
+
+    Args:
+        target_dir (str): The dir you wish to write the schema to.
+    """
+    import json
+    import os
+
+    file: str = "usage_statistics_record_schema.json"
+    out: str = os.path.join(target_dir, file)
+
+    with open(out, "w") as outfile:
         json.dump(anonymized_usage_statistics_record_schema, outfile, indent=2)
+
+
+if __name__ == "__main__":
+    import sys
+
+    target_dir = sys.argv[1] if len(sys.argv) >= 2 else "."
+    write_schema_to_file(target_dir)

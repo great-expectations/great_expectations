@@ -18,9 +18,16 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
+)
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+    DataAssistantDispatcher,
 )
 
 try:
@@ -102,7 +109,10 @@ from great_expectations.datasource.new_datasource import BaseDatasource, Datasou
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler import (
+    RuleBasedProfiler,
+    RuleBasedProfilerResult,
+)
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import (
     filter_properties_dict,
@@ -123,7 +133,8 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-class BaseDataContext(ConfigPeer):
+# TODO: <WILL> Most of the logic here will be migrated to EphemeralDataContext
+class BaseDataContext(EphemeralDataContext, ConfigPeer):
     """
         This class implements most of the functionality of DataContext, with a few exceptions.
 
@@ -310,7 +321,7 @@ class BaseDataContext(ConfigPeer):
         return True
 
     @usage_statistics_enabled_method(
-        event_name="data_context.__init__",
+        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__.value,
     )
     def __init__(
         self,
@@ -397,6 +408,8 @@ class BaseDataContext(ConfigPeer):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
+        self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -775,7 +788,7 @@ class BaseDataContext(ConfigPeer):
         return site_builder
 
     @usage_statistics_enabled_method(
-        event_name="data_context.open_data_docs",
+        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS.value,
     )
     def open_data_docs(
         self,
@@ -984,7 +997,7 @@ class BaseDataContext(ConfigPeer):
     #
     #####
 
-    def _load_config_variables_file(self):
+    def _load_config_variables_file(self) -> dict:
         """
         Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
         have already been interpolated before being sent from the Cloud API.
@@ -1017,7 +1030,9 @@ class BaseDataContext(ConfigPeer):
         else:
             return {}
 
-    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
+    def get_config_with_variables_substituted(
+        self, config: Optional[DataContextConfig] = None
+    ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
         in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
@@ -1107,8 +1122,11 @@ class BaseDataContext(ConfigPeer):
             return value.replace("$", dollar_sign_escape_string)
 
     def save_config_variable(
-        self, config_variable_name, value, skip_if_substitution_variable: bool = True
-    ):
+        self,
+        config_variable_name: str,
+        value: Any,
+        skip_if_substitution_variable: bool = True,
+    ) -> None:
         r"""Save config variable value
         Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
 
@@ -1152,7 +1170,7 @@ class BaseDataContext(ConfigPeer):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self, datasource_name: str):
+    def delete_datasource(self, datasource_name: str) -> None:
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
@@ -1444,7 +1462,7 @@ class BaseDataContext(ConfigPeer):
         return batch_list[0]
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_validation_operator",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR.value,
         args_payload_fn=run_validation_operator_usage_statistics,
     )
     def run_validation_operator(
@@ -1647,7 +1665,7 @@ class BaseDataContext(ConfigPeer):
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.get_batch_list",
+        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST.value,
         args_payload_fn=get_batch_list_usage_statistics,
     )
     def get_batch_list(
@@ -1874,6 +1892,11 @@ class BaseDataContext(ConfigPeer):
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
     ) -> Validator:
+        if len(batch_list) == 0:
+            raise ge_exceptions.InvalidBatchRequestError(
+                """Validator could not be created because BatchRequest returned an empty batch_list.
+                Please check your parameters and try again."""
+            )
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         batch_definition: BatchDefinition = batch_list[-1].batch_definition
@@ -1896,7 +1919,7 @@ class BaseDataContext(ConfigPeer):
         return list(self.validation_operators.keys())
 
     @usage_statistics_enabled_method(
-        event_name="data_context.add_datasource",
+        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE.value,
         args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
@@ -2006,7 +2029,7 @@ class BaseDataContext(ConfigPeer):
         )
         return generator
 
-    def set_config(self, project_config: DataContextConfig):
+    def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
 
     def _build_datasource_from_config(
@@ -2161,7 +2184,7 @@ class BaseDataContext(ConfigPeer):
 
     def send_usage_message(
         self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
-    ):
+    ) -> None:
         """helper method to send a usage method using DataContext. Used when sending usage events from
             classes like ExpectationSuite.
             event
@@ -2303,7 +2326,7 @@ class BaseDataContext(ConfigPeer):
         return sorted_expectation_suite_names
 
     @usage_statistics_enabled_method(
-        event_name="data_context.save_expectation_suite",
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
         args_payload_fn=save_expectation_suite_usage_statistics,
     )
     def save_expectation_suite(
@@ -2359,7 +2382,9 @@ class BaseDataContext(ConfigPeer):
         self._evaluation_parameter_dependencies_compiled = False
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
-    def _store_metrics(self, requested_metrics, validation_results, target_store_name):
+    def _store_metrics(
+        self, requested_metrics, validation_results, target_store_name
+    ) -> None:
         """
         requested_metrics is a dictionary like this:
 
@@ -2433,10 +2458,12 @@ class BaseDataContext(ConfigPeer):
 
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
-    ):
+    ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
 
-    def store_evaluation_parameters(self, validation_results, target_store_name=None):
+    def store_evaluation_parameters(
+        self, validation_results, target_store_name=None
+    ) -> None:
         if not self._evaluation_parameter_dependencies_compiled:
             self._compile_evaluation_parameter_dependencies()
 
@@ -2467,7 +2494,11 @@ class BaseDataContext(ConfigPeer):
     def validations_store(self) -> ValidationsStore:
         return self.stores[self.validations_store_name]
 
-    def _compile_evaluation_parameter_dependencies(self):
+    @property
+    def assistants(self) -> DataAssistantDispatcher:
+        return self._assistants
+
+    def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
@@ -2566,7 +2597,7 @@ class BaseDataContext(ConfigPeer):
         return return_obj
 
     @usage_statistics_enabled_method(
-        event_name="data_context.build_data_docs",
+        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,
     )
     def build_data_docs(
         self,
@@ -3217,7 +3248,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_checkpoint",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT.value,
     )
     def run_checkpoint(
         self,
@@ -3361,31 +3392,29 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_profiler_with_dynamic_arguments",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
     )
     def run_profiler_with_dynamic_arguments(
         self,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> RuleBasedProfilerResult:
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
 
         Args:
+            batch_list: Explicit list of Batch objects to supply data at runtime
+            batch_request: Explicit batch_request used to supply data at runtime
             name: Identifier used to retrieve the profiler from a store.
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
             variables: Attribute name/value pairs (overrides)
             rules: Key-value pairs of name/configuration-dictionary (overrides)
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
 
         Returns:
-            Set of rule evaluation results in the form of an ExpectationSuite.
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
 
         Raises:
             AssertionError if both a `name` and `ge_cloud_id` are provided.
@@ -3394,17 +3423,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return RuleBasedProfiler.run_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
+            batch_list=batch_list,
+            batch_request=batch_request,
             name=name,
             ge_cloud_id=ge_cloud_id,
             variables=variables,
             rules=rules,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_profiler_on_data",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA.value,
     )
     def run_profiler_on_data(
         self,
@@ -3412,10 +3440,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         batch_request: Optional[BatchRequestBase] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> RuleBasedProfilerResult:
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
         Args:
@@ -3423,12 +3448,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             batch_request: Explicit batch_request used to supply data at runtime.
             name: Identifier used to retrieve the profiler from a store.
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
 
         Returns:
-            Set of rule evaluation results in the form of an ExpectationSuite.
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
 
         Raises:
             ProfilerConfigurationError is both "batch_list" and "batch_request" arguments are specified.
@@ -3442,9 +3464,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             batch_request=batch_request,
             name=name,
             ge_cloud_id=ge_cloud_id,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
         )
 
     def test_yaml_config(
@@ -3471,34 +3490,28 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         test_yaml_config is mainly intended for use within notebooks and tests.
 
-        Parameters
-        ----------
-        yaml_config : str
-            A string containing the yaml config to be tested
+        --Public API--
 
-        name: str
-            (Optional) A string containing the name of the component to instantiate
+        --Documentation--
+            https://docs.greatexpectations.io/docs/terms/data_context
+            https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
-        pretty_print : bool
-            Determines whether to print human-readable output
+        Args:
+            yaml_config: A string containing the yaml config to be tested
+            name: (Optional) A string containing the name of the component to instantiate
+            pretty_print: Determines whether to print human-readable output
+            return_mode: Determines what type of object test_yaml_config will return.
+                Valid modes are "instantiated_class" and "report_object"
+            shorten_tracebacks:If true, catch any errors during instantiation and print only the
+                last element of the traceback stack. This can be helpful for
+                rapid iteration on configs in a notebook, because it can remove
+                the need to scroll up and down a lot.
 
-        return_mode : str
-            Determines what type of object test_yaml_config will return
-            Valid modes are "instantiated_class" and "report_object"
-
-        shorten_tracebacks : bool
-            If true, catch any errors during instantiation and print only the
-            last element of the traceback stack. This can be helpful for
-            rapid iteration on configs in a notebook, because it can remove
-            the need to scroll up and down a lot.
-
-        Returns
-        -------
-        The instantiated component (e.g. a Datasource)
-        OR
-        a json object containing metadata from the component's self_check method
-
-        The returned object is determined by return_mode.
+        Returns:
+            The instantiated component (e.g. a Datasource)
+            OR
+            a json object containing metadata from the component's self_check method.
+            The returned object is determined by return_mode.
         """
         if return_mode not in ["instantiated_class", "report_object"]:
             raise ValueError(f"Unknown return_mode: {return_mode}.")

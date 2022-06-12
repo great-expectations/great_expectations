@@ -6,7 +6,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import defaultdict, namedtuple
+from collections import OrderedDict, defaultdict, namedtuple
 from collections.abc import Hashable
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
@@ -49,19 +49,20 @@ from great_expectations.expectations.registry import (
     list_registered_expectation_implementations,
 )
 from great_expectations.marshmallow__shade import ValidationError
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
+    ReconciliationDirectives,
+    ReconciliationStrategy,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
-    ReconciliationDirectives,
-    ReconciliationStrategy,
 )
 from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.types import ClassConfig
@@ -109,8 +110,8 @@ def _calc_validation_statistics(
     return ``ExpectationStatistics``.
     """
     # calc stats
-    successful_expectations = sum(exp.success for exp in validation_results)
     evaluated_expectations = len(validation_results)
+    successful_expectations = sum(exp.success for exp in validation_results)
     unsuccessful_expectations = evaluated_expectations - successful_expectations
     success = successful_expectations == evaluated_expectations
     try:
@@ -148,7 +149,7 @@ class Validator:
         ] = None,  # Cannot type DataContext due to circular import
         batches: Optional[List[Batch]] = None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Validator is the key object used to create Expectations, validate Expectations,
         and get Metrics for Expectations.
@@ -167,6 +168,8 @@ class Validator:
         self._data_context = data_context
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
+
+        self._show_progress_bars = self._determine_progress_bars()
 
         if batches is None:
             batches = []
@@ -226,6 +229,27 @@ class Validator:
             combined_dir | set(dir(pd.DataFrame))
 
         return list(combined_dir)
+
+    def _determine_progress_bars(self) -> bool:
+        enable: bool = True
+        if self._data_context:
+            progress_bars = self._data_context.progress_bars
+            # If progress_bars are not present, assume we want them enabled
+            if progress_bars is not None:
+                if "globally" in progress_bars:
+                    enable = progress_bars["globally"]
+                if "metric_calculations" in progress_bars:
+                    enable = progress_bars["metric_calculations"]
+
+        return enable
+
+    @property
+    def show_progress_bars(self) -> bool:
+        return self._show_progress_bars
+
+    @show_progress_bars.setter
+    def show_progress_bars(self, enable: bool) -> None:
+        self._show_progress_bars = enable
 
     @property
     def data_context(self) -> Optional["DataContext"]:  # noqa: F821
@@ -395,7 +419,7 @@ class Validator:
         meta: dict,
         expectation_impl: "Expectation",  # noqa: F821
     ) -> ExpectationConfiguration:
-        auto: Optional[bool] = expectation_kwargs.get("auto")
+        auto: bool = expectation_kwargs.get("auto", False)
         profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
             "profiler_config"
         )
@@ -418,7 +442,7 @@ class Validator:
             *(), **expectation_kwargs
         )
         if profiler is not None:
-            profiler.run(
+            profiler_result: RuleBasedProfilerResult = profiler.run(
                 variables=None,
                 rules=None,
                 batch_list=list(self.batches.values()),
@@ -428,8 +452,7 @@ class Validator:
             )
             expectation_configurations: List[
                 ExpectationConfiguration
-            ] = profiler.get_expectation_suite().expectations
-
+            ] = profiler_result.expectation_configurations
             configuration = expectation_configurations[0]
 
             # Reconcile explicitly provided "ExpectationConfiguration" success_kwargs as overrides to generated values.
@@ -731,7 +754,7 @@ class Validator:
         self,
         parameter_builder: ParameterBuilder,
         metric_value_kwargs: Optional[dict] = None,
-    ):
+    ) -> None:
         if metric_value_kwargs is None:
             metric_value_kwargs = {}
 
@@ -806,10 +829,18 @@ class Validator:
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
         # updates graph with aborted metrics
-        self.resolve_validation_graph(
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ] = self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
         )
+
+        if aborted_metrics_info:
+            logger.warning(
+                f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
+            )
 
         return resolved_metrics
 
@@ -1141,7 +1172,7 @@ class Validator:
         metric_configuration: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
+    ) -> None:
         """Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
         until all metrics have been added."""
 
@@ -1225,16 +1256,7 @@ class Validator:
             )
 
             # Check to see if the user has disabled progress bars
-            disable = False
-            if self._data_context:
-                progress_bars = self._data_context.progress_bars
-                # If progress_bars are not present, assume we want them enabled
-                if progress_bars is not None:
-                    if "globally" in progress_bars:
-                        disable = not progress_bars["globally"]
-                    if "metric_calculations" in progress_bars:
-                        disable = not progress_bars["metric_calculations"]
-
+            disable = not self._show_progress_bars
             if len(graph.edges) < min_graph_edges_pbar_enable:
                 disable = True
 
@@ -1393,6 +1415,9 @@ aborting graph resolution.
     @property
     def batches(self) -> Dict[str, Batch]:
         """Getter for batches"""
+        if not isinstance(self._batches, OrderedDict):
+            self._batches = OrderedDict(self._batches)
+
         return self._batches
 
     @property
@@ -2007,7 +2032,7 @@ set as active.
         else:
             return default_value
 
-    def set_evaluation_parameter(self, parameter_name, parameter_value):
+    def set_evaluation_parameter(self, parameter_name, parameter_value) -> None:
         """
         Provide a value to be stored in the data_asset evaluation_parameters object and used to evaluate
         parameterized expectations.
@@ -2046,6 +2071,13 @@ set as active.
     @property
     def expectation_suite(self) -> ExpectationSuite:
         return self._expectation_suite
+
+    @expectation_suite.setter
+    def expectation_suite(self, value: ExpectationSuite) -> None:
+        self._initialize_expectations(
+            expectation_suite=value,
+            expectation_suite_name=value.expectation_suite_name,
+        )
 
     @property
     def expectation_suite_name(self) -> str:
@@ -2181,7 +2213,7 @@ set as active.
         self,
         expectation_suite: ExpectationSuite = None,
         expectation_suite_name: str = None,
-    ):
+    ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -2277,7 +2309,9 @@ set as active.
 class BridgeValidator:
     """This is currently helping bridge APIs"""
 
-    def __init__(self, batch, expectation_suite, expectation_engine=None, **kwargs):
+    def __init__(
+        self, batch, expectation_suite, expectation_engine=None, **kwargs
+    ) -> None:
         """Builds an expectation_engine object using an expectation suite and a batch, with the expectation engine being
         determined either by the user or by the type of batch data (pandas dataframe, SqlAlchemy table, etc.)
 

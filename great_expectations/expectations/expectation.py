@@ -10,11 +10,9 @@ from copy import deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple, Union
 
-import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
@@ -44,8 +42,9 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.core.util import nested_update
+from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.exceptions import (
+    ExpectationNotFoundError,
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
@@ -73,7 +72,6 @@ from great_expectations.render.types import (
     renderedAtomicValueSchema,
 )
 from great_expectations.render.util import num_to_str
-from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
@@ -94,6 +92,7 @@ _TEST_DEFS_DIR = os.path.join(
 )
 
 
+# noinspection PyMethodParameters
 class MetaExpectation(ABCMeta):
     """MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.
 
@@ -103,9 +102,12 @@ class MetaExpectation(ABCMeta):
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
+        # noinspection PyUnresolvedReferences
         if not newclass.is_abstract():
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
+
+        # noinspection PyUnresolvedReferences
         newclass._register_renderer_functions()
         default_kwarg_values = {}
         for base in reversed(bases):
@@ -165,7 +167,9 @@ class Expectation(metaclass=MetaExpectation):
     }
     args_keys = None
 
-    def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
+    def __init__(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         if configuration is not None:
             self.validate_configuration(configuration)
         self._configuration = configuration
@@ -175,7 +179,7 @@ class Expectation(metaclass=MetaExpectation):
         return isabstract(cls)
 
     @classmethod
-    def _register_renderer_functions(cls):
+    def _register_renderer_functions(cls) -> None:
         expectation_type = camel_to_snake(cls.__name__)
 
         for candidate_renderer_fn_name in dir(cls):
@@ -193,7 +197,7 @@ class Expectation(metaclass=MetaExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-    ):
+    ) -> Union[ExpectationValidationResult, dict]:
         raise NotImplementedError
 
     @classmethod
@@ -823,7 +827,9 @@ class Expectation(metaclass=MetaExpectation):
             result_format = configuration_result_format
         return result_format
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         if configuration is None:
             configuration = self.configuration
         try:
@@ -1167,6 +1173,33 @@ class Expectation(metaclass=MetaExpectation):
                             )
 
     @staticmethod
+    def is_expectation_self_initializing(name: str) -> bool:
+        """
+        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
+
+        Args:
+            name (str): name of Expectation
+
+        Returns:
+            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
+        """
+
+        expectation_impl: MetaExpectation = get_expectation_impl(name)
+        if not expectation_impl:
+            raise ExpectationNotFoundError(
+                f"Expectation {name} was not found in the list of registered Expectations. "
+                f"Please check your configuration and try again"
+            )
+        if "auto" in expectation_impl.default_kwarg_values:
+            print(
+                f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
+            )
+            return True
+        else:
+            print(f"The Expectation {name} is not able to be self-initialized.")
+            return False
+
+    @staticmethod
     def _choose_example(
         examples: List[ExpectationTestDataCases],
     ) -> Tuple[TestData, ExpectationTestCase]:
@@ -1216,10 +1249,14 @@ class Expectation(metaclass=MetaExpectation):
                 test=exp_test["test"],
                 raise_exception=False,
             )
+            print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
             if error_message is None:
+                print(f"  PASSED")
                 test_passed = True
                 error_diagnostics = None
             else:
+                print(f"  ERROR: {repr(error_message)}")
+                print(f"{stack_trace[0]}")
                 error_diagnostics = ExpectationErrorDiagnostics(
                     error_msg=error_message,
                     stack_trace=stack_trace,
@@ -1251,8 +1288,10 @@ class Expectation(metaclass=MetaExpectation):
     def _get_rendered_result_as_string(self, rendered_result) -> str:
         """Convenience method to get rendered results as strings."""
 
+        result: str = ""
+
         if type(rendered_result) == str:
-            return rendered_result
+            result = rendered_result
 
         elif type(rendered_result) == list:
             sub_result_list = []
@@ -1261,44 +1300,48 @@ class Expectation(metaclass=MetaExpectation):
                 if res is not None:
                     sub_result_list.append(res)
 
-            return "\n".join(sub_result_list)
+            result = "\n".join(sub_result_list)
 
         elif isinstance(rendered_result, RenderedStringTemplateContent):
-            return rendered_result.__str__()
+            result = rendered_result.__str__()
 
         elif isinstance(rendered_result, CollapseContent):
-            return rendered_result.__str__()
+            result = rendered_result.__str__()
 
         elif isinstance(rendered_result, RenderedAtomicContent):
-            return f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, RenderedContentBlockContainer):
-            return "(RenderedContentBlockContainer) " + repr(
+            result = "(RenderedContentBlockContainer) " + repr(
                 rendered_result.to_json_dict()
             )
 
         elif isinstance(rendered_result, RenderedTableContent):
-            return f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, RenderedGraphContent):
-            return f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, ValueListContent):
-            return f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, dict):
-            return f"(dict) {repr(rendered_result)}"
+            result = f"(dict) {repr(rendered_result)}"
 
         elif isinstance(rendered_result, int):
-            return repr(rendered_result)
+            result = repr(rendered_result)
 
         elif rendered_result == None:
-            return ""
+            result = ""
 
         else:
             raise TypeError(
                 f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."
             )
+
+        if "inf" in result:
+            result = ""
+        return result
 
     def _get_renderer_diagnostics(
         self,
@@ -1682,7 +1725,9 @@ class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         # Ensuring basic configuration parameters are properly set
         try:
             assert (
@@ -1710,7 +1755,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -1922,7 +1969,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -2119,7 +2168,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -2407,22 +2458,3 @@ def _format_map_output(
         return return_obj
 
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")
-
-
-def get_default_profiler_config_for_expectation_type(
-    expectation_type: str,
-) -> Optional[RuleBasedProfilerConfig]:
-    """Retrieves the default profiler config as defined within a given Expectation.
-
-    Args:
-        expectation_type (str): The name of the Expectation to parse
-
-    Returns:
-        The default profiler config within the target Expectation.
-        If not available, returns None.
-    """
-    expectation_impl = get_expectation_impl(expectation_name=expectation_type)
-    profiler_config: Optional[
-        RuleBasedProfilerConfig
-    ] = expectation_impl.default_kwarg_values.get("profiler_config")
-    return profiler_config

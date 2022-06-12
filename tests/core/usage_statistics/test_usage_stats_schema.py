@@ -1,5 +1,8 @@
+import json
+
 import jsonschema
 
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_batch_request_schema,
     anonymized_batch_schema,
@@ -8,13 +11,16 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_cli_suite_expectation_suite_payload_schema,
     anonymized_datasource_schema,
     anonymized_datasource_sqlalchemy_connect_payload_schema,
+    anonymized_get_or_edit_or_save_expectation_suite_payload_schema,
     anonymized_init_payload_schema,
     anonymized_legacy_profiler_build_suite_payload_schema,
     anonymized_rule_based_profiler_run_schema,
+    anonymized_run_validation_operator_payload_schema,
     anonymized_test_yaml_config_payload_schema,
     anonymized_usage_statistics_record_schema,
     empty_payload_schema,
 )
+from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_usage_statistics_messages import (
     valid_usage_statistics_messages,
 )
@@ -63,6 +69,7 @@ def test_comprehensive_list_of_messages():
         "data_context.run_checkpoint",
         "data_context.save_expectation_suite",
         "data_context.test_yaml_config",
+        "data_context.run_validation_operator",
         "datasource.sqlalchemy.connect",
         "execution_engine.sqlalchemy.connect",
         "checkpoint.run",
@@ -71,7 +78,14 @@ def test_comprehensive_list_of_messages():
         "profiler.run",
         "data_context.run_profiler_on_data",
         "data_context.run_profiler_with_dynamic_arguments",
+        "profiler.result.get_expectation_suite",
+        "data_assistant.result.get_expectation_suite",
     }
+    # Note: "cli.project.upgrade" has no base event, only .begin and .end events
+    assert set(valid_message_list) == set(
+        UsageStatsEvents.get_all_event_names_no_begin_end_events()
+        + ["cli.project.upgrade"]
+    )
 
 
 def test_init_message():
@@ -162,6 +176,21 @@ def test_checkpoint_run_message():
             )
 
 
+def test_run_validation_operator_message():
+    usage_stats_records_messages = ["data_context.run_validation_operator"]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                anonymized_usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                anonymized_run_validation_operator_payload_schema,
+            )
+
+
 def test_legacy_profiler_build_suite_message():
     usage_stats_records_messages = [
         "legacy_profiler.build_suite",
@@ -182,6 +211,8 @@ def test_legacy_profiler_build_suite_message():
 def test_data_context_save_expectation_suite_message():
     usage_stats_records_messages = [
         "data_context.save_expectation_suite",
+        "profiler.result.get_expectation_suite",
+        "data_assistant.result.get_expectation_suite",
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
@@ -192,7 +223,7 @@ def test_data_context_save_expectation_suite_message():
             )
             jsonschema.validate(
                 message["event_payload"],
-                anonymized_cli_suite_expectation_suite_payload_schema,
+                anonymized_get_or_edit_or_save_expectation_suite_payload_schema,
             )
 
 
@@ -376,3 +407,14 @@ def test_rule_based_profiler_run_message():
                 message["event_payload"],
                 anonymized_rule_based_profiler_run_schema,
             )
+
+
+def test_usage_stats_schema_in_codebase_is_up_to_date() -> None:
+    path: str = file_relative_path(
+        __file__,
+        "../../../great_expectations/core/usage_statistics/usage_statistics_record_schema.json",
+    )
+    with open(path) as f:
+        contents: dict = json.load(f)
+
+    assert contents == anonymized_usage_statistics_record_schema

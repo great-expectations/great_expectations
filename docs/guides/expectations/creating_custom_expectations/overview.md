@@ -26,29 +26,29 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
 <i class="fas fa-circle" style={{color: "#dc3545"}}></i> An Experimental Expectation...
 
-* Has a `library_metadata` object
+* Has a valid `library_metadata` object
 * Has a docstring, including a one-line short description
 * Has at least one positive and negative example case, and all test cases pass
 * Has core logic and passes tests on at least one <TechnicalTag tag="execution_engine" text="Execution Engine" />
+* Passes all linting checks
 
 <i class="fas fa-circle" style={{color: "#ffc107"}}></i> A Beta Expectation...
 
 * Has basic input validation and type checking
 * Has both Statement Renderers: prescriptive and diagnostic
 <!-- * Has default `Parameter Builders` and Domain hooks to support Profiling -->
-* Has core logic that passes tests for all applicable Execution Engines
+* Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 
 <i class="fas fa-check-circle" style={{color: "#28a745"}}></i> A Production Expectation...
 
-* Passes all linting checks
 <!--  * Has all applicable Renderers, with fully typed and styled output -->
 * Has a robust suite of tests, as determined by a code owner
 * Has passed a manual review by a code owner for code standards and style guides
 
 ### How these docs are organized
 
-The docs in `Creating Custom Expectations` focus on completing the four steps required for Experimental Expectations. 
-Completing them will leave you with a Custom Expectation that can be executed against one backend, with a couple tests to verify correctness, and a basic docstring and metadata to support diagonstics. 
+The docs in `Creating Custom Expectations` focus on completing the five steps required for Experimental Expectations. 
+Completing them will leave you with a Custom Expectation that meets our linting standards, can be executed against one backend, with a couple tests to verify correctness, and a basic docstring and metadata to support diagnostics. 
 
 The code to achieve the first four steps looks somewhat different depending on the class of Expectation you're developing. Accordingly, there are separate how-to guides and templates for each class of Expectation.
 
@@ -56,6 +56,7 @@ The code to achieve the first four steps looks somewhat different depending on t
 |-----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [Column Map Expectation](./how_to_create_custom_column_map_expectations.md)             | [column_map_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py)       |
 | [Column Aggregate Expectation](./how_to_create_custom_column_aggregate_expectations.md) | [column_aggregate_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py) |
+| [Table Expectation](./how_to_create_custom_table_expectations.md) | [table_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/table_expectation_template.py) |
 | [Regex-Based Column Map Expectation](./how_to_create_custom_regex_based_column_map_expectations.md) | [regex-based map column_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/regex_based_column_map_expectation_template.py) |
 | [Set-Based Column Map Expectation](./how_to_create_custom_set_based_column_map_expectations.md) | [set-based map_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/set_based_column_map_expectation_template.py) |
 
@@ -69,10 +70,10 @@ Beyond the first four steps, additional features are generally similar across al
 
 | Step | Guide |
 |------|-------|
+| Passes all linting checks                                                                        | [Great Expectations Code Style Guide: Linting](../../../contributing/style_guides/code_style.md#linting) |
 | Has basic input validation and type checking                                                     | [How to add input validation and type checking for a Custom Expectation](../features_custom_expectations/how_to_add_input_validation_for_an_expectation.md) |
 | Has both Statement Renderers: prescriptive and diagnostic              | [How to add Statement Renderers for Custom Expectations](../features_custom_expectations/how_to_add_statement_renderers_for_an_expectation.md) |
-| Has core logic that passes tests for all applicable Execution Engines   | [How to add SQLAlchemy support for Custom Expectations](../features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation.md)<br/> [How to add Spark support for Custom Expectations](../features_custom_expectations/how_to_add_spark_support_for_an_expectation.md)|
-| Passes all linting checks                                                                        | [Great Expectations Code Style Guide: Linting](../../../contributing/style_guides/code_style.md#linting) |
+| Has core logic that passes tests for all applicable Execution Engines and SQL dialects  | [How to add SQLAlchemy support for Custom Expectations](../features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation.md)<br/> [How to add Spark support for Custom Expectations](../features_custom_expectations/how_to_add_spark_support_for_an_expectation.md)|
 
 The final two checks required for acceptance into the Great Expectations codebase at a Production level require manual review and guidance by a code owner.
 

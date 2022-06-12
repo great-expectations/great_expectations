@@ -24,6 +24,11 @@ from great_expectations.expectations.metrics.util import attempt_allowing_relati
 logger = logging.getLogger(__name__)
 
 try:
+    from trino.exceptions import TrinoUserError
+except ImportError:
+    TrinoUserError = None
+
+try:
     from sqlalchemy.exc import ProgrammingError
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
@@ -112,6 +117,13 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             )
         elif dialect.name.lower() == "mysql":
             return _get_column_quantiles_mysql(
+                column=column,
+                quantiles=quantiles,
+                selectable=selectable,
+                sqlalchemy_engine=sqlalchemy_engine,
+            )
+        elif dialect.name.lower() == "trino":
+            return _get_column_quantiles_trino(
                 column=column,
                 quantiles=quantiles,
                 selectable=selectable,
@@ -279,6 +291,27 @@ def _get_column_quantiles_mysql(
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
     except ProgrammingError as pe:
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe
+
+
+def _get_column_quantiles_trino(
+    column, quantiles: Iterable, selectable, sqlalchemy_engine
+) -> list:
+    # Trino does not have the percentile_disc func, but instead has approx_percentile
+    sql_approx: str = f"approx_percentile({column}, ARRAY{list(quantiles)})"
+    selects_approx: List[TextClause] = [sa.text(sql_approx)]
+    quantiles_query: Select = sa.select(selects_approx).select_from(selectable)
+
+    try:
+        quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
+        return list(quantiles_results)[0]
+    except (ProgrammingError, TrinoUserError) as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (

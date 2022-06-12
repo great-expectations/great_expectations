@@ -268,12 +268,6 @@ def suite_with_column_pair_and_table_expectations(
 
 
 @pytest.fixture
-def ge_cloud_id():
-    # Fake id but adheres to the format required of a UUID
-    return "731ee1bd-604a-4851-9ee8-bca8ffb32bce"
-
-
-@pytest.fixture
 def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3, empty_data_context_stats_enabled):
     context: DataContext = empty_data_context_stats_enabled
 
@@ -293,7 +287,7 @@ def test_find_expectation_indexes_on_empty_suite(exp1, empty_suite):
 
 
 def test_find_expectation_indexes(
-    exp1, exp2, exp3, exp4, exp5, domain_success_runtime_suite, single_expectation_suite
+    exp1, exp4, domain_success_runtime_suite, single_expectation_suite
 ):
     assert domain_success_runtime_suite.find_expectation_indexes(exp4, "domain") == [
         1,
@@ -320,6 +314,7 @@ def test_find_expectation_indexes(
         )
 
 
+@pytest.mark.cloud
 def test_find_expectation_indexes_with_ge_cloud_suite(ge_cloud_suite, ge_cloud_id):
     # All expectations in `ge_cloud_suite` have our desired id
     res = ge_cloud_suite.find_expectation_indexes(ge_cloud_id=ge_cloud_id)
@@ -330,6 +325,7 @@ def test_find_expectation_indexes_with_ge_cloud_suite(ge_cloud_suite, ge_cloud_i
     assert res == []
 
 
+@pytest.mark.cloud
 def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
         ge_cloud_suite.find_expectation_indexes(
@@ -340,6 +336,7 @@ def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
     )
 
 
+@pytest.mark.cloud
 def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suite):
     with pytest.raises(InvalidExpectationConfigurationError) as err:
         ge_cloud_suite.find_expectation_indexes(
@@ -348,9 +345,7 @@ def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suit
     assert str(err.value) == "Ensure that expectation configuration is valid."
 
 
-def test_find_expectations(
-    exp1, exp2, exp3, exp4, exp5, domain_success_runtime_suite, single_expectation_suite
-):
+def test_find_expectations(exp2, exp3, exp4, exp5, domain_success_runtime_suite):
     expectation_to_find1 = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "COMPLETE"},
@@ -379,6 +374,7 @@ def test_find_expectations(
     )
 
 
+@pytest.mark.cloud
 def test_find_expectations_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
         ge_cloud_suite.find_expectations(
@@ -490,19 +486,53 @@ def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
     )
 
 
+def test_add_expectation_configurations(
+    exp1,
+    exp2,
+    exp3,
+    exp4,
+    exp5,
+    single_expectation_suite,
+    different_suite,
+):
+    expectation_configurations = [exp1, exp2, exp3, exp4, exp5]
+    assert len(single_expectation_suite.expectations) == 1
+    assert not single_expectation_suite.isEquivalentTo(different_suite)
+    result = single_expectation_suite.add_expectation_configurations(
+        expectation_configurations=expectation_configurations,
+        send_usage_event=False,
+        match_type="domain",
+        overwrite_existing=True,
+    )
+    assert len(result) == 5
+
+    # Collisions/overrites due to same "match_type" value
+    assert len(single_expectation_suite.expectations) == 2
+
+    # Should raise if overwrite_existing=False and a matching expectation is found
+    with pytest.raises(DataContextError):
+        # noinspection PyUnusedLocal
+        result = single_expectation_suite.add_expectation_configurations(
+            expectation_configurations=expectation_configurations,
+            send_usage_event=False,
+            match_type="domain",
+            overwrite_existing=False,
+        )
+
+    assert single_expectation_suite.isEquivalentTo(different_suite)
+
+
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_add_expectation(
     mock_emit,
-    exp1,
     exp2,
     exp4,
     single_expectation_suite,
     baseline_suite,
     different_suite,
     domain_success_runtime_suite,
-    empty_data_context_stats_enabled,
 ):
     assert len(single_expectation_suite.expectations) == 1
     assert not single_expectation_suite.isEquivalentTo(baseline_suite)
@@ -570,13 +600,13 @@ def test_add_expectation(
     ]
 
 
+@pytest.mark.cloud
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_add_expectation_with_ge_cloud_id(
     mock_emit,
     single_expectation_suite_with_expectation_ge_cloud_id,
-    empty_data_context_stats_enabled,
 ):
     """
     This test ensures that expectation does not lose ge_cloud_id attribute when updated
@@ -640,6 +670,7 @@ def test_remove_all_expectations_of_type(
     )
 
 
+@pytest.mark.cloud
 def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, exp1):
     # The state of the first expectation before update
     expectation_before_update = ge_cloud_suite.expectations[0]
@@ -667,6 +698,7 @@ def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, e
     )
 
 
+@pytest.mark.cloud
 def test_replace_expectation_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
         ge_cloud_suite.replace_expectation(
@@ -680,7 +712,8 @@ def test_replace_expectation_without_necessary_args(ge_cloud_suite):
     )
 
 
-def test_replace_expectation_finds_too_many_matches(ge_cloud_suite, exp1, ge_cloud_id):
+@pytest.mark.cloud
+def test_replace_expectation_finds_too_many_matches(ge_cloud_suite, ge_cloud_id):
     new_expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [4, 5, 6], "result_format": "BASIC"},
@@ -698,6 +731,7 @@ def test_replace_expectation_finds_too_many_matches(ge_cloud_suite, exp1, ge_clo
     )
 
 
+@pytest.mark.cloud
 def test_replace_expectation_finds_no_matches(ge_cloud_suite, ge_cloud_id, exp4):
     with pytest.raises(ValueError) as err:
         ge_cloud_suite.replace_expectation(

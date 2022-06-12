@@ -5,16 +5,14 @@ import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, List, Optional, Union, cast
+from typing import Any, Generator, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
 import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import BatchRequestBase, materialize_batch_request
-from great_expectations.data_context import BaseDataContext
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import (
     CheckpointStore,
     ProfilerStore,
@@ -36,18 +34,6 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.rule_based_profiler.helpers.util import (
-    convert_variables_to_dict,
-)
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.rule_based_profiler import (
-    BaseRuleBasedProfiler,
-)
-from great_expectations.rule_based_profiler.types import (
-    build_parameter_container_for_variables,
-)
-from great_expectations.validator.validator import Validator
-from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +51,9 @@ except ImportError:
     Select = None
     SQLAlchemyError = None
 
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
+yaml_handler: YAMLHandler = YAMLHandler()
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -478,6 +465,24 @@ def get_snowflake_connection_url() -> str:
     return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 
 
+def get_bigquery_table_prefix() -> str:
+    """Get table_prefix that will be used by the BigQuery client in loading a BigQuery table from DataFrame.
+
+    Reference link
+        https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
+
+    Returns:
+        String of table prefix, which is the gcp_project and dataset concatenated by a "."
+    """
+    gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+        )
+    bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "test_ci")
+    return f"""{gcp_project}.{bigquery_dataset}"""
+
+
 def get_bigquery_connection_url() -> str:
     """Get bigquery connection url from environment variables.
 
@@ -504,6 +509,45 @@ class LoadedTable:
     inserted_dataframe: pd.DataFrame
 
 
+def load_and_concatenate_csvs(
+    csv_paths: List[str],
+    load_full_dataset: bool = False,
+    convert_column_names_to_datetime: Optional[List[str]] = None,
+) -> pd.DataFrame:
+    """Utility method that is used in loading test data into a pandas dataframe.
+
+    It includes several parameters used to describe the output data.
+
+    Args:
+        csv_paths: list of paths of csvs to write, can be a single path. These should all be the same shape.
+        load_full_dataset: if False, load only the first 10 rows.
+        convert_column_names_to_datetime: List of column names to convert to datetime before writing to db.
+
+    Returns:
+        A pandas dataframe concatenating data loaded from all csvs.
+    """
+
+    if convert_column_names_to_datetime is None:
+        convert_column_names_to_datetime = []
+
+    import pandas as pd
+
+    dfs: List[pd.DataFrame] = []
+    for csv_path in csv_paths:
+        df = pd.read_csv(csv_path)
+        for column_name_to_convert in convert_column_names_to_datetime:
+            df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+        if not load_full_dataset:
+            # Improving test performance by only loading the first 10 rows of our test data into the db
+            df = df.head(10)
+
+        dfs.append(df)
+
+    all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
+
+    return all_dfs_concatenated
+
+
 def load_data_into_test_database(
     table_name: str,
     connection_string: str,
@@ -512,6 +556,7 @@ def load_data_into_test_database(
     load_full_dataset: bool = False,
     convert_colnames_to_datetime: Optional[List[str]] = None,
     random_table_suffix: bool = False,
+    to_sql_method: Optional[str] = None,
 ) -> LoadedTable:
     """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
 
@@ -526,43 +571,27 @@ def load_data_into_test_database(
         convert_colnames_to_datetime: List of column names to convert to datetime before writing to db.
         random_table_suffix: If true, add 8 random characters to the table suffix and remove other tables with the
             same prefix.
+        to_sql_method: Method to pass to method param of pd.to_sql()
 
     Returns:
-        For convenience, the pandas dataframe that was used to load the data.
+        LoadedTable which for convenience, contains the pandas dataframe that was used to load the data.
     """
     if csv_path and csv_paths:
         csv_paths.append(csv_path)
     elif csv_path and not csv_paths:
         csv_paths = [csv_path]
 
-    if convert_colnames_to_datetime is None:
-        convert_colnames_to_datetime = []
+    all_dfs_concatenated: pd.DataFrame = load_and_concatenate_csvs(
+        csv_paths, load_full_dataset, convert_colnames_to_datetime
+    )
 
     if random_table_suffix:
         table_name: str = f"{table_name}_{str(uuid.uuid4())[:8]}"
 
-    import pandas as pd
-
-    print("Generating dataframe of all csv data")
-    dfs: List[pd.DataFrame] = []
-    for csv_path in csv_paths:
-        df = pd.read_csv(csv_path)
-        for colname_to_convert in convert_colnames_to_datetime:
-            df[colname_to_convert] = pd.to_datetime(df[colname_to_convert])
-        if not load_full_dataset:
-            # Improving test performance by only loading the first 10 rows of our test data into the db
-            df = df.head(10)
-
-        dfs.append(df)
-
-    all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
-
     return_value: LoadedTable = LoadedTable(
         table_name=table_name, inserted_dataframe=all_dfs_concatenated
     )
-
     connection = None
-
     if sa:
         engine = sa.create_engine(connection_string)
     else:
@@ -571,23 +600,117 @@ def load_data_into_test_database(
             "install optional sqlalchemy dependency for support."
         )
         return return_value
-    try:
-        connection = engine.connect()
-        print(f"Dropping table {table_name}")
-        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-        print(f"Creating table {table_name} and adding data from {csv_paths}")
-        all_dfs_concatenated.to_sql(
-            name=table_name, con=engine, index=False, if_exists="append"
+    if engine.dialect.name.lower() == "bigquery":
+        # bigquery is handled in a special way
+        load_data_into_test_bigquery_database_with_bigquery_client(
+            dataframe=all_dfs_concatenated, table_name=table_name
         )
         return return_value
-    except SQLAlchemyError as e:
-        logger.error(
-            """Docs integration tests encountered an error while loading test-data into test-database."""
+    elif engine.dialect.name.lower() == "awsathena":
+        try:
+            connection = engine.connect()
+            load_dataframe_into_test_athena_database_as_table(
+                df=all_dfs_concatenated,
+                table_name=table_name,
+                connection=connection,
+            )
+            return return_value
+        except SQLAlchemyError as e:
+            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+            logger.error(error_message)
+            raise ge_exceptions.DatabaseConnectionError(error_message)
+            # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+            # sensitive information does not make it into our CI logs.
+        finally:
+            connection.close()
+            engine.dispose()
+    else:
+        try:
+            connection = engine.connect()
+            print(f"Dropping table {table_name}")
+            connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+            print(f"Creating table {table_name} and adding data from {csv_paths}")
+            all_dfs_concatenated.to_sql(
+                name=table_name,
+                con=engine,
+                index=False,
+                if_exists="append",
+                method=to_sql_method,
+            )
+            return return_value
+        except SQLAlchemyError as e:
+            error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+            logger.error(error_message)
+            raise ge_exceptions.DatabaseConnectionError(error_message)
+            # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+            # sensitive information does not make it into our CI logs.
+        finally:
+            connection.close()
+            engine.dispose()
+
+
+def load_data_into_test_bigquery_database_with_bigquery_client(
+    dataframe: pd.DataFrame, table_name: str
+) -> None:
+    """
+    Loads dataframe into bigquery table using BigQuery client. Follows pattern specified in the GCP documentation here:
+        - https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
+    Args:
+        dataframe (pd.DataFrame): DataFrame to load
+        table_name (str): table to load DataFrame to. Prefix containing project and dataset are loaded
+                        by helper function.
+    """
+    prefix: str = get_bigquery_table_prefix()
+    table_id: str = f"""{prefix}.{table_name}"""
+    from google.cloud import bigquery
+
+    gcp_project: Optional[str] = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
         )
-        raise
-    finally:
-        connection.close()
-        engine.dispose()
+    client: bigquery.Client = bigquery.Client(project=gcp_project)
+    job: bigquery.LoadJob = client.load_table_from_dataframe(
+        dataframe, table_id
+    )  # Make an API request.
+    job.result()  # Wait for the job to complete
+
+
+def load_dataframe_into_test_athena_database_as_table(
+    df: pd.DataFrame,
+    table_name: str,
+    connection,
+    data_location_bucket: Optional[str] = None,
+    data_location: Optional[str] = None,
+) -> None:
+    """
+
+    Args:
+        df: dataframe containing data.
+        table_name: name of table to write.
+        connection: connection to database.
+        data_location_bucket: name of bucket where data is located.
+        data_location: path to data from bucket without leading / e.g.
+            "data/stuff/" in path "s3://my-bucket/data/stuff/"
+
+    Returns:
+        None
+    """
+
+    from pyathena.pandas.util import to_sql
+
+    if not data_location_bucket:
+        data_location_bucket = os.getenv("ATHENA_DATA_BUCKET")
+    if not data_location:
+        data_location = "data/ten_trips_from_each_month/"
+    location: str = f"s3://{data_location_bucket}/{data_location}"
+    to_sql(
+        df=df,
+        name=table_name,
+        conn=connection,
+        location=location,
+        if_exists="replace",
+    )
 
 
 def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:
@@ -678,10 +801,11 @@ def check_athena_table_count(
         result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         return len(result) == expected_table_count
     except SQLAlchemyError as e:
-        logger.error(
-            """Docs integration tests encountered an error while loading test-data into test-database."""
-        )
-        raise
+        error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
+        logger.error(error_message)
+        raise ge_exceptions.DatabaseConnectionError(error_message)
+        # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
+        # sensitive information does not make it into our CI logs.
     finally:
         connection.close()
         engine.dispose()
@@ -725,82 +849,91 @@ def _get_batch_request_from_validator(validator):
     my_batch_request = my_batch.batch_request
     return my_batch_request
 
-def get_validator_with_expectation_suite(
-    batch_request: Union[BatchRequestBase, dict],
-    data_context: BaseDataContext,
-    expectation_suite: Optional[ExpectationSuite] = None,
-    expectation_suite_name: Optional[str] = None,
-    component_name: str = "test",
-) -> Validator:
+def get_awsathena_db_name(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
+    """Get awsathena database name from environment variables.
+
+    Returns:
+        String of the awsathena database name.
     """
-    Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
-    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
-    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
-    """
-    suite: ExpectationSuite
-
-    generate_temp_expectation_suite_name: bool
-    create_expectation_suite: bool
-
-    if expectation_suite is not None and expectation_suite_name is not None:
-        if expectation_suite.expectation_suite_name != expectation_suite_name:
-            raise ValueError(
-                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
-            )
-        generate_temp_expectation_suite_name = False
-        create_expectation_suite = False
-    elif expectation_suite is None and expectation_suite_name is not None:
-        generate_temp_expectation_suite_name = False
-        create_expectation_suite = True
-    elif expectation_suite is not None and expectation_suite_name is None:
-        generate_temp_expectation_suite_name = False
-        create_expectation_suite = False
-    else:
-        generate_temp_expectation_suite_name = True
-        create_expectation_suite = True
-
-    if generate_temp_expectation_suite_name:
-        expectation_suite_name = f"tmp.{component_name}.suite_{str(uuid.uuid4())[:8]}"
-
-    if create_expectation_suite:
-        try:
-            # noinspection PyUnusedLocal
-            expectation_suite = data_context.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-        except ge_exceptions.DataContextError:
-            expectation_suite = data_context.create_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-            print(
-                f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
-            )
-
-    batch_request = materialize_batch_request(batch_request=batch_request)
-    validator: Validator = data_context.get_validator(
-        batch_request=batch_request,
-        expectation_suite_name=expectation_suite_name,
-    )
-
-    return validator
-
-
-def set_bootstrap_random_seed_variable(
-    profiler: BaseRuleBasedProfiler,
-    random_seed: int = RANDOM_SEED,
-) -> None:
-    variables_dict: dict
-
-    variables_dict = convert_variables_to_dict(variables=profiler.variables)
-    variables_dict["bootstrap_random_seed"] = random_seed
-    profiler.variables = build_parameter_container_for_variables(
-        variables_configs=variables_dict
-    )
-
-    rule: Rule
-    for rule in profiler.rules:
-        variables_dict = convert_variables_to_dict(variables=rule.variables)
-        variables_dict["bootstrap_random_seed"] = random_seed
-        rule.variables = build_parameter_container_for_variables(
-            variables_configs=variables_dict
+    athena_db_name: str = os.getenv(db_name_env_var)
+    if not athena_db_name:
+        raise ValueError(
+            f"Environment Variable {db_name_env_var} is required to run integration tests against AWS Athena"
         )
+    return athena_db_name
+
+
+def get_awsathena_connection_url(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
+    """Get awsathena connection url from environment variables.
+
+    Returns:
+        String of the awsathena connection url.
+    """
+    ATHENA_DB_NAME: str = get_awsathena_db_name(db_name_env_var)
+    ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
+    if not ATHENA_STAGING_S3:
+        raise ValueError(
+            "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
+        )
+
+    return f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
+
+
+def get_connection_string_and_dialect(
+    athena_db_name_env_var: str = "ATHENA_DB_NAME",
+) -> Tuple[str, str]:
+
+    with open("./connection_string.yml") as f:
+        db_config: dict = yaml_handler.load(f)
+
+    dialect: str = db_config["dialect"]
+    if dialect == "snowflake":
+        connection_string: str = get_snowflake_connection_url()
+    elif dialect == "bigquery":
+        connection_string: str = get_bigquery_connection_url()
+    elif dialect == "awsathena":
+        connection_string: str = get_awsathena_connection_url(athena_db_name_env_var)
+    else:
+        connection_string: str = db_config["connection_string"]
+
+    return dialect, connection_string
+
+
+def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
+    """Recursively traverse a nested structure to find all strings in an input string.
+
+    Args:
+        obj (Any): The object to traverse (generally a dict to start with)
+        target_strings (List[str]): The collection of strings to find.
+
+    Returns:
+        True if ALL target strings are found. Otherwise, will return False.
+    """
+
+    strings: Set[str] = set(target_strings)
+
+    def _find_string(data: Any) -> bool:
+        if isinstance(data, list):
+            for val in data:
+                if _find_string(val):
+                    return True
+        elif isinstance(data, dict):
+            for key, val in data.items():
+                if _find_string(key) or _find_string(val):
+                    return True
+        elif isinstance(data, str):
+            string_to_remove: Optional[str] = None
+            for string in strings:
+                if string in data:
+                    string_to_remove = string
+                    break
+            if string_to_remove:
+                strings.remove(string_to_remove)
+                if not strings:
+                    return True
+        return False
+
+    success: bool = _find_string(obj)
+    if not success:
+        logger.info(f"Could not find the following target strings: {strings}")
+    return success

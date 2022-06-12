@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 from copy import deepcopy
@@ -5,6 +6,7 @@ from typing import Optional
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
@@ -45,7 +47,7 @@ class ExpectationValidationResult(SerializableDictDot):
         result=None,
         meta=None,
         exception_info=None,
-    ):
+    ) -> None:
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
         self.success = success
@@ -146,13 +148,39 @@ class ExpectationValidationResult(SerializableDictDot):
             return True
 
     def __repr__(self):
+        """
+        # TODO: <Alex>5/9/2022</Alex>
+        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
+        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
+        """
+        json_dict: dict = self.to_json_dict()
         if in_jupyter_notebook():
-            json_dict = self.to_json_dict()
-            json_dict.pop("expectation_config")
-            return json.dumps(json_dict, indent=2)
-        return json.dumps(self.to_json_dict(), indent=2)
+            json_dict: dict = self.to_json_dict()
+            if (
+                "expectation_config" in json_dict
+                and "kwargs" in json_dict["expectation_config"]
+                and "auto" in json_dict["expectation_config"]["kwargs"]
+                and json_dict["expectation_config"]["kwargs"]["auto"]
+            ):
+                json_dict["expectation_config"]["meta"] = {
+                    "auto_generated_at": datetime.datetime.now(
+                        datetime.timezone.utc
+                    ).strftime("%Y%m%dT%H%M%S.%fZ"),
+                    "great_expectations_version": ge_version,
+                }
+                json_dict["expectation_config"]["kwargs"].pop("auto")
+                json_dict["expectation_config"]["kwargs"].pop("batch_id", None)
+            else:
+                json_dict.pop("expectation_config", None)
+
+        return json.dumps(json_dict, indent=2)
 
     def __str__(self):
+        """
+        # TODO: <Alex>5/9/2022</Alex>
+        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
+        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
+        """
         return json.dumps(self.to_json_dict(), indent=2)
 
     @staticmethod
@@ -180,6 +208,10 @@ class ExpectationValidationResult(SerializableDictDot):
         myself = expectationValidationResultSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
+        if "expectation_config" in myself:
+            myself["expectation_config"] = convert_to_json_serializable(
+                myself["expectation_config"]
+            )
         if "result" in myself:
             myself["result"] = convert_to_json_serializable(myself["result"])
         if "meta" in myself:
@@ -280,7 +312,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         statistics=None,
         meta=None,
         ge_cloud_id: Optional[UUID] = None,
-    ):
+    ) -> None:
         self.success = success
         if results is None:
             results = []
@@ -372,7 +404,9 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             )
         )
 
-    def get_failed_validation_results(self) -> "ExpectationSuiteValidationResult":
+    def get_failed_validation_results(
+        self,
+    ) -> "ExpectationSuiteValidationResult":  # noqa: F821
         validation_results = [result for result in self.results if not result.success]
 
         successful_expectations = sum(exp.success for exp in validation_results)
@@ -413,9 +447,13 @@ class ExpectationSuiteValidationResultSchema(Schema):
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
         if isinstance(data, ExpectationSuiteValidationResult):
-            data.meta = convert_to_json_serializable(data.meta)
+            data.meta = convert_to_json_serializable(data=data.meta)
+            data.statistics = convert_to_json_serializable(data=data.statistics)
         elif isinstance(data, dict):
-            data["meta"] = convert_to_json_serializable(data.get("meta"))
+            data["meta"] = convert_to_json_serializable(data=data.get("meta"))
+            data["statistics"] = convert_to_json_serializable(
+                data=data.get("statistics")
+            )
         return data
 
     # noinspection PyUnusedLocal

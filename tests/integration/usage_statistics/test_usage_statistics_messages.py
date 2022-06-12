@@ -10,6 +10,9 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
 from great_expectations.data_context import BaseDataContext
+from tests.integration.usage_statistics.example_events.data_context_run_validation_operator import (
+    data_context_run_validation_operator_events,
+)
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -211,7 +214,6 @@ valid_usage_statistics_messages = {
                         },
                         "anonymized_site_index_builder": {
                             "parent_class": "DefaultSiteIndexBuilder",
-                            "show_cta_footer": True,
                         },
                     },
                 ],
@@ -304,7 +306,6 @@ valid_usage_statistics_messages = {
                         },
                         "anonymized_site_index_builder": {
                             "parent_class": "DefaultSiteIndexBuilder",
-                            "show_cta_footer": True,
                         },
                     },
                 ],
@@ -1104,6 +1105,7 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
+    "data_context.run_validation_operator": data_context_run_validation_operator_events,
     "legacy_profiler.build_suite": [
         {
             "event": "legacy_profiler.build_suite",
@@ -1285,6 +1287,36 @@ valid_usage_statistics_messages = {
     "data_context.save_expectation_suite": [
         {
             "event": "data_context.save_expectation_suite",
+            "event_payload": {
+                "anonymized_expectation_suite_name": "4b6bf73298fcc2db6da929a8f18173f7"
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:23.570Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+    ],
+    "profiler.result.get_expectation_suite": [
+        {
+            "event": "profiler.result.get_expectation_suite",
+            "event_payload": {
+                "anonymized_expectation_suite_name": "4b6bf73298fcc2db6da929a8f18173f7"
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:23.570Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+    ],
+    "data_assistant.result.get_expectation_suite": [
+        {
+            "event": "data_assistant.result.get_expectation_suite",
             "event_payload": {
                 "anonymized_expectation_suite_name": "4b6bf73298fcc2db6da929a8f18173f7"
             },

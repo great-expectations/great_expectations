@@ -3114,17 +3114,56 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = """\
-profiler = UserConfigurableProfiler(
-    profile_dataset=validator,
-    excluded_expectations=None,
-    ignored_columns=ignored_columns,
-    not_null_only=False,
-    primary_or_compound_key=False,
-    semantic_types_dict=None,
-    table_expectations_only=False,
-    value_set_threshold="MANY",
+data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+    batch_request=batch_request,
+    # include_column_names=include_column_names,
+    exclude_column_names=exclude_column_names,
+    # include_column_name_suffixes=include_column_name_suffixes,
+    # exclude_column_name_suffixes=exclude_column_name_suffixes,
+    # semantic_type_filter_module_name=semantic_type_filter_module_name,
+    # semantic_type_filter_class_name=semantic_type_filter_class_name,
+    # include_semantic_types=include_semantic_types,
+    # exclude_semantic_types=exclude_semantic_types,
+    # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+    cardinality_limit_mode="rel_100",  # case-insenstive (see documentaiton for other options)
+    # max_unique_values=max_unique_values,
+    # max_proportion_unique=max_proportion_unique,
+    # column_value_uniqueness_rule={
+    #     "success_ratio": 0.8,
+    # },
+    # column_value_nullity_rule={
+    # },
+    # column_value_nonnullity_rule={
+    # },
+    # numeric_columns_low_precision_rule={
+    #     "round_decimals": 1,   # parameters will be rounded to 1 decimal place for metrics that preserve precision
+    #     "false_positive_rate": 0.1,
+    #     "random_seed": 43792,
+    # },
+    # numeric_columns_high_precision_rule={
+    #     "round_decimals": 4,   # parameters will be rounded to 4 decimal places for metrics that increase precision
+    #     "false_positive_rate": 0.1,
+    #     "random_seed": 43792,
+    # },
+    # datetime_columns_rule={
+    #     "truncate_values": {
+    #         "lower_bound": 0,
+    #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+    #     },
+    #     "round_decimals": 0,
+    # },
+    # text_columns_rule={
+    #     "strict_min": True,
+    #     "strict_max": True,
+    #     "success_ratio": 0.8,
+    # },
+    # categorical_columns_rule={
+    #     "false_positive_rate": 0.1,
+    #     "round_decimals": 3,
+    # },
 )
-suite = profiler.build_suite()"""
+validator.expectation_suite = data_assistant_result.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+"""
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
@@ -3143,35 +3182,62 @@ suite = profiler.build_suite()"""
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
-    suite: ExpectationSuite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
-    assert suite.expectations == [
+    expected_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_table_columns_to_match_ordered_list",
-                "kwargs": {
-                    "column_list": [
-                        "Unnamed: 0",
-                        "Name",
-                        "PClass",
-                        "Age",
-                        "Sex",
-                        "Survived",
-                        "SexCode",
-                    ]
+                "kwargs": {"max_value": 1313, "min_value": 1313},
+                "expectation_type": "expect_table_row_count_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "domain_kwargs": {},
+                            "metric_dependencies": None,
+                            "metric_name": "table.row_count",
+                            "metric_value_kwargs": None,
+                        },
+                        "num_batches": 1,
+                    }
                 },
-                "meta": {},
             }
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_table_row_count_to_be_between",
-                "kwargs": {"max_value": 1313, "min_value": 1313},
-                "meta": {},
+                "kwargs": {
+                    "column_set": [
+                        "Age",
+                        "Name",
+                        "PClass",
+                        "Sex",
+                        "SexCode",
+                        "Survived",
+                        "Unnamed: 0",
+                    ],
+                    "exact_match": None,
+                },
+                "expectation_type": "expect_table_columns_to_match_set",
+                "meta": {"profiler_details": {"success_ratio": 1.0}},
             }
         ),
     ]
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    expectation_configurations: List[ExpectationConfiguration] = []
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in suite.expectations:
+        kwargs: dict = expectation_configuration.kwargs
+        key: str
+        value: Any
+        kwargs = {
+            key: sorted(value) if isinstance(value, (list, set, tuple)) else value
+            for key, value in kwargs.items()
+        }
+        expectation_configuration.kwargs = kwargs
+        expectation_configurations.append(expectation_configuration)
+
+    assert expectation_configurations == expected_expectation_configurations
 
     assert mock_subprocess.call_count == 0
 
@@ -3355,17 +3421,58 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = """\
-profiler = UserConfigurableProfiler(
-    profile_dataset=validator,
-    excluded_expectations=None,
-    ignored_columns=ignored_columns,
-    not_null_only=False,
-    primary_or_compound_key=False,
-    semantic_types_dict=None,
-    table_expectations_only=False,
-    value_set_threshold="MANY",
+data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+    batch_request=batch_request,
+    # include_column_names=include_column_names,
+    exclude_column_names=exclude_column_names,
+    # include_column_name_suffixes=include_column_name_suffixes,
+    # exclude_column_name_suffixes=exclude_column_name_suffixes,
+    # semantic_type_filter_module_name=semantic_type_filter_module_name,
+    # semantic_type_filter_class_name=semantic_type_filter_class_name,
+    # include_semantic_types=include_semantic_types,
+    # exclude_semantic_types=exclude_semantic_types,
+    # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+    cardinality_limit_mode="rel_100",  # case-insenstive (see documentaiton for other options)
+    # max_unique_values=max_unique_values,
+    # max_proportion_unique=max_proportion_unique,
+    # column_value_uniqueness_rule={
+    #     "success_ratio": 0.8,
+    # },
+    # column_value_nullity_rule={
+    # },
+    # column_value_nonnullity_rule={
+    # },
+    # numeric_columns_low_precision_rule={
+    #     "round_decimals": 1,   # parameters will be rounded to 1 decimal place for metrics that preserve precision
+    #     "false_positive_rate": 0.1,
+    #     "random_seed": 43792,
+    # },
+    # numeric_columns_high_precision_rule={
+    #     "round_decimals": 4,   # parameters will be rounded to 4 decimal places for metrics that increase precision
+    #     "false_positive_rate": 0.1,
+    #     "random_seed": 43792,
+    # },
+    # datetime_columns_rule={
+    #     "truncate_values": {
+    #         "lower_bound": 0,
+    #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+    #     },
+    #     "round_decimals": 0,
+    # },
+    # text_columns_rule={
+    #     "strict_min": True,
+    #     "strict_max": True,
+    #     "success_ratio": 0.8,
+    # },
+    # categorical_columns_rule={
+    #     "false_positive_rate": 0.1,
+    #     "round_decimals": 3,
+    # },
 )
-suite = profiler.build_suite()"""
+validator.expectation_suite = data_assistant_result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
+)
+"""
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
@@ -3384,35 +3491,62 @@ suite = profiler.build_suite()"""
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
-    suite: ExpectationSuite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
-    assert suite.expectations == [
+    expected_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_table_columns_to_match_ordered_list",
-                "kwargs": {
-                    "column_list": [
-                        "Unnamed: 0",
-                        "Name",
-                        "PClass",
-                        "Age",
-                        "Sex",
-                        "Survived",
-                        "SexCode",
-                    ]
+                "kwargs": {"max_value": 1313, "min_value": 1313},
+                "expectation_type": "expect_table_row_count_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "domain_kwargs": {},
+                            "metric_dependencies": None,
+                            "metric_name": "table.row_count",
+                            "metric_value_kwargs": None,
+                        },
+                        "num_batches": 1,
+                    }
                 },
-                "meta": {},
             }
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_table_row_count_to_be_between",
-                "kwargs": {"max_value": 1313, "min_value": 1313},
-                "meta": {},
+                "kwargs": {
+                    "column_set": [
+                        "Age",
+                        "Name",
+                        "PClass",
+                        "Sex",
+                        "SexCode",
+                        "Survived",
+                        "Unnamed: 0",
+                    ],
+                    "exact_match": None,
+                },
+                "expectation_type": "expect_table_columns_to_match_set",
+                "meta": {"profiler_details": {"success_ratio": 1.0}},
             }
         ),
     ]
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    expectation_configurations: List[ExpectationConfiguration] = []
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in suite.expectations:
+        kwargs: dict = expectation_configuration.kwargs
+        key: str
+        value: Any
+        kwargs = {
+            key: sorted(value) if isinstance(value, (list, set, tuple)) else value
+            for key, value in kwargs.items()
+        }
+        expectation_configuration.kwargs = kwargs
+        expectation_configurations.append(expectation_configuration)
+
+    assert expectation_configurations == expected_expectation_configurations
 
     assert mock_subprocess.call_count == 1
     call_args: List[str] = mock_subprocess.call_args[0][0]
@@ -3604,9 +3738,12 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = f"""\
-suite = context.run_profiler_with_dynamic_arguments(
+result = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
-    expectation_suite=validator.expectation_suite
+    batch_request=batch_request,
+)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
 )
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
@@ -3728,9 +3865,12 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = f"""\
-suite = context.run_profiler_with_dynamic_arguments(
+result = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
-    expectation_suite=validator.expectation_suite
+    batch_request=batch_request,
+)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
 )
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
