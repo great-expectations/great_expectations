@@ -31,10 +31,8 @@ datasources:
           pattern: (.*)
       default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
-        assets:
-            default:
-                batch_identifiers:
-                  - default_identifier_name
+        batch_identifiers:
+          - default_identifier_name
         module_name: great_expectations.datasource.data_connector
 
 # This config file supports variable substitution which enables: 1) keeping

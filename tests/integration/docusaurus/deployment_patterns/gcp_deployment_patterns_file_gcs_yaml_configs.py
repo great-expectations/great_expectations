@@ -223,10 +223,8 @@ execution_engine:
 data_connectors:
     default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
-        assets:
-            default:
-                batch_identifiers:
-                  - default_identifier_name
+        batch_identifiers:
+            - default_identifier_name
     default_inferred_data_connector_name:
         class_name: InferredAssetGCSDataConnector
         bucket_or_name: <YOUR_GCS_BUCKET_HERE>

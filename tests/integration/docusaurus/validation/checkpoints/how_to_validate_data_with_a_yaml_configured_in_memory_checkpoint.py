@@ -45,10 +45,8 @@ data_connectors:
       pattern: (.*)\\.csv
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    assets:
-        default:
-            batch_identifiers:
-              - default_identifier_name
+    batch_identifiers:
+      - default_identifier_name
 """
 context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))

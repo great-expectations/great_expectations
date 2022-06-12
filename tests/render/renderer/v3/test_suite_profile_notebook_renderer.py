@@ -212,17 +212,8 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
                 },
                 "my_runtime_data_connector": {
                     "module_name": "great_expectations.datasource.data_connector",
+                    "batch_identifiers": ["pipeline_stage_name", "airflow_run_id"],
                     "class_name": "RuntimeDataConnector",
-                    "assets": {
-                        "default": {
-                            "module_name": "great_expectations.datasource.data_connector.asset",
-                            "class_name": "Asset",
-                            "batch_identifiers": [
-                                "pipeline_stage_name",
-                                "airflow_run_id",
-                            ],
-                        },
-                    },
                 },
             },
         },
@@ -500,17 +491,8 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                 },
                 "my_runtime_data_connector": {
                     "module_name": "great_expectations.datasource.data_connector",
+                    "batch_identifiers": ["pipeline_stage_name", "airflow_run_id"],
                     "class_name": "RuntimeDataConnector",
-                    "assets": {
-                        "default": {
-                            "module_name": "great_expectations.datasource.data_connector.asset",
-                            "class_name": "Asset",
-                            "batch_identifiers": [
-                                "pipeline_stage_name",
-                                "airflow_run_id",
-                            ],
-                        },
-                    },
                 },
             },
         },

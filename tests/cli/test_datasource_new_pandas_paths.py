@@ -74,15 +74,7 @@ def _run_cli_datasource_new_path_test(
                 "default_runtime_data_connector_name": {
                     "class_name": "RuntimeDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
-                    "assets": {
-                        "default": {
-                            "module_name": "great_expectations.datasource.data_connector.asset",
-                            "class_name": "Asset",
-                            "batch_identifiers": [
-                                "default_identifier_name",
-                            ],
-                        },
-                    },
+                    "batch_identifiers": ["default_identifier_name"],
                 },
             },
         }

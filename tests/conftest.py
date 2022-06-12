@@ -750,11 +750,9 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
             my_runtime_data_connector:
                 module_name: great_expectations.datasource.data_connector
                 class_name: RuntimeDataConnector
-                assets:
-                    default:
-                        batch_identifiers:
-                            - pipeline_stage_name
-                            - airflow_run_id
+                batch_identifiers:
+                    - pipeline_stage_name
+                    - airflow_run_id
     """
 
     # noinspection PyUnusedLocal
@@ -6198,18 +6196,11 @@ def build_in_memory_runtime_context():
                 "data_connectors": {
                     "runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "assets": {
-                            "default": {
-                                "module_name": "great_expectations.datasource.data_connector.asset",
-                                "class_name": "Asset",
-                                "batch_identifiers": [
-                                    "default_identifier_name",
-                                    "id_key_0",
-                                    "id_key_1",
-                                ],
-                            },
-                        },
-                    },
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
                 },
             },
             "spark_datasource": {
@@ -6222,18 +6213,11 @@ def build_in_memory_runtime_context():
                 "data_connectors": {
                     "runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "assets": {
-                            "default": {
-                                "module_name": "great_expectations.datasource.data_connector.asset",
-                                "class_name": "Asset",
-                                "batch_identifiers": [
-                                    "default_identifier_name",
-                                    "id_key_0",
-                                    "id_key_1",
-                                ],
-                            },
-                        },
-                    },
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
                 },
             },
         },

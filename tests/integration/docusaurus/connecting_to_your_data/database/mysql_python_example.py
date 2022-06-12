@@ -26,15 +26,7 @@ datasource_config = {
     "data_connectors": {
         "default_runtime_data_connector_name": {
             "class_name": "RuntimeDataConnector",
-            "assets": {
-                "default": {
-                    "module_name": "great_expectations.datasource.data_connector.asset",
-                    "class_name": "Asset",
-                    "batch_identifiers": [
-                        "default_identifier_name",
-                    ],
-                },
-            },
+            "batch_identifiers": ["default_identifier_name"],
         },
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetSqlDataConnector",
