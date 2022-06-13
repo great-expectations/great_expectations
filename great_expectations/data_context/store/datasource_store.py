@@ -6,7 +6,6 @@ from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
-from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
