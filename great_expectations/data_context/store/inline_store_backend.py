@@ -52,9 +52,9 @@ class InlineStoreBackend(StoreBackend):
     def config(self) -> dict:
         return self._config
 
-    def _get(self, key: Tuple[DataContextVariableSchema, str]) -> Any:
-        config_var_type: DataContextVariableSchema = key[0]
-        config_var_name: Optional[str] = key[1]
+    def _get(self, key: Tuple[str, str]) -> Any:
+        config_var_type: str = key[0]
+        config_var_name: str = key[1]
 
         variable_config: Any = self._data_context.config[config_var_type]
 
@@ -62,11 +62,9 @@ class InlineStoreBackend(StoreBackend):
             return variable_config[config_var_name]
         return variable_config
 
-    def _set(
-        self, key: Tuple[DataContextVariableSchema, str], value: Any, **kwargs: dict
-    ) -> None:
+    def _set(self, key: Tuple[str, str], value: Any, **kwargs: dict) -> None:
         config_var_type: DataContextVariableSchema = key[0]
-        config_var_name: Optional[str] = key[1]
+        config_var_name: str = key[1]
 
         project_config: DataContextConfig = self._data_context.config
 
@@ -78,13 +76,13 @@ class InlineStoreBackend(StoreBackend):
         self._data_context._save_project_config()
 
     def _move(
-        self, source_key: Tuple[str, ...], dest_key: Tuple[str, ...], **kwargs: dict
+        self, source_key: Tuple[str, str], dest_key: Tuple[str, str], **kwargs: dict
     ) -> None:
         raise StoreBackendError(
             "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"
         )
 
-    def list_keys(self, prefix: Tuple[str, ...] = ()) -> List[str]:
+    def list_keys(self, prefix: Tuple[str, str] = ()) -> List[str]:
         """
         See `StoreBackend.list_keys` for more information.
 
@@ -113,31 +111,37 @@ class InlineStoreBackend(StoreBackend):
 
         return keys
 
-    def remove_key(self, key: Tuple[str, ...]) -> None:
+    def remove_key(self, key: Tuple[str, str]) -> None:
         """
-        Not relevant to this StoreBackend due to reliance on the DataContext but necessary to fulfill contract set by parent.
         See `StoreBackend.remove_key` for more information.
         """
-        raise StoreBackendError(
-            "InlineStoreBackend does not support the deletion of keys; the DataContext's config variables schema is immutable"
-        )
-
-    def _has_key(self, key: Tuple[str, ...]) -> bool:
         resource_type: str = key[0]
-        resource_name: Optional[str] = None
+        resource_name: str = key[1]
+
+        if not resource_name:
+            raise StoreBackendError(
+                "InlineStoreBackend does not support the deletion of top level keys; the DataContext's config variables schema is immutable"
+            )
+        elif not self._has_key(key):
+            raise StoreBackendError(
+                f"Could not find a value associated with key `{key}`"
+            )
+
+        del self._data_context.config[resource_type][resource_name]
+
+    def _has_key(self, key: Tuple[str, str]) -> bool:
+        resource_type: str = key[0]
+        resource_name: str = key[1]
 
         if len(key) == 1:
             return resource_type in self._data_context.config
         elif len(key) == 2:
-            resource_name = key[1]
-            return (
-                resource_type in self._data_context.config
-                and resource_name in self._data_context.config[resource_type]
-            )
+            res = self._data_context.config.get(resource_type) or {}
+            return resource_name in res
 
         return False
 
-    def _validate_key(self, key: Tuple[str, ...]) -> None:
+    def _validate_key(self, key: Tuple[str, str]) -> None:
         if len(key) != 2:
             raise TypeError(
                 f"Keys used in {self.__class__.__name__} must be composed of two parts: a variable type and an optional name"
