@@ -9,6 +9,7 @@ from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     NotebookConfig,
     NotebookTemplateConfig,
+    ProgressBarsConfig,
 )
 from great_expectations.data_context.types.data_context_variables import (
     CloudDataContextVariables,
@@ -51,6 +52,7 @@ def data_context_config_dict() -> dict:
         ),
         "notebooks": None,
         "concurrency": None,
+        "progress_bars": None,
     }
     return config
 
@@ -135,6 +137,14 @@ def concurrency() -> ConcurrencyConfig:
     return ConcurrencyConfig(enabled=True)
 
 
+@pytest.fixture
+def progress_bars() -> ProgressBarsConfig:
+    return ProgressBarsConfig(
+        globally=True,
+        profilers=False,
+    )
+
+
 @pytest.mark.parametrize(
     "crud_method,target_attr",
     [
@@ -200,6 +210,11 @@ def concurrency() -> ConcurrencyConfig:
             "get_concurrency",
             DataContextVariableSchema.CONCURRENCY,
             id="concurrency getter",
+        ),
+        pytest.param(
+            "get_progress_bars",
+            DataContextVariableSchema.PROGRESS_BARS,
+            id="progress_bars getter",
         ),
     ],
 )
@@ -305,6 +320,12 @@ def test_data_context_variables_get(
             concurrency,
             DataContextVariableSchema.CONCURRENCY,
             id="concurrency setter",
+        ),
+        pytest.param(
+            "set_progress_bars",
+            progress_bars,
+            DataContextVariableSchema.PROGRESS_BARS,
+            id="progress_bars setter",
         ),
     ],
 )

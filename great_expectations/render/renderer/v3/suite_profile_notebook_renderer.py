@@ -192,7 +192,13 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # },
     # column_value_nonnullity_rule={
     # },
-    # numeric_columns_rule={
+    # numeric_columns_low_precision_rule={
+    #     "round_decimals": 1,   # parameters will be rounded to 1 decimal place for metrics that preserve precision
+    #     "false_positive_rate": 0.1,
+    #     "random_seed": 43792,
+    # },
+    # numeric_columns_high_precision_rule={
+    #     "round_decimals": 4,   # parameters will be rounded to 4 decimal places for metrics that increase precision
     #     "false_positive_rate": 0.1,
     #     "random_seed": 43792,
     # },
@@ -273,7 +279,7 @@ after this initial step gets you started on the path towards what you want.**
 
 This is highly configurable depending on your goals.
 You can ignore columns, specify cardinality of categorical columns, configure semantic types for columns, even adjust thresholds and/or different estimator parameters, etc.
-You can find more information about OnboardingDataAssistant and other DataAssistant components (please see documentation for the complete set of DataAssistant controls) [how to choose and control the behavior of the DataAssistant tailored to your goals](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.html).
+You can find more information about OnboardingDataAssistant and other DataAssistant components (please see documentation for the complete set of DataAssistant controls) [how to choose and control the behavior of the DataAssistant tailored to your goals](https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).
 
 """
         )

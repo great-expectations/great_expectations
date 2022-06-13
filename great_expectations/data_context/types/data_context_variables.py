@@ -279,6 +279,21 @@ class DataContextVariables(ABC):
         """
         return self._get(DataContextVariableSchema.CONCURRENCY)
 
+    def set_progress_bars(self, progress_bars: ProgressBarsConfig) -> None:
+        """
+        Setter for `progress_bars`.
+        """
+        self._set(
+            DataContextVariableSchema.PROGRESS_BARS,
+            progress_bars,
+        )
+
+    def get_progress_bars(self) -> Optional[ProgressBarsConfig]:
+        """
+        Getter for `progress_bars`.
+        """
+        return self._get(DataContextVariableSchema.PROGRESS_BARS)
+
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
