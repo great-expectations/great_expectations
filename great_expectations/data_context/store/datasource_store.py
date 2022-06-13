@@ -2,6 +2,9 @@ import copy
 from typing import Any, List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.data_context.store.inline_store_backend import (
+    InlineStoreBackend,
+)
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
@@ -34,10 +37,13 @@ class DatasourceStore(Store):
             store_name=store_name,
         )
 
-        if store_backend:
-            self._store_backend._data_context = store_backend.get("data_context")
-        else:
-            self._store_backend._data_context = None
+        # When using an InlineStoreBackend, we MUST use the same exact context (and not a copy).
+        # Equivalent contexts at different memory addresses will result in inconsistent persistence.
+        if (
+            isinstance(self._store_backend, InlineStoreBackend)
+            and store_backend is not None
+        ):
+            self._store_backend.data_context = store_backend.get("data_context")
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
