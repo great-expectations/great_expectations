@@ -262,7 +262,9 @@ class RuntimeDataConnector(DataConnector):
         )
         batch_definition_list = [batch_definition]
         self._update_data_references_cache(
-            batch_request.data_asset_name, batch_definition_list, batch_identifiers
+            batch_request.data_asset_name,
+            batch_definition_list,
+            IDDict(batch_identifiers),
         )
         return batch_definition_list
 
