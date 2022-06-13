@@ -34,6 +34,11 @@ class DatasourceStore(Store):
             store_name=store_name,
         )
 
+        if store_backend:
+            self._store_backend._data_context = store_backend.get("data_context")
+        else:
+            self._store_backend._data_context = None
+
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
         self._config = {
@@ -63,6 +68,9 @@ class DatasourceStore(Store):
             if not key == StoreBackend.STORE_BACKEND_ID_KEY
         ]
         return [key for key in keys_without_store_backend_id]
+
+    def remove_key(self, key: Tuple[str, str]) -> None:
+        return self._store_backend.remove_key(key)
 
     def serialize(
         self, key: Optional[Any], value: DatasourceConfig
@@ -105,9 +113,8 @@ class DatasourceStore(Store):
         Raises:
             ValueError if a DatasourceConfig is not found.
         """
-        datasource_key: DataContextVariableKey = DataContextVariableKey(
-            resource_type=DataContextVariableSchema.DATASOURCES,
-            resource_name=datasource_name,
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(
+            datasource_name=datasource_name
         )
         if not self.has_key(datasource_key):
             raise ValueError(
@@ -116,3 +123,16 @@ class DatasourceStore(Store):
 
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))
         return datasource_config
+
+    def delete_by_name(self, datasource_name: str) -> None:
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(
+            datasource_name=datasource_name
+        )
+        self.remove_key(datasource_key.to_tuple())
+
+    def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
+        datasource_key: DataContextVariableKey = DataContextVariableKey(
+            resource_type=DataContextVariableSchema.DATASOURCES,
+            resource_name=datasource_name,
+        )
+        return datasource_key

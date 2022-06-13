@@ -128,6 +128,7 @@ class InlineStoreBackend(StoreBackend):
             )
 
         del self._data_context.config[resource_type][resource_name]
+        self._data_context._save_project_config()
 
     def _has_key(self, key: Tuple[str, str]) -> bool:
         resource_type: str = key[0]
