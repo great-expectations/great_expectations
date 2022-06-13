@@ -6,7 +6,6 @@ from ruamel import yaml
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import DataContextError, GeCloudError
-from great_expectations.exceptions.exceptions import DatasourceInitializationError
 
 
 @pytest.fixture
@@ -114,6 +113,7 @@ def ge_cloud_data_context_config(
     return DataContextConfig(**config)
 
 
+@pytest.mark.cloud
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error(
     ge_cloud_data_context_config,
     data_context_with_incomplete_global_config_in_dot_dir_only,
@@ -127,6 +127,7 @@ def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_er
             DataContext(context_root_dir="/my/context/root/dir", ge_cloud_mode=True)
 
 
+@pytest.mark.cloud
 @mock.patch("requests.get")
 def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     mock_request,
@@ -160,6 +161,7 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     assert mock_request.call_args[1] == called_with_header
 
 
+@pytest.mark.cloud
 @mock.patch("requests.get")
 def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_error(
     mock_request,

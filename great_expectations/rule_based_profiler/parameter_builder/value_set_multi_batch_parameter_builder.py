@@ -117,12 +117,10 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = (
-            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
-                attributed_metric_values=parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-            )
+        metric_values: MetricValues = AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+            attributed_metric_values=parameter_node[
+                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+            ]
         )
 
         return Attributes(
@@ -150,7 +148,12 @@ def _get_unique_values_from_nested_collection_of_sets(
         Single flattened set containing unique values.
     """
 
-    flattened: List[Set[Any]] = list(itertools.chain.from_iterable(collection))
+    flattened: Union[List[Set[Any]], Set[Any]] = list(
+        itertools.chain.from_iterable(collection)
+    )
+    element: Any
+    if all(isinstance(element, set) for element in flattened):
+        flattened = set().union(*flattened)
 
     """
     In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to
@@ -161,7 +164,7 @@ def _get_unique_values_from_nested_collection_of_sets(
         sorted(
             filter(
                 lambda element: element is not None,
-                set().union(*flattened),
+                set(flattened),
             )
         )
     )

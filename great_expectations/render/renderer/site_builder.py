@@ -816,9 +816,13 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 if (validations and validations not in FALSEY_YAML_STRINGS)
                 else "profiling"
             )
-            validation_and_profiling_result_source_keys = self.data_context.stores[
-                self.site_section_builders_config[source_store].get("source_store_name")
-            ].list_keys()
+            validation_and_profiling_result_source_keys = set(
+                self.data_context.stores[
+                    self.site_section_builders_config[source_store].get(
+                        "source_store_name"
+                    )
+                ].list_keys()
+            )
             validation_and_profiling_result_site_keys = [
                 ValidationResultIdentifier.from_tuple(validation_result_tuple)
                 for validation_result_tuple in self.target_store.store_backends[

@@ -15,6 +15,7 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
     Domain,
+    MetricValue,
     ParameterContainer,
     ParameterNode,
 )
@@ -32,12 +33,21 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
         "column_partition_metric_single_batch_parameter_builder_config",
         "column_value_counts_metric_single_batch_parameter_builder_config",
         "column_values_nonnull_count_metric_single_batch_parameter_builder_config",
+        "metric_name",
+        "metric_domain_kwargs",
+        "metric_value_kwargs",
+        "enforce_numeric_metric",
+        "replace_nan_with_zero",
+        "reduce_scalar_metric",
     }
 
     def __init__(
         self,
         name: str,
         bucketize_data: Union[str, bool] = True,
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
+        ] = None,
         json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> None:
@@ -47,6 +57,9 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             bucketize_data: If True (default), then data is continuous (non-categorical); hence, must bucketize it.
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with this ParameterBuilder
         """
@@ -65,7 +78,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=None,
-            json_serialize=False,
+            json_serialize=True,
         )
         self._column_value_counts_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -96,11 +109,12 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             json_serialize=False,
         )
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
-            self._column_partition_metric_single_batch_parameter_builder_config,
-            self._column_value_counts_metric_single_batch_parameter_builder_config,
-            self._column_values_nonnull_count_metric_single_batch_parameter_builder_config,
-        ]
+        if evaluation_parameter_builder_configs is None:
+            evaluation_parameter_builder_configs = [
+                self._column_partition_metric_single_batch_parameter_builder_config,
+                self._column_value_counts_metric_single_batch_parameter_builder_config,
+                self._column_values_nonnull_count_metric_single_batch_parameter_builder_config,
+            ]
 
         super().__init__(
             name=name,
@@ -154,7 +168,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        bins: list = column_partition_parameter_node[
+        bins: MetricValue = column_partition_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
@@ -195,7 +209,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
                 ].index
             )
             weights = list(
-                np.array(
+                np.asarray(
                     column_value_counts_parameter_node[
                         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
                     ]
@@ -242,7 +256,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             # in this case, we have requested a partition, histogram using said partition, and nonnull count
             bins = list(bins)
             weights = list(
-                np.array(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY])
+                np.asarray(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY])
                 / column_values_nonnull_count_parameter_node[
                     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
                 ]

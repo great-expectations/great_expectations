@@ -75,15 +75,18 @@ class BaseYamlConfig(SerializableDictDot):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."
             )
+
         if not issubclass(cls.get_config_class(), BaseYamlConfig):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
             )
+
         if hasattr(cls.get_config_class(), "_schema_instance"):
             # noinspection PyProtectedMember
-            schema_instance: Schema = cls.get_config_class()._schema_instance
+            schema_instance: Optional[Schema] = cls.get_config_class()._schema_instance
             if schema_instance is None:
                 cls.get_config_class()._schema_instance = (cls.get_schema_class())()
+                return cls.get_config_class().schema_instance
             else:
                 return schema_instance
         else:
@@ -91,13 +94,13 @@ class BaseYamlConfig(SerializableDictDot):
             return cls.get_config_class().schema_instance
 
     @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap):
+    def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
         try:
-            config: Union[dict, BaseYamlConfig] = cls._get_schema_instance().load(
-                commented_map
-            )
+            schema_instance: Any = cls._get_schema_instance()
+            config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
+
             return config
         except ValidationError:
             logger.error(
@@ -134,15 +137,15 @@ class BaseYamlConfig(SerializableDictDot):
         return self._get_schema_validated_updated_commented_map()
 
     @classmethod
-    def get_config_class(cls) -> None:
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         raise NotImplementedError
 
     @classmethod
-    def get_schema_class(cls) -> None:
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         raise NotImplementedError
 
 
-class AssetConfig(DictDot):
+class AssetConfig(SerializableDictDot):
     def __init__(
         self,
         name: Optional[str] = None,
@@ -197,6 +200,18 @@ class AssetConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
 
 class AssetConfigSchema(Schema):
@@ -342,7 +357,7 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class DataConnectorConfig(DictDot):
+class DataConnectorConfig(SerializableDictDot):
     def __init__(
         self,
         class_name,
@@ -432,6 +447,18 @@ class DataConnectorConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
 
 class DataConnectorConfigSchema(Schema):
@@ -796,7 +823,7 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(DictDot):
+class DatasourceConfig(SerializableDictDot):
     def __init__(
         self,
         class_name=None,
@@ -879,6 +906,18 @@ class DatasourceConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
 
 class DatasourceConfigSchema(Schema):
@@ -1343,6 +1382,7 @@ class DataContextConfigSchema(Schema):
         "progress_bars",  # 0.13.49
     ]
 
+    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
         data = copy.deepcopy(data)
@@ -2034,9 +2074,9 @@ class DataContextConfig(BaseYamlConfig):
         validation_operators=None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
-        notebooks=None,
+        notebooks: Optional[NotebookConfig] = None,
         config_variables_file_path: Optional[str] = None,
-        anonymous_usage_statistics=None,
+        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
@@ -2100,16 +2140,20 @@ class DataContextConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls):
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         return cls  # DataContextConfig
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         return DataContextConfigSchema
 
     @property
     def config_version(self):
         return self._config_version
+
+    @config_version.setter
+    def config_version(self, config_version: float) -> None:
+        self._config_version = config_version
 
     def to_json_dict(self) -> dict:
         """
@@ -2360,11 +2404,11 @@ class CheckpointConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls) -> type:
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         return cls  # CheckpointConfig
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         return CheckpointConfigSchema
 
     @property
