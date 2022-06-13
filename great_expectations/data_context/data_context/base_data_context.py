@@ -18,13 +18,9 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
-from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
-)
-from great_expectations.data_context.types.data_context_variables import (
-    DataContextVariableSchema,
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
@@ -2113,19 +2109,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         if datasource_name in self._cached_datasources:
             return self._cached_datasources[datasource_name]
 
-        datasource_key: DataContextVariableKey = DataContextVariableKey(
-            resource_type=DataContextVariableSchema.DATASOURCES,
-            resource_name=datasource_name,
+        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
+            datasource_name=datasource_name
         )
-
-        if self._datasource_store.has_key(datasource_key):
-            datasource_config: DatasourceConfig = copy.deepcopy(
-                self._datasource_store.get(datasource_key)
-            )
-        else:
-            raise ValueError(
-                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
-            )
 
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
         substitutions: dict = self._determine_substitutions()

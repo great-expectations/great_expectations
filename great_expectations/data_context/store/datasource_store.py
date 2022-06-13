@@ -1,3 +1,4 @@
+import copy
 from typing import Any, List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
@@ -6,6 +7,9 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
+)
+from great_expectations.data_context.types.data_context_variables import (
+    DataContextVariableSchema,
 )
 from great_expectations.util import filter_properties_dict
 
@@ -87,3 +91,28 @@ class DatasourceStore(Store):
             return self._schema.load(value)
         else:
             return self._schema.loads(value)
+
+    def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig:
+        """Retrieves a DatasourceConfig persisted in the store by it's given name.
+
+        Args:
+            datasource_name: The name of the Datasource to retrieve.
+
+        Returns:
+            The DatasourceConfig persisted in the store that is associated with the given
+            input datasource_name.
+
+        Raises:
+            ValueError if a DatasourceConfig is not found.
+        """
+        datasource_key: DataContextVariableKey = DataContextVariableKey(
+            resource_type=DataContextVariableSchema.DATASOURCES,
+            resource_name=datasource_name,
+        )
+        if not self.has_key(datasource_key):
+            raise ValueError(
+                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
+            )
+
+        datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))
+        return datasource_config
