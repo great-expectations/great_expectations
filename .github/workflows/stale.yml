@@ -1,8 +1,9 @@
+---
 name: stalebot
 
 on:
  issues:
-   types: [reopened]
+   types: [reopened]  # TODO: Evaluate if sane
  schedule:
    - cron: "0 0 * * *"
 
@@ -10,19 +11,20 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     env:
-      ACTIONS_STEP_DEBUG: true
+      ACTIONS_STEP_DEBUG: true  # DEBUG: toggle to false
     steps:
-    - uses: actions/stale@v2
+    - uses: actions/stale@latest  #  TODO: we're brave
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
+        # TODO: evaluate if messages need tweaking
         stale-issue-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
         stale-pr-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-        days-before-stale: 90
-        days-before-close: 7
+        days-before-stale: 90  # NIT: This is a bit high
+        days-before-close: false  # DEBUG: settle on date with team
         stale-issue-label: stale
         stale-pr-label: stale
-        exempt-issue-label: stalebot-exempt
-        exempt-pr-labels: stalebot-exempt
+        exempt-issue-label: stalebot-exempt  # TODO: include trage and core-team
+        exempt-pr-labels: stalebot-exempt  # NIT: Do not feel as though this should be expanded
         operations-per-run: 30
         main: 'lib/main.js'
-        debug-only: false
+        debug-only: true  # DEBUG: Toggle to false
