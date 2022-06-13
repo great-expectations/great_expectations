@@ -470,7 +470,7 @@ class DataAssistantResult(SerializableDictDot):
                 df = df.iloc[:1]
             else:
                 # filter only on batches that do not contain every possible column
-                unique_columns: Set = {
+                unique_columns: Set[str] = {
                     column for column_list in df[metric_name] for column in column_list
                 }
                 df = df[df[metric_name].apply(set) != unique_columns]
