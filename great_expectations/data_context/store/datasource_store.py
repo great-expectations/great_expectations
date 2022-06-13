@@ -36,14 +36,6 @@ class DatasourceStore(Store):
             store_name=store_name,
         )
 
-        # When using an InlineStoreBackend, we MUST use the same exact context (and not a copy).
-        # Equivalent contexts at different memory addresses will result in inconsistent persistence.
-        if (
-            isinstance(self._store_backend, InlineStoreBackend)
-            and store_backend is not None
-        ):
-            self._store_backend.data_context = store_backend.get("data_context")
-
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
         self._config = {

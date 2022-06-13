@@ -481,9 +481,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
 
         store_name: str = "datasource_store"  # Never explicitly referenced but adheres to the convention set by other internal Stores
-        store_backend: dict = {"class_name": "InlineStoreBackend", "data_context": self}
+        store_backend: dict = {"class_name": "InlineStoreBackend"}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
+            "data_context": self,  # By passing this value in our runtime_environment, we ensure that the same exact context (memory address and all) is supplied to the Store backend
         }
 
         datasource_store: DatasourceStore = DatasourceStore(
@@ -2134,21 +2135,31 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         return keys
 
-    def list_datasources(self):
+    def list_datasources(self) -> List[dict]:
         """List currently-configured datasources on this context. Masks passwords.
 
         Returns:
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
         """
-        datasources = []
-        for (
-            name,
-            value,
-        ) in self.project_config_with_variables_substituted.datasources.items():
-            datasource_config = copy.deepcopy(value)
-            datasource_config["name"] = name
-            masked_config = PasswordMasker.sanitize_config(datasource_config)
+        datasources: List[dict] = []
+        substitutions: dict = self._determine_substitutions()
+
+        datasource_name: str
+        for datasource_name in self._datasource_store.list_keys():
+            datasource_config: DatasourceConfig = (
+                self._datasource_store.retrieve_by_name(datasource_name)
+            )
+            datasource_dict: dict = datasource_config.to_json_dict()
+            datasource_dict["name"] = datasource_name
+            substituted_config: dict = cast(
+                dict,
+                substitute_all_config_variables(
+                    datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+                ),
+            )
+            masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
             datasources.append(masked_config)
+
         return datasources
 
     def list_stores(self):
