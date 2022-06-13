@@ -2,9 +2,6 @@ import copy
 from typing import Any, List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.data_context.store.inline_store_backend import (
-    InlineStoreBackend,
-)
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
