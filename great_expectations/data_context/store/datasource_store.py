@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.store.store import Store
@@ -49,13 +49,13 @@ class DatasourceStore(Store):
             DataContextVariableSchema,
         )
 
-        datasource_key: DataContextVariableSchema = (
-            DataContextVariableSchema.DATASOURCES
+        datasource_key: Tuple[DataContextVariableSchema] = (
+            DataContextVariableSchema.DATASOURCES,
         )
 
         keys_without_store_backend_id: List[str] = [
             key
-            for key in self._store_backend.list_keys(prefix=(datasource_key,))
+            for key in self._store_backend.list_keys(prefix=datasource_key)
             if not key == StoreBackend.STORE_BACKEND_ID_KEY
         ]
         return [key for key in keys_without_store_backend_id]
