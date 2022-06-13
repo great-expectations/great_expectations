@@ -1,11 +1,11 @@
 ---
-title: How to use self-initializing Expectations
+title: How to use auto-initializing Expectations
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will walk you through the process of using a self-initializing <TechnicalTag tag="expectation" text="Expectations" /> to automate parameter estimation when you are creating Expectations interactively by using a <TechnicalTag tag="batch" text="Batch" /> or Batches that have been loaded into a <TechnicalTag tag="validator" text="Validator" />.
+This guide will walk you through the process of using a auto-initializing <TechnicalTag tag="expectation" text="Expectations" /> to automate parameter estimation when you are creating Expectations interactively by using a <TechnicalTag tag="batch" text="Batch" /> or Batches that have been loaded into a <TechnicalTag tag="validator" text="Validator" />.
 
 :::note PREREQUISITES: THIS HOW-TO GUIDE ASSUMES YOU HAVE:
 - Completed the [Getting started tutorial](../../tutorials/getting_started/tutorial_overview.md)
@@ -21,15 +21,15 @@ This guide will walk you through the process of using a self-initializing <Techn
 
 This guide assumes that you are creating and editing expectations in a Jupyter Notebook.  This process is covered in the guide: [How to create and edit expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).  
 
-Additionally, this guide assumes that you are using a multi-batch <TechnicalTag tag="batch_request" text="Batch Request" /> to provide your sample data.  (Self-initializing Expectations will work when run on a single Batch, but they really shine when run on multiple Batches that would have otherwise needed to be individually processed if a manual aproach were taken.)
+Additionally, this guide assumes that you are using a multi-batch <TechnicalTag tag="batch_request" text="Batch Request" /> to provide your sample data.  (Auto-initializing Expectations will work when run on a single Batch, but they really shine when run on multiple Batches that would have otherwise needed to be individually processed if a manual aproach were taken.)
 
-### 1. Determine if your Expectation is self-initializing
+### 1. Determine if your Expectation is auto-initializing
 
-Not all Expectations are self-initializng.  In order to be a self-initializing Expectation, an Expectation must have parameters that can be estimated.  As an example: `ExpectColumnToExist` only takes in a `Domain` (which is the column name) and checks whether the column name is in the list of names in the table's metadata.  This would be an example of an Expectation that would not work under the self-initializing framework.
+Not all Expectations are self-initializng.  In order to be a auto-initializing Expectation, an Expectation must have parameters that can be estimated.  As an example: `ExpectColumnToExist` only takes in a `Domain` (which is the column name) and checks whether the column name is in the list of names in the table's metadata.  This would be an example of an Expectation that would not work under the auto-initializing framework.
 
-An example of Expectations that would work under the self-initializing framework would be the ones that have numeric ranges, like `ExpectColumnMeanToBeBetween`, `ExpectColumnMaxToBeBetween`, and `ExpectColumnSumToBeBetween`.
+An example of Expectations that would work under the auto-initializing framework would be the ones that have numeric ranges, like `ExpectColumnMeanToBeBetween`, `ExpectColumnMaxToBeBetween`, and `ExpectColumnSumToBeBetween`.
 
-To check whether the Expectation you are interested in works under the self-initializing framework, run the `is_expectation_self_initializing()` method of the `Expectation` class.
+To check whether the Expectation you are interested in works under the auto-initializing framework, run the `is_expectation_self_initializing()` method of the `Expectation` class.
 
 For example:
 
@@ -73,7 +73,7 @@ Without the self-initialization framework you would have to get the values for `
 
 #### Using `auto=True`
 
-Self-initializing Expectations automate this sort of calculation across batches.  To perform the same calculation described above (the mean ranges across the 12 Batches in the 2018 taxi data) the only thing you need to do is run the Expectation with `auto=True`
+Auto-initializing Expectations automate this sort of calculation across batches.  To perform the same calculation described above (the mean ranges across the 12 Batches in the 2018 taxi data) the only thing you need to do is run the Expectation with `auto=True`
 
 ```python title="Python script/Jupyter notebook" file=../../../tests/integration/docusaurus/expectations/self_initializing_expectations/self_initializing_expect_column_mean_to_be_between.py#L79-L81
 ```
