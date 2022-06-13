@@ -71,7 +71,7 @@ class InlineStoreBackend(StoreBackend):
         return variable_config
 
     def _set(self, key: Tuple[str, str], value: Any, **kwargs: dict) -> None:
-        config_var_type: DataContextVariableSchema = key[0]
+        config_var_type: str = key[0]
         config_var_name: str = key[1]
 
         project_config: DataContextConfig = self._data_context.config

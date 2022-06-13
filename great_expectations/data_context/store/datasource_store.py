@@ -69,13 +69,14 @@ class DatasourceStore(Store):
         )
 
         keys_without_store_backend_id: List[str] = [
-            key
-            for key in self._store_backend.list_keys(prefix=datasource_key)
-            if not key == StoreBackend.STORE_BACKEND_ID_KEY
+            key for key in self._store_backend.list_keys(prefix=datasource_key)
         ]
         return [key for key in keys_without_store_backend_id]
 
     def remove_key(self, key: Tuple[str, str]) -> None:
+        """
+        See parent `Store.remove_key()` for more information
+        """
         return self._store_backend.remove_key(key)
 
     def serialize(
@@ -131,6 +132,11 @@ class DatasourceStore(Store):
         return datasource_config
 
     def delete_by_name(self, datasource_name: str) -> None:
+        """Deletes a DatasourceConfig persisted in the store by it's given name.
+
+        Args:
+            datasource_name: The name of the Datasource to retrieve.
+        """
         datasource_key: DataContextVariableKey = self._determine_datasource_key(
             datasource_name=datasource_name
         )
