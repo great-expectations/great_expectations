@@ -35,15 +35,17 @@ axis_label_color: str = Colors.BLUE_1.value
 axis_label_font_size: int = 12
 
 # X-Axis Only
+x_axis_title_y: int = 25
 x_axis_label_angle: int = 0
 x_axis_label_flush: bool = True
 x_axis_grid: bool = True
 
 # Y-Axis Only
+y_axis_title_x: int = -55
 
 # Legend
 legend_title_color: str = Colors.PURPLE.value
-legend_title_font_size: str = 12
+legend_title_font_size: int = 12
 
 #
 # Color Palettes
@@ -73,6 +75,13 @@ point_color: str = Colors.GREEN.value
 point_filled: bool = True
 point_opacity: float = 1.0
 
+# Bar Chart
+bar_color: str = Colors.PURPLE.value
+bar_opacity: float = 0.7
+bar_stroke_color: str = Colors.BLUE_1.value
+bar_stroke_width: int = 1
+bar_stroke_opacity: float = 1.0
+
 
 class AltairThemes(Enum):
     # https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
@@ -100,7 +109,11 @@ class AltairThemes(Enum):
             "labelFontSize": axis_label_font_size,
             "labelColor": axis_label_color,
         },
+        "axisY": {
+            "titleX": y_axis_title_x,
+        },
         "axisX": {
+            "titleY": x_axis_title_y,
             "labelAngle": x_axis_label_angle,
             "labelFlush": x_axis_label_flush,
             "grid": x_axis_grid,
@@ -128,5 +141,12 @@ class AltairThemes(Enum):
             "color": point_color,
             "filled": point_filled,
             "opacity": point_opacity,
+        },
+        "bar": {
+            "color": bar_color,
+            "opacity": bar_opacity,
+            "stroke": bar_stroke_color,
+            "strokeWidth": bar_stroke_width,
+            "strokeOpacity": bar_stroke_opacity,
         },
     }

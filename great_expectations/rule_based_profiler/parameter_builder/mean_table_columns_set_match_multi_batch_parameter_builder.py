@@ -116,7 +116,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         one_batch_table_columns_names_value: MetricValue
         multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
-            set(one_batch_table_columns_names_value.tolist())
+            set(one_batch_table_columns_names_value)
             for one_batch_table_columns_names_value in table_columns_names_multi_batch_value
         ]
 
@@ -126,7 +126,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         one_batch_table_columns_names_set: Set[str]
         mean_table_columns_set_match: np.float64 = np.mean(
-            np.array(
+            np.asarray(
                 [
                     1
                     if one_batch_table_columns_names_set

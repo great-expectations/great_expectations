@@ -35,42 +35,45 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
+# TODO: <WILL> Most of the logic here will be migrated to FileDataContext
 class DataContext(BaseDataContext):
-    """A DataContext represents a Great Expectations project. It organizes storage and access for
-    expectation suites, datasources, notification settings, and data fixtures.
+    """A DataContext represents a Great Expectations project. It is the primary entry point for a Great Expectations
+    deployment, with configurations and methods for all supporting components.
 
-    The DataContext is configured via a yml file stored in a directory called great_expectations; the configuration file
-    as well as managed expectation suites should be stored in version control.
+    The DataContext is configured via a yml file stored in a directory called great_expectations; this configuration
+    file as well as managed Expectation Suites should be stored in version control. There are other ways to create a
+    Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GE Cloud
+    (coming soon). Please refer to our documentation for more details.
 
-    Use the `create` classmethod to create a new empty config, or instantiate the DataContext
-    by passing the path to an existing data context root directory.
+    You can Validate data or generate Expectations using Execution Engines including:
 
-    DataContexts use data sources you're already familiar with. BatchKwargGenerators help introspect data stores and data execution
-    frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
-    enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
-    existing infrastructure and work environment.
+     * SQL (multiple dialects supported)
+     * Spark
+     * Pandas
 
-    DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
-    normalized *data_asset_name*, consisting of *datasource/generator/data_asset_name*.
+    Your data can be stored in common locations including:
 
-    - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
-      connected to a compute environment and ready for validation.
+     * databases / data warehouses
+     * files in s3, GCS, Azure, local storage
+     * dataframes (spark and pandas) loaded into memory
 
-    - The BatchKwargGenerator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
-      particular slices of data.
+    Please see our documentation for examples on how to set up Great Expectations, connect to your data,
+    create Expectations, and Validate data.
 
-    - The data_asset_name is a specific name -- often a table name or other name familiar to users -- that \
-      batch kwargs generators can slice into batches.
+    Other configuration options you can apply to a DataContext besides how to access data include things like where to
+    store Expectations, Profilers, Checkpoints, Metrics, Validation Results and Data Docs and how those Stores are
+    configured. Take a look at our documentation for more configuration options.
 
-    An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
-    in many projects it is useful to have different expectations evaluate in different contexts--profiling
-    vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
-    option for selecting which expectations a DataContext returns.
+    You can create or load a DataContext from disk via the following:
+    ```
+    import great_expectations as ge
+    ge.get_context()
+    ```
 
-    In many simple projects, the datasource or batch kwargs generator name may be omitted and the DataContext will infer
-    the correct name when there is no ambiguity.
+    --Public API--
 
-    Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
+    --Documentation--
+        https://docs.greatexpectations.io/docs/terms/data_context
     """
 
     @classmethod
@@ -83,14 +86,19 @@ class DataContext(BaseDataContext):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
-        `create` will not create a new "great_expectations" directory in the provided folder, provided one does not
+        `create` will create a new "great_expectations" directory in the provided folder, provided one does not
         already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
+
+        --Public API--
+
+        --Documentation--
+            https://docs.greatexpectations.io/docs/terms/data_context
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
             usage_statistics_enabled: boolean directive specifying whether or not to gather usage statistics
-            runtime_environment: a dictionary of config variables that
-            override both those set in config_variables.yml and the environment
+            runtime_environment: a dictionary of config variables that override both those set in
+                config_variables.yml and the environment
 
         Returns:
             DataContext
@@ -244,12 +252,6 @@ class DataContext(BaseDataContext):
                 conf_file_section="ge_cloud_config",
                 conf_file_option="account_id",
             )
-            logger.warning(
-                'If you have an environment variable named "GE_CLOUD_ACCOUNT_ID", please rename it to '
-                '"GE_CLOUD_ORGANIZATION_ID". If you have a global config file with an "account_id" '
-                'option, please rename it to "organization_id". "GE_CLOUD_ACCOUNT_ID" and "account_id" '
-                "will be deprecated in the next major release."
-            )
 
         if ge_cloud_organization_id is None:
             ge_cloud_organization_id = super()._get_global_config_value(
@@ -273,7 +275,7 @@ class DataContext(BaseDataContext):
             "access_token": ge_cloud_access_token,
         }
 
-    # TODO: deprecate ge_cloud_ascount_id
+    # TODO: deprecate ge_cloud_account_id
     def get_ge_cloud_config(
         self,
         ge_cloud_base_url: Optional[str] = None,
