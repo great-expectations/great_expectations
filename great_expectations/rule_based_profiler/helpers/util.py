@@ -83,11 +83,6 @@ def get_validator(
             variables=variables,
             parameters=parameters,
         )
-
-        validator = data_context.get_validator(
-            batch_request=batch_request,
-            create_expectation_suite_with_name=expectation_suite_name,
-        )
     else:
         num_batches: int = len(batch_list)
         if num_batches == 0:
@@ -96,16 +91,19 @@ def get_validator(
 """
             )
 
-        expectation_suite: ExpectationSuite = data_context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        validator = data_context.get_validator_using_batch_list(
-            expectation_suite=expectation_suite,
-            batch_list=batch_list,
-        )
+    validator = get_validator_with_expectation_suite(
+        data_context=data_context,
+        batch_list=batch_list,
+        batch_request=batch_request,
+        expectation_suite=None,
+        expectation_suite_name=expectation_suite_name,
+        component_name=f"rule_based_profiler-{expectation_suite_name}",
+        persist=False,
+    )
 
     # Always disabled for RBP and DataAssistants due to volume of metric calculations
     validator.show_progress_bars = False
+
     return validator
 
 
@@ -710,16 +708,17 @@ def _determine_quantile_bias_corrected_point_estimate(
 
 
 def get_validator_with_expectation_suite(
-    batch_request: Union[BatchRequestBase, dict],
     data_context: "BaseDataContext",  # noqa: F821
+    batch_list: Optional[List[Batch]] = None,
+    batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
     expectation_suite_name: Optional[str] = None,
     component_name: str = "test",
     persist: bool = False,
 ) -> "Validator":  # noqa: F821
     """
-    Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
-    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    Instantiates and returns "Validator" using "data_context", "batch_list" or "batch_request", and other information.
+    Use "expectation_suite" if provided; otherwise, if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
     """
     assert expectation_suite is None or isinstance(expectation_suite, ExpectationSuite)
@@ -732,9 +731,9 @@ def get_validator_with_expectation_suite(
         component_name=component_name,
         persist=persist,
     )
-
     batch_request = materialize_batch_request(batch_request=batch_request)
     validator: "Validator" = data_context.get_validator(  # noqa: F821
+        batch_list=batch_list,
         batch_request=batch_request,
         expectation_suite=expectation_suite,
     )
