@@ -4,9 +4,6 @@ schedules:
 # https://crontab.guru/#0_8_*_*_1-5
 - cron: "0 8 * * 1-5"
   displayName: Partner Integration Tests
-  branches:
-    include:
-    - develop
 
 stages:
   - stage: scope_check
