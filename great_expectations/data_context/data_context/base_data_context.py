@@ -1684,7 +1684,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         batch: Optional[Batch] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[BatchRequestBase] = None,
-        batch_request_list: List[Optional[BatchRequestBase]] = None,
+        batch_request_list: Optional[List[BatchRequestBase]] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,

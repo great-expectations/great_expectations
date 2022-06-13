@@ -393,13 +393,10 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_regex_single_candidate(
-    mock_data_context: mock.MagicMock, batch_fixture: Batch
+    mock_data_context: mock.MagicMock,
+    batch_fixture: Batch,
 ):
     batch: Batch = batch_fixture
-    mock_data_context.get_batch_list.return_value = [batch]
-    mock_data_context.get_validator_using_batch_list.return_value = Validator(
-        execution_engine=PandasExecutionEngine(), batches=[batch]
-    )
 
     data_context: DataContext = mock_data_context
 
@@ -424,6 +421,12 @@ def test_regex_single_candidate(
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    validator: Validator = Validator(
+        execution_engine=PandasExecutionEngine(),
+        batches=[batch],
+    )
+    mock_data_context.get_validator.return_value = validator
 
     assert parameter_container.parameter_nodes is None
 
@@ -464,10 +467,6 @@ def test_regex_single_candidate(
 def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: Batch):
     batch: Batch = batch_fixture
 
-    mock_data_context.get_batch_list.return_value = [batch]
-    mock_data_context.get_validator_using_batch_list.return_value = Validator(
-        execution_engine=PandasExecutionEngine(), batches=[batch]
-    )
     data_context: DataContext = mock_data_context
 
     metric_domain_kwargs: dict = {"column": "b"}
@@ -491,6 +490,12 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    validator: Validator = Validator(
+        execution_engine=PandasExecutionEngine(),
+        batches=[batch],
+    )
+    mock_data_context.get_validator.return_value = validator
 
     assert parameter_container.parameter_nodes is None
 
