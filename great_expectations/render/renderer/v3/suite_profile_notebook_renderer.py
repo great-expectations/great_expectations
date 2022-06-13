@@ -193,7 +193,7 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # column_value_nonnullity_rule={
     # },
     # numeric_columns_rule={
-    #     "round_decimals": 4,
+    #     "round_decimals": 12,
     #     "false_positive_rate": 0.1,
     #     "random_seed": 43792,
     # },
@@ -211,7 +211,7 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # },
     # categorical_columns_rule={
     #     "false_positive_rate": 0.1,
-    #     "round_decimals": 3,
+    #     "round_decimals": 4,
     # },
 )
 validator.expectation_suite = data_assistant_result.get_expectation_suite(

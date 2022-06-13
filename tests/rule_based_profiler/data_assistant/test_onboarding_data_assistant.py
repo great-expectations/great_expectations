@@ -203,7 +203,7 @@ def test_onboarding_data_assistant_result_serialization(
         bobby_onboarding_data_assistant_result.to_json_dict()
         == onboarding_data_assistant_result_as_dict
     )
-    assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 9
+    assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 8
 
 
 @mock.patch(
@@ -322,7 +322,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         # column_value_nonnullity_rule={
         # },
         numeric_columns_rule={
-            "round_decimals": 4,
+            "round_decimals": 12,
             "false_positive_rate": 0.1,
             "random_seed": 43792,
         },
@@ -340,14 +340,14 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         },
         categorical_columns_rule={
             "false_positive_rate": 0.1,
-            # "round_decimals": 3,
+            # "round_decimals": 4,
         },
     )
     assert (
         data_assistant_result.profiler_config.rules["numeric_columns_rule"][
             "variables"
         ]["round_decimals"]
-        == 4
+        == 12
     )
     assert (
         data_assistant_result.profiler_config.rules["numeric_columns_rule"][
