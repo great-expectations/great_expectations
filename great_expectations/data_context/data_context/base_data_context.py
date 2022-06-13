@@ -475,11 +475,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._init_datasource_store()
 
     def _init_datasource_store(self) -> None:
+        """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
+
+        Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default
+        implementation is provided based on the user's environment but is not customizable.
+        """
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
 
-        store_name: str = "datasource_store"
+        store_name: str = "datasource_store"  # Never explicitly referenced but adheres to the convention set by other internal Stores
         store_backend: dict = {"class_name": "InlineStoreBackend", "data_context": self}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
@@ -495,9 +500,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def _init_datasources(self) -> None:
         for datasource_name in self._datasource_store.list_keys():
             try:
-                self._cached_datasources[datasource_name] = self.get_datasource(
+                datasource: Datasource = self.get_datasource(
                     datasource_name=datasource_name
                 )
+                self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
@@ -1094,7 +1100,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
 
     def _determine_substitutions(self) -> dict:
-        substituted_config_variables = substitute_all_config_variables(
+        """Aggregates substitutions from the project's config variables file, any environment variables, and
+        the runtime environment.
+
+        Returns: A dictionary containing all possible substitutions that can be applied to a given object
+                 using `substitute_all_config_variables`.
+        """
+        substituted_config_variables: dict = substitute_all_config_variables(
             self.config_variables,
             dict(os.environ),
             self.DOLLAR_SIGN_ESCAPE_STRING,
