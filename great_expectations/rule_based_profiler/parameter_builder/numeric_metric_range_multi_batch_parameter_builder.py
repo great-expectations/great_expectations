@@ -20,10 +20,8 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    AttributedResolvedMetrics,
     Domain,
     MetricValues,
     NumericRangeEstimationResult,
@@ -313,13 +311,9 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = (
-            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
-                attributed_metric_values=parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-            )
-        )
+        metric_values: MetricValues = parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+        ]
 
         # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         estimator: str = get_parameter_value_and_validate_return_type(
@@ -515,7 +509,7 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                     estimation_histogram=np.histogram(
                         a=metric_value_vector, bins=NUM_HISTOGRAM_BINS
                     )[0],
-                    value_range=np.array(
+                    value_range=np.asarray(
                         [metric_value_vector[0], metric_value_vector[0]]
                     ),
                 )
