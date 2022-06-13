@@ -52,14 +52,6 @@ class InlineStoreBackend(StoreBackend):
     def config(self) -> dict:
         return self._config
 
-    @property
-    def data_context(self) -> "DataContext":  # noqa: F821
-        return self._data_context
-
-    @data_context.setter
-    def data_context(self, value: "DataContext") -> None:  # noqa: F821
-        self._data_context = value
-
     def _get(self, key: Tuple[str, str]) -> Any:
         config_var_type: str = key[0]
         config_var_name: str = key[1]
