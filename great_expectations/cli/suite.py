@@ -38,6 +38,13 @@ except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 
+MESSAGE_USER_CONFIGURABLE_PROFILER: str = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
+MESSAGE_ONBOARDING_DATA_ASSISTANT: str = "Since you did not supply a profiler name, defaulting to the OnboardingDataAssistant"
+MESSAGE_RULE_BASED_PROFILER: str = (
+    "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
+)
+
+
 @click.group()
 @click.pass_context
 def suite(ctx: click.Context) -> None:
@@ -157,14 +164,10 @@ def _determine_profile(profiler_name: Optional[str]) -> bool:
     profile: bool = profiler_name is not None
     if profile:
         if profiler_name:
-            msg = "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
+            msg = MESSAGE_RULE_BASED_PROFILER
         else:
             # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-            # msg = "Since you did not supply a profiler name, defaulting to the OnboardingDataAssistant"
-            # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-            # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-            msg = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
-            # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+            msg = MESSAGE_USER_CONFIGURABLE_PROFILER
         cli_message(string=f"<yellow>{msg}</yellow>")
 
     return profile
