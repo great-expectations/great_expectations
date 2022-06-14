@@ -113,7 +113,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(self._get_schema_instance().dump(self))
         return commented_map
 
-    def to_yaml(self, outfile) -> None:
+    def to_yaml(self, outfile: str) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """

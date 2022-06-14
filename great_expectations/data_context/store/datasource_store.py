@@ -61,11 +61,11 @@ class DatasourceStore(Store):
         ]
         return [key for key in keys_without_store_backend_id]
 
-    def remove_key(self, key: Tuple[str, str]) -> None:
+    def remove_key(self, key: DataContextVariableKey) -> None:
         """
         See parent `Store.remove_key()` for more information
         """
-        return self._store_backend.remove_key(key)
+        return self._store_backend.remove_key(key.to_tuple())
 
     def serialize(
         self, key: Optional[Any], value: DatasourceConfig
@@ -128,7 +128,15 @@ class DatasourceStore(Store):
         datasource_key: DataContextVariableKey = self._determine_datasource_key(
             datasource_name=datasource_name
         )
-        self.remove_key(datasource_key.to_tuple())
+        self.remove_key(datasource_key)
+
+    def set_by_name(
+        self, datasource_name: str, datasource_config: DatasourceConfig
+    ) -> None:
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(
+            datasource_name=datasource_name
+        )
+        self.set(datasource_key, datasource_config)
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
         datasource_key: DataContextVariableKey = DataContextVariableKey(
