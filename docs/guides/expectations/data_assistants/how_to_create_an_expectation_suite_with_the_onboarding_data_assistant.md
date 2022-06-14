@@ -19,7 +19,7 @@ Data Assistants are currently an experimental feature and this workflow may be s
 This process mirrors that of the Jupyter Notebook that is created when you run the following <TechnicalTag tag="cli" text="CLI" /> command:
 
 ```terminal
-great_expectations suite new --profile
+great_expectations suite new --profile onboarding-data-assistant
 ```
 :::
 
