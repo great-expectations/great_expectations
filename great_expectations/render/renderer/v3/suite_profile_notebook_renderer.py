@@ -48,8 +48,12 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
 
         self.add_header()
 
+        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
         if self._profiler_name:
-            self._add_rule_based_profiler_cells()
+            if self._profiler_name == "onboarding-data-assistant":
+                self._add_onboarding_data_assistant_cells()
+            else:
+                self._add_rule_based_profiler_cells()
         else:
             self._add_user_configurable_profiler_cells()
 
@@ -226,54 +230,7 @@ validator.expectation_suite = result.get_expectation_suite(
             lint=True,
         )
 
-    def _add_profiler_instructions(self) -> None:
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-        self.add_markdown_cell(
-            markdown="""# Run the UserConfigurableProfiler
-
-The suites generated here are **not meant to be production suites** -- they are **a starting point to build upon**.
-
-**To get to a production-grade suite, you will definitely want to [edit this
-suite](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html?utm_source=notebook&utm_medium=profile_based_expectations)
-after this initial step gets you started on the path towards what you want.**
-
-This is highly configurable depending on your goals.
-You can ignore columns or exclude certain expectations, specify a threshold for creating value set expectations, or even specify semantic types for a given column.
-You can find more information about [how to configure this profiler, including a list of the expectations that it uses, here.](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html)
-
-"""
-        )
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-
-    #         self.add_markdown_cell(
-    #             markdown="""# Run the OnboardingDataAssistant
-    #
-    # The suites generated here are **not meant to be production suites** -- they are **a starting point to build upon**.
-    #
-    # **To get to a production-grade suite, you will definitely want to [edit this
-    # suite](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html?utm_source=notebook&utm_medium=profile_based_expectations)
-    # after this initial step gets you started on the path towards what you want.**
-    #
-    # This is highly configurable depending on your goals.
-    # You can ignore columns, specify cardinality of categorical columns, configure semantic types for columns, even adjust thresholds and/or different estimator parameters, etc.
-    # You can find more information about OnboardingDataAssistant and other DataAssistant components (please see documentation for the complete set of DataAssistant controls) [how to choose and control the behavior of the DataAssistant tailored to your goals](https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).
-    #
-    # """
-    #         )
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-
-    def _add_available_columns_list(self) -> None:
-        column_names: List[str]
-        column_name: str
-        column_names = [
-            f'    "{column_name}",\n' for column_name in self._validator.columns()
-        ]
-        code: str = f'exclude_column_names = [\n{"".join(column_names)}]'
-        self.add_code_cell(code=code, lint=True)
-
     def _add_onboarding_data_assistant_cells(self) -> None:
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
         self.add_code_cell(
             code=f"""\
 import datetime
@@ -321,7 +278,7 @@ Other directives are shown (commented out) as examples of the depth of control p
 """
         )
         self._add_available_columns_list()
-        self._add_profiler_instructions()
+        self._add_onboarding_data_assistant_instructions()
         self.add_code_cell(
             code="""\
 data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
@@ -373,3 +330,46 @@ validator.expectation_suite = data_assistant_result.get_expectation_suite(
 """,
             lint=True,
         )
+
+    def _add_profiler_instructions(self) -> None:
+        self.add_markdown_cell(
+            markdown="""# Run the UserConfigurableProfiler
+
+The suites generated here are **not meant to be production suites** -- they are **a starting point to build upon**.
+
+**To get to a production-grade suite, you will definitely want to [edit this
+suite](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html?utm_source=notebook&utm_medium=profile_based_expectations)
+after this initial step gets you started on the path towards what you want.**
+
+This is highly configurable depending on your goals.
+You can ignore columns or exclude certain expectations, specify a threshold for creating value set expectations, or even specify semantic types for a given column.
+You can find more information about [how to configure this profiler, including a list of the expectations that it uses, here.](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html)
+
+"""
+        )
+
+    def _add_onboarding_data_assistant_instructions(self) -> None:
+        self.add_markdown_cell(
+            markdown="""# Run the OnboardingDataAssistant
+
+The suites generated here are **not meant to be production suites** -- they are **a starting point to build upon**.
+
+**To get to a production-grade suite, you will definitely want to [edit this
+suite](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html?utm_source=notebook&utm_medium=profile_based_expectations)
+after this initial step gets you started on the path towards what you want.**
+
+This is highly configurable depending on your goals.
+You can ignore columns, specify cardinality of categorical columns, configure semantic types for columns, even adjust thresholds and/or different estimator parameters, etc.
+You can find more information about OnboardingDataAssistant and other DataAssistant components (please see documentation for the complete set of DataAssistant controls) [how to choose and control the behavior of the DataAssistant tailored to your goals](https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).
+
+    """
+        )
+
+    def _add_available_columns_list(self) -> None:
+        column_names: List[str]
+        column_name: str
+        column_names = [
+            f'    "{column_name}",\n' for column_name in self._validator.columns()
+        ]
+        code: str = f'exclude_column_names = [\n{"".join(column_names)}]'
+        self.add_code_cell(code=code, lint=True)
