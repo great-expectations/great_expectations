@@ -24,16 +24,8 @@ class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectati
     examples = [
         {
             "data": {
-                "valid": [
-                    "-3.14",
-                    "1.07E-10",
-                    "3.14e-12"
-                ],
-                "invalid": [
-                    "11.e-12",
-                    "0E+5",
-                    "007"
-                ],
+                "valid": ["-3.14", "1.07E-10", "3.14e-12"],
+                "invalid": ["11.e-12", "0E+5", "007"],
                 "empty": ["", None, False],
             },
             "tests": [
