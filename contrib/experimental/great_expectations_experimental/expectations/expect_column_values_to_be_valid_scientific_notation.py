@@ -6,7 +6,9 @@ For detailed instructions on how to use it, please see:
 
 from typing import Dict
 
-from great_expectations.expectations.regex_based_column_map_expectation import RegexBasedColumnMapExpectation
+from great_expectations.expectations.regex_based_column_map_expectation import (
+    RegexBasedColumnMapExpectation,
+)
 
 
 class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectation):
