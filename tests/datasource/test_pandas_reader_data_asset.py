@@ -5,6 +5,8 @@ from great_expectations.datasource.base_data_asset import (
     BatchIdentifierException,
     BatchIdentifiers,
     NewBatchRequest,
+)
+from great_expectations.datasource.pandas_reader_data_asset import (
     PandasReaderDataAsset,
 )
 

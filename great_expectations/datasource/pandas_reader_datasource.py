@@ -8,7 +8,7 @@ import pandas as pd
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.datasource.base_data_asset import PandasReaderDataAsset
+from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.marshmallow__shade.fields import Bool
 from great_expectations.types import DictDot
@@ -223,7 +223,18 @@ class PandasReaderDatasource(Datasource):
                         "id_",
                         "timestamp",
                     ],
+                },
+                "configured_data_connector": {
+                    "class_name": "ConfiguredAssetFilesystemDataConnector",
+                    "base_directory":"",
+                    "assets":{
+                        "default_data_asset":{
+                            "pattern":"(.*)",
+                            "group_names":["filename"],
+                        }
+                    }
                 }
+
             },
         )
 

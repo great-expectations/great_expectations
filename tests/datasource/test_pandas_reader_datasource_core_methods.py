@@ -70,29 +70,3 @@ def test_PandasReaderDatasource_add_asset(test_dir_alpha):
     )
 
     #using custom sorters
-
-
-def test_PandasReaderDatasource_add_asset_from_method_signature():
-    """This is scratch code"""
-    return
-
-    my_validator = my_datasource.read_csv(my_file_name)
-    new_asset = my_datasource.get_asset_from_method_signature(
-        'read_json',
-        my_file_name,
-    )
-    assert new_asset == PandasReaderDataAsset(
-        name="???",
-
-    )
-
-    my_datasource.add_asset_from_method_signature(
-        'read_json',
-        my_file_name,
-    )
-
-
-    my_datasource.read_csv(
-            file_relative_path(__file__, "fixtures/example_1.csv"),
-            use_primary_arg_as_id=False,
-        )
