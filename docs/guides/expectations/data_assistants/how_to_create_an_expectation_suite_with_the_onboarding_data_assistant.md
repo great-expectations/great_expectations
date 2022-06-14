@@ -8,9 +8,15 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 This guide demonstrates how to use the Onboarding Data Assistant to Profile your data and automate the generation of an
 Expectation Suite, which you can then adjust to be suited for your specific needs.
 
+:::caution
+
+Data Assistants are currently an experimental feature and this workflow may be subject to change.
+
+:::
+
 :::note
 
-This process mirrors that of the Jupyter Notebook that is created when you run the following CLI command:
+This process mirrors that of the Jupyter Notebook that is created when you run the following <TechnicalTag tag="cli" text="CLI" /> command:
 
 ```terminal
 great_expectations suite new --profile
