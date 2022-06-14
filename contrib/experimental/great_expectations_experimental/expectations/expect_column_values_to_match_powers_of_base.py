@@ -23,7 +23,7 @@ def is_power_of_n(num, base) -> bool:
     if base in {0, 1}:
         return num == base
     power = int(math.log(num, base) + 0.5)
-    return base**power == num
+    return base ** power == num
 
 
 # This class defines a Metric to support your Expectation.
