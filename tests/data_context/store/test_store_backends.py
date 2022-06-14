@@ -1622,13 +1622,40 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
 
     assert "InlineStoreBackend does not support moving of keys" in str(e.value)
 
-    # test .remove_key
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.PROGRESS_BARS)
+    # test invalid .remove_key
+    key = DataContextVariableKey(
+        resource_type=DataContextVariableSchema.PROGRESS_BARS, resource_name="profilers"
+    )
     tuple_ = key.to_tuple()
     with pytest.raises(StoreBackendError) as e:
         inline_store_backend.remove_key(tuple_)
 
-    assert "InlineStoreBackend does not support the deletion of keys" in str(e.value)
+    assert "Could not find a value associated with key" in str(e.value)
+
+    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+    tuple_ = key.to_tuple()
+    with pytest.raises(StoreBackendError) as e:
+        inline_store_backend.remove_key(tuple_)
+
+    assert "InlineStoreBackend does not support the deletion of top level keys" in str(
+        e.value
+    )
+
+    # test valid .remove_key
+    store_name: str = "my_store"
+    store_value: dict = {
+        "class_name": "ExpectationsStore",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+        },
+    }
+    key = DataContextVariableKey(
+        resource_type=DataContextVariableSchema.STORES, resource_name=store_name
+    )
+
+    tuple_ = key.to_tuple()
+    inline_store_backend.set(key=tuple_, value=store_value)
+    inline_store_backend.remove_key(tuple_)
 
 
 @pytest.mark.integration

@@ -385,7 +385,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._cached_datasources = {}
 
         # Build the datasources we know about and have access to
-        self._init_datasources(self.project_config_with_variables_substituted)
+        self._init_datasources()
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -466,14 +466,41 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
-    def _init_datasources(self, config: DataContextConfig) -> None:
-        if not config.datasources:
-            return
-        for datasource_name in config.datasources:
+        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
+        # As such, it must be instantiated separately.
+        self._init_datasource_store()
+
+    def _init_datasource_store(self) -> None:
+        """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
+
+        Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default
+        implementation is provided based on the user's environment but is not customizable.
+        """
+        from great_expectations.data_context.store.datasource_store import (
+            DatasourceStore,
+        )
+
+        store_name: str = "datasource_store"  # Never explicitly referenced but adheres to the convention set by other internal Stores
+        store_backend: dict = {"class_name": "InlineStoreBackend"}
+        runtime_environment: dict = {
+            "root_directory": self.root_directory,
+            "data_context": self,  # By passing this value in our runtime_environment, we ensure that the same exact context (memory address and all) is supplied to the Store backend
+        }
+
+        datasource_store: DatasourceStore = DatasourceStore(
+            store_name=store_name,
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+        )
+        self._datasource_store = datasource_store
+
+    def _init_datasources(self) -> None:
+        for datasource_name in self._datasource_store.list_keys():
             try:
-                self._cached_datasources[datasource_name] = self.get_datasource(
+                datasource: Datasource = self.get_datasource(
                     datasource_name=datasource_name
                 )
+                self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
@@ -1042,18 +1069,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         if not config:
             config = self.config
 
-        substituted_config_variables = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-
-        # Substitutions should have already occurred for GE Cloud configs at this point
-        substitutions = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
+        substitutions: dict = self._determine_substitutions()
 
         if self.ge_cloud_mode:
             ge_cloud_config_variable_defaults = {
@@ -1079,6 +1095,27 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
             )
         )
+
+    def _determine_substitutions(self) -> dict:
+        """Aggregates substitutions from the project's config variables file, any environment variables, and
+        the runtime environment.
+
+        Returns: A dictionary containing all possible substitutions that can be applied to a given object
+                 using `substitute_all_config_variables`.
+        """
+        substituted_config_variables: dict = substitute_all_config_variables(
+            self.config_variables,
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
+        return substitutions
 
     def escape_all_config_variables(
         self,
@@ -1183,10 +1220,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
-                # remove key until we have a delete method on project_config
-                # self.project_config_with_variables_substituted.datasources[
-                # datasource_name].remove()
-                del self.config["datasources"][datasource_name]
+                self._datasource_store.delete_by_name(datasource_name)
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(f"Datasource {datasource_name} not found")
@@ -2072,20 +2106,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         if datasource_name in self._cached_datasources:
             return self._cached_datasources[datasource_name]
-        if (
-            datasource_name
-            in self.project_config_with_variables_substituted.datasources
-        ):
-            datasource_config: DatasourceConfig = copy.deepcopy(
-                self.project_config_with_variables_substituted.datasources[
-                    datasource_name
-                ]
-            )
-        else:
-            raise ValueError(
-                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
-            )
+
+        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
+            datasource_name=datasource_name
+        )
+
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        substitutions: dict = self._determine_substitutions()
+        config = substitute_all_config_variables(
+            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        )
+
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = self._instantiate_datasource_from_config(
@@ -2104,21 +2135,31 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         return keys
 
-    def list_datasources(self):
+    def list_datasources(self) -> List[dict]:
         """List currently-configured datasources on this context. Masks passwords.
 
         Returns:
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
         """
-        datasources = []
-        for (
-            name,
-            value,
-        ) in self.project_config_with_variables_substituted.datasources.items():
-            datasource_config = copy.deepcopy(value)
-            datasource_config["name"] = name
-            masked_config = PasswordMasker.sanitize_config(datasource_config)
+        datasources: List[dict] = []
+        substitutions: dict = self._determine_substitutions()
+
+        datasource_name: str
+        for datasource_name in self._datasource_store.list_keys():
+            datasource_config: DatasourceConfig = (
+                self._datasource_store.retrieve_by_name(datasource_name)
+            )
+            datasource_dict: dict = datasource_config.to_json_dict()
+            datasource_dict["name"] = datasource_name
+            substituted_config: dict = cast(
+                dict,
+                substitute_all_config_variables(
+                    datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+                ),
+            )
+            masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
             datasources.append(masked_config)
+
         return datasources
 
     def list_stores(self):
