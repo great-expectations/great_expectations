@@ -194,32 +194,37 @@ def test_cli_datasource_new(
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
         {
-            "execution_engine": {
-                "class_name": "PandasExecutionEngine",
-                "module_name": "great_expectations.execution_engine",
-            },
             "class_name": "Datasource",
-            "module_name": "great_expectations.datasource",
             "data_connectors": {
                 "default_inferred_data_connector_name": {
-                    "module_name": "great_expectations.datasource.data_connector",
+                    "base_directory": "../../filesystem_csv_2",
+                    "class_name": "InferredAssetFilesystemDataConnector",
                     "default_regex": {
                         "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
-                    "base_directory": "../../filesystem_csv_2",
-                    "class_name": "InferredAssetFilesystemDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
                 },
                 "default_runtime_data_connector_name": {
-                    "module_name": "great_expectations.datasource.data_connector",
-                    "batch_identifiers": ["default_identifier_name"],
+                    "assets": {
+                        "my_runtime_asset_name": {
+                            "batch_identifiers": ["runtime_batch_identifier_name"],
+                            "class_name": "Asset",
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                        }
+                    },
                     "class_name": "RuntimeDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
                 },
             },
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "module_name": "great_expectations.datasource",
             "name": "my_datasource",
         }
     ]
-
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -340,28 +345,34 @@ def test_cli_datasource_new_with_name_param(
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
         {
-            "module_name": "great_expectations.datasource",
-            "execution_engine": {
-                "module_name": "great_expectations.execution_engine",
-                "class_name": "PandasExecutionEngine",
-            },
+            "class_name": "Datasource",
             "data_connectors": {
                 "default_inferred_data_connector_name": {
+                    "base_directory": "../../filesystem_csv_2",
+                    "class_name": "InferredAssetFilesystemDataConnector",
                     "default_regex": {
                         "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
-                    "class_name": "InferredAssetFilesystemDataConnector",
-                    "base_directory": "../../filesystem_csv_2",
                 },
                 "default_runtime_data_connector_name": {
-                    "batch_identifiers": ["default_identifier_name"],
-                    "module_name": "great_expectations.datasource.data_connector",
+                    "assets": {
+                        "my_runtime_asset_name": {
+                            "batch_identifiers": ["runtime_batch_identifier_name"],
+                            "class_name": "Asset",
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                        }
+                    },
                     "class_name": "RuntimeDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
                 },
             },
-            "class_name": "Datasource",
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "module_name": "great_expectations.datasource",
             "name": "foo",
         }
     ]
@@ -414,28 +425,34 @@ def test_cli_datasource_new_from_misc_directory(
 
     assert context.list_datasources() == [
         {
-            "module_name": "great_expectations.datasource",
-            "execution_engine": {
-                "module_name": "great_expectations.execution_engine",
-                "class_name": "PandasExecutionEngine",
-            },
             "class_name": "Datasource",
             "data_connectors": {
                 "default_inferred_data_connector_name": {
-                    "module_name": "great_expectations.datasource.data_connector",
-                    "class_name": "InferredAssetFilesystemDataConnector",
                     "base_directory": "../../filesystem_csv_2",
+                    "class_name": "InferredAssetFilesystemDataConnector",
                     "default_regex": {
                         "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
+                    "module_name": "great_expectations.datasource.data_connector",
                 },
                 "default_runtime_data_connector_name": {
-                    "module_name": "great_expectations.datasource.data_connector",
-                    "batch_identifiers": ["default_identifier_name"],
+                    "assets": {
+                        "my_runtime_asset_name": {
+                            "batch_identifiers": ["runtime_batch_identifier_name"],
+                            "class_name": "Asset",
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                        }
+                    },
                     "class_name": "RuntimeDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
                 },
             },
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "module_name": "great_expectations.datasource",
             "name": "my_datasource",
         }
     ]
