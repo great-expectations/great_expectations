@@ -3212,6 +3212,7 @@ data_connectors:
                             "group_names": ["filename"],
                             "module_name": "great_expectations.datasource.data_connector.asset",
                             "pattern": "(.*)\\.csv",
+                            "reader_options": {"delimiter": ","},
                         }
                     },
                     "base_directory": data_connector_base_directory,
@@ -6165,6 +6166,7 @@ data_connectors:
                             "group_names": ["batch_num", "total_batches"],
                             "module_name": "great_expectations.datasource.data_connector.asset",
                             "pattern": "csv_batch_(\\d.+)_of_(\\d.+)\\.csv",
+                            "reader_options": {"delimiter": ","},
                         }
                     },
                     "base_directory": data_connector_base_directory,
