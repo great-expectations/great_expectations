@@ -11,8 +11,7 @@ from great_expectations.datasource.pandas_reader_datasource import (
 from tests.test_utils import _get_batch_request_from_validator
 
 ### Tests for PandasReaderDatasource.read_csv ###
-# These are thorough, covering pretty much all of our API surface area, including error states
-
+# These are thorough, covering pretty much all of the API surface area for the new read_* methods, including error states
 
 def test_PandasReaderDatasource_read_csv_basic():
     my_datasource = PandasReaderDatasource("my_datasource")

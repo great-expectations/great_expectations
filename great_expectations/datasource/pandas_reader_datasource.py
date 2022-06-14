@@ -8,8 +8,11 @@ import pandas as pd
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.datasource.base_data_asset import PandasReaderDataAsset
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.marshmallow__shade.fields import Bool
+from great_expectations.types import DictDot
+from great_expectations.types.base import DotDict
 from great_expectations.validator.validator import Validator
 
 
@@ -205,6 +208,8 @@ class PandasReaderDatasource(Datasource):
         #     GxExperimentalWarning,
         # )
 
+        self._assets = DictDot()
+
         super().__init__(
             name=name,
             execution_engine={
@@ -221,6 +226,36 @@ class PandasReaderDatasource(Datasource):
                 }
             },
         )
+
+    def add_asset(
+        self,
+        name: str,
+        base_directory: str,
+        method: Optional[str] = "read_csv",
+        regex: Optional[str] = "(.*)",
+        batch_identifiers: List[str] = ["filename"],
+        # check_new_asset: bool = False,
+    ) -> PandasReaderDataAsset:
+
+        new_asset = PandasReaderDataAsset(
+            datasource=self,
+            name=name,
+            method=method,
+            base_directory=base_directory,
+            regex=regex,
+            batch_identifiers=batch_identifiers
+        )
+
+        self._assets[name] = new_asset
+
+        return new_asset
+
+    def list_data_asset_names(self) -> List[str]:
+        return list(self.assets.keys())
+
+    @property
+    def assets(self) -> Dict[str, PandasReaderDataAsset]:
+        return DotDict(self._assets)
 
     def _decide_whether_to_use_variable_as_identifier(self, var):
         #!!! This is brittle. Almost certainly needs fleshing out.
