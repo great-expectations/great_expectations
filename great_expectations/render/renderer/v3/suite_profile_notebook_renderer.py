@@ -121,7 +121,6 @@ This can be done by running `great_expectations suite edit {self._expectation_su
         )
 
     def _add_user_configurable_profiler_cells(self) -> None:
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
         self.add_code_cell(
             code=f"""\
 import datetime
@@ -153,57 +152,6 @@ validator.head(n_rows=5, fetch_all=False)
 """,
             lint=True,
         )
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-        #         self.add_code_cell(
-        #             code=f"""\
-        # import datetime
-        #
-        # import pandas as pd
-        #
-        # import great_expectations as ge
-        # import great_expectations.jupyter_ux
-        # from great_expectations.core.batch import BatchRequest
-        # from great_expectations.rule_based_profiler.types.data_assistant_result import (
-        #     DataAssistantResult,
-        # )
-        # from great_expectations.checkpoint import SimpleCheckpoint
-        # from great_expectations.exceptions import DataContextError
-        #
-        # context = ge.data_context.DataContext()
-        #
-        # batch_request = {self._batch_request}
-        #
-        # expectation_suite_name = "{self._expectation_suite_name}"
-        #
-        # validator = context.get_validator(
-        #     batch_request=BatchRequest(**batch_request),
-        #     expectation_suite_name=expectation_suite_name
-        # )
-        # column_names = [f'"{{column_name}}"' for column_name in validator.columns()]
-        # print(f"Columns: {{', '.join(column_names)}}.")
-        # validator.head(n_rows=5, fetch_all=False)
-        # """,
-        #             lint=True,
-        #         )
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-        #         self.add_markdown_cell(
-        #             markdown="""\
-        # # Select columns
-        #
-        # Select the columns on which you would like to set expectations and those which you would like to ignore.
-        #
-        # Great Expectations will choose which expectations might make sense for a column based on the **data type** and **cardinality** of the data in each selected column.
-        #
-        # Simply comment out columns that are important and should be included. You can select multiple lines and use a Jupyter
-        # keyboard shortcut to toggle each line: **Linux/Windows**:
-        # `Ctrl-/`, **macOS**: `Cmd-/`
-        #
-        # Other directives are shown (commented out) as examples of the depth of control possible (see documentation for details).
-        # """
-        #         )
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
         self.add_markdown_cell(
             markdown="""\
 # Select columns
@@ -217,63 +165,8 @@ keyboard shortcut to toggle each line: **Linux/Windows**:
 `Ctrl-/`, **macOS**: `Cmd-/`
         """
         )
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
         self._add_available_columns_list()
         self._add_profiler_instructions()
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-        #         self.add_code_cell(
-        #             code="""\
-        # data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
-        #     batch_request=batch_request,
-        #     # include_column_names=include_column_names,
-        #     exclude_column_names=exclude_column_names,
-        #     # include_column_name_suffixes=include_column_name_suffixes,
-        #     # exclude_column_name_suffixes=exclude_column_name_suffixes,
-        #     # semantic_type_filter_module_name=semantic_type_filter_module_name,
-        #     # semantic_type_filter_class_name=semantic_type_filter_class_name,
-        #     # include_semantic_types=include_semantic_types,
-        #     # exclude_semantic_types=exclude_semantic_types,
-        #     # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        #     cardinality_limit_mode="rel_100",  # case-insenstive (see documentaiton for other options)
-        #     # max_unique_values=max_unique_values,
-        #     # max_proportion_unique=max_proportion_unique,
-        #     # column_value_uniqueness_rule={
-        #     #     "success_ratio": 0.8,
-        #     # },
-        #     # column_value_nullity_rule={
-        #     # },
-        #     # column_value_nonnullity_rule={
-        #     # },
-        #     # numeric_columns_rule={
-        #     #     "round_decimals": 12,
-        #     #     "false_positive_rate": 0.1,
-        #     #     "random_seed": 43792,
-        #     # },
-        #     # datetime_columns_rule={
-        #     #     "truncate_values": {
-        #     #         "lower_bound": 0,
-        #     #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
-        #     #     },
-        #     #     "round_decimals": 0,
-        #     # },
-        #     # text_columns_rule={
-        #     #     "strict_min": True,
-        #     #     "strict_max": True,
-        #     #     "success_ratio": 0.8,
-        #     # },
-        #     # categorical_columns_rule={
-        #     #     "false_positive_rate": 0.1,
-        #     #     "round_decimals": 4,
-        #     # },
-        # )
-        # validator.expectation_suite = data_assistant_result.get_expectation_suite(
-        #     expectation_suite_name=expectation_suite_name
-        # )
-        # """,
-        #             lint=True,
-        #         )
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
         self.add_code_cell(
             code="""\
 profiler = UserConfigurableProfiler(
@@ -281,7 +174,7 @@ profiler = UserConfigurableProfiler(
     excluded_expectations=None,
     ignored_columns=exclude_column_names,
     not_null_only=False,
-    primary_or_compound_key=False,
+    primary_or_compound_key=None,
     semantic_types_dict=None,
     table_expectations_only=False,
     value_set_threshold="MANY",
@@ -291,7 +184,6 @@ validator.expectation_suite = suite
 """,
             lint=True,
         )
-        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
 
     def _add_rule_based_profiler_cells(self) -> None:
         self.add_code_cell(
@@ -379,3 +271,105 @@ You can find more information about [how to configure this profiler, including a
         ]
         code: str = f'exclude_column_names = [\n{"".join(column_names)}]'
         self.add_code_cell(code=code, lint=True)
+
+    def _add_onboarding_data_assistant_cells(self) -> None:
+        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+        self.add_code_cell(
+            code=f"""\
+import datetime
+
+import pandas as pd
+
+import great_expectations as ge
+import great_expectations.jupyter_ux
+from great_expectations.core.batch import BatchRequest
+from great_expectations.rule_based_profiler.types.data_assistant_result import (
+    DataAssistantResult,
+)
+from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.exceptions import DataContextError
+
+context = ge.data_context.DataContext()
+
+batch_request = {self._batch_request}
+
+expectation_suite_name = "{self._expectation_suite_name}"
+
+validator = context.get_validator(
+    batch_request=BatchRequest(**batch_request),
+    expectation_suite_name=expectation_suite_name
+)
+column_names = [f'"{{column_name}}"' for column_name in validator.columns()]
+print(f"Columns: {{', '.join(column_names)}}.")
+validator.head(n_rows=5, fetch_all=False)
+""",
+            lint=True,
+        )
+        self.add_markdown_cell(
+            markdown="""\
+# Select columns
+
+Select the columns on which you would like to set expectations and those which you would like to ignore.
+
+Great Expectations will choose which expectations might make sense for a column based on the **data type** and **cardinality** of the data in each selected column.
+
+Simply comment out columns that are important and should be included. You can select multiple lines and use a Jupyter
+keyboard shortcut to toggle each line: **Linux/Windows**:
+`Ctrl-/`, **macOS**: `Cmd-/`
+
+Other directives are shown (commented out) as examples of the depth of control possible (see documentation for details).
+"""
+        )
+        self._add_available_columns_list()
+        self._add_profiler_instructions()
+        self.add_code_cell(
+            code="""\
+data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+    batch_request=batch_request,
+    # include_column_names=include_column_names,
+    exclude_column_names=exclude_column_names,
+    # include_column_name_suffixes=include_column_name_suffixes,
+    # exclude_column_name_suffixes=exclude_column_name_suffixes,
+    # semantic_type_filter_module_name=semantic_type_filter_module_name,
+    # semantic_type_filter_class_name=semantic_type_filter_class_name,
+    # include_semantic_types=include_semantic_types,
+    # exclude_semantic_types=exclude_semantic_types,
+    # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+    cardinality_limit_mode="rel_100",  # case-insenstive (see documentaiton for other options)
+    # max_unique_values=max_unique_values,
+    # max_proportion_unique=max_proportion_unique,
+    # column_value_uniqueness_rule={
+    #     "success_ratio": 0.8,
+    # },
+    # column_value_nullity_rule={
+    # },
+    # column_value_nonnullity_rule={
+    # },
+    # numeric_columns_rule={
+    #     "round_decimals": 12,
+    #     "false_positive_rate": 0.1,
+    #     "random_seed": 43792,
+    # },
+    # datetime_columns_rule={
+    #     "truncate_values": {
+    #         "lower_bound": 0,
+    #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+    #     },
+    #     "round_decimals": 0,
+    # },
+    # text_columns_rule={
+    #     "strict_min": True,
+    #     "strict_max": True,
+    #     "success_ratio": 0.8,
+    # },
+    # categorical_columns_rule={
+    #     "false_positive_rate": 0.1,
+    #     "round_decimals": 4,
+    # },
+)
+validator.expectation_suite = data_assistant_result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
+)
+""",
+            lint=True,
+        )
