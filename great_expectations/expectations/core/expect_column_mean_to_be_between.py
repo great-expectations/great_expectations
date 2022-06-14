@@ -317,6 +317,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
             },
         }
 
+        template_str = ""
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "mean may have any numerical value."
         else:
@@ -375,6 +376,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
             ],
         )
 
+        template_str = ""
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "mean may have any numerical value."
         else:

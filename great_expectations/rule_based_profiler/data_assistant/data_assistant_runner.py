@@ -129,8 +129,8 @@ class DataAssistantRunner:
         """
         data_assistant_name: str = self._data_assistant_cls.data_assistant_type
         validator: Validator = get_validator_with_expectation_suite(
-            batch_request=batch_request,
             data_context=self._data_context,
+            batch_request=batch_request,
             expectation_suite=None,
             expectation_suite_name=None,
             component_name=data_assistant_name,
