@@ -14,6 +14,8 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
     RegexColumnMapMetricProvider,
 )
+
+
 class ExpectColumnValuesToBeValidArn(RegexBasedColumnMapExpectation):
     """Expect values in this column to be a valid geohash."""
 
@@ -31,7 +33,10 @@ class ExpectColumnValuesToBeValidArn(RegexBasedColumnMapExpectation):
                     "arn:aws:s3:::my-bucket/my-object",
                     "arn:partition:service:region:account-id:resource",
                 ],
-                "invalid_alphanumeric": ["apz8", "bubba:arn:123",],  # "a" is an invalid geohash char
+                "invalid_alphanumeric": [
+                    "apz8",
+                    "bubba:arn:123",
+                ],  # "a" is an invalid geohash char
                 "invalid_arn": [
                     "arn:aws:::::::my-bucket/my-object",
                     "arn::::",
