@@ -32,6 +32,33 @@ class PlotComponent:
             format=format,
         )
 
+    def plot_on_x_axis(self) -> alt.X:
+        """
+        Plots domain on X axis.
+
+        Returns:
+            An instance of alt.X.
+        """
+        return alt.X(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
+            scale=alt.Scale(align=0.05),
+        )
+
+    def plot_on_y_axis(self) -> alt.Y:
+        """
+        Plots domain on Y axis.
+
+        Returns:
+            An instance of alt.Y.
+        """
+        return alt.Y(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
+        )
+
     def plot_on_axis(self) -> Union[alt.X, alt.Y]:
         """Wrapper around alt.X/alt.Y plotting utility.
 
@@ -95,6 +122,7 @@ class BatchPlotComponent(PlotComponent):
             self.name,
             type=self.alt_type,
             title=self.title,
+            scale=alt.Scale(align=0.05),
         )
 
     def generate_tooltip(self, format: str = "") -> List[alt.Tooltip]:
@@ -138,8 +166,9 @@ def determine_plot_title(
     metric_plot_component: MetricPlotComponent,
     batch_plot_component: BatchPlotComponent,
     domain_plot_component: DomainPlotComponent,
+    expectation_type: Optional[str] = None,
 ) -> alt.TitleParams:
-    """Determines the appropriate title for a chart based on input componentsself.
+    """Determines the appropriate title for a chart based on input components.
 
     Conditionally renders a subtitle if relevant (specifically with column domain)
 
@@ -152,7 +181,13 @@ def determine_plot_title(
         An Altair TitleParam object
 
     """
-    contents: str = f"{metric_plot_component.title} per {batch_plot_component.title}"
+    contents: str
+    if expectation_type:
+        contents = expectation_type
+    else:
+        contents: str = (
+            f"{metric_plot_component.title} per {batch_plot_component.title}"
+        )
     subtitle: Optional[str] = domain_plot_component.subtitle
     domain_selector: Optional[str] = domain_plot_component.name
 

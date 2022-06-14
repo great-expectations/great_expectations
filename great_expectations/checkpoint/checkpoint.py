@@ -888,7 +888,7 @@ class LegacyCheckpoint(Checkpoint):
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = None,
-    ):
+    ) -> ValidationOperatorResult:
         result_format = result_format or {"result_format": "SUMMARY"}
 
         if not assets_to_validate:
@@ -979,6 +979,7 @@ class LegacyCheckpoint(Checkpoint):
                     f'Could not find Validation Operator "{self.validation_operator_name}" when '
                     f'running Checkpoint "{self.name}". Using default action_list_operator.'
                 )
+
             results = self._run_default_validation_operator(
                 assets_to_validate=batches_to_validate,
                 run_id=run_id,

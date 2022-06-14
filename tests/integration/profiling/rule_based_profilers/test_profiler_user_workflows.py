@@ -60,11 +60,12 @@ def alice_validator(alice_columnar_table_single_batch_context) -> Validator:
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 1
@@ -84,11 +85,12 @@ def bobby_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 3
@@ -113,11 +115,12 @@ def bobster_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 36
@@ -139,11 +142,12 @@ def quentin_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 36
@@ -255,7 +259,7 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"].expectations
     )
 
-    assert mock_emit.call_count == 54
+    assert mock_emit.call_count == 43
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
@@ -475,6 +479,38 @@ def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_pro
         "mostly": 1.0,
         "strftime_format": "%Y-%m-%d %H:%M:%S",
         "result_format": "SUMMARY",
+    }
+
+
+@freeze_time(TIMESTAMP)
+def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    alice_validator: Validator,
+) -> None:
+    validator: Validator = alice_validator
+
+    result: ExpectationValidationResult = (
+        validator.expect_column_value_lengths_to_be_between(
+            column="user_agent",
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
+    )
+
+    assert result.success
+
+    expectation_config_kwargs: dict = result.expectation_config.kwargs
+    assert expectation_config_kwargs == {
+        "auto": True,
+        "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
+        "column": "user_agent",
+        "include_config": True,
+        "max_value": 115,  # Chetan - 20220516 - Note that all values in the dataset are of equal length
+        "min_value": 115,  # TODO - we should add an additional test upon using an updated dataset (confirmed behavior through UAT)
+        "mostly": 1.0,
+        "result_format": "SUMMARY",
+        "strict_max": False,
+        "strict_min": False,
     }
 
 
@@ -1074,11 +1110,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
     assert len(validator.batches) == 1
 
@@ -1319,11 +1356,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
     assert len(validator.batches) == 1
 
@@ -1586,6 +1624,7 @@ def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profi
         if key != "column_set"
     }
     assert expectation_config_kwargs == {
+        "exact_match": None,
         "result_format": "SUMMARY",
         "include_config": True,
         "auto": True,

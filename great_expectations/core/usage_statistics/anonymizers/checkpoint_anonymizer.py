@@ -33,6 +33,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         if "config" in kwargs:
             return self._anonymize_checkpoint_config(**kwargs)
+
         return self._anonymize_checkpoint_run(obj=obj, **kwargs)
 
     def _anonymize_checkpoint_config(self, name: str, config: dict) -> dict:
@@ -61,6 +62,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
         )
         return anonymized_info_dict
 
+    # noinspection PyUnusedLocal
     def _anonymize_checkpoint_run(self, obj: object, **kwargs) -> dict:
         """
         Traverse the entire Checkpoint configuration structure (as per its formal, validated Marshmallow schema) and
