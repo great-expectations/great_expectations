@@ -60,8 +60,8 @@ class ExpectColumnValuesToBeValidIataCode(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_users": ["MCO", "SFO", "LAX", "JFK", "LGA", "EWR"],
-                "invalid_users": [
+                "valid_airport_codes": ["MCO", "SFO", "LAX", "JFK", "LGA", "EWR"],
+                "invalid_airport_codes": [
                     "XYZ",
                     "UWU",
                     "MEME",
@@ -72,14 +72,14 @@ class ExpectColumnValuesToBeValidIataCode(ColumnMapExpectation):
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "valid_users"},
+                    "in": {"column": "valid_airport_codes"},
                     "out": {"success": True},
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "invalid_users"},
+                    "in": {"column": "invalid_airport_codes"},
                     "out": {"success": False},
                 },
             ],
