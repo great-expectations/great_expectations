@@ -159,7 +159,12 @@ def _determine_profile(profiler_name: Optional[str]) -> bool:
         if profiler_name:
             msg = "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
         else:
-            msg = "Since you did not supply a profiler name, defaulting to the OnboardingDataAssistant"
+            # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+            # msg = "Since you did not supply a profiler name, defaulting to the OnboardingDataAssistant"
+            # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+            # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+            msg = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
+            # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
         cli_message(string=f"<yellow>{msg}</yellow>")
 
     return profile
