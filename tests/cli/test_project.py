@@ -39,7 +39,7 @@ def titanic_data_context_clean(
 
 
 @pytest.fixture
-def titanic_data_context_clean_usage_stats_enabled(
+def titanic_data_context_to_upgrade_usage_stats_enabled(
     tmp_path_factory, monkeypatch
 ) -> DataContext:
     # Re-enable GE_USAGE_STATS
@@ -51,8 +51,9 @@ def titanic_data_context_clean_usage_stats_enabled(
     os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
     data_path = os.path.join(context_path, "..", "data")
     os.makedirs(os.path.join(data_path), exist_ok=True)
+    # this is a v2 great_expectations.yml
     titanic_yml_path = file_relative_path(
-        __file__, "../test_fixtures/great_expectations_v013clean_titanic.yml"
+        __file__, "../test_fixtures/great_expectations_titanic.yml"
     )
     shutil.copy(
         titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
@@ -72,7 +73,7 @@ def test_project_check_on_missing_ge_dir_guides_user_to_fix(
     monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["--v3-api", "project", "check-config"],
+        ["project", "check-config"],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -95,7 +96,7 @@ def test_project_check_on_valid_project_says_so(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "project", "check-config"],
+        ["project", "check-config"],
         catch_exceptions=False,
     )
     assert "Checking your config files for validity" in result.output
@@ -126,16 +127,23 @@ def test_project_check_on_valid_project_says_so(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_project_check_on_project_with_v2_datasources_and_validation_operators(
-    mock_emit, caplog, monkeypatch, titanic_data_context
+    mock_emit, caplog, monkeypatch, titanic_data_context_to_upgrade_usage_stats_enabled
 ):
-    context = titanic_data_context
+    context = titanic_data_context_to_upgrade_usage_stats_enabled
     runner = CliRunner(mix_stderr=False)
+
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "project", "check-config"],
+        ["project", "upgrade"],
         catch_exceptions=False,
     )
+    result = runner.invoke(
+        cli,
+        ["project", "check-config"],
+        catch_exceptions=False,
+    )
+
     assert "Checking your config files for validity" in result.output
     assert (
         "Your project needs to be upgraded in order to be compatible with Great Expectations V3 API."
@@ -155,9 +163,38 @@ def test_project_check_on_project_with_v2_datasources_and_validation_operators(
         "The configuration of your great_expectations.yml is outdated.  Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your Great Expectations configuration in order to take advantage of the latest capabilities."
         in result.output
     )
-    assert result.exit_code == 1
-    assert mock_emit.call_count == 0
-
+    assert mock_emit.call_count == 7
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.project.upgrade.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.project.upgrade.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+    ]
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
@@ -176,7 +213,7 @@ def test_project_check_on_project_with_missing_config_file_guides_user(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "project", "check-config"],
+        ["project", "check-config"],
         catch_exceptions=False,
     )
     assert result.exit_code == 1
