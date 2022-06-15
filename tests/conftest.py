@@ -1238,9 +1238,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 
 @pytest.fixture
-def titanic_data_context(
-    tmp_path_factory,
-) -> DataContext:
+def titanic_data_context(tmp_path_factory) -> DataContext:
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -3212,6 +3210,7 @@ data_connectors:
                             "group_names": ["filename"],
                             "module_name": "great_expectations.datasource.data_connector.asset",
                             "pattern": "(.*)\\.csv",
+                            "reader_options": {"delimiter": ","},
                         }
                     },
                     "base_directory": data_connector_base_directory,
@@ -6165,6 +6164,7 @@ data_connectors:
                             "group_names": ["batch_num", "total_batches"],
                             "module_name": "great_expectations.datasource.data_connector.asset",
                             "pattern": "csv_batch_(\\d.+)_of_(\\d.+)\\.csv",
+                            "reader_options": {"delimiter": ","},
                         }
                     },
                     "base_directory": data_connector_base_directory,
