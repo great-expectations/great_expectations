@@ -25,6 +25,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
+    PartitionParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
     RegexPatternStringParameterBuilder,
@@ -189,21 +190,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column_values.null.unexpected_count",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
-            )
-
-        def get_column_histogram_metric_multi_batch_parameter_builder(
-            self,
-            json_serialize: Union[str, bool] = True,
-        ) -> ParameterBuilder:
-            """
-            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
-            """
-            return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name="column.histogram",
-                metric_value_kwargs={
-                    "bins": f"{VARIABLES_KEY}bins",
-                },
                 json_serialize=json_serialize,
             )
 
@@ -379,12 +365,31 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
             """
+            name: str = sanitize_parameter_name(name=f"{name}")
             return RegexPatternStringParameterBuilder(
                 name=name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
                 threshold=1.0,
                 candidate_regexes=None,
+                evaluation_parameter_builder_configs=None,
+                json_serialize=json_serialize,
+                data_context=None,
+            )
+
+        @staticmethod
+        def build_partition_parameter_builder(
+            name: str,
+            bucketize_data: Union[str, bool] = True,
+            json_serialize: Union[str, bool] = True,
+        ) -> PartitionParameterBuilder:
+            """
+            This method instantiates "PartitionParameterBuilder" class with specific arguments for given purpose.
+            """
+            name: str = sanitize_parameter_name(name=f"{name}")
+            return PartitionParameterBuilder(
+                name=name,
+                bucketize_data=bucketize_data,
                 evaluation_parameter_builder_configs=None,
                 json_serialize=json_serialize,
                 data_context=None,
@@ -418,20 +423,21 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._batches = self._validator.batches
 
-        variables: Optional[Dict[str, Any]] = self.get_variables() or {}
-        rules: Optional[List[Rule]] = self.get_rules() or []
+        self._data_context = self._validator.data_context
 
+        variables: Optional[Dict[str, Any]] = self.get_variables() or {}
         self._profiler = RuleBasedProfiler(
             name=self.name,
             config_version=1.0,
             variables=variables,
-            data_context=self._validator.data_context,
+            data_context=self._data_context,
         )
 
         self._metrics_parameter_builders_by_domain = {}
 
-        rule: Rule
+        rules: Optional[List[Rule]] = self.get_rules() or []
 
+        rule: Rule
         for rule in rules:
             self.profiler.add_rule(rule=rule)
             self._metrics_parameter_builders_by_domain[
@@ -467,6 +473,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         data_assistant_result: DataAssistantResult = DataAssistantResult(
             batch_id_to_batch_identifier_display_name_map=self.batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
+            usage_statistics_handler=self._data_context._usage_statistics_handler,
         )
         run_profiler_on_data(
             data_assistant=self,

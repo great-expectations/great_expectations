@@ -60,8 +60,8 @@ def alice_validator(alice_columnar_table_single_batch_context) -> Validator:
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
@@ -85,8 +85,8 @@ def bobby_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
@@ -115,8 +115,8 @@ def bobster_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
@@ -142,8 +142,8 @@ def quentin_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
@@ -259,7 +259,7 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"].expectations
     )
 
-    assert mock_emit.call_count == 54
+    assert mock_emit.call_count == 43
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
@@ -1110,8 +1110,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
@@ -1356,8 +1356,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",

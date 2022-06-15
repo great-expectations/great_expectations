@@ -32,6 +32,33 @@ class PlotComponent:
             format=format,
         )
 
+    def plot_on_x_axis(self) -> alt.X:
+        """
+        Plots domain on X axis.
+
+        Returns:
+            An instance of alt.X.
+        """
+        return alt.X(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
+            scale=alt.Scale(align=0.05),
+        )
+
+    def plot_on_y_axis(self) -> alt.Y:
+        """
+        Plots domain on Y axis.
+
+        Returns:
+            An instance of alt.Y.
+        """
+        return alt.Y(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
+        )
+
     def plot_on_axis(self) -> Union[alt.X, alt.Y]:
         """Wrapper around alt.X/alt.Y plotting utility.
 

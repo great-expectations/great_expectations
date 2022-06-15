@@ -524,6 +524,94 @@ def test_quantiles_metric_spark(spark_session):
     assert results == {desired_metric.id: [1.0, 2.0, 3.0]}
 
 
+def test_column_histogram_metric_pd():
+    engine = build_pandas_engine(pd.DataFrame({"a": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}))
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.histogram",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+
+
+def test_column_histogram_metric_sa(sa):
+    engine = build_sa_engine(pd.DataFrame({"a": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}), sa)
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.histogram",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+
+
+def test_column_histogram_metric_spark(spark_session):
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame({"a": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.histogram",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+
+
 def test_max_metric_column_exists_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)

@@ -29,25 +29,43 @@ from tests.render.test_util import find_code_in_notebook, run_notebook
 yaml = YAML()
 
 
-@mock.patch("great_expectations.data_context.DataContext")
-def test_suite_notebook_renderer_render_onboarding_data_assistant_configuration(
-    mock_data_context: mock.MagicMock,
-):
-    renderer = SuiteProfileNotebookRenderer(
-        context=mock_data_context,
-        expectation_suite_name="my_expectation_suite",
-        profiler_name="",  # No name should signal that OnboardingDataAssistant is invoked
-        batch_request={
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1912",
-        },
-    )
-    notebook = renderer.render()
+SNIPPETS_USER_CONFIGURABLE_PROFILER: List[str] = [
+    # Imports
+    """import datetime
 
-    snippets = [
-        # Imports
-        """\
+import pandas as pd
+
+import great_expectations as ge
+import great_expectations.jupyter_ux
+from great_expectations.profile.user_configurable_profiler import (
+    UserConfigurableProfiler,
+)
+from great_expectations.core.batch import BatchRequest
+from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.exceptions import DataContextError""",
+    # Batch request
+    """batch_request = {
+    "datasource_name": "my_datasource",
+    "data_connector_name": "my_basic_data_connector",
+    "data_asset_name": "Titanic_1912",
+}""",
+    # Profiler instantiation/usage
+    """profiler = UserConfigurableProfiler(
+    profile_dataset=validator,
+    excluded_expectations=None,
+    ignored_columns=exclude_column_names,
+    not_null_only=False,
+    primary_or_compound_key=None,
+    semantic_types_dict=None,
+    table_expectations_only=False,
+    value_set_threshold="MANY",
+)
+suite = profiler.build_suite()
+validator.expectation_suite = suite""",
+]
+SNIPPETS_ONBOARDING_DATA_ASSISTANT: List[str] = [
+    # Imports
+    """\
 import datetime
 
 import pandas as pd
@@ -60,15 +78,15 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
 )
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError""",
-        # Batch request
-        """batch_request = {
-    "datasource_name": "my_datasource",
-    "data_connector_name": "my_basic_data_connector",
-    "data_asset_name": "Titanic_1912",
-}
+    # Batch request
+    """batch_request = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1912",
+    }
 """,
-        # OnboardingDataAssistant instantiation/usage
-        """\
+    # OnboardingDataAssistant instantiation/usage
+    """\
 data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     batch_request=batch_request,
     # include_column_names=include_column_names,
@@ -80,7 +98,7 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # include_semantic_types=include_semantic_types,
     # exclude_semantic_types=exclude_semantic_types,
     # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-    cardinality_limit_mode="rel_100",  # case-insenstive (see documentaiton for other options)
+    # cardinality_limit_mode="rel_100",  # case-insensitive (see documentation for other options)
     # max_unique_values=max_unique_values,
     # max_proportion_unique=max_proportion_unique,
     # column_value_uniqueness_rule={
@@ -91,6 +109,7 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # column_value_nonnullity_rule={
     # },
     # numeric_columns_rule={
+    #     "round_decimals": 12,
     #     "false_positive_rate": 0.1,
     #     "random_seed": 43792,
     # },
@@ -108,13 +127,140 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # },
     # categorical_columns_rule={
     #     "false_positive_rate": 0.1,
-    #     "round_decimals": 3,
+    #     "round_decimals": 4,
     # },
 )
 validator.expectation_suite = data_assistant_result.get_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )""",
-    ]
+]
+SNIPPETS_RULE_BASED_PROFILER: List[str] = [
+    # Imports
+    """\
+import datetime
+
+import pandas as pd
+
+import great_expectations as ge
+import great_expectations.jupyter_ux
+from great_expectations.core.batch import BatchRequest
+from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.exceptions import DataContextError
+""",
+    # Batch request
+    """\
+batch_request = {
+    "datasource_name": "my_datasource",
+    "data_connector_name": "my_basic_data_connector",
+    "data_asset_name": "Titanic_1912",
+}
+""",
+    # Profiler instantiation/usage
+    """\
+result = context.run_profiler_with_dynamic_arguments(
+    name="my_profiler",
+    batch_request=batch_request,
+)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
+)""",
+]
+
+EXPECTED_EXPECTATIONS_USER_CONFIGURABLE_PROFILER: Set[str] = {
+    "expect_table_row_count_to_be_between",
+    "expect_table_columns_to_match_ordered_list",
+}
+EXPECTED_EXPECTATIONS_ONBOARDING_DATA_ASSISTANT: Set[str] = {
+    "expect_table_row_count_to_be_between",
+    "expect_table_columns_to_match_set",
+}
+
+EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER: List[
+    ExpectationConfiguration
+] = [
+    ExpectationConfiguration(
+        **{
+            "expectation_type": "expect_table_columns_to_match_ordered_list",
+            "kwargs": {
+                "column_list": [
+                    "Age",
+                    "Name",
+                    "PClass",
+                    "Sex",
+                    "SexCode",
+                    "Survived",
+                    "Unnamed: 0",
+                ]
+            },
+            "meta": {},
+        }
+    ),
+    ExpectationConfiguration(
+        **{
+            "expectation_type": "expect_table_row_count_to_be_between",
+            "kwargs": {"max_value": 1313, "min_value": 1313},
+            "meta": {},
+        }
+    ),
+]
+EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT: List[
+    ExpectationConfiguration
+] = [
+    ExpectationConfiguration(
+        **{
+            "kwargs": {"max_value": 1313, "min_value": 1313},
+            "expectation_type": "expect_table_row_count_to_be_between",
+            "meta": {
+                "profiler_details": {
+                    "metric_configuration": {
+                        "domain_kwargs": {},
+                        "metric_dependencies": None,
+                        "metric_name": "table.row_count",
+                        "metric_value_kwargs": None,
+                    },
+                    "num_batches": 1,
+                }
+            },
+        }
+    ),
+    ExpectationConfiguration(
+        **{
+            "kwargs": {
+                "column_set": [
+                    "Age",
+                    "Name",
+                    "PClass",
+                    "Sex",
+                    "SexCode",
+                    "Survived",
+                    "Unnamed: 0",
+                ],
+                "exact_match": None,
+            },
+            "expectation_type": "expect_table_columns_to_match_set",
+            "meta": {"profiler_details": {"success_ratio": 1.0}},
+        }
+    ),
+]
+
+
+@mock.patch("great_expectations.data_context.DataContext")
+def test_suite_notebook_renderer_render_onboarding_data_assistant_configuration(
+    mock_data_context: mock.MagicMock,
+):
+    renderer = SuiteProfileNotebookRenderer(
+        context=mock_data_context,
+        expectation_suite_name="my_expectation_suite",
+        profiler_name="",  # No name should signal that OnboardingDataAssistant is invoked
+        batch_request={
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_basic_data_connector",
+            "data_asset_name": "Titanic_1912",
+        },
+    )
+    notebook = renderer.render()
+
+    snippets = SNIPPETS_USER_CONFIGURABLE_PROFILER
 
     for snippet in snippets:
         assert find_code_in_notebook(
@@ -274,43 +420,10 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         "success_percent": 100.0,
     }
 
-    expected_expectation_configurations: List[ExpectationConfiguration] = [
-        ExpectationConfiguration(
-            **{
-                "kwargs": {"max_value": 1313, "min_value": 1313},
-                "expectation_type": "expect_table_row_count_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "domain_kwargs": {},
-                            "metric_dependencies": None,
-                            "metric_name": "table.row_count",
-                            "metric_value_kwargs": None,
-                        },
-                        "num_batches": 1,
-                    }
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "kwargs": {
-                    "column_set": [
-                        "Age",
-                        "Name",
-                        "PClass",
-                        "Sex",
-                        "SexCode",
-                        "Survived",
-                        "Unnamed: 0",
-                    ],
-                    "exact_match": None,
-                },
-                "expectation_type": "expect_table_columns_to_match_set",
-                "meta": {"profiler_details": {"success_ratio": 1.0}},
-            }
-        ),
-    ]
+    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+    expected_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -338,10 +451,9 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         expectations_from_suite,
     ) = get_set_of_columns_and_expectations_from_suite(suite=suite)
 
-    expected_expectations: Set[str] = {
-        "expect_table_row_count_to_be_between",
-        "expect_table_columns_to_match_set",
-    }
+    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+    expected_expectations: Set[str] = EXPECTED_EXPECTATIONS_USER_CONFIGURABLE_PROFILER
+
     assert columns_with_expectations == set()
     assert expectations_from_suite == expected_expectations
 
@@ -362,37 +474,7 @@ def test_suite_notebook_renderer_render_rule_based_profiler_configuration(
     )
     notebook = renderer.render()
 
-    snippets = [
-        # Imports
-        """\
-import datetime
-
-import pandas as pd
-
-import great_expectations as ge
-import great_expectations.jupyter_ux
-from great_expectations.core.batch import BatchRequest
-from great_expectations.checkpoint import SimpleCheckpoint
-from great_expectations.exceptions import DataContextError
-""",
-        # Batch request
-        """\
-batch_request = {
-    "datasource_name": "my_datasource",
-    "data_connector_name": "my_basic_data_connector",
-    "data_asset_name": "Titanic_1912",
-}
-""",
-        # Profiler instantiation/usage
-        """\
-result = context.run_profiler_with_dynamic_arguments(
-    name="my_profiler",
-    batch_request=batch_request,
-)
-_ = validator.expectation_suite.add_expectation_configurations(
-    expectation_configurations=result.expectation_configurations
-)""",
-    ]
+    snippets = SNIPPETS_RULE_BASED_PROFILER
 
     for snippet in snippets:
         assert find_code_in_notebook(

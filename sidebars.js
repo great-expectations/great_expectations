@@ -182,10 +182,11 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Configuring Profilers',
+          label: 'Profilers and Data Assistants',
           items: [
             'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file'
+            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
+            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant'
           ]
         },
         {
@@ -353,6 +354,7 @@ module.exports = {
         {
           type: 'category',
           label: 'Supplemental documentation',
+          link: { type: 'doc', id: 'reference/supplemental_documentation' },
           items: [
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
@@ -364,6 +366,7 @@ module.exports = {
         {
           type: 'category',
           label: 'API documentation',
+          link: { type: 'doc', id: 'reference/api_reference' },
           items: [
             {
               type: 'category',
@@ -376,7 +379,6 @@ module.exports = {
             }
           ]
         },
-        'glossary',
         {
           type: 'category',
           label: 'Glossary of Terms',
@@ -430,18 +432,6 @@ module.exports = {
             'terms/supporting_resource',
             'terms/validator',
             'terms/validation_result'
-          ]
-        },
-        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
-        {
-          type: 'category',
-          label: 'Supplemental documentation',
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
-            { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/data_discovery' },
-            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         }
       ]

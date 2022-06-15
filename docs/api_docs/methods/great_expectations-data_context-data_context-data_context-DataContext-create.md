@@ -11,7 +11,7 @@ title: DataContext.create
 
 Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
-`create` will not create a new "great_expectations" directory in the provided folder, provided one does not
+`create` will create a new "great_expectations" directory in the provided folder, provided one does not
 already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
 
 ### Parameters

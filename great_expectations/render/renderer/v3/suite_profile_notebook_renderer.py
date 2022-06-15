@@ -48,8 +48,12 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
 
         self.add_header()
 
+        # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
         if self._profiler_name:
-            self._add_rule_based_profiler_cells()
+            if self._profiler_name == "onboarding-data-assistant":
+                self._add_onboarding_data_assistant_cells()
+            else:
+                self._add_rule_based_profiler_cells()
         else:
             self._add_user_configurable_profiler_cells()
 
@@ -129,6 +133,112 @@ import pandas as pd
 
 import great_expectations as ge
 import great_expectations.jupyter_ux
+from great_expectations.profile.user_configurable_profiler import (
+    UserConfigurableProfiler,
+)
+from great_expectations.core.batch import BatchRequest
+from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.exceptions import DataContextError
+
+context = ge.data_context.DataContext()
+
+batch_request = {self._batch_request}
+
+expectation_suite_name = "{self._expectation_suite_name}"
+
+validator = context.get_validator(
+    batch_request=BatchRequest(**batch_request),
+    expectation_suite_name=expectation_suite_name
+)
+column_names = [f'"{{column_name}}"' for column_name in validator.columns()]
+print(f"Columns: {{', '.join(column_names)}}.")
+validator.head(n_rows=5, fetch_all=False)
+""",
+            lint=True,
+        )
+        self.add_markdown_cell(
+            markdown="""\
+# Select columns
+
+Select the columns on which you would like to set expectations and those which you would like to ignore.
+
+Great Expectations will choose which expectations might make sense for a column based on the **data type** and **cardinality** of the data in each selected column.
+
+Simply comment out columns that are important and should be included. You can select multiple lines and use a Jupyter
+keyboard shortcut to toggle each line: **Linux/Windows**:
+`Ctrl-/`, **macOS**: `Cmd-/`
+        """
+        )
+        self._add_available_columns_list()
+        self._add_profiler_instructions()
+        self.add_code_cell(
+            code="""\
+profiler = UserConfigurableProfiler(
+    profile_dataset=validator,
+    excluded_expectations=None,
+    ignored_columns=exclude_column_names,
+    not_null_only=False,
+    primary_or_compound_key=None,
+    semantic_types_dict=None,
+    table_expectations_only=False,
+    value_set_threshold="MANY",
+)
+suite = profiler.build_suite()
+validator.expectation_suite = suite
+""",
+            lint=True,
+        )
+
+    def _add_rule_based_profiler_cells(self) -> None:
+        self.add_code_cell(
+            code=f"""\
+import datetime
+
+import pandas as pd
+
+import great_expectations as ge
+import great_expectations.jupyter_ux
+from great_expectations.core.batch import BatchRequest
+from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.exceptions import DataContextError
+
+context = ge.data_context.DataContext()
+
+batch_request = {self._batch_request}
+
+expectation_suite_name = "{self._expectation_suite_name}"
+
+validator = context.get_validator(
+    batch_request=BatchRequest(**batch_request),
+    expectation_suite_name=expectation_suite_name
+)
+validator.head(n_rows=5, fetch_all=False)
+""",
+            lint=True,
+        )
+        self._add_profiler_instructions()
+        self.add_code_cell(
+            code=f"""\
+result = context.run_profiler_with_dynamic_arguments(
+    name="{self._profiler_name}",
+    batch_request=batch_request,
+)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
+)
+""",
+            lint=True,
+        )
+
+    def _add_onboarding_data_assistant_cells(self) -> None:
+        self.add_code_cell(
+            code=f"""\
+import datetime
+
+import pandas as pd
+
+import great_expectations as ge
+import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
@@ -168,7 +278,7 @@ Other directives are shown (commented out) as examples of the depth of control p
 """
         )
         self._add_available_columns_list()
-        self._add_profiler_instructions()
+        self._add_onboarding_data_assistant_instructions()
         self.add_code_cell(
             code="""\
 data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
@@ -182,7 +292,7 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # include_semantic_types=include_semantic_types,
     # exclude_semantic_types=exclude_semantic_types,
     # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-    cardinality_limit_mode="rel_100",  # case-insenstive (see documentaiton for other options)
+    # cardinality_limit_mode="rel_100",  # case-insensitive (see documentation for other options)
     # max_unique_values=max_unique_values,
     # max_proportion_unique=max_proportion_unique,
     # column_value_uniqueness_rule={
@@ -193,6 +303,7 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # column_value_nonnullity_rule={
     # },
     # numeric_columns_rule={
+    #     "round_decimals": 12,
     #     "false_positive_rate": 0.1,
     #     "random_seed": 43792,
     # },
@@ -210,7 +321,7 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     # },
     # categorical_columns_rule={
     #     "false_positive_rate": 0.1,
-    #     "round_decimals": 3,
+    #     "round_decimals": 4,
     # },
 )
 validator.expectation_suite = data_assistant_result.get_expectation_suite(
@@ -220,48 +331,24 @@ validator.expectation_suite = data_assistant_result.get_expectation_suite(
             lint=True,
         )
 
-    def _add_rule_based_profiler_cells(self) -> None:
-        self.add_code_cell(
-            code=f"""\
-import datetime
-
-import pandas as pd
-
-import great_expectations as ge
-import great_expectations.jupyter_ux
-from great_expectations.core.batch import BatchRequest
-from great_expectations.checkpoint import SimpleCheckpoint
-from great_expectations.exceptions import DataContextError
-
-context = ge.data_context.DataContext()
-
-batch_request = {self._batch_request}
-
-expectation_suite_name = "{self._expectation_suite_name}"
-
-validator = context.get_validator(
-    batch_request=BatchRequest(**batch_request),
-    expectation_suite_name=expectation_suite_name
-)
-validator.head(n_rows=5, fetch_all=False)
-""",
-            lint=True,
-        )
-        self._add_profiler_instructions()
-        self.add_code_cell(
-            code=f"""\
-result = context.run_profiler_with_dynamic_arguments(
-    name="{self._profiler_name}",
-    batch_request=batch_request,
-)
-_ = validator.expectation_suite.add_expectation_configurations(
-    expectation_configurations=result.expectation_configurations
-)
-""",
-            lint=True,
-        )
-
     def _add_profiler_instructions(self) -> None:
+        self.add_markdown_cell(
+            markdown="""# Run the UserConfigurableProfiler
+
+The suites generated here are **not meant to be production suites** -- they are **a starting point to build upon**.
+
+**To get to a production-grade suite, you will definitely want to [edit this
+suite](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html?utm_source=notebook&utm_medium=profile_based_expectations)
+after this initial step gets you started on the path towards what you want.**
+
+This is highly configurable depending on your goals.
+You can ignore columns or exclude certain expectations, specify a threshold for creating value set expectations, or even specify semantic types for a given column.
+You can find more information about [how to configure this profiler, including a list of the expectations that it uses, here.](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html)
+
+"""
+        )
+
+    def _add_onboarding_data_assistant_instructions(self) -> None:
         self.add_markdown_cell(
             markdown="""# Run the OnboardingDataAssistant
 
@@ -273,9 +360,9 @@ after this initial step gets you started on the path towards what you want.**
 
 This is highly configurable depending on your goals.
 You can ignore columns, specify cardinality of categorical columns, configure semantic types for columns, even adjust thresholds and/or different estimator parameters, etc.
-You can find more information about OnboardingDataAssistant and other DataAssistant components (please see documentation for the complete set of DataAssistant controls) [how to choose and control the behavior of the DataAssistant tailored to your goals](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.html).
+You can find more information about OnboardingDataAssistant and other DataAssistant components (please see documentation for the complete set of DataAssistant controls) [how to choose and control the behavior of the DataAssistant tailored to your goals](https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).
 
-"""
+    """
         )
 
     def _add_available_columns_list(self) -> None:

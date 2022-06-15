@@ -76,6 +76,7 @@ class VolumeDataAssistant(DataAssistant):
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
             execution_time=data_assistant_result.execution_time,
+            usage_statistics_handler=data_assistant_result.usage_statistics_handler,
         )
 
     @staticmethod

@@ -2074,9 +2074,9 @@ class DataContextConfig(BaseYamlConfig):
         validation_operators=None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
-        notebooks=None,
+        notebooks: Optional[NotebookConfig] = None,
         config_variables_file_path: Optional[str] = None,
-        anonymous_usage_statistics=None,
+        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
@@ -2150,6 +2150,10 @@ class DataContextConfig(BaseYamlConfig):
     @property
     def config_version(self):
         return self._config_version
+
+    @config_version.setter
+    def config_version(self, config_version: float) -> None:
+        self._config_version = config_version
 
     def to_json_dict(self) -> dict:
         """
