@@ -16,9 +16,12 @@ from tests.cli.utils import (
 
 
 @pytest.fixture
-def titanic_data_context_clean(
-    tmp_path_factory,
+def titanic_data_context_clean_usage_stats_enabled(
+    tmp_path_factory, monkeypatch
 ) -> DataContext:
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -126,43 +129,70 @@ def test_project_check_on_valid_project_says_so(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_project_check_on_project_with_v2_datasources_and_validation_operators(
+def test_project_upgrade_on_project_with_v2_datasources_and_validation_operators(
     mock_emit, caplog, monkeypatch, titanic_data_context_to_upgrade_usage_stats_enabled
 ):
     context = titanic_data_context_to_upgrade_usage_stats_enabled
     runner = CliRunner(mix_stderr=False)
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+    upgrade_result = runner.invoke(
         cli,
         ["project", "upgrade"],
         catch_exceptions=False,
     )
-    result = runner.invoke(
+    assert (
+        "UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations V3 API."
+        in upgrade_result.output
+    )
+    assert (
+        "The following Stores and/or Store Names will be upgraded:"
+        in upgrade_result.output
+    )
+    assert "- Stores: checkpoint_store" in upgrade_result.output
+    assert "- Store Names: checkpoint_store_name" in upgrade_result.output
+    assert (
+        "The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:"
+        in upgrade_result.output
+    )
+    assert "- Data Sources: mydatasource" in upgrade_result.output
+    assert (
+        "Your project requires manual upgrade steps in order to be up-to-date."
+        in upgrade_result.output
+    )
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=upgrade_result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
+
+    check_config_result = runner.invoke(
         cli,
         ["project", "check-config"],
         catch_exceptions=False,
     )
-
-    assert "Checking your config files for validity" in result.output
+    assert "Checking your config files for validity" in check_config_result.output
     assert (
         "Your project needs to be upgraded in order to be compatible with Great Expectations V3 API."
-        in result.output
+        in check_config_result.output
     )
     assert (
         "The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:"
-        in result.output
+        in check_config_result.output
     )
-    assert "- Data Sources: mydatasource" in result.output
+    assert "- Data Sources: mydatasource" in check_config_result.output
     assert (
         "Your configuration uses validation_operators, which are being deprecated.  Please, manually convert validation_operators to use the new Checkpoint validation unit, since validation_operators will be deleted."
-        in result.output
+        in check_config_result.output
     )
-    assert "Unfortunately, your config appears to be invalid" in result.output
+    assert (
+        "Unfortunately, your config appears to be invalid" in check_config_result.output
+    )
     assert (
         "The configuration of your great_expectations.yml is outdated.  Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your Great Expectations configuration in order to take advantage of the latest capabilities."
-        in result.output
+        in check_config_result.output
     )
+    assert check_config_result.exit_code == 1
     assert mock_emit.call_count == 7
     assert mock_emit.call_args_list == [
         mock.call(
@@ -197,7 +227,7 @@ def test_project_check_on_project_with_v2_datasources_and_validation_operators(
     ]
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
-        click_result=result,
+        click_result=check_config_result,
         allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
