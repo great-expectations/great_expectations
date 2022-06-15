@@ -1,3 +1,4 @@
+from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
@@ -14,4 +15,21 @@ class OnboardingDataAssistantResult(DataAssistantResult):
         "column.mean": "expect_column_mean_to_be_between",
         "column.median": "expect_column_median_to_be_between",
         "column.standard_deviation": "expect_column_stdev_to_be_between",
+    }
+
+    # A mapping is defined for the Altair data type associated with each metric
+    # Altair data types can be one of:
+    #     - Nominal: Metric is a discrete unordered category
+    #     - Ordinal: Metric is a discrete ordered quantity
+    #     - Quantitative: Metric is a continuous real-valued quantity
+    #     - Temporal: Metric is a time or date value
+    METRIC_TYPES = {
+        "table.columns": AltairDataTypes.NOMINAL,
+        "table.row_count": AltairDataTypes.QUANTITATIVE,
+        "column.distinct_values.count": AltairDataTypes.QUANTITATIVE,
+        "column.min": AltairDataTypes.QUANTITATIVE,
+        "column.max": AltairDataTypes.QUANTITATIVE,
+        "column.mean": AltairDataTypes.QUANTITATIVE,
+        "column.median": AltairDataTypes.QUANTITATIVE,
+        "column.standard_deviation": AltairDataTypes.QUANTITATIVE,
     }
