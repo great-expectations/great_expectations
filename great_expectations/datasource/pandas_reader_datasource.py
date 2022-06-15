@@ -17,6 +17,10 @@ from great_expectations.types.base import DotDict
 from great_expectations.validator.validator import Validator
 
 
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action='ignore', category=pd.errors.ParserWarning)
+
+
 #!!! Factor this out to somewhere nicer
 class GxExperimentalWarning(Warning):
     pass
@@ -62,7 +66,7 @@ def _add_gx_args(
         self,
         primary_arg: Optional[Any] = None,
         *args,
-        data_asset_name: str = "default_data_asset",
+        data_asset_name: Optional[str] = None,
         id_: Optional[str] = None,
         use_primary_arg_as_id: Optional[Bool] = default_use_primary_arg_as_id,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -104,6 +108,17 @@ def _add_gx_args(
                 )
 
             primary_arg = kwargs.pop(primary_arg_variable_name)
+
+        if data_asset_name == None:
+            data_asset_name = "default_data_asset"
+        else:
+            if data_asset_name in self.assets:
+                pass
+            else:
+                self.add_asset(
+                    name = data_asset_name,
+                    base_directory = "",
+                )
 
         df = func(self, primary_arg, *args, **kwargs)
 
@@ -236,13 +251,13 @@ class PandasReaderDatasource(Datasource):
                 "module_name": "great_expectations.execution_engine",
             },
             data_connectors={
-                "runtime_data_connector": {
-                    "class_name": "RuntimeDataConnector",
-                    "batch_identifiers": [
-                        "id_",
-                        "timestamp",
-                    ],
-                },
+                # "runtime_data_connector": {
+                #     "class_name": "RuntimeDataConnector",
+                #     "batch_identifiers": [
+                #         "id_",
+                #         "timestamp",
+                #     ],
+                # },
                 "configured_data_connector": {
                     "class_name": "ConfiguredAssetFilesystemDataConnector",
                     "base_directory":"",
@@ -253,7 +268,6 @@ class PandasReaderDatasource(Datasource):
                         }
                     }
                 }
-
             },
         )
 

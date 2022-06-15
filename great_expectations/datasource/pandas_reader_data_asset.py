@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import logging
 from typing import List, Dict
 from great_expectations.core.batch import BatchRequest
@@ -99,3 +100,26 @@ class PandasReaderDataAsset(BaseDataAsset):
             raise BatchIdentifierException(f"Missing BatchIdentifier keys : {missing_keys}")
 
         return BatchIdentifiers(**batch_identifier_dict)
+
+    def __str__(self):
+        # !!! We should figure out a convention for __str__ifying objects, and apply it across the codebase
+        return f"""great_expectations.datasource.pandas_reader_data_asset.PandasReaderDataAsset object :
+    datasource:        {self._datasource}
+    name:              {self._name}
+    batch_identifiers: {self._batch_identifiers}
+    method:            {self._method}
+    base_directory:    {self._base_directory}
+    regex:             {self._regex}
+"""
+
+    def __eq__(self, other) -> bool:
+        # !!! I'm not sure if this is a good implementation of __eq__, but I had to do something to get `assert A == B` in tests working.
+
+        return all([
+            self._datasource == other._datasource,
+            self._name == other._name,
+            self._batch_identifiers == other._batch_identifiers,
+            self._method == other._method,
+            self._base_directory == other._base_directory,
+            self._regex == other._regex,
+        ])

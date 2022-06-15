@@ -94,10 +94,10 @@ class NewBatchRequest:
         # !!! I'm not sure if this is a good implementation of __eq__, but I had to do something to get `assert A == B` in tests working.
 
         return all([
-           self.datasource_name == other.datasource_name,
-           self.data_asset_name == other.data_asset_name,
-           self.batch_identifiers == other.batch_identifiers,
-           self.runtime_parameters == other.runtime_parameters,
+            self.datasource_name == other.datasource_name,
+            self.data_asset_name == other.data_asset_name,
+            self.batch_identifiers == other.batch_identifiers,
+            self.runtime_parameters == other.runtime_parameters,
         ])
 
 
