@@ -56,14 +56,7 @@
     "@algolia/client-search" "4.13.0"
     "@algolia/transporter" "4.13.0"
 
-"@algolia/client-account@4.9.1":
-  version "4.9.1"
-  resolved "https://registry.yarnpkg.com/@algolia/client-account/-/client-account-4.9.1.tgz#f2c1b3e49de2ee1fca44b8b5e64e1ce0dbdff0db"
-  integrity sha512-Shpjeuwb7i2LR5QuWREb6UbEQLGB+Pl/J5+wPgILJDP/uWp7jpl0ase9mYNQGKj7TjztpSpQCPZ3dSHPnzZPfw==
-  dependencies:
-    "@algolia/client-common" "4.9.1"
-    "@algolia/client-search" "4.9.1"
-    "@algolia/transporter" "4.9.1"
+
 
 "@algolia/client-analytics@4.13.0":
   version "4.13.0"
