@@ -92,8 +92,8 @@ class VolumeDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder(
-            json_serialize=True
+        table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
@@ -101,7 +101,6 @@ class VolumeDataAssistant(DataAssistant):
         table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name="table.row_count",
             metric_value_kwargs=None,
-            json_serialize=True,
         )
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
@@ -181,8 +180,8 @@ class VolumeDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder(
-            json_serialize=True
+        column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder()
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
@@ -190,7 +189,6 @@ class VolumeDataAssistant(DataAssistant):
         column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name="column.distinct_values.count",
             metric_value_kwargs=None,
-            json_serialize=True,
         )
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]

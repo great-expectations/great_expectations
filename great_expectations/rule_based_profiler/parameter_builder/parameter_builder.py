@@ -25,6 +25,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
+    RAW_PARAMETER_KEY,
     AttributedResolvedMetrics,
     Builder,
     Domain,
@@ -70,7 +71,6 @@ class ParameterBuilder(ABC, Builder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> None:
         """
@@ -83,7 +83,6 @@ class ParameterBuilder(ABC, Builder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with ParameterBuilder
         """
         super().__init__(data_context=data_context)
@@ -99,15 +98,12 @@ class ParameterBuilder(ABC, Builder):
             data_context=self._data_context,
         )
 
-        self._json_serialize = json_serialize
-
     def build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         parameter_computation_impl: Optional[Callable] = None,
-        json_serialize: Optional[bool] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
@@ -118,7 +114,6 @@ class ParameterBuilder(ABC, Builder):
             variables: attribute name/value pairs
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
             parameter_computation_impl: Object containing desired ParameterBuilder implementation.
-            json_serialize: If absent, use property value (in standard way, supporting variables look-up).
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
@@ -159,22 +154,11 @@ class ParameterBuilder(ABC, Builder):
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
 
-            if json_serialize is None:
-                # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-                json_serialize = get_parameter_value_and_validate_return_type(
-                    domain=domain,
-                    parameter_reference=self.json_serialize,
-                    expected_return_type=bool,
-                    variables=variables,
-                    parameters=parameters,
-                )
-
             parameter_values: Dict[str, Any] = {
+                self.raw_fully_qualified_parameter_name: parameter_computation_result,
                 self.fully_qualified_parameter_name: convert_to_json_serializable(
                     data=parameter_computation_result
-                )
-                if json_serialize
-                else parameter_computation_result,
+                ),
             }
 
             build_parameter_container(
@@ -199,16 +183,12 @@ class ParameterBuilder(ABC, Builder):
         return self._evaluation_parameter_builder_configs
 
     @property
-    def json_serialize(self) -> Union[str, bool]:
-        return self._json_serialize
-
-    @json_serialize.setter
-    def json_serialize(self, value: Union[str, bool]) -> None:
-        self._json_serialize = value
-
-    @property
     def fully_qualified_parameter_name(self) -> str:
         return f"{PARAMETER_KEY}{self.name}"
+
+    @property
+    def raw_fully_qualified_parameter_name(self) -> str:
+        return f"{RAW_PARAMETER_KEY}{self.name}"
 
     @abstractmethod
     def _build_parameters(
@@ -706,9 +686,14 @@ def resolve_evaluation_dependencies(
         fully_qualified_evaluation_parameter_builder_name: str = (
             f"{PARAMETER_KEY}{evaluation_parameter_builder.name}"
         )
+        raw_fully_qualified_evaluation_parameter_builder_name: str = (
+            f"{RAW_PARAMETER_KEY}{evaluation_parameter_builder.name}"
+        )
 
         if (
             fully_qualified_evaluation_parameter_builder_name
+            not in fully_qualified_parameter_names
+            or raw_fully_qualified_evaluation_parameter_builder_name
             not in fully_qualified_parameter_names
         ):
             evaluation_parameter_builder.set_batch_list_or_batch_request(
