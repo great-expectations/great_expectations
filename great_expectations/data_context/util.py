@@ -127,11 +127,11 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
 
 
 def build_store_from_config(
-    store_name: str = None,
-    store_config: dict = None,
+    store_name: Optional[str] = None,
+    store_config: Optional[dict] = None,
     module_name: str = "great_expectations.data_context.store",
-    runtime_environment: dict = None,
-):
+    runtime_environment: Optional[dict] = None,
+) -> Optional["Store"]:  # noqa: F821
     if store_config is None or module_name is None:
         return None
 

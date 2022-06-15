@@ -2239,17 +2239,23 @@ def data_context_with_query_store(
 
 
 @pytest.fixture
-def ge_cloud_base_url():
+def ge_cloud_id():
+    # Fake id but adheres to the format required of a UUID
+    return "731ee1bd-604a-4851-9ee8-bca8ffb32bce"
+
+
+@pytest.fixture
+def ge_cloud_base_url() -> str:
     return "https://app.test.greatexpectations.io"
 
 
 @pytest.fixture
-def ge_cloud_organization_id():
+def ge_cloud_organization_id() -> str:
     return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
 
 
 @pytest.fixture
-def ge_cloud_access_token():
+def ge_cloud_access_token() -> str:
     return "6bb5b6f5c7794892a4ca168c65c2603e"
 
 
@@ -3206,6 +3212,7 @@ data_connectors:
                             "group_names": ["filename"],
                             "module_name": "great_expectations.datasource.data_connector.asset",
                             "pattern": "(.*)\\.csv",
+                            "reader_options": {"delimiter": ","},
                         }
                     },
                     "base_directory": data_connector_base_directory,
@@ -6159,6 +6166,7 @@ data_connectors:
                             "group_names": ["batch_num", "total_batches"],
                             "module_name": "great_expectations.datasource.data_connector.asset",
                             "pattern": "csv_batch_(\\d.+)_of_(\\d.+)\\.csv",
+                            "reader_options": {"delimiter": ","},
                         }
                     },
                     "base_directory": data_connector_base_directory,

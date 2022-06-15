@@ -118,10 +118,16 @@ class UsageStatsEvents(enum.Enum):
     CHECKPOINT_RUN = "checkpoint.run"
     EXPECTATION_SUITE_ADD_EXPECTATION = "expectation_suite.add_expectation"
     LEGACY_PROFILER_BUILD_SUITE = "legacy_profiler.build_suite"
-    PROFILER_RUN = "profiler.run"
-    DATA_CONTEXT_RUN_PROFILER_ON_DATA = "data_context.run_profiler_on_data"
-    DATA_CONTEXT_RUN_PROFILER_WITH_DYNAMIC_ARGUMENTS = (
+    RULE_BASED_PROFILER_RUN = "profiler.run"
+    RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE = (
+        "profiler.result.get_expectation_suite"
+    )
+    DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA = "data_context.run_profiler_on_data"
+    DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS = (
         "data_context.run_profiler_with_dynamic_arguments"
+    )
+    DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE = (
+        "data_assistant.result.get_expectation_suite"
     )
 
     @classmethod
