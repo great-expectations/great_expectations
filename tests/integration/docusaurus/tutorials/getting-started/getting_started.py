@@ -37,7 +37,7 @@ data_connectors:
     default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
         batch_identifiers:
-            - default_identifier_name
+            - runtime_batch_identifier_name
 """
 # </snippet>
 
