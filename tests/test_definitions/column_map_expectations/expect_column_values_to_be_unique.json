@@ -177,7 +177,7 @@
       {
         "title": "positive_case_all_null_values",
         "exact_match_out": false,
-        "only_for": ["postgresql", "mysql", "mssql", "sqlite", "pandas", "spark"],
+        "suppress_test_for": ["trino", "bigquery"],
         "in": {
           "column": "null"
         },
