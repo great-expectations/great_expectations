@@ -101,9 +101,9 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 ```
 
 **Cell 3**
-![Cell3](../../images/getting_started_tutorial/tutorial_create_expectations_cell3.png)
+![Cell3](../../images/getting_started_tutorial/tutorial_create_expectations_cell3_onboarding_assistant.png)
 
-3. The next cell is where you configure a `UserConfigurableProfiler` and instantiate it, which will then profile the data and create the relevant Expectations to add to your `taxi.demo` suite.
+3. Cell 3 is where you run a Data Assistant.  In this case, the assistant being used is the Onboarding Assistant, which will Profile the data provided by your Batch Request and create the relevant Expectations to add to your `taxi.demo` suite.
 
 **Cell 4**
 ![Cell4](../../images/getting_started_tutorial/tutorial_create_expectations_cell4.png)

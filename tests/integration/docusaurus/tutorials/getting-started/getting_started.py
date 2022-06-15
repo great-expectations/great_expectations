@@ -3,8 +3,8 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
+from great_expectations.profile.user_configurable_profiler import (
+    UserConfigurableProfiler,
 )
 from great_expectations.validator.validator import Validator
 
@@ -19,18 +19,14 @@ context = ge.get_context()
 assert context
 
 # First configure a new Datasource and add to DataContext
+
+# <snippet>
 datasource_yaml = f"""
 name: getting_started_datasource
 class_name: Datasource
-module_name: great_expectations.datasource
 execution_engine:
-  module_name: great_expectations.execution_engine
   class_name: PandasExecutionEngine
 data_connectors:
-    default_runtime_data_connector_name:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-            - default_identifier_name
     default_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: ../data/
@@ -38,7 +34,14 @@ data_connectors:
           group_names:
             - data_asset_name
           pattern: (.*)
+    default_runtime_data_connector_name:
+        class_name: RuntimeDataConnector
+        assets:
+            my_runtime_asset_name:
+              batch_identifiers:
+                - runtime_batch_identifier_name
 """
+# </snippet>
 
 # Note : this override is for internal GE purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
@@ -81,7 +84,7 @@ validator = context.get_validator(
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)
 
-# Profile the data with the OnboardingDataAssistant and save resulting ExpectationSuite
+# Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
 # <snippet>
 exclude_column_names = [
     "vendor_id",
@@ -105,51 +108,18 @@ exclude_column_names = [
 ]
 # </snippet>
 
-data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
-    batch_request=batch_request,
-    # include_column_names=include_column_names,
-    exclude_column_names=exclude_column_names,
-    # include_column_name_suffixes=include_column_name_suffixes,
-    # exclude_column_name_suffixes=exclude_column_name_suffixes,
-    # semantic_type_filter_module_name=semantic_type_filter_module_name,
-    # semantic_type_filter_class_name=semantic_type_filter_class_name,
-    # include_semantic_types=include_semantic_types,
-    # exclude_semantic_types=exclude_semantic_types,
-    # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-    cardinality_limit_mode="rel_100",  # case-insenstive (see documentaiton for other options)
-    # max_unique_values=max_unique_values,
-    # max_proportion_unique=max_proportion_unique,
-    # column_value_uniqueness_rule={
-    #     "success_ratio": 0.8,
-    # },
-    # column_value_nullity_rule={
-    # },
-    # column_value_nonnullity_rule={
-    # },
-    # numeric_columns_rule={
-    #     "false_positive_rate": 0.1,
-    #     "random_seed": 43792,
-    # },
-    # datetime_columns_rule={
-    #     "truncate_values": {
-    #         "lower_bound": 0,
-    #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
-    #     },
-    #     "round_decimals": 0,
-    # },
-    # text_columns_rule={
-    #     "strict_min": True,
-    #     "strict_max": True,
-    #     "success_ratio": 0.8,
-    # },
-    # categorical_columns_rule={
-    #     "false_positive_rate": 0.1,
-    #     "round_decimals": 3,
-    # },
+profiler = UserConfigurableProfiler(
+    profile_dataset=validator,
+    excluded_expectations=None,
+    ignored_columns=exclude_column_names,
+    not_null_only=False,
+    primary_or_compound_key=None,
+    semantic_types_dict=None,
+    table_expectations_only=False,
+    value_set_threshold="MANY",
 )
-validator.expectation_suite = data_assistant_result.get_expectation_suite(
-    expectation_suite_name=expectation_suite_name
-)
+suite = profiler.build_suite()
+validator.expectation_suite = suite
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv

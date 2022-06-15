@@ -143,8 +143,8 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
 
     explicit_instantiation_code: str = """
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="onboarding_data_assistant",
@@ -322,6 +322,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         # column_value_nonnullity_rule={
         # },
         numeric_columns_rule={
+            "round_decimals": 12,
             "false_positive_rate": 0.1,
             "random_seed": 43792,
         },
@@ -339,8 +340,14 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         },
         categorical_columns_rule={
             "false_positive_rate": 0.1,
-            # "round_decimals": 3,
+            # "round_decimals": 4,
         },
+    )
+    assert (
+        data_assistant_result.profiler_config.rules["numeric_columns_rule"][
+            "variables"
+        ]["round_decimals"]
+        == 12
     )
     assert (
         data_assistant_result.profiler_config.rules["numeric_columns_rule"][
