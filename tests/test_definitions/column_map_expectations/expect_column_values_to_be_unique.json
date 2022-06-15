@@ -149,19 +149,6 @@
         }
       },
       {
-        "title": "positive_case_all_null_values_bigquery_nulls",
-        "exact_match_out": false,
-        "only_for": ["bigquery"],
-        "in": {
-          "column": "null"
-        },
-        "out": {
-          "success": true,
-          "unexpected_list": [null, null, null, null],
-          "unexpected_index_list": [0, 1, 2, 3]
-        }
-      },
-      {
         "title": "positive_case_all_null_values_bigquery_nones",
         "exact_match_out": false,
         "only_for": ["bigquery"],
