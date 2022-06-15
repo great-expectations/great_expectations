@@ -285,13 +285,13 @@ class OnboardingDataAssistant(DataAssistant):
             bucketize_data=True,
             json_serialize=True,
         )
-        column_column_quantile_values_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_quantile_values_metric_multi_batch_parameter_builder(
-            json_serialize=True
-        )
         column_min_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_min_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
         column_max_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_max_metric_multi_batch_parameter_builder(
+            json_serialize=True
+        )
+        column_column_quantile_values_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_quantile_values_metric_multi_batch_parameter_builder(
             json_serialize=True
         )
         column_median_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_median_metric_multi_batch_parameter_builder(
@@ -420,7 +420,7 @@ class OnboardingDataAssistant(DataAssistant):
             },
             allow_relative_error=f"{VARIABLES_KEY}allow_relative_error",
             meta={
-                "profiler_details": f"{column_max_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                "profiler_details": f"{column_quantile_values_range_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
             },
         )
 
@@ -500,13 +500,13 @@ class OnboardingDataAssistant(DataAssistant):
                 "lower_bound": None,
                 "upper_bound": None,
             },
-            "round_decimals": 1,
+            "round_decimals": 12,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_partition_parameter_builder_for_metrics,
-            column_column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,
             column_min_metric_multi_batch_parameter_builder_for_metrics,
             column_max_metric_multi_batch_parameter_builder_for_metrics,
+            column_column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,
             column_median_metric_multi_batch_parameter_builder_for_metrics,
             column_mean_metric_multi_batch_parameter_builder_for_metrics,
             column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics,
