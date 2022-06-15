@@ -16,7 +16,7 @@ Changelog
 * [FEATURE] Support both UserConfigurableProfiler and OnboardingDataAssistant in "CLI SUITE NEW --PROFILE <name>" command (#5306)
 * [BUGFIX] Fix ColumnPartition metric handling of the number of bins (must always be integer). (#5282)
 * [BUGFIX] Add new high precision rule for mean and stdev in `OnboardingDataAssistant` (#5276)
-* [BUGFIX] Warning in Getting Started Guide notebook. (#5297) (thanks @Shinnnyshinshin)
+* [BUGFIX] Warning in Getting Started Guide notebook. (#5297)
 * [DOCS] how to create an expectation suite with the onboarding assistant (#5266)
 * [DOCS] update getting started tutorial for onboarding assistant (#5294)
 * [DOCS] getting started tutorial doc standards updates (#5295)
