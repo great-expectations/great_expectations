@@ -150,89 +150,89 @@ stages:
       vmImage: 'ubuntu-18.04'
 
     jobs:
-      - job: compatibility_matrix
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 120
-        variables:
-          GE_pytest_opts: '--no-sqlalchemy'
-        strategy:
-          matrix:
-            Python37-Pandas023:
-              python.version: '3.7'
-              numpy.version: '1.17.0'
-              pandas.version: '0.23.4'
-              scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
-            Python37-Pandas025:
-              python.version: '3.7'
-              numpy.version: '1.17.0'
-              pandas.version: '0.25.3'
-              # numpy 1.20 and pandas 0.25.3 do not coexist happily
-              scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
-            Python38-PandasLatest:
-              python.version: '3.8'
-              numpy.version: 'latest'
-              pandas.version: 'latest'
-              scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
+      # - job: compatibility_matrix
+      #   condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      #   timeoutInMinutes: 120
+      #   variables:
+      #     GE_pytest_opts: '--no-sqlalchemy'
+      #   strategy:
+      #     matrix:
+      #       Python37-Pandas023:
+      #         python.version: '3.7'
+      #         numpy.version: '1.17.0'
+      #         pandas.version: '0.23.4'
+      #         scipy.version: 'latest'
+      #         GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
+      #       Python37-Pandas025:
+      #         python.version: '3.7'
+      #         numpy.version: '1.17.0'
+      #         pandas.version: '0.25.3'
+      #         # numpy 1.20 and pandas 0.25.3 do not coexist happily
+      #         scipy.version: 'latest'
+      #         GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
+      #       Python38-PandasLatest:
+      #         python.version: '3.8'
+      #         numpy.version: 'latest'
+      #         pandas.version: 'latest'
+      #         scipy.version: 'latest'
+      #         GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+      #   steps:
+      #     - task: UsePythonVersion@0
+      #       inputs:
+      #         versionSpec: '$(python.version)'
+      #       displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+      #     - bash: python -m pip install --upgrade pip==21.3.1
+      #       displayName: 'Update pip'
 
-          - script: |
-              if [[ $(numpy.version) == 'latest' ]]; then
-                pip install numpy
-              else
-                pip install numpy==$(numpy.version)
-              fi
-            displayName: 'Install numpy'
+      #     - script: |
+      #         if [[ $(numpy.version) == 'latest' ]]; then
+      #           pip install numpy
+      #         else
+      #           pip install numpy==$(numpy.version)
+      #         fi
+      #       displayName: 'Install numpy'
 
-          - script: |
-              if [[ $(pandas.version) == 'latest' ]]; then
-                pip install pandas
-              else
-                pip install pandas==$(pandas.version)
-              fi
-            displayName: 'Install pandas'
+      #     - script: |
+      #         if [[ $(pandas.version) == 'latest' ]]; then
+      #           pip install pandas
+      #         else
+      #           pip install pandas==$(pandas.version)
+      #         fi
+      #       displayName: 'Install pandas'
 
-          - script: |
-              if [[ $(scipy.version) == 'latest' ]]; then
-                pip install scipy
-              else
-                pip install scipy==$(scipy.version)
-              fi
-            displayName: 'Install scipy'
+      #     - script: |
+      #         if [[ $(scipy.version) == 'latest' ]]; then
+      #           pip install scipy
+      #         else
+      #           pip install scipy==$(scipy.version)
+      #         fi
+      #       displayName: 'Install scipy'
 
-          - script: |
-              pip install $(GE_pytest_pip_opts)
-              pip install  --requirement requirements.txt
-              # Consider fragmenting *all* integration tests into separate folder and run
-              pip install  .
-            displayName: 'Install dependencies'
+      #     - script: |
+      #         pip install $(GE_pytest_pip_opts)
+      #         pip install  --requirement requirements.txt
+      #         # Consider fragmenting *all* integration tests into separate folder and run
+      #         pip install  .
+      #       displayName: 'Install dependencies'
 
-          - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            displayName: 'pytest'
+      #     - script: |
+      #         pip install pytest pytest-cov pytest-azurepipelines
+      #         pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+      #       displayName: 'pytest'
 
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: 'Publish test results for Python $(python.version)'
+      #     - task: PublishTestResults@2
+      #       condition: succeededOrFailed()
+      #       inputs:
+      #         testResultsFiles: '**/test-*.xml'
+      #         testRunTitle: 'Publish test results for Python $(python.version)'
 
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+      #     - task: PublishCodeCoverageResults@1
+      #       inputs:
+      #         codeCoverageTool: Cobertura
+      #         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+      #         reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
         condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
@@ -285,7 +285,8 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --spark tests/datasource/test_new_datasource.py::test_basic_spark_datasource_self_check
+              # pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -300,242 +301,242 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-  - stage: usage_stats_integration
-    dependsOn: [lint, import_ge, custom_checks]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: usage_stats_integration
+  #   dependsOn: [lint, import_ge, custom_checks]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: test_usage_stats_messages
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        variables:
-          python.version: '3.8'
+  #   jobs:
+  #     - job: test_usage_stats_messages
+  #       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==20.2.4
+  #           displayName: 'Update pip'
 
-          - script: |
-              pip install --requirement requirements-dev-test.txt
-              pip install --requirement requirements.txt
-              pip install .
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --requirement requirements-dev-test.txt
+  #             pip install --requirement requirements.txt
+  #             pip install .
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              pip install pytest pytest-azurepipelines
-              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
-            displayName: 'pytest'
+  #         - script: |
+  #             pip install pytest pytest-azurepipelines
+  #             pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+  #           displayName: 'pytest'
 
-  - stage: db_integration
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: db_integration
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    dependsOn: [lint, import_ge, custom_checks]
+  #   dependsOn: [lint, import_ge, custom_checks]
 
-    jobs:
-      - job: mysql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 120
+  #   jobs:
+  #     - job: mysql
+  #       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+  #       timeoutInMinutes: 120
 
-        services:
-          mysql: mysql
+  #       services:
+  #         mysql: mysql
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==21.3.1
+  #           displayName: 'Update pip'
 
-          - script: |
-              printf 'Waiting for MySQL database to accept connections'
-              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
-                printf '.'
-                sleep 1;
-              done;
-            displayName: Wait for database to initialise
+  #         - script: |
+  #             printf 'Waiting for MySQL database to accept connections'
+  #             until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+  #               printf '.'
+  #               sleep 1;
+  #             done;
+  #           displayName: Wait for database to initialise
 
-          - script: |
-              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
-              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
-            displayName: 'Configure mysql'
+  #         - script: |
+  #             echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+  #             mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+  #           displayName: 'Configure mysql'
 
-          - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+  #             pip install --requirement requirements.txt
+  #             pip install .
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            displayName: 'pytest'
+  #         - script: |
+  #             pip install --requirement requirements.txt
+  #             pip install pytest pytest-cov pytest-azurepipelines
+  #             pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+  #           displayName: 'pytest'
 
-      - job: mssql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 120
+  #     - job: mssql
+  #       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+  #       timeoutInMinutes: 120
 
-        services:
-          mssql: mssql
+  #       services:
+  #         mssql: mssql
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==21.3.1
+  #           displayName: 'Update pip'
 
-          - script: |
-              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+  #         - script: |
+  #             sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
-          - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+  #             pip install --requirement requirements.txt
+  #             pip install .
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            displayName: 'pytest'
+  #         - script: |
+  #             pip install pytest pytest-cov pytest-azurepipelines
+  #             pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+  #           displayName: 'pytest'
 
-      - job: trino
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 120
+  #     - job: trino
+  #       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+  #       timeoutInMinutes: 120
 
-        services:
-          trino: trino
+  #       services:
+  #         trino: trino
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==21.3.1
+  #           displayName: 'Update pip'
 
-          - script: |
-              printf 'Waiting for Trino database to accept connections'
-              sleep 30
-#             until trino --execute "SHOW CATALOGS"; do
-#               printf '.'
-#               sleep 1;
-#             done;
-            displayName: Wait for database to initialise
+  #         - script: |
+  #             printf 'Waiting for Trino database to accept connections'
+  #             sleep 30
+# #             until trino --execute "SHOW CATALOGS"; do
+# #               printf '.'
+# #               sleep 1;
+# #             done;
+  #           displayName: Wait for database to initialise
 
-          - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+  #             pip install --requirement requirements.txt
+  #             pip install .
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            displayName: 'pytest'
+  #         - script: |
+  #             pip install pytest pytest-cov pytest-azurepipelines
+  #             pytest --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+  #           displayName: 'pytest'
 
-  - stage: cli_integration
-    dependsOn: [lint, import_ge, custom_checks]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: cli_integration
+  #   dependsOn: [lint, import_ge, custom_checks]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: test_cli
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+  #   jobs:
+  #     - job: test_cli
+  #       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
 
-        services:
-          postgres: postgres
+  #       services:
+  #         postgres: postgres
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==21.3.1
+  #           displayName: 'Update pip'
 
-          - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+  #             pip install --requirement requirements.txt
+  #             pip install .
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              pip install pytest
-              pytest --postgresql --spark --aws-integration -v tests/cli
-            displayName: 'pytest'
+  #         - script: |
+  #             pip install pytest
+  #             pytest --postgresql --spark --aws-integration -v tests/cli
+  #           displayName: 'pytest'
 
-  - stage: deploy
-    condition: and(succeeded(), eq(variables.isRelease, true))
-    pool:
-      vmImage: 'ubuntu-latest'
-    dependsOn: [import_ge, custom_checks, required, lint, db_integration, usage_stats_integration, cli_integration]
+  # - stage: deploy
+  #   condition: and(succeeded(), eq(variables.isRelease, true))
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
+  #   dependsOn: [import_ge, custom_checks, required, lint, db_integration, usage_stats_integration, cli_integration]
 
-    jobs:
-      - job: deploy
-        variables:
-          python.version: '3.8'
+  #   jobs:
+  #     - job: deploy
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==21.3.1
+  #           displayName: 'Update pip'
 
-          - script: |
-              deployment_version=$(cat ./great_expectations/deployment_version)
-              tag=$(basename "$(Build.SourceBranch)")
-              if [[ "$deployment_version" != "$tag" ]]; then
-                printf "There is a discrepancy between the 'deployment_version' file (%s) and the provided tag (%s)" $deployment_version $tag
-                exit 1
-              fi
-            displayName: 'Check for valid tag'
+  #         - script: |
+  #             deployment_version=$(cat ./great_expectations/deployment_version)
+  #             tag=$(basename "$(Build.SourceBranch)")
+  #             if [[ "$deployment_version" != "$tag" ]]; then
+  #               printf "There is a discrepancy between the 'deployment_version' file (%s) and the provided tag (%s)" $deployment_version $tag
+  #               exit 1
+  #             fi
+  #           displayName: 'Check for valid tag'
 
-          - script: |
-              pip install twine
-              pip install wheel
-              git config --global user.email "team@greatexpectations.io"
-              git config --global user.name "Great Expectations"
-            displayName: 'Prepare packaging'
+  #         - script: |
+  #             pip install twine
+  #             pip install wheel
+  #             git config --global user.email "team@greatexpectations.io"
+  #             git config --global user.name "Great Expectations"
+  #           displayName: 'Prepare packaging'
 
-          # Build the python distribution from source
-          - script: |
-              python setup.py sdist
-              python setup.py bdist_wheel
-            displayName: 'Build distribution'
+  #         # Build the python distribution from source
+  #         - script: |
+  #             python setup.py sdist
+  #             python setup.py bdist_wheel
+  #           displayName: 'Build distribution'
 
-          - task: TwineAuthenticate@1
-            inputs:
-              pythonUploadServiceConnection: pypi
+  #         - task: TwineAuthenticate@1
+  #           inputs:
+  #             pythonUploadServiceConnection: pypi
 
-          # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
-          - script: |
-              python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
-            displayName: 'Upload'
+  #         # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
+  #         - script: |
+  #             python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
+  #           displayName: 'Upload'
