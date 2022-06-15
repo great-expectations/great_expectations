@@ -1,1 +1,1 @@
-pyspark>=2.3.2  # spark
+pyspark>=2.3.2,<3.3.0  # spark
