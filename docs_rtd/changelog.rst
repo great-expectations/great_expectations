@@ -4,6 +4,36 @@
 Changelog
 #########
 
+0.15.10
+-----------------
+* [FEATURE] `DataContextVariables` CRUD for `stores` (#5268)
+* [FEATURE] `DataContextVariables` CRUD for `data_docs_sites` (#5269)
+* [FEATURE] `DataContextVariables` CRUD for `anonymous_usage_statistics` (#5271)
+* [FEATURE] `DataContextVariables` CRUD for `notebooks`  (#5272)
+* [FEATURE] `DataContextVariables` CRUD for `concurrency` (#5273)
+* [FEATURE] `DataContextVariables` CRUD for `progress_bars` (#5274)
+* [FEATURE] Integrate `DatasourceStore` with `DataContext` (#5292)
+* [FEATURE] Support both UserConfigurableProfiler and OnboardingDataAssistant in "CLI SUITE NEW --PROFILE <name>" command (#5306)
+* [BUGFIX] Fix ColumnPartition metric handling of the number of bins (must always be integer). (#5282)
+* [BUGFIX] Add new high precision rule for mean and stdev in `OnboardingDataAssistant` (#5276)
+* [BUGFIX] Warning in Getting Started Guide notebook. (#5297)
+* [DOCS] how to create an expectation suite with the onboarding assistant (#5266)
+* [DOCS] update getting started tutorial for onboarding assistant (#5294)
+* [DOCS] getting started tutorial doc standards updates (#5295)
+* [DOCS] Update standard arguments doc for Expectations to not reference datasets. (#5052)
+* [MAINTENANCE] Add check to `check_type_hint_coverage` script to ensure proper `mypy` installation (#5291)
+* [MAINTENANCE] `DataAssistantResult` cleanup and extensibility enhancements (#5259)
+* [MAINTENANCE] Handle compare Expectation in presence of high precision floating point numbers and NaN values (#5298)
+* [MAINTENANCE] Suppress persisting of temporary ExpectationSuite configurations in Rule-Based Profiler computations (#5305)
+* [MAINTENANCE] Adds column values github user validation (#5302)
+* [MAINTENANCE] Adds column values IATA code validation (#5303)
+* [MAINTENANCE] Adds column values ARN validation (#5304)
+* [MAINTENANCE] Fixing a typo in a comment (in several files) (#5310)
+* [MAINTENANCE] Adds column scientific notation string validation (#5309)
+* [MAINTENANCE] lint fixes (#5312)
+* [MAINTENANCE] Adds column value JSON validation (#5313)
+* [MAINTENANCE] Expect column values to be valid scientific notation (#5311)
+
 0.15.9
 -----------------
 * [FEATURE] Add new expectation: expect column values to match powers of a base g… (#5219) (thanks @rifatKomodoDragon)
