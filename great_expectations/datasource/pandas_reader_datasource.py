@@ -62,6 +62,7 @@ def _add_gx_args(
         self,
         primary_arg: Optional[Any] = None,
         *args,
+        data_asset_name: str = "default_data_asset",
         id_: Optional[str] = None,
         use_primary_arg_as_id: Optional[Bool] = default_use_primary_arg_as_id,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -134,7 +135,7 @@ def _add_gx_args(
             data=df,
             batch_request=NewConfiguredBatchRequest(
                 datasource_name=self.name,
-                data_asset_name="default_data_asset",
+                data_asset_name=data_asset_name,
                 data_connector_query=DataConnectorQuery(
                     id_= id_,
                     timestamp= timestamp,
@@ -418,70 +419,3 @@ class PandasReaderDatasource(Datasource):
     @_add_gx_args(primary_arg_variable_name="path", default_use_primary_arg_as_id=True)
     def read_spss(self, primary_arg, *args, **kwargs):
         return pd.read_spss(primary_arg, *args, **kwargs)
-
-    #!!! Leaving this commented out, in case we have second thoughts about the decorator
-    # def read_csv(
-    #     self,
-    #     primary_arg : Any,
-    #     *args,
-    #     id_ : Optional[str] = None,
-    #     use_primary_arg_as_id : Optional[Bool] = None,
-    #     expectation_suite : Optional[ExpectationSuite] = None,
-    #     timestamp = None,
-    #     **kwargs,
-    # ) -> Validator:
-    #     #!!! This whole top section could be put into a decorator
-    #     if id_ is not None and use_primary_arg_as_id == True:
-    #         raise ValueError(
-    #             "id_ cannot be specified when use_primary_arg_as_id is also True"
-    #         )
-
-    #     if id_ is None:
-    #         if use_primary_arg_as_id == None:
-    #             use_primary_arg_as_id = self._decide_whether_to_use_variable_as_identifier(primary_arg)
-
-    #         if use_primary_arg_as_id:
-    #             id_ = primary_arg
-    #         else:
-    #             id_ = None
-
-    #     if timestamp == None:
-    #         timestamp  = datetime.datetime.now()
-
-    #     #!!! Check to ensure serializability of args and kwargs.
-    #     # Non-serializable args and kwargs should be replaced by some token that indicates that they were present, but can't be saved.
-    #     # https://stackoverflow.com/questions/51674222/how-to-make-json-dumps-in-python-ignore-a-non-serializable-field
-
-    #     df = pd.read_csv(
-    #         primary_arg,
-    #         *args,
-    #         **kwargs
-    #     )
-
-    #     #!!! This bottom section could be put into a decorator, too
-    #     batch = self.get_single_batch_from_batch_request(
-    #         batch_request=RuntimeBatchRequest(
-    #             datasource_name=self.name,
-    #             data_connector_name="runtime_data_connector",
-    #             data_asset_name="default_data_asset",
-    #             runtime_parameters={
-    #                 "batch_data": df,
-    #                 "args": list(args),
-    #                 "kwargs": kwargs,
-    #             },
-    #             batch_identifiers={
-    #                 "id_": id_,
-    #                 "timestamp": timestamp,
-    #             },
-    #         )
-    #     )
-
-    #     #!!! Returning a Validator goes against the pattern we've used elsewhere for Datasources.
-    #     #I'm increasingly convinced that this is the right move, rather than returning Batches, which are useless objects.
-    #     validator = Validator(
-    #         execution_engine = self.execution_engine,
-    #         expectation_suite=expectation_suite,
-    #         batches = [batch],
-    #     )
-
-    #     return validator
