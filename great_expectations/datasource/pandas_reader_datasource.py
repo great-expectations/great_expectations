@@ -7,7 +7,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import pandas as pd
 
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewConfiguredBatchRequest
 from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.marshmallow__shade.fields import Bool
@@ -111,20 +112,37 @@ def _add_gx_args(
             kwargs,
         )
 
-        batch = self.get_single_batch_from_batch_request(
-            batch_request=RuntimeBatchRequest(
+        ### Here's my original, hacky implementation for getting a Batch
+        # batch = self.get_single_batch_from_batch_request(
+        #     batch_request=RuntimeBatchRequest(
+        #         datasource_name=self.name,
+        #         data_connector_name="runtime_data_connector",
+        #         data_asset_name="default_data_asset",
+        #         runtime_parameters={
+        #             "batch_data": df,
+        #             "args": list(args),
+        #             "kwargs": kwargs,
+        #         },
+        #         batch_identifiers={
+        #             "id_": id_,
+        #             "timestamp": timestamp,
+        #         },
+        #     )
+        # )
+
+        batch = Batch(
+            data=df,
+            batch_request=NewConfiguredBatchRequest(
                 datasource_name=self.name,
-                data_connector_name="runtime_data_connector",
                 data_asset_name="default_data_asset",
-                runtime_parameters={
-                    "batch_data": df,
-                    "args": list(args),
-                    "kwargs": kwargs,
-                },
-                batch_identifiers={
-                    "id_": id_,
-                    "timestamp": timestamp,
-                },
+                data_connector_query=DataConnectorQuery(
+                    id_= id_,
+                    timestamp= timestamp,
+                ),
+                batch_spec_passthrough=BatchSpecPassthrough(
+                    args= list(args),
+                    kwargs= kwargs,
+                ),
             )
         )
 

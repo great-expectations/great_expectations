@@ -840,7 +840,8 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
 def _get_batch_request_from_validator(validator):
     """Utility method to unpack batch_requests from Validators
 
-    #!!! I suspect that some cleanup work in the Validator class would make this method unnecessary
+    #!!! Some cleanup work in the Validator class would make this method unnecessary
+    #!!! This method assumes that the Validator contains a single Batch
     """
     key_ = list(validator.batches)[0]
     my_batch = validator.batches[key_]
@@ -848,6 +849,19 @@ def _get_batch_request_from_validator(validator):
 
     my_batch_request = my_batch.batch_request
     return my_batch_request
+
+def _get_data_from_validator(validator):
+    """Utility method to unpack batch_requests from Validators
+
+    #!!! Some cleanup work in the Validator class would make this method unnecessary
+    #!!! This method assumes that the Validator contains a single Batch
+    """
+    key_ = list(validator.batches)[0]
+    my_batch = validator.batches[key_]
+
+    my_data = my_batch._data
+    return my_data
+
 
 def get_awsathena_db_name(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
     """Get awsathena database name from environment variables.

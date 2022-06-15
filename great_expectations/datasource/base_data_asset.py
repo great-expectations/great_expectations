@@ -1,16 +1,52 @@
+from abc import ABC
+from dataclasses import dataclass
 import logging
 from typing import List, Optional, Dict
 
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.types import SerializableDictDot
 from great_expectations.validator.validator import Validator
 
 # from great_expectations.datasource.pandas_reader_datasource import PandasReaderDatasource #!!! This causes a circular import
 
 logger = logging.getLogger(__name__)
 
+
 class BatchIdentifierException(BaseException):
     # !!! Do we want to create a class for this? Is this the right name and inheritance?
     pass
+
+
+
+### Second approach to BatchRequests ###
+
+
+# !!! I kinda hate this name
+class DataConnectorQuery(dict, SerializableDictDot):
+    pass
+
+# !!! I kinda hate this name
+class BatchSpecPassthrough(dict, SerializableDictDot):
+    pass
+
+@dataclass
+class NewBatchRequestBase(SerializableDictDot, ABC):
+
+    datasource_name: str
+    data_asset_name: str
+    data_connector_query: DataConnectorQuery
+
+@dataclass
+class NewConfiguredBatchRequest(NewBatchRequestBase):
+    batch_spec_passthrough: BatchSpecPassthrough
+
+@dataclass
+class NewRuntimeBatchRequest(NewBatchRequestBase):
+    data: BatchSpecPassthrough
+
+
+
+### First approach to BatchRequests ###
 
 class BatchIdentifiers(dict):
     pass
@@ -63,6 +99,7 @@ class NewBatchRequest:
            self.batch_identifiers == other.batch_identifiers,
            self.runtime_parameters == other.runtime_parameters,
         ])
+
 
 
 class BaseDataAsset:
