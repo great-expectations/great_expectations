@@ -22,6 +22,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -35,6 +36,13 @@ except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = ge_exceptions.ProfilerError
+
+
+MESSAGE_USER_CONFIGURABLE_PROFILER: str = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
+MESSAGE_ONBOARDING_DATA_ASSISTANT: str = "Since you did not supply a profiler name, defaulting to the OnboardingDataAssistant"
+MESSAGE_RULE_BASED_PROFILER: str = (
+    "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
+)
 
 
 @click.group()
@@ -156,9 +164,10 @@ def _determine_profile(profiler_name: Optional[str]) -> bool:
     profile: bool = profiler_name is not None
     if profile:
         if profiler_name:
-            msg = "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
+            msg = MESSAGE_RULE_BASED_PROFILER
         else:
-            msg = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
+            # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+            msg = MESSAGE_USER_CONFIGURABLE_PROFILER
         cli_message(string=f"<yellow>{msg}</yellow>")
 
     return profile
@@ -775,7 +784,7 @@ def _suite_edit_workflow(
         notebook_name: str = f"edit_{expectation_suite_name}.ipynb"
         notebook_path: str = _get_notebook_path(context, notebook_name)
 
-        renderer: SuiteProfileNotebookRenderer
+        renderer: BaseNotebookRenderer
         if profile:
             if not assume_yes:
                 toolkit.prompt_profile_to_create_a_suite(
@@ -791,9 +800,10 @@ def _suite_edit_workflow(
             renderer.render_to_disk(notebook_file_path=notebook_path)
         else:
             renderer = SuiteEditNotebookRenderer.from_data_context(data_context=context)
+            # noinspection PyTypeChecker
             renderer.render_to_disk(
-                suite=suite,
                 notebook_file_path=notebook_path,
+                suite=suite,
                 batch_request=batch_request,
             )
 

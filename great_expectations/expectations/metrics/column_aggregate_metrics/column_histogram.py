@@ -3,6 +3,7 @@ import logging
 from typing import Any, Dict
 
 import numpy as np
+import pandas as pd
 
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -41,7 +42,10 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         )
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
-        hist, bin_edges = np.histogram(df[column], bins, density=False)
+        column_series: pd.Series = df[column]
+        column_null_elements_cond: pd.Series = column_series.isnull()
+        column_nonnull_elements: pd.Series = column_series[~column_null_elements_cond]
+        hist, bin_edges = np.histogram(column_nonnull_elements, bins, density=False)
         return list(hist)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)

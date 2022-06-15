@@ -1,3 +1,4 @@
+import datetime
 import glob
 import json
 import logging
@@ -8,8 +9,10 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
+from numbers import Number
 from typing import Dict, List, Optional, Tuple, Union
 
+import numpy as np
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
@@ -1249,10 +1252,14 @@ class Expectation(metaclass=MetaExpectation):
                 test=exp_test["test"],
                 raise_exception=False,
             )
+            print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
             if error_message is None:
+                print(f"  PASSED")
                 test_passed = True
                 error_diagnostics = None
             else:
+                print(f"  ERROR: {repr(error_message)}")
+                print(f"{stack_trace[0]}")
                 error_diagnostics = ExpectationErrorDiagnostics(
                     error_msg=error_message,
                     stack_trace=stack_trace,
@@ -1284,8 +1291,10 @@ class Expectation(metaclass=MetaExpectation):
     def _get_rendered_result_as_string(self, rendered_result) -> str:
         """Convenience method to get rendered results as strings."""
 
+        result: str = ""
+
         if type(rendered_result) == str:
-            return rendered_result
+            result = rendered_result
 
         elif type(rendered_result) == list:
             sub_result_list = []
@@ -1294,44 +1303,48 @@ class Expectation(metaclass=MetaExpectation):
                 if res is not None:
                     sub_result_list.append(res)
 
-            return "\n".join(sub_result_list)
+            result = "\n".join(sub_result_list)
 
         elif isinstance(rendered_result, RenderedStringTemplateContent):
-            return rendered_result.__str__()
+            result = rendered_result.__str__()
 
         elif isinstance(rendered_result, CollapseContent):
-            return rendered_result.__str__()
+            result = rendered_result.__str__()
 
         elif isinstance(rendered_result, RenderedAtomicContent):
-            return f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, RenderedContentBlockContainer):
-            return "(RenderedContentBlockContainer) " + repr(
+            result = "(RenderedContentBlockContainer) " + repr(
                 rendered_result.to_json_dict()
             )
 
         elif isinstance(rendered_result, RenderedTableContent):
-            return f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, RenderedGraphContent):
-            return f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, ValueListContent):
-            return f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, dict):
-            return f"(dict) {repr(rendered_result)}"
+            result = f"(dict) {repr(rendered_result)}"
 
         elif isinstance(rendered_result, int):
-            return repr(rendered_result)
+            result = repr(rendered_result)
 
         elif rendered_result == None:
-            return ""
+            result = ""
 
         else:
             raise TypeError(
                 f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."
             )
+
+        if "inf" in result:
+            result = ""
+        return result
 
     def _get_renderer_diagnostics(
         self,
@@ -1689,12 +1702,18 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 except TypeError:
                     pass
 
+        if not isinstance(metric_value, datetime.datetime) and np.isnan(metric_value):
+            return {"success": False, "result": {"observed_value": None}}
+
         # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
                 above_min = metric_value > min_value
             else:
-                above_min = metric_value >= min_value
+                above_min = (
+                    self._isclose(operand_a=metric_value, operand_b=min_value)
+                    or metric_value >= min_value
+                )
         else:
             above_min = True
 
@@ -1702,13 +1721,35 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 below_max = metric_value < max_value
             else:
-                below_max = metric_value <= max_value
+                below_max = (
+                    self._isclose(operand_a=metric_value, operand_b=min_value)
+                    or metric_value <= max_value
+                )
         else:
             below_max = True
 
         success = above_min and below_max
 
         return {"success": success, "result": {"observed_value": metric_value}}
+
+    @staticmethod
+    def _isclose(
+        operand_a: Union[datetime.datetime, Number],
+        operand_b: Union[datetime.datetime, Number],
+    ) -> bool:
+        """
+        Checks whether or not two numbers (or timestamps) are approximately close to one another.
+        """
+        operand_a_as_number: np.float64
+        operand_b_as_number: np.float64
+        if isinstance(operand_a, datetime.datetime):
+            operand_a_as_number = np.float64(int(operand_a.strftime("%Y%m%d%H%M%S")))
+            operand_b_as_number = np.float64(int(operand_b.strftime("%Y%m%d%H%M%S")))
+        else:
+            operand_a_as_number = np.float64(operand_a)
+            operand_b_as_number = np.float64(operand_b)
+
+        return np.isclose(operand_a_as_number, operand_b_as_number)
 
 
 class ColumnExpectation(TableExpectation, ABC):

@@ -262,7 +262,7 @@ stages:
 
       - job: comprehensive
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 90
+        timeoutInMinutes: 120
 
         services:
           postgres: postgres
@@ -336,9 +336,17 @@ stages:
                 tests/datasource/test_sqlalchemy_datasource_workarounds.py \
                 tests/expectations/test_generate_diagnostic_checklist.py \
                 tests/test_deprecation.py \
-                tests/test_packaging.py
+                tests/test_packaging.py \
+                tests/test_release.py
 
-            displayName: 'dgtest-overrides'
+            displayName: 'dgtest-general-overrides'
+
+          - script: |
+              # These are tests that are specific to Great Expectations Cloud.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              pytest -m cloud
+
+            displayName: 'dgtest-cloud-overrides'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -394,7 +402,7 @@ stages:
     jobs:
       - job: mysql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 75
+        timeoutInMinutes: 120
 
         services:
           mysql: mysql
@@ -445,7 +453,7 @@ stages:
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 75
+        timeoutInMinutes: 120
 
         services:
           mssql: mssql
@@ -485,7 +493,7 @@ stages:
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 75
+        timeoutInMinutes: 120
 
         services:
           trino: trino

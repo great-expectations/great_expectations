@@ -24,16 +24,16 @@ class ConfigPeer(ABC):
     """
     A ConfigPeer is an object, whose subclasses can be instantiated using instantiate_class_from_config() (located in
     great_expectations/util.py).  Its immediate descendant subclass must use a subclass of BaseYamlConfig as an argument
-    to its constructor, and the subsequent descentants must use only primitive types as their constructor arguments,
-    whereever keys correspond to the keys of the "BaseYamlConfig" configuration object counterpart. The name ConfigPeer
+    to its constructor, and the subsequent descendants must use only primitive types as their constructor arguments,
+    wherever keys correspond to the keys of the "BaseYamlConfig" configuration object counterpart. The name ConfigPeer
     means: Every immediate descendant subclass must have Marshmallow Schema validated configuration class as its peer.
 
     # TODO: <Alex>2/11/2022</Alex>
     When -- as part of a potential future architecture update -- serialization is decoupled from configuration, the
-    configuration objects, persitable as YAML files, will no longer inherit from the BaseYamlConfig class.  Rather,
+    configuration objects, persistable as YAML files, will no longer inherit from the BaseYamlConfig class.  Rather,
     any form of serialization (YAML, JSON, SQL Database Tables, Pickle, etc.) will apply as peers, independent of the
     configuration classes themselves.  Hence, as part of this change, ConfigPeer will cease being the superclass of
-    business objects (such as BaseDataContext, BaseCheckpoint, and BaseRuleBasedProfiler).  Instead, every persitable
+    business objects (such as BaseDataContext, BaseCheckpoint, and BaseRuleBasedProfiler).  Instead, every persistable
     business object will contain a reference to its corresponding peer class, supporting the ConfigPeer interfaces.
     """
 

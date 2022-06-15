@@ -76,6 +76,7 @@ class VolumeDataAssistant(DataAssistant):
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
             execution_time=data_assistant_result.execution_time,
+            usage_statistics_handler=data_assistant_result.usage_statistics_handler,
         )
 
     @staticmethod
@@ -171,7 +172,7 @@ class VolumeDataAssistant(DataAssistant):
                 include_semantic_types=None,
                 exclude_semantic_types=None,
                 allowed_semantic_types_passthrough=None,
-                limit_mode=CardinalityLimitMode.REL_100,
+                cardinality_limit_mode=CardinalityLimitMode.REL_100,
                 max_unique_values=None,
                 max_proportion_unique=None,
                 data_context=None,

@@ -116,7 +116,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         one_batch_table_columns_names_value: MetricValue
         multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
-            set(one_batch_table_columns_names_value.tolist())
+            set(one_batch_table_columns_names_value)
             for one_batch_table_columns_names_value in table_columns_names_multi_batch_value
         ]
 
