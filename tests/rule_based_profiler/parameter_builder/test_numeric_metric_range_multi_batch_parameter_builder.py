@@ -381,7 +381,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
     numeric_metric_range_parameter_builder: ParameterBuilder = (
         NumericMetricRangeMultiBatchParameterBuilder(
             name="column_min_range",
-            metric_name="column.min",
+            metric_name=None,
             metric_multi_batch_parameter_builder_name="my_column_min",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             estimator="oneshot",
