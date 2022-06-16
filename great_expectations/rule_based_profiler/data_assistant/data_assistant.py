@@ -307,6 +307,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return NumericMetricRangeMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
+                metric_multi_batch_parameter_builder_name=None,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=metric_value_kwargs,
                 enforce_numeric_metric=True,
