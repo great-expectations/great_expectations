@@ -28,7 +28,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        metric_name: Optional[str] = None,
+        metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = False,
