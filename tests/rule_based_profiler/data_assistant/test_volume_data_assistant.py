@@ -1575,7 +1575,6 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
-                            "json_serialize": True,
                             "reduce_scalar_metric": True,
                             "metric_name": "table.row_count",
                         },
@@ -1592,7 +1591,6 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "enforce_numeric_metric": True,
                                     "n_resamples": "$variables.n_resamples",
                                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                    "json_serialize": True,
                                     "estimator": "$variables.estimator",
                                     "reduce_scalar_metric": True,
                                     "metric_name": "table.row_count",
@@ -1655,7 +1653,6 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
-                            "json_serialize": True,
                             "reduce_scalar_metric": True,
                             "metric_name": "column.distinct_values.count",
                         },
@@ -1678,7 +1675,6 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                                     "metric_domain_kwargs": "$domain.domain_kwargs",
                                     "estimator": "$variables.estimator",
-                                    "json_serialize": True,
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "name": "column_distinct_values_count_range",
                                     "round_decimals": "$variables.round_decimals",
@@ -2128,8 +2124,8 @@ def quentin_explicit_instantiation_result_actual_time(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
@@ -2164,8 +2160,8 @@ def quentin_explicit_instantiation_result_frozen_time(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
@@ -2280,8 +2276,8 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 
     explicit_instantiation_code: str = """
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",

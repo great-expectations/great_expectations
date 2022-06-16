@@ -189,7 +189,6 @@ class ParameterBuilderConfig(SerializableDictDot):
         class_name: str,
         module_name: Optional[str] = None,
         evaluation_parameter_builder_configs: Optional[list] = None,
-        json_serialize: bool = True,
         **kwargs,
     ) -> None:
         self.module_name = module_name
@@ -198,8 +197,6 @@ class ParameterBuilderConfig(SerializableDictDot):
         self.name = name
 
         self.evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
-
-        self.json_serialize = json_serialize
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -281,11 +278,6 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         ),
         required=False,
         allow_none=True,
-    )
-    json_serialize = fields.Boolean(
-        required=False,
-        allow_none=True,
-        missing=True,
     )
 
 

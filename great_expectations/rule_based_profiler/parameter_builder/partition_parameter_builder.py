@@ -13,7 +13,7 @@ from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
+    RAW_PARAMETER_KEY,
     Domain,
     MetricValue,
     ParameterContainer,
@@ -48,7 +48,6 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> None:
         """
@@ -60,7 +59,6 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with this ParameterBuilder
         """
 
@@ -78,7 +76,6 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=None,
-            json_serialize=True,
         )
         self._column_value_counts_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -93,7 +90,6 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=None,
-            json_serialize=False,
         )
         self._column_values_nonnull_count_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -106,7 +102,6 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=None,
-            json_serialize=False,
         )
 
         if evaluation_parameter_builder_configs is None:
@@ -125,7 +120,6 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -159,7 +153,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
 
         is_categorical: bool = not bucketize_data
 
-        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
+        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
         # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -177,7 +171,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
         else:
             is_categorical = is_categorical or not np.all(np.diff(bins) > 0.0)
 
-        fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
+        fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
         # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -193,7 +187,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
         weights: list
 
         if is_categorical:
-            fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
+            fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
             # Obtain "column.value_counts" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
             column_value_counts_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
                 domain=domain,
@@ -238,7 +232,6 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
                 variables=variables,
                 parameters=parameters,
                 parameter_computation_impl=super()._build_parameters,
-                json_serialize=False,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
 
@@ -246,7 +239,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             parameter_node: ParameterNode = (
                 get_parameter_value_and_validate_return_type(
                     domain=domain,
-                    parameter_reference=self.fully_qualified_parameter_name,
+                    parameter_reference=self.raw_fully_qualified_parameter_name,
                     expected_return_type=None,
                     variables=variables,
                     parameters=parameters,
