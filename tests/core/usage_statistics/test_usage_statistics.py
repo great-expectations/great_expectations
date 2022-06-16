@@ -16,6 +16,9 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
     USAGE_STATISTICS_QA_URL,
 )
 
+# keep this with the BaseDataContext
+# new tests.. with File and only with Ephemeral
+
 
 @pytest.fixture
 def in_memory_data_context_config_usage_stats_enabled():
@@ -130,6 +133,8 @@ def test_opt_out_etc(
             assert project_config.anonymous_usage_statistics.enabled is False
 
 
+# add mark for pytest.mark(base_data_context?)
+#
 def test_opt_out_home_folder(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
