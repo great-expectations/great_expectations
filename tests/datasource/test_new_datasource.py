@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 import pytest
@@ -240,11 +240,8 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
     report: dict = basic_spark_datasource.self_check()
 
     # The structure of this config is dynamic based on PySpark version;
-    # we deem asserting it's presence sufficient for purposes of this test
-    spark_config: dict = report["execution_engine"]["spark_config"]
-    assert isinstance(spark_config, dict) and len(spark_config.keys()) > 0
-
-    spark_config = {
+    # we deem asserting certain key-value pairs sufficient for purposes of this test
+    expected_spark_config: Dict[str, str] = {
         "spark.app.name": "default_great_expectations_spark_application",
         "spark.default.parallelism": "4",
         "spark.driver.memory": "6g",
@@ -258,11 +255,13 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
         "spark.submit.deployMode": "client",
         "spark.ui.showConsoleProgress": "False",
     }
+    actual_spark_config: Dict[str, Any] = report["execution_engine"]["spark_config"]
 
     assert is_candidate_subset_of_target(
-        candidate=spark_config, target=report["execution_engine"]["spark_config"]
+        candidate=expected_spark_config, target=actual_spark_config
     )
 
+    # Remove Spark-specific information so we can assert against the rest of the payload
     report["execution_engine"].pop("spark_config")
 
     assert report == {

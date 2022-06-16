@@ -54,7 +54,7 @@ def titanic_data_context_v2_datasources_and_validation_operators_usage_stats_ena
     os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
     data_path = os.path.join(context_path, "..", "data")
     os.makedirs(os.path.join(data_path), exist_ok=True)
-    # this is
+
     titanic_yml_path = file_relative_path(
         __file__, "../test_fixtures/great_expectations_v013_titanic.yml"
     )
