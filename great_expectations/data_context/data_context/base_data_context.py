@@ -436,6 +436,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
 
+    def _apply_global_config_overrides(
+        self, config: DataContextConfig
+    ) -> DataContextConfig:
+        pass
+
     def _build_store_from_config(
         self, store_name: str, store_config: dict
     ) -> Optional[Store]:
