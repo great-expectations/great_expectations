@@ -127,7 +127,6 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         column_proportion_range_estimator_parameter_builder_config
