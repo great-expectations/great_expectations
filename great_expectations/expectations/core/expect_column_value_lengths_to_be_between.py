@@ -119,6 +119,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="column_min_length_range_estimator",
         metric_name="column_values.length.min",
+        metric_multi_batch_parameter_builder_name=None,
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,
@@ -133,13 +134,13 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     column_max_length_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="column_max_length_range_estimator",
         metric_name="column_values.length.max",
+        metric_multi_batch_parameter_builder_name=None,
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,
@@ -154,7 +155,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         column_min_length_range_estimator_parameter_builder_config,

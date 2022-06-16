@@ -131,7 +131,6 @@ class Rule(SerializableDictDot):
                     variables=variables,
                     parameters=rule_state.parameters,
                     parameter_computation_impl=None,
-                    json_serialize=None,
                     batch_list=batch_list,
                     batch_request=batch_request,
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
