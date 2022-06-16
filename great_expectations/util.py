@@ -222,9 +222,15 @@ def measure_execution_time(
                 if pretty_print:
                     bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
                     call_args: OrderedDict = bound_args.arguments
+                    # TODO: <Alex>ALEX</Alex>
+                    # print(
+                    #     f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} seconds."
+                    # )
+                    # TODO: <Alex>ALEX</Alex>
                     print(
-                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} seconds."
+                        f"Total execution time of function {func.__name__}: {delta_t} seconds."
                     )
+                    # TODO: <Alex>ALEX</Alex>
 
         return compute_delta_t
 
