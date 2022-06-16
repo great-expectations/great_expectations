@@ -43,7 +43,6 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=0,
-            json_serialize=False,
             data_context=data_context,
         )
     )
@@ -172,7 +171,6 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=1,
-            json_serialize=False,
             data_context=data_context,
         )
     )
@@ -272,7 +270,6 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=5.0e-2,
             round_decimals=1,
-            json_serialize=False,
             data_context=data_context,
         )
     )
@@ -574,7 +571,6 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=0,
-            json_serialize=False,
             data_context=data_context,
         )
     )
@@ -702,7 +698,6 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
             estimator="bootstrap",
             false_positive_rate=5.0e-2,
             round_decimals=0,
-            json_serialize=False,
             data_context=data_context,
         )
     )
@@ -752,7 +747,6 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
             estimator="kde",
             false_positive_rate=5.0e-2,
             round_decimals=0,
-            json_serialize=False,
             data_context=data_context,
         )
     )
@@ -825,7 +819,6 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
             estimator="kde",
             false_positive_rate=5.0e-2,
             round_decimals=0,
-            json_serialize=False,
             data_context=data_context,
         )
     )
@@ -876,7 +869,6 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
             bw_method=0.5,
             false_positive_rate=5.0e-2,
             round_decimals=0,
-            json_serialize=False,
             data_context=data_context,
         )
     )

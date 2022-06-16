@@ -36,8 +36,10 @@ data_connectors:
           pattern: (.*)
     default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
-        batch_identifiers:
-            - default_identifier_name
+        assets:
+            my_runtime_asset_name:
+              batch_identifiers:
+                - runtime_batch_identifier_name
 """
 # </snippet>
 
@@ -82,8 +84,8 @@ validator = context.get_validator(
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)
 
-# Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
 # <snippet>
+# Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
 exclude_column_names = [
     "vendor_id",
     "pickup_datetime",

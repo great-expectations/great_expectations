@@ -107,7 +107,6 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=None,
-            json_serialize=True,
         )
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
