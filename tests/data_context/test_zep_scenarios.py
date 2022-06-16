@@ -62,26 +62,24 @@ def test_ZEP_scenario_1(test_dir_oscar):
     # !!! DX TBD
     # context.add_checkpoint()
 
-
-@pytest.mark.skip(reason="Doesn't work yet")
-def test_ZEP_scenario_2(test_dir_alpha):
+# @pytest.mark.skip(reason="still broken")
+def test_ZEP_scenario_2():
     context = gx.get_context(lite=True)
 
-    # !!! DX TBD
-    context.add_sql_datasource(
-        name="my_sqlite_db",
-        connection_string="postgresql+psycopg2://user:password@hostname/database_name"
-    )
-    # Use the built-in datasource to get a validator, runtime-style
-    my_validator_1 = context.sources.my_sqlite_db.read_table("users")
-    my_validator_1.head()
-    my_validator_1.expect_column_values_to_be_between("x", min_value=1, max_value=2)
+    print(context.sources)
 
-    # Add a single configured asset
-    context.sources.my_sqlite_db.add_asset(
-        name="my_asset",
-        base_directory=test_dir_alpha,
+    context.fancy_add_datasource(
+        name="my_sqlite_db",
+        module_name="great_expectations.datasource.new_sqlalchemy_datasource",
+        class_name="NewSqlAlchemyDatasource",
+        connection_string="sqlite:///tests/chinook.db",
     )
+
+    # Use the built-in datasource to get a validator, runtime-style
+    my_validator_1 = context.sources.my_sqlite_db.get_table("invoices")
+    my_validator_1.head()
+    my_validator_1.expect_column_values_to_not_be_null("BillingCountry")
+
     return
     my_validator_2 = context.sources.default_pandas_reader.assets.my_asset.get_validator(
         filename="B.csv"

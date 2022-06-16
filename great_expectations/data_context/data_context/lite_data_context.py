@@ -9,7 +9,9 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.datasource import BaseDatasource
+from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
 from great_expectations.types.base import DotDict
+from great_expectations.util import load_class
 
 
 #!!! Factor this out to somewhere nicer
@@ -23,7 +25,7 @@ class LiteDataContext(BaseDataContext):
         datasources={
             "default_pandas_reader": {
                 "class_name": "PandasReaderDatasource",
-                "module_name": "great_expectations.datasource",
+                "module_name": "great_expectations.datasource",                
             },
         },
         expectations_store_name="expectations_store",
@@ -77,3 +79,16 @@ class LiteDataContext(BaseDataContext):
         so it's often nicer to be able to type "so<TAB>" to autocomplete.
         """
         return self.datasources
+
+    def fancy_add_datasource(
+        self,
+        name: str,
+        module_name: str,
+        class_name: str,
+        **kwargs,
+    ) -> NewNewNewDatasource:
+        class_ = load_class(class_name=class_name, module_name=module_name)
+        self._cached_datasources[name] = class_(
+            name=name,
+            **kwargs
+        )

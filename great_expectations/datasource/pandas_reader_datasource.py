@@ -13,22 +13,18 @@ from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewBatchRequestBase, NewConfiguredBatchRequest
 from great_expectations.datasource.data_connector.util import convert_batch_identifiers_to_data_reference_string_using_regex
+from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
 from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
 from great_expectations.marshmallow__shade.fields import Bool
 from great_expectations.types import DictDot
 from great_expectations.validator.validator import Validator
 
-
+#!!! Keep this? It disables some annoying pandas warnings.
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=pd.errors.ParserWarning)
 
-
 #!!! Factor this out to somewhere nicer
 class GxExperimentalWarning(Warning):
-    pass
-
-#!!! Rename this
-class NewNewNewDatasource:
     pass
 
 #!!! Could this decorator be moved inside PandasReaderDataSource, maybe as a staticmethod?
