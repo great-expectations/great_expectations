@@ -217,14 +217,14 @@ local_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
     IntegrationTestFixture(
-        name="self_initializing_expect_column_mean_to_be_between",
-        user_flow_script="tests/integration/docusaurus/expectations/self_initializing_expectations/self_initializing_expect_column_mean_to_be_between.py",
+        name="auto_initializing_expect_column_mean_to_be_between",
+        user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
     IntegrationTestFixture(
-        name="is_expectation_self_initializing",
-        user_flow_script="tests/integration/docusaurus/expectations/self_initializing_expectations/is_expectation_self_initializing.py",
+        name="is_expectation_auto_initializing",
+        user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
     IntegrationTestFixture(

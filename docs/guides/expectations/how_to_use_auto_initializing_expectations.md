@@ -25,32 +25,32 @@ Additionally, this guide assumes that you are using a multi-batch <TechnicalTag 
 
 ### 1. Determine if your Expectation is auto-initializing
 
-Not all Expectations are self-initializng.  In order to be a auto-initializing Expectation, an Expectation must have parameters that can be estimated.  As an example: `ExpectColumnToExist` only takes in a `Domain` (which is the column name) and checks whether the column name is in the list of names in the table's metadata.  This would be an example of an Expectation that would not work under the auto-initializing framework.
+Not all Expectations are auto-initializng.  In order to be a auto-initializing Expectation, an Expectation must have parameters that can be estimated.  As an example: `ExpectColumnToExist` only takes in a `Domain` (which is the column name) and checks whether the column name is in the list of names in the table's metadata.  This would be an example of an Expectation that would not work under the auto-initializing framework.
 
 An example of Expectations that would work under the auto-initializing framework would be the ones that have numeric ranges, like `ExpectColumnMeanToBeBetween`, `ExpectColumnMaxToBeBetween`, and `ExpectColumnSumToBeBetween`.
 
-To check whether the Expectation you are interested in works under the auto-initializing framework, run the `is_expectation_self_initializing()` method of the `Expectation` class.
+To check whether the Expectation you are interested in works under the auto-initializing framework, run the `is_expectation_auto_initializing()` method of the `Expectation` class.
 
 For example:
 
-```python title="Python script/Jupyter notebook" file=../../../tests/integration/docusaurus/expectations/self_initializing_expectations/is_expectation_self_initializing.py#L16-L18
+```python title="Python script/Jupyter notebook" file=../../../tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py#L16-L18
 ```
 
 will return `False` and print the message:
 
 ```markdown title="Console output"
-The Expectation expect_column_to_exist is not able to be self-initialized.
+The Expectation expect_column_to_exist is not able to be auto-initialized.
 ```
 
 However, the command:
 
-```python title="Python script/Jupyter notebook" file=../../../tests/integration/docusaurus/expectations/self_initializing_expectations/is_expectation_self_initializing.py#L22
+```python title="Python script/Jupyter notebook" file=../../../tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py#L22
 ```
 
 will return `True` and print the message:
 
 ```markdown title="Console output"
-The Expectation expect_column_mean_to_be_between is able to be self-initialized. Please run by using the auto=True parameter.
+The Expectation expect_column_mean_to_be_between is able to be auto-initialized. Please run by using the auto=True parameter.
 ```
 
 For the purposes of this guide, we will be using `expect_column_mean_to_be_between` as our example Expectation.
@@ -69,13 +69,13 @@ The Expectation `expect_column_mean_to_be_between()` has the following parameter
 - strict_min (boolean): If True, the column mean must be strictly larger than min_value, default=False
 - strict_max (boolean): If True, the column mean must be strictly smaller than max_value, default=False
 
-Without the self-initialization framework you would have to get the values for `min_value` and `max_value` for your series of 12 Batches by calculating the mean value for each Batch and using calculated `mean` values to determine the `min_value` and `max_value` parameters to pass your Expectation.  This, although not _difficult_, would be a monotonous and time consuming task.
+Without the auto-initialization framework you would have to get the values for `min_value` and `max_value` for your series of 12 Batches by calculating the mean value for each Batch and using calculated `mean` values to determine the `min_value` and `max_value` parameters to pass your Expectation.  This, although not _difficult_, would be a monotonous and time consuming task.
 
 #### Using `auto=True`
 
 Auto-initializing Expectations automate this sort of calculation across batches.  To perform the same calculation described above (the mean ranges across the 12 Batches in the 2018 taxi data) the only thing you need to do is run the Expectation with `auto=True`
 
-```python title="Python script/Jupyter notebook" file=../../../tests/integration/docusaurus/expectations/self_initializing_expectations/self_initializing_expect_column_mean_to_be_between.py#L79-L81
+```python title="Python script/Jupyter notebook" file=../../../tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py#L79-L81
 ```
 
 Now the Expectation will calculate the `min_value` (2.83) and `max_value` (3.06) using all of the Batches that are loaded into the Validator.  In our case, that means all 12 Batches associated with the 2018 taxi data.
@@ -84,7 +84,7 @@ Now the Expectation will calculate the `min_value` (2.83) and `max_value` (3.06)
 
 Now that the Expectation's upper and lower bounds have come from the Batches, you can save your <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and move on.
 
-```python file=../../../tests/integration/docusaurus/expectations/self_initializing_expectations/self_initializing_expect_column_mean_to_be_between.py#L85
+```python file=../../../tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py#L85
 ```
 
 
@@ -92,6 +92,6 @@ Now that the Expectation's upper and lower bounds have come from the Batches, yo
 
 :::note
 To view the full scripts that were used in this page, see them on GitHub:
-- [is_expectation_self_initializing.py](https://github.com/great-expectations/tests/integration/docusaurus/expectations/self_initializing_expectations/is_expectation_self_initializing.py)
-- [self_initializing_expect_column_mean_to_be_between.py](https://github.com/great-expectations/tests/integration/docusaurus/expectations/self_initializing_expectations/self_initializing_expect_column_mean_to_be_between.py)
+- [is_expectation_auto_initializing.py](https://github.com/great-expectations/tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py)
+- [auto_initializing_expect_column_mean_to_be_between.py](https://github.com/great-expectations/tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py)
 :::

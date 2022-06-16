@@ -1,7 +1,7 @@
-"""Example Script: How to determine if an Expectation is self-initializing
+"""Example Script: How to determine if an Expectation is auto-initializing
 
 This example script is intended for use in online documentation that shows how a user can determine if an Expectation
-will work within the self-initializing framework.
+will work within the auto-initializing framework.
 
 Assert statements are included to ensure that if the behaviour shown in this script breaks it will not pass
 tests and will be updated.  These statements can be ignored by users.

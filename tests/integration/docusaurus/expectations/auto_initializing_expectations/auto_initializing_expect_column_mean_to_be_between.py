@@ -1,6 +1,6 @@
-"""Example Script: Using a self-initializing Expectation
+"""Example Script: Using an auto-initializing Expectation
 
-This example script is intended for use in documentation on how to use a self-initializing Expectation.
+This example script is intended for use in documentation on how to use a auto-initializing Expectation.
 
 Assert statements are included to ensure that if the behaviour shown in this script breaks it will not pass
 tests and will be updated.  These statements can be ignored by users.
