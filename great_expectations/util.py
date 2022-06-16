@@ -1480,6 +1480,14 @@ def get_pyathena_potential_type(type_module, type_):
     return potential_type
 
 
+def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
+    """
+    Leverage on Trino Package to return sqlalchemy sql type
+    """
+    potential_type = type_module.parse_sqltype(type_)
+    return potential_type
+
+
 def pandas_series_between_inclusive(
     series: pd.Series, min_value: int, max_value: int
 ) -> pd.Series:
