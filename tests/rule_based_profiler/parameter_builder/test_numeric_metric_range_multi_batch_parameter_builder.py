@@ -356,6 +356,13 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
         "data_asset_name": "my_reports",
     }
 
+    metric_domain_kwargs: dict = {"column": "fare_amount"}
+
+    fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
+
+    expected_value_dict: dict
+    actual_value_dict: dict
+
     my_column_min_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
@@ -371,14 +378,6 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         my_column_min_metric_multi_batch_parameter_builder_config,
     ]
-
-    metric_domain_kwargs: dict = {"column": "fare_amount"}
-
-    fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
-
-    expected_value_dict: dict
-    actual_value_dict: dict
-
     numeric_metric_range_parameter_builder: ParameterBuilder = (
         NumericMetricRangeMultiBatchParameterBuilder(
             name="column_min_range",
@@ -1046,7 +1045,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
             name="column_min_range",
             metric_name="column.min",
             metric_multi_batch_parameter_builder_name=None,
-            metric_domain_kwargs=metric_domain_kwargs,
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             estimator="kde",
             false_positive_rate=5.0e-2,
             round_decimals=0,
@@ -1058,8 +1057,9 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
-        domain_type=MetricDomainTypes.TABLE,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -1097,7 +1097,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
             name="column_min_range",
             metric_name="column.min",
             metric_multi_batch_parameter_builder_name=None,
-            metric_domain_kwargs=metric_domain_kwargs,
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             estimator="kde",
             bw_method=0.5,
             false_positive_rate=5.0e-2,
@@ -1107,12 +1107,6 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
         )
     )
 
-    variables: Optional[ParameterContainer] = None
-
-    domain: Domain = Domain(
-        rule_name="my_rule",
-        domain_type=MetricDomainTypes.TABLE,
-    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
