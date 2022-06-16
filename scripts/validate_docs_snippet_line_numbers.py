@@ -97,9 +97,7 @@ def evaluate_snippet_validity(
     """
     all_broken_refs: List[DocusaurusRef] = []
     for docs_file, ref_list in docusaurus_refs.items():
-        logger.debug(
-            f"Checking {docs_file} for snippet validity"
-        )
+        logger.debug(f"Checking {docs_file} for snippet validity")
         file_broken_refs: List[DocusaurusRef] = _evaluate_snippet_validity(
             docs_file, ref_list
         )
