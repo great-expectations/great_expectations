@@ -3,6 +3,7 @@ import pytest
 from great_expectations.datasource.pandas_reader_datasource import PandasReaderDatasource
 from great_expectations.datasource.base_data_asset import (
     BatchIdentifierException,
+    BatchSpecPassthrough,
     DataConnectorQuery,
     NewBatchRequestBase,
     NewConfiguredBatchRequest,
@@ -33,7 +34,7 @@ def test_PandasReaderDataAsset_basic_get_batch_request(test_dir_alpha):
         data_connector_query=DataConnectorQuery(
             filename= "A"
         ),
-        batch_spec_passthrough=None,
+        batch_spec_passthrough=BatchSpecPassthrough(),
     )
 
 # @pytest.fixture

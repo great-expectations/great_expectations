@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import pandas as pd
 
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewBatchRequestBase, NewConfiguredBatchRequest
@@ -16,7 +16,6 @@ from great_expectations.datasource.data_connector.util import convert_batch_iden
 from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
 from great_expectations.marshmallow__shade.fields import Bool
 from great_expectations.types import DictDot
-from great_expectations.types.base import DotDict
 from great_expectations.validator.validator import Validator
 
 
@@ -365,8 +364,8 @@ class PandasReaderDatasource(NewNewNewDatasource):
 
         # !!! How do we handle non-serializable elements like `con`?
 
-        args = batch_request.batch_spec_passthrough["args"]
-        kwargs = batch_request.batch_spec_passthrough["kwargs"]
+        args = batch_request.batch_spec_passthrough.get("args", [])
+        kwargs = batch_request.batch_spec_passthrough.get("kwargs", {})
 
         df = func(primary_arg, *args, **kwargs)
 
@@ -377,7 +376,8 @@ class PandasReaderDatasource(NewNewNewDatasource):
 
         return batch
 
-    def get_validator(self, batch_request: NewBatchRequestBase) -> Batch:
+    def get_validator(self, batch_request: NewConfiguredBatchRequest) -> Batch:
+        print(batch_request)
         batch = self.get_batch(batch_request)
         return Validator(
             execution_engine=self._execution_engine,

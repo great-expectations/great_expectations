@@ -8,6 +8,7 @@ from great_expectations.datasource.base_data_asset import (
     BaseDataAsset,
     # NewBatchRequest,
     BatchIdentifierException,
+    BatchSpecPassthrough,
     DataConnectorQuery,
     NewBatchRequestBase,
     NewConfiguredBatchRequest,
@@ -48,7 +49,7 @@ class PandasReaderDataAsset(BaseDataAsset):
             datasource_name=self._datasource.name,
             data_asset_name=self._name,
             data_connector_query=batch_identifiers,
-            batch_spec_passthrough=None,
+            batch_spec_passthrough=BatchSpecPassthrough(),
             # batch_identifiers=batch_identifiers,
         )
 
