@@ -17,7 +17,6 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
 )
-from great_expectations.util import measure_execution_time
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -36,9 +35,6 @@ class DomainBuilder(ABC, Builder):
         """
         super().__init__(data_context=data_context)
 
-    # TODO: <Alex>ALEX</Alex>
-    @measure_execution_time()
-    # TODO: <Alex>ALEX</Alex>
     def get_domains(
         self,
         rule_name: str,
@@ -64,7 +60,6 @@ class DomainBuilder(ABC, Builder):
             batch_request=batch_request,
         )
 
-        print(f"\n[ALEX_TEST] [DOMAIN_BUILDER.GET_DOMAINS()] RULE_NAME:\n{rule_name}")
         return self._get_domains(rule_name=rule_name, variables=variables)
 
     @property

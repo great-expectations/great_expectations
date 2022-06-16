@@ -37,7 +37,6 @@ from great_expectations.rule_based_profiler.types import (
     get_fully_qualified_parameter_names,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import measure_execution_time
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -99,9 +98,6 @@ class ParameterBuilder(ABC, Builder):
             data_context=self._data_context,
         )
 
-    # TODO: <Alex>ALEX</Alex>
-    # @measure_execution_time()
-    # TODO: <Alex>ALEX</Alex>
     def build_parameters(
         self,
         domain: Domain,
@@ -112,7 +108,6 @@ class ParameterBuilder(ABC, Builder):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
     ) -> None:
-        # print(f'\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()] PARAMETER_NAME:\n{self.name} ; TYPE: {str(type(self.name))}')
         """
         Args:
             domain: Domain object that is context for execution of this ParameterBuilder object.

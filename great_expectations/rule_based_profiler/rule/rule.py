@@ -29,10 +29,7 @@ from great_expectations.rule_based_profiler.types import (
     build_parameter_container_for_variables,
 )
 from great_expectations.types import SerializableDictDot
-from great_expectations.util import (
-    deep_filter_properties_iterable,
-    measure_execution_time,
-)
+from great_expectations.util import deep_filter_properties_iterable
 
 
 class Rule(SerializableDictDot):
@@ -76,9 +73,6 @@ class Rule(SerializableDictDot):
         self._parameter_builders = parameter_builders
         self._expectation_configuration_builders = expectation_configuration_builders
 
-    # TODO: <Alex>ALEX</Alex>
-    @measure_execution_time()
-    # TODO: <Alex>ALEX</Alex>
     def run(
         self,
         variables: Optional[ParameterContainer] = None,
@@ -117,9 +111,6 @@ class Rule(SerializableDictDot):
                 batch_list=batch_list,
                 batch_request=batch_request,
             )
-        )
-        print(
-            f"\n[ALEX_TEST] [RULE.RUN()] RULE_NAME: {self.name} ; NUM_DOMAINS: {len(domains)}:\n{domains}"
         )
         rule_state: RuleState = RuleState(
             rule=self,
