@@ -10,7 +10,7 @@ title: Changelog
 * [FEATURE] `DataContextVariables` CRUD for `concurrency` (#5273)
 * [FEATURE] `DataContextVariables` CRUD for `progress_bars` (#5274)
 * [FEATURE] Integrate `DatasourceStore` with `DataContext` (#5292)
-* [FEATURE] Support both UserConfigurableProfiler and OnboardingDataAssistant in "CLI SUITE NEW --PROFILE" command (#5306)
+* [FEATURE] Support both UserConfigurableProfiler and OnboardingDataAssistant in "CLI SUITE NEW --PROFILE name" command (#5306)
 * [BUGFIX] Fix ColumnPartition metric handling of the number of bins (must always be integer). (#5282)
 * [BUGFIX] Add new high precision rule for mean and stdev in `OnboardingDataAssistant` (#5276)
 * [BUGFIX] Warning in Getting Started Guide notebook. (#5297)
