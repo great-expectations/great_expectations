@@ -83,7 +83,6 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         mean_table_columns_set_match_multi_batch_parameter_builder_config,

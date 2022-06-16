@@ -331,7 +331,6 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,
                         "evaluation_parameter_builder_configs": None,
-                        "json_serialize": True,
                     },
                 ],
                 "expectation_configuration_builders": [
