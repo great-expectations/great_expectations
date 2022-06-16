@@ -1,5 +1,6 @@
 import datetime
 import functools
+import os
 import re
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -7,10 +8,12 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import pandas as pd
 
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import Batch, RuntimeBatchRequest
-from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewConfiguredBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.id_dict import IDDict
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewBatchRequestBase, NewConfiguredBatchRequest
+from great_expectations.datasource.data_connector.util import convert_batch_identifiers_to_data_reference_string_using_regex
 from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
-from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.marshmallow__shade.fields import Bool
 from great_expectations.types import DictDot
 from great_expectations.types.base import DotDict
@@ -25,6 +28,9 @@ warnings.simplefilter(action='ignore', category=pd.errors.ParserWarning)
 class GxExperimentalWarning(Warning):
     pass
 
+#!!! Rename this
+class NewNewNewDatasource:
+    pass
 
 #!!! Could this decorator be moved inside PandasReaderDataSource, maybe as a staticmethod?
 def _add_gx_args(
@@ -110,7 +116,7 @@ def _add_gx_args(
             primary_arg = kwargs.pop(primary_arg_variable_name)
 
         if data_asset_name == None:
-            data_asset_name = "default_data_asset"
+            data_asset_name = "DEFAULT_DATA_ASSET"
         else:
             if data_asset_name in self.assets:
                 pass
@@ -128,12 +134,40 @@ def _add_gx_args(
             kwargs,
         )
 
+        batch_request = NewConfiguredBatchRequest(
+            datasource_name=self.name,
+            data_asset_name=data_asset_name,
+            data_connector_query=DataConnectorQuery(
+                id_= id_,
+                timestamp= timestamp,
+            ),
+            batch_spec_passthrough=BatchSpecPassthrough(
+                # method= func,
+                # primary_arg= primary_arg,
+                args= list(args),
+                kwargs= kwargs,
+            ),
+        )
+
+        batch = Batch(
+            data=df,
+            batch_request=batch_request,
+        )
+
+        validator = Validator(
+            execution_engine=self._execution_engine,
+            expectation_suite=None,#expectation_suite,
+            batches=[batch],
+        )
+
+        return validator
+
         ### Here's my original, hacky implementation for getting a Batch
         # batch = self.get_single_batch_from_batch_request(
         #     batch_request=RuntimeBatchRequest(
         #         datasource_name=self.name,
         #         data_connector_name="runtime_data_connector",
-        #         data_asset_name="default_data_asset",
+        #         data_asset_name="DEFAULT_DATA_ASSET",
         #         runtime_parameters={
         #             "batch_data": df,
         #             "args": list(args),
@@ -146,36 +180,38 @@ def _add_gx_args(
         #     )
         # )
 
-        batch = Batch(
-            data=df,
-            batch_request=NewConfiguredBatchRequest(
-                datasource_name=self.name,
-                data_asset_name=data_asset_name,
-                data_connector_query=DataConnectorQuery(
-                    id_= id_,
-                    timestamp= timestamp,
-                ),
-                batch_spec_passthrough=BatchSpecPassthrough(
-                    args= list(args),
-                    kwargs= kwargs,
-                ),
-            )
-        )
+        # return self.get_validator(batch_request)
 
-        #!!! Returning a Validator goes against the pattern we've used elsewhere for Datasources.
-        # I'm increasingly convinced that this is the right move, rather than returning Batches, which are useless objects.
-        validator = Validator(
-            execution_engine=self.execution_engine,
-            expectation_suite=expectation_suite,
-            batches=[batch],
-        )
+        # batch = Batch(
+        #     data=df,
+        #     batch_request=NewConfiguredBatchRequest(
+        #         datasource_name=self.name,
+        #         data_asset_name=data_asset_name,
+        #         data_connector_query=DataConnectorQuery(
+        #             id_= id_,
+        #             timestamp= timestamp,
+        #         ),
+        #         batch_spec_passthrough=BatchSpecPassthrough(
+        #             args= list(args),
+        #             kwargs= kwargs,
+        #         ),
+        #     )
+        # )
 
-        return validator
+        # #!!! Returning a Validator goes against the pattern we've used elsewhere for Datasources.
+        # # I'm increasingly convinced that this is the right move, rather than returning Batches, which are useless objects.
+        # validator = Validator(
+        #     execution_engine=self._execution_engine,
+        #     expectation_suite=expectation_suite,
+        #     batches=[batch],
+        # )
+
+        # return validator
 
     return wrapped
 
 
-class PandasReaderDatasource(Datasource):
+class PandasReaderDatasource(NewNewNewDatasource):
     """
     This class is enables very simple syntax for users who are just getting started with Great Expectations, and have not configured (or learned about) Datasources and DataConnectors. To do so, it provides thin wrapper methods for all 20 of pandas' `read_*` methods.
     
@@ -241,35 +277,49 @@ class PandasReaderDatasource(Datasource):
         #     "================================================================================\n",
         #     GxExperimentalWarning,
         # )
-
+        self._name = name
         self._assets = DictDot()
 
-        super().__init__(
-            name=name,
-            execution_engine={
+        self._execution_engine = instantiate_class_from_config(
+            config={
                 "class_name": "PandasExecutionEngine",
                 "module_name": "great_expectations.execution_engine",
             },
-            data_connectors={
-                # "runtime_data_connector": {
-                #     "class_name": "RuntimeDataConnector",
-                #     "batch_identifiers": [
-                #         "id_",
-                #         "timestamp",
-                #     ],
-                # },
-                "configured_data_connector": {
-                    "class_name": "ConfiguredAssetFilesystemDataConnector",
-                    "base_directory":"",
-                    "assets":{
-                        "default_data_asset":{
-                            "pattern":"(.*)",
-                            "group_names":["filename"],
-                        }
-                    }
-                }
+            runtime_environment={
+                "concurrency": None
+            },
+            config_defaults={
+                "module_name": "great_expectations.execution_engine"
             },
         )
+
+
+        # super().__init__(
+        #     name=name,
+        #     execution_engine={
+        #         "class_name": "PandasExecutionEngine",
+        #         "module_name": "great_expectations.execution_engine",
+        #     },
+        #     data_connectors={
+        #         # "runtime_data_connector": {
+        #         #     "class_name": "RuntimeDataConnector",
+        #         #     "batch_identifiers": [
+        #         #         "id_",
+        #         #         "timestamp",
+        #         #     ],
+        #         # },
+        #         "configured_data_connector": {
+        #             "class_name": "ConfiguredAssetFilesystemDataConnector",
+        #             "base_directory":"",
+        #             "assets":{
+        #                 "DEFAULT_DATA_ASSET":{
+        #                     "pattern":"(.*)",
+        #                     "group_names":["filename"],
+        #                 }
+        #             }
+        #         }
+        #     },
+        # )
 
     def add_asset(
         self,
@@ -294,12 +344,56 @@ class PandasReaderDatasource(Datasource):
 
         return new_asset
 
-    def list_data_asset_names(self) -> List[str]:
+    def list_asset_names(self) -> List[str]:
         return list(self.assets.keys())
+
+    def get_batch(self, batch_request: NewConfiguredBatchRequest) -> Batch:
+
+        asset = self.assets[batch_request.data_asset_name]
+
+        func = getattr(pd, asset.method)
+        filename = convert_batch_identifiers_to_data_reference_string_using_regex(
+            batch_identifiers= IDDict(**batch_request.data_connector_query),
+            regex_pattern= asset.regex,
+            group_names= asset.batch_identifiers,
+            # data_asset_name= self.name,
+        )
+        primary_arg = os.path.join(
+            asset.base_directory,
+            filename,
+        )
+
+        # !!! How do we handle non-serializable elements like `con`?
+
+        args = batch_request.batch_spec_passthrough["args"]
+        kwargs = batch_request.batch_spec_passthrough["kwargs"]
+
+        df = func(primary_arg, *args, **kwargs)
+
+        batch = Batch(
+            data=df,
+            batch_request=batch_request,
+        )
+
+        return batch
+
+    def get_validator(self, batch_request: NewBatchRequestBase) -> Batch:
+        batch = self.get_batch(batch_request)
+        return Validator(
+            execution_engine=self._execution_engine,
+            expectation_suite=None,#expectation_suite,
+            batches=[batch],
+        )
 
     @property
     def assets(self) -> Dict[str, PandasReaderDataAsset]:
-        return DotDict(self._assets)
+        #!!! DotDict is on its way to becoming a deprecated class. Use DictDot instead.
+        #!!! Unfortunately, this currently crashes with `TypeError: DictDot() takes no arguments`
+        return self._assets
+
+    @property
+    def name(self) -> str:
+        return self._name
 
     def _decide_whether_to_use_variable_as_identifier(self, var):
         #!!! This is brittle. Almost certainly needs fleshing out.
@@ -433,3 +527,7 @@ class PandasReaderDatasource(Datasource):
     @_add_gx_args(primary_arg_variable_name="path", default_use_primary_arg_as_id=True)
     def read_spss(self, primary_arg, *args, **kwargs):
         return pd.read_spss(primary_arg, *args, **kwargs)
+
+
+
+

@@ -258,7 +258,7 @@ def test_PandasReaderDatasource_read_dataframe():
     }
     assert my_batch_request.batch_spec_passthrough["args"] == []
     assert my_batch_request.batch_spec_passthrough["kwargs"] == {}
-    assert my_batch_requestdata_connector_query == {
+    assert my_batch_request.data_connector_query == {
         "timestamp": 0,
         "id_": None,
     }

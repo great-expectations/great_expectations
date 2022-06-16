@@ -3,8 +3,9 @@ import pytest
 from great_expectations.datasource.pandas_reader_datasource import PandasReaderDatasource
 from great_expectations.datasource.base_data_asset import (
     BatchIdentifierException,
-    BatchIdentifiers,
-    NewBatchRequest,
+    DataConnectorQuery,
+    NewBatchRequestBase,
+    NewConfiguredBatchRequest,
 )
 from great_expectations.datasource.pandas_reader_data_asset import (
     PandasReaderDataAsset,
@@ -20,18 +21,19 @@ def test_PandasReaderDataAsset_basic_get_batch_request(test_dir_alpha):
         name="test_dir_alpha",
         method="read_csv",
         base_directory=f"{test_dir_alpha}/test_dir_alpha/",
-        regex="(*.)\.csv",
+        regex="(*.)\\.csv",
         batch_identifiers=["filename"],
     )
 
     my_batch_request = my_asset.get_batch_request("A")
-    assert isinstance(my_batch_request, NewBatchRequest)
-    assert my_batch_request == NewBatchRequest(
+    assert isinstance(my_batch_request, NewBatchRequestBase)
+    assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name = "my_datasource",
         data_asset_name = "test_dir_alpha",
-        batch_identifiers = BatchIdentifiers(
+        data_connector_query=DataConnectorQuery(
             filename= "A"
-        )
+        ),
+        batch_spec_passthrough=None,
     )
 
 # @pytest.fixture
@@ -54,14 +56,14 @@ def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs(
         name="test_dir_alpha",
         method="read_csv",
         base_directory="some_dir/",
-        regex="(.*)\.(.*)",
+        regex="(.*)\\.(.*)",
         batch_identifiers=["filename", "file_extension"],
     )
 
     assert my_asset._generate_batch_identifiers_from_args_and_kwargs(
         batch_identifier_args = ["some_file", "csv"],
         batch_identifier_kwargs = {},
-    ) == BatchIdentifiers(
+    ) == DataConnectorQuery(
         filename="some_file",
         file_extension="csv",
     )
@@ -71,7 +73,7 @@ def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs(
         batch_identifier_kwargs = {
             "file_extension": "csv"
         },
-    ) == BatchIdentifiers(
+    ) == DataConnectorQuery(
         filename="some_file",
         file_extension="csv",
     )

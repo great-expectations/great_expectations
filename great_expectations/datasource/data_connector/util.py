@@ -258,6 +258,7 @@ def _invert_regex_to_data_reference_template(
     num_groups = len(group_names)
 
     # print("-"*80)
+    print(regex_pattern)
     parsed_sre = sre_parse.parse(regex_pattern)
     for token, value in parsed_sre:
         if token == sre_constants.LITERAL:

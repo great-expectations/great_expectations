@@ -36,7 +36,7 @@ def test_PandasReaderDatasource_read_csv_basic():
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name= "my_datasource",
-        data_asset_name= "default_data_asset",
+        data_asset_name= "DEFAULT_DATA_ASSET",
         data_connector_query= DataConnectorQuery(
             timestamp= 0,
             id_= file_relative_path(__file__, "fixtures/example_1.csv"),
@@ -109,7 +109,7 @@ def test_PandasReaderDatasource_read_csv_with_sep():
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name= "my_datasource",
-        data_asset_name= "default_data_asset",
+        data_asset_name= "DEFAULT_DATA_ASSET",
         data_connector_query= DataConnectorQuery(
             timestamp= 0,
             id_= file_relative_path(__file__, "fixtures/example_2.csv"),
@@ -139,7 +139,7 @@ def test_PandasReaderDatasource_read_csv_with_sep_as_positional_arg():
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name= "my_datasource",
-        data_asset_name= "default_data_asset",
+        data_asset_name= "DEFAULT_DATA_ASSET",
         data_connector_query= DataConnectorQuery(
             timestamp= 0,
             id_= file_relative_path(__file__, "fixtures/example_2.csv"),
@@ -170,7 +170,7 @@ def test_PandasReaderDatasource_read_csv_with_buffer():
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name= "my_datasource",
-        data_asset_name= "default_data_asset",
+        data_asset_name= "DEFAULT_DATA_ASSET",
         data_connector_query= DataConnectorQuery(
             timestamp= 0,
             id_= None,
@@ -244,7 +244,7 @@ def test_PandasReaderDatasource_read_csv_with_nonserializable_parameter():
 
 def test_PandasReaderDatasource_read_csv__with_data_asset_name():
     my_datasource = PandasReaderDatasource("my_datasource")
-    assert my_datasource.list_data_asset_names() == []
+    assert my_datasource.list_asset_names() == []
 
     my_validator = my_datasource.read_csv(
         file_relative_path(__file__, "fixtures/example_1.csv"),
@@ -275,7 +275,7 @@ def test_PandasReaderDatasource_read_csv__with_data_asset_name():
     )
 
     # This operation automatically configures a new asset on the datasource
-    assert my_datasource.list_data_asset_names() == ["my_new_data_asset"]
+    assert my_datasource.list_asset_names() == ["my_new_data_asset"]
     test_asset = PandasReaderDataAsset(
         datasource=my_datasource,
         name = "my_new_data_asset",

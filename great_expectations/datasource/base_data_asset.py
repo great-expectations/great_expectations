@@ -48,57 +48,57 @@ class NewRuntimeBatchRequest(NewBatchRequestBase):
 
 ### First approach to BatchRequests ###
 
-class BatchIdentifiers(dict):
-    pass
+# class BatchIdentifiers(dict):
+#     pass
 
-class RuntimeParameters(dict):
-    pass
+# class RuntimeParameters(dict):
+#     pass
 
-class NewBatchRequest:
-    # !!! This prolly isn't the right name for this class
+# class NewBatchRequest:
+#     # !!! This prolly isn't the right name for this class
 
-    def __init__(
-        self,
-        datasource_name: str,
-        data_asset_name: str,
-        batch_identifiers: Optional[BatchIdentifiers] = None,
-        runtime_parameters: Optional[RuntimeParameters] = None,
-    ) -> None:
-        self._datasource_name = datasource_name
-        self._data_asset_name = data_asset_name
+#     def __init__(
+#         self,
+#         datasource_name: str,
+#         data_asset_name: str,
+#         batch_identifiers: Optional[BatchIdentifiers] = None,
+#         runtime_parameters: Optional[RuntimeParameters] = None,
+#     ) -> None:
+#         self._datasource_name = datasource_name
+#         self._data_asset_name = data_asset_name
 
-        self._batch_identifiers = batch_identifiers
-        self._runtime_parameters = runtime_parameters
+#         self._batch_identifiers = batch_identifiers
+#         self._runtime_parameters = runtime_parameters
 
-    @property
-    def datasource_name(self) -> str:
-        return self._datasource_name
+#     @property
+#     def datasource_name(self) -> str:
+#         return self._datasource_name
 
-    @property
-    def data_asset_name(self) -> str:
-        return self._data_asset_name
+#     @property
+#     def data_asset_name(self) -> str:
+#         return self._data_asset_name
 
-    @property
-    def batch_identifiers(self) -> str:
-        return self._batch_identifiers
+#     @property
+#     def batch_identifiers(self) -> str:
+#         return self._batch_identifiers
 
-    @property
-    def runtime_parameters(self) -> str:
-        return self._runtime_parameters
+#     @property
+#     def runtime_parameters(self) -> str:
+#         return self._runtime_parameters
 
-    def __str__(self) -> str:
-        # !!! This isn't right---very slapdash
-        return f"""{self.datasource_name},{self.data_asset_name},{self._batch_identifiers},{self._runtime_parameters}"""
+#     def __str__(self) -> str:
+#         # !!! This isn't right---very slapdash
+#         return f"""{self.datasource_name},{self.data_asset_name},{self._batch_identifiers},{self._runtime_parameters}"""
 
-    def __eq__(self, other) -> bool:
-        # !!! I'm not sure if this is a good implementation of __eq__, but I had to do something to get `assert A == B` in tests working.
+#     def __eq__(self, other) -> bool:
+#         # !!! I'm not sure if this is a good implementation of __eq__, but I had to do something to get `assert A == B` in tests working.
 
-        return all([
-            self.datasource_name == other.datasource_name,
-            self.data_asset_name == other.data_asset_name,
-            self.batch_identifiers == other.batch_identifiers,
-            self.runtime_parameters == other.runtime_parameters,
-        ])
+#         return all([
+#             self.datasource_name == other.datasource_name,
+#             self.data_asset_name == other.data_asset_name,
+#             self.batch_identifiers == other.batch_identifiers,
+#             self.runtime_parameters == other.runtime_parameters,
+#         ])
 
 
 

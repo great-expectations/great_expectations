@@ -6,9 +6,11 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.validator.validator import Validator
 from great_expectations.datasource.base_data_asset import (
     BaseDataAsset,
-    NewBatchRequest,
+    # NewBatchRequest,
     BatchIdentifierException,
-    BatchIdentifiers,
+    DataConnectorQuery,
+    NewBatchRequestBase,
+    NewConfiguredBatchRequest,
 )
 # from great_expectations.datasource.pandas_reader_datasource import PandasReaderDatasource # !!! This creates a circular import
 
@@ -35,42 +37,45 @@ class PandasReaderDataAsset(BaseDataAsset):
             batch_identifiers=batch_identifiers
         )
     
-    def get_batch_request(self, *batch_identifier_args, **batch_identifier_kwargs) -> NewBatchRequest:
+    def get_batch_request(self, *batch_identifier_args, **batch_identifier_kwargs) -> NewBatchRequestBase:
 
         batch_identifiers = self._generate_batch_identifiers_from_args_and_kwargs(
             batch_identifier_args,
             batch_identifier_kwargs,
         )
 
-        return NewBatchRequest(
+        return NewConfiguredBatchRequest(
             datasource_name=self._datasource.name,
             data_asset_name=self._name,
-            batch_identifiers=batch_identifiers
+            data_connector_query=batch_identifiers,
+            batch_spec_passthrough=None,
+            # batch_identifiers=batch_identifiers,
         )
 
-    def get_validator(self, *batch_identifier_kargs, **batch_identifier_kwargs):
+    def get_validator(self, *batch_identifier_args, **batch_identifier_kwargs):
         batch_request = self.get_batch_request(
-            *batch_identifier_kargs,
+            *batch_identifier_args,
             **batch_identifier_kwargs,
         )
         # !!! The current implementation of this method is a hack to get a basic prototype working
-        self._datasource.data_connectors["configured_data_connector"]._base_directory = self._base_directory
+        # self._datasource.data_connectors["configured_data_connector"]._base_directory = self._base_directory
 
-        batch = self._datasource.get_single_batch_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name=self._datasource.name,
-                data_connector_name="configured_data_connector",
-                data_asset_name="default_data_asset",
-                data_connector_query={
-                    "batch_filter_parameters": batch_request.batch_identifiers
-                },
-            )
-        )
-        validator = Validator(
-            execution_engine=self._datasource.execution_engine,
-            expectation_suite=None,#expectation_suite,
-            batches=[batch],
-        )
+        validator = self._datasource.get_validator(batch_request)
+        # batch = self._datasource.get_single_batch_from_batch_request(
+        #     batch_request=BatchRequest(
+        #         datasource_name=self._datasource.name,
+        #         data_connector_name="configured_data_connector",
+        #         data_asset_name="DEFAULT_DATA_ASSET",
+        #         data_connector_query={
+        #             "batch_filter_parameters": batch_request.batch_identifiers
+        #         },
+        #     )
+        # )
+        # validator = Validator(
+        #     execution_engine=self._datasource.execution_engine,
+        #     expectation_suite=None,#expectation_suite,
+        #     batches=[batch],
+        # )
 
         return validator
 
@@ -78,7 +83,7 @@ class PandasReaderDataAsset(BaseDataAsset):
         self,
         batch_identifier_args : List[str],
         batch_identifier_kwargs : Dict,
-    ) -> BatchIdentifiers:
+    ) -> DataConnectorQuery:
 
         if len(batch_identifier_args) > len(self._batch_identifiers):
             raise BatchIdentifierException(f"Expected no more than {len(self._batch_identifiers)} batch_identifiers. Got {len(batch_identifier_args)} instead.")
@@ -99,7 +104,7 @@ class PandasReaderDataAsset(BaseDataAsset):
         if missing_keys != set({}):
             raise BatchIdentifierException(f"Missing BatchIdentifier keys : {missing_keys}")
 
-        return BatchIdentifiers(**batch_identifier_dict)
+        return DataConnectorQuery(**batch_identifier_dict)
 
     def __str__(self):
         # !!! We should figure out a convention for __str__ifying objects, and apply it across the codebase
@@ -123,3 +128,19 @@ class PandasReaderDataAsset(BaseDataAsset):
             self._base_directory == other._base_directory,
             self._regex == other._regex,
         ])
+
+    @property
+    def method(self) -> str:
+        return self._method
+
+    @property
+    def base_directory(self) -> str:
+        return self._base_directory
+
+    @property
+    def regex(self) -> str:
+        return self._regex
+
+    @property
+    def batch_identifiers(self) -> str:
+        return self._batch_identifiers
