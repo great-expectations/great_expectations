@@ -243,27 +243,24 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
     # we deem asserting it's presence sufficient for purposes of this test
     spark_config: dict = report["execution_engine"]["spark_config"]
     assert isinstance(spark_config, dict) and len(spark_config.keys()) > 0
-    report["execution_engine"].pop("spark_config")
 
-    spark_config = (
-        {
-            "spark.app.name": "default_great_expectations_spark_application",
-            "spark.default.parallelism": "4",
-            "spark.driver.memory": "6g",
-            "spark.executor.id": "driver",
-            "spark.executor.memory": "6g",
-            "spark.master": "local[*]",
-            "spark.rdd.compress": "True",
-            "spark.serializer.objectStreamReset": "100",
-            "spark.sql.catalogImplementation": "hive",
-            "spark.sql.shuffle.partitions": "2",
-            "spark.submit.deployMode": "client",
-            "spark.ui.showConsoleProgress": "False",
-        },
-    )
+    spark_config = {
+        "spark.app.name": "default_great_expectations_spark_application",
+        "spark.default.parallelism": "4",
+        "spark.driver.memory": "6g",
+        "spark.executor.id": "driver",
+        "spark.executor.memory": "6g",
+        "spark.master": "local[*]",
+        "spark.rdd.compress": "True",
+        "spark.serializer.objectStreamReset": "100",
+        "spark.sql.catalogImplementation": "hive",
+        "spark.sql.shuffle.partitions": "2",
+        "spark.submit.deployMode": "client",
+        "spark.ui.showConsoleProgress": "False",
+    }
 
     assert is_candidate_subset_of_target(
-        spark_config, report["execution_engine"]["spark_config"]
+        candidate=spark_config, target=report["execution_engine"]["spark_config"]
     )
 
     report["execution_engine"].pop("spark_config")

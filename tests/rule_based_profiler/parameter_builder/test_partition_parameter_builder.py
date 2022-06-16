@@ -102,7 +102,7 @@ def test_partition_parameter_builder_alice_continuous(
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=parameter_builder.json_serialized_fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
@@ -169,7 +169,7 @@ def test_partition_parameter_builder_alice_categorical(
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=parameter_builder.json_serialized_fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
@@ -240,7 +240,7 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=parameter_builder.json_serialized_fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,

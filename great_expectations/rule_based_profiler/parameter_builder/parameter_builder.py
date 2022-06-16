@@ -127,7 +127,9 @@ class ParameterBuilder(ABC, Builder):
         )
         if (
             recompute_existing_parameter_values
-            or self.fully_qualified_parameter_name
+            or self.raw_fully_qualified_parameter_name
+            not in fully_qualified_parameter_names
+            or self.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
             self.set_batch_list_or_batch_request(
@@ -156,7 +158,7 @@ class ParameterBuilder(ABC, Builder):
 
             parameter_values: Dict[str, Any] = {
                 self.raw_fully_qualified_parameter_name: parameter_computation_result,
-                self.fully_qualified_parameter_name: convert_to_json_serializable(
+                self.json_serialized_fully_qualified_parameter_name: convert_to_json_serializable(
                     data=parameter_computation_result
                 ),
             }
@@ -183,12 +185,18 @@ class ParameterBuilder(ABC, Builder):
         return self._evaluation_parameter_builder_configs
 
     @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"{PARAMETER_KEY}{self.name}"
+    def raw_fully_qualified_parameter_name(self) -> str:
+        """
+        This fully-qualified parameter name references "raw" "ParameterNode" output (including "Numpy" "dtype" values).
+        """
+        return f"{RAW_PARAMETER_KEY}{self.name}"
 
     @property
-    def raw_fully_qualified_parameter_name(self) -> str:
-        return f"{RAW_PARAMETER_KEY}{self.name}"
+    def json_serialized_fully_qualified_parameter_name(self) -> str:
+        """
+        This fully-qualified parameter name references "JSON-serialized" "ParameterNode" output.
+        """
+        return f"{PARAMETER_KEY}{self.name}"
 
     @abstractmethod
     def _build_parameters(
@@ -671,7 +679,8 @@ def resolve_evaluation_dependencies(
 
     # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
     # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
-    # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name").
+    # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name");
+    # this list contains both, "raw" (for internal calculations) and "JSON-serialized" fully-qualified parameter names.
     if fully_qualified_parameter_names is None:
         fully_qualified_parameter_names = get_fully_qualified_parameter_names(
             domain=domain,
@@ -683,17 +692,10 @@ def resolve_evaluation_dependencies(
     # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
     evaluation_parameter_builder: "ParameterBuilder"  # noqa: F821
     for evaluation_parameter_builder in evaluation_parameter_builders:
-        fully_qualified_evaluation_parameter_builder_name: str = (
-            f"{PARAMETER_KEY}{evaluation_parameter_builder.name}"
-        )
-        raw_fully_qualified_evaluation_parameter_builder_name: str = (
-            f"{RAW_PARAMETER_KEY}{evaluation_parameter_builder.name}"
-        )
-
         if (
-            fully_qualified_evaluation_parameter_builder_name
+            evaluation_parameter_builder.raw_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
-            or raw_fully_qualified_evaluation_parameter_builder_name
+            or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
             evaluation_parameter_builder.set_batch_list_or_batch_request(

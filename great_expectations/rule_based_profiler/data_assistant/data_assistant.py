@@ -547,7 +547,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         parameter_builder: ParameterBuilder
         fully_qualified_metrics_parameter_names_by_domain: Dict[Domain, List[str]] = {
             domain: [
-                parameter_builder.fully_qualified_parameter_name
+                parameter_builder.json_serialized_fully_qualified_parameter_name
                 for parameter_builder in parameter_builders
             ]
             for domain, parameter_builders in self.metrics_parameter_builders_by_domain.items()
@@ -740,9 +740,9 @@ def build_map_metric_rule(
         expectation_type=expectation_type,
         validation_parameter_builder_configs=validation_parameter_builder_configs,
         column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-        condition=f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= 1.0 - {VARIABLES_KEY}success_ratio",
+        condition=f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= 1.0 - {VARIABLES_KEY}success_ratio",
         meta={
-            "profiler_details": f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            "profiler_details": f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
         },
     )
 
