@@ -45,7 +45,7 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
 
         if regex_expression is None:
             logger.warning(
-                f"Regex is not supported for dialect {str(_dialect.dialect.name)}" 
+                f"Regex is not supported for dialect {str(_dialect.dialect.name)}"
             )
             raise NotImplementedError
 

@@ -370,9 +370,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 try:
                     return matches.group(match_group_id)
                 except IndexError:
-                    logger.warning(
-                        f"No match group {match_group_id} in key {key}"
-                    )
+                    logger.warning(f"No match group {match_group_id} in key {key}")
                     return (
                         datetime.datetime.now(datetime.timezone.utc).strftime(
                             "%Y%m%dT%H%M%S.%fZ"

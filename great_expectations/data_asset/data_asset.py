@@ -615,7 +615,7 @@ class DataAsset:
             message += (
                 f" Omitting {discards['failed_expectations']} expectation(s) that failed when last run; set "
                 "discard_failed_expectations=False to include them."
-                )
+            )
 
         for expectation in expectations:
             # FIXME: Factor this out into a new function. The logic is duplicated in remove_expectation,

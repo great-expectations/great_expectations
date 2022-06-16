@@ -263,9 +263,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 try:
                     return matches.group(match_group_id)
                 except IndexError:
-                    logger.warning(
-                        f"No match group {match_group_id} in path {path}"
-                    )
+                    logger.warning(f"No match group {match_group_id} in path {path}")
                     return (
                         datetime.datetime.now(datetime.timezone.utc).strftime(
                             "%Y%m%dT%H%M%S.%fZ"

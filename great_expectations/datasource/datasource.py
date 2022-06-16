@@ -126,7 +126,7 @@ class LegacyDatasource:
         module_name="great_expectations.datasource",
         data_asset_type=None,
         batch_kwargs_generators=None,
-        **kwargs
+        **kwargs,
     ):
         """
         Build a full configuration object for a datasource, potentially including batch kwargs generators with defaults.
@@ -147,7 +147,7 @@ class LegacyDatasource:
         configuration = class_.build_configuration(
             data_asset_type=data_asset_type,
             batch_kwargs_generators=batch_kwargs_generators,
-            **kwargs
+            **kwargs,
         )
         return configuration
 
@@ -157,7 +157,7 @@ class LegacyDatasource:
         data_context=None,
         data_asset_type=None,
         batch_kwargs_generators=None,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Build a new datasource.
