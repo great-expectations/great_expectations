@@ -40,6 +40,8 @@ def _add_gx_args(
 ):
     """Decorator to wrap any given pandas.read_* method, and return a Validator.
 
+    #!!! This docstring is out of date
+
     This decorator
         1. wraps pandas.read_* methods,
         2. adds some additional input parameters,
@@ -136,6 +138,7 @@ def _add_gx_args(
         batch_request = NewConfiguredBatchRequest(
             datasource_name=self.name,
             data_asset_name=data_asset_name,
+            #!!! Revisit the parameters passed to DataConnectorQuery---these two make sense for Runtime requests, but not Configured requests.
             data_connector_query=DataConnectorQuery(
                 id_= id_,
                 timestamp= timestamp,
@@ -161,52 +164,6 @@ def _add_gx_args(
 
         return validator
 
-        ### Here's my original, hacky implementation for getting a Batch
-        # batch = self.get_single_batch_from_batch_request(
-        #     batch_request=RuntimeBatchRequest(
-        #         datasource_name=self.name,
-        #         data_connector_name="runtime_data_connector",
-        #         data_asset_name="DEFAULT_DATA_ASSET",
-        #         runtime_parameters={
-        #             "batch_data": df,
-        #             "args": list(args),
-        #             "kwargs": kwargs,
-        #         },
-        #         batch_identifiers={
-        #             "id_": id_,
-        #             "timestamp": timestamp,
-        #         },
-        #     )
-        # )
-
-        # return self.get_validator(batch_request)
-
-        # batch = Batch(
-        #     data=df,
-        #     batch_request=NewConfiguredBatchRequest(
-        #         datasource_name=self.name,
-        #         data_asset_name=data_asset_name,
-        #         data_connector_query=DataConnectorQuery(
-        #             id_= id_,
-        #             timestamp= timestamp,
-        #         ),
-        #         batch_spec_passthrough=BatchSpecPassthrough(
-        #             args= list(args),
-        #             kwargs= kwargs,
-        #         ),
-        #     )
-        # )
-
-        # #!!! Returning a Validator goes against the pattern we've used elsewhere for Datasources.
-        # # I'm increasingly convinced that this is the right move, rather than returning Batches, which are useless objects.
-        # validator = Validator(
-        #     execution_engine=self._execution_engine,
-        #     expectation_suite=expectation_suite,
-        #     batches=[batch],
-        # )
-
-        # return validator
-
     return wrapped
 
 
@@ -214,11 +171,14 @@ class PandasReaderDatasource(NewNewNewDatasource):
     """
     This class is enables very simple syntax for users who are just getting started with Great Expectations, and have not configured (or learned about) Datasources and DataConnectors. To do so, it provides thin wrapper methods for all 20 of pandas' `read_*` methods.
     
-    From a LiteDataContext, it can be invoked as follows: `my_context.datasources.pandas_readers.read_csv`
+
+    From a LiteDataContext, it can be invoked as follows: `my_context.datasources.default_pandas_reader.read_csv`
 
     Note on limitations:
 
-        This class is based on a RuntimeDataConnector, so no DataConnector configuration is required. This comes with some serious limitations:
+        #!!! This docstring is out of date
+
+        This class is based on a RuntimeDataConnector, so no DataSource or DataAsset configuration is required. This comes with some serious limitations:
             * All dataframes must be read one at a time, with no wildcards within filenames or globbing of filepaths.
             * All dataframes will appear as a single Data Asset in your Data Docs.
             * Can't be profiled with a multibatch Data Assistants
@@ -292,34 +252,6 @@ class PandasReaderDatasource(NewNewNewDatasource):
             },
         )
 
-
-        # super().__init__(
-        #     name=name,
-        #     execution_engine={
-        #         "class_name": "PandasExecutionEngine",
-        #         "module_name": "great_expectations.execution_engine",
-        #     },
-        #     data_connectors={
-        #         # "runtime_data_connector": {
-        #         #     "class_name": "RuntimeDataConnector",
-        #         #     "batch_identifiers": [
-        #         #         "id_",
-        #         #         "timestamp",
-        #         #     ],
-        #         # },
-        #         "configured_data_connector": {
-        #             "class_name": "ConfiguredAssetFilesystemDataConnector",
-        #             "base_directory":"",
-        #             "assets":{
-        #                 "DEFAULT_DATA_ASSET":{
-        #                     "pattern":"(.*)",
-        #                     "group_names":["filename"],
-        #                 }
-        #             }
-        #         }
-        #     },
-        # )
-
     def add_asset(
         self,
         name: str,
@@ -327,7 +259,7 @@ class PandasReaderDatasource(NewNewNewDatasource):
         method: Optional[str] = "read_csv",
         regex: Optional[str] = "(.*)",
         batch_identifiers: List[str] = ["filename"],
-        # check_new_asset: bool = False,
+        # check_new_asset: bool = False, # !!! Maybe implement this?
     ) -> PandasReaderDataAsset:
 
         new_asset = PandasReaderDataAsset(
@@ -377,7 +309,6 @@ class PandasReaderDatasource(NewNewNewDatasource):
         return batch
 
     def get_validator(self, batch_request: NewConfiguredBatchRequest) -> Batch:
-        print(batch_request)
         batch = self.get_batch(batch_request)
         return Validator(
             execution_engine=self._execution_engine,
@@ -387,8 +318,6 @@ class PandasReaderDatasource(NewNewNewDatasource):
 
     @property
     def assets(self) -> Dict[str, PandasReaderDataAsset]:
-        #!!! DotDict is on its way to becoming a deprecated class. Use DictDot instead.
-        #!!! Unfortunately, this currently crashes with `TypeError: DictDot() takes no arguments`
         return self._assets
 
     @property

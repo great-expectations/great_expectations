@@ -37,19 +37,6 @@ def test_PandasReaderDataAsset_basic_get_batch_request(test_dir_alpha):
         batch_spec_passthrough=BatchSpecPassthrough(),
     )
 
-# @pytest.fixture
-# def configured_pandas_reader_data_asset():
-#     my_datasource = PandasReaderDatasource("my_datasource")
-#     my_asset = PandasReaderDataAsset(
-#         datasource=my_datasource,
-#         name="test_dir_alpha",
-#         method="read_csv",
-#         base_directory="some_dir/",
-#         regex="(.*)\.(.*)",
-#         batch_identifiers=["filename", "file_extension"],
-#     )
-#     return my_asset
-
 def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs():
     my_datasource = PandasReaderDatasource("my_datasource")
     my_asset = PandasReaderDataAsset(

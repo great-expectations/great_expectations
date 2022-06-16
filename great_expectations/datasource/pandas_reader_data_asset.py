@@ -58,25 +58,8 @@ class PandasReaderDataAsset(BaseDataAsset):
             *batch_identifier_args,
             **batch_identifier_kwargs,
         )
-        # !!! The current implementation of this method is a hack to get a basic prototype working
-        # self._datasource.data_connectors["configured_data_connector"]._base_directory = self._base_directory
 
         validator = self._datasource.get_validator(batch_request)
-        # batch = self._datasource.get_single_batch_from_batch_request(
-        #     batch_request=BatchRequest(
-        #         datasource_name=self._datasource.name,
-        #         data_connector_name="configured_data_connector",
-        #         data_asset_name="DEFAULT_DATA_ASSET",
-        #         data_connector_query={
-        #             "batch_filter_parameters": batch_request.batch_identifiers
-        #         },
-        #     )
-        # )
-        # validator = Validator(
-        #     execution_engine=self._datasource.execution_engine,
-        #     expectation_suite=None,#expectation_suite,
-        #     batches=[batch],
-        # )
 
         return validator
 
