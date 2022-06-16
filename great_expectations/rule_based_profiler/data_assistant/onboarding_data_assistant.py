@@ -173,7 +173,7 @@ class OnboardingDataAssistant(DataAssistant):
             metric_name="table.row_count",
             metric_value_kwargs=None,
         )
-        mean_table_columns_set_match_multi_batch_parameter_builder_config: ParameterBuilder = MeanTableColumnsSetMatchMultiBatchParameterBuilder(
+        mean_table_columns_set_match_multi_batch_parameter_builder_for_validations: ParameterBuilder = MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             name="column_names_set_estimator",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
@@ -201,17 +201,17 @@ class OnboardingDataAssistant(DataAssistant):
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
-                **mean_table_columns_set_match_multi_batch_parameter_builder_config.to_json_dict(),
+                **mean_table_columns_set_match_multi_batch_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
         expect_table_columns_to_match_set_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_table_columns_to_match_set",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
-            condition=f"{mean_table_columns_set_match_multi_batch_parameter_builder_config.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
-            column_set=f"{mean_table_columns_set_match_multi_batch_parameter_builder_config.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+            condition=f"{mean_table_columns_set_match_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
+            column_set=f"{mean_table_columns_set_match_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
             exact_match=f"{VARIABLES_KEY}exact_match",
             meta={
-                "profiler_details": f"{mean_table_columns_set_match_multi_batch_parameter_builder_config.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                "profiler_details": f"{mean_table_columns_set_match_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
             },
         )
 
