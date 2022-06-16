@@ -11,7 +11,6 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import NP_EPSILON
 from great_expectations.rule_based_profiler.parameter_builder import (
-    MetricMultiBatchParameterBuilder,
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
 )
@@ -78,7 +77,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: dict = {
+    expected_value_dict: Dict[str, Optional[str]] = {
         "value": None,
         "details": {
             "metric_configuration": {
@@ -164,9 +163,6 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
 
-    expected_value_dict: dict
-    actual_value_dict: dict
-
     numeric_metric_range_parameter_builder: ParameterBuilder = (
         NumericMetricRangeMultiBatchParameterBuilder(
             name="column_min_range",
@@ -208,7 +204,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict = {
+    expected_value_dict: Dict[str, Optional[str]] = {
         "value": None,
         "details": {
             "metric_configuration": {
@@ -350,18 +346,15 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
-    batch_request: dict = {
+    batch_request: Dict[str, str] = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    metric_domain_kwargs: dict = {"column": "fare_amount"}
+    metric_domain_kwargs: Dict[str, str] = {"column": "fare_amount"}
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
-
-    expected_value_dict: dict
-    actual_value_dict: dict
 
     my_column_min_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -419,7 +412,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict = {
+    expected_value_dict: Dict[str, Optional[str]] = {
         "value": None,
         "details": {
             "metric_configuration": {
@@ -831,7 +824,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: dict = {
+    expected_value_dict: Dict[str, Optional[str]] = {
         "value": None,
         "details": {
             "metric_configuration": {
