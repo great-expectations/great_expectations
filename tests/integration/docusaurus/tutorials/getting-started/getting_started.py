@@ -84,8 +84,8 @@ validator = context.get_validator(
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)
 
-# Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
 # <snippet>
+# Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
 exclude_column_names = [
     "vendor_id",
     "pickup_datetime",
