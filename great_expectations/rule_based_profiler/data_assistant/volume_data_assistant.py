@@ -98,14 +98,20 @@ class VolumeDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+            ParameterBuilderConfig(
+                **table_row_count_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
+            ),
+        ]
         table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name="table.row_count",
+            metric_name=None,
             metric_value_kwargs=None,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
 
-        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
-
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -186,9 +192,15 @@ class VolumeDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+            ParameterBuilderConfig(
+                **column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
+            ),
+        ]
         column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name="column.distinct_values.count",
+            metric_name=None,
             metric_value_kwargs=None,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
