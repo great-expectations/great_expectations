@@ -370,8 +370,8 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
         metric_name="column.min",
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
-        enforce_numeric_metric=False,
-        replace_nan_with_zero=False,
+        enforce_numeric_metric=True,
+        replace_nan_with_zero=True,
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
     )
