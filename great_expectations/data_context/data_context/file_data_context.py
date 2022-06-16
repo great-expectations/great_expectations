@@ -6,10 +6,7 @@ from typing import Mapping, Optional, Union
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    anonymizedUsageStatisticsSchema,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.data_context_variables import (
     FileDataContextVariables,
 )
@@ -75,9 +72,9 @@ class FileDataContext(AbstractDataContext):
     @classmethod
     def _get_global_config_value(
         cls,
-        environment_variable: Optional[str] = None,
-        conf_file_section=None,
-        conf_file_option=None,
+        environment_variable: str,
+        conf_file_section: Optional[str] = None,
+        conf_file_option: Optional[str] = None,
     ) -> Optional[str]:
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
@@ -105,10 +102,10 @@ class FileDataContext(AbstractDataContext):
             conf_file_option="data_context_id",
         )
 
-    def _get_usage_stats_url_override(self):
+    def _get_usage_stats_url_override(self) -> Optional[str]:
         return self._get_config_value_from_env_var_and_file()
 
-    def _get_config_value_from_env_var_and_file(self):
+    def _get_config_value_from_env_var_and_file(self) -> Optional[str]:
         return self._get_global_config_value(
             environment_variable="GE_USAGE_STATISTICS_URL",
             conf_file_section="anonymous_usage_statistics",

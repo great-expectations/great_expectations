@@ -1,4 +1,3 @@
-import configparser
 import copy
 import json
 import logging
@@ -92,9 +91,7 @@ class AbstractDataContext(ABC):
         return config_with_global_config_overrides
 
     @classmethod
-    def _get_global_config_value(
-        cls, environment_variable: Optional[str]
-    ) -> Optional[str]:
+    def _get_global_config_value(cls, environment_variable: str) -> Optional[str]:
         # Overridden when necessary in child classes
         return cls._get_config_value_from_env_var(
             environment_variable=environment_variable
@@ -133,10 +130,10 @@ class AbstractDataContext(ABC):
     def _get_data_context_id_override_from_env_var(self) -> Optional[str]:
         return self._get_global_config_value(environment_variable="GE_DATA_CONTEXT_ID")
 
-    def _get_usage_stats_url_override(self):
+    def _get_usage_stats_url_override(self) -> Optional[str]:
         return self._get_config_value_from_env_var()
 
-    def _get_usage_stats_url_override_from_env_var(self):
+    def _get_usage_stats_url_override_from_env_var(self) -> Optional[str]:
         return self._get_global_config_value(
             environment_variable="GE_USAGE_STATISTICS_URL"
         )
