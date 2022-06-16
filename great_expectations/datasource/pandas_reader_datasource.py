@@ -362,7 +362,7 @@ class PandasReaderDatasource(NewNewNewDatasource):
             filename,
         )
 
-        # !!! How do we handle non-serializable elements like `con`?
+        # !!! How do we handle non-serializable elements like `con` for sql?
 
         args = batch_request.batch_spec_passthrough.get("args", [])
         kwargs = batch_request.batch_spec_passthrough.get("kwargs", {})
