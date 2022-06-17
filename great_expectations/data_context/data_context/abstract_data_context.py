@@ -19,7 +19,6 @@ class AbstractDataContext(ABC):
 
     The class encapsulates most store / core components and convenience methods used to access them, meaning the
     majority of DataContext functionality lives here.
-
     """
 
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]

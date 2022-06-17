@@ -1,15 +1,10 @@
-import copy
-import json
 import logging
 from typing import Mapping, Optional, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    anonymizedUsageStatisticsSchema,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.data_context_variables import (
     EphemeralDataContextVariables,
 )
