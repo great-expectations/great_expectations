@@ -1,5 +1,6 @@
 import os
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from unittest import mock
 
 import altair as alt
 import nbconvert
@@ -10,11 +11,15 @@ from freezegun import freeze_time
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
+)
+from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
+    CardinalityLimitMode,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
@@ -43,11 +48,8 @@ from tests.test_utils import find_strings_in_nested_obj
 @pytest.fixture
 def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
-        Domain(
-            domain_type=MetricDomainTypes.TABLE,
-            rule_name="default_expect_table_row_count_to_be_between_rule",
-        ): {
-            "$parameter.table.row_count": {
+        Domain(domain_type=MetricDomainTypes.TABLE, rule_name="table_rule",): {
+            "$parameter.table_row_count": {
                 "value": [
                     10000,
                     10000,
@@ -138,106 +140,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
-                "column": "vendor_id",
-            },
-            details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    "vendor_id": SemanticDomainTypes.NUMERIC,
-                },
-            },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
-        ): {
-            "$parameter.column.distinct_values.count": {
-                "value": [
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    3,
-                    3,
-                    3,
-                    3,
-                    3,
-                    3,
-                    3,
-                    3,
-                    3,
-                    3,
-                    3,
-                    3,
-                    3,
-                    3,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                    2,
-                ],
-                "attributed_value": {
-                    "c92d0679f769ac83fef2bb5eaac5d12a": [2],
-                    "562969eaef9c843cb4531aecbc13bbcb": [2],
-                    "569a4a80bf434c888593c651dbf2f157": [2],
-                    "f6c389dcef63c1f214c30f66b66945c0": [2],
-                    "c4fe9afce1cf3e83eb8518a9f5abc754": [2],
-                    "e20c38f98b9830a40b851939ca7189d4": [2],
-                    "f2e4d3da6556638b55df8ce509b094c2": [3],
-                    "44c1b1947c9049e7db62c5320dde4c63": [3],
-                    "47157bdaf05a7992473cd699cabaef74": [3],
-                    "08085632aff9ce4cebbb8023049e1aec": [3],
-                    "bb54e4fa3906387218be10cff631a7c2": [3],
-                    "58ce3b40d384eacd9bad7d916eb8f705": [3],
-                    "0327cfb13205ec8512e1c28e438ab43b": [3],
-                    "0808e185a52825d22356de2fe00a8f5f": [3],
-                    "90bb41c1fbd7c71c05dbc8695320af71": [3],
-                    "6c7e43619fe5e6963e8159cc84a28321": [3],
-                    "976b121b46db6967854b9c1a6628396b": [3],
-                    "9e58d3c72c7006b6f5800b623fbc9818": [3],
-                    "ce5f02ac408b7b5c500050190f549736": [3],
-                    "bb81456ec79522bf02f34b02762f95e0": [3],
-                    "b20800a7faafd2808d6c888577a2ba1d": [2],
-                    "33d910f95326c0c7dfe7536d1cfeba51": [2],
-                    "61e4931d87cb627df2a19b8bc5819b7b": [2],
-                    "3692b23382fd4734215465251290c65b": [2],
-                    "eff8910cddcdff62e4741243099240d5": [2],
-                    "f67d274202366f6b976414c950ca14bd": [2],
-                    "7b3ce20a8e8cf3097bb9df270a7ae63a": [2],
-                    "73612fdabd337d5a8279acc30ce22d00": [2],
-                    "ad2ad2a70c3e0bf94ddef3f893e92291": [2],
-                    "8ce0d477f610ea18e2ea4fbbb46de857": [2],
-                    "ff5a6cc031dd2c98b8bccd4766af38c1": [2],
-                    "940576153c66af14a949fd19aedd5f5b": [2],
-                    "ab05b4fb82e37c8cf5b1ac40d0a37fe9": [2],
-                    "57c04d62ada3a102248b48f34c755159": [2],
-                    "816b147dcf3305839f723a131b9ad6af": [2],
-                    "84000630d1b69a0fe870c94fb26a32bc": [2],
-                },
-                "details": {
-                    "metric_configuration": {
-                        "metric_name": "column.distinct_values.count",
-                        "domain_kwargs": {"column": "vendor_id"},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
-                    },
-                    "num_batches": 36,
-                },
-            }
-        },
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
                 "column": "pickup_datetime",
             },
             details={
@@ -245,9 +147,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "pickup_datetime": SemanticDomainTypes.TEXT,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     9979,
                     9965,
@@ -345,9 +247,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "dropoff_datetime": SemanticDomainTypes.TEXT,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     9979,
                     9977,
@@ -445,9 +347,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "passenger_count": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     7,
                     7,
@@ -545,9 +447,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "trip_distance": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     1157,
                     1141,
@@ -638,106 +540,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
-                "column": "rate_code_id",
-            },
-            details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    "rate_code_id": SemanticDomainTypes.NUMERIC,
-                },
-            },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
-        ): {
-            "$parameter.column.distinct_values.count": {
-                "value": [
-                    5,
-                    5,
-                    5,
-                    6,
-                    5,
-                    6,
-                    5,
-                    6,
-                    6,
-                    6,
-                    6,
-                    6,
-                    7,
-                    5,
-                    5,
-                    5,
-                    5,
-                    6,
-                    5,
-                    6,
-                    5,
-                    5,
-                    5,
-                    5,
-                    5,
-                    6,
-                    5,
-                    6,
-                    6,
-                    6,
-                    6,
-                    5,
-                    5,
-                    6,
-                    5,
-                    5,
-                ],
-                "attributed_value": {
-                    "c92d0679f769ac83fef2bb5eaac5d12a": [5],
-                    "562969eaef9c843cb4531aecbc13bbcb": [5],
-                    "569a4a80bf434c888593c651dbf2f157": [5],
-                    "f6c389dcef63c1f214c30f66b66945c0": [6],
-                    "c4fe9afce1cf3e83eb8518a9f5abc754": [5],
-                    "e20c38f98b9830a40b851939ca7189d4": [6],
-                    "f2e4d3da6556638b55df8ce509b094c2": [5],
-                    "44c1b1947c9049e7db62c5320dde4c63": [6],
-                    "47157bdaf05a7992473cd699cabaef74": [6],
-                    "08085632aff9ce4cebbb8023049e1aec": [6],
-                    "bb54e4fa3906387218be10cff631a7c2": [6],
-                    "58ce3b40d384eacd9bad7d916eb8f705": [6],
-                    "0327cfb13205ec8512e1c28e438ab43b": [7],
-                    "0808e185a52825d22356de2fe00a8f5f": [5],
-                    "90bb41c1fbd7c71c05dbc8695320af71": [5],
-                    "6c7e43619fe5e6963e8159cc84a28321": [5],
-                    "976b121b46db6967854b9c1a6628396b": [5],
-                    "9e58d3c72c7006b6f5800b623fbc9818": [6],
-                    "ce5f02ac408b7b5c500050190f549736": [5],
-                    "bb81456ec79522bf02f34b02762f95e0": [6],
-                    "b20800a7faafd2808d6c888577a2ba1d": [5],
-                    "33d910f95326c0c7dfe7536d1cfeba51": [5],
-                    "61e4931d87cb627df2a19b8bc5819b7b": [5],
-                    "3692b23382fd4734215465251290c65b": [5],
-                    "eff8910cddcdff62e4741243099240d5": [5],
-                    "f67d274202366f6b976414c950ca14bd": [6],
-                    "7b3ce20a8e8cf3097bb9df270a7ae63a": [5],
-                    "73612fdabd337d5a8279acc30ce22d00": [6],
-                    "ad2ad2a70c3e0bf94ddef3f893e92291": [6],
-                    "8ce0d477f610ea18e2ea4fbbb46de857": [6],
-                    "ff5a6cc031dd2c98b8bccd4766af38c1": [6],
-                    "940576153c66af14a949fd19aedd5f5b": [5],
-                    "ab05b4fb82e37c8cf5b1ac40d0a37fe9": [5],
-                    "57c04d62ada3a102248b48f34c755159": [6],
-                    "816b147dcf3305839f723a131b9ad6af": [5],
-                    "84000630d1b69a0fe870c94fb26a32bc": [5],
-                },
-                "details": {
-                    "metric_configuration": {
-                        "metric_name": "column.distinct_values.count",
-                        "domain_kwargs": {"column": "rate_code_id"},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
-                    },
-                    "num_batches": 36,
-                },
-            }
-        },
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
                 "column": "store_and_fwd_flag",
             },
             details={
@@ -745,9 +547,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "store_and_fwd_flag": SemanticDomainTypes.TEXT,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     2,
                     2,
@@ -838,206 +640,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
-                "column": "pickup_location_id",
-            },
-            details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    "pickup_location_id": SemanticDomainTypes.NUMERIC,
-                },
-            },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
-        ): {
-            "$parameter.column.distinct_values.count": {
-                "value": [
-                    118,
-                    118,
-                    124,
-                    132,
-                    119,
-                    133,
-                    133,
-                    136,
-                    134,
-                    146,
-                    151,
-                    141,
-                    151,
-                    155,
-                    145,
-                    137,
-                    138,
-                    143,
-                    155,
-                    154,
-                    154,
-                    144,
-                    144,
-                    150,
-                    142,
-                    146,
-                    157,
-                    208,
-                    214,
-                    211,
-                    212,
-                    209,
-                    193,
-                    195,
-                    187,
-                    199,
-                ],
-                "attributed_value": {
-                    "c92d0679f769ac83fef2bb5eaac5d12a": [118],
-                    "562969eaef9c843cb4531aecbc13bbcb": [118],
-                    "569a4a80bf434c888593c651dbf2f157": [124],
-                    "f6c389dcef63c1f214c30f66b66945c0": [132],
-                    "c4fe9afce1cf3e83eb8518a9f5abc754": [119],
-                    "e20c38f98b9830a40b851939ca7189d4": [133],
-                    "f2e4d3da6556638b55df8ce509b094c2": [133],
-                    "44c1b1947c9049e7db62c5320dde4c63": [136],
-                    "47157bdaf05a7992473cd699cabaef74": [134],
-                    "08085632aff9ce4cebbb8023049e1aec": [146],
-                    "bb54e4fa3906387218be10cff631a7c2": [151],
-                    "58ce3b40d384eacd9bad7d916eb8f705": [141],
-                    "0327cfb13205ec8512e1c28e438ab43b": [151],
-                    "0808e185a52825d22356de2fe00a8f5f": [155],
-                    "90bb41c1fbd7c71c05dbc8695320af71": [145],
-                    "6c7e43619fe5e6963e8159cc84a28321": [137],
-                    "976b121b46db6967854b9c1a6628396b": [138],
-                    "9e58d3c72c7006b6f5800b623fbc9818": [143],
-                    "ce5f02ac408b7b5c500050190f549736": [155],
-                    "bb81456ec79522bf02f34b02762f95e0": [154],
-                    "b20800a7faafd2808d6c888577a2ba1d": [154],
-                    "33d910f95326c0c7dfe7536d1cfeba51": [144],
-                    "61e4931d87cb627df2a19b8bc5819b7b": [144],
-                    "3692b23382fd4734215465251290c65b": [150],
-                    "eff8910cddcdff62e4741243099240d5": [142],
-                    "f67d274202366f6b976414c950ca14bd": [146],
-                    "7b3ce20a8e8cf3097bb9df270a7ae63a": [157],
-                    "73612fdabd337d5a8279acc30ce22d00": [208],
-                    "ad2ad2a70c3e0bf94ddef3f893e92291": [214],
-                    "8ce0d477f610ea18e2ea4fbbb46de857": [211],
-                    "ff5a6cc031dd2c98b8bccd4766af38c1": [212],
-                    "940576153c66af14a949fd19aedd5f5b": [209],
-                    "ab05b4fb82e37c8cf5b1ac40d0a37fe9": [193],
-                    "57c04d62ada3a102248b48f34c755159": [195],
-                    "816b147dcf3305839f723a131b9ad6af": [187],
-                    "84000630d1b69a0fe870c94fb26a32bc": [199],
-                },
-                "details": {
-                    "metric_configuration": {
-                        "metric_name": "column.distinct_values.count",
-                        "domain_kwargs": {"column": "pickup_location_id"},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
-                    },
-                    "num_batches": 36,
-                },
-            }
-        },
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
-                "column": "dropoff_location_id",
-            },
-            details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    "dropoff_location_id": SemanticDomainTypes.NUMERIC,
-                },
-            },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
-        ): {
-            "$parameter.column.distinct_values.count": {
-                "value": [
-                    184,
-                    197,
-                    196,
-                    190,
-                    200,
-                    204,
-                    202,
-                    203,
-                    203,
-                    192,
-                    197,
-                    205,
-                    199,
-                    205,
-                    205,
-                    202,
-                    196,
-                    206,
-                    213,
-                    217,
-                    205,
-                    203,
-                    198,
-                    204,
-                    206,
-                    204,
-                    207,
-                    234,
-                    237,
-                    238,
-                    233,
-                    232,
-                    224,
-                    222,
-                    230,
-                    224,
-                ],
-                "attributed_value": {
-                    "c92d0679f769ac83fef2bb5eaac5d12a": [184],
-                    "562969eaef9c843cb4531aecbc13bbcb": [197],
-                    "569a4a80bf434c888593c651dbf2f157": [196],
-                    "f6c389dcef63c1f214c30f66b66945c0": [190],
-                    "c4fe9afce1cf3e83eb8518a9f5abc754": [200],
-                    "e20c38f98b9830a40b851939ca7189d4": [204],
-                    "f2e4d3da6556638b55df8ce509b094c2": [202],
-                    "44c1b1947c9049e7db62c5320dde4c63": [203],
-                    "47157bdaf05a7992473cd699cabaef74": [203],
-                    "08085632aff9ce4cebbb8023049e1aec": [192],
-                    "bb54e4fa3906387218be10cff631a7c2": [197],
-                    "58ce3b40d384eacd9bad7d916eb8f705": [205],
-                    "0327cfb13205ec8512e1c28e438ab43b": [199],
-                    "0808e185a52825d22356de2fe00a8f5f": [205],
-                    "90bb41c1fbd7c71c05dbc8695320af71": [205],
-                    "6c7e43619fe5e6963e8159cc84a28321": [202],
-                    "976b121b46db6967854b9c1a6628396b": [196],
-                    "9e58d3c72c7006b6f5800b623fbc9818": [206],
-                    "ce5f02ac408b7b5c500050190f549736": [213],
-                    "bb81456ec79522bf02f34b02762f95e0": [217],
-                    "b20800a7faafd2808d6c888577a2ba1d": [205],
-                    "33d910f95326c0c7dfe7536d1cfeba51": [203],
-                    "61e4931d87cb627df2a19b8bc5819b7b": [198],
-                    "3692b23382fd4734215465251290c65b": [204],
-                    "eff8910cddcdff62e4741243099240d5": [206],
-                    "f67d274202366f6b976414c950ca14bd": [204],
-                    "7b3ce20a8e8cf3097bb9df270a7ae63a": [207],
-                    "73612fdabd337d5a8279acc30ce22d00": [234],
-                    "ad2ad2a70c3e0bf94ddef3f893e92291": [237],
-                    "8ce0d477f610ea18e2ea4fbbb46de857": [238],
-                    "ff5a6cc031dd2c98b8bccd4766af38c1": [233],
-                    "940576153c66af14a949fd19aedd5f5b": [232],
-                    "ab05b4fb82e37c8cf5b1ac40d0a37fe9": [224],
-                    "57c04d62ada3a102248b48f34c755159": [222],
-                    "816b147dcf3305839f723a131b9ad6af": [230],
-                    "84000630d1b69a0fe870c94fb26a32bc": [224],
-                },
-                "details": {
-                    "metric_configuration": {
-                        "metric_name": "column.distinct_values.count",
-                        "domain_kwargs": {"column": "dropoff_location_id"},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
-                    },
-                    "num_batches": 36,
-                },
-            }
-        },
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
                 "column": "payment_type",
             },
             details={
@@ -1045,9 +647,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "payment_type": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     4,
                     4,
@@ -1145,9 +747,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "fare_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     153,
                     148,
@@ -1245,9 +847,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "extra": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     6,
                     6,
@@ -1345,9 +947,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "mta_tax": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     3,
                     3,
@@ -1445,9 +1047,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "tip_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     532,
                     530,
@@ -1545,9 +1147,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "tolls_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     20,
                     24,
@@ -1645,9 +1247,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "improvement_surcharge": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     3,
                     3,
@@ -1745,9 +1347,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "total_amount": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     898,
                     884,
@@ -1845,9 +1447,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "congestion_surcharge": SemanticDomainTypes.NUMERIC,
                 },
             },
-            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            rule_name="categorical_columns_rule",
         ): {
-            "$parameter.column.distinct_values.count": {
+            "$parameter.column_distinct_values_count": {
                 "value": [
                     0,
                     0,
@@ -1941,20 +1543,25 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
 
 @pytest.fixture
 def quentin_expected_rule_based_profiler_configuration() -> Callable:
-    def _profiler_config(name: str) -> RuleBasedProfilerConfig:
+    def _profiler_config(
+        name: str, exclude_column_names: Optional[List[str]] = None
+    ) -> RuleBasedProfilerConfig:
+        exclude_column_names = exclude_column_names or []
         expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
             config_version=1.0,
             name=name,
             variables={"random_seed": None},
             rules={
-                "default_expect_table_row_count_to_be_between_rule": {
+                "table_rule": {
                     "variables": {
                         "false_positive_rate": 0.05,
                         "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "n_resamples": 9999,
                         "include_estimator_samples_histogram_in_details": False,
-                        "truncate_values": {"lower_bound": 0},
+                        "truncate_values": {
+                            "lower_bound": 0,
+                        },
                         "round_decimals": 0,
                     },
                     "domain_builder": {
@@ -1963,51 +1570,64 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     },
                     "parameter_builders": [
                         {
-                            "metric_domain_kwargs": "$domain.domain_kwargs",
                             "replace_nan_with_zero": True,
-                            "name": "table.row_count",
+                            "name": "table_row_count",
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
-                            "json_serialize": True,
                             "reduce_scalar_metric": True,
                             "metric_name": "table.row_count",
-                        }
+                        },
                     ],
                     "expectation_configuration_builders": [
                         {
-                            "max_value": "$parameter.table_row_count_range_estimator.value[1]",
+                            "max_value": "$parameter.table_row_count_range.value[1]",
                             "validation_parameter_builder_configs": [
                                 {
                                     "replace_nan_with_zero": True,
-                                    "name": "table_row_count_range_estimator",
-                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                                    "name": "table_row_count_range",
+                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                                     "truncate_values": "$variables.truncate_values",
                                     "enforce_numeric_metric": True,
                                     "n_resamples": "$variables.n_resamples",
                                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                    "json_serialize": True,
                                     "estimator": "$variables.estimator",
                                     "reduce_scalar_metric": True,
                                     "metric_name": "table.row_count",
+                                    "metric_multi_batch_parameter_builder_name": "table_row_count",
+                                    "metric_domain_kwargs": "$domain.domain_kwargs",
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "random_seed": "$variables.random_seed",
                                     "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
                                     "round_decimals": "$variables.round_decimals",
-                                }
+                                    "evaluation_parameter_builder_configs": [
+                                        {
+                                            "enforce_numeric_metric": True,
+                                            "replace_nan_with_zero": True,
+                                            "name": "table_row_count",
+                                            "class_name": "MetricMultiBatchParameterBuilder",
+                                            "evaluation_parameter_builder_configs": None,
+                                            "metric_value_kwargs": None,
+                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                                            "metric_domain_kwargs": None,
+                                            "reduce_scalar_metric": True,
+                                            "metric_name": "table.row_count",
+                                        }
+                                    ],
+                                },
                             ],
                             "expectation_type": "expect_table_row_count_to_be_between",
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                             "meta": {
-                                "profiler_details": "$parameter.table_row_count_range_estimator.details"
+                                "profiler_details": "$parameter.table_row_count_range.details"
                             },
                             "class_name": "DefaultExpectationConfigurationBuilder",
-                            "min_value": "$parameter.table_row_count_range_estimator.value[0]",
-                        }
+                            "min_value": "$parameter.table_row_count_range.value[0]",
+                        },
                     ],
                 },
-                "default_expect_column_unique_values_to_be_between_rule": {
+                "categorical_columns_rule": {
                     "variables": {
                         "mostly": 1.0,
                         "strict_min": False,
@@ -2017,61 +1637,89 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "estimator": "bootstrap",
                         "n_resamples": 9999,
                         "include_estimator_samples_histogram_in_details": False,
-                        "truncate_values": {"lower_bound": 0},
-                        "round_decimals": 0,
+                        "truncate_values": {
+                            "lower_bound": 0.0,
+                        },
+                        "round_decimals": 1,
                     },
                     "domain_builder": {
-                        "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
-                        "class_name": "ColumnDomainBuilder",
+                        "allowed_semantic_types_passthrough": ["logic"],
+                        "class_name": "CategoricalColumnDomainBuilder",
+                        "cardinality_limit_mode": {
+                            "name": "REL_100",
+                            "max_proportion_unique": 1.0,
+                            "metric_name_defining_limit": "column.unique_proportion",
+                        },
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
+                        "exclude_column_names": sorted(
+                            [
+                                "id",
+                            ]
+                            + exclude_column_names
+                        ),
+                        "exclude_column_name_suffixes": ["_id"],
+                        "exclude_semantic_types": ["binary", "currency", "identifier"],
                     },
                     "parameter_builders": [
                         {
                             "metric_domain_kwargs": "$domain.domain_kwargs",
                             "replace_nan_with_zero": True,
-                            "name": "column.distinct_values.count",
+                            "name": "column_distinct_values_count",
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
-                            "json_serialize": True,
                             "reduce_scalar_metric": True,
                             "metric_name": "column.distinct_values.count",
-                        }
+                        },
                     ],
                     "expectation_configuration_builders": [
                         {
-                            "max_value": "$parameter.column_unique_values_range_estimator.value[1]",
-                            "validation_parameter_builder_configs": [
-                                {
-                                    "metric_domain_kwargs": "$domain.domain_kwargs",
-                                    "replace_nan_with_zero": True,
-                                    "name": "column_unique_values_range_estimator",
-                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                                    "truncate_values": "$variables.truncate_values",
-                                    "enforce_numeric_metric": True,
-                                    "n_resamples": "$variables.n_resamples",
-                                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                    "json_serialize": True,
-                                    "estimator": "$variables.estimator",
-                                    "reduce_scalar_metric": True,
-                                    "metric_name": "column.distinct_values.count",
-                                    "false_positive_rate": "$variables.false_positive_rate",
-                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
-                                    "random_seed": "$variables.random_seed",
-                                    "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
-                                    "round_decimals": "$variables.round_decimals",
-                                }
-                            ],
-                            "expectation_type": "expect_column_unique_value_count_to_be_between",
+                            "min_value": "$parameter.column_distinct_values_count_range.value[0]",
+                            "class_name": "DefaultExpectationConfigurationBuilder",
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                             "meta": {
-                                "profiler_details": "$parameter.column_unique_values_range_estimator.details"
+                                "profiler_details": "$parameter.column_distinct_values_count_range.details"
                             },
-                            "class_name": "DefaultExpectationConfigurationBuilder",
-                            "strict_max": "$variables.strict_max",
-                            "min_value": "$parameter.column_unique_values_range_estimator.value[0]",
+                            "expectation_type": "expect_column_unique_value_count_to_be_between",
+                            "max_value": "$parameter.column_distinct_values_count_range.value[1]",
                             "strict_min": "$variables.strict_min",
+                            "strict_max": "$variables.strict_max",
                             "column": "$domain.domain_kwargs.column",
-                        }
+                            "validation_parameter_builder_configs": [
+                                {
+                                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                                    "metric_domain_kwargs": "$domain.domain_kwargs",
+                                    "metric_multi_batch_parameter_builder_name": "column_distinct_values_count",
+                                    "estimator": "$variables.estimator",
+                                    "false_positive_rate": "$variables.false_positive_rate",
+                                    "name": "column_distinct_values_count_range",
+                                    "round_decimals": "$variables.round_decimals",
+                                    "reduce_scalar_metric": True,
+                                    "metric_name": "column.distinct_values.count",
+                                    "enforce_numeric_metric": True,
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                                    "replace_nan_with_zero": True,
+                                    "n_resamples": "$variables.n_resamples",
+                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                                    "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
+                                    "truncate_values": "$variables.truncate_values",
+                                    "evaluation_parameter_builder_configs": [
+                                        {
+                                            "enforce_numeric_metric": True,
+                                            "replace_nan_with_zero": True,
+                                            "name": "column_distinct_values_count",
+                                            "class_name": "MetricMultiBatchParameterBuilder",
+                                            "evaluation_parameter_builder_configs": None,
+                                            "metric_value_kwargs": None,
+                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                                            "reduce_scalar_metric": True,
+                                            "metric_name": "column.distinct_values.count",
+                                        }
+                                    ],
+                                },
+                            ],
+                        },
                     ],
                 },
             },
@@ -2110,29 +1758,6 @@ def quentin_expected_expectation_suite(
         expected_expect_column_unique_value_count_to_be_between_expectation_configuration_list: List[
             ExpectationConfiguration
         ] = [
-            ExpectationConfiguration(
-                **{
-                    "meta": {
-                        "profiler_details": {
-                            "metric_configuration": {
-                                "metric_name": "column.distinct_values.count",
-                                "domain_kwargs": {"column": "vendor_id"},
-                                "metric_value_kwargs": None,
-                                "metric_dependencies": None,
-                            },
-                            "num_batches": 36,
-                        }
-                    },
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "strict_max": False,
-                        "max_value": 3,
-                        "strict_min": False,
-                        "column": "vendor_id",
-                        "min_value": 2,
-                    },
-                }
-            ),
             ExpectationConfiguration(
                 **{
                     "meta": {
@@ -2231,29 +1856,6 @@ def quentin_expected_expectation_suite(
                         "profiler_details": {
                             "metric_configuration": {
                                 "metric_name": "column.distinct_values.count",
-                                "domain_kwargs": {"column": "rate_code_id"},
-                                "metric_value_kwargs": None,
-                                "metric_dependencies": None,
-                            },
-                            "num_batches": 36,
-                        }
-                    },
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "strict_max": False,
-                        "max_value": 6,
-                        "strict_min": False,
-                        "column": "rate_code_id",
-                        "min_value": 5,
-                    },
-                }
-            ),
-            ExpectationConfiguration(
-                **{
-                    "meta": {
-                        "profiler_details": {
-                            "metric_configuration": {
-                                "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "store_and_fwd_flag"},
                                 "metric_value_kwargs": None,
                                 "metric_dependencies": None,
@@ -2268,52 +1870,6 @@ def quentin_expected_expectation_suite(
                         "strict_min": False,
                         "column": "store_and_fwd_flag",
                         "min_value": 2,
-                    },
-                }
-            ),
-            ExpectationConfiguration(
-                **{
-                    "meta": {
-                        "profiler_details": {
-                            "metric_configuration": {
-                                "metric_name": "column.distinct_values.count",
-                                "domain_kwargs": {"column": "pickup_location_id"},
-                                "metric_value_kwargs": None,
-                                "metric_dependencies": None,
-                            },
-                            "num_batches": 36,
-                        }
-                    },
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "strict_max": False,
-                        "max_value": 211,
-                        "strict_min": False,
-                        "column": "pickup_location_id",
-                        "min_value": 118,
-                    },
-                }
-            ),
-            ExpectationConfiguration(
-                **{
-                    "meta": {
-                        "profiler_details": {
-                            "metric_configuration": {
-                                "metric_name": "column.distinct_values.count",
-                                "domain_kwargs": {"column": "dropoff_location_id"},
-                                "metric_value_kwargs": None,
-                                "metric_dependencies": None,
-                            },
-                            "num_batches": 36,
-                        }
-                    },
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "strict_max": False,
-                        "max_value": 236,
-                        "strict_min": False,
-                        "column": "dropoff_location_id",
-                        "min_value": 190,
                     },
                 }
             ),
@@ -2549,7 +2105,7 @@ def quentin_expected_expectation_suite(
         expected_expectation_suite_meta: Dict[str, Any] = {
             "citations": [
                 {
-                    "citation_date": "2019-09-26T13:42:41+00:00",
+                    "citation_date": "2019-09-26T13:42:41.000000Z",
                     "profiler_config": quentin_expected_rule_based_profiler_configuration(
                         name=name
                     ).to_json_dict(),
@@ -2598,11 +2154,12 @@ def quentin_explicit_instantiation_result_actual_time(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
+        persist=False,
     )
     assert len(validator.batches) == 36
 
@@ -2633,11 +2190,12 @@ def quentin_explicit_instantiation_result_frozen_time(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
+        persist=False,
     )
     assert len(validator.batches) == 36
 
@@ -2748,11 +2306,12 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 
     explicit_instantiation_code: str = """
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
+        persist=False,
     )
 
     data_assistant: DataAssistant = VolumeDataAssistant(
@@ -2809,6 +2368,31 @@ def test_volume_data_assistant_result_serialization(
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_volume_data_assistant_result_get_expectation_suite(
+    mock_emit,
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
+):
+    expectation_suite_name: str = "my_suite"
+
+    suite: ExpectationSuite = bobby_volume_data_assistant_result.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    assert suite is not None and len(suite.expectations) > 0
+
+    assert mock_emit.call_count == 1
+
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert (
+        actual_events[-1][0][0]["event"]
+        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
+    )
+
+
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
@@ -2826,13 +2410,15 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
         is not None
         for parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.values()
         for parameter_node in parameter_values_for_fully_qualified_parameter_names.values()
-        for batch_id in parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-        ].keys()
+        for batch_id in (
+            parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY]
+            if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
+            else {}
+        ).keys()
     )
 
 
-def test_get_metrics_and_expectations_using_explicit_instantiation(
+def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_instantiation(
     quentin_explicit_instantiation_result_frozen_time,
     quentin_expected_metrics_by_domain,
     quentin_expected_expectation_suite,
@@ -2867,7 +2453,7 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
         delete_fields={"random_seed"},
     ) == deep_filter_properties_iterable(
         properties=quentin_expected_rule_based_profiler_configuration(
-            name=data_assistant_name
+            name=data_assistant_name,
         ).to_json_dict(),
         delete_fields={"random_seed"},
     )
@@ -2875,14 +2461,25 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
     data_assistant_result.citation.pop("profiler_config", None)
     expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
 
+    data_assistant_result.citation.pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
     assert (
         data_assistant_result.citation
         == expected_expectation_suite.meta["citations"][0]
     )
 
+    actual_expectation_suite: ExpectationSuite = (
+        data_assistant_result.get_expectation_suite(expectation_suite_name="my_suite")
+    )
+    actual_expectation_suite.meta.pop("great_expectations_version", None)
+    expected_expectation_suite.meta.pop("great_expectations_version", None)
+    actual_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    assert actual_expectation_suite == expected_expectation_suite
+
 
 @freeze_time("09/26/2019 13:42:41")
-def test_get_metrics_and_expectations_using_implicit_invocation(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
     quentin_expected_metrics_by_domain,
     quentin_expected_expectation_suite,
@@ -2925,13 +2522,258 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
     data_assistant_result.citation.pop("profiler_config", None)
     expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
 
+    data_assistant_result.citation.pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
     assert (
         data_assistant_result.citation
         == expected_expectation_suite.meta["citations"][0]
     )
 
+    actual_expectation_suite: ExpectationSuite = (
+        data_assistant_result.get_expectation_suite(expectation_suite_name="my_suite")
+    )
+    actual_expectation_suite.meta.pop("great_expectations_version", None)
+    expected_expectation_suite.meta.pop("great_expectations_version", None)
+    actual_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    assert actual_expectation_suite == expected_expectation_suite
 
-def test_execution_time_within_proper_bounds_using_explicit_instantiation(
+
+@freeze_time("09/26/2019 13:42:41")
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
+    quentin_columnar_table_multi_batch_data_context,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+    quentin_expected_metrics_by_domain,
+    quentin_expected_expectation_suite,
+    quentin_expected_rule_based_profiler_configuration,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    exclude_column_names: List[str] = [
+        "dropoff_datetime",
+        "store_and_fwd_flag",
+        "extra",
+        "congestion_surcharge",
+    ]
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
+        # include_column_names=include_column_names,
+        exclude_column_names=exclude_column_names,
+        # include_column_name_suffixes=include_column_name_suffixes,
+        # exclude_column_name_suffixes=exclude_column_name_suffixes,
+        # semantic_type_filter_module_name=semantic_type_filter_module_name,
+        # semantic_type_filter_class_name=semantic_type_filter_class_name,
+        # include_semantic_types=include_semantic_types,
+        # exclude_semantic_types=exclude_semantic_types,
+        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+        cardinality_limit_mode=CardinalityLimitMode.REL_100,
+        # max_unique_values=max_unique_values,
+        # max_proportion_unique=max_proportion_unique,
+        # column_value_uniqueness_rule={
+        #     "success_ratio": 0.8,
+        # },
+        # column_value_nullity_rule={
+        # },
+        # column_value_nonnullity_rule={
+        # },
+        # numeric_columns_rule={
+        #     "false_positive_rate": 0.1,
+        #     "random_seed": 43792,
+        # },
+        # datetime_columns_rule={
+        #     "truncate_values": {
+        #         "lower_bound": 0,
+        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+        #     },
+        #     "round_decimals": 0,
+        # },
+        # text_columns_rule={
+        #     "strict_min": True,
+        #     "strict_max": True,
+        #     "success_ratio": 0.8,
+        # },
+        # categorical_columns_rule={
+        #     "false_positive_rate": 0.1,
+        #     "round_decimals": 3,
+        # },
+    )
+
+    column_name: str
+    expected_excluded_domains: List[Domain] = [
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": column_name,
+            },
+        )
+        for column_name in exclude_column_names
+    ]
+
+    domain_key: Domain
+
+    # noinspection PyTypeChecker
+    quentin_expected_metrics_by_domain = dict(
+        filter(
+            lambda element: not any(
+                element[0].is_superset(other=domain_key)
+                for domain_key in expected_excluded_domains
+            ),
+            quentin_expected_metrics_by_domain.items(),
+        )
+    )
+
+    registered_data_assistant_name: str = "volume_data_assistant"
+
+    expected_expectation_suite: ExpectationSuite = quentin_expected_expectation_suite(
+        name=registered_data_assistant_name
+    )
+
+    assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
+
+    expectation_configuration: ExpectationConfiguration
+
+    expected_expectation_suite.expectations = [
+        expectation_configuration
+        for expectation_configuration in expected_expectation_suite.expectations
+        if not (
+            expectation_configuration.kwargs
+            and expectation_configuration.kwargs.get("column") in exclude_column_names
+        )
+    ]
+
+    for expectation_configuration in data_assistant_result.expectation_configurations:
+        if "profiler_details" in expectation_configuration.meta:
+            expectation_configuration.meta["profiler_details"].pop(
+                "estimation_histogram", None
+            )
+
+    assert (
+        data_assistant_result.expectation_configurations
+        == expected_expectation_suite.expectations
+    )
+
+    data_assistant_result_profiler_config_as_json_dict: dict = (
+        deep_filter_properties_iterable(
+            properties=data_assistant_result.profiler_config.to_json_dict(),
+            delete_fields={"random_seed"},
+        )
+    )
+    quentin_expected_rule_based_profiler_configuration_as_json_dict: dict = (
+        deep_filter_properties_iterable(
+            properties=quentin_expected_rule_based_profiler_configuration(
+                name=registered_data_assistant_name,
+                exclude_column_names=exclude_column_names,
+            ).to_json_dict(),
+            delete_fields={"random_seed"},
+        )
+    )
+    data_assistant_result_profiler_config_as_json_dict["rules"][
+        "categorical_columns_rule"
+    ]["domain_builder"]["exclude_column_names"] = sorted(
+        data_assistant_result_profiler_config_as_json_dict["rules"][
+            "categorical_columns_rule"
+        ]["domain_builder"]["exclude_column_names"]
+    )
+    quentin_expected_rule_based_profiler_configuration_as_json_dict["rules"][
+        "categorical_columns_rule"
+    ]["domain_builder"]["exclude_column_names"] = sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict["rules"][
+            "categorical_columns_rule"
+        ]["domain_builder"]["exclude_column_names"]
+    )
+    assert (
+        data_assistant_result_profiler_config_as_json_dict
+        == quentin_expected_rule_based_profiler_configuration_as_json_dict
+    )
+
+    data_assistant_result.citation.pop("profiler_config", None)
+    expected_expectation_suite.meta["citations"][0].pop("profiler_config", None)
+
+    data_assistant_result.citation.pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    assert (
+        data_assistant_result.citation
+        == expected_expectation_suite.meta["citations"][0]
+    )
+
+    actual_expectation_suite: ExpectationSuite = (
+        data_assistant_result.get_expectation_suite(expectation_suite_name="my_suite")
+    )
+    actual_expectation_suite.meta.pop("great_expectations_version", None)
+    expected_expectation_suite.meta.pop("great_expectations_version", None)
+    actual_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    expected_expectation_suite.meta["citations"][0].pop("citation_date", None)
+    assert actual_expectation_suite == expected_expectation_suite
+
+
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
+        # include_column_names=include_column_names,
+        # exclude_column_names=exclude_column_names,
+        # include_column_name_suffixes=include_column_name_suffixes,
+        # exclude_column_name_suffixes=exclude_column_name_suffixes,
+        # semantic_type_filter_module_name=semantic_type_filter_module_name,
+        # semantic_type_filter_class_name=semantic_type_filter_class_name,
+        # include_semantic_types=include_semantic_types,
+        # exclude_semantic_types=exclude_semantic_types,
+        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+        # cardinality_limit_mode=CardinalityLimitMode.REL_100,
+        # max_unique_values=max_unique_values,
+        # max_proportion_unique=max_proportion_unique,
+        # column_value_uniqueness_rule={
+        #     "success_ratio": 0.8,
+        # },
+        # column_value_nullity_rule={
+        # },
+        # column_value_nonnullity_rule={
+        # },
+        # numeric_columns_rule={
+        #     "false_positive_rate": 0.1,
+        #     "random_seed": 43792,
+        # },
+        # datetime_columns_rule={
+        #     "truncate_values": {
+        #         "lower_bound": 0,
+        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+        #     },
+        #     "round_decimals": 0,
+        # },
+        # text_columns_rule={
+        #     "strict_min": True,
+        #     "strict_max": True,
+        #     "success_ratio": 0.8,
+        # },
+        categorical_columns_rule={
+            "false_positive_rate": 0.1,
+            # "round_decimals": 3,
+        },
+    )
+    assert (
+        data_assistant_result.profiler_config.rules["categorical_columns_rule"][
+            "variables"
+        ]["false_positive_rate"]
+        == 1.0e-1
+    )
+
+
+def test_volume_data_assistant_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
     validator: Validator
@@ -2942,7 +2784,7 @@ def test_execution_time_within_proper_bounds_using_explicit_instantiation(
     assert data_assistant_result.execution_time > 0.0
 
 
-def test_execution_time_within_proper_bounds_using_implicit_invocation(
+def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
 ):
     data_assistant_result: DataAssistantResult = (
@@ -2953,7 +2795,7 @@ def test_execution_time_within_proper_bounds_using_implicit_invocation(
     assert data_assistant_result.execution_time > 0.0
 
 
-def test_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
+def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
     validator: Validator
@@ -3243,7 +3085,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "month",
                 "format": "",
                 "title": "Month",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -3251,7 +3093,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "name",
                 "format": "",
                 "title": "Name",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -3259,7 +3101,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "year",
                 "format": "",
                 "title": "Year",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -3309,3 +3151,62 @@ def test_volume_data_assistant_plot_return_tooltip(
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
     assert actual_tooltip == expected_tooltip
+
+
+def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    new_cell: str = "data_assistant_result.plot_metrics(sequential=False)"
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=False,
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=True,
+    )
+
+
+def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    new_cell: str = (
+        "data_assistant_result.plot_expectations_and_metrics(sequential=False)"
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=False,
+    )
+
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context,
+        new_cell=new_cell,
+        implicit=True,
+    )
+
+
+def test_volume_data_assistant_plot_non_sequential(
+    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    sequential: bool = False
+    plot_metrics_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics(
+        sequential=sequential
+    )
+
+    assert all([chart.mark == "bar" for chart in plot_metrics_result.charts])
+
+    plot_expectations_result: PlotResult = (
+        bobby_volume_data_assistant_result.plot_metrics(sequential=sequential)
+    )
+
+    assert all([chart.mark == "bar" for chart in plot_expectations_result.charts])

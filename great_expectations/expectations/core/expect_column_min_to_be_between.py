@@ -113,6 +113,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="min_range_estimator",
         metric_name="column.min",
+        metric_multi_batch_parameter_builder_name=None,
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,
@@ -127,7 +128,6 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         min_range_estimator_parameter_builder_config,

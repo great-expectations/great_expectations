@@ -85,6 +85,7 @@ def dialect_name_to_sql_statement():
             GESqlDialect.DREMIO: 'SELECT * FROM "TEST_SCHEMA_NAME"."TEST_TABLE" WHERE 1 = 1 LIMIT 10',
             GESqlDialect.TERADATASQL: "SELECT TOP 10 * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1",
             GESqlDialect.TRINO: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
+            GESqlDialect.HIVE: "SELECT * FROM `TEST_SCHEMA_NAME`.`TEST_TABLE` WHERE TRUE LIMIT 10",
         }
         return DIALECT_NAME_TO_SQL_STATEMENT[dialect_name]
 
@@ -94,7 +95,9 @@ def dialect_name_to_sql_statement():
 @pytest.mark.parametrize(
     "dialect_name",
     [
-        pytest.param(dialect_name, id=dialect_name.value)
+        pytest.param(
+            dialect_name, id=dialect_name.value, marks=pytest.mark.external_sqldialect
+        )
         for dialect_name in GESqlDialect.get_all_dialects()
     ],
 )
@@ -128,6 +131,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             GESqlDialect.DREMIO: "dremio://",
             GESqlDialect.TERADATASQL: "teradatasql://",
             GESqlDialect.TRINO: "trino://",
+            GESqlDialect.HIVE: "hive://",
         }
 
         @property

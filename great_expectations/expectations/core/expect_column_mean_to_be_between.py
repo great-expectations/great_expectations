@@ -111,6 +111,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="mean_range_estimator",
         metric_name="column.mean",
+        metric_multi_batch_parameter_builder_name=None,
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,
@@ -125,7 +126,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         mean_range_estimator_parameter_builder_config,
@@ -317,6 +317,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
             },
         }
 
+        template_str = ""
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "mean may have any numerical value."
         else:
@@ -375,6 +376,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
             ],
         )
 
+        template_str = ""
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "mean may have any numerical value."
         else:

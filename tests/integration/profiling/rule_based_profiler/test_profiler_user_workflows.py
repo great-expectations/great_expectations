@@ -18,6 +18,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.registry import get_expectation_impl
@@ -60,11 +61,12 @@ def alice_validator(alice_columnar_table_single_batch_context) -> Validator:
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 1
@@ -84,11 +86,12 @@ def bobby_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 3
@@ -113,11 +116,12 @@ def bobster_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 36
@@ -139,11 +143,12 @@ def quentin_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
 
     assert len(validator.batches) == 36
@@ -255,7 +260,7 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"].expectations
     )
 
-    assert mock_emit.call_count == 54
+    assert mock_emit.call_count == 43
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
@@ -478,6 +483,38 @@ def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_pro
     }
 
 
+@freeze_time(TIMESTAMP)
+def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    alice_validator: Validator,
+) -> None:
+    validator: Validator = alice_validator
+
+    result: ExpectationValidationResult = (
+        validator.expect_column_value_lengths_to_be_between(
+            column="user_agent",
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
+    )
+
+    assert result.success
+
+    expectation_config_kwargs: dict = result.expectation_config.kwargs
+    assert expectation_config_kwargs == {
+        "auto": True,
+        "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
+        "column": "user_agent",
+        "include_config": True,
+        "max_value": 115,  # Chetan - 20220516 - Note that all values in the dataset are of equal length
+        "min_value": 115,  # TODO - we should add an additional test upon using an updated dataset (confirmed behavior through UAT)
+        "mostly": 1.0,
+        "result_format": "SUMMARY",
+        "strict_max": False,
+        "strict_min": False,
+    }
+
+
 # noinspection PyUnusedLocal
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     monkeypatch,
@@ -658,9 +695,10 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         "expected_parameter_values_for_fully_qualified_parameter_names_by_domain"
     ]
 
-    assert (
-        profiled_parameter_values_for_fully_qualified_parameter_names_by_domain
-        == fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain
+    assert convert_to_json_serializable(
+        data=profiled_parameter_values_for_fully_qualified_parameter_names_by_domain
+    ) == convert_to_json_serializable(
+        data=fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain
     )
 
     domain = Domain(
@@ -690,9 +728,10 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         domain
     ]
 
-    assert (
-        profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
-        == fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
+    assert convert_to_json_serializable(
+        data=profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
+    ) == convert_to_json_serializable(
+        data=fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
     )
 
     assert mock_emit.call_count == 99
@@ -1074,11 +1113,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
     assert len(validator.batches) == 1
 
@@ -1319,11 +1359,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
+        persist=False,
     )
     assert len(validator.batches) == 1
 
@@ -1560,6 +1601,63 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
         )
     )
     assert result.expectation_config.kwargs["auto"]
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_validator: Validator,
+):
+    validator: Validator = quentin_validator
+
+    # Use all batches, loaded by Validator, for estimating Expectation argument values.
+    result: ExpectationValidationResult = validator.expect_table_columns_to_match_set(
+        result_format="SUMMARY",
+        include_config=True,
+        auto=True,
+    )
+    assert result.success
+
+    value: Any
+    expectation_config_kwargs: dict = {
+        key: value
+        for key, value in result.expectation_config["kwargs"].items()
+        if key != "column_set"
+    }
+    assert expectation_config_kwargs == {
+        "exact_match": None,
+        "result_format": "SUMMARY",
+        "include_config": True,
+        "auto": True,
+        "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+    }
+
+    column_set_expected: List[str] = [
+        "total_amount",
+        "tip_amount",
+        "payment_type",
+        "pickup_datetime",
+        "trip_distance",
+        "dropoff_location_id",
+        "improvement_surcharge",
+        "vendor_id",
+        "tolls_amount",
+        "congestion_surcharge",
+        "rate_code_id",
+        "pickup_location_id",
+        "extra",
+        "fare_amount",
+        "mta_tax",
+        "dropoff_datetime",
+        "store_and_fwd_flag",
+        "passenger_count",
+    ]
+    column_set_computed: List[str] = result.expectation_config["kwargs"]["column_set"]
+
+    assert len(column_set_computed) == len(column_set_expected)
+    assert set(column_set_computed) == set(column_set_expected)
 
 
 @pytest.mark.skipif(
