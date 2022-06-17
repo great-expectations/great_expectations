@@ -1496,7 +1496,6 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            "expect_column_stdev_to_be_between",
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
