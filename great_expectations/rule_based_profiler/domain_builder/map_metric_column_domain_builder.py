@@ -310,15 +310,14 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             for column_name, resolved_metrics in resolved_metrics_by_column_name.items()
         }
 
+        metric_value_ratios: List[float]
         metric_value_ratio: float
         intra_batch_adherence_by_column_name: Dict[str, List[bool]] = {
             column_name: [
                 metric_value_ratio <= max_unexpected_ratio
-                for metric_value_ratio in intra_batch_unexpected_ratios_by_column_name[
-                    column_name
-                ]
+                for metric_value_ratio in metric_value_ratios
             ]
-            for column_name in intra_batch_unexpected_ratios_by_column_name.keys()
+            for column_name, metric_value_ratios in intra_batch_unexpected_ratios_by_column_name.items()
         }
 
         inter_batch_adherence_by_column_name: Dict[str, float] = {

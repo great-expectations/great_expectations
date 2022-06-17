@@ -18,6 +18,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.registry import get_expectation_impl
@@ -60,8 +61,8 @@ def alice_validator(alice_columnar_table_single_batch_context) -> Validator:
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
@@ -85,8 +86,8 @@ def bobby_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
@@ -115,8 +116,8 @@ def bobster_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
@@ -142,8 +143,8 @@ def quentin_validator(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
@@ -259,7 +260,7 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"].expectations
     )
 
-    assert mock_emit.call_count == 54
+    assert mock_emit.call_count == 43
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
@@ -694,9 +695,10 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         "expected_parameter_values_for_fully_qualified_parameter_names_by_domain"
     ]
 
-    assert (
-        profiled_parameter_values_for_fully_qualified_parameter_names_by_domain
-        == fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain
+    assert convert_to_json_serializable(
+        data=profiled_parameter_values_for_fully_qualified_parameter_names_by_domain
+    ) == convert_to_json_serializable(
+        data=fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain
     )
 
     domain = Domain(
@@ -726,9 +728,10 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         domain
     ]
 
-    assert (
-        profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
-        == fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
+    assert convert_to_json_serializable(
+        data=profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
+    ) == convert_to_json_serializable(
+        data=fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
     )
 
     assert mock_emit.call_count == 99
@@ -1110,8 +1113,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",
@@ -1356,8 +1359,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="profiler",

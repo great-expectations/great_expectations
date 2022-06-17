@@ -1575,7 +1575,6 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
-                            "json_serialize": True,
                             "reduce_scalar_metric": True,
                             "metric_name": "table.row_count",
                         },
@@ -1592,16 +1591,30 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "enforce_numeric_metric": True,
                                     "n_resamples": "$variables.n_resamples",
                                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                    "json_serialize": True,
                                     "estimator": "$variables.estimator",
                                     "reduce_scalar_metric": True,
                                     "metric_name": "table.row_count",
+                                    "metric_multi_batch_parameter_builder_name": "table_row_count",
                                     "metric_domain_kwargs": "$domain.domain_kwargs",
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "random_seed": "$variables.random_seed",
                                     "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
                                     "round_decimals": "$variables.round_decimals",
+                                    "evaluation_parameter_builder_configs": [
+                                        {
+                                            "enforce_numeric_metric": True,
+                                            "replace_nan_with_zero": True,
+                                            "name": "table_row_count",
+                                            "class_name": "MetricMultiBatchParameterBuilder",
+                                            "evaluation_parameter_builder_configs": None,
+                                            "metric_value_kwargs": None,
+                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                                            "metric_domain_kwargs": None,
+                                            "reduce_scalar_metric": True,
+                                            "metric_name": "table.row_count",
+                                        }
+                                    ],
                                 },
                             ],
                             "expectation_type": "expect_table_row_count_to_be_between",
@@ -1655,7 +1668,6 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
-                            "json_serialize": True,
                             "reduce_scalar_metric": True,
                             "metric_name": "column.distinct_values.count",
                         },
@@ -1677,8 +1689,8 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                 {
                                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                                     "metric_domain_kwargs": "$domain.domain_kwargs",
+                                    "metric_multi_batch_parameter_builder_name": "column_distinct_values_count",
                                     "estimator": "$variables.estimator",
-                                    "json_serialize": True,
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "name": "column_distinct_values_count_range",
                                     "round_decimals": "$variables.round_decimals",
@@ -1691,6 +1703,20 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                                     "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
                                     "truncate_values": "$variables.truncate_values",
+                                    "evaluation_parameter_builder_configs": [
+                                        {
+                                            "enforce_numeric_metric": True,
+                                            "replace_nan_with_zero": True,
+                                            "name": "column_distinct_values_count",
+                                            "class_name": "MetricMultiBatchParameterBuilder",
+                                            "evaluation_parameter_builder_configs": None,
+                                            "metric_value_kwargs": None,
+                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                                            "reduce_scalar_metric": True,
+                                            "metric_name": "column.distinct_values.count",
+                                        }
+                                    ],
                                 },
                             ],
                         },
@@ -2128,8 +2154,8 @@ def quentin_explicit_instantiation_result_actual_time(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
@@ -2164,8 +2190,8 @@ def quentin_explicit_instantiation_result_frozen_time(
     }
 
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
@@ -2280,8 +2306,8 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 
     explicit_instantiation_code: str = """
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="volume_data_assistant",
@@ -2384,9 +2410,11 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
         is not None
         for parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.values()
         for parameter_node in parameter_values_for_fully_qualified_parameter_names.values()
-        for batch_id in parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-        ].keys()
+        for batch_id in (
+            parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY]
+            if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
+            else {}
+        ).keys()
     )
 
 
@@ -3057,7 +3085,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "month",
                 "format": "",
                 "title": "Month",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -3065,7 +3093,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "name",
                 "format": "",
                 "title": "Name",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -3073,7 +3101,7 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "field": "year",
                 "format": "",
                 "title": "Year",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(

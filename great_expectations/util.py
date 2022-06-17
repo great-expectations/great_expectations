@@ -84,6 +84,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "expectation_validation_result": "expectation_validation_results",
     "contract": "contracts",
     "rendered_data_doc": "rendered_data_docs",
+    "data_context_variable": "data_context_variables",
 }
 
 PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
@@ -97,13 +98,14 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "expectation_validation_results": "expectation_validation_result",
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
+    "data_context_variables": "data_context_variable",
 }
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
-def pluralize(singular_ge_noun):
+def pluralize(singular_ge_noun: str) -> str:
     """
     Pluralizes a Great Expectations singular noun
     """
@@ -116,7 +118,7 @@ def pluralize(singular_ge_noun):
         )
 
 
-def singularize(plural_ge_noun):
+def singularize(plural_ge_noun: str) -> str:
     """
     Singularizes a Great Expectations plural noun
     """
@@ -129,7 +131,7 @@ def singularize(plural_ge_noun):
         )
 
 
-def camel_to_snake(name):
+def camel_to_snake(name: str) -> str:
     name = p1.sub(r"\1_\2", name)
     return p2.sub(r"\1_\2", name).lower()
 
@@ -1476,6 +1478,14 @@ def get_pyathena_potential_type(type_module, type_):
         # < 2.5 column type mapping
         potential_type = type_module._TYPE_MAPPINGS.get(type_)
 
+    return potential_type
+
+
+def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
+    """
+    Leverage on Trino Package to return sqlalchemy sql type
+    """
+    potential_type = type_module.parse_sqltype(type_)
     return potential_type
 
 
