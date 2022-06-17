@@ -50,10 +50,8 @@ class AbstractDataContext(ABC):
         """
         validation_errors: dict = {}
         config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
-        usage_stats_opted_out: bool = self._check_global_usage_statistics_opt_out()
-        # if usage_stats_opted_out then usage_statistics is false
-        # TODO: Refactor so that this becomes usage_stats_enabled (and we don't have to flip the boolean in our minds)
-        if usage_stats_opted_out:
+        usage_stats_enabled: bool = self._get_global_usage_statistics_override()
+        if not usage_stats_enabled:
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
@@ -137,19 +135,20 @@ class AbstractDataContext(ABC):
                     return config_value
         return None
 
-    def _check_global_usage_statistics_opt_out(self) -> bool:
+    @staticmethod
+    def _get_global_usage_statistics_override() -> bool:
         """
-        Method to retrieve config value.
-        This method can be overridden in child classes (like FileDataContext) when we need to look for
-        config values in other locations like config files.
-
+        Checks environment variable to see if GE_USAGE_STATS exists as an environment variable
+        If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
+        Return True otherwise.
+        Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for anonymous_usage_statistics
         Returns:
-            bool that tells you whether usage_statistics is opted out
+            bool that tells you whether usage_statistics is on or off
         """
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
-                return True
+                return False
             else:
                 logger.warning(
                     "GE_USAGE_STATS environment variable must be one of: {}".format(
@@ -166,12 +165,13 @@ class AbstractDataContext(ABC):
             config.BOOLEAN_STATES = states
             config.read(config_path)
             try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
+                if config.getboolean("anonymous_usage_statistics", "enabled"):
                     return True
+                else:
+                    return False
             except (ValueError, configparser.Error):
                 pass
-        return False
+        return True
 
     def _get_data_context_id_override(self) -> Optional[str]:
         """
