@@ -2005,6 +2005,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def _instantiate_datasource_from_config_and_update_project_config(
         self, name: str, config: dict, initialize: bool = True
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+        substitutions: dict = self._determine_substitutions()
+        config = substitute_all_config_variables(
+            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        )
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
