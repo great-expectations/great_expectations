@@ -93,7 +93,7 @@ The Validation Results would show up in Validation tab on Dataset page in DataHu
 ## Further discussion
 
 ### Things to consider
-Currently this integration only supports v3 API datasources using SqlAlchemyExecutionEngine.
+Currently this integration only supports v3 API Datasources using `SqlAlchemyExecutionEngine`.
 
 This integration does not support
 
