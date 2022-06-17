@@ -111,7 +111,7 @@ class BaseYamlConfig(SerializableDictDot):
     def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
         commented_map: CommentedMap = copy.deepcopy(self._commented_map)
         schema_validated_map: dict = self._get_schema_instance().dump(self)
-        commented_map.update(schema_validated_commented_map)
+        commented_map.update(schema_validated_map)
         return commented_map
 
     def to_yaml(self, outfile: str) -> None:

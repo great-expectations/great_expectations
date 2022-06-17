@@ -70,12 +70,8 @@ class InlineStoreBackend(StoreBackend):
 
         if config_var_name:
             project_config[config_var_type][config_var_name] = value
-            if project_config._commented_map.get(config_var_type) is None:
-                project_config._commented_map[config_var_type] = {}
-            project_config._commented_map[config_var_type][config_var_name] = value
         else:
             project_config[config_var_type] = value
-            project_config._commented_map[config_var_type] = value
 
         self._data_context._save_project_config()
 

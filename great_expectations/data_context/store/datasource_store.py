@@ -69,7 +69,7 @@ class DatasourceStore(Store):
 
     def serialize(
         self, key: Optional[Any], value: DatasourceConfig
-    ) -> Union[str, dict]:
+    ) -> Union[str, DatasourceConfig]:
         """
         See parent 'Store.serialize()' for more information
         """
@@ -77,7 +77,7 @@ class DatasourceStore(Store):
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._schema.dump(value)
-        return self._schema.dumps(value, indent=2, sort_keys=True)
+        return value
 
     def deserialize(
         self, key: Optional[Any], value: Union[dict, DatasourceConfig]
