@@ -9,15 +9,17 @@ import pytest
 from great_expectations.core.usage_statistics.usage_statistics import (
     run_validation_operator_usage_statistics,
 )
-from great_expectations.data_context import BaseDataContext, DataContext
+from great_expectations.data_context import (
+    BaseDataContext,
+    DataContext,
+    EphemeralDataContext,
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
-
-# keep this with the BaseDataContext
-# new tests.. with File and only with Ephemeral
 
 
 @pytest.fixture
@@ -59,6 +61,7 @@ def in_memory_data_context_config_usage_stats_enabled():
     )
 
 
+@pytest.mark.base_data_context
 def test_consistent_name_anonymization(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
@@ -79,7 +82,22 @@ def test_consistent_name_anonymization(
     assert payload["anonymized_operator_name"] == "e079c942d946b823312054118b3b6ef4"
 
 
-def test_opt_out_environment_variable(
+def test_opt_out_environment_variable_ephemeral_data_context(
+    in_memory_data_context_config_usage_stats_enabled, monkeypatch
+):
+    """Set the env variable GE_USAGE_STATS value to any of the following: FALSE, False, false, 0"""
+    monkeypatch.setenv("GE_USAGE_STATS", "False")
+    assert (
+        in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled
+        is True
+    )
+    context = EphemeralDataContext(in_memory_data_context_config_usage_stats_enabled)
+    project_config = context._project_config
+    assert project_config.anonymous_usage_statistics.enabled is False
+
+
+@pytest.mark.base_data_context
+def test_opt_out_environment_variable_base_data_context(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
     """Set the env variable GE_USAGE_STATS value to any of the following: FALSE, False, false, 0"""
@@ -93,6 +111,7 @@ def test_opt_out_environment_variable(
     assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.base_data_context
 def test_opt_out_etc(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
@@ -133,8 +152,7 @@ def test_opt_out_etc(
             assert project_config.anonymous_usage_statistics.enabled is False
 
 
-# add mark for pytest.mark(base_data_context?)
-#
+@pytest.mark.base_data_context
 def test_opt_out_home_folder(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
@@ -203,6 +221,7 @@ def test_opt_out_yml(tmp_path_factory, monkeypatch):
 
 
 # Test precedence: environment variable > home folder > /etc > yml
+@pytest.mark.base_data_context
 def test_opt_out_env_var_overrides_home_folder(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
@@ -242,6 +261,7 @@ def test_opt_out_env_var_overrides_home_folder(
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.base_data_context
 def test_opt_out_env_var_overrides_etc(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
@@ -339,6 +359,7 @@ def test_opt_out_env_var_overrides_yml_v013(tmp_path_factory, monkeypatch):
     assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.base_data_context
 def test_opt_out_home_folder_overrides_etc(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
