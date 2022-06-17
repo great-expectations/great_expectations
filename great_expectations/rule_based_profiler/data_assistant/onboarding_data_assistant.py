@@ -195,9 +195,9 @@ class OnboardingDataAssistant(DataAssistant):
             evaluation_parameter_builder_configs=None,
         )
 
-        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
-
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -825,6 +825,8 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_min_length_range_parameter_builder_for_validations.to_json_dict(),
@@ -981,9 +983,9 @@ class OnboardingDataAssistant(DataAssistant):
             metric_value_kwargs=None,
         )
 
-        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
-
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
