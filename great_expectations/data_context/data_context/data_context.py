@@ -448,7 +448,6 @@ class DataContext(BaseDataContext):
 
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
         with open(config_filepath, "w") as outfile:
-            # Everything looks good up until this point!
             self.config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):

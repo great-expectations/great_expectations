@@ -1969,7 +1969,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     )
     def add_datasource(
         self, name: str, initialize: bool = True, **kwargs: dict
-    ) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name: the name for the new datasource to add
@@ -1995,7 +1995,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             config = kwargs
 
-        datasource = self._instantiate_datasource_from_config_and_update_project_config(
+        datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = self._instantiate_datasource_from_config_and_update_project_config(
             name=name,
             config=config,
             initialize=initialize,
