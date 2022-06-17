@@ -1,4 +1,3 @@
-import configparser
 import copy
 import datetime
 import errno
@@ -374,21 +373,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._data_context = EphemeralDataContext(
                 project_config=project_config, runtime_environment=runtime_environment
             )
-        # <WILL> why does this check exist?
-        # Currently there are tests where BaseDataContext is instantiated in-memory (ie EphemeralDataContext)
-        # but also checks for overrides from config files. The following block of code preserves that behavior.
-        if isinstance(self._data_context, EphemeralDataContext):
-            usage_stats_opted_out: bool = (
-                self._check_global_usage_statistics_env_var_and_file_opt_out()
-            )
-            if usage_stats_opted_out:
-                self._data_context._project_config.anonymous_usage_statistics.enabled = (
-                    False
-                )
-            else:
-                self._data_context._project_config.anonymous_usage_statistics.enabled = (
-                    True
-                )
 
         # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
         self._project_config = self._data_context._project_config
@@ -453,42 +437,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
-
-    @staticmethod
-    def _check_global_usage_statistics_env_var_and_file_opt_out() -> bool:
-        """
-        Currently there are tests where BaseDataContext is instantiated in-memory (ie EphemeralDataContext)
-        but also checks for overrides from config files. The following block of code preserves that behavior.
-
-        Returns:
-            bool that represents whether usage_statistics have been opted out (set to False)
-        """
-        if os.environ.get("GE_USAGE_STATS", False):
-            ge_usage_stats = os.environ.get("GE_USAGE_STATS")
-            if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
-                return True
-            else:
-                logger.warning(
-                    "GE_USAGE_STATS environment variable must be one of: {}".format(
-                        BaseDataContext.FALSEY_STRINGS
-                    )
-                )
-        for config_path in BaseDataContext.GLOBAL_CONFIG_PATHS:
-            config = configparser.ConfigParser()
-            states = config.BOOLEAN_STATES
-            for falsey_string in BaseDataContext.FALSEY_STRINGS:
-                states[falsey_string] = False
-            states["TRUE"] = True
-            states["True"] = True
-            config.BOOLEAN_STATES = states
-            config.read(config_path)
-            try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
-                    return True
-            except (ValueError, configparser.Error):
-                pass
-        return False
 
     def _apply_global_config_overrides(
         self, config: DataContextConfig

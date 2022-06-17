@@ -1,3 +1,4 @@
+import configparser
 import copy
 import json
 import logging
@@ -102,39 +103,39 @@ class AbstractDataContext(ABC):
 
         return config_with_global_config_overrides
 
-    @classmethod
-    def _get_global_config_value(cls, environment_variable: str) -> Optional[str]:
+    @staticmethod
+    def _get_global_config_value(
+        environment_variable: str,
+        conf_file_section: Optional[str] = None,
+        conf_file_option: Optional[str] = None,
+    ) -> Optional[str]:
         """
         Method to retrieve config value.
-        This method can be overridden in child classes (like FileDataContext) when we need to look for
-        config values in other locations like config files.
+        Looks for config value in environment_variable and config file section
 
         Args:
             environment_variable (str): name of environment_variable to retrieve
+            conf_file_section (str): section of config
+            conf_file_option (str): key in section
 
         Returns:
-            alue of global_config_value
+            Optional string representing config value
         """
-        return cls._get_config_value_from_env_var(
-            environment_variable=environment_variable
-        )
-
-    @classmethod
-    def _get_config_value_from_env_var(
-        cls,
-        environment_variable: Optional[str] = None,
-    ) -> Optional[str]:
-        """
-        Method to retrieve config value from environment variable.
-        Args:
-            environment_variable (str): name of environment variable to retrieve
-        Returns:
-            value of environment_variable which can also be None
-        """
+        assert (conf_file_section and conf_file_option) or (
+            not conf_file_section and not conf_file_option
+        ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
         if environment_variable and os.environ.get(environment_variable, False):
             return os.environ.get(environment_variable)
-        else:
-            return None
+        if conf_file_section and conf_file_option:
+            for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
+                config = configparser.ConfigParser()
+                config.read(config_path)
+                config_value = config.get(
+                    conf_file_section, conf_file_option, fallback=None
+                )
+                if config_value:
+                    return config_value
+        return None
 
     def _check_global_usage_statistics_opt_out(self) -> bool:
         """
@@ -144,21 +145,6 @@ class AbstractDataContext(ABC):
 
         Returns:
             bool that tells you whether usage_statistics is opted out
-        """
-        return self._check_global_usage_statistics_env_var_opt_out()
-
-    @staticmethod
-    def _check_global_usage_statistics_env_var_opt_out() -> bool:
-        """
-        Checks environment variable to see if GE_USAGE_STATS exists as an environment variable
-        If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics overridden (return True)
-        Return False otherwise.
-
-        This method can be overridden in child classes (like FileDataContext) when we need to look for
-        config values in other locations like config files.
-
-        Returns:
-            bool that tells you whether usage_statistics is overridden
         """
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
@@ -170,6 +156,21 @@ class AbstractDataContext(ABC):
                         AbstractDataContext.FALSEY_STRINGS
                     )
                 )
+        for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
+            config = configparser.ConfigParser()
+            states = config.BOOLEAN_STATES
+            for falsey_string in AbstractDataContext.FALSEY_STRINGS:
+                states[falsey_string] = False
+            states["TRUE"] = True
+            states["True"] = True
+            config.BOOLEAN_STATES = states
+            config.read(config_path)
+            try:
+                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
+                    # If stats are disabled, then opt out is true
+                    return True
+            except (ValueError, configparser.Error):
+                pass
         return False
 
     def _get_data_context_id_override(self) -> Optional[str]:
@@ -179,16 +180,11 @@ class AbstractDataContext(ABC):
         Returns:
             Optional string that represents data_context_id
         """
-        return self._get_data_context_id_override_from_env_var()
-
-    def _get_data_context_id_override_from_env_var(self) -> Optional[str]:
-        """
-        Checks environment variable to see if GE_DATA_CONTEXT_ID exists as an environment variable
-
-        Returns:
-            Optional string that represents data_context_id
-        """
-        return self._get_global_config_value(environment_variable="GE_DATA_CONTEXT_ID")
+        return self._get_global_config_value(
+            environment_variable="GE_DATA_CONTEXT_ID",
+            conf_file_section="anonymous_usage_statistics",
+            conf_file_option="data_context_id",
+        )
 
     def _get_usage_stats_url_override(self) -> Optional[str]:
         """
@@ -197,15 +193,8 @@ class AbstractDataContext(ABC):
         Returns:
             Optional string that represents GE_USAGE_STATISTICS_URL
         """
-        return self._get_config_value_from_env_var()
-
-    def _get_usage_stats_url_override_from_env_var(self) -> Optional[str]:
-        """
-        Checks environment variable to see if GE_USAGE_STATISTICS_URL exists as an environment variable
-
-        Returns:
-            Optional string that represents GE_USAGE_STATISTICS_URL
-        """
         return self._get_global_config_value(
-            environment_variable="GE_USAGE_STATISTICS_URL"
+            environment_variable="GE_USAGE_STATISTICS_URL",
+            conf_file_section="anonymous_usage_statistics",
+            conf_file_option="usage_statistics_url",
         )

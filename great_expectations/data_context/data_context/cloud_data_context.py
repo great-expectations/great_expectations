@@ -1,6 +1,4 @@
-import configparser
 import logging
-import os
 from typing import Mapping, Optional, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -46,37 +44,3 @@ class CloudDataContext(AbstractDataContext):
 
     def _init_variables(self) -> CloudDataContextVariables:
         raise NotImplementedError
-
-    @classmethod
-    def _get_global_config_value(
-        cls,
-        environment_variable: str,
-        conf_file_section: Optional[str] = None,
-        conf_file_option: Optional[str] = None,
-    ) -> Optional[str]:
-        """
-        Overrides _get_global_config_value() method in AbstractDataContext to allow for conf_file_section
-        and conf_file_option. Currently this is called by DataContext
-
-        Args:
-            environment_variable (str): name of environment_variable to retrieve
-            conf_file_section (str): section of config
-            conf_file_option (str): key in section
-        Returns:
-            Optional string representing config value
-        """
-        assert (conf_file_section and conf_file_option) or (
-            not conf_file_section and not conf_file_option
-        ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
-        if environment_variable and os.environ.get(environment_variable, False):
-            return os.environ.get(environment_variable)
-        if conf_file_section and conf_file_option:
-            for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
-                config = configparser.ConfigParser()
-                config.read(config_path)
-                config_value = config.get(
-                    conf_file_section, conf_file_option, fallback=None
-                )
-                if config_value:
-                    return config_value
-        return None
