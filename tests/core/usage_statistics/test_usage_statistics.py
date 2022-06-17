@@ -82,20 +82,6 @@ def test_consistent_name_anonymization(
     assert payload["anonymized_operator_name"] == "e079c942d946b823312054118b3b6ef4"
 
 
-def test_opt_out_environment_variable_ephemeral_data_context(
-    in_memory_data_context_config_usage_stats_enabled, monkeypatch
-):
-    """Set the env variable GE_USAGE_STATS value to any of the following: FALSE, False, false, 0"""
-    monkeypatch.setenv("GE_USAGE_STATS", "False")
-    assert (
-        in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.enabled
-        is True
-    )
-    context = EphemeralDataContext(in_memory_data_context_config_usage_stats_enabled)
-    project_config = context._project_config
-    assert project_config.anonymous_usage_statistics.enabled is False
-
-
 @pytest.mark.base_data_context
 def test_opt_out_environment_variable_base_data_context(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch

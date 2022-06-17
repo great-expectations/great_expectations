@@ -992,7 +992,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 if substitutions.get(config_variable) is None:
                     logger.info(
                         f'Config variable "{config_variable}" was not found in environment or global config ('
-                        f'{super().GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
+                        f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
                         f"like to "
                         f"use a different value, please specify it in an environment variable or in a "
                         f"great_expectations.conf file located at one of the above paths, in a section named "
