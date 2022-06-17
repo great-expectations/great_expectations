@@ -25,9 +25,9 @@ There is a custom Action named `DataHubValidationAction` which allows you to vie
 
 `DataHubValidationAction` pushes Expectations metadata to DataHub. This includes
 
-- **Expectation Details**: Details of assertions (i.e. expectation) set on a Dataset (Table). Expectation set on a dataset in GE aligns with `AssertionInfo` aspect in DataHub. AssertionInfo captures the dataset and dataset fields on which assertion is applied, along with its scope, type and parameters. 
+- **Expectation Details**: Details of assertions (i.e. Expectation) set on a Dataset (Table). Expectation set on a dataset in GE aligns with `AssertionInfo` aspect in DataHub. `AssertionInfo` captures the dataset and dataset fields on which assertion is applied, along with its scope, type and parameters. 
 - **Expectation Results**: Evaluation results for an assertion tracked over time. 
-Validation Result for an expectation in GE align with `AssertionRunEvent` aspect in DataHub. AssertionRunEvent captures the time at which validation was run, batch(subset) of dataset on which it was run, the success status along with other result fields.
+Validation Result for an Expectation in GE align with `AssertionRunEvent` aspect in DataHub. `AssertionRunEvent` captures the time at which Validation was run, Batch(subset) of dataset on which it was run, the success status along with other result fields.
 
 
 ### Dev loops unlocked by integration
