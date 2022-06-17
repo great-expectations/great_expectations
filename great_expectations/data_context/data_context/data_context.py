@@ -437,7 +437,7 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def _save_project_config(self):
+    def _save_project_config(self) -> None:
         """Save the current project to disk."""
         if self.ge_cloud_mode:
             logger.debug(
