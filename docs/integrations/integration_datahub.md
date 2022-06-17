@@ -31,8 +31,8 @@ Validation Result for an Expectation in GE align with `AssertionRunEvent` aspect
 
 
 ### Dev loops unlocked by integration
-* View dataset and column level expectations set on a dataset
-* View time-series history of expectation's outcome (pass/fail)
+* View dataset and column level Expectations set on a dataset
+* View time-series history of Expectation's outcome (pass/fail)
 * View current health status of dataset
 
 ### Setup
