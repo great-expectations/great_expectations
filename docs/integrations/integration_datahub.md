@@ -16,7 +16,7 @@ This integration allows you to push the results of running Expectations into Dat
 
 
 ### Technical background
-There is a custom action named `DataHubValidationAction` which allows you to view expectation results inside of DataHub.
+There is a custom Action named `DataHubValidationAction` which allows you to view Expectation Results inside of DataHub.
 
 :::note Prerequisites
  - Create a [Great Expectations Checkpoint](https://docs.greatexpectations.io/docs/terms/checkpoint)
