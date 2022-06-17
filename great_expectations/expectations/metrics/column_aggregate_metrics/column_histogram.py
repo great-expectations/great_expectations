@@ -95,15 +95,19 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             )
             idx += 1
 
+        negative_boundary: float
+        positive_boundary: float
         for idx in range(idx, len(bins) - 2):
+            negative_boundary = float(bins[idx])
+            positive_boundary = float(bins[idx + 1])
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
                         [
                             (
                                 sa.and_(
-                                    bins[idx] <= sa.column(column),
-                                    sa.column(column) < bins[idx + 1],
+                                    negative_boundary <= sa.column(column),
+                                    sa.column(column) < positive_boundary,
                                 ),
                                 1,
                             )
@@ -124,20 +128,23 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                 schema="api_cast", negative=False
             )
         ):
+            negative_boundary = float(bins[-2])
             case_conditions.append(
                 sa.func.sum(
-                    sa.case([(bins[-2] <= sa.column(column), 1)], else_=0)
+                    sa.case([(negative_boundary <= sa.column(column), 1)], else_=0)
                 ).label(f"bin_{str(len(bins) - 1)}")
             )
         else:
+            negative_boundary = float(bins[-2])
+            positive_boundary = float(bins[-1])
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
                         [
                             (
                                 sa.and_(
-                                    bins[-2] <= sa.column(column),
-                                    sa.column(column) <= bins[-1],
+                                    negative_boundary <= sa.column(column),
+                                    sa.column(column) <= positive_boundary,
                                 ),
                                 1,
                             )
