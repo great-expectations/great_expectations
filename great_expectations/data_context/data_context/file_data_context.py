@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class FileDataContext(AbstractDataContext):
     """
-    Extends AbstractDataContext, contains only functionality necessary to hydrate state from disk.
+    Extends AbstractDataContext, contains functionality necessary to hydrate state from disk.
 
     TODO: Most of the functionality in DataContext will be refactored into this class, and the current DataContext
     class will exist only for backwards-compatibility reasons.
@@ -28,6 +28,15 @@ class FileDataContext(AbstractDataContext):
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
+        """FileDataContext constructor
+
+        Args:
+            project_config (DataContextConfig):  Config for current DataContext
+            context_root_dir (Optional[str]): location to look for the ``great_expectations.yml`` file. If None,
+                searches for the file based on conventions for project subdirectories.
+            runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
+                config_variables.yml and the environment
+        """
         self.runtime_environment = runtime_environment or {}
         self._context_root_dir = context_root_dir
         self._project_config = self._apply_global_config_overrides(
@@ -37,15 +46,35 @@ class FileDataContext(AbstractDataContext):
     def _init_variables(self) -> FileDataContextVariables:
         raise NotImplementedError
 
-    def _check_global_usage_statistics_opt_out(self) -> bool:
-        return self._check_global_usage_statistics_env_var_and_file_opt_out()
+    def _get_global_usage_statistics_override(self) -> bool:
+        """
+        Method to retrieve usage_statistics_enabled config value.
+
+        calls _check_global_usage_statistics_env_var_and_file, which will look for override in
+        environment variable and config file
+
+        Returns:
+            bool that tells you whether usage_statistics is on or off
+        """
+        return self._check_global_usage_statistics_env_var_and_file()
 
     @staticmethod
-    def _check_global_usage_statistics_env_var_and_file_opt_out() -> bool:
+    def _check_global_usage_statistics_env_var_and_file() -> bool:
+        """
+        Checks environment variable to see if GE_USAGE_STATS exists as an environment variable
+
+        If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
+        Return True otherwise.
+
+        Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for anonymous_usage_statistics
+
+        Returns:
+            bool that tells you whether usage_statistics is on or off
+        """
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
-                return True
+                return False
             else:
                 logger.warning(
                     "GE_USAGE_STATS environment variable must be one of: {}".format(
@@ -62,12 +91,13 @@ class FileDataContext(AbstractDataContext):
             config.BOOLEAN_STATES = states
             config.read(config_path)
             try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
+                if config.getboolean("anonymous_usage_statistics", "enabled"):
                     return True
+                else:
+                    return False
             except (ValueError, configparser.Error):
                 pass
-        return False
+        return True
 
     @classmethod
     def _get_global_config_value(
@@ -76,6 +106,18 @@ class FileDataContext(AbstractDataContext):
         conf_file_section: Optional[str] = None,
         conf_file_option: Optional[str] = None,
     ) -> Optional[str]:
+        """
+        Method to retrieve config value.
+
+        Looks for config value in environment_variable and config file section
+        Args:
+            environment_variable (str): name of environment_variable to retrieve
+            conf_file_section (str): section of config
+            conf_file_option (str): key in section
+
+        Returns:
+            Optional string representing config value
+        """
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
         ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
@@ -93,9 +135,22 @@ class FileDataContext(AbstractDataContext):
         return None
 
     def _get_data_context_id_override(self) -> Optional[str]:
+        """
+        Checks environment variable and conf to see if GE_DATA_CONTEXT_ID exists as an environment variable
+
+        Returns:
+            Optional string that represents data_context_id for usage_statistics
+        """
         return self._get_data_context_id_override_from_env_var_and_file()
 
     def _get_data_context_id_override_from_env_var_and_file(self) -> Optional[str]:
+        """
+        Checks environment variable to see if GE_DATA_CONTEXT_ID exists as an environment variable
+            or section in conf file
+
+        Returns:
+            Optional string that represents data_context_id
+        """
         return self._get_global_config_value(
             environment_variable="GE_DATA_CONTEXT_ID",
             conf_file_section="anonymous_usage_statistics",
@@ -103,74 +158,23 @@ class FileDataContext(AbstractDataContext):
         )
 
     def _get_usage_stats_url_override(self) -> Optional[str]:
+        """
+        Return GE_USAGE_STATISTICS_URL if it exists in env variable or conf file
+
+        Returns:
+            Optional string that represents GE_USAGE_STATISTICS_URL
+        """
         return self._get_config_value_from_env_var_and_file()
 
     def _get_config_value_from_env_var_and_file(self) -> Optional[str]:
+        """
+        Checks environment variable + config file to see if GE_USAGE_STATISTICS_URL exists
+
+        Returns:
+           Optional string that represents GE_USAGE_STATISTICS_URL
+        """
         return self._get_global_config_value(
             environment_variable="GE_USAGE_STATISTICS_URL",
             conf_file_section="anonymous_usage_statistics",
             conf_file_option="usage_statistics_url",
         )
-
-        # def _apply_global_config_overrides(
-
-    #     self, config: DataContextConfig
-    # ) -> DataContextConfig:
-    #     # check for global usage_statistics opt out
-    #     validation_errors: dict = {}
-    #     config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
-    #
-    #     if self._check_global_usage_statistics_opt_out():
-    #         logger.info(
-    #             "Usage statistics is disabled globally. Applying override to project_config."
-    #         )
-    #         config_with_global_config_overrides.anonymous_usage_statistics.enabled = (
-    #             False
-    #         )
-    #
-    #     # check for global data_context_id
-    #     global_data_context_id = self._get_global_config_value(
-    #         environment_variable="GE_DATA_CONTEXT_ID",
-    #         conf_file_section="anonymous_usage_statistics",
-    #         conf_file_option="data_context_id",
-    #     )
-    #     if global_data_context_id:
-    #         data_context_id_errors = anonymizedUsageStatisticsSchema.validate(
-    #             {"data_context_id": global_data_context_id}
-    #         )
-    #         if not data_context_id_errors:
-    #             logger.info(
-    #                 "data_context_id is defined globally. Applying override to project_config."
-    #             )
-    #             config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = (
-    #                 global_data_context_id
-    #             )
-    #         else:
-    #             validation_errors.update(data_context_id_errors)
-    #     # check for global usage_statistics url
-    #     global_usage_statistics_url = self._get_global_config_value(
-    #         environment_variable="GE_USAGE_STATISTICS_URL",
-    #         conf_file_section="anonymous_usage_statistics",
-    #         conf_file_option="usage_statistics_url",
-    #     )
-    #     if global_usage_statistics_url:
-    #         usage_statistics_url_errors = anonymizedUsageStatisticsSchema.validate(
-    #             {"usage_statistics_url": global_usage_statistics_url}
-    #         )
-    #         if not usage_statistics_url_errors:
-    #             logger.info(
-    #                 "usage_statistics_url is defined globally. Applying override to project_config."
-    #             )
-    #             config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = (
-    #                 global_usage_statistics_url
-    #             )
-    #         else:
-    #             validation_errors.update(usage_statistics_url_errors)
-    #     if validation_errors:
-    #         logger.warning(
-    #             "The following globally-defined config variables failed validation:\n{}\n\n"
-    #             "Please fix the variables if you would like to apply global values to project_config.".format(
-    #                 json.dumps(validation_errors, indent=2)
-    #             )
-    #         )
-    #     return config_with_global_config_overrides

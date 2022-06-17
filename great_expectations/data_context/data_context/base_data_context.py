@@ -336,9 +336,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         Args:
             context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file \
-            based on conventions for project subdirectories.
+                based on conventions for project subdirectories.
             runtime_environment: a dictionary of config variables that
-            override both those set in config_variables.yml and the environment
+                override both those set in config_variables.yml and the environment
+            ge_cloud_mode: boolean flag that describe whether DataContext is being instantiated by ge_cloud
+            ge_cloud_config: config for ge_cloud
 
         Returns:
             None
@@ -355,7 +357,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         self.runtime_environment = runtime_environment or {}
 
-        # does this still need to happen? Base = eph + cloud + file
         if self._ge_cloud_mode:
             self._data_context = CloudDataContext(
                 project_config=project_config,
@@ -374,8 +375,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 project_config=project_config, runtime_environment=runtime_environment
             )
         # <WILL> why does this check exist?
-        # in cases where
-        # this is best seen in test_usage_statistics.py
+        # Currently there are tests where BaseDataContext is instantiated in-memory (ie EphemeralDataContext)
+        # but also checks for overrides from config files. The following block of code preserves that behavior.
         if isinstance(self._data_context, EphemeralDataContext):
             usage_stats_opted_out: bool = (
                 self._check_global_usage_statistics_env_var_and_file_opt_out()
@@ -391,6 +392,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
         self._project_config = self._data_context._project_config
+
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
             self.plugins_directory
@@ -454,11 +456,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return self._ge_cloud_mode
 
     @staticmethod
-    def _check_global_usage_statistics_env_var_and_file_opt_out() -> bool:
+    def _check_global_usage_statistics_env_var_and_file() -> bool:
+        """
+        Currently there are tests where BaseDataContext is instantiated in-memory (ie EphemeralDataContext)
+        but also checks for overrides from config files. The following block of code preserves that behavior.
+
+        Returns:
+
+        """
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
-                return True
+                return False
             else:
                 logger.warning(
                     "GE_USAGE_STATS environment variable must be one of: {}".format(
@@ -475,12 +484,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             config.BOOLEAN_STATES = states
             config.read(config_path)
             try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
+                if config.getboolean("anonymous_usage_statistics", "enabled"):
                     return True
+                else:
+                    return False
             except (ValueError, configparser.Error):
                 pass
-        return False
+        return True
 
     def _apply_global_config_overrides(
         self, config: DataContextConfig
