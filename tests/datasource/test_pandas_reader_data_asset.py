@@ -56,6 +56,35 @@ def test_PandasReaderDataAsset__init__(test_dir_alpha):
     # !!! If regex is not Null, the number of groups should be exactly equal to the number of parameters in batch_identifiers
 
 
+def test_PandasReaderDataAsset_method_list():
+    my_datasource = PandasReaderDatasource("my_datasource")
+    my_asset = PandasReaderDataAsset(
+        datasource=my_datasource,
+        name="my_asset",
+    )
+    dir_results = dir(my_asset)
+    filtered_dir_results = [ r for r in dir_results if r[0] != "_"]
+    print("\n".join(filtered_dir_results))
+
+    assert set(filtered_dir_results) == set({
+        # Properties
+        "name",
+        "base_directory",
+        "batch_identifiers",
+        "method",
+        "name",
+        "regex",
+
+        # Methods        
+        "batches",
+        "get_batch",
+        "get_batch_request",
+        "get_validator",
+        "list_batches",
+        "set_name",
+        "update_configuration",
+    })
+
 @pytest.fixture
 def alpha_test_files_pandas_reader_data_asset(test_dir_alpha) -> PandasReaderDataAsset:
     my_datasource = PandasReaderDatasource("my_datasource")

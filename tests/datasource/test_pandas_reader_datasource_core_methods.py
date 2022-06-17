@@ -30,8 +30,8 @@ def test_PandasReaderDatasource_method_list():
 
         # Core methods
         "add_asset",
-        "get_batch",
         "rename_asset",
+        "get_batch",
         ### "get_batches", #!!! Add this later
         "get_validator",
         "list_asset_names",
