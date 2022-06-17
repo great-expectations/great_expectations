@@ -31,6 +31,7 @@ def test_PandasReaderDatasource_method_list():
         # Core methods
         "add_asset",
         "get_batch",
+        "rename_asset",
         ### "get_batches", #!!! Add this later
         "get_validator",
         "list_asset_names",
@@ -121,6 +122,31 @@ def test_PandasReaderDatasource_add_asset(test_dir_alpha):
     #using custom sorters
 
     # assert my_datasource.list_asset_names() == ["test_dir_alpha"]
+
+def test_PandasReaderDatasource_rename_asset():
+    my_datasource = PandasReaderDatasource("my_datasource")
+    assert my_datasource.list_asset_names() == []
+
+    my_datasource.add_asset("A")
+    assert my_datasource.list_asset_names() == ["A"]
+
+    with pytest.raises(TypeError):
+        # None isn't a valid asset name.
+        my_datasource.rename_asset("A", None)
+    assert my_datasource.list_asset_names() == ["A"]
+
+    my_datasource.rename_asset("A", "B")
+    assert my_datasource.list_asset_names() == ["B"]
+
+    my_datasource.add_asset("A")
+    assert my_datasource.list_asset_names() == ["B", "A"]
+
+    with pytest.raises(KeyError):
+        # An asset named B already exists
+        my_datasource.rename_asset("A", "B")
+    assert my_datasource.list_asset_names() == ["B", "A"]
+
+
 
 def test_PandasReaderDatasource_asset_property(test_dir_alpha):
     my_datasource = PandasReaderDatasource("my_datasource")

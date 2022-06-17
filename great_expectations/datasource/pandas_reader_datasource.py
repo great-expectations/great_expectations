@@ -251,7 +251,7 @@ class PandasReaderDatasource(NewNewNewDatasource):
     def add_asset(
         self,
         name: str,
-        base_directory: Optional[str] = None,
+        base_directory: Optional[str] = "",
         method: Optional[str] = "read_csv",
         regex: Optional[str] = "(.*)",
         batch_identifiers: List[str] = ["filename"],
@@ -295,10 +295,10 @@ class PandasReaderDatasource(NewNewNewDatasource):
         return list(self.assets.keys())
 
     def get_batch(self, batch_request: NewConfiguredBatchRequest) -> Batch:
-
         asset = self.assets[batch_request.data_asset_name]
 
         func = getattr(pd, asset.method)
+
         filename = convert_batch_identifiers_to_data_reference_string_using_regex(
             batch_identifiers= IDDict(**batch_request.data_connector_query),
             regex_pattern= asset.regex,
@@ -331,6 +331,19 @@ class PandasReaderDatasource(NewNewNewDatasource):
             expectation_suite=None,#expectation_suite,
             batches=[batch],
         )
+
+    def rename_asset(self, old_name:str, new_name:str) -> None:
+        if not isinstance(new_name, str):
+            raise TypeError(f"new_name must be of type str, not {type(new_name)}.")
+
+        if new_name in self._assets.keys():
+            raise KeyError(f"An asset named {new_name} already exists.")
+
+        self._assets[new_name] = self._assets.pop(old_name)
+        asset = self._assets[new_name]
+        asset.set_name(new_name)
+
+        return asset
 
     @property
     def assets(self) -> Dict[str, PandasReaderDataAsset]:

@@ -27,13 +27,20 @@ class PandasReaderDataAsset(BaseDataAsset):
         self,
         datasource, #Should be of type: PandasReaderDatasource,
         name: str,
-        batch_identifiers: List[str],
-        method: Optional[str] = None,
-        base_directory: Optional[str] = None,
-        regex: Optional[str] = None,
+        batch_identifiers: List[str] = ["filename"],
+        method: str = "read_csv",
+        base_directory: str = "",
+        regex: str = "(.*)",
     ) -> None:
+
+        # !!! Check to make sure this is a valid configuration of parameters.
+        # !!! For example, if base_directory is Null, method and regex should be Null as well.
+        # !!! Also, if base_directory is not Null, method and regex should be populated as well. defaults are okay.
+        # !!! Also, if regex is not Null, the number of groups should be exactly equal to the number of parameters in batch_identifiers
+
         self._method = method
         self._base_directory = base_directory
+        print(base_directory)
         self._regex = regex
 
         super().__init__(
@@ -57,7 +64,10 @@ class PandasReaderDataAsset(BaseDataAsset):
         # !!! Also, if regex is not Null, the number of groups should be exactly equal to the number of parameters in batch_identifiers
 
         if name != None:
-            self._name = name
+            self._datasource.rename_asset(
+                self._name,
+                name
+            )
         
         if batch_identifiers != None:
             self._batch_identifiers = batch_identifiers
@@ -82,13 +92,15 @@ class PandasReaderDataAsset(BaseDataAsset):
         )
 
         #!!! Need to handle batch_spec passthrough parameters here
-        return NewConfiguredBatchRequest(
+        batch_request = NewConfiguredBatchRequest(
             datasource_name=self._datasource.name,
             data_asset_name=self._name,
             data_connector_query=batch_identifiers,
             batch_spec_passthrough=BatchSpecPassthrough(),
             # batch_identifiers=batch_identifiers,
         )
+
+        return batch_request
 
     def get_validator(self, *batch_identifier_args, **batch_identifier_kwargs) -> Validator:
         batch_request = self.get_batch_request(
@@ -109,8 +121,10 @@ class PandasReaderDataAsset(BaseDataAsset):
             self.base_directory,
             "*"
         )
-        print(asset_paths)
         return asset_paths
+
+    def set_name(self, name:str):
+        self._name = name
 
     @property
     def batches(self) -> List[Batch]:
@@ -149,8 +163,6 @@ class PandasReaderDataAsset(BaseDataAsset):
     def _get_data_asset_paths(self):
         # glob_config = self._get_data_asset_config(data_asset_name)
         # return glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
-        print(self.base_directory)
-        print(glob.glob(self.base_directory+"/*.csv"))
         # return glob.glob(os.path.join(self.base_directory, "*.csv"), recursive=True)
         return glob.glob(self.base_directory)
 
@@ -192,13 +204,3 @@ class PandasReaderDataAsset(BaseDataAsset):
     @property
     def batch_identifiers(self) -> str:
         return self._batch_identifiers
-
-    def read_csv(self, *args, **kwargs):
-        #!!! I'm not sure this is the right conditional statement...
-
-        if self._base_directory == None:
-            return self._datasource.read_csv(*args, **kwargs)
-        
-        else:
-            return self.get_batch(*args, **kwargs)
-

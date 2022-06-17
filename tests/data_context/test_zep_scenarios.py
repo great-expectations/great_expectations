@@ -35,16 +35,23 @@ def test_ZEP_scenario_1(test_dir_oscar):
 
 
     my_new_asset = context.sources.default_pandas_reader.add_asset("my_new_asset")
-    df = my_new_asset.read_csv(test_dir_oscar+"/A/data-202112.csv")
+    df = my_new_asset.get_batch(test_dir_oscar+"/A/data-202112.csv")
 
     my_new_asset.update_configuration(
         base_directory=test_dir_oscar+"/A/",
     )
-    print(my_new_asset)
-    df = my_new_asset.read_csv(
+    df = my_new_asset.get_batch(
         "data-202112.csv",
     )
-    print(df.head())
+    df.expect_column_values_to_be_between("x", min_value=1, max_value=2)
+
+    df = my_new_asset.update_configuration(
+        name="oscar_A_2",
+        base_directory=test_dir_oscar+"/A/",
+        method="read_csv",
+    ).get_batch(
+        filename="data-202112.csv",
+    )
 
     df = my_new_asset.update_configuration(
         base_directory=test_dir_oscar+"/A/",
@@ -52,7 +59,6 @@ def test_ZEP_scenario_1(test_dir_oscar):
     ).get_batch(
         filename="data-202112.csv",
     )
-    print(df.head())
 
     df = my_new_asset.update_configuration(
         base_directory=test_dir_oscar+"/A/",
@@ -61,7 +67,6 @@ def test_ZEP_scenario_1(test_dir_oscar):
     ).get_batch(
         filename="data-202112",
     )
-    print(df.head())
 
     df = my_new_asset.update_configuration(
         base_directory=test_dir_oscar+"/A/",
