@@ -39,7 +39,7 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _dialect, _metrics, **kwargs):
-        """SQLAlchemy Standard Deviation implementation"""
+        """SqlAlchemy Standard Deviation implementation"""
         if _dialect.name.lower() == "mssql":
             standard_deviation = sa.func.stdev(column)
         elif _dialect.name.lower() == "sqlite":
