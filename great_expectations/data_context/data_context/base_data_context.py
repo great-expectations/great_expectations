@@ -2013,13 +2013,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._datasource_store.set_by_name(
             datasource_name=name, datasource_config=datasource_config
         )
-        config = dict(datasourceConfigSchema.dump(datasource_config))
+
+        substitutions: dict = self._determine_substitutions()
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        substituted_config: dict = substitute_all_config_variables(
+            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        )
 
         datasource: Optional[Union[LegacyDatasource, BaseDatasource]] = None
         if initialize:
             try:
                 datasource = self._instantiate_datasource_from_config(
-                    name=name, config=datasource_config
+                    name=name, config=substituted_config
                 )
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
