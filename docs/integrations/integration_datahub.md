@@ -23,7 +23,7 @@ There is a custom Action named `DataHubValidationAction` which allows you to vie
  - [Deploy an instance of DataHub](https://datahubproject.io/docs/quickstart)
 :::
 
-`DataHubValidationAction` pushes expectations metadata to DataHub. This includes
+`DataHubValidationAction` pushes Expectations metadata to DataHub. This includes
 
 - **Expectation Details**: Details of assertions (i.e. expectation) set on a Dataset (Table). Expectation set on a dataset in GE aligns with `AssertionInfo` aspect in DataHub. AssertionInfo captures the dataset and dataset fields on which assertion is applied, along with its scope, type and parameters. 
 - **Expectation Results**: Evaluation results for an assertion tracked over time. 
