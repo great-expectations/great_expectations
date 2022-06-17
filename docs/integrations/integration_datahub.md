@@ -58,7 +58,7 @@ datahub ingest -c recipe.yaml
 You should be able to see the dataset in DataHub UI.
 
 #### 2. Update GE Checkpoint Configurations
-Add `DataHubValidationAction` in action_list of your Great Expectations Checkpoint. For more details on setting action_list, see [Checkpoints and Actions](https://docs.greatexpectations.io/docs/reference/checkpoints_and_actions/) 
+Add `DataHubValidationAction` in `action_list` of your Great Expectations Checkpoint. For more details on setting action_list, see [the configuration section of the GE Actions reference entry](https://docs.greatexpectations.io/docs/terms/action#configuration) 
 ```yml
 action_list:
   - name: datahub_action
