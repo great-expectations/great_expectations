@@ -37,9 +37,9 @@ class AbstractDataContext(ABC):
     ) -> DataContextConfig:
 
         """
-        Applies global confirmation overrides for
+        Applies global configuration overrides for
             - usage_statistics being enabled
-            - data_context_id
+            - data_context_id for usage_statistics
             - global_usage_statistics_url
 
         Args:

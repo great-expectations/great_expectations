@@ -21,7 +21,7 @@ class CloudDataContext(AbstractDataContext):
         self,
         project_config: Union[DataContextConfig, Mapping],
         runtime_environment: Optional[dict] = None,
-        ge_cloud_mode: bool = False,  # TODO: determine if this can be set to True for CloudDataContext
+        ge_cloud_mode: bool = False,
         ge_cloud_config: Optional[GeCloudConfig] = None,
     ) -> None:
         """

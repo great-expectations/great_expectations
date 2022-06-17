@@ -355,7 +355,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         self.runtime_environment = runtime_environment or {}
 
-        # does this still need to happen? Base = eph + cloud + file
         if self._ge_cloud_mode:
             self._data_context = CloudDataContext(
                 project_config=project_config,
@@ -437,11 +436,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
-
-    def _apply_global_config_overrides(
-        self, config: DataContextConfig
-    ) -> DataContextConfig:
-        pass
 
     def _build_store_from_config(
         self, store_name: str, store_config: dict
