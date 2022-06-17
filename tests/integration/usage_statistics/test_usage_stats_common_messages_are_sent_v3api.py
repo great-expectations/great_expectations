@@ -93,7 +93,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     context._usage_statistics_handler._close_worker()
 
     # Make sure usage stats are enabled
-    assert not context._check_global_usage_statistics_opt_out()
+    assert context._get_global_usage_statistics_override()
     assert context.anonymous_usage_statistics.enabled
     assert context.anonymous_usage_statistics.data_context_id == DATA_CONTEXT_ID
 
