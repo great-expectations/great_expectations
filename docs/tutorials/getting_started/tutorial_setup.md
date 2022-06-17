@@ -50,7 +50,7 @@ great_expectations --version
 This should return something like:
 
 ```console
-great_expectations, version 0.13.46
+great_expectations, version 0.15.10
 ```
 
 For detailed installation instructions, see [How to install Great Expectations locally](../../guides/setup/installation/local.md).
