@@ -50,7 +50,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
                         data=fully_qualified_parameter_names
                     ),
                 }
-                for domain, fully_qualified_parameter_names in self.fully_qualified_parameter_names_by_domain.items()
+                for domain, fully_qualified_parameter_names in self.json_serialized_fully_qualified_parameter_name.items()
             ],
             "parameter_values_for_fully_qualified_parameter_names_by_domain": [
                 {

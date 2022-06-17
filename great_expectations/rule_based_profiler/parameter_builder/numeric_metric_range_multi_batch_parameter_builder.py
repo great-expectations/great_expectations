@@ -22,6 +22,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    RAW_PARAMETER_KEY,
     Domain,
     MetricValues,
     NumericRangeEstimationResult,
@@ -83,6 +84,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         self,
         name: str,
         metric_name: Optional[str] = None,
+        metric_multi_batch_parameter_builder_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = True,
@@ -102,7 +104,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> None:
         """
@@ -111,6 +112,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
                 and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
+            metric_multi_batch_parameter_builder_name: name of parameter that computes "metric_name" (for every Batch).
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
@@ -141,7 +143,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
                 ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
                 These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
@@ -153,8 +154,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
             data_context=data_context,
+        )
+
+        self._metric_multi_batch_parameter_builder_name = (
+            metric_multi_batch_parameter_builder_name
         )
 
         self._false_positive_rate = false_positive_rate
@@ -198,9 +202,9 @@ detected.
 
         self._truncate_values = truncate_values
 
-    """
-    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
-    """
+    @property
+    def metric_multi_batch_parameter_builder_name(self) -> str:
+        return self._metric_multi_batch_parameter_builder_name
 
     @property
     def false_positive_rate(self) -> Union[str, float]:
@@ -293,20 +297,36 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
             )
             false_positive_rate = np.float64(1.0 - NP_EPSILON)
 
-        # Compute metric value for each Batch object.
-        super().build_parameters(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-            parameter_computation_impl=super()._build_parameters,
-            json_serialize=False,
-            recompute_existing_parameter_values=recompute_existing_parameter_values,
-        )
+        parameter_reference: str
+        if self.metric_multi_batch_parameter_builder_name:
+            # Obtain metric_multi_batch_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            metric_multi_batch_parameter_builder_name: str = (
+                get_parameter_value_and_validate_return_type(
+                    domain=domain,
+                    parameter_reference=self.metric_multi_batch_parameter_builder_name,
+                    expected_return_type=str,
+                    variables=variables,
+                    parameters=parameters,
+                )
+            )
+            parameter_reference = (
+                f"{RAW_PARAMETER_KEY}{metric_multi_batch_parameter_builder_name}"
+            )
+        else:
+            # Compute metric value for each Batch object.
+            super().build_parameters(
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+                parameter_computation_impl=super()._build_parameters,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
+            )
+            parameter_reference = self.raw_fully_qualified_parameter_name
 
         # Retrieve metric values for all Batch objects.
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self.fully_qualified_parameter_name,
+            parameter_reference=parameter_reference,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
