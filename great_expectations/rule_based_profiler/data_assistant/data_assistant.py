@@ -297,17 +297,27 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         @staticmethod
         def build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name: str,
+            metric_name: Optional[str] = None,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
+            evaluation_parameter_builder_configs: Optional[
+                List[ParameterBuilderConfig]
+            ] = None,
         ) -> NumericMetricRangeMultiBatchParameterBuilder:
             """
             This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """
+            metric_multi_batch_parameter_builder_name: Optional[str] = None
+            if metric_name is None:
+                metric_name = evaluation_parameter_builder_configs[0]["metric_name"]
+                metric_multi_batch_parameter_builder_name = (
+                    evaluation_parameter_builder_configs[0].name
+                )
+
             name: str = sanitize_parameter_name(name=f"{metric_name}.range")
             return NumericMetricRangeMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
-                metric_multi_batch_parameter_builder_name=None,
+                metric_multi_batch_parameter_builder_name=metric_multi_batch_parameter_builder_name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=metric_value_kwargs,
                 enforce_numeric_metric=True,
@@ -321,7 +331,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
                 truncate_values=f"{VARIABLES_KEY}truncate_values",
                 round_decimals=f"{VARIABLES_KEY}round_decimals",
-                evaluation_parameter_builder_configs=None,
+                evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
                 data_context=None,
             )
 
@@ -651,6 +661,9 @@ def build_map_metric_rule(
     rule_name: str,
     expectation_type: str,
     map_metric_name: str,
+    total_count_metric_multi_batch_parameter_builder_for_evaluations: Optional[
+        ParameterBuilder
+    ] = None,
     include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
     exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
     include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
@@ -705,9 +718,11 @@ def build_map_metric_rule(
 
     # Step-3: Set up "MeanUnexpectedMapMetricMultiBatchParameterBuilder" to compute "condition" for emitting "ExpectationConfiguration" (based on "Domain" data).
 
-    total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
-        DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
-    )
+    if total_count_metric_multi_batch_parameter_builder_for_evaluations is None:
+        total_count_metric_multi_batch_parameter_builder_for_evaluations = (
+            DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
+        )
+
     column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
         DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
     )
