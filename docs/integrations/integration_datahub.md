@@ -49,7 +49,7 @@ Stand up and take a breath
 :::
 
 ####  1. Ingest the metadata from source data platform into DataHub
-For example, if you have GE checkpoint that runs expectations on a BigQuery dataset, then first
+For example, if you have GE Checkpoint that runs Expectations on a BigQuery dataset, then first
 ingest the respective dataset into DataHub using [BigQuery](https://datahubproject.io/docs/generated/ingestion/sources/bigquery#module-bigquery) metadata ingestion source recipe. 
 
 ```bash
