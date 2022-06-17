@@ -335,11 +335,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """DataContext constructor
 
         Args:
-            context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file \
-            based on conventions for project subdirectories.
+            context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file
+                based on conventions for project subdirectories.
             runtime_environment: a dictionary of config variables that
-            override both those set in config_variables.yml and the environment
-
+                override both those set in config_variables.yml and the environment
+            ge_cloud_mode: boolean flag that describe whether DataContext is being instantiated by ge_cloud
+           ge_cloud_config: config for ge_cloud
         Returns:
             None
         """
@@ -374,8 +375,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 project_config=project_config, runtime_environment=runtime_environment
             )
         # <WILL> why does this check exist?
-        # in cases where
-        # this is best seen in test_usage_statistics.py
+        # Currently there are tests where BaseDataContext is instantiated in-memory (ie EphemeralDataContext)
+        # but also checks for overrides from config files. The following block of code preserves that behavior.
         if isinstance(self._data_context, EphemeralDataContext):
             usage_stats_opted_out: bool = (
                 self._check_global_usage_statistics_env_var_and_file_opt_out()
@@ -455,6 +456,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @staticmethod
     def _check_global_usage_statistics_env_var_and_file_opt_out() -> bool:
+        """
+        Currently there are tests where BaseDataContext is instantiated in-memory (ie EphemeralDataContext)
+        but also checks for overrides from config files. The following block of code preserves that behavior.
+
+        Returns:
+            bool that represents whether usage_statistics have been opted out (set to False)
+        """
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
