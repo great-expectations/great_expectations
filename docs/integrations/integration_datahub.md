@@ -97,9 +97,9 @@ Currently this integration only supports v3 API Datasources using `SqlAlchemyExe
 
 This integration does not support
 
-- v2 Datasources such as SqlAlchemyDataset
-- v3 Datasources using execution engine other than SqlAlchemyExecutionEngine (Spark, Pandas)
-- Cross-dataset expectations (those involving > 1 table)
+- v2 Datasources such as `SqlAlchemyDataset`
+- v3 Datasources using an Execution Engine other than `SqlAlchemyExecutionEngine` (Spark, Pandas)
+- Cross-dataset Expectations (those involving > 1 table)
 
 ### When things don't work
 
