@@ -31,6 +31,70 @@ def test_ZEP_scenario_1(test_dir_oscar):
     my_validator_2.head()
     my_validator_2.expect_column_values_to_be_between("x", min_value=1, max_value=2)
 
+
+
+
+    my_new_asset = context.sources.default_pandas_reader.add_asset("my_new_asset")
+    df = my_new_asset.read_csv(test_dir_oscar+"/A/data-202112.csv")
+
+    my_new_asset.update_configuration(
+        base_directory=test_dir_oscar+"/A/",
+    )
+    print(my_new_asset)
+    df = my_new_asset.read_csv(
+        "data-202112.csv",
+    )
+    print(df.head())
+
+    df = my_new_asset.update_configuration(
+        base_directory=test_dir_oscar+"/A/",
+        method="read_csv",
+    ).get_batch(
+        filename="data-202112.csv",
+    )
+    print(df.head())
+
+    df = my_new_asset.update_configuration(
+        base_directory=test_dir_oscar+"/A/",
+        method="read_csv",
+        regex="(.*)\\.csv",
+    ).get_batch(
+        filename="data-202112",
+    )
+    print(df.head())
+
+    df = my_new_asset.update_configuration(
+        base_directory=test_dir_oscar+"/A/",
+        method="read_csv",
+        regex="data-(.*)\\.csv",
+        batch_identifiers=["year_month"]
+    ).get_batch(
+        year_month="202112",
+    )
+    print(df.head())
+
+    df = my_new_asset.update_configuration(
+        base_directory=test_dir_oscar+"/A/",
+        method="read_csv",
+        regex="data-(.*)\\.csv",
+        batch_identifiers=["year_month"]
+    ).get_batch(
+        "202112",
+    )
+    print(df.head())
+
+    df = my_new_asset.update_configuration(
+        base_directory=test_dir_oscar+"/A/",
+        method="read_csv",
+        regex="data-(\\d{4})(\\d{2})\\.csv",
+        batch_identifiers=["year", "month"]
+    ).get_batch(
+        year=2021,
+        month=12,
+    )
+
+
+
     return
     # Refine the asset configuration by adding a more detailed regex
     context.sources.default_pandas_reader.add_asset(

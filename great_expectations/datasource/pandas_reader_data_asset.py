@@ -1,7 +1,11 @@
 from dataclasses import dataclass
+import glob
 import logging
-from typing import List, Dict
-from great_expectations.core.batch import BatchRequest
+import os
+from typing import List, Dict, Optional
+from typing_extensions import Self
+from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.datasource.data_connector.util import get_filesystem_one_level_directory_glob_path_list
 
 from great_expectations.validator.validator import Validator
 from great_expectations.datasource.base_data_asset import (
@@ -24,9 +28,9 @@ class PandasReaderDataAsset(BaseDataAsset):
         datasource, #Should be of type: PandasReaderDatasource,
         name: str,
         batch_identifiers: List[str],
-        method: str,
-        base_directory: str,
-        regex: str,
+        method: Optional[str] = None,
+        base_directory: Optional[str] = None,
+        regex: Optional[str] = None,
     ) -> None:
         self._method = method
         self._base_directory = base_directory
@@ -37,6 +41,38 @@ class PandasReaderDataAsset(BaseDataAsset):
             name=name,
             batch_identifiers=batch_identifiers
         )
+
+    def update_configuration(
+        self,
+        name: Optional[str] = None,
+        batch_identifiers: Optional[List[str]] = None,
+        method: Optional[str] = None,
+        base_directory: Optional[str] = None,
+        regex: Optional[str] = None,
+    ) -> Self:
+
+        # !!! Check to make sure this is a valid configuration of parameters.
+        # !!! For example, if base_directory is Null, method and regex should be Null as well.
+        # !!! Also, if base_directory is not Null, method and regex should be populated as well. defaults are okay.
+        # !!! Also, if regex is not Null, the number of groups should be exactly equal to the number of parameters in batch_identifiers
+
+        if name != None:
+            self._name = name
+        
+        if batch_identifiers != None:
+            self._batch_identifiers = batch_identifiers
+        
+        if method != None:
+            self._method = method
+        
+        if base_directory != None:
+            self._base_directory = base_directory
+        
+        if regex != None:
+            self._regex = regex
+        
+
+        return self
     
     def get_batch_request(self, *batch_identifier_args, **batch_identifier_kwargs) -> NewBatchRequestBase:
 
@@ -45,6 +81,7 @@ class PandasReaderDataAsset(BaseDataAsset):
             batch_identifier_kwargs,
         )
 
+        #!!! Need to handle batch_spec passthrough parameters here
         return NewConfiguredBatchRequest(
             datasource_name=self._datasource.name,
             data_asset_name=self._name,
@@ -53,7 +90,7 @@ class PandasReaderDataAsset(BaseDataAsset):
             # batch_identifiers=batch_identifiers,
         )
 
-    def get_validator(self, *batch_identifier_args, **batch_identifier_kwargs):
+    def get_validator(self, *batch_identifier_args, **batch_identifier_kwargs) -> Validator:
         batch_request = self.get_batch_request(
             *batch_identifier_args,
             **batch_identifier_kwargs,
@@ -62,6 +99,25 @@ class PandasReaderDataAsset(BaseDataAsset):
         validator = self._datasource.get_validator(batch_request)
 
         return validator
+
+    #!!! not a batch
+    def get_batch(self, *batch_identifier_args, **batch_identifier_kwargs) -> Validator:
+        return self.get_validator(*batch_identifier_args, **batch_identifier_kwargs)
+
+    def list_batches(self) -> List[BatchRequest]:
+        asset_paths = get_filesystem_one_level_directory_glob_path_list(
+            self.base_directory,
+            "*"
+        )
+        print(asset_paths)
+        return asset_paths
+
+    @property
+    def batches(self) -> List[Batch]:
+        #!!! OMG inefficient
+        # return [self.get_batch(b) for b in self.list_batches()]
+        # return []
+        return self.list_batches()
 
     def _generate_batch_identifiers_from_args_and_kwargs(
         self,
@@ -89,6 +145,14 @@ class PandasReaderDataAsset(BaseDataAsset):
             raise BatchIdentifierException(f"Missing BatchIdentifier keys : {missing_keys}")
 
         return DataConnectorQuery(**batch_identifier_dict)
+
+    def _get_data_asset_paths(self):
+        # glob_config = self._get_data_asset_config(data_asset_name)
+        # return glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
+        print(self.base_directory)
+        print(glob.glob(self.base_directory+"/*.csv"))
+        # return glob.glob(os.path.join(self.base_directory, "*.csv"), recursive=True)
+        return glob.glob(self.base_directory)
 
     def __str__(self):
         # !!! We should figure out a convention for __str__ifying objects, and apply it across the codebase
@@ -128,3 +192,13 @@ class PandasReaderDataAsset(BaseDataAsset):
     @property
     def batch_identifiers(self) -> str:
         return self._batch_identifiers
+
+    def read_csv(self, *args, **kwargs):
+        #!!! I'm not sure this is the right conditional statement...
+
+        if self._base_directory == None:
+            return self._datasource.read_csv(*args, **kwargs)
+        
+        else:
+            return self.get_batch(*args, **kwargs)
+

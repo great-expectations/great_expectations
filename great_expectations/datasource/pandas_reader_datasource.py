@@ -251,12 +251,24 @@ class PandasReaderDatasource(NewNewNewDatasource):
     def add_asset(
         self,
         name: str,
-        base_directory: str,
+        base_directory: Optional[str] = None,
         method: Optional[str] = "read_csv",
         regex: Optional[str] = "(.*)",
         batch_identifiers: List[str] = ["filename"],
         # check_new_asset: bool = False, # !!! Maybe implement this?
     ) -> PandasReaderDataAsset:
+
+        # if base_directory != None:
+
+        #!!! Add a check to make sure that regex and batch_identifiers are correct.
+        if base_directory == None:
+            #!!! regex and batch_identifiers should be None
+            pass
+            
+        else:
+            #!!! Make sure that regex and batch_identifiers are present,
+            #!!! ...and share the same number of matching groups and identifiers, respectively
+            pass
 
         new_asset = PandasReaderDataAsset(
             datasource=self,
@@ -266,6 +278,14 @@ class PandasReaderDatasource(NewNewNewDatasource):
             regex=regex,
             batch_identifiers=batch_identifiers
         )
+
+        # else:
+
+        #     new_asset = PandasReaderRuntimeDataAsset(
+        #         datasource=self,
+        #         name=name,
+        #         batch_identifiers=None,
+        #     )
 
         self._assets[name] = new_asset
 

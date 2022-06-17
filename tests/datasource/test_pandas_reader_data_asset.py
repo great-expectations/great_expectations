@@ -1,3 +1,5 @@
+from ast import List
+from great_expectations.core.batch import Batch
 import pytest
 
 from great_expectations.datasource.pandas_reader_datasource import PandasReaderDatasource
@@ -14,9 +16,10 @@ from great_expectations.datasource.pandas_reader_data_asset import (
 
 from tests.datasource.new_fixtures import test_dir_alpha
 
-def test_PandasReaderDataAsset_basic_get_batch_request(test_dir_alpha):
-
+def test_PandasReaderDataAsset__init__(test_dir_alpha):
     my_datasource = PandasReaderDatasource("my_datasource")
+
+    # Smoke test
     my_asset = PandasReaderDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",
@@ -25,6 +28,48 @@ def test_PandasReaderDataAsset_basic_get_batch_request(test_dir_alpha):
         regex="(*.)\\.csv",
         batch_identifiers=["filename"],
     )
+
+    # Instantiate as a runtime data asset
+    my_asset = PandasReaderDataAsset(
+        datasource=my_datasource,
+        name="test_dir_alpha",
+        batch_identifiers=["filename"],
+    )
+
+    my_asset = PandasReaderDataAsset(
+        datasource=my_datasource,
+        name="test_dir_alpha",
+        batch_identifiers=["id", "timestamp"],
+    )
+
+
+    # !!! This should throw an error: "Cannot declare method or regex when base_directory=None"
+    PandasReaderDataAsset(
+        datasource=my_datasource,
+        name="test_dir_alpha",
+        method="read_csv",
+        regex="(*.)\\.csv",
+        batch_identifiers=["filename"],
+    )
+
+    # !!! If base_directory is not Null, method and regex should be populated as well. defaults are okay.
+    # !!! If regex is not Null, the number of groups should be exactly equal to the number of parameters in batch_identifiers
+
+
+@pytest.fixture
+def alpha_test_files_pandas_reader_data_asset(test_dir_alpha) -> PandasReaderDataAsset:
+    my_datasource = PandasReaderDatasource("my_datasource")
+    return PandasReaderDataAsset(
+        datasource=my_datasource,
+        name="test_dir_alpha",
+        method="read_csv",
+        base_directory=test_dir_alpha,
+        regex="(*.)\\.csv",
+        batch_identifiers=["filename"],
+    )
+
+def test_PandasReaderDataAsset_get_batch_request(alpha_test_files_pandas_reader_data_asset):
+    my_asset = alpha_test_files_pandas_reader_data_asset
 
     my_batch_request = my_asset.get_batch_request("A")
     assert isinstance(my_batch_request, NewBatchRequestBase)
@@ -36,6 +81,36 @@ def test_PandasReaderDataAsset_basic_get_batch_request(test_dir_alpha):
         ),
         batch_spec_passthrough=BatchSpecPassthrough(),
     )
+
+def test_PandasReaderDataAsset_list_batches(alpha_test_files_pandas_reader_data_asset):
+    my_asset = alpha_test_files_pandas_reader_data_asset
+    print(my_asset.list_batches())
+    assert len(my_asset.list_batches()) == 4
+
+    sample_batch = my_asset.list_batches()[0]
+    assert isinstance(sample_batch, NewBatchRequestBase)
+
+    #!!! Test to make sure that we're getting back real BatchRequests
+
+
+def test_PandasReaderDataAsset_batches(alpha_test_files_pandas_reader_data_asset):
+    my_asset = alpha_test_files_pandas_reader_data_asset
+    assert len(my_asset.batches) == 4
+    assert isinstance(my_asset.batches[0], Batch)
+    assert isinstance(my_asset.batches[:2], List[Batch])
+
+
+def test_PandasReaderDataAsset_update_configuration():
+    #!!!
+    pass
+
+def test_PandasReaderDataAsset_get_validator():
+    #!!!
+    pass
+
+def test_PandasReaderDataAsset_read_csv():
+    #!!!
+    pass
 
 def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs():
     my_datasource = PandasReaderDatasource("my_datasource")
@@ -98,11 +173,3 @@ def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs(
                 "filename": "other_filename"
             },
         )
-
-def test_PandasReaderDataAsset_list_batches():
-    pass
-    # assert my_asset.list_batches() == [
-    #     BatchRequest(
-
-    #     )
-    # ]
