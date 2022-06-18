@@ -1,8 +1,8 @@
 from ast import List
-from great_expectations.core.batch import Batch
+
 import pytest
 
-from great_expectations.datasource.configured_pandas_datasource import ConfiguredPandasDatasource
+from great_expectations.core.batch import Batch
 from great_expectations.datasource.base_data_asset import (
     BatchIdentifierException,
     BatchSpecPassthrough,
@@ -10,11 +10,12 @@ from great_expectations.datasource.base_data_asset import (
     NewBatchRequestBase,
     NewConfiguredBatchRequest,
 )
-from great_expectations.datasource.pandas_reader_data_asset import (
-    PandasReaderDataAsset,
+from great_expectations.datasource.configured_pandas_datasource import (
+    ConfiguredPandasDatasource,
 )
-
+from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
 from tests.datasource.new_fixtures import test_dir_alpha
+
 
 def test_PandasReaderDataAsset__init__(test_dir_alpha):
     my_datasource = ConfiguredPandasDatasource("my_datasource")
@@ -42,7 +43,6 @@ def test_PandasReaderDataAsset__init__(test_dir_alpha):
         batch_identifiers=["id", "timestamp"],
     )
 
-
     # !!! This should throw an error: "Cannot declare method or regex when base_directory=None"
     PandasReaderDataAsset(
         datasource=my_datasource,
@@ -63,28 +63,30 @@ def test_PandasReaderDataAsset_method_list():
         name="my_asset",
     )
     dir_results = dir(my_asset)
-    filtered_dir_results = [ r for r in dir_results if r[0] != "_"]
+    filtered_dir_results = [r for r in dir_results if r[0] != "_"]
     print("\n".join(filtered_dir_results))
 
-    assert set(filtered_dir_results) == set({
-        # Properties
-        "name",
-        "base_directory",
-        "batch_identifiers",
-        "method",
-        "name",
-        "regex",
-        "batches",
+    assert set(filtered_dir_results) == set(
+        {
+            # Properties
+            "name",
+            "base_directory",
+            "batch_identifiers",
+            "method",
+            "name",
+            "regex",
+            "batches",
+            # Methods
+            "set_name",
+            "update_configuration",  #
+            "list_batches",  #
+            "get_batch",  #
+            "get_batches",  #
+            "get_batch_request",  #
+            "get_validator",  #
+        }
+    )
 
-        # Methods
-        "set_name",
-        "update_configuration",#
-        "list_batches",#
-        "get_batch",#
-        "get_batches",#
-        "get_batch_request",#
-        "get_validator",#
-    })
 
 @pytest.fixture
 def alpha_test_files_pandas_reader_data_asset(test_dir_alpha) -> PandasReaderDataAsset:
@@ -98,19 +100,21 @@ def alpha_test_files_pandas_reader_data_asset(test_dir_alpha) -> PandasReaderDat
         batch_identifiers=["filename"],
     )
 
-def test_PandasReaderDataAsset_get_batch_request(alpha_test_files_pandas_reader_data_asset):
+
+def test_PandasReaderDataAsset_get_batch_request(
+    alpha_test_files_pandas_reader_data_asset,
+):
     my_asset = alpha_test_files_pandas_reader_data_asset
 
     my_batch_request = my_asset.get_batch_request("A")
     assert isinstance(my_batch_request, NewBatchRequestBase)
     assert my_batch_request == NewConfiguredBatchRequest(
-        datasource_name = "my_datasource",
-        data_asset_name = "test_dir_alpha",
-        data_connector_query=DataConnectorQuery(
-            filename= "A"
-        ),
+        datasource_name="my_datasource",
+        data_asset_name="test_dir_alpha",
+        data_connector_query=DataConnectorQuery(filename="A"),
         batch_spec_passthrough=BatchSpecPassthrough(),
     )
+
 
 @pytest.mark.skip(reason="Doesn't work yet")
 def test_PandasReaderDataAsset_list_batches(alpha_test_files_pandas_reader_data_asset):
@@ -122,6 +126,7 @@ def test_PandasReaderDataAsset_list_batches(alpha_test_files_pandas_reader_data_
     assert isinstance(sample_batch, NewBatchRequestBase)
 
     #!!! Test to make sure that we're getting back real BatchRequests
+
 
 @pytest.mark.skip(reason="Doesn't work yet")
 def test_PandasReaderDataAsset_batches(alpha_test_files_pandas_reader_data_asset):
@@ -135,17 +140,21 @@ def test_PandasReaderDataAsset_update_configuration():
     #!!!
     pass
 
+
 def test_PandasReaderDataAsset_get_batch():
     #!!!
     pass
+
 
 def test_PandasReaderDataAsset_get_batches():
     #!!!
     pass
 
+
 def test_PandasReaderDataAsset_get_validator():
     #!!!
     pass
+
 
 def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs():
     my_datasource = ConfiguredPandasDatasource("my_datasource")
@@ -159,18 +168,16 @@ def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs(
     )
 
     assert my_asset._generate_batch_identifiers_from_args_and_kwargs(
-        batch_identifier_args = ["some_file", "csv"],
-        batch_identifier_kwargs = {},
+        batch_identifier_args=["some_file", "csv"],
+        batch_identifier_kwargs={},
     ) == DataConnectorQuery(
         filename="some_file",
         file_extension="csv",
     )
 
     assert my_asset._generate_batch_identifiers_from_args_and_kwargs(
-        batch_identifier_args = ["some_file"],
-        batch_identifier_kwargs = {
-            "file_extension": "csv"
-        },
+        batch_identifier_args=["some_file"],
+        batch_identifier_kwargs={"file_extension": "csv"},
     ) == DataConnectorQuery(
         filename="some_file",
         file_extension="csv",
@@ -179,8 +186,8 @@ def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs(
     # kwargs have wrong names
     with pytest.raises(BatchIdentifierException):
         my_asset._generate_batch_identifiers_from_args_and_kwargs(
-            batch_identifier_args = [],
-            batch_identifier_kwargs = {
+            batch_identifier_args=[],
+            batch_identifier_kwargs={
                 "filename": "some_file",
                 "wrong_name": "csv",
             },
@@ -189,22 +196,20 @@ def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs(
     # Not enough args and kwargs to fully specify
     with pytest.raises(BatchIdentifierException):
         my_asset._generate_batch_identifiers_from_args_and_kwargs(
-            batch_identifier_args = [],
-            batch_identifier_kwargs = {},
+            batch_identifier_args=[],
+            batch_identifier_kwargs={},
         )
 
     # Too many args
     with pytest.raises(BatchIdentifierException):
         my_asset._generate_batch_identifiers_from_args_and_kwargs(
-            batch_identifier_args = ["some_file", "csv", "not_a_real_batch_identifier"],
-            batch_identifier_kwargs = {},
+            batch_identifier_args=["some_file", "csv", "not_a_real_batch_identifier"],
+            batch_identifier_kwargs={},
         )
 
     # args and kwargs conflict
     with pytest.raises(BatchIdentifierException):
         my_asset._generate_batch_identifiers_from_args_and_kwargs(
-            batch_identifier_args = ["some_file", "csv"],
-            batch_identifier_kwargs = {
-                "filename": "other_filename"
-            },
+            batch_identifier_args=["some_file", "csv"],
+            batch_identifier_kwargs={"filename": "other_filename"},
         )

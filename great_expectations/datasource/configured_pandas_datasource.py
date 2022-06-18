@@ -11,8 +11,15 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewBatchRequestBase, NewConfiguredBatchRequest
-from great_expectations.datasource.data_connector.util import convert_batch_identifiers_to_data_reference_string_using_regex
+from great_expectations.datasource.base_data_asset import (
+    BatchSpecPassthrough,
+    DataConnectorQuery,
+    NewBatchRequestBase,
+    NewConfiguredBatchRequest,
+)
+from great_expectations.datasource.data_connector.util import (
+    convert_batch_identifiers_to_data_reference_string_using_regex,
+)
 from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
 from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
 from great_expectations.marshmallow__shade.fields import Bool
@@ -20,16 +27,16 @@ from great_expectations.types import DictDot
 from great_expectations.validator.validator import Validator
 
 #!!! Keep this? It disables some annoying pandas warnings.
-warnings.simplefilter(action='ignore', category=FutureWarning)
-warnings.simplefilter(action='ignore', category=pd.errors.ParserWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
+warnings.simplefilter(action="ignore", category=pd.errors.ParserWarning)
 
 #!!! Factor this out to somewhere nicer
 class GxExperimentalWarning(Warning):
     pass
 
+
 class ConfiguredPandasDatasource(NewNewNewDatasource):
-    """
-    """
+    """ """
 
     def __init__(
         self,
@@ -54,12 +61,8 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
                 "class_name": "PandasExecutionEngine",
                 "module_name": "great_expectations.execution_engine",
             },
-            runtime_environment={
-                "concurrency": None
-            },
-            config_defaults={
-                "module_name": "great_expectations.execution_engine"
-            },
+            runtime_environment={"concurrency": None},
+            config_defaults={"module_name": "great_expectations.execution_engine"},
         )
 
     def add_asset(
@@ -77,7 +80,7 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
         if base_directory == None:
             #!!! regex and batch_identifiers should be None
             pass
-            
+
         else:
             #!!! Make sure that regex and batch_identifiers are present,
             #!!! ...and share the same number of matching groups and identifiers, respectively
@@ -89,7 +92,7 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
             method=method,
             base_directory=base_directory,
             regex=regex,
-            batch_identifiers=batch_identifiers
+            batch_identifiers=batch_identifiers,
         )
 
         # else:
@@ -113,9 +116,9 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
         func = getattr(pd, asset.method)
 
         filename = convert_batch_identifiers_to_data_reference_string_using_regex(
-            batch_identifiers= IDDict(**batch_request.data_connector_query),
-            regex_pattern= asset.regex,
-            group_names= asset.batch_identifiers,
+            batch_identifiers=IDDict(**batch_request.data_connector_query),
+            regex_pattern=asset.regex,
+            group_names=asset.batch_identifiers,
             # data_asset_name= self.name,
         )
         primary_arg = os.path.join(
@@ -141,11 +144,11 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
         batch = self.get_batch(batch_request)
         return Validator(
             execution_engine=self._execution_engine,
-            expectation_suite=None,#expectation_suite,
+            expectation_suite=None,  # expectation_suite,
             batches=[batch],
         )
 
-    def rename_asset(self, old_name:str, new_name:str) -> None:
+    def rename_asset(self, old_name: str, new_name: str) -> None:
         if not isinstance(new_name, str):
             raise TypeError(f"new_name must be of type str, not {type(new_name)}.")
 
@@ -188,8 +191,3 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
         args = [i for j, i in enumerate(args) if j not in remove_indices]
 
         return args, kwargs
-
-
-
-
-

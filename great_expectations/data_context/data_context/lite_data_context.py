@@ -92,7 +92,4 @@ class LiteDataContext(BaseDataContext):
         **kwargs,
     ) -> NewNewNewDatasource:
         class_ = load_class(class_name=class_name, module_name=module_name)
-        self._cached_datasources[name] = class_(
-            name=name,
-            **kwargs
-        )
+        self._cached_datasources[name] = class_(name=name, **kwargs)

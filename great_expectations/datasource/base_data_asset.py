@@ -1,7 +1,7 @@
+import logging
 from abc import ABC
 from dataclasses import dataclass
-import logging
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.types import SerializableDictDot
@@ -17,7 +17,6 @@ class BatchIdentifierException(BaseException):
     pass
 
 
-
 ### Second approach to BatchRequests ###
 
 
@@ -25,9 +24,11 @@ class BatchIdentifierException(BaseException):
 class DataConnectorQuery(dict, SerializableDictDot):
     pass
 
+
 # !!! I kinda hate this name
 class BatchSpecPassthrough(dict, SerializableDictDot):
     pass
+
 
 @dataclass
 class NewBatchRequestBase(SerializableDictDot, ABC):
@@ -36,14 +37,15 @@ class NewBatchRequestBase(SerializableDictDot, ABC):
     data_asset_name: str
     data_connector_query: DataConnectorQuery
 
+
 @dataclass
 class NewConfiguredBatchRequest(NewBatchRequestBase):
     batch_spec_passthrough: BatchSpecPassthrough
 
+
 @dataclass
 class NewRuntimeBatchRequest(NewBatchRequestBase):
     data: BatchSpecPassthrough
-
 
 
 ### First approach to BatchRequests ###
@@ -101,14 +103,12 @@ class NewRuntimeBatchRequest(NewBatchRequestBase):
 #         ])
 
 
-
 class BaseDataAsset:
-
     def __init__(
         self,
-        datasource, #Should be of type: V15Datasource
+        datasource,  # Should be of type: V15Datasource
         name: str,
-        batch_identifiers: List[str]
+        batch_identifiers: List[str],
     ) -> None:
         self._datasource = datasource
         self._name = name

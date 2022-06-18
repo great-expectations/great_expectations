@@ -97,7 +97,7 @@ class DictDot:
         if self.__contains__(key=key):
             return self.__getitem__(item=key)
         return self.__dict__.get(key, default_value)
-    
+
     def pop(self, key):
         value = self[key]
         self.__delattr__(key)

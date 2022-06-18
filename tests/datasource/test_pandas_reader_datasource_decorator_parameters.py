@@ -1,22 +1,24 @@
 import datetime
 
 import pandas as pd
-from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewConfiguredBatchRequest
-from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
 import pytest
 import sqlalchemy as sa
 
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.base_data_asset import (
+    BatchSpecPassthrough,
+    DataConnectorQuery,
+    NewConfiguredBatchRequest,
+)
+from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
 from great_expectations.datasource.runtime_pandas_datasource import (
     RuntimePandasDatasource,
 )
-from tests.test_utils import (
-    _get_batch_request_from_validator,
-    _get_data_from_validator,
-)
+from tests.test_utils import _get_batch_request_from_validator, _get_data_from_validator
 
 ### Tests for RuntimePandasDatasource.read_csv ###
 # These are thorough, covering pretty much all of the API surface area for the new read_* methods, including error states
+
 
 def test_PandasReaderDatasource_read_csv_basic():
     my_datasource = RuntimePandasDatasource("my_datasource")
@@ -35,17 +37,18 @@ def test_PandasReaderDatasource_read_csv_basic():
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert my_batch_request == NewConfiguredBatchRequest(
-        datasource_name= "my_datasource",
-        data_asset_name= "DEFAULT_DATA_ASSET",
-        data_connector_query= DataConnectorQuery(
-            timestamp= 0,
-            id_= file_relative_path(__file__, "fixtures/example_1.csv"),
+        datasource_name="my_datasource",
+        data_asset_name="DEFAULT_DATA_ASSET",
+        data_connector_query=DataConnectorQuery(
+            timestamp=0,
+            id_=file_relative_path(__file__, "fixtures/example_1.csv"),
         ),
-        batch_spec_passthrough= BatchSpecPassthrough(
-            args = [],
-            kwargs = {},
-        )
+        batch_spec_passthrough=BatchSpecPassthrough(
+            args=[],
+            kwargs={},
+        ),
     )
+
 
 def test_PandasReaderDatasource_read_csv_with_real_timestamp():
     my_datasource = RuntimePandasDatasource("my_datasource")
@@ -108,17 +111,18 @@ def test_PandasReaderDatasource_read_csv_with_sep():
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert my_batch_request == NewConfiguredBatchRequest(
-        datasource_name= "my_datasource",
-        data_asset_name= "DEFAULT_DATA_ASSET",
-        data_connector_query= DataConnectorQuery(
-            timestamp= 0,
-            id_= file_relative_path(__file__, "fixtures/example_2.csv"),
+        datasource_name="my_datasource",
+        data_asset_name="DEFAULT_DATA_ASSET",
+        data_connector_query=DataConnectorQuery(
+            timestamp=0,
+            id_=file_relative_path(__file__, "fixtures/example_2.csv"),
         ),
-        batch_spec_passthrough= BatchSpecPassthrough(
-            args = [],
-            kwargs = {"sep": "   "},
-        )
+        batch_spec_passthrough=BatchSpecPassthrough(
+            args=[],
+            kwargs={"sep": "   "},
+        ),
     )
+
 
 def test_PandasReaderDatasource_read_csv_with_sep_as_positional_arg():
     my_datasource = RuntimePandasDatasource("my_datasource")
@@ -138,17 +142,18 @@ def test_PandasReaderDatasource_read_csv_with_sep_as_positional_arg():
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert my_batch_request == NewConfiguredBatchRequest(
-        datasource_name= "my_datasource",
-        data_asset_name= "DEFAULT_DATA_ASSET",
-        data_connector_query= DataConnectorQuery(
-            timestamp= 0,
-            id_= file_relative_path(__file__, "fixtures/example_2.csv"),
+        datasource_name="my_datasource",
+        data_asset_name="DEFAULT_DATA_ASSET",
+        data_connector_query=DataConnectorQuery(
+            timestamp=0,
+            id_=file_relative_path(__file__, "fixtures/example_2.csv"),
         ),
-        batch_spec_passthrough= BatchSpecPassthrough(
-            args = ["   "],
-            kwargs = {},
-        )
+        batch_spec_passthrough=BatchSpecPassthrough(
+            args=["   "],
+            kwargs={},
+        ),
     )
+
 
 def test_PandasReaderDatasource_read_csv_with_buffer():
     my_datasource = RuntimePandasDatasource("my_datasource")
@@ -169,22 +174,23 @@ def test_PandasReaderDatasource_read_csv_with_buffer():
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert my_batch_request == NewConfiguredBatchRequest(
-        datasource_name= "my_datasource",
-        data_asset_name= "DEFAULT_DATA_ASSET",
-        data_connector_query= DataConnectorQuery(
-            timestamp= 0,
-            id_= None,
+        datasource_name="my_datasource",
+        data_asset_name="DEFAULT_DATA_ASSET",
+        data_connector_query=DataConnectorQuery(
+            timestamp=0,
+            id_=None,
         ),
-        batch_spec_passthrough= BatchSpecPassthrough(
-            args = [],
-            kwargs = {},
-        )
+        batch_spec_passthrough=BatchSpecPassthrough(
+            args=[],
+            kwargs={},
+        ),
     )
+
 
 @pytest.mark.skip(reason="Unsure if this is the behavior that we want.")
 def test_PandasReaderDatasource_read_csv_with_buffer_and_use_primary_arg_as_id():
     # !!! Here's what this does currently. I'm not sure if this is the behavior that we want.
-    #TypeError: <_io.TextIOWrapper name='/Users/abe/Documents/great_expectations/tests/datasource/fixtures/example_1.csv' mode='r' encoding='UTF-8'> is of type TextIOWrapper which cannot be serialized.
+    # TypeError: <_io.TextIOWrapper name='/Users/abe/Documents/great_expectations/tests/datasource/fixtures/example_1.csv' mode='r' encoding='UTF-8'> is of type TextIOWrapper which cannot be serialized.
 
     my_datasource = RuntimePandasDatasource("my_datasource")
     with pytest.raises(TypeError):
@@ -240,8 +246,6 @@ def test_PandasReaderDatasource_read_csv_with_nonserializable_parameter():
     }
 
 
-
-
 def test_PandasReaderDatasource_read_csv__with_data_asset_name():
     my_datasource = RuntimePandasDatasource("my_datasource")
     assert my_datasource.list_asset_names() == []
@@ -262,24 +266,24 @@ def test_PandasReaderDatasource_read_csv__with_data_asset_name():
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert my_batch_request == NewConfiguredBatchRequest(
-        datasource_name= "my_datasource",
-        data_asset_name= "my_new_data_asset",
-        data_connector_query= DataConnectorQuery(
-            timestamp= 0,
-            id_= file_relative_path(__file__, "fixtures/example_1.csv"),
+        datasource_name="my_datasource",
+        data_asset_name="my_new_data_asset",
+        data_connector_query=DataConnectorQuery(
+            timestamp=0,
+            id_=file_relative_path(__file__, "fixtures/example_1.csv"),
         ),
-        batch_spec_passthrough= BatchSpecPassthrough(
-            args = [],
-            kwargs = {},
-        )
+        batch_spec_passthrough=BatchSpecPassthrough(
+            args=[],
+            kwargs={},
+        ),
     )
 
     # This operation automatically configures a new asset on the datasource
     assert my_datasource.list_asset_names() == ["my_new_data_asset"]
     test_asset = PandasReaderDataAsset(
         datasource=my_datasource,
-        name = "my_new_data_asset",
-        base_directory = "",
+        name="my_new_data_asset",
+        base_directory="",
         batch_identifiers=["filename"],
         method="read_csv",
         regex="(.*)",

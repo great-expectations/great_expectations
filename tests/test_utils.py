@@ -850,6 +850,7 @@ def _get_batch_request_from_validator(validator):
     my_batch_request = my_batch.batch_request
     return my_batch_request
 
+
 def _get_data_from_validator(validator):
     """Utility method to unpack batch_requests from Validators
 

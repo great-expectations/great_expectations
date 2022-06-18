@@ -1,18 +1,18 @@
 import datetime
 
 import pandas as pd
-from great_expectations.datasource.base_data_asset import NewConfiguredBatchRequest
 import pytest
 import sqlalchemy as sa
 
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.runtime_pandas_datasource import RuntimePandasDatasource
-from tests.test_utils import (
-    _get_batch_request_from_validator,
-    _get_data_from_validator,
+from great_expectations.datasource.base_data_asset import NewConfiguredBatchRequest
+from great_expectations.datasource.runtime_pandas_datasource import (
+    RuntimePandasDatasource,
 )
+from tests.test_utils import _get_batch_request_from_validator, _get_data_from_validator
 
 ### Tests of other methods. These don't go into edge cases, because we trust the decorators to cover them.
+
 
 def test_PandasReaderDatasource_read_json():
     my_datasource = RuntimePandasDatasource("my_datasource")
@@ -135,7 +135,7 @@ def test_PandasReaderDatasource_read_sql_table_with_con_as_positional_arg(
         "test_table", sqlite_engine, timestamp=0
     )
 
-    my_data = _get_data_from_validator(my_validator)    
+    my_data = _get_data_from_validator(my_validator)
     assert isinstance(my_data, pd.DataFrame)
     assert my_data.to_dict() == {
         "a": {0: 1, 1: 4},
@@ -181,15 +181,12 @@ def test_PandasReaderDatasource_read_sql_with_query(sqlite_engine):
         "SELECT * FROM test_table;", con=sqlite_engine, timestamp=0
     )
     my_data = _get_data_from_validator(my_validator)
-    assert isinstance(
-        my_data, pd.DataFrame
-    )
+    assert isinstance(my_data, pd.DataFrame)
     assert my_data.to_dict() == {
         "a": {0: 1, 1: 4},
         "b": {0: 2, 1: 5},
         "c": {0: 3, 1: 6},
     }
-
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert isinstance(my_batch_request, NewConfiguredBatchRequest)
@@ -204,7 +201,7 @@ def test_PandasReaderDatasource_read_sql_with_query(sqlite_engine):
 def test_PandasReaderDatasource_read_sql_with_table(sqlite_engine):
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_sql("test_table", con=sqlite_engine, timestamp=0)
-    
+
     my_data = _get_data_from_validator(my_validator)
     assert isinstance(my_data, pd.DataFrame)
     assert my_data.to_dict() == {
@@ -212,8 +209,10 @@ def test_PandasReaderDatasource_read_sql_with_table(sqlite_engine):
         "b": {0: 2, 1: 5},
         "c": {0: 3, 1: 6},
     }
-    
-    my_batch_request: NewConfiguredBatchRequest = _get_batch_request_from_validator(my_validator)
+
+    my_batch_request: NewConfiguredBatchRequest = _get_batch_request_from_validator(
+        my_validator
+    )
     assert isinstance(my_batch_request, NewConfiguredBatchRequest)
     assert my_batch_request.batch_spec_passthrough["args"] == []
     assert my_batch_request.batch_spec_passthrough["kwargs"] == {}
@@ -244,7 +243,7 @@ def test_PandasReaderDatasource_read_dataframe():
         my_batch_request.batch_spec_passthrough["batch_data"], pd.DataFrame
     )
 
-    print("&"*80)
+    print("&" * 80)
     print(my_batch_request)
     print(my_batch_request.batch_spec_passthrough)
     print(my_data)

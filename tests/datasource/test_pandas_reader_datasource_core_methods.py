@@ -1,42 +1,45 @@
 import datetime
 
 import pandas as pd
-from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewConfiguredBatchRequest
-from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
-from great_expectations.types import DictDot
 import pytest
 import sqlalchemy as sa
 
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.base_data_asset import (
+    BatchSpecPassthrough,
+    DataConnectorQuery,
+    NewConfiguredBatchRequest,
+)
 from great_expectations.datasource.configured_pandas_datasource import (
     ConfiguredPandasDatasource,
 )
-from tests.test_utils import (
-    create_files_in_directory,
-)
-
+from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
+from great_expectations.types import DictDot
 from tests.datasource.new_fixtures import test_dir_alpha
+from tests.test_utils import create_files_in_directory
+
 
 def test_PandasReaderDatasource_method_list():
     my_datasource = ConfiguredPandasDatasource("my_datasource")
     dir_results = dir(my_datasource)
-    filtered_dir_results = [ r for r in dir_results if r[0] != "_"]
+    filtered_dir_results = [r for r in dir_results if r[0] != "_"]
     print("\n".join(filtered_dir_results))
 
-    assert set(filtered_dir_results) == set({
-        # Properties
-        "name",
-        "assets",
-
-        # Core methods
-        "add_asset",
-        "rename_asset",
-        "get_batch",
-        ### "get_batches", #!!! Add this later
-        "get_validator",
-        "list_asset_names",
-        # "self_check",
-    })
+    assert set(filtered_dir_results) == set(
+        {
+            # Properties
+            "name",
+            "assets",
+            # Core methods
+            "add_asset",
+            "rename_asset",
+            "get_batch",
+            ### "get_batches", #!!! Add this later
+            "get_validator",
+            "list_asset_names",
+            # "self_check",
+        }
+    )
 
 
 def test_PandasReaderDatasource_add_asset(test_dir_alpha):
@@ -56,7 +59,7 @@ def test_PandasReaderDatasource_add_asset(test_dir_alpha):
 
     # !!! Some of these tests should fail.
 
-    #duplicate asset name
+    # duplicate asset name
     my_datasource.add_asset(
         name="test_dir_alpha",
         base_directory="test_file_directories/test_dir_alpha/",
@@ -68,37 +71,37 @@ def test_PandasReaderDatasource_add_asset(test_dir_alpha):
         base_directory="test_file_directories/test_dir_alpha/",
     )
 
-
-    #relative filepath
+    # relative filepath
     my_datasource.add_asset(
         name="test_dir_alpha",
         base_directory="test_file_directories/test_dir_alpha/",
     )
 
-    #absolute filepath
+    # absolute filepath
     my_datasource.add_asset(
         name="test_dir_alpha",
-        base_directory="test_file_directories/test_dir_alpha/", #!!! Make this absolute
-    #     regex="(*.)\.csv", # Regex defaults to the whole filename
-    #     batch_identifiers=[("filename_letter")], #batch_identifiers defaults to "filename"
-    #     sorter
-    #     method_for_loading="read_csv", #method_for_loading defaults to read_csv
-    #     other arguments
+        base_directory="test_file_directories/test_dir_alpha/",  #!!! Make this absolute
+        #     regex="(*.)\.csv", # Regex defaults to the whole filename
+        #     batch_identifiers=[("filename_letter")], #batch_identifiers defaults to "filename"
+        #     sorter
+        #     method_for_loading="read_csv", #method_for_loading defaults to read_csv
+        #     other arguments
     )
 
-    #using regex and batch_identifiers
+    # using regex and batch_identifiers
     my_datasource.add_asset(
         name="test_dir_alpha",
         base_directory="test_file_directories/test_dir_alpha/",
         regex="(*.)\\.csv",
         batch_identifiers=["filename_letter"],
-    #     method_for_loading="read_csv", #method_for_loading defaults to read_csv
-    #     other arguments
+        #     method_for_loading="read_csv", #method_for_loading defaults to read_csv
+        #     other arguments
     )
 
-    #using custom sorters
+    # using custom sorters
 
     # assert my_datasource.list_asset_names() == ["test_dir_alpha"]
+
 
 def test_PandasReaderDatasource_rename_asset():
     my_datasource = ConfiguredPandasDatasource("my_datasource")
@@ -122,7 +125,6 @@ def test_PandasReaderDatasource_rename_asset():
         # An asset named B already exists
         my_datasource.rename_asset("A", "B")
     assert my_datasource.list_asset_names() == ["B", "A"]
-
 
 
 def test_PandasReaderDatasource_asset_property(test_dir_alpha):
@@ -163,6 +165,7 @@ def test_PandasReaderDatasource_asset_property(test_dir_alpha):
         batch_identifiers=["filename"],
     )
 
+
 def test_PandasReaderDatasource_get_batch(test_dir_alpha):
     my_datasource = ConfiguredPandasDatasource("my_datasource")
     my_datasource.add_asset(
@@ -176,9 +179,7 @@ def test_PandasReaderDatasource_get_batch(test_dir_alpha):
     batch_request = NewConfiguredBatchRequest(
         datasource_name="my_datasource",
         data_asset_name="test_dir_alpha",
-        data_connector_query=DataConnectorQuery(
-            filename="A"
-        ),
+        data_connector_query=DataConnectorQuery(filename="A"),
         batch_spec_passthrough=BatchSpecPassthrough(
             args=[],
             kwargs={},
@@ -186,9 +187,11 @@ def test_PandasReaderDatasource_get_batch(test_dir_alpha):
     )
     my_datasource.get_batch(batch_request)
 
+
 # !!!
 def test_PandasReaderDatasource_get_validator(test_dir_alpha):
     pass
+
 
 # !!!
 def test_PandasReaderDatasource_list_asset_names(test_dir_alpha):

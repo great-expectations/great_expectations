@@ -1,5 +1,6 @@
-
-from great_expectations.datasource.new_sqlalchemy_datasource import NewSqlAlchemyDatasource
+from great_expectations.datasource.new_sqlalchemy_datasource import (
+    NewSqlAlchemyDatasource,
+)
 
 
 def test_NewSqlAlchemyDatasource_instantiation():

@@ -11,8 +11,15 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewBatchRequestBase, NewConfiguredBatchRequest
-from great_expectations.datasource.data_connector.util import convert_batch_identifiers_to_data_reference_string_using_regex
+from great_expectations.datasource.base_data_asset import (
+    BatchSpecPassthrough,
+    DataConnectorQuery,
+    NewBatchRequestBase,
+    NewConfiguredBatchRequest,
+)
+from great_expectations.datasource.data_connector.util import (
+    convert_batch_identifiers_to_data_reference_string_using_regex,
+)
 from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
 from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
 from great_expectations.marshmallow__shade.fields import Bool
@@ -20,12 +27,13 @@ from great_expectations.types import DictDot
 from great_expectations.validator.validator import Validator
 
 #!!! Keep this? It disables some annoying pandas warnings.
-warnings.simplefilter(action='ignore', category=FutureWarning)
-warnings.simplefilter(action='ignore', category=pd.errors.ParserWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
+warnings.simplefilter(action="ignore", category=pd.errors.ParserWarning)
 
 #!!! Factor this out to somewhere nicer
 class GxExperimentalWarning(Warning):
     pass
+
 
 #!!! Could this decorator be moved inside PandasReaderDataSource, maybe as a staticmethod?
 def _add_gx_args(
@@ -119,8 +127,8 @@ def _add_gx_args(
                 pass
             else:
                 self.add_asset(
-                    name = data_asset_name,
-                    base_directory = "",
+                    name=data_asset_name,
+                    base_directory="",
                 )
 
         df = func(self, primary_arg, *args, **kwargs)
@@ -136,14 +144,14 @@ def _add_gx_args(
             data_asset_name=data_asset_name,
             #!!! Revisit the parameters passed to DataConnectorQuery---these two make sense for Runtime requests, but not Configured requests.
             data_connector_query=DataConnectorQuery(
-                id_= id_,
-                timestamp= timestamp,
+                id_=id_,
+                timestamp=timestamp,
             ),
             batch_spec_passthrough=BatchSpecPassthrough(
                 # method= func,
                 # primary_arg= primary_arg,
-                args= list(args),
-                kwargs= kwargs,
+                args=list(args),
+                kwargs=kwargs,
             ),
         )
 
@@ -154,7 +162,7 @@ def _add_gx_args(
 
         validator = Validator(
             execution_engine=self._execution_engine,
-            expectation_suite=None,#expectation_suite,
+            expectation_suite=None,  # expectation_suite,
             batches=[batch],
         )
 
@@ -166,7 +174,7 @@ def _add_gx_args(
 class RuntimePandasDatasource(NewNewNewDatasource):
     """
     This class is enables very simple syntax for users who are just getting started with Great Expectations, and have not configured (or learned about) Datasources and DataConnectors. To do so, it provides thin wrapper methods for all 20 of pandas' `read_*` methods.
-    
+
 
     From a LiteDataContext, it can be invoked as follows: `my_context.datasources.default_pandas_reader.read_csv`
 
@@ -240,12 +248,8 @@ class RuntimePandasDatasource(NewNewNewDatasource):
                 "class_name": "PandasExecutionEngine",
                 "module_name": "great_expectations.execution_engine",
             },
-            runtime_environment={
-                "concurrency": None
-            },
-            config_defaults={
-                "module_name": "great_expectations.execution_engine"
-            },
+            runtime_environment={"concurrency": None},
+            config_defaults={"module_name": "great_expectations.execution_engine"},
         )
 
     def add_asset(
@@ -264,7 +268,7 @@ class RuntimePandasDatasource(NewNewNewDatasource):
         if base_directory == None:
             #!!! regex and batch_identifiers should be None
             pass
-            
+
         else:
             #!!! Make sure that regex and batch_identifiers are present,
             #!!! ...and share the same number of matching groups and identifiers, respectively
@@ -276,7 +280,7 @@ class RuntimePandasDatasource(NewNewNewDatasource):
             method=method,
             base_directory=base_directory,
             regex=regex,
-            batch_identifiers=batch_identifiers
+            batch_identifiers=batch_identifiers,
         )
 
         # else:
@@ -300,9 +304,9 @@ class RuntimePandasDatasource(NewNewNewDatasource):
         func = getattr(pd, asset.method)
 
         filename = convert_batch_identifiers_to_data_reference_string_using_regex(
-            batch_identifiers= IDDict(**batch_request.data_connector_query),
-            regex_pattern= asset.regex,
-            group_names= asset.batch_identifiers,
+            batch_identifiers=IDDict(**batch_request.data_connector_query),
+            regex_pattern=asset.regex,
+            group_names=asset.batch_identifiers,
             # data_asset_name= self.name,
         )
         primary_arg = os.path.join(
@@ -328,11 +332,11 @@ class RuntimePandasDatasource(NewNewNewDatasource):
         batch = self.get_batch(batch_request)
         return Validator(
             execution_engine=self._execution_engine,
-            expectation_suite=None,#expectation_suite,
+            expectation_suite=None,  # expectation_suite,
             batches=[batch],
         )
 
-    def rename_asset(self, old_name:str, new_name:str) -> None:
+    def rename_asset(self, old_name: str, new_name: str) -> None:
         if not isinstance(new_name, str):
             raise TypeError(f"new_name must be of type str, not {type(new_name)}.")
 
@@ -485,7 +489,3 @@ class RuntimePandasDatasource(NewNewNewDatasource):
     @_add_gx_args(primary_arg_variable_name="path", default_use_primary_arg_as_id=True)
     def read_spss(self, primary_arg, *args, **kwargs):
         return pd.read_spss(primary_arg, *args, **kwargs)
-
-
-
-

@@ -1,13 +1,21 @@
 from typing import List
-import sqlalchemy as sa
+
 import pandas as pd
+import sqlalchemy as sa
+
 from great_expectations.core.batch import Batch
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewConfiguredBatchRequest
-from great_expectations.datasource.data_connector.util import convert_batch_identifiers_to_data_reference_string_using_regex
-
+from great_expectations.datasource.base_data_asset import (
+    BatchSpecPassthrough,
+    DataConnectorQuery,
+    NewConfiguredBatchRequest,
+)
+from great_expectations.datasource.data_connector.util import (
+    convert_batch_identifiers_to_data_reference_string_using_regex,
+)
 from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
 from great_expectations.validator.validator import Validator
+
 
 class NewSqlAlchemyDatasource(NewNewNewDatasource):
     def __init__(
@@ -25,14 +33,9 @@ class NewSqlAlchemyDatasource(NewNewNewDatasource):
                 "class_name": "PandasExecutionEngine",
                 "module_name": "great_expectations.execution_engine",
             },
-            runtime_environment={
-                "concurrency": None
-            },
-            config_defaults={
-                "module_name": "great_expectations.execution_engine"
-            },
+            runtime_environment={"concurrency": None},
+            config_defaults={"module_name": "great_expectations.execution_engine"},
         )
-
 
     def _connect_engine(self):
         if self._engine == None:
@@ -50,7 +53,6 @@ class NewSqlAlchemyDatasource(NewNewNewDatasource):
         )
         return self.get_validator(batch_request)
 
-
     def list_tables(self) -> List[str]:
         self._connect_engine()
 
@@ -63,7 +65,6 @@ class NewSqlAlchemyDatasource(NewNewNewDatasource):
                 print("Table: %s" % table_name)
                 # for column in inspector.get_columns(table_name, schema=schema):
                 #     print("Column: %s" % column)
-
 
     def get_batch(self, batch_request: NewConfiguredBatchRequest) -> Batch:
         self._connect_engine()
@@ -84,6 +85,6 @@ class NewSqlAlchemyDatasource(NewNewNewDatasource):
         batch = self.get_batch(batch_request)
         return Validator(
             execution_engine=self._execution_engine,
-            expectation_suite=None,#expectation_suite,
+            expectation_suite=None,  # expectation_suite,
             batches=[batch],
-        )            
+        )
