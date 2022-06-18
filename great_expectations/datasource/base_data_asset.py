@@ -6,7 +6,7 @@ from typing_extensions import Self
 
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.datasource.misc_types import NewBatchRequestBase
-from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
+# from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class BaseDataAsset:
         self._batch_identifiers = batch_identifiers
 
     @property
-    def datasource(self) -> NewNewNewDatasource:
+    def datasource(self): # Should be: -> NewNewNewDatasource:
         return self._datasource
 
     @property

@@ -226,26 +226,8 @@ class RuntimePandasDatasource(NewNewNewDatasource):
         self,
         name,
     ):
-        #!!! Trying this on for size
-        # experimental-v0.15.1
-        # warnings.warn(
-        #     "\n================================================================================\n" \
-        #     "RuntimePandasDatasource is an experimental feature of Great Expectations\n" \
-        #     "You should consider the API to be unstable.\n" \
-        #     "\n" \
-        #     "You can disable this warning by calling: \n" \
-        #     "from great_expectations.warnings import GxExperimentalWarning\n" \
-        #     "warnings.simplefilter(action=\"ignore\", category=GxExperimentalWarning)\n" \
-        #     "\n" \
-        #     "If you have questions or feedback, please chime in at\n" \
-        #     "https://github.com/great-expectations/great_expectations/discussions/DISCUSSION-ID-GOES-HERE\n" \
-        #     "================================================================================\n",
-        #     GxExperimentalWarning,
-        # )
-
-        self._name = name
-        self._assets = DictDot()
-
+        super().__init__(name=name)
+        
         self._execution_engine = instantiate_class_from_config(
             config={
                 "class_name": "PandasExecutionEngine",
@@ -274,9 +256,6 @@ class RuntimePandasDatasource(NewNewNewDatasource):
 
         return new_asset
 
-    def list_asset_names(self) -> List[str]:
-        return list(self.assets.keys())
-
     def get_batch(self, batch_request: NewConfiguredBatchRequest) -> Batch:
         asset = self.assets[batch_request.data_asset_name]
 
@@ -286,7 +265,6 @@ class RuntimePandasDatasource(NewNewNewDatasource):
             batch_identifiers=IDDict(**batch_request.batch_identifiers),
             regex_pattern=asset.regex,
             group_names=asset.batch_identifiers,
-            # data_asset_name= self.name,
         )
         primary_arg = os.path.join(
             asset.base_directory,
@@ -307,26 +285,13 @@ class RuntimePandasDatasource(NewNewNewDatasource):
 
         return batch
 
-    def get_validator(self, batch_request: NewConfiguredBatchRequest) -> Batch:
+    def get_validator(self, batch_request: NewConfiguredBatchRequest) -> Validator:
         batch = self.get_batch(batch_request)
         return Validator(
             execution_engine=self._execution_engine,
-            expectation_suite=None,  # expectation_suite,
+            expectation_suite=None,
             batches=[batch],
         )
-
-    def rename_asset(self, old_name: str, new_name: str) -> None:
-        if not isinstance(new_name, str):
-            raise TypeError(f"new_name must be of type str, not {type(new_name)}.")
-
-        if new_name in self._assets.keys():
-            raise KeyError(f"An asset named {new_name} already exists.")
-
-        self._assets[new_name] = self._assets.pop(old_name)
-        asset = self._assets[new_name]
-        asset.set_name(new_name)
-
-        return asset
 
     @property
     def assets(self) -> Dict[str, RuntimePandasDataAsset]:
