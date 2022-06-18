@@ -34,7 +34,7 @@ def test_ConfiguredPandasDatasource_method_list():
             "add_asset",
             "rename_asset",
             "get_batch",
-            ### "get_batches", #!!! Add this later
+            # "get_batches", #!!! Add this later
             "get_validator",
             "list_asset_names",
             # "self_check",

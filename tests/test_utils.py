@@ -845,7 +845,7 @@ def _get_batch_request_from_validator(validator):
     """
     key_ = list(validator.batches)[0]
     my_batch = validator.batches[key_]
-    print(my_batch.batch_request.to_dict())
+    # print(my_batch.batch_request.to_dict())
 
     my_batch_request = my_batch.batch_request
     return my_batch_request

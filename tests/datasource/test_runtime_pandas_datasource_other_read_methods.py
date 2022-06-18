@@ -1,3 +1,4 @@
+import datetime
 import warnings
 
 import pandas as pd
@@ -5,7 +6,7 @@ import pytest
 import sqlalchemy as sa
 
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.misc_types import NewConfiguredBatchRequest
+from great_expectations.datasource.misc_types import BatchIdentifiers, NewConfiguredBatchRequest, PassthroughParameters
 from great_expectations.datasource.runtime_pandas_datasource import (
     RuntimePandasDatasource,
 )
@@ -251,3 +252,26 @@ def test_RuntimePandasDatasource_read_dataframe():
         "timestamp": 0,
         "id_": None,
     }
+
+
+# !!! Move this to a different file
+
+def test_NewConfiguredBatchRequest__str__():
+    assert NewConfiguredBatchRequest(
+        datasource_name='runtime_pandas',
+        data_asset_name='DEFAULT_DATA_ASSET',
+        batch_identifiers=BatchIdentifiers(
+            id_= None,
+            timestamp= datetime.datetime(2022, 6, 18, 10, 1, 25, 294504)
+        ),
+        passthrough_parameters=PassthroughParameters(
+            args= [],
+            kwargs= {}
+        )
+    ).__str__() == """NewConfiguredBatchRequest(
+    datasource_name='runtime_pandas',
+    data_asset_name='DEFAULT_DATA_ASSET',
+    batch_identifiers='{'id_': None, 'timestamp': datetime.datetime(2022, 6, 18, 10, 1, 25, 294504)}',
+    passthrough_parameters='{'args': [], 'kwargs': {}}',
+)
+"""

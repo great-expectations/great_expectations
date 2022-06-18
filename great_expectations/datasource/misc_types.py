@@ -17,6 +17,17 @@ class BatchIdentifiers(dict, SerializableDictDot):
 
 class PassthroughParameters(dict, SerializableDictDot):
     pass
+    """
+    !!! For full feature parity with previous versions, this will need to support these 5 (or maybe 4) parameters.
+    batch_filter_parameters : {
+        "airflow_run_id": "string_airflow_run_id_that_was_provided",
+        "other_key": "string_other_key_that_was_provided",
+    limit: 10
+    index: Optional[Union[int, list, tuple, slice, str]],  # examples: 0; "-1"; [3:7]; "[2:4]"
+    partition_index #!!! Unclear if this is different from index. Needs investigation
+    custom_filter_function: my_filter_fn #!!! In order for this to be serializable, we're probably going to need to implement a filter_fn registry.
+    """
+
 
 class GxData(object):
     pass
@@ -32,6 +43,17 @@ class NewBatchRequestBase(SerializableDictDot, ABC):
 @dataclass
 class NewConfiguredBatchRequest(NewBatchRequestBase):
     passthrough_parameters: PassthroughParameters
+
+
+    def __str__(self) -> str:
+        return f"""NewConfiguredBatchRequest(
+    datasource_name='{self.datasource_name}',
+    data_asset_name='{self.data_asset_name}',
+    batch_identifiers='{self.batch_identifiers.__str__()}',
+    passthrough_parameters='{self.passthrough_parameters.__str__()}',
+)
+"""
+    
 
 
 @dataclass
