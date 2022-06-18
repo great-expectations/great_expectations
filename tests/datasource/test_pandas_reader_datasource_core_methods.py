@@ -208,3 +208,11 @@ def test_PandasReaderDatasource_get_batch(test_dir_alpha):
         ),
     )
     my_datasource.get_batch(batch_request)
+
+# !!!
+def test_PandasReaderDatasource_get_validator(test_dir_alpha):
+    pass
+
+# !!!
+def test_PandasReaderDatasource_list_asset_names(test_dir_alpha):
+    pass

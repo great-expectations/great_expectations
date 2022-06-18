@@ -74,15 +74,16 @@ def test_PandasReaderDataAsset_method_list():
         "method",
         "name",
         "regex",
-
-        # Methods        
         "batches",
-        "get_batch",
-        "get_batch_request",
-        "get_validator",
-        "list_batches",
+
+        # Methods
         "set_name",
-        "update_configuration",
+        "update_configuration",#
+        "list_batches",#
+        "get_batch",#
+        "get_batches",#
+        "get_batch_request",#
+        "get_validator",#
     })
 
 @pytest.fixture
@@ -131,6 +132,14 @@ def test_PandasReaderDataAsset_batches(alpha_test_files_pandas_reader_data_asset
 
 
 def test_PandasReaderDataAsset_update_configuration():
+    #!!!
+    pass
+
+def test_PandasReaderDataAsset_get_batch():
+    #!!!
+    pass
+
+def test_PandasReaderDataAsset_get_batches():
     #!!!
     pass
 

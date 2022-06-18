@@ -112,9 +112,13 @@ class PandasReaderDataAsset(BaseDataAsset):
 
         return validator
 
-    #!!! not a batch
+    #!!! This currently returns a Validator, not a Batch
     def get_batch(self, *batch_identifier_args, **batch_identifier_kwargs) -> Validator:
         return self.get_validator(*batch_identifier_args, **batch_identifier_kwargs)
+
+    #!!! Not sure what this method signature should be
+    def get_batches(self, *batch_identifier_args, **batch_identifier_kwargs) -> Validator:
+        raise NotImplementedError
 
     def list_batches(self) -> List[BatchRequest]:
         asset_paths = get_filesystem_one_level_directory_glob_path_list(
@@ -124,6 +128,11 @@ class PandasReaderDataAsset(BaseDataAsset):
         return asset_paths
 
     def set_name(self, name:str):
+        """Changes the DataAsset's name.
+        
+        Note: This method is intended to be called only from PandasDataSource.rename_asset.
+        This will keep the name of the asset in sync with the key in the Datasource's _asset registry.
+        """
         self._name = name
 
     @property
