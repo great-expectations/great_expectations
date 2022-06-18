@@ -69,6 +69,7 @@ def test_ConfiguredPandasDataAsset_method_list():
     assert set(filtered_dir_results) == set(
         {
             # Properties
+            "datasource",
             "name",
             "base_directory",
             "batch_identifiers",
