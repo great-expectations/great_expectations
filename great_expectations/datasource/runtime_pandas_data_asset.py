@@ -57,15 +57,6 @@ class RuntimePandasDataAsset(BaseDataAsset):
         if batch_identifiers != None:
             self._batch_identifiers = batch_identifiers
 
-        if method != None:
-            self._method = method
-
-        if base_directory != None:
-            self._base_directory = base_directory
-
-        if regex != None:
-            self._regex = regex
-
         return self
 
     def get_batch_request(
