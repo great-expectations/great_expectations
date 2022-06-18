@@ -1,6 +1,7 @@
 import copy
 import datetime
 import logging
+import math
 import random
 import re
 import string
@@ -344,9 +345,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "snowflake",
             "mysql",
         ]:
+            dialect = self.engine.dialect.name.lower()
+            raw_connection = self.engine.raw_connection()
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
+            if dialect == "sqlite":
+                raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
