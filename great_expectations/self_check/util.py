@@ -90,8 +90,6 @@ except ImportError:
     spark_DataFrame = type(None)
 
 try:
-    import sqlite3
-
     import sqlalchemy.dialects.sqlite as sqlitetypes
 
     # noinspection PyPep8Naming
@@ -109,7 +107,6 @@ try:
         "TIMESTAMP": sqlitetypes.TIMESTAMP,
     }
 except (ImportError, KeyError):
-    sqlite3 = None
     sqlitetypes = None
     sqliteDialect = None
     SQLITE_TYPES = {}
