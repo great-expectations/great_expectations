@@ -57,7 +57,7 @@ def _add_gx_args(
 
     The decorator itself accepts 3 optional arguments:
     * primary_arg_variable_name : If the read_* method has a first positional argument, then primary_arg_variable_name should match the name of the first argument in the pandas method declaration. For example for read_csv, it's "filepath_or_buffer"
-    * default_use_primary_arg_as_id : When the read_* method is called, the first positional argument (aka "primary_arg") might or might make sense to keep as an id_ in BatchRequest.batch_identifiers. For example, a filename passed to read_parquet could be a good id_, but a large JSON object passed to read_jon, probably isn't. default_use_primary_arg_as_id specifies the default value that the PandasReaderDatasource.read_* method will use.
+    * default_use_primary_arg_as_id : When the read_* method is called, the first positional argument (aka "primary_arg") might or might make sense to keep as an id_ in BatchRequest.batch_identifiers. For example, a filename passed to read_parquet could be a good id_, but a large JSON object passed to read_jon, probably isn't. default_use_primary_arg_as_id specifies the default value that the RuntimePandasDatasource.read_* method will use.
         * True : Default to using the primary_arg as an id_
         * False : Default to not using the primary_arg as an id_
         * None : Use _decide_whether_to_use_variable_as_identifier to make the call on a case-by-case basis
@@ -233,7 +233,7 @@ class RuntimePandasDatasource(NewNewNewDatasource):
         # experimental-v0.15.1
         # warnings.warn(
         #     "\n================================================================================\n" \
-        #     "PandasReaderDatasource is an experimental feature of Great Expectations\n" \
+        #     "RuntimePandasDatasource is an experimental feature of Great Expectations\n" \
         #     "You should consider the API to be unstable.\n" \
         #     "If you have questions or feedback, please chime in at\n" \
         #     "https://github.com/great-expectations/great_expectations/discussions/DISCUSSION-ID-GOES-HERE\n" \

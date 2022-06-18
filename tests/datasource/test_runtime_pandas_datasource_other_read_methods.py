@@ -1,4 +1,4 @@
-import datetime
+import warnings
 
 import pandas as pd
 import pytest
@@ -11,8 +11,8 @@ from great_expectations.datasource.runtime_pandas_datasource import (
 )
 from tests.test_utils import _get_batch_request_from_validator, _get_data_from_validator
 
-### Tests of other methods. These don't go into edge cases, because we trust the decorators to cover them.
-
+### Tests of the read_* methods on RuntimePandasDatasource. Also from_dataframe.
+### These don't go into edge cases, because we trust the decorators to cover them.
 
 def test_RuntimePandasDatasource_read_json():
     my_datasource = RuntimePandasDatasource("my_datasource")
@@ -51,7 +51,6 @@ def test_RuntimePandasDatasource_read_table():
         "b": {0: 2, 1: 5},
         "c": {0: 3, 1: 6},
     }
-
 
 @pytest.mark.skip(
     "This test doesn't work on some headless infrastructure, including our CI setup."
@@ -222,7 +221,6 @@ def test_RuntimePandasDatasource_read_sql_with_table(sqlite_engine):
     }
 
 
-@pytest.mark.skip("For convenience")
 def test_RuntimePandasDatasource_read_dataframe():
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_df = pd.DataFrame(
@@ -237,22 +235,16 @@ def test_RuntimePandasDatasource_read_dataframe():
         my_df,
         timestamp=0,
     )
-    my_batch_request = _get_batch_request_from_validator(my_validator)
-
-    assert isinstance(
-        my_batch_request.batch_spec_passthrough["batch_data"], pd.DataFrame
-    )
-
-    print("&" * 80)
-    print(my_batch_request)
-    print(my_batch_request.batch_spec_passthrough)
-    print(my_data)
-
+    
+    my_data = _get_data_from_validator(my_validator)
+    assert isinstance(my_data, pd.DataFrame)
     assert my_data.to_dict() == {
         "a": {0: 1, 1: 4},
         "b": {0: 2, 1: 5},
         "c": {0: 3, 1: 6},
     }
+
+    my_batch_request = _get_batch_request_from_validator(my_validator)
     assert my_batch_request.batch_spec_passthrough["args"] == []
     assert my_batch_request.batch_spec_passthrough["kwargs"] == {}
     assert my_batch_request.data_connector_query == {
