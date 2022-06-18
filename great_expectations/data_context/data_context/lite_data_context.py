@@ -6,6 +6,7 @@ from great_expectations.data_context.data_context.base_data_context import (
 )
 from great_expectations.data_context.types.base import (
     DataContextConfig,
+    GeCloudConfig,
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.datasource import BaseDatasource
@@ -41,11 +42,11 @@ class LiteDataContext(BaseDataContext):
 
     def __init__(
         self,
-        project_config=default_context_config,
-        context_root_dir=None,
-        runtime_environment=None,
-        ge_cloud_mode=False,
-        ge_cloud_config=None,
+        project_config: DataContextConfig=default_context_config,
+        context_root_dir:str=None,
+        runtime_environment:str=None,
+        ge_cloud_mode:bool=False,
+        ge_cloud_config:GeCloudConfig=None,
     ) -> BaseDataContext:
 
         #!!! Trying this on for size...

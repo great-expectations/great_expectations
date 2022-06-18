@@ -13,15 +13,15 @@ from great_expectations.datasource.base_data_asset import (
 from great_expectations.datasource.configured_pandas_datasource import (
     ConfiguredPandasDatasource,
 )
-from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
+from great_expectations.datasource.configured_pandas_data_asset import ConfiguredPandasDataAsset
 from tests.datasource.new_fixtures import test_dir_alpha
 
 
-def test_PandasReaderDataAsset__init__(test_dir_alpha):
+def test_ConfiguredPandasDataAsset__init__(test_dir_alpha):
     my_datasource = ConfiguredPandasDatasource("my_datasource")
 
     # Smoke test
-    my_asset = PandasReaderDataAsset(
+    my_asset = ConfiguredPandasDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",
         method="read_csv",
@@ -31,20 +31,20 @@ def test_PandasReaderDataAsset__init__(test_dir_alpha):
     )
 
     # Instantiate as a runtime data asset
-    my_asset = PandasReaderDataAsset(
+    my_asset = ConfiguredPandasDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",
         batch_identifiers=["filename"],
     )
 
-    my_asset = PandasReaderDataAsset(
+    my_asset = ConfiguredPandasDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",
         batch_identifiers=["id", "timestamp"],
     )
 
     # !!! This should throw an error: "Cannot declare method or regex when base_directory=None"
-    PandasReaderDataAsset(
+    ConfiguredPandasDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",
         method="read_csv",
@@ -56,9 +56,9 @@ def test_PandasReaderDataAsset__init__(test_dir_alpha):
     # !!! If regex is not Null, the number of groups should be exactly equal to the number of parameters in batch_identifiers
 
 
-def test_PandasReaderDataAsset_method_list():
+def test_ConfiguredPandasDataAsset_method_list():
     my_datasource = ConfiguredPandasDatasource("my_datasource")
-    my_asset = PandasReaderDataAsset(
+    my_asset = ConfiguredPandasDataAsset(
         datasource=my_datasource,
         name="my_asset",
     )
@@ -89,9 +89,9 @@ def test_PandasReaderDataAsset_method_list():
 
 
 @pytest.fixture
-def alpha_test_files_pandas_reader_data_asset(test_dir_alpha) -> PandasReaderDataAsset:
+def alpha_test_files_configured_pandas_data_asset(test_dir_alpha) -> ConfiguredPandasDataAsset:
     my_datasource = ConfiguredPandasDatasource("my_datasource")
-    return PandasReaderDataAsset(
+    return ConfiguredPandasDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",
         method="read_csv",
@@ -101,10 +101,10 @@ def alpha_test_files_pandas_reader_data_asset(test_dir_alpha) -> PandasReaderDat
     )
 
 
-def test_PandasReaderDataAsset_get_batch_request(
-    alpha_test_files_pandas_reader_data_asset,
+def test_ConfiguredPandasDataAsset_get_batch_request(
+    alpha_test_files_configured_pandas_data_asset,
 ):
-    my_asset = alpha_test_files_pandas_reader_data_asset
+    my_asset = alpha_test_files_configured_pandas_data_asset
 
     my_batch_request = my_asset.get_batch_request("A")
     assert isinstance(my_batch_request, NewBatchRequestBase)
@@ -117,8 +117,8 @@ def test_PandasReaderDataAsset_get_batch_request(
 
 
 @pytest.mark.skip(reason="Doesn't work yet")
-def test_PandasReaderDataAsset_list_batches(alpha_test_files_pandas_reader_data_asset):
-    my_asset = alpha_test_files_pandas_reader_data_asset
+def test_ConfiguredPandasDataAsset_list_batches(alpha_test_files_configured_pandas_data_asset):
+    my_asset = alpha_test_files_configured_pandas_data_asset
     print(my_asset.list_batches())
     assert len(my_asset.list_batches()) == 4
 
@@ -129,36 +129,36 @@ def test_PandasReaderDataAsset_list_batches(alpha_test_files_pandas_reader_data_
 
 
 @pytest.mark.skip(reason="Doesn't work yet")
-def test_PandasReaderDataAsset_batches(alpha_test_files_pandas_reader_data_asset):
-    my_asset = alpha_test_files_pandas_reader_data_asset
+def test_ConfiguredPandasDataAsset_batches(alpha_test_files_configured_pandas_data_asset):
+    my_asset = alpha_test_files_configured_pandas_data_asset
     assert len(my_asset.batches) == 4
     assert isinstance(my_asset.batches[0], Batch)
     assert isinstance(my_asset.batches[:2], List[Batch])
 
 
-def test_PandasReaderDataAsset_update_configuration():
+def test_ConfiguredPandasDataAsset_update_configuration():
     #!!!
     pass
 
 
-def test_PandasReaderDataAsset_get_batch():
+def test_ConfiguredPandasDataAsset_get_batch():
     #!!!
     pass
 
 
-def test_PandasReaderDataAsset_get_batches():
+def test_ConfiguredPandasDataAsset_get_batches():
     #!!!
     pass
 
 
-def test_PandasReaderDataAsset_get_validator():
+def test_ConfiguredPandasDataAsset_get_validator():
     #!!!
     pass
 
 
-def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs():
+def test_ConfiguredPandasDataAsset__generate_batch_identifiers_from_args_and_kwargs():
     my_datasource = ConfiguredPandasDatasource("my_datasource")
-    my_asset = PandasReaderDataAsset(
+    my_asset = ConfiguredPandasDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",
         method="read_csv",

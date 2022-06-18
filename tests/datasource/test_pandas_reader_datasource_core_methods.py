@@ -13,7 +13,7 @@ from great_expectations.datasource.base_data_asset import (
 from great_expectations.datasource.configured_pandas_datasource import (
     ConfiguredPandasDatasource,
 )
-from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
+from great_expectations.datasource.configured_pandas_data_asset import ConfiguredPandasDataAsset
 from great_expectations.types import DictDot
 from tests.datasource.new_fixtures import test_dir_alpha
 from tests.test_utils import create_files_in_directory
@@ -141,7 +141,7 @@ def test_PandasReaderDatasource_asset_property(test_dir_alpha):
     )
     assert len(my_datasource.assets) == 1
 
-    new_asset_test_obj = PandasReaderDataAsset(
+    new_asset_test_obj = ConfiguredPandasDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",
         method="read_csv",
@@ -156,7 +156,7 @@ def test_PandasReaderDatasource_asset_property(test_dir_alpha):
 
     # assets supports item assignment (???)
     # !!! I think we want to forbid this, and require users to use .add_asset
-    my_datasource.assets["test_dir_beta"] = PandasReaderDataAsset(
+    my_datasource.assets["test_dir_beta"] = ConfiguredPandasDataAsset(
         datasource=my_datasource,
         name="some_other_asset",
         method="read_csv",

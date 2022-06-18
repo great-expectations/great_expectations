@@ -10,7 +10,7 @@ from great_expectations.datasource.base_data_asset import (
     DataConnectorQuery,
     NewConfiguredBatchRequest,
 )
-from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
+from great_expectations.datasource.runtime_pandas_data_asset import RuntimePandasDataAsset
 from great_expectations.datasource.runtime_pandas_datasource import (
     RuntimePandasDatasource,
 )
@@ -280,7 +280,7 @@ def test_PandasReaderDatasource_read_csv__with_data_asset_name():
 
     # This operation automatically configures a new asset on the datasource
     assert my_datasource.list_asset_names() == ["my_new_data_asset"]
-    test_asset = PandasReaderDataAsset(
+    test_asset = RuntimePandasDataAsset(
         datasource=my_datasource,
         name="my_new_data_asset",
         base_directory="",

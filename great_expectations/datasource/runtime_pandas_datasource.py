@@ -21,7 +21,7 @@ from great_expectations.datasource.data_connector.util import (
     convert_batch_identifiers_to_data_reference_string_using_regex,
 )
 from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
-from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
+from great_expectations.datasource.runtime_pandas_data_asset import RuntimePandasDataAsset
 from great_expectations.marshmallow__shade.fields import Bool
 from great_expectations.types import DictDot
 from great_expectations.validator.validator import Validator
@@ -255,41 +255,17 @@ class RuntimePandasDatasource(NewNewNewDatasource):
     def add_asset(
         self,
         name: str,
-        base_directory: Optional[str] = "",
-        method: Optional[str] = "read_csv",
-        regex: Optional[str] = "(.*)",
-        batch_identifiers: List[str] = ["filename"],
+        batch_identifiers: List[str],
+        # method ?
+        # passthrough args?
         # check_new_asset: bool = False, # !!! Maybe implement this?
-    ) -> PandasReaderDataAsset:
+    ) -> RuntimePandasDataAsset:
 
-        # if base_directory != None:
-
-        #!!! Add a check to make sure that regex and batch_identifiers are correct.
-        if base_directory == None:
-            #!!! regex and batch_identifiers should be None
-            pass
-
-        else:
-            #!!! Make sure that regex and batch_identifiers are present,
-            #!!! ...and share the same number of matching groups and identifiers, respectively
-            pass
-
-        new_asset = PandasReaderDataAsset(
+        new_asset = RuntimePandasDataAsset(
             datasource=self,
             name=name,
-            method=method,
-            base_directory=base_directory,
-            regex=regex,
             batch_identifiers=batch_identifiers,
         )
-
-        # else:
-
-        #     new_asset = PandasReaderRuntimeDataAsset(
-        #         datasource=self,
-        #         name=name,
-        #         batch_identifiers=None,
-        #     )
 
         self._assets[name] = new_asset
 
@@ -350,7 +326,7 @@ class RuntimePandasDatasource(NewNewNewDatasource):
         return asset
 
     @property
-    def assets(self) -> Dict[str, PandasReaderDataAsset]:
+    def assets(self) -> Dict[str, RuntimePandasDataAsset]:
         return self._assets
 
     @property

@@ -25,15 +25,14 @@ from great_expectations.validator.validator import Validator
 logger = logging.getLogger(__name__)
 
 
-class PandasReaderDataAsset(BaseDataAsset):
+class RuntimePandasDataAsset(BaseDataAsset):
     def __init__(
         self,
-        datasource,  # Should be of type: PandasReaderDatasource,
+        datasource,  # Should be of type: RuntimePandasDatasource,
         name: str,
-        batch_identifiers: List[str] = ["filename"],
+        batch_identifiers: List[str],
         method: str = "read_csv",
         base_directory: str = "",
-        regex: str = "(.*)",
     ) -> None:
 
         # !!! Check to make sure this is a valid configuration of parameters.
@@ -43,7 +42,6 @@ class PandasReaderDataAsset(BaseDataAsset):
 
         self._method = method
         self._base_directory = base_directory
-        print(base_directory)
         self._regex = regex
 
         super().__init__(
@@ -191,7 +189,7 @@ class PandasReaderDataAsset(BaseDataAsset):
 
     def __str__(self):
         # !!! We should figure out a convention for __str__ifying objects, and apply it across the codebase
-        return f"""great_expectations.datasource.pandas_reader_data_asset.PandasReaderDataAsset object :
+        return f"""great_expectations.datasource.runtime_pandas_data_asset.RuntimePandasDataAsset object :
     datasource:        {self._datasource}
     name:              {self._name}
     batch_identifiers: {self._batch_identifiers}

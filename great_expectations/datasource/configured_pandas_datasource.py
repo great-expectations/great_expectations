@@ -1,27 +1,21 @@
-import datetime
-import functools
 import os
 import re
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.base_data_asset import (
-    BatchSpecPassthrough,
-    DataConnectorQuery,
-    NewBatchRequestBase,
     NewConfiguredBatchRequest,
 )
 from great_expectations.datasource.data_connector.util import (
     convert_batch_identifiers_to_data_reference_string_using_regex,
 )
 from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
-from great_expectations.datasource.pandas_reader_data_asset import PandasReaderDataAsset
+from great_expectations.datasource.configured_pandas_data_asset import ConfiguredPandasDataAsset
 from great_expectations.marshmallow__shade.fields import Bool
 from great_expectations.types import DictDot
 from great_expectations.validator.validator import Validator
@@ -72,21 +66,9 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
         method: str = "read_csv",
         regex: str = "(.*)",
         batch_identifiers: str = ["filename"],
-    ) -> PandasReaderDataAsset:
+    ) -> ConfiguredPandasDataAsset:
 
-        # if base_directory != None:
-
-        #!!! Add a check to make sure that regex and batch_identifiers are correct.
-        if base_directory == None:
-            #!!! regex and batch_identifiers should be None
-            pass
-
-        else:
-            #!!! Make sure that regex and batch_identifiers are present,
-            #!!! ...and share the same number of matching groups and identifiers, respectively
-            pass
-
-        new_asset = PandasReaderDataAsset(
+        new_asset = ConfiguredPandasDataAsset(
             datasource=self,
             name=name,
             method=method,
@@ -94,14 +76,6 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
             regex=regex,
             batch_identifiers=batch_identifiers,
         )
-
-        # else:
-
-        #     new_asset = PandasReaderRuntimeDataAsset(
-        #         datasource=self,
-        #         name=name,
-        #         batch_identifiers=None,
-        #     )
 
         self._assets[name] = new_asset
 
@@ -162,7 +136,7 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
         return asset
 
     @property
-    def assets(self) -> Dict[str, PandasReaderDataAsset]:
+    def assets(self) -> Dict[str, ConfiguredPandasDataAsset]:
         return self._assets
 
     @property
