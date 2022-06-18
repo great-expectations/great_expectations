@@ -1,7 +1,7 @@
 import pandas as pd
 
 import great_expectations as gx
-from great_expectations.datasource.misc_types import BatchIdentifiers, NewConfiguredBatchRequest, PassthroughParameters
+from great_expectations.datasource.misc_types import BatchIdentifiers, NewBatchRequestBase, NewConfiguredBatchRequest, PassthroughParameters
 from tests.datasource.new_fixtures import test_dir_oscar
 from tests.test_utils import _get_batch_request_from_validator
 
@@ -21,18 +21,7 @@ def test_ZEP_scenario__runtime_pandas(test_dir_oscar):
 
     # RuntimePandasDatasource automatically generates BatchRequests
     batch_request = _get_batch_request_from_validator(my_df)
-    assert batch_request == NewConfiguredBatchRequest(
-        datasource_name='runtime_pandas',
-        data_asset_name='DEFAULT_DATA_ASSET',
-        batch_identifiers=BatchIdentifiers(
-            id_= None,
-            timestamp= 0,
-        ),
-        passthrough_parameters= PassthroughParameters(
-            args= [],
-            kwargs= {}
-        ),
-    )
+    assert isinstance(batch_request, NewBatchRequestBase)
 
     # You can assign asset_names, if you wish
     my_df = context.sources.runtime_pandas.from_dataframe(
@@ -40,19 +29,7 @@ def test_ZEP_scenario__runtime_pandas(test_dir_oscar):
         data_asset_name="some_airflow_dag_step",
         timestamp=0,
     )
-    batch_request = _get_batch_request_from_validator(my_df)
-    assert batch_request == NewConfiguredBatchRequest(
-        datasource_name='runtime_pandas',
-        data_asset_name='some_airflow_dag_step',
-        batch_identifiers=BatchIdentifiers(
-            id_= None,
-            timestamp= 0,
-        ),
-        passthrough_parameters= PassthroughParameters(
-            args= [],
-            kwargs= {}
-        ),
-    )
+    assert context.sources.runtime_pandas.list_asset_names() == ["some_airflow_dag_step"]
 
     # You can pipe in the id_ parameter
     my_df = context.sources.runtime_pandas.from_dataframe(
@@ -62,19 +39,7 @@ def test_ZEP_scenario__runtime_pandas(test_dir_oscar):
         timestamp=0,
     )
     batch_request = _get_batch_request_from_validator(my_df)
-    assert batch_request == NewConfiguredBatchRequest(
-        datasource_name='runtime_pandas',
-        data_asset_name='some_airflow_dag_step',
-        batch_identifiers=BatchIdentifiers(
-            id_= "my_airflow_run_id",
-            timestamp= 0,
-        ),
-        passthrough_parameters= PassthroughParameters(
-            args= [],
-            kwargs= {}
-        ),
-    )
-
+    assert batch_request.batch_identifiers["id_"] == "my_airflow_run_id"
 
     # Now get a runtime-style dataframe.
     my_validator_1 = context.sources.runtime_pandas.read_csv(

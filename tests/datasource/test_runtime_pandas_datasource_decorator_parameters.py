@@ -44,6 +44,8 @@ def test_RuntimePandasDatasource_read_csv_basic():
             id_=file_relative_path(__file__, "fixtures/example_1.csv"),
         ),
         passthrough_parameters=PassthroughParameters(
+            method="read_csv",
+            primary_arg=file_relative_path(__file__, "fixtures/example_1.csv"),
             args=[],
             kwargs={},
         ),
@@ -123,6 +125,8 @@ def test_RuntimePandasDatasource_read_csv_with_sep():
             id_=file_relative_path(__file__, "fixtures/example_2.csv"),
         ),
         passthrough_parameters=PassthroughParameters(
+            method="read_csv",
+            primary_arg=file_relative_path(__file__, "fixtures/example_2.csv"),
             args=[],
             kwargs={"sep": "   "},
         ),
@@ -159,6 +163,8 @@ def test_RuntimePandasDatasource_read_csv_with_sep_as_positional_arg():
             id_=file_relative_path(__file__, "fixtures/example_2.csv"),
         ),
         passthrough_parameters=PassthroughParameters(
+            method="read_csv",
+            primary_arg=file_relative_path(__file__, "fixtures/example_2.csv"),
             args=["   "],
             kwargs={},
         ),
@@ -180,21 +186,24 @@ def test_RuntimePandasDatasource_read_csv_with_buffer():
         "b": {0: 2, 1: 5},
         "c": {0: 3, 1: 6},
     }
-    # del my_data
 
-    my_batch_request = _get_batch_request_from_validator(my_validator)
-    assert my_batch_request == NewConfiguredBatchRequest(
-        datasource_name="my_datasource",
-        data_asset_name="DEFAULT_DATA_ASSET",
-        batch_identifiers=BatchIdentifiers(
-            timestamp=0,
-            id_=None,
-        ),
-        passthrough_parameters=PassthroughParameters(
-            args=[],
-            kwargs={},
-        ),
-    )
+    # !!! This is an example of a nonserializable argument: primary_arg is a buffer, not a filename.
+    # my_batch_request = _get_batch_request_from_validator(my_validator)
+    # print(my_batch_request)
+    # assert my_batch_request == NewConfiguredBatchRequest(
+    #     datasource_name="my_datasource",
+    #     data_asset_name="DEFAULT_DATA_ASSET",
+    #     batch_identifiers=BatchIdentifiers(
+    #         timestamp=0,
+    #         id_=None,
+    #     ),
+    #     passthrough_parameters=PassthroughParameters(
+    #         method="read_csv",
+    #         primary_arg=file_relative_path(__file__, "fixtures/example_1.csv"),
+    #         args=[],
+    #         kwargs={},
+    #     ),
+    # )
 
 
 @pytest.mark.skip(reason="Unsure if this is the behavior that we want.")
@@ -283,6 +292,8 @@ def test_RuntimePandasDatasource_read_csv__with_data_asset_name():
             id_=file_relative_path(__file__, "fixtures/example_1.csv"),
         ),
         passthrough_parameters=PassthroughParameters(
+            method="read_csv",
+            primary_arg=file_relative_path(__file__, "fixtures/example_1.csv"),
             args=[],
             kwargs={},
         ),

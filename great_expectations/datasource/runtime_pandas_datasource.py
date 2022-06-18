@@ -13,6 +13,8 @@ from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.warnings import GxExperimentalWarning, GxRuntimeAssetWarning
 from great_expectations.datasource.misc_types import (
+    GxData,
+    NewRuntimeBatchRequest,
     PassthroughParameters,
     BatchIdentifiers,
     NewConfiguredBatchRequest,
@@ -136,6 +138,9 @@ def _add_gx_args(
             kwargs,
         )
 
+        # !!! This code is stuck in the middle between being runtime vs configured.
+        # !!! I suspect that there's actually a way to generate configured assets from read_* method calls.
+
         batch_request = NewConfiguredBatchRequest(
             datasource_name=self.name,
             data_asset_name=data_asset_name,
@@ -145,8 +150,8 @@ def _add_gx_args(
                 timestamp=timestamp,
             ),
             passthrough_parameters=PassthroughParameters(
-                # method= func,
-                # primary_arg= primary_arg,
+                method= func.__name__,
+                primary_arg= primary_arg,
                 args=list(args),
                 kwargs=kwargs,
             ),
@@ -256,37 +261,90 @@ class RuntimePandasDatasource(NewNewNewDatasource):
 
         return new_asset
 
-    def get_batch(self, batch_request: NewConfiguredBatchRequest) -> Batch:
-        asset = self.assets[batch_request.data_asset_name]
+    def get_batch(
+        self,
+        data: Optional[GxData] = None,
+        batch_request: Optional[NewRuntimeBatchRequest] = None,
+        method: Optional[str] = None,
+        data_asset_name: Optional[str] = "DEFAULT_DATA_ASSET",
+        id_:Optional[str] = None,
+        timestamp = None,
+        **kwargs
+    ) -> Batch:
+        """
+        """
 
-        func = getattr(pd, asset.method)
+        if sum([
+            data is not None,
+            batch_request is not None,
+            method is not None,
+        ]) != 1:
+            raise ValueError("Exactly one of data, batch_request, and method must be specified")
 
-        filename = convert_batch_identifiers_to_data_reference_string_using_regex(
-            batch_identifiers=IDDict(**batch_request.batch_identifiers),
-            regex_pattern=asset.regex,
-            group_names=asset.batch_identifiers,
-        )
-        primary_arg = os.path.join(
-            asset.base_directory,
-            filename,
-        )
+        if timestamp == None:
+            timestamp = datetime.datetime.now()
 
-        # !!! How do we handle non-serializable elements like `con` for sql?
+        if method is not None:
+            func = getattr(pd, method)
+            data = func(**kwargs)
 
-        args = batch_request.batch_spec_passthrough.get("args", [])
-        kwargs = batch_request.batch_spec_passthrough.get("kwargs", {})
+            # !!! Here's older, non-working, but possibly more sophisticated and better logic for this
+            # asset = self.assets[batch_request.data_asset_name]
 
-        df = func(primary_arg, *args, **kwargs)
+            # func = getattr(pd, asset.method)
+
+            # filename = convert_batch_identifiers_to_data_reference_string_using_regex(
+            #     batch_identifiers=IDDict(**batch_request.batch_identifiers),
+            #     regex_pattern=asset.regex,
+            #     group_names=asset.batch_identifiers,
+            # )
+            # primary_arg = os.path.join(
+            #     asset.base_directory,
+            #     filename,
+            # )
+
+            # # !!! How do we handle non-serializable elements like `con` for sql?
+
+            # args = batch_request.batch_spec_passthrough.get("args", [])
+            # kwargs = batch_request.batch_spec_passthrough.get("kwargs", {})
+
+            # data = func(primary_arg, *args, **kwargs)
+
+        if data is not None:
+            batch_request = NewRuntimeBatchRequest(
+                datasource_name=self.name,
+                data_asset_name=data_asset_name,
+                batch_identifiers=BatchIdentifiers(
+                    id_=id_,
+                    timestamp=timestamp,
+                ),
+                data=data
+            )
+
+        else:
+            data = batch_request.data
 
         batch = Batch(
-            data=df,
+            data=data,
             batch_request=batch_request,
         )
 
         return batch
 
-    def get_validator(self, batch_request: NewConfiguredBatchRequest) -> Validator:
-        batch = self.get_batch(batch_request)
+    def get_validator(
+        self,
+        data: Optional[GxData] = None,
+        batch_request: Optional[NewRuntimeBatchRequest] = None,
+        method: Optional[str] = None,
+        **kwargs
+    ) -> Validator:
+        batch = self.get_batch(
+            data=data,
+            batch_request=batch_request,
+            method=method,
+            **kwargs
+        )
+
         return Validator(
             execution_engine=self._execution_engine,
             expectation_suite=None,

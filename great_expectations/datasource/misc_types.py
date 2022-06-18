@@ -53,9 +53,25 @@ class NewConfiguredBatchRequest(NewBatchRequestBase):
 )
 """
     
-
-
 @dataclass
 class NewRuntimeBatchRequest(NewBatchRequestBase):
     data: GxData
 
+    def __eq__(self, other) -> str:
+        return all(
+            [
+                self["datasource_name"] == other["datasource_name"],
+                self["data_asset_name"] == other["data_asset_name"],
+                self["batch_identifiers"] == other["batch_identifiers"],
+                # self["data"] == other["data"], # !!!
+            ]
+        )
+
+    def __str__(self) -> str:
+        return f"""NewConfiguredBatchRequest(
+    datasource_name='{self.datasource_name}',
+    data_asset_name='{self.data_asset_name}',
+    batch_identifiers='{self.batch_identifiers.__str__()}',
+    data='{self.passthrough_parameters.__str__()}',
+)
+"""
