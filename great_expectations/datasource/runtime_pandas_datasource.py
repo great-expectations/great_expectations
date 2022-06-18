@@ -128,7 +128,7 @@ def _add_gx_args(
             else:
                 self.add_asset(
                     name=data_asset_name,
-                    base_directory="",
+                    batch_identifiers=["id_", "timestamp"],
                 )
 
         df = func(self, primary_arg, *args, **kwargs)

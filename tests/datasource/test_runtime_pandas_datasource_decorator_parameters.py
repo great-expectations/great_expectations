@@ -94,6 +94,11 @@ def test_RuntimePandasDatasource_read_csv_with_use_primary_arg_as_id__eq__true_a
 
 
 def test_RuntimePandasDatasource_read_csv_with_sep():
+    #!!! Not sure if this is the best way to handle this
+    import warnings
+    warnings.simplefilter(action="ignore", category=FutureWarning)
+    warnings.simplefilter(action="ignore", category=pd.errors.ParserWarning)
+
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_csv(
         file_relative_path(__file__, "fixtures/example_2.csv"),
@@ -125,6 +130,11 @@ def test_RuntimePandasDatasource_read_csv_with_sep():
 
 
 def test_RuntimePandasDatasource_read_csv_with_sep_as_positional_arg():
+    #!!! Not sure if this is the best way to handle this
+    import warnings
+    warnings.simplefilter(action="ignore", category=FutureWarning)
+    warnings.simplefilter(action="ignore", category=pd.errors.ParserWarning)
+
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_csv(
         file_relative_path(__file__, "fixtures/example_2.csv"),
@@ -283,9 +293,6 @@ def test_RuntimePandasDatasource_read_csv__with_data_asset_name():
     test_asset = RuntimePandasDataAsset(
         datasource=my_datasource,
         name="my_new_data_asset",
-        base_directory="",
-        batch_identifiers=["filename"],
-        method="read_csv",
-        regex="(.*)",
+        batch_identifiers=["id_", "timestamp"]
     )
     assert my_datasource.assets.my_new_data_asset == test_asset
