@@ -12,8 +12,8 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.misc_types import (
-    BatchSpecPassthrough,
-    DataConnectorQuery,
+    PassthroughParameters,
+    BatchIdentifiers,
     NewBatchRequestBase,
     NewConfiguredBatchRequest,
 )
@@ -142,12 +142,12 @@ def _add_gx_args(
         batch_request = NewConfiguredBatchRequest(
             datasource_name=self.name,
             data_asset_name=data_asset_name,
-            #!!! Revisit the parameters passed to DataConnectorQuery---these two make sense for Runtime requests, but not Configured requests.
-            data_connector_query=DataConnectorQuery(
+            #!!! Revisit the parameters passed to BatchIdentifiers---these two make sense for Runtime requests, but not Configured requests.
+            batch_identifiers=BatchIdentifiers(
                 id_=id_,
                 timestamp=timestamp,
             ),
-            batch_spec_passthrough=BatchSpecPassthrough(
+            passthrough_parameters=PassthroughParameters(
                 # method= func,
                 # primary_arg= primary_arg,
                 args=list(args),
@@ -280,7 +280,7 @@ class RuntimePandasDatasource(NewNewNewDatasource):
         func = getattr(pd, asset.method)
 
         filename = convert_batch_identifiers_to_data_reference_string_using_regex(
-            batch_identifiers=IDDict(**batch_request.data_connector_query),
+            batch_identifiers=IDDict(**batch_request.batch_identifiers),
             regex_pattern=asset.regex,
             group_names=asset.batch_identifiers,
             # data_asset_name= self.name,

@@ -5,8 +5,8 @@ import pytest
 from great_expectations.core.batch import Batch
 from great_expectations.datasource.misc_types import (
     BatchIdentifierException,
-    BatchSpecPassthrough,
-    DataConnectorQuery,
+    PassthroughParameters,
+    BatchIdentifiers,
     NewBatchRequestBase,
     NewConfiguredBatchRequest,
 )
@@ -112,8 +112,8 @@ def test_ConfiguredPandasDataAsset_get_batch_request(
     assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name="my_datasource",
         data_asset_name="test_dir_alpha",
-        data_connector_query=DataConnectorQuery(filename="A"),
-        batch_spec_passthrough=BatchSpecPassthrough(),
+        batch_identifiers=BatchIdentifiers(filename="A"),
+        passthrough_parameters=PassthroughParameters(),
     )
 
 
@@ -171,7 +171,7 @@ def test_ConfiguredPandasDataAsset__generate_batch_identifiers_from_args_and_kwa
     assert my_asset._generate_batch_identifiers_from_args_and_kwargs(
         batch_identifier_args=["some_file", "csv"],
         batch_identifier_kwargs={},
-    ) == DataConnectorQuery(
+    ) == BatchIdentifiers(
         filename="some_file",
         file_extension="csv",
     )
@@ -179,7 +179,7 @@ def test_ConfiguredPandasDataAsset__generate_batch_identifiers_from_args_and_kwa
     assert my_asset._generate_batch_identifiers_from_args_and_kwargs(
         batch_identifier_args=["some_file"],
         batch_identifier_kwargs={"file_extension": "csv"},
-    ) == DataConnectorQuery(
+    ) == BatchIdentifiers(
         filename="some_file",
         file_extension="csv",
     )

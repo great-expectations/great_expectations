@@ -6,12 +6,9 @@ import sqlalchemy as sa
 from great_expectations.core.batch import Batch
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.misc_types import (
-    BatchSpecPassthrough,
-    DataConnectorQuery,
+    BatchIdentifiers,
+    PassthroughParameters,
     NewConfiguredBatchRequest,
-)
-from great_expectations.datasource.data_connector.util import (
-    convert_batch_identifiers_to_data_reference_string_using_regex,
 )
 from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
 from great_expectations.validator.validator import Validator
@@ -48,8 +45,8 @@ class NewSqlAlchemyDatasource(NewNewNewDatasource):
         batch_request = NewConfiguredBatchRequest(
             datasource_name=self._name,
             data_asset_name=table,
-            data_connector_query=DataConnectorQuery(),
-            batch_spec_passthrough=BatchSpecPassthrough(),
+            batch_identifiers=BatchIdentifiers(),
+            passthrough_parameters=PassthroughParameters(),
         )
         return self.get_validator(batch_request)
 

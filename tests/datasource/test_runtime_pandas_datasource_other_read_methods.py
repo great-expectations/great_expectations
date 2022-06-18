@@ -30,7 +30,7 @@ def test_RuntimePandasDatasource_read_json():
     }
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
-    assert my_batch_request.data_connector_query == {
+    assert my_batch_request.batch_identifiers == {
         "timestamp": 0,
         "id_": None,
     }
@@ -80,7 +80,7 @@ def test_RuntimePandasDatasource_read_clipboard():
     }
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
-    assert my_batch_request.data_connector_query == {
+    assert my_batch_request.batch_identifiers == {
         "timestamp": 0,
         "id_": None,
     }
@@ -118,9 +118,9 @@ def test_RuntimePandasDatasource_read_sql_table_with_con_as_keyword_arg(sqlite_e
     }
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
-    assert my_batch_request.batch_spec_passthrough["args"] == []
-    assert my_batch_request.batch_spec_passthrough["kwargs"] == {}
-    assert my_batch_request.data_connector_query == {
+    assert my_batch_request.passthrough_parameters["args"] == []
+    assert my_batch_request.passthrough_parameters["kwargs"] == {}
+    assert my_batch_request.batch_identifiers == {
         "timestamp": 0,
         "id_": "test_table",
     }
@@ -143,9 +143,9 @@ def test_RuntimePandasDatasource_read_sql_table_with_con_as_positional_arg(
     }
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
-    assert my_batch_request.batch_spec_passthrough["args"] == []
-    assert my_batch_request.batch_spec_passthrough["kwargs"] == {}
-    assert my_batch_request.data_connector_query == {
+    assert my_batch_request.passthrough_parameters["args"] == []
+    assert my_batch_request.passthrough_parameters["kwargs"] == {}
+    assert my_batch_request.batch_identifiers == {
         "timestamp": 0,
         "id_": "test_table",
     }
@@ -166,9 +166,9 @@ def test_RuntimePandasDatasource_read_sql_query(sqlite_engine):
     }
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
-    assert my_batch_request.batch_spec_passthrough["args"] == []
-    assert my_batch_request.batch_spec_passthrough["kwargs"] == {}
-    assert my_batch_request.data_connector_query == {
+    assert my_batch_request.passthrough_parameters["args"] == []
+    assert my_batch_request.passthrough_parameters["kwargs"] == {}
+    assert my_batch_request.batch_identifiers == {
         "timestamp": 0,
         "id_": None,
     }
@@ -189,9 +189,9 @@ def test_RuntimePandasDatasource_read_sql_with_query(sqlite_engine):
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
     assert isinstance(my_batch_request, NewConfiguredBatchRequest)
-    assert my_batch_request.batch_spec_passthrough["args"] == []
-    assert my_batch_request.batch_spec_passthrough["kwargs"] == {}
-    assert my_batch_request.data_connector_query == {
+    assert my_batch_request.passthrough_parameters["args"] == []
+    assert my_batch_request.passthrough_parameters["kwargs"] == {}
+    assert my_batch_request.batch_identifiers == {
         "timestamp": 0,
         "id_": None,
     }
@@ -213,9 +213,9 @@ def test_RuntimePandasDatasource_read_sql_with_table(sqlite_engine):
         my_validator
     )
     assert isinstance(my_batch_request, NewConfiguredBatchRequest)
-    assert my_batch_request.batch_spec_passthrough["args"] == []
-    assert my_batch_request.batch_spec_passthrough["kwargs"] == {}
-    assert my_batch_request.data_connector_query == {
+    assert my_batch_request.passthrough_parameters["args"] == []
+    assert my_batch_request.passthrough_parameters["kwargs"] == {}
+    assert my_batch_request.batch_identifiers == {
         "timestamp": 0,
         "id_": "test_table",
     }
@@ -245,9 +245,9 @@ def test_RuntimePandasDatasource_read_dataframe():
     }
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
-    assert my_batch_request.batch_spec_passthrough["args"] == []
-    assert my_batch_request.batch_spec_passthrough["kwargs"] == {}
-    assert my_batch_request.data_connector_query == {
+    assert my_batch_request.passthrough_parameters["args"] == []
+    assert my_batch_request.passthrough_parameters["kwargs"] == {}
+    assert my_batch_request.batch_identifiers == {
         "timestamp": 0,
         "id_": None,
     }

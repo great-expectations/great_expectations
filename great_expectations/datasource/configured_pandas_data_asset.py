@@ -10,8 +10,8 @@ from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.datasource.base_data_asset import BaseDataAsset
 from great_expectations.datasource.misc_types import (
     BatchIdentifierException,
-    BatchSpecPassthrough,
-    DataConnectorQuery,
+    PassthroughParameters,
+    BatchIdentifiers,
     NewBatchRequestBase,
     NewConfiguredBatchRequest,
 )
@@ -91,9 +91,8 @@ class ConfiguredPandasDataAsset(BaseDataAsset):
         batch_request = NewConfiguredBatchRequest(
             datasource_name=self._datasource.name,
             data_asset_name=self._name,
-            data_connector_query=batch_identifiers,
-            batch_spec_passthrough=BatchSpecPassthrough(),
-            # batch_identifiers=batch_identifiers,
+            batch_identifiers=batch_identifiers,
+            passthrough_parameters=PassthroughParameters(),
         )
 
         return batch_request
@@ -137,7 +136,7 @@ class ConfiguredPandasDataAsset(BaseDataAsset):
         self,
         batch_identifier_args: List[str],
         batch_identifier_kwargs: Dict,
-    ) -> DataConnectorQuery:
+    ) -> BatchIdentifiers:
 
         if len(batch_identifier_args) > len(self._batch_identifiers):
             raise BatchIdentifierException(
@@ -170,7 +169,7 @@ class ConfiguredPandasDataAsset(BaseDataAsset):
                 f"Missing BatchIdentifier keys : {missing_keys}"
             )
 
-        return DataConnectorQuery(**batch_identifier_dict)
+        return BatchIdentifiers(**batch_identifier_dict)
 
     def _get_data_asset_paths(self):
         # glob_config = self._get_data_asset_config(data_asset_name)

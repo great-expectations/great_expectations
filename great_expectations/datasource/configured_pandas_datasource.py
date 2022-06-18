@@ -90,7 +90,7 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
         func = getattr(pd, asset.method)
 
         filename = convert_batch_identifiers_to_data_reference_string_using_regex(
-            batch_identifiers=IDDict(**batch_request.data_connector_query),
+            batch_identifiers=IDDict(**batch_request.batch_identifiers),
             regex_pattern=asset.regex,
             group_names=asset.batch_identifiers,
             # data_asset_name= self.name,
@@ -102,8 +102,8 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
 
         # !!! How do we handle non-serializable elements like `con` for sql?
 
-        args = batch_request.batch_spec_passthrough.get("args", [])
-        kwargs = batch_request.batch_spec_passthrough.get("kwargs", {})
+        args = batch_request.passthrough_parameters.get("args", [])
+        kwargs = batch_request.passthrough_parameters.get("kwargs", {})
 
         df = func(primary_arg, *args, **kwargs)
 

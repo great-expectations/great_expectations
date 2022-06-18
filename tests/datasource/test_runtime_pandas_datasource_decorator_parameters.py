@@ -6,8 +6,8 @@ import sqlalchemy as sa
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.misc_types import (
-    BatchSpecPassthrough,
-    DataConnectorQuery,
+    PassthroughParameters,
+    BatchIdentifiers,
     NewConfiguredBatchRequest,
 )
 from great_expectations.datasource.runtime_pandas_data_asset import RuntimePandasDataAsset
@@ -39,11 +39,11 @@ def test_RuntimePandasDatasource_read_csv_basic():
     assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name="my_datasource",
         data_asset_name="DEFAULT_DATA_ASSET",
-        data_connector_query=DataConnectorQuery(
+        batch_identifiers=BatchIdentifiers(
             timestamp=0,
             id_=file_relative_path(__file__, "fixtures/example_1.csv"),
         ),
-        batch_spec_passthrough=BatchSpecPassthrough(
+        passthrough_parameters=PassthroughParameters(
             args=[],
             kwargs={},
         ),
@@ -57,7 +57,7 @@ def test_RuntimePandasDatasource_read_csv_with_real_timestamp():
         file_relative_path(__file__, "fixtures/example_1.csv"),
     )
     my_batch_request = _get_batch_request_from_validator(my_validator)
-    time_delta = now - my_batch_request.data_connector_query["timestamp"]
+    time_delta = now - my_batch_request.batch_identifiers["timestamp"]
     assert time_delta.total_seconds() < 1
 
 
@@ -68,7 +68,7 @@ def test_RuntimePandasDatasource_read_csv_with_use_primary_arg_as_id__eq__false(
         use_primary_arg_as_id=False,
     )
     my_batch_request = _get_batch_request_from_validator(my_validator)
-    assert my_batch_request.data_connector_query["id_"] == None
+    assert my_batch_request.batch_identifiers["id_"] == None
 
 
 def test_RuntimePandasDatasource_read_csv_with_use_primary_arg_as_id__eq__false_and_an_id_():
@@ -79,7 +79,7 @@ def test_RuntimePandasDatasource_read_csv_with_use_primary_arg_as_id__eq__false_
         id_="Here's an ID!",
     )
     my_batch_request = _get_batch_request_from_validator(my_validator)
-    assert my_batch_request.data_connector_query["id_"] == "Here's an ID!"
+    assert my_batch_request.batch_identifiers["id_"] == "Here's an ID!"
 
 
 def test_RuntimePandasDatasource_read_csv_with_use_primary_arg_as_id__eq__true_and_an_id_():
@@ -118,11 +118,11 @@ def test_RuntimePandasDatasource_read_csv_with_sep():
     assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name="my_datasource",
         data_asset_name="DEFAULT_DATA_ASSET",
-        data_connector_query=DataConnectorQuery(
+        batch_identifiers=BatchIdentifiers(
             timestamp=0,
             id_=file_relative_path(__file__, "fixtures/example_2.csv"),
         ),
-        batch_spec_passthrough=BatchSpecPassthrough(
+        passthrough_parameters=PassthroughParameters(
             args=[],
             kwargs={"sep": "   "},
         ),
@@ -154,11 +154,11 @@ def test_RuntimePandasDatasource_read_csv_with_sep_as_positional_arg():
     assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name="my_datasource",
         data_asset_name="DEFAULT_DATA_ASSET",
-        data_connector_query=DataConnectorQuery(
+        batch_identifiers=BatchIdentifiers(
             timestamp=0,
             id_=file_relative_path(__file__, "fixtures/example_2.csv"),
         ),
-        batch_spec_passthrough=BatchSpecPassthrough(
+        passthrough_parameters=PassthroughParameters(
             args=["   "],
             kwargs={},
         ),
@@ -186,11 +186,11 @@ def test_RuntimePandasDatasource_read_csv_with_buffer():
     assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name="my_datasource",
         data_asset_name="DEFAULT_DATA_ASSET",
-        data_connector_query=DataConnectorQuery(
+        batch_identifiers=BatchIdentifiers(
             timestamp=0,
             id_=None,
         ),
-        batch_spec_passthrough=BatchSpecPassthrough(
+        passthrough_parameters=PassthroughParameters(
             args=[],
             kwargs={},
         ),
@@ -251,7 +251,7 @@ def test_RuntimePandasDatasource_read_csv_with_nonserializable_parameter():
     )
 
     my_batch_request = _get_batch_request_from_validator(my_validator)
-    assert my_batch_request.batch_spec_passthrough["kwargs"] == {
+    assert my_batch_request.passthrough_parameters["kwargs"] == {
         "date_parser": "<<non-serializable>>"
     }
 
@@ -278,11 +278,11 @@ def test_RuntimePandasDatasource_read_csv__with_data_asset_name():
     assert my_batch_request == NewConfiguredBatchRequest(
         datasource_name="my_datasource",
         data_asset_name="my_new_data_asset",
-        data_connector_query=DataConnectorQuery(
+        batch_identifiers=BatchIdentifiers(
             timestamp=0,
             id_=file_relative_path(__file__, "fixtures/example_1.csv"),
         ),
-        batch_spec_passthrough=BatchSpecPassthrough(
+        passthrough_parameters=PassthroughParameters(
             args=[],
             kwargs={},
         ),

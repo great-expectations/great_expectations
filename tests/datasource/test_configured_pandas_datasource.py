@@ -6,8 +6,8 @@ import sqlalchemy as sa
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.misc_types import (
-    BatchSpecPassthrough,
-    DataConnectorQuery,
+    PassthroughParameters,
+    BatchIdentifiers,
     NewConfiguredBatchRequest,
 )
 from great_expectations.datasource.configured_pandas_datasource import (
@@ -179,8 +179,8 @@ def test_ConfiguredPandasDatasource_get_batch(test_dir_alpha):
     batch_request = NewConfiguredBatchRequest(
         datasource_name="my_datasource",
         data_asset_name="test_dir_alpha",
-        data_connector_query=DataConnectorQuery(filename="A"),
-        batch_spec_passthrough=BatchSpecPassthrough(
+        batch_identifiers=BatchIdentifiers(filename="A"),
+        passthrough_parameters=PassthroughParameters(
             args=[],
             kwargs={},
         ),
