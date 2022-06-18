@@ -91,6 +91,8 @@ except ImportError:
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
+
+    # noinspection PyPep8Naming
     from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 
     SQLITE_TYPES = {
@@ -111,6 +113,7 @@ except (ImportError, KeyError):
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
+    # noinspection PyPep8Naming
     import sqlalchemy_bigquery as sqla_bigquery
     import sqlalchemy_bigquery as BigQueryDialect
 
