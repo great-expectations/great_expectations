@@ -22,7 +22,6 @@ from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
-
 class ConfiguredPandasDataAsset(BaseDataAsset):
     def __init__(
         self,

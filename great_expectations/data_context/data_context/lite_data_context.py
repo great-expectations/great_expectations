@@ -10,6 +10,7 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.datasource import BaseDatasource
+from great_expectations.warnings import GxExperimentalWarning
 from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
 from great_expectations.types.base import DotDict
 from great_expectations.util import load_class
@@ -46,15 +47,20 @@ class LiteDataContext(BaseDataContext):
 
         #!!! Trying this on for size...
         # experimental-v0.15.1
-        warnings.warn(
-            "\n================================================================================\n" \
-            "LiteDataContext is an experimental feature of Great Expectations.\n" \
-            "You should consider the API to be unstable.\n" \
-            "If you have questions or feedback, please chime in at\n" \
-            "https://github.com/great-expectations/great_expectations/discussions/DISCUSSION-ID-GOES-HERE" \
-            "\n================================================================================\n",
-            GxExperimentalWarning,
-        )
+        # warnings.warn(
+        #     "\n================================================================================\n" \
+        #     "LiteDataContext is an experimental feature of Great Expectations.\n" \
+        #     "You should consider the API to be unstable.\n" \
+        #     "\n" \
+        #     "You can disable this warning by calling: \n" \
+        #     "from great_expectations.warnings import GxExperimentalWarning\n" \
+        #     "warnings.simplefilter(action=\"ignore\", category=GxExperimentalWarning)\n" \
+        #     "\n" \
+        #     "If you have questions or feedback, please chime in at\n" \
+        #     "https://github.com/great-expectations/great_expectations/discussions/DISCUSSION-ID-GOES-HERE" \
+        #     "\n================================================================================\n",
+        #     GxExperimentalWarning,
+        # )
 
         super().__init__(
             project_config=project_config,

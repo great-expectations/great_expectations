@@ -8,8 +8,8 @@ import pandas as pd
 from great_expectations.core.batch import Batch
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.warnings import GxExperimentalWarning
 from great_expectations.datasource.misc_types import (
-    GxExperimentalWarning,
     NewConfiguredBatchRequest,
 )
 from great_expectations.datasource.data_connector.util import (
@@ -35,15 +35,21 @@ class ConfiguredPandasDatasource(NewNewNewDatasource):
     ):
         #!!! Trying this on for size
         # experimental-v0.15.1
-        warnings.warn(
-            "\n================================================================================\n" \
-            "ConfiguredPandasDatasource is an experimental feature of Great Expectations\n" \
-            "You should consider the API to be unstable.\n" \
-            "If you have questions or feedback, please chime in at\n" \
-            "https://github.com/great-expectations/great_expectations/discussions/DISCUSSION-ID-GOES-HERE\n" \
-            "================================================================================\n",
-            GxExperimentalWarning,
-        )
+        # warnings.warn(
+        #     "\n================================================================================\n" \
+        #     "ConfiguredPandasDatasource is an experimental feature of Great Expectations\n" \
+        #     "You should consider the API to be unstable.\n" \
+        #     "\n" \
+        #     "You can disable this warning by calling: \n" \
+        #     "from great_expectations.warnings import GxExperimentalWarning\n" \
+        #     "warnings.simplefilter(action=\"ignore\", category=GxExperimentalWarning)\n" \
+        #     "\n" \
+        #     "If you have questions or feedback, please chime in at\n" \
+        #     "https://github.com/great-expectations/great_expectations/discussions/DISCUSSION-ID-GOES-HERE\n" \
+        #     "================================================================================\n",
+        #     GxExperimentalWarning,
+        # )
+
         self._name = name
         self._assets = DictDot()
 
