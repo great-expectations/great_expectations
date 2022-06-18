@@ -2,106 +2,14 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 from typing import Dict, List, Optional
+from typing_extensions import Self
 
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.types import SerializableDictDot
+from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.datasource.misc_types import NewBatchRequestBase
+from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
 from great_expectations.validator.validator import Validator
 
-# from great_expectations.datasource.pandas_reader_datasource import PandasReaderDatasource #!!! This causes a circular import
-
 logger = logging.getLogger(__name__)
-
-
-class BatchIdentifierException(BaseException):
-    # !!! Do we want to create a class for this? Is this the right name and inheritance?
-    pass
-
-
-### Second approach to BatchRequests ###
-
-
-# !!! I kinda hate this name
-class DataConnectorQuery(dict, SerializableDictDot):
-    pass
-
-
-# !!! I kinda hate this name
-class BatchSpecPassthrough(dict, SerializableDictDot):
-    pass
-
-
-@dataclass
-class NewBatchRequestBase(SerializableDictDot, ABC):
-
-    datasource_name: str
-    data_asset_name: str
-    data_connector_query: DataConnectorQuery
-
-
-@dataclass
-class NewConfiguredBatchRequest(NewBatchRequestBase):
-    batch_spec_passthrough: BatchSpecPassthrough
-
-
-@dataclass
-class NewRuntimeBatchRequest(NewBatchRequestBase):
-    data: BatchSpecPassthrough
-
-
-### First approach to BatchRequests ###
-
-# class BatchIdentifiers(dict):
-#     pass
-
-# class RuntimeParameters(dict):
-#     pass
-
-# class NewBatchRequest:
-#     # !!! This prolly isn't the right name for this class
-
-#     def __init__(
-#         self,
-#         datasource_name: str,
-#         data_asset_name: str,
-#         batch_identifiers: Optional[BatchIdentifiers] = None,
-#         runtime_parameters: Optional[RuntimeParameters] = None,
-#     ) -> None:
-#         self._datasource_name = datasource_name
-#         self._data_asset_name = data_asset_name
-
-#         self._batch_identifiers = batch_identifiers
-#         self._runtime_parameters = runtime_parameters
-
-#     @property
-#     def datasource_name(self) -> str:
-#         return self._datasource_name
-
-#     @property
-#     def data_asset_name(self) -> str:
-#         return self._data_asset_name
-
-#     @property
-#     def batch_identifiers(self) -> str:
-#         return self._batch_identifiers
-
-#     @property
-#     def runtime_parameters(self) -> str:
-#         return self._runtime_parameters
-
-#     def __str__(self) -> str:
-#         # !!! This isn't right---very slapdash
-#         return f"""{self.datasource_name},{self.data_asset_name},{self._batch_identifiers},{self._runtime_parameters}"""
-
-#     def __eq__(self, other) -> bool:
-#         # !!! I'm not sure if this is a good implementation of __eq__, but I had to do something to get `assert A == B` in tests working.
-
-#         return all([
-#             self.datasource_name == other.datasource_name,
-#             self.data_asset_name == other.data_asset_name,
-#             self.batch_identifiers == other.batch_identifiers,
-#             self.runtime_parameters == other.runtime_parameters,
-#         ])
-
 
 class BaseDataAsset:
     def __init__(
@@ -115,9 +23,58 @@ class BaseDataAsset:
         self._batch_identifiers = batch_identifiers
 
     @property
+    def datasource(self) -> NewNewNewDatasource:
+        return self._datasource
+
+    @property
     def name(self) -> str:
         return self._name
 
     @property
     def batch_identifiers(self) -> List[str]:
         return self._batch_identifiers
+
+    def set_name(self, name: str):
+        """Changes the DataAsset's name.
+
+        Note: This method is intended to be called only from Dataasource's rename_asset method.
+        This will keep the name of the asset in sync with the key in the Datasource's _asset registry.
+        """
+        self._name = name
+
+    def update_configuration(self, **kwargs) -> Self:
+        raise NotImplementedError
+        
+    def list_batches(self) -> List[NewBatchRequestBase]:
+        raise NotImplementedError
+
+    def get_batch(self, *args, **kwargs) -> Batch:
+        raise NotImplementedError
+
+    def get_batches(self, *args, **kwargs) -> List[Batch]:
+        raise NotImplementedError
+
+    def get_batch_request(self, *args, **kwargs) -> NewBatchRequestBase:
+        raise NotImplementedError
+
+    def get_validator(self, *args, **kwargs) -> Validator:
+        raise NotImplementedError
+
+    def __eq__(self, other) -> bool:
+        # !!! I'm not sure if this is a good implementation of __eq__, but I had to do something to get `assert A == B` in tests working.
+
+        return all(
+            [
+                self._datasource == other._datasource,
+                self._name == other._name,
+                self._batch_identifiers == other._batch_identifiers,
+            ]
+        )
+
+    def __str__(self):
+        # !!! We should figure out a convention for __str__ifying objects, and apply it across the codebase
+        return f"""great_expectations.datasource.runtime_pandas_data_asset.RuntimePandasDataAsset object :
+    datasource:        {self._datasource}
+    name:              {self._name}
+    batch_identifiers: {self._batch_identifiers}
+"""

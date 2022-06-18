@@ -3,7 +3,7 @@ from ast import List
 import pytest
 
 from great_expectations.core.batch import Batch
-from great_expectations.datasource.base_data_asset import (
+from great_expectations.datasource.misc_types import (
     BatchIdentifierException,
     BatchSpecPassthrough,
     DataConnectorQuery,

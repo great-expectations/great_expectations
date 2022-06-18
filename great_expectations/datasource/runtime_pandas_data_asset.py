@@ -7,8 +7,8 @@ from typing import Dict, List, Optional
 from typing_extensions import Self
 
 from great_expectations.core.batch import Batch, BatchRequest
-from great_expectations.datasource.base_data_asset import (
-    BaseDataAsset,
+from great_expectations.datasource.base_data_asset import BaseDataAsset
+from great_expectations.datasource.misc_types import (
     BatchIdentifierException,
     BatchSpecPassthrough,
     DataConnectorQuery,
@@ -20,8 +20,6 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.validator.validator import Validator
 
-# from great_expectations.datasource.pandas_reader_datasource import PandasReaderDatasource # !!! This creates a circular import
-
 logger = logging.getLogger(__name__)
 
 
@@ -31,18 +29,12 @@ class RuntimePandasDataAsset(BaseDataAsset):
         datasource,  # Should be of type: RuntimePandasDatasource,
         name: str,
         batch_identifiers: List[str],
-        method: str = "read_csv",
-        base_directory: str = "",
     ) -> None:
 
         # !!! Check to make sure this is a valid configuration of parameters.
         # !!! For example, if base_directory is Null, method and regex should be Null as well.
         # !!! Also, if base_directory is not Null, method and regex should be populated as well. defaults are okay.
         # !!! Also, if regex is not Null, the number of groups should be exactly equal to the number of parameters in batch_identifiers
-
-        self._method = method
-        self._base_directory = base_directory
-        self._regex = regex
 
         super().__init__(
             datasource=datasource, name=name, batch_identifiers=batch_identifiers
@@ -52,9 +44,6 @@ class RuntimePandasDataAsset(BaseDataAsset):
         self,
         name: Optional[str] = None,
         batch_identifiers: Optional[List[str]] = None,
-        method: Optional[str] = None,
-        base_directory: Optional[str] = None,
-        regex: Optional[str] = None,
     ) -> Self:
 
         # !!! Check to make sure this is a valid configuration of parameters.
@@ -94,7 +83,6 @@ class RuntimePandasDataAsset(BaseDataAsset):
             data_asset_name=self._name,
             data_connector_query=batch_identifiers,
             batch_spec_passthrough=BatchSpecPassthrough(),
-            # batch_identifiers=batch_identifiers,
         )
 
         return batch_request
@@ -126,14 +114,6 @@ class RuntimePandasDataAsset(BaseDataAsset):
             self.base_directory, "*"
         )
         return asset_paths
-
-    def set_name(self, name: str):
-        """Changes the DataAsset's name.
-
-        Note: This method is intended to be called only from PandasDataSource.rename_asset.
-        This will keep the name of the asset in sync with the key in the Datasource's _asset registry.
-        """
-        self._name = name
 
     @property
     def batches(self) -> List[Batch]:
@@ -180,50 +160,3 @@ class RuntimePandasDataAsset(BaseDataAsset):
             )
 
         return DataConnectorQuery(**batch_identifier_dict)
-
-    def _get_data_asset_paths(self):
-        # glob_config = self._get_data_asset_config(data_asset_name)
-        # return glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
-        # return glob.glob(os.path.join(self.base_directory, "*.csv"), recursive=True)
-        return glob.glob(self.base_directory)
-
-    def __str__(self):
-        # !!! We should figure out a convention for __str__ifying objects, and apply it across the codebase
-        return f"""great_expectations.datasource.runtime_pandas_data_asset.RuntimePandasDataAsset object :
-    datasource:        {self._datasource}
-    name:              {self._name}
-    batch_identifiers: {self._batch_identifiers}
-    method:            {self._method}
-    base_directory:    {self._base_directory}
-    regex:             {self._regex}
-"""
-
-    def __eq__(self, other) -> bool:
-        # !!! I'm not sure if this is a good implementation of __eq__, but I had to do something to get `assert A == B` in tests working.
-
-        return all(
-            [
-                self._datasource == other._datasource,
-                self._name == other._name,
-                self._batch_identifiers == other._batch_identifiers,
-                self._method == other._method,
-                self._base_directory == other._base_directory,
-                self._regex == other._regex,
-            ]
-        )
-
-    @property
-    def method(self) -> str:
-        return self._method
-
-    @property
-    def base_directory(self) -> str:
-        return self._base_directory
-
-    @property
-    def regex(self) -> str:
-        return self._regex
-
-    @property
-    def batch_identifiers(self) -> str:
-        return self._batch_identifiers

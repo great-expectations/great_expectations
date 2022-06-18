@@ -7,8 +7,8 @@ from typing import Dict, List, Optional
 from typing_extensions import Self
 
 from great_expectations.core.batch import Batch, BatchRequest
-from great_expectations.datasource.base_data_asset import (
-    BaseDataAsset,
+from great_expectations.datasource.base_data_asset import BaseDataAsset
+from great_expectations.datasource.misc_types import (
     BatchIdentifierException,
     BatchSpecPassthrough,
     DataConnectorQuery,
@@ -20,15 +20,13 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.validator.validator import Validator
 
-# from great_expectations.datasource.pandas_reader_datasource import PandasReaderDatasource # !!! This creates a circular import
-
 logger = logging.getLogger(__name__)
 
 
 class ConfiguredPandasDataAsset(BaseDataAsset):
     def __init__(
         self,
-        datasource,  # Should be of type: PandasReaderDatasource,
+        datasource,  # Should be of type: ConfiguredPandasDatasource,
         name: str,
         batch_identifiers: List[str] = ["filename"],
         method: str = "read_csv",
@@ -128,14 +126,6 @@ class ConfiguredPandasDataAsset(BaseDataAsset):
         )
         return asset_paths
 
-    def set_name(self, name: str):
-        """Changes the DataAsset's name.
-
-        Note: This method is intended to be called only from PandasDataSource.rename_asset.
-        This will keep the name of the asset in sync with the key in the Datasource's _asset registry.
-        """
-        self._name = name
-
     @property
     def batches(self) -> List[Batch]:
         #!!! OMG inefficient
@@ -190,7 +180,7 @@ class ConfiguredPandasDataAsset(BaseDataAsset):
 
     def __str__(self):
         # !!! We should figure out a convention for __str__ifying objects, and apply it across the codebase
-        return f"""great_expectations.datasource.pandas_reader_data_asset.ConfiguredPandasDataAsset object :
+        return f"""great_expectations.datasource.configured_pandas_data_asset.py.ConfiguredPandasDataAsset object :
     datasource:        {self._datasource}
     name:              {self._name}
     batch_identifiers: {self._batch_identifiers}
@@ -224,7 +214,3 @@ class ConfiguredPandasDataAsset(BaseDataAsset):
     @property
     def regex(self) -> str:
         return self._regex
-
-    @property
-    def batch_identifiers(self) -> str:
-        return self._batch_identifiers

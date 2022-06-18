@@ -5,7 +5,7 @@ import pytest
 import sqlalchemy as sa
 
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.base_data_asset import NewConfiguredBatchRequest
+from great_expectations.datasource.misc_types import NewConfiguredBatchRequest
 from great_expectations.datasource.runtime_pandas_datasource import (
     RuntimePandasDatasource,
 )
@@ -14,7 +14,7 @@ from tests.test_utils import _get_batch_request_from_validator, _get_data_from_v
 ### Tests of other methods. These don't go into edge cases, because we trust the decorators to cover them.
 
 
-def test_PandasReaderDatasource_read_json():
+def test_RuntimePandasDatasource_read_json():
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_json(
         '{"a":[1,4], "b":[2,5], "c":[3,6]}',
@@ -36,7 +36,7 @@ def test_PandasReaderDatasource_read_json():
     }
 
 
-def test_PandasReaderDatasource_read_table():
+def test_RuntimePandasDatasource_read_table():
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_table(
         file_relative_path(__file__, "fixtures/example_3.tsv"),
@@ -56,7 +56,7 @@ def test_PandasReaderDatasource_read_table():
 @pytest.mark.skip(
     "This test doesn't work on some headless infrastructure, including our CI setup."
 )
-def test_PandasReaderDatasource_read_clipboard():
+def test_RuntimePandasDatasource_read_clipboard():
     import pyperclip
 
     old_clipboard_text = pyperclip.paste()
@@ -104,7 +104,7 @@ def sqlite_engine():
     return engine
 
 
-def test_PandasReaderDatasource_read_sql_table_with_con_as_keyword_arg(sqlite_engine):
+def test_RuntimePandasDatasource_read_sql_table_with_con_as_keyword_arg(sqlite_engine):
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_sql_table(
         "test_table", con=sqlite_engine, timestamp=0
@@ -127,7 +127,7 @@ def test_PandasReaderDatasource_read_sql_table_with_con_as_keyword_arg(sqlite_en
     }
 
 
-def test_PandasReaderDatasource_read_sql_table_with_con_as_positional_arg(
+def test_RuntimePandasDatasource_read_sql_table_with_con_as_positional_arg(
     sqlite_engine,
 ):
     my_datasource = RuntimePandasDatasource("my_datasource")
@@ -152,7 +152,7 @@ def test_PandasReaderDatasource_read_sql_table_with_con_as_positional_arg(
     }
 
 
-def test_PandasReaderDatasource_read_sql_query(sqlite_engine):
+def test_RuntimePandasDatasource_read_sql_query(sqlite_engine):
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_sql_query(
         "SELECT * FROM test_table;", con=sqlite_engine, timestamp=0
@@ -175,7 +175,7 @@ def test_PandasReaderDatasource_read_sql_query(sqlite_engine):
     }
 
 
-def test_PandasReaderDatasource_read_sql_with_query(sqlite_engine):
+def test_RuntimePandasDatasource_read_sql_with_query(sqlite_engine):
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_sql(
         "SELECT * FROM test_table;", con=sqlite_engine, timestamp=0
@@ -198,7 +198,7 @@ def test_PandasReaderDatasource_read_sql_with_query(sqlite_engine):
     }
 
 
-def test_PandasReaderDatasource_read_sql_with_table(sqlite_engine):
+def test_RuntimePandasDatasource_read_sql_with_table(sqlite_engine):
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_sql("test_table", con=sqlite_engine, timestamp=0)
 
@@ -223,7 +223,7 @@ def test_PandasReaderDatasource_read_sql_with_table(sqlite_engine):
 
 
 @pytest.mark.skip("For convenience")
-def test_PandasReaderDatasource_read_dataframe():
+def test_RuntimePandasDatasource_read_dataframe():
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_df = pd.DataFrame(
         {

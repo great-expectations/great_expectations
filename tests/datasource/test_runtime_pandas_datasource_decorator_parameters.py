@@ -5,7 +5,7 @@ import pytest
 import sqlalchemy as sa
 
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.base_data_asset import (
+from great_expectations.datasource.misc_types import (
     BatchSpecPassthrough,
     DataConnectorQuery,
     NewConfiguredBatchRequest,
@@ -20,7 +20,7 @@ from tests.test_utils import _get_batch_request_from_validator, _get_data_from_v
 # These are thorough, covering pretty much all of the API surface area for the new read_* methods, including error states
 
 
-def test_PandasReaderDatasource_read_csv_basic():
+def test_RuntimePandasDatasource_read_csv_basic():
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_csv(
         file_relative_path(__file__, "fixtures/example_1.csv"),
@@ -50,7 +50,7 @@ def test_PandasReaderDatasource_read_csv_basic():
     )
 
 
-def test_PandasReaderDatasource_read_csv_with_real_timestamp():
+def test_RuntimePandasDatasource_read_csv_with_real_timestamp():
     my_datasource = RuntimePandasDatasource("my_datasource")
     now = datetime.datetime.now()
     my_validator = my_datasource.read_csv(
@@ -61,7 +61,7 @@ def test_PandasReaderDatasource_read_csv_with_real_timestamp():
     assert time_delta.total_seconds() < 1
 
 
-def test_PandasReaderDatasource_read_csv_with_use_primary_arg_as_id__eq__false():
+def test_RuntimePandasDatasource_read_csv_with_use_primary_arg_as_id__eq__false():
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_csv(
         file_relative_path(__file__, "fixtures/example_1.csv"),
@@ -71,7 +71,7 @@ def test_PandasReaderDatasource_read_csv_with_use_primary_arg_as_id__eq__false()
     assert my_batch_request.data_connector_query["id_"] == None
 
 
-def test_PandasReaderDatasource_read_csv_with_use_primary_arg_as_id__eq__false_and_an_id_():
+def test_RuntimePandasDatasource_read_csv_with_use_primary_arg_as_id__eq__false_and_an_id_():
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_csv(
         file_relative_path(__file__, "fixtures/example_1.csv"),
@@ -82,7 +82,7 @@ def test_PandasReaderDatasource_read_csv_with_use_primary_arg_as_id__eq__false_a
     assert my_batch_request.data_connector_query["id_"] == "Here's an ID!"
 
 
-def test_PandasReaderDatasource_read_csv_with_use_primary_arg_as_id__eq__true_and_an_id_():
+def test_RuntimePandasDatasource_read_csv_with_use_primary_arg_as_id__eq__true_and_an_id_():
     my_datasource = RuntimePandasDatasource("my_datasource")
     with pytest.raises(ValueError):
         my_datasource.read_csv(
@@ -93,7 +93,7 @@ def test_PandasReaderDatasource_read_csv_with_use_primary_arg_as_id__eq__true_an
         )
 
 
-def test_PandasReaderDatasource_read_csv_with_sep():
+def test_RuntimePandasDatasource_read_csv_with_sep():
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_csv(
         file_relative_path(__file__, "fixtures/example_2.csv"),
@@ -124,7 +124,7 @@ def test_PandasReaderDatasource_read_csv_with_sep():
     )
 
 
-def test_PandasReaderDatasource_read_csv_with_sep_as_positional_arg():
+def test_RuntimePandasDatasource_read_csv_with_sep_as_positional_arg():
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_csv(
         file_relative_path(__file__, "fixtures/example_2.csv"),
@@ -155,7 +155,7 @@ def test_PandasReaderDatasource_read_csv_with_sep_as_positional_arg():
     )
 
 
-def test_PandasReaderDatasource_read_csv_with_buffer():
+def test_RuntimePandasDatasource_read_csv_with_buffer():
     my_datasource = RuntimePandasDatasource("my_datasource")
     with open(file_relative_path(__file__, "fixtures/example_1.csv")) as file:
         my_validator = my_datasource.read_csv(
@@ -188,7 +188,7 @@ def test_PandasReaderDatasource_read_csv_with_buffer():
 
 
 @pytest.mark.skip(reason="Unsure if this is the behavior that we want.")
-def test_PandasReaderDatasource_read_csv_with_buffer_and_use_primary_arg_as_id():
+def test_RuntimePandasDatasource_read_csv_with_buffer_and_use_primary_arg_as_id():
     # !!! Here's what this does currently. I'm not sure if this is the behavior that we want.
     # TypeError: <_io.TextIOWrapper name='/Users/abe/Documents/great_expectations/tests/datasource/fixtures/example_1.csv' mode='r' encoding='UTF-8'> is of type TextIOWrapper which cannot be serialized.
 
@@ -200,7 +200,7 @@ def test_PandasReaderDatasource_read_csv_with_buffer_and_use_primary_arg_as_id()
             )
 
 
-def test_PandasReaderDatasource_read_csv_with_filepath_or_buffer_argument():
+def test_RuntimePandasDatasource_read_csv_with_filepath_or_buffer_argument():
     my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_csv(
         filepath_or_buffer=file_relative_path(__file__, "fixtures/example_1.csv"),
@@ -215,7 +215,7 @@ def test_PandasReaderDatasource_read_csv_with_filepath_or_buffer_argument():
     }
 
 
-def test_PandasReaderDatasource_read_csv_with_filepath_or_buffer_argument_and_a_positional_argument():
+def test_RuntimePandasDatasource_read_csv_with_filepath_or_buffer_argument_and_a_positional_argument():
     my_datasource = RuntimePandasDatasource("my_datasource")
     with pytest.raises(TypeError) as exc:
         my_validator = my_datasource.read_csv(
@@ -230,7 +230,7 @@ def test_PandasReaderDatasource_read_csv_with_filepath_or_buffer_argument_and_a_
 
 #!!!
 @pytest.mark.skip(reason="This might require deeper surgery on BatchRequest class")
-def test_PandasReaderDatasource_read_csv_with_nonserializable_parameter():
+def test_RuntimePandasDatasource_read_csv_with_nonserializable_parameter():
     def date_parser(x):
         return x
 
@@ -246,7 +246,7 @@ def test_PandasReaderDatasource_read_csv_with_nonserializable_parameter():
     }
 
 
-def test_PandasReaderDatasource_read_csv__with_data_asset_name():
+def test_RuntimePandasDatasource_read_csv__with_data_asset_name():
     my_datasource = RuntimePandasDatasource("my_datasource")
     assert my_datasource.list_asset_names() == []
 
