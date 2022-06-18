@@ -19,6 +19,7 @@ def test_ZEP_scenario__runtime_pandas(test_dir_oscar):
     my_df.head()
     my_df.expect_column_values_to_be_between("x", 0, 10)
 
+    # RuntimePandasDatasource automatically generates BatchRequests
     batch_request = _get_batch_request_from_validator(my_df)
     assert batch_request == NewConfiguredBatchRequest(
         datasource_name='runtime_pandas',
@@ -33,6 +34,7 @@ def test_ZEP_scenario__runtime_pandas(test_dir_oscar):
         ),
     )
 
+    # You can assign asset_names, if you wish
     my_df = context.sources.runtime_pandas.from_dataframe(
         raw_df,
         data_asset_name="some_airflow_dag_step",
@@ -52,6 +54,7 @@ def test_ZEP_scenario__runtime_pandas(test_dir_oscar):
         ),
     )
 
+    # You can pipe in the id_ parameter
     my_df = context.sources.runtime_pandas.from_dataframe(
         raw_df,
         data_asset_name="some_airflow_dag_step",
@@ -165,23 +168,6 @@ def test_ZEP_scenario__configured_pandas(test_dir_oscar):
     )
 
     return
-    # Refine the asset configuration by adding a more detailed regex
-    context.sources.default_pandas_reader.add_asset(
-        name="oscar_A",
-        base_directory=test_dir_oscar + "/A",
-        regex="file-(.*)/.csv",
-        batch_identifiers=["number"],
-    )
-    # context.sources.default_pandas_reader.assets.oscar_A.list_batches()
-    my_batch_request_3 = (
-        context.sources.default_pandas_reader.assets.oscar_A.get_batch_request(number=1)
-    )
-    # my_validator_3 = context.sources.default_pandas_reader.assets.oscar_A.get_validator(
-    #     number=1
-    # )
-    # my_validator_3.head()
-    # my_validator_3.expect_column_values_to_be_between("x", min_value=1, max_value=2)
-
     # Get a batch request spanning multiple files, and use it to configure a profiler
     #!!! Need to figure out the syntax for BatchRequests that can span ranges and multiple Batches.
     #!!! This implementation strikes me as error-prone.
