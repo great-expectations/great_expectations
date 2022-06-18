@@ -21,3 +21,7 @@ class GxExperimentalWarning(Warning):
     """
 
     pass
+
+
+class GxRuntimeAssetWarning(Warning):
+    pass

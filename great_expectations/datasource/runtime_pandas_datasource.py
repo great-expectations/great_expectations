@@ -11,7 +11,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.warnings import GxExperimentalWarning
+from great_expectations.warnings import GxExperimentalWarning, GxRuntimeAssetWarning
 from great_expectations.datasource.misc_types import (
     PassthroughParameters,
     BatchIdentifiers,
@@ -227,7 +227,7 @@ class RuntimePandasDatasource(NewNewNewDatasource):
         name,
     ):
         super().__init__(name=name)
-        
+
         self._execution_engine = instantiate_class_from_config(
             config={
                 "class_name": "PandasExecutionEngine",
@@ -325,8 +325,18 @@ class RuntimePandasDatasource(NewNewNewDatasource):
         return args, kwargs
 
     #!!! What's the best way to add docstrings to these methods?
+    #!!! Need to add disable_runtime_asset_warning=True to all these methods, probably to the decorator.
     @_add_gx_args(primary_arg_variable_name="filepath_or_buffer")
     def read_csv(self, primary_arg, *args, **kwargs):
+
+        warnings.warn(f"""
+RuntimePandasDatasource.read_csv generates a RuntimeDataAsset, which is usually not the best way to handle reading csvs from a file system.
+
+Instead, we recommend a ConfiguredPandasDatasource. You can read about it here: https://docs.great_expectations.io/somet/doc/about/this.
+
+You can disable this warning with `disable_runtime_asset_warning=True`
+""", GxRuntimeAssetWarning)
+
         return pd.read_csv(primary_arg, *args, **kwargs)
 
     @_add_gx_args(
