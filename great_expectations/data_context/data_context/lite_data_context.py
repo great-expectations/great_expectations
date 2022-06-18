@@ -15,11 +15,6 @@ from great_expectations.types.base import DotDict
 from great_expectations.util import load_class
 
 
-#!!! Factor this out to somewhere nicer
-class GxExperimentalWarning(Warning):
-    pass
-
-
 class LiteDataContext(BaseDataContext):
     #!!! Rather than start from a config, it would be better to programmatically instantiate this datasource in __init__. That will allow other configs to be passed in.
     default_context_config: DataContextConfig = DataContextConfig(
@@ -51,15 +46,15 @@ class LiteDataContext(BaseDataContext):
 
         #!!! Trying this on for size...
         # experimental-v0.15.1
-        # warnings.warn(
-        #     "\n================================================================================\n" \
-        #     "LiteDataContext is an experimental feature of Great Expectations.\n" \
-        #     "You should consider the API to be unstable.\n" \
-        #     "If you have questions or feedback, please chime in at\n" \
-        #     "https://github.com/great-expectations/great_expectations/discussions/DISCUSSION-ID-GOES-HERE" \
-        #     "\n================================================================================\n",
-        #     GxExperimentalWarning,
-        # )
+        warnings.warn(
+            "\n================================================================================\n" \
+            "LiteDataContext is an experimental feature of Great Expectations.\n" \
+            "You should consider the API to be unstable.\n" \
+            "If you have questions or feedback, please chime in at\n" \
+            "https://github.com/great-expectations/great_expectations/discussions/DISCUSSION-ID-GOES-HERE" \
+            "\n================================================================================\n",
+            GxExperimentalWarning,
+        )
 
         super().__init__(
             project_config=project_config,

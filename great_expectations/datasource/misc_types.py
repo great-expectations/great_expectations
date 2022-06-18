@@ -11,6 +11,9 @@ class BatchIdentifierException(BaseException):
     # !!! Do we want to create a class for this? Is this the right name and inheritance?
     pass
 
+class GxExperimentalWarning(Warning):
+    pass
+
 
 class BatchIdentifiers(dict, SerializableDictDot):
     pass
