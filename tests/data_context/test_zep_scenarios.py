@@ -1,22 +1,88 @@
-import glob
-
-import pytest
+import pandas as pd
 
 import great_expectations as gx
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.misc_types import BatchIdentifiers, NewConfiguredBatchRequest, PassthroughParameters
 from tests.datasource.new_fixtures import test_dir_oscar
 from tests.test_utils import _get_batch_request_from_validator
 
-
-def test_ZEP_scenario_1(test_dir_oscar):
+# !!! These are mostly just smoke tests.
+# !!! We should level these up, maybe even include testing that autocomplete namespaces aren't cluttered and warnings appear in the propoer places.
+def test_ZEP_scenario__runtime_pandas(test_dir_oscar):
     context = gx.get_context(lite=True)
 
     # Use the built-in datasource to get a validator, runtime-style
+    raw_df = pd.DataFrame({
+        "x": range(10),
+        "y": range(10),
+    })
+    my_df = context.sources.runtime_pandas.from_dataframe(raw_df, timestamp=0)
+    my_df.head()
+    my_df.expect_column_values_to_be_between("x", 0, 10)
+
+    batch_request = _get_batch_request_from_validator(my_df)
+    assert batch_request == NewConfiguredBatchRequest(
+        datasource_name='runtime_pandas',
+        data_asset_name='DEFAULT_DATA_ASSET',
+        batch_identifiers=BatchIdentifiers(
+            id_= None,
+            timestamp= 0,
+        ),
+        passthrough_parameters= PassthroughParameters(
+            args= [],
+            kwargs= {}
+        ),
+    )
+
+    my_df = context.sources.runtime_pandas.from_dataframe(
+        raw_df,
+        data_asset_name="some_airflow_dag_step",
+        timestamp=0,
+    )
+    batch_request = _get_batch_request_from_validator(my_df)
+    assert batch_request == NewConfiguredBatchRequest(
+        datasource_name='runtime_pandas',
+        data_asset_name='some_airflow_dag_step',
+        batch_identifiers=BatchIdentifiers(
+            id_= None,
+            timestamp= 0,
+        ),
+        passthrough_parameters= PassthroughParameters(
+            args= [],
+            kwargs= {}
+        ),
+    )
+
+    my_df = context.sources.runtime_pandas.from_dataframe(
+        raw_df,
+        data_asset_name="some_airflow_dag_step",
+        id_="my_airflow_run_id",
+        timestamp=0,
+    )
+    batch_request = _get_batch_request_from_validator(my_df)
+    assert batch_request == NewConfiguredBatchRequest(
+        datasource_name='runtime_pandas',
+        data_asset_name='some_airflow_dag_step',
+        batch_identifiers=BatchIdentifiers(
+            id_= "my_airflow_run_id",
+            timestamp= 0,
+        ),
+        passthrough_parameters= PassthroughParameters(
+            args= [],
+            kwargs= {}
+        ),
+    )
+
+
+    # Now get a runtime-style dataframe.
     my_validator_1 = context.sources.runtime_pandas.read_csv(
         test_dir_oscar + "/A/data-202201.csv"
     )
     my_validator_1.head()
     my_validator_1.expect_column_values_to_be_between("x", min_value=1, max_value=2)
+
+# !!! These are just smoke tests. We should level these up, maybe even include testing that autocomplete namespaces aren't cluttered and warnings appear in the propoer places.
+def test_ZEP_scenario__configured_pandas(test_dir_oscar):
+    context = gx.get_context(lite=True)
 
     # Add a configured asset and use it to fetch a Validator
     context.sources.configured_pandas.add_asset(
