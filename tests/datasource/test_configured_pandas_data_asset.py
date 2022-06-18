@@ -30,30 +30,14 @@ def test_ConfiguredPandasDataAsset__init__(test_dir_alpha):
         batch_identifiers=["filename"],
     )
 
-    # Instantiate as a runtime data asset
-    my_asset = ConfiguredPandasDataAsset(
-        datasource=my_datasource,
-        name="test_dir_alpha",
-        batch_identifiers=["filename"],
-    )
-
-    my_asset = ConfiguredPandasDataAsset(
-        datasource=my_datasource,
-        name="test_dir_alpha",
-        batch_identifiers=["id", "timestamp"],
-    )
-
-    # !!! This should throw an error: "Cannot declare method or regex when base_directory=None"
+    # !!! This should throw an error: "The number of regex groups should be exactly equal to the number of parameters in batch_identifiers"
     ConfiguredPandasDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",
         method="read_csv",
-        regex="(*.)\\.csv",
+        regex="somefile.csv",
         batch_identifiers=["filename"],
     )
-
-    # !!! If base_directory is not Null, method and regex should be populated as well. defaults are okay.
-    # !!! If regex is not Null, the number of groups should be exactly equal to the number of parameters in batch_identifiers
 
 
 def test_ConfiguredPandasDataAsset_method_list():
