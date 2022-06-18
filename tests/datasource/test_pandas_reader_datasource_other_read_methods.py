@@ -1,14 +1,12 @@
 import datetime
 
 import pandas as pd
-from great_expectations.datasource.base_data_asset import BatchSpecPassthrough, DataConnectorQuery, NewConfiguredBatchRequest
+from great_expectations.datasource.base_data_asset import NewConfiguredBatchRequest
 import pytest
 import sqlalchemy as sa
 
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.pandas_reader_datasource import (
-    PandasReaderDatasource,
-)
+from great_expectations.datasource.runtime_pandas_datasource import RuntimePandasDatasource
 from tests.test_utils import (
     _get_batch_request_from_validator,
     _get_data_from_validator,
@@ -17,7 +15,7 @@ from tests.test_utils import (
 ### Tests of other methods. These don't go into edge cases, because we trust the decorators to cover them.
 
 def test_PandasReaderDatasource_read_json():
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_json(
         '{"a":[1,4], "b":[2,5], "c":[3,6]}',
         timestamp=0,
@@ -39,7 +37,7 @@ def test_PandasReaderDatasource_read_json():
 
 
 def test_PandasReaderDatasource_read_table():
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_table(
         file_relative_path(__file__, "fixtures/example_3.tsv"),
         delimiter="|",
@@ -71,7 +69,7 @@ def test_PandasReaderDatasource_read_clipboard():
 """
     )
 
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_clipboard(timestamp=0)
 
     my_data = _get_data_from_validator(my_validator)
@@ -107,7 +105,7 @@ def sqlite_engine():
 
 
 def test_PandasReaderDatasource_read_sql_table_with_con_as_keyword_arg(sqlite_engine):
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_sql_table(
         "test_table", con=sqlite_engine, timestamp=0
     )
@@ -132,7 +130,7 @@ def test_PandasReaderDatasource_read_sql_table_with_con_as_keyword_arg(sqlite_en
 def test_PandasReaderDatasource_read_sql_table_with_con_as_positional_arg(
     sqlite_engine,
 ):
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_sql_table(
         "test_table", sqlite_engine, timestamp=0
     )
@@ -155,7 +153,7 @@ def test_PandasReaderDatasource_read_sql_table_with_con_as_positional_arg(
 
 
 def test_PandasReaderDatasource_read_sql_query(sqlite_engine):
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_sql_query(
         "SELECT * FROM test_table;", con=sqlite_engine, timestamp=0
     )
@@ -178,7 +176,7 @@ def test_PandasReaderDatasource_read_sql_query(sqlite_engine):
 
 
 def test_PandasReaderDatasource_read_sql_with_query(sqlite_engine):
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_sql(
         "SELECT * FROM test_table;", con=sqlite_engine, timestamp=0
     )
@@ -204,7 +202,7 @@ def test_PandasReaderDatasource_read_sql_with_query(sqlite_engine):
 
 
 def test_PandasReaderDatasource_read_sql_with_table(sqlite_engine):
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = RuntimePandasDatasource("my_datasource")
     my_validator = my_datasource.read_sql("test_table", con=sqlite_engine, timestamp=0)
     
     my_data = _get_data_from_validator(my_validator)
@@ -227,7 +225,7 @@ def test_PandasReaderDatasource_read_sql_with_table(sqlite_engine):
 
 @pytest.mark.skip("For convenience")
 def test_PandasReaderDatasource_read_dataframe():
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = RuntimePandasDatasource("my_datasource")
     my_df = pd.DataFrame(
         {
             "a": [1, 4],
@@ -243,7 +241,7 @@ def test_PandasReaderDatasource_read_dataframe():
     my_batch_request = _get_batch_request_from_validator(my_validator)
 
     assert isinstance(
-        my_batch_requestbatch_spec_passthrough["batch_data"], pd.DataFrame
+        my_batch_request.batch_spec_passthrough["batch_data"], pd.DataFrame
     )
 
     print("&"*80)

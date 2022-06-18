@@ -2,7 +2,7 @@ from ast import List
 from great_expectations.core.batch import Batch
 import pytest
 
-from great_expectations.datasource.pandas_reader_datasource import PandasReaderDatasource
+from great_expectations.datasource.configured_pandas_datasource import ConfiguredPandasDatasource
 from great_expectations.datasource.base_data_asset import (
     BatchIdentifierException,
     BatchSpecPassthrough,
@@ -17,7 +17,7 @@ from great_expectations.datasource.pandas_reader_data_asset import (
 from tests.datasource.new_fixtures import test_dir_alpha
 
 def test_PandasReaderDataAsset__init__(test_dir_alpha):
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = ConfiguredPandasDatasource("my_datasource")
 
     # Smoke test
     my_asset = PandasReaderDataAsset(
@@ -57,7 +57,7 @@ def test_PandasReaderDataAsset__init__(test_dir_alpha):
 
 
 def test_PandasReaderDataAsset_method_list():
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = ConfiguredPandasDatasource("my_datasource")
     my_asset = PandasReaderDataAsset(
         datasource=my_datasource,
         name="my_asset",
@@ -88,7 +88,7 @@ def test_PandasReaderDataAsset_method_list():
 
 @pytest.fixture
 def alpha_test_files_pandas_reader_data_asset(test_dir_alpha) -> PandasReaderDataAsset:
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = ConfiguredPandasDatasource("my_datasource")
     return PandasReaderDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",
@@ -148,7 +148,7 @@ def test_PandasReaderDataAsset_get_validator():
     pass
 
 def test_PandasReaderDataAsset__generate_batch_identifiers_from_args_and_kwargs():
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = ConfiguredPandasDatasource("my_datasource")
     my_asset = PandasReaderDataAsset(
         datasource=my_datasource,
         name="test_dir_alpha",

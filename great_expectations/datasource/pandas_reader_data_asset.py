@@ -10,7 +10,6 @@ from great_expectations.datasource.data_connector.util import get_filesystem_one
 from great_expectations.validator.validator import Validator
 from great_expectations.datasource.base_data_asset import (
     BaseDataAsset,
-    # NewBatchRequest,
     BatchIdentifierException,
     BatchSpecPassthrough,
     DataConnectorQuery,

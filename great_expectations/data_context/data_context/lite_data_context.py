@@ -23,9 +23,13 @@ class LiteDataContext(BaseDataContext):
     #!!! Rather than start from a config, it would be better to programmatically instantiate this datasource in __init__. That will allow other configs to be passed in.
     default_context_config: DataContextConfig = DataContextConfig(
         datasources={
-            "default_pandas_reader": {
-                "class_name": "PandasReaderDatasource",
-                "module_name": "great_expectations.datasource",                
+            "runtime_pandas": {
+                "class_name": "RuntimePandasDatasource",
+                "module_name": "great_expectations.datasource.runtime_pandas_datasource",
+            },
+            "configured_pandas": {
+                "class_name": "ConfiguredPandasDatasource",
+                "module_name": "great_expectations.datasource.configured_pandas_datasource",
             },
         },
         expectations_store_name="expectations_store",

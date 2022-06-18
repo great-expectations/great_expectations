@@ -13,19 +13,19 @@ def test_ZEP_scenario_1(test_dir_oscar):
     context = gx.get_context(lite=True)
 
     # Use the built-in datasource to get a validator, runtime-style
-    my_validator_1 = context.sources.default_pandas_reader.read_csv(test_dir_oscar+"/A/data-202201.csv")
+    my_validator_1 = context.sources.runtime_pandas.read_csv(test_dir_oscar+"/A/data-202201.csv")
     my_validator_1.head()
     my_validator_1.expect_column_values_to_be_between("x", min_value=1, max_value=2)
 
     # Add a configured asset and use it to fetch a Validator
-    context.sources.default_pandas_reader.add_asset(
+    context.sources.configured_pandas.add_asset(
         name="oscar_A",
         base_directory=test_dir_oscar+"/A",
     )
-    my_batch_request_2 = context.sources.default_pandas_reader.assets.oscar_A.get_batch_request(
+    my_batch_request_2 = context.sources.configured_pandas.assets.oscar_A.get_batch_request(
         filename="data-202202.csv"
     )
-    my_validator_2 = context.sources.default_pandas_reader.assets.oscar_A.get_validator(
+    my_validator_2 = context.sources.configured_pandas.assets.oscar_A.get_validator(
         filename="data-202202.csv"
     )
     my_validator_2.head()
@@ -34,7 +34,7 @@ def test_ZEP_scenario_1(test_dir_oscar):
 
 
 
-    my_new_asset = context.sources.default_pandas_reader.add_asset("my_new_asset")
+    my_new_asset = context.sources.configured_pandas.add_asset("my_new_asset")
     df = my_new_asset.get_batch(test_dir_oscar+"/A/data-202112.csv")
 
     my_new_asset.update_configuration(

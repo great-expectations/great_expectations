@@ -163,7 +163,7 @@ def _add_gx_args(
     return wrapped
 
 
-class PandasReaderDatasource(NewNewNewDatasource):
+class RuntimePandasDatasource(NewNewNewDatasource):
     """
     This class is enables very simple syntax for users who are just getting started with Great Expectations, and have not configured (or learned about) Datasources and DataConnectors. To do so, it provides thin wrapper methods for all 20 of pandas' `read_*` methods.
     

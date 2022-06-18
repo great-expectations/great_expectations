@@ -8,8 +8,8 @@ import pytest
 import sqlalchemy as sa
 
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.pandas_reader_datasource import (
-    PandasReaderDatasource,
+from great_expectations.datasource.configured_pandas_datasource import (
+    ConfiguredPandasDatasource,
 )
 from tests.test_utils import (
     create_files_in_directory,
@@ -18,7 +18,7 @@ from tests.test_utils import (
 from tests.datasource.new_fixtures import test_dir_alpha
 
 def test_PandasReaderDatasource_method_list():
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = ConfiguredPandasDatasource("my_datasource")
     dir_results = dir(my_datasource)
     filtered_dir_results = [ r for r in dir_results if r[0] != "_"]
     print("\n".join(filtered_dir_results))
@@ -36,34 +36,11 @@ def test_PandasReaderDatasource_method_list():
         "get_validator",
         "list_asset_names",
         # "self_check",
-        
-        # read_* methods
-        "from_dataframe",
-        "read_clipboard",
-        "read_csv",
-        "read_excel",
-        "read_feather",
-        "read_fwf",
-        "read_gbq",
-        "read_hdf",
-        "read_html",
-        "read_json",
-        "read_orc",
-        "read_parquet",
-        "read_pickle",
-        "read_sas",
-        "read_spss",
-        "read_sql",
-        "read_sql_query",
-        "read_sql_table",
-        "read_stata",
-        "read_table",
-        "read_xml",
     })
 
 
 def test_PandasReaderDatasource_add_asset(test_dir_alpha):
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = ConfiguredPandasDatasource("my_datasource")
     assert my_datasource.list_asset_names() == []
 
     my_datasource.add_asset(
@@ -124,7 +101,7 @@ def test_PandasReaderDatasource_add_asset(test_dir_alpha):
     # assert my_datasource.list_asset_names() == ["test_dir_alpha"]
 
 def test_PandasReaderDatasource_rename_asset():
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = ConfiguredPandasDatasource("my_datasource")
     assert my_datasource.list_asset_names() == []
 
     my_datasource.add_asset("A")
@@ -149,7 +126,7 @@ def test_PandasReaderDatasource_rename_asset():
 
 
 def test_PandasReaderDatasource_asset_property(test_dir_alpha):
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = ConfiguredPandasDatasource("my_datasource")
     print(my_datasource.assets)
     assert len(my_datasource.assets) == 0
 
@@ -187,7 +164,7 @@ def test_PandasReaderDatasource_asset_property(test_dir_alpha):
     )
 
 def test_PandasReaderDatasource_get_batch(test_dir_alpha):
-    my_datasource = PandasReaderDatasource("my_datasource")
+    my_datasource = ConfiguredPandasDatasource("my_datasource")
     my_datasource.add_asset(
         name="test_dir_alpha",
         method="read_csv",
