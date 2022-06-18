@@ -42,8 +42,7 @@ class NewBatchRequestBase(SerializableDictDot, ABC):
 
 @dataclass
 class NewConfiguredBatchRequest(NewBatchRequestBase):
-    passthrough_parameters: PassthroughParameters
-
+    AAAA_passthrough_parameters: PassthroughParameters
 
     def __str__(self) -> str:
         return f"""NewConfiguredBatchRequest(
