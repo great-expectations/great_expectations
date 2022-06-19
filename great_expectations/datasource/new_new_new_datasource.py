@@ -1,5 +1,5 @@
 #!!! Rename this
-from typing import List
+from typing import Dict, List
 from great_expectations.core.batch import Batch
 from great_expectations.datasource.base_data_asset import BaseDataAsset
 from great_expectations.datasource.misc_types import NewBatchRequestBase
@@ -57,3 +57,11 @@ class NewNewNewDatasource:
 
     def get_validator(self, *args, **kwargs) -> Validator:
         raise NotImplementedError
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def assets(self) -> Dict[str, BaseDataAsset]:
+        return self._assets

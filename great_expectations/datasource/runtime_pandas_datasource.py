@@ -355,10 +355,6 @@ class RuntimePandasDatasource(NewNewNewDatasource):
     def assets(self) -> Dict[str, RuntimePandasDataAsset]:
         return self._assets
 
-    @property
-    def name(self) -> str:
-        return self._name
-
     def _decide_whether_to_use_variable_as_identifier(self, var):
         #!!! This is brittle. Almost certainly needs fleshing out.
         if not isinstance(var, str):

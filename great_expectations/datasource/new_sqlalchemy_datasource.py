@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List, Optional
 
 import pandas as pd
 import sqlalchemy as sa
@@ -11,6 +11,7 @@ from great_expectations.datasource.misc_types import (
     NewConfiguredBatchRequest,
 )
 from great_expectations.datasource.new_new_new_datasource import NewNewNewDatasource
+from great_expectations.datasource.new_sqlalchemy_data_asset import ConfiguredNewSqlAlchemyDataAsset
 from great_expectations.validator.validator import Validator
 
 
@@ -20,7 +21,9 @@ class NewSqlAlchemyDatasource(NewNewNewDatasource):
         name: str,
         connection_string: str,
     ) -> None:
-        self._name = name
+
+        super().__init__(name=name)
+
         self._connection_string = connection_string
         self._engine = None
 
@@ -50,18 +53,66 @@ class NewSqlAlchemyDatasource(NewNewNewDatasource):
         )
         return self.get_validator(batch_request)
 
-    def list_tables(self) -> List[str]:
+    def list_tables(
+        self,
+        schema: Optional[str]= None,
+        return_as:str = "strings",
+    ) -> List[str]:
         self._connect_engine()
 
         inspector = sa.inspect(self._engine)
         schemas = inspector.get_schema_names()
 
-        for schema in schemas:
-            print("schema: %s" % schema)
-            for table_name in inspector.get_table_names(schema=schema):
-                print("Table: %s" % table_name)
-                # for column in inspector.get_columns(table_name, schema=schema):
-                #     print("Column: %s" % column)
+        if return_as == "strings":
+
+            table_names = []
+            for schema_name in schemas:
+                for table_name in inspector.get_table_names(schema=schema):
+                    table_names.append(f"{schema_name}.{table_name}")
+
+            return table_names
+
+        elif return_as == "assets":
+
+            assets = []
+            for schema_name in schemas:
+                for table_name in inspector.get_table_names(schema=schema):
+                    new_asset = ConfiguredNewSqlAlchemyDataAsset(
+                        name=f"{schema_name}.{table_name}",
+                        datasource=self,
+                        batch_identifiers=[],
+                        table_name=table_name,
+                        schema_name=schema_name,
+                    )
+                    assets.append(new_asset)
+            
+            return assets
+
+        else:
+            raise ValueError(f'return_as got unknown value {return_as}. Expected "strings" or "assets"')
+
+    def add_asset(
+        self,
+        name: str,
+        table_name: Optional[str] = None,
+        schema_name: Optional[str] = None,
+    ) -> ConfiguredNewSqlAlchemyDataAsset:
+
+        new_asset = ConfiguredNewSqlAlchemyDataAsset(
+            datasource=self,
+            name=name,
+        )
+
+        self._assets[name] = new_asset
+
+        return new_asset
+
+    def update_assets(self, assets:List[ConfiguredNewSqlAlchemyDataAsset]) -> None:
+        for asset in assets:
+            if asset.name in self.assets:
+                self.assets.update_asset(asset)
+            else:
+                self._assets[asset.name] = asset
 
     def get_batch(self, batch_request: NewConfiguredBatchRequest) -> Batch:
         self._connect_engine()
@@ -85,3 +136,7 @@ class NewSqlAlchemyDatasource(NewNewNewDatasource):
             expectation_suite=None,  # expectation_suite,
             batches=[batch],
         )
+
+    @property
+    def assets(self) -> Dict[str, ConfiguredNewSqlAlchemyDataAsset]:
+        return self._assets
