@@ -185,6 +185,7 @@ def measure_execution_time(
     execution_time_holder_object_reference_name: str = "execution_time_holder",
     execution_time_property_name: str = "execution_time",
     pretty_print: bool = True,
+    include_arguments: bool = True,
 ) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
         @wraps(func)
@@ -221,11 +222,19 @@ def measure_execution_time(
                     )
 
                 if pretty_print:
-                    bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-                    call_args: OrderedDict = bound_args.arguments
-                    print(
-                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} seconds."
-                    )
+                    if include_arguments:
+                        bound_args: BoundArguments = signature(func).bind(
+                            *args, **kwargs
+                        )
+                        call_args: OrderedDict = bound_args.arguments
+                        print(
+                            f"""Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} \
+seconds."""
+                        )
+                    else:
+                        print(
+                            f"Total execution time of function {func.__name__}(): {delta_t} seconds."
+                        )
 
         return compute_delta_t
 
