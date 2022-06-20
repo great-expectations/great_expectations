@@ -29,8 +29,8 @@ Steps
 
     * ``ColumnMapExpectation``: ``examples/expectations/column_map_expectation_template.py``
     * ``ColumnExpectation``: ``examples/expectations/column_aggregate_expectation_template.py``
-    * ``ColumnPairMapExpectation``: coming soon...
-    * ``TableExpectation``: coming soon...
+    * ``ColumnPairMapExpectation``: ``examples/expectations/column_pair_map_expectation_template.py``
+    * ``TableExpectation``: ``examples/expectations/table_expectation_template.py``
 
 
 #. **Copy the template file**
