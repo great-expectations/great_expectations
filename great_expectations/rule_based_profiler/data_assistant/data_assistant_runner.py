@@ -89,8 +89,6 @@ class DataAssistantRunner:
     specified by "batch_request", loaded into memory.  Then, "DataAssistant.run()" is issued with given directives.
     """
 
-    RUNTIME_ENVIRONMENT_KWARGS: dict = _build_enum_to_default_kwargs_map()
-
     def __init__(
         self,
         data_assistant_cls: Type["DataAssistant"],  # noqa: F821
@@ -104,7 +102,7 @@ class DataAssistantRunner:
         self._data_assistant_cls = data_assistant_cls
         self._data_context = data_context
 
-    @augment_arguments(**RUNTIME_ENVIRONMENT_KWARGS)
+    @augment_arguments(**_build_enum_to_default_kwargs_map())
     def run(
         self,
         variables: Optional[Dict[str, Any]] = None,
