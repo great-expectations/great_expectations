@@ -144,6 +144,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
     explicit_instantiation_code: str = """
     validator: Validator = get_validator_with_expectation_suite(
         data_context=context,
+        batch_list=None,
         batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
