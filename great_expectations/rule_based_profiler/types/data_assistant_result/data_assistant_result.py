@@ -132,6 +132,7 @@ class DataAssistantResult(SerializableDictDot):
                 expectation_configuration.to_json_dict()
                 for expectation_configuration in self.expectation_configurations
             ],
+            "citation": convert_to_json_serializable(data=self.citation),
             "execution_time": convert_to_json_serializable(data=self.execution_time),
             "usage_statistics_handler": self.usage_statistics_handler.__class__.__name__,
         }
@@ -141,6 +142,19 @@ class DataAssistantResult(SerializableDictDot):
         Returns: This DataAssistantResult as JSON-serializable dictionary.
         """
         return self.to_dict()
+
+    def __dir__(self):
+        """
+        This custom magic method is used to enable tab completion on "DataAssistantResult" objects.
+        """
+        return list(
+            set(self.to_json_dict().keys())
+            | {
+                "get_expectation_suite",
+                "plot_metrics",
+                "plot_expectations_and_metrics",
+            }
+        )
 
     @property
     def _usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
