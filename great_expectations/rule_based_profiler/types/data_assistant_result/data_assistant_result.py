@@ -476,6 +476,7 @@ class DataAssistantResult(SerializableDictDot):
                 df = df[df[metric_name].apply(set) != unique_columns]
                 # record containing all columns to be compared against
                 empty_columns: List[None] = [None] * (len(batch_identifiers) + 1)
+                # noinspection PyTypeChecker
                 all_columns_record: pd.DataFrame = pd.DataFrame(
                     data=[[unique_columns] + empty_columns], columns=df.columns
                 )
@@ -2730,29 +2731,31 @@ class DataAssistantResult(SerializableDictDot):
 
         return column_based_expectation_configurations_by_type
 
+    @staticmethod
     def _filter_attributed_metrics_by_column_names(
-        self,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        def _filter(m: Dict[Domain, Dict[str, ParameterNode]]) -> bool:
-            column_name: str = m.domain_kwargs.column
+        def _filter(domain: Domain) -> bool:
+            column_name: str = domain.domain_kwargs.column
             if exclude_column_names and column_name in exclude_column_names:
                 return False
             if include_column_names and column_name not in include_column_names:
                 return False
             return True
 
-        domains: Set[Domain] = set(filter(lambda m: _filter(m), attributed_metrics))
+        domains: Set[Domain] = set(
+            filter(lambda m: _filter(m), list(attributed_metrics.keys()))
+        )
         filtered_attributed_metrics: Dict[Domain, Dict[str, ParameterNode]] = {
             domain: attributed_metrics[domain] for domain in domains
         }
 
         return filtered_attributed_metrics
 
+    @staticmethod
     def _filter_attributed_metrics_by_metric_name(
-        self,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         metric_name: str,
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
