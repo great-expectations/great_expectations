@@ -104,8 +104,6 @@ class DataAssistantRunner:
         self._data_assistant_cls = data_assistant_cls
         self._data_context = data_context
 
-        self._data_assistant = None
-
     def _build_data_assistant(
         self,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -113,40 +111,43 @@ class DataAssistantRunner:
         """
         batch_request: Explicit batch_request used to supply data at runtime
         """
-        if self._data_assistant:
-            return self._data_assistant
-
         data_assistant_name: str = self._data_assistant_cls.data_assistant_type
-        validator: Validator = get_validator_with_expectation_suite(
-            data_context=self._data_context,
-            batch_list=None,
-            batch_request=batch_request,
-            expectation_suite=None,
-            expectation_suite_name=None,
-            component_name=data_assistant_name,
-            persist=False,
-        )
-        data_assistant: DataAssistant = self._data_assistant_cls(
-            name=data_assistant_name,
-            validator=validator,
-        )
 
-        self._data_assistant = data_assistant
+        data_assistant: DataAssistant
 
-        return self._data_assistant
+        if batch_request is None:
+            data_assistant = self._data_assistant_cls(
+                name=data_assistant_name,
+                validator=None,
+            )
+        else:
+            validator: Validator = get_validator_with_expectation_suite(
+                data_context=self._data_context,
+                batch_list=None,
+                batch_request=batch_request,
+                expectation_suite=None,
+                expectation_suite_name=None,
+                component_name=data_assistant_name,
+                persist=False,
+            )
+            data_assistant = self._data_assistant_cls(
+                name=data_assistant_name,
+                validator=validator,
+            )
+
+        return data_assistant
 
     def get_profiler_config(
         self,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         mode: ConfigOutputModeType = ConfigOutputModes.JSON_DICT,
     ) -> Union[BaseYamlConfig, dict, str]:
         """
         batch_request: Explicit batch_request used to supply data at runtime
         mode: One of "ConfigOutputModes" Enum typed values (corresponding string typed values are also supported)
         """
-        return self._build_data_assistant(
-            batch_request=batch_request
-        ).profiler.get_config(mode=mode)
+        return self._build_data_assistant(batch_request=None).profiler.get_config(
+            mode=mode
+        )
 
     @augment_arguments(**_build_enum_to_default_kwargs_map())
     def run(
