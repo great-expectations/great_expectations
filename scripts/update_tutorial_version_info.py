@@ -8,10 +8,14 @@ the CLI command `great_expectations --version`.
             what the user should expect to see when they run the `great_expectations --version` CLI command.
         4. That's it.  You were already done after step 1.
 
-    NOTE:
-        The script doesn't require that you enter the paths for the file containing the deployment versio or the path
-        where the snippet should be generated.  Instead, these are stored as global variables (so you can find them
-        right at the top of the script if they ever need to be changed for some reason).
+    NOTES:
+        - The script doesn't require that you enter the paths for the file containing the deployment versio or the path
+          where the snippet should be generated.  Instead, these are stored as global variables (so you can find them
+          right at the top of the script if they ever need to be changed for some reason).
+        - The script doesn't actually run the `great_expectations --version` command or use
+          great_expectations.__version__ to generate the output snippet, as both of those would presumably include
+          additional information about the current "dirty" state of the code that a user shouldn't be seeing when
+          they run the command after a fresh install of the most recent release.
 """
 # from great_expectations import __version__ as ge_version
 
@@ -22,8 +26,8 @@ SNIPPET_PATH = "../docs/tutorials/getting_started/tutorial_version_snippet.mdx"
 
 
 def update_version_mdx():
-    """Creates a `.mdx` file containing the output of the CLI command `great_expectations --version` in a markdown
-    codeblock.
+    """Creates a `.mdx` file containing the expected output of the CLI command `great_expectations --version` in a
+     markdown codeblock.
 
     If the .mdx file already exists, it is overwritten when the script runs.
 
