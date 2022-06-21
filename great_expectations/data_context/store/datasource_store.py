@@ -133,6 +133,12 @@ class DatasourceStore(Store):
     def set_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
     ) -> None:
+        """Persists a DatasourceConfig in the store by a given name.
+
+        Args:
+            datasource_name: The name of the Datasource to retrieve.
+            datasource_config: The config object to persist using the StoreBackend.
+        """
         datasource_key: DataContextVariableKey = self._determine_datasource_key(
             datasource_name=datasource_name
         )

@@ -2011,6 +2011,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             datasource_name=name, datasource_config=datasource_config
         )
 
+        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
         substituted_config: dict = substitute_all_config_variables(
