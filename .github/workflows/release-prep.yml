@@ -2,7 +2,7 @@ name: Release Prep
 on:
   schedule:
     # Every Thursday at 12am PST / 3am EST
-    - cron: '0 7 * * 4'
+    - cron: '0 7 * * *'
 
 jobs:
   prep:
