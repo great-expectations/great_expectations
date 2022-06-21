@@ -143,7 +143,7 @@ class DataAssistantResult(SerializableDictDot):
         """
         return self.to_dict()
 
-    def __dir__(self):
+    def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable tab completion on "DataAssistantResult" objects.
         """
