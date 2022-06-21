@@ -1032,9 +1032,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     #
     #####
 
-    def _save_project_config(self) -> None:
-        pass
-
     def _load_config_variables_file(self) -> dict:
         """
         Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
