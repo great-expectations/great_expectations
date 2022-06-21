@@ -83,7 +83,7 @@ def test_consistent_name_anonymization(
 
 
 @pytest.mark.base_data_context
-def test_opt_out_environment_variable_base_data_context(
+def test_global_override_environment_variable_base_data_context(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
     """Set the env variable GE_USAGE_STATS value to any of the following: FALSE, False, false, 0"""
@@ -98,7 +98,7 @@ def test_opt_out_environment_variable_base_data_context(
 
 
 @pytest.mark.base_data_context
-def test_opt_out_etc(
+def test_global_override_from_config_file_in_etc(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
     monkeypatch.delenv(
@@ -139,7 +139,7 @@ def test_opt_out_etc(
 
 
 @pytest.mark.base_data_context
-def test_opt_out_home_folder(
+def test_global_override_from_config_file_in_home_folder(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
     monkeypatch.delenv(
@@ -182,7 +182,7 @@ def test_opt_out_home_folder(
             assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_yml(tmp_path_factory, monkeypatch):
+def test_global_override_in_yml(tmp_path_factory, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
@@ -208,7 +208,7 @@ def test_opt_out_yml(tmp_path_factory, monkeypatch):
 
 # Test precedence: environment variable > home folder > /etc > yml
 @pytest.mark.base_data_context
-def test_opt_out_env_var_overrides_home_folder(
+def test_global_override_env_var_overrides_home_folder(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
     monkeypatch.delenv(
@@ -248,7 +248,7 @@ def test_opt_out_env_var_overrides_home_folder(
 
 
 @pytest.mark.base_data_context
-def test_opt_out_env_var_overrides_etc(
+def test_global_override_env_var_overrides_etc(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
     monkeypatch.delenv(
@@ -287,7 +287,7 @@ def test_opt_out_env_var_overrides_etc(
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_env_var_overrides_yml(tmp_path_factory, monkeypatch):
+def test_global_override_env_var_overrides_yml(tmp_path_factory, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
@@ -316,7 +316,7 @@ def test_opt_out_env_var_overrides_yml(tmp_path_factory, monkeypatch):
     assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_env_var_overrides_yml_v013(tmp_path_factory, monkeypatch):
+def test_global_override_env_var_overrides_yml_v013(tmp_path_factory, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
@@ -346,7 +346,7 @@ def test_opt_out_env_var_overrides_yml_v013(tmp_path_factory, monkeypatch):
 
 
 @pytest.mark.base_data_context
-def test_opt_out_home_folder_overrides_etc(
+def test_global_override_home_folder_overrides_etc(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
     monkeypatch.delenv(
@@ -390,7 +390,7 @@ def test_opt_out_home_folder_overrides_etc(
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_home_folder_overrides_yml(tmp_path_factory, monkeypatch):
+def test_global_override_home_folder_overrides_yml(tmp_path_factory, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
@@ -440,7 +440,7 @@ def test_opt_out_home_folder_overrides_yml(tmp_path_factory, monkeypatch):
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_home_folder_overrides_yml_v013(tmp_path_factory, monkeypatch):
+def test_global_override_home_folder_overrides_yml_v013(tmp_path_factory, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
@@ -490,7 +490,7 @@ def test_opt_out_home_folder_overrides_yml_v013(tmp_path_factory, monkeypatch):
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_etc_overrides_yml(tmp_path_factory, monkeypatch):
+def test_global_override_etc_overrides_yml(tmp_path_factory, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
@@ -540,7 +540,7 @@ def test_opt_out_etc_overrides_yml(tmp_path_factory, monkeypatch):
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
-def test_opt_out_etc_overrides_yml_v013(tmp_path_factory, monkeypatch):
+def test_global_override_etc_overrides_yml_v013(tmp_path_factory, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
