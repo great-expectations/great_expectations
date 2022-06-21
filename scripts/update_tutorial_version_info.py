@@ -9,7 +9,7 @@ the CLI command `great_expectations --version`.
         4. That's it.  You were already done after step 1.
 
     NOTES:
-        - The script doesn't require that you enter the paths for the file containing the deployment versio or the path
+        - The script doesn't require that you enter the paths for the file containing the deployment version or the path
           where the snippet should be generated.  Instead, these are stored as global variables (so you can find them
           right at the top of the script if they ever need to be changed for some reason).
         - The script doesn't actually run the `great_expectations --version` command or use
