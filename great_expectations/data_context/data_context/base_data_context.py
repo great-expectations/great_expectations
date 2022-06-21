@@ -373,6 +373,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
         self._project_config = self._data_context._project_config
+        self.runtime_environment = self._data_context.runtime_environment or {}
+
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
             self.plugins_directory
