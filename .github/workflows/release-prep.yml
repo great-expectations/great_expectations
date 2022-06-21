@@ -1,7 +1,7 @@
 name: Release Prep
 on:
   schedule:
-    # Every Thursday at 12am PST / 3am EST
+    # Every day at 12am PST / 3am EST
     - cron: '0 7 * * *'
 
 jobs:
@@ -21,4 +21,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
+          # A release PR will only be drafted if the current date matches the release schedule
           ge_releaser prep --file=./.github/release_schedule.json
