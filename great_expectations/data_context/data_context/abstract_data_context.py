@@ -28,6 +28,9 @@ class AbstractDataContext(ABC):
         "/etc/great_expectations.conf",
     ]
 
+    def __init__(self, runtime_environment: dict):
+        self.runtime_environment = runtime_environment
+
     @abstractmethod
     def _init_variables(self) -> None:
         raise NotImplementedError

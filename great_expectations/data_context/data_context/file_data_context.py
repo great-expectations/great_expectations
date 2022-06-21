@@ -35,7 +35,7 @@ class FileDataContext(AbstractDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
-        self.runtime_environment = runtime_environment or {}
+        super().__init__(runtime_environment=runtime_environment)
         self._context_root_dir = context_root_dir
         self._project_config = self._apply_global_config_overrides(
             config=project_config
