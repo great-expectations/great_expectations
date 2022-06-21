@@ -19,7 +19,7 @@ yaml: YAMLHandler = YAMLHandler()
 @pytest.fixture()
 def basic_in_memory_data_context_config_just_stores():
     return DataContextConfig(
-        config_version=2.0,
+        config_version=3.0,
         plugins_directory=None,
         evaluation_parameter_store_name="evaluation_parameter_store",
         expectations_store_name="expectations_store",

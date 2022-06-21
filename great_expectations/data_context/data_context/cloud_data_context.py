@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Optional, Union
+from typing import Mapping, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -20,9 +20,8 @@ class CloudDataContext(AbstractDataContext):
     def __init__(
         self,
         project_config: Union[DataContextConfig, Mapping],
-        runtime_environment: Optional[dict] = None,
-        ge_cloud_mode: bool = False,
-        ge_cloud_config: Optional[GeCloudConfig] = None,
+        runtime_environment: dict,
+        ge_cloud_config: GeCloudConfig,
     ) -> None:
         """
         CloudDataContext constructor
@@ -31,13 +30,11 @@ class CloudDataContext(AbstractDataContext):
             project_config (DataContextConfig): config for CloudDataContext
             runtime_environment (dict):  a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
-            ge_cloud_mode (bool): is cloud_mode true? (default true)
             ge_cloud_config (GeCloudConfig): GeCloudConfig corresponding to current CloudDataContext
         """
-        self._ge_cloud_mode = ge_cloud_mode
+        super().__init__(runtime_environment=runtime_environment)
+        self._ge_cloud_mode = True  # property needed for backward compatibility
         self._ge_cloud_config = ge_cloud_config
-        self.runtime_environment = runtime_environment or {}
-
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
