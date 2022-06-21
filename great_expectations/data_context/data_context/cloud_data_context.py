@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Optional, Union
+from typing import Mapping, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -33,7 +33,7 @@ class CloudDataContext(AbstractDataContext):
             ge_cloud_config (GeCloudConfig): GeCloudConfig corresponding to current CloudDataContext
         """
         super().__init__(runtime_environment=runtime_environment)
-        self._ge_cloud_mode = True  # backwards compatibility
+        self._ge_cloud_mode = True  # property needed for backward compatibility
         self._ge_cloud_config = ge_cloud_config
         self._project_config = self._apply_global_config_overrides(
             config=project_config

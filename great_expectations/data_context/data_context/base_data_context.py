@@ -1042,7 +1042,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             input value with all `$` characters replaced with the escape string
         """
-
         if isinstance(value, dict) or isinstance(value, OrderedDict):
             return {
                 k: self.escape_all_config_variables(

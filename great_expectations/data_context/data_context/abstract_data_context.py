@@ -29,6 +29,13 @@ class AbstractDataContext(ABC):
     ]
 
     def __init__(self, runtime_environment: dict):
+        """
+        Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
+
+        Args:
+            runtime_environment (dict): a dictionary of config variables that
+                override both those set in config_variables.yml and the environment
+        """
         self.runtime_environment = runtime_environment
 
     @abstractmethod
