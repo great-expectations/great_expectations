@@ -4,6 +4,32 @@
 Changelog
 #########
 
+0.15.11
+-----------------
+* [FEATURE] Enable NumericMetricRangeMultiBatchParameterBuilder to use evaluation dependencies (#5323)
+* [FEATURE] Improve Trino Support (#5261) (thanks @aezomz)
+* [FEATURE] added support to Aws Athena quantiles (#5114) (thanks @kuhnen)
+* [FEATURE] Implement the "column.standard_deviation" metric for sqlite database (#5338)
+* [FEATURE] Update `add_datasource` to leverage the `DatasourceStore` (#5334)
+* [FEATURE] Provide ability for DataAssistant to return its effective underlying BaseRuleBasedProfiler configuration (#5359)
+* [BUGFIX] Fix Netlify build issue that was being caused by entry in changelog (#5322) (thanks @Shinnnyshinshin)
+* [BUGFIX] Numpy dtype.float64 formatted floating point numbers must be converted to Python float for use in SQLAlchemy Boolean clauses (#5336)
+* [BUGFIX] Fix for failing Expectation test in `cloud_db_integration` pipeline (#5321) (thanks @Shinnnyshinshin)
+* [DOCS] revert getting started tutorial to RBP process (#5307)
+* [DOCS] mark onboarding assistant guide as experimental and update cli command (#5308)
+* [DOCS] Fix line numbers in getting started guide (#5324)
+* [DOCS] DOC-337 automate updates to the version information displayed in the getting started tutorial. (#5348)
+* [MAINTENANCE] Fix link in suite profile renderer (#5242) (thanks @andyjessen)
+* [MAINTENANCE] Refactor of `_apply_global_config_overrides()` method to return config (#5286) (thanks @Shinnnyshinshin)
+* [MAINTENANCE] Remove "json_serialize" directive from ParameterBuilder computations (#5320)
+* [MAINTENANCE] Misc cleanup post `0.15.10` release (#5325)
+* [MAINTENANCE] Standardize instantiation of NumericMetricRangeMultibatchParameterBuilder throughout the codebase. (#5327)
+* [MAINTENANCE] Reuse MetricMultiBatchParameterBuilder computation results as evaluation dependencies for performance enhancement (#5329)
+* [MAINTENANCE] clean up type declarations (#5331)
+* [MAINTENANCE] Maintenance/great 761/great 1010/great 1011/alexsherstinsky/rule based profiler/data assistant/include only essential public methods in data assistant dispatcher class 2022 06 21 177 (#5351)
+* [MAINTENANCE] Update release schedule JSON (#5349)
+* [MAINTENANCE] Include only essential public methods in DataAssistantResult class (and its descendants) (#5360)
+
 0.15.10
 -----------------
 * [FEATURE] `DataContextVariables` CRUD for `stores` (#5268)
