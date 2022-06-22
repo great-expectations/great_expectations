@@ -93,6 +93,7 @@ class DataAssistantResult(SerializableDictDot):
         "metrics_by_domain",
         "expectation_configurations",
         "execution_time",
+        "citation",
         "usage_statistics_handler",
     }
 
@@ -148,7 +149,7 @@ class DataAssistantResult(SerializableDictDot):
         This custom magic method is used to enable tab completion on "DataAssistantResult" objects.
         """
         return list(
-            set(self.to_json_dict().keys())
+            DataAssistantResult.ALLOWED_KEYS
             | {
                 "get_expectation_suite",
                 "plot_metrics",
