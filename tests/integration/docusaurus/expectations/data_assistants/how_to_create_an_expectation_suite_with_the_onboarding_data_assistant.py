@@ -163,7 +163,7 @@ validator = context.get_validator(
 # Save your Expectation Suite
 
 # <snippet>
-validator.expectation_suite = onboarding_assistant_result.get_expectation_suite(
+validator.expectation_suite = result.get_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )
 # </snippet>
