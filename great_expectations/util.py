@@ -77,6 +77,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "batch": "batches",
     "checkpoint": "checkpoints",
     "data_asset": "data_assets",
+    "data_context": "data_contexts",
     "datasource": "datasources",
     "expectation": "expectations",
     "expectation_suite": "expectation_suites",
@@ -84,13 +85,13 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "expectation_validation_result": "expectation_validation_results",
     "contract": "contracts",
     "rendered_data_doc": "rendered_data_docs",
-    "data_context_variable": "data_context_variables",
 }
 
 PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "batches": "batch",
     "checkpoints": "checkpoint",
     "data_assets": "data_asset",
+    "data_contexts": "data_context",
     "datasources": "datasource",
     "expectations": "expectation",
     "expectation_suites": "expectation_suite",
@@ -98,7 +99,6 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "expectation_validation_results": "expectation_validation_result",
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
-    "data_context_variables": "data_context_variable",
 }
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")

@@ -71,9 +71,9 @@ class DataContextVariables(ABC):
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         raise NotImplementedError
 
-    def _get_key(self) -> ConfigurationIdentifier:
+    def get_key(self) -> ConfigurationIdentifier:
         key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key="data-context"
+            configuration_key="data_context"
         )
         return key
 
@@ -88,7 +88,7 @@ class DataContextVariables(ABC):
         return substituted_val
 
     def save_config(self) -> None:
-        key: ConfigurationIdentifier = self._get_key()
+        key: ConfigurationIdentifier = self.get_key()
         self.store.set(key=key, value=self.config)
 
     def set_config_version(self, config_version: float) -> None:
@@ -377,7 +377,7 @@ class CloudDataContextVariables(DataContextVariables):
         store_backend: dict = {
             "class_name": "GeCloudStoreBackend",
             "ge_cloud_base_url": self.ge_cloud_base_url,
-            "ge_cloud_resource_type": "data_context_variable",
+            "ge_cloud_resource_type": "data_context",
             "ge_cloud_credentials": {
                 "access_token": self.ge_cloud_access_token,
                 "organization_id": self.ge_cloud_organization_id,
@@ -391,6 +391,6 @@ class CloudDataContextVariables(DataContextVariables):
         )
         return store
 
-    def _get_key(self) -> GeCloudIdentifier:
+    def get_key(self) -> GeCloudIdentifier:
         key: GeCloudIdentifier = GeCloudIdentifier(resource_type="data_context")
         return key
