@@ -378,7 +378,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     def __init__(
         self,
         name: str,
-        validator: Validator,
+        validator: Optional[Validator],
     ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
@@ -395,9 +395,12 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._validator = validator
 
-        self._batches = self._validator.batches
-
-        self._data_context = self._validator.data_context
+        if validator is None:
+            self._data_context = None
+            self._batches = None
+        else:
+            self._data_context = self._validator.data_context
+            self._batches = self._validator.batches
 
         variables: Optional[Dict[str, Any]] = self.get_variables() or {}
         self._profiler = RuleBasedProfiler(
