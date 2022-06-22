@@ -1965,8 +1965,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
-        self, name, initialize=True, **kwargs
-    ) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
+        self, name: str, initialize: bool = True, **kwargs: dict
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name: the name for the new datasource to add
@@ -1979,9 +1979,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
 
-        module_name = kwargs.get("module_name", "great_expectations.datasource")
+        module_name: str = kwargs.get("module_name", "great_expectations.datasource")
         verify_dynamic_loading_support(module_name=module_name)
-        class_name = kwargs.get("class_name")
+        class_name: Optional[str] = kwargs.get("class_name")
         datasource_class = load_class(module_name=module_name, class_name=class_name)
 
         # For any class that should be loaded, it may control its configuration construction
@@ -1992,11 +1992,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             config = kwargs
 
-        return self._instantiate_datasource_from_config_and_update_project_config(
+        datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = self._instantiate_datasource_from_config_and_update_project_config(
             name=name,
             config=config,
             initialize=initialize,
         )
+        return datasource
 
     def _instantiate_datasource_from_config_and_update_project_config(
         self, name: str, config: dict, initialize: bool = True
@@ -2004,28 +2007,33 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
-        self.config["datasources"][name] = datasource_config
-        datasource_config = self.project_config_with_variables_substituted.datasources[
-            name
-        ]
-        config = dict(datasourceConfigSchema.dump(datasource_config))
-        datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
+        self._datasource_store.set_by_name(
+            datasource_name=name, datasource_config=datasource_config
+        )
+
+        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
+        substitutions: dict = self._determine_substitutions()
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        substituted_config: dict = substitute_all_config_variables(
+            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        )
+
+        datasource: Optional[Union[LegacyDatasource, BaseDatasource]] = None
         if initialize:
             try:
                 datasource = self._instantiate_datasource_from_config(
-                    name=name, config=config
+                    name=name, config=substituted_config
                 )
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
-                del self.config["datasources"][name]
+                self._datasource_store.delete_by_name(datasource_name=name)
                 raise e
-        else:
-            datasource = None
+
         return datasource
 
     def _instantiate_datasource_from_config(
-        self, name: str, config: dict
+        self, name: str, config: Union[dict, DatasourceConfig]
     ) -> Union[LegacyDatasource, BaseDatasource]:
         """Instantiate a new datasource to the data context, with configuration provided as kwargs.
         Args:

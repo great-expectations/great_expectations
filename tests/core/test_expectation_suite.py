@@ -216,7 +216,6 @@ def profiler_config():
         parameter_builders:
           - parameter_name: row_count_range
             class_name: NumericMetricRangeMultiBatchParameterBuilder
-            batch_request: $variables.jan_2018_thru_nov_2020_monthly_tripdata_batch_request
             metric_name: table.row_count
             confidence_level: $variables.confidence_level
             truncate_values:

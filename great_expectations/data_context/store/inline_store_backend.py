@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List, Optional, Tuple
 
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -7,6 +8,8 @@ from great_expectations.data_context.types.data_context_variables import (
 )
 from great_expectations.exceptions.exceptions import StoreBackendError
 from great_expectations.util import filter_properties_dict
+
+logger = logging.getLogger(__name__)
 
 
 class InlineStoreBackend(StoreBackend):
@@ -73,7 +76,12 @@ class InlineStoreBackend(StoreBackend):
         else:
             project_config[config_var_type] = value
 
-        self._data_context._save_project_config()
+        try:
+            self._data_context._save_project_config()
+        except AttributeError as e:
+            logger.warning(
+                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} is not file-system enabled: {e}"
+            )
 
     def _move(
         self, source_key: Tuple[str, str], dest_key: Tuple[str, str], **kwargs: dict
@@ -128,7 +136,13 @@ class InlineStoreBackend(StoreBackend):
             )
 
         del self._data_context.config[resource_type][resource_name]
-        self._data_context._save_project_config()
+
+        try:
+            self._data_context._save_project_config()
+        except AttributeError as e:
+            logger.warning(
+                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} is not file-system enabled: {e}"
+            )
 
     def _has_key(self, key: Tuple[str, str]) -> bool:
         resource_type: str = key[0]
