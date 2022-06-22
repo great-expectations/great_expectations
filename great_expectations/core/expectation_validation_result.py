@@ -155,7 +155,6 @@ class ExpectationValidationResult(SerializableDictDot):
         """
         json_dict: dict = self.to_json_dict()
         if in_jupyter_notebook():
-            json_dict: dict = self.to_json_dict()
             if (
                 "expectation_config" in json_dict
                 and "kwargs" in json_dict["expectation_config"]
