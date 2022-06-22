@@ -226,9 +226,6 @@ def test_cli_datasource_new_connection_string(
     caplog,
     monkeypatch,
 ):
-    monkeypatch.delenv(
-        "GE_USAGE_STATS", raising=False
-    )  # Undo the project-wide test default
     root_dir = empty_data_context_stats_enabled.root_directory
     context: DataContext = empty_data_context_stats_enabled
     assert context.list_datasources() == []
