@@ -182,7 +182,7 @@ class AbstractDataContext(ABC):
             except (ValueError, configparser.Error):
                 pass
         return True
-
+      
     def _get_data_context_id_override(self) -> Optional[str]:
         """
         Return data_context_id from environment variable.

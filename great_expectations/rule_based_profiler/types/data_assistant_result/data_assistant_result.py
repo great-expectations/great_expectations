@@ -1,4 +1,6 @@
 import copy
+import datetime
+import json
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
@@ -8,6 +10,7 @@ import numpy as np
 import pandas as pd
 from IPython.display import HTML, display
 
+from great_expectations import __version__ as ge_version
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -15,7 +18,11 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import convert_to_json_serializable, nested_update
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    in_jupyter_notebook,
+    nested_update,
+)
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
@@ -93,7 +100,12 @@ class DataAssistantResult(SerializableDictDot):
         "metrics_by_domain",
         "expectation_configurations",
         "execution_time",
+        "citation",
         "usage_statistics_handler",
+    }
+
+    IN_JUPYTER_NOTEBOOK_KEYS = {
+        "execution_time",
     }
 
     batch_id_to_batch_identifier_display_name_map: Optional[
@@ -132,6 +144,7 @@ class DataAssistantResult(SerializableDictDot):
                 expectation_configuration.to_json_dict()
                 for expectation_configuration in self.expectation_configurations
             ],
+            "citation": convert_to_json_serializable(data=self.citation),
             "execution_time": convert_to_json_serializable(data=self.execution_time),
             "usage_statistics_handler": self.usage_statistics_handler.__class__.__name__,
         }
@@ -141,6 +154,58 @@ class DataAssistantResult(SerializableDictDot):
         Returns: This DataAssistantResult as JSON-serializable dictionary.
         """
         return self.to_dict()
+
+    def __dir__(self) -> List[str]:
+        """
+        This custom magic method is used to enable tab completion on "DataAssistantResult" objects.
+        """
+        return list(
+            DataAssistantResult.ALLOWED_KEYS
+            | {
+                "get_expectation_suite",
+                "plot_metrics",
+                "plot_expectations_and_metrics",
+            }
+        )
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>6/22/2022</Alex>
+        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
+        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
+        """
+        json_dict: dict = self.to_json_dict()
+        if in_jupyter_notebook():
+            key: str
+            value: Any
+            json_dict = {
+                key: value
+                for key, value in json_dict.items()
+                if key in DataAssistantResult.IN_JUPYTER_NOTEBOOK_KEYS
+            }
+            json_dict.update(
+                {
+                    "num_profiler_rules": len(self.profiler_config.rules),
+                    "num_domains": len(self.metrics_by_domain),
+                    "num_expectation_configurations": len(
+                        self.expectation_configurations
+                    ),
+                    "auto_generated_at": datetime.datetime.now(
+                        datetime.timezone.utc
+                    ).strftime("%Y%m%dT%H%M%S.%fZ"),
+                    "great_expectations_version": ge_version,
+                }
+            )
+
+        return json.dumps(json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>6/22/2022</Alex>
+        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
+        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
+        """
+        return json.dumps(self.to_json_dict(), indent=2)
 
     @property
     def _usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
