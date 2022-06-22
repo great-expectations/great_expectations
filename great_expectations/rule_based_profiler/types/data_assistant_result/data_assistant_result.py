@@ -168,7 +168,7 @@ class DataAssistantResult(SerializableDictDot):
             }
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         # TODO: <Alex>6/22/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
@@ -199,7 +199,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return json.dumps(json_dict, indent=2)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         # TODO: <Alex>6/22/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach

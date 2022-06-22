@@ -147,7 +147,7 @@ class ExpectationValidationResult(SerializableDictDot):
             # if invalid comparisons are attempted, the objects are not equal.
             return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         # TODO: <Alex>5/9/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
@@ -174,7 +174,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
         return json.dumps(json_dict, indent=2)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         # TODO: <Alex>5/9/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
