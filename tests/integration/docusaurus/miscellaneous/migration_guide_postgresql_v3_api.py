@@ -38,10 +38,12 @@ expected_existing_datasource_yaml = r"""
       connection_string: postgresql+psycopg2://postgres:@localhost/test_ci
     data_connectors:
       default_runtime_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
         batch_identifiers:
           - default_identifier_name
       default_inferred_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetSqlDataConnector
         include_schema_name: true
 """

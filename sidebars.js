@@ -182,10 +182,11 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Configuring Profilers',
+          label: 'Profilers and Data Assistants',
           items: [
             'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file'
+            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
+            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant'
           ]
         },
         {
@@ -193,7 +194,8 @@ module.exports = {
           label: 'Advanced skills',
           items: [
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
-            'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database'
+            'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler',
           ]
         },
         {
@@ -204,10 +206,11 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations',
-            'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
+            'guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
+            'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
             // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
             {
               type: 'category',
@@ -305,7 +308,6 @@ module.exports = {
             { type: 'doc', id: 'contributing/contributing_test' },
             { type: 'doc', id: 'contributing/contributing_maturity' },
             { type: 'doc', id: 'contributing/contributing_misc' },
-            { type: 'doc', id: 'contributing/contributing_package' }
           ]
         },
         {
@@ -328,7 +330,8 @@ module.exports = {
                 { type: 'doc', id: 'integrations/integration_template', label: 'TEMPLATE Integration Document' }
               ]
             },
-            'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
+            { type: 'doc', id: 'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations' },
+            { type: 'doc', id: 'contributing/contributing_package' }
           ]
         },
         {
@@ -348,6 +351,34 @@ module.exports = {
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
+        {
+          type: 'category',
+          label: 'Supplemental documentation',
+          link: { type: 'doc', id: 'reference/supplemental_documentation' },
+          items: [
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+            { type: 'doc', id: 'reference/customize_your_deployment' },
+            { type: 'doc', id: 'reference/data_discovery' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'API documentation',
+          link: { type: 'doc', id: 'reference/api_reference' },
+          items: [
+            {
+              type: 'category',
+              label: 'Class DataContext',
+              link: { type: 'doc', id: 'api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext' },
+              items: [
+                { label: '  .create(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create' },
+                { label: '  .test_yaml_config(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config' }
+              ]
+            }
+          ]
+        },
         {
           type: 'category',
           label: 'Glossary of Terms',
@@ -401,18 +432,6 @@ module.exports = {
             'terms/supporting_resource',
             'terms/validator',
             'terms/validation_result'
-          ]
-        },
-        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
-        {
-          type: 'category',
-          label: 'Supplemental documentation',
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
-            { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/data_discovery' },
-            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         }
       ]

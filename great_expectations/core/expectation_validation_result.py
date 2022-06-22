@@ -147,7 +147,7 @@ class ExpectationValidationResult(SerializableDictDot):
             # if invalid comparisons are attempted, the objects are not equal.
             return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         # TODO: <Alex>5/9/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
@@ -155,7 +155,6 @@ class ExpectationValidationResult(SerializableDictDot):
         """
         json_dict: dict = self.to_json_dict()
         if in_jupyter_notebook():
-            json_dict: dict = self.to_json_dict()
             if (
                 "expectation_config" in json_dict
                 and "kwargs" in json_dict["expectation_config"]
@@ -175,7 +174,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
         return json.dumps(json_dict, indent=2)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         # TODO: <Alex>5/9/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
@@ -404,7 +403,9 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             )
         )
 
-    def get_failed_validation_results(self) -> "ExpectationSuiteValidationResult":
+    def get_failed_validation_results(
+        self,
+    ) -> "ExpectationSuiteValidationResult":  # noqa: F821
         validation_results = [result for result in self.results if not result.success]
 
         successful_expectations = sum(exp.success for exp in validation_results)
@@ -445,9 +446,13 @@ class ExpectationSuiteValidationResultSchema(Schema):
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
         if isinstance(data, ExpectationSuiteValidationResult):
-            data.meta = convert_to_json_serializable(data.meta)
+            data.meta = convert_to_json_serializable(data=data.meta)
+            data.statistics = convert_to_json_serializable(data=data.statistics)
         elif isinstance(data, dict):
-            data["meta"] = convert_to_json_serializable(data.get("meta"))
+            data["meta"] = convert_to_json_serializable(data=data.get("meta"))
+            data["statistics"] = convert_to_json_serializable(
+                data=data.get("statistics")
+            )
         return data
 
     # noinspection PyUnusedLocal

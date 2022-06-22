@@ -136,6 +136,9 @@ class GEDependencies:
         "snapshottest",
         # "sqlalchemy",  # Not excluded from tracking
         "trino",
+        "PyHive",
+        "thrift",
+        "thrift-sasl",
     ]
 
     GE_DEV_DEPENDENCIES: List[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(

@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Optional
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.ge_cloud_store_backend import (
@@ -29,7 +29,10 @@ class Store:
     _key_class = DataContextKey
 
     def __init__(
-        self, store_backend=None, runtime_environment=None, store_name="no_store_name"
+        self,
+        store_backend: Optional[dict] = None,
+        runtime_environment: Optional[dict] = None,
+        store_name: str = "no_store_name",
     ) -> None:
         """
         Runtime environment may be necessary to instantiate store backend elements.
@@ -78,15 +81,15 @@ class Store:
             )
 
     @property
-    def ge_cloud_mode(self):
+    def ge_cloud_mode(self) -> bool:
         return isinstance(self._store_backend, GeCloudStoreBackend)
 
     @property
-    def store_backend(self):
+    def store_backend(self) -> dict:
         return self._store_backend
 
     @property
-    def store_name(self):
+    def store_name(self) -> str:
         return self._store_name
 
     @property

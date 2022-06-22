@@ -3,6 +3,7 @@ title: 'Tutorial, Step 1: Setup'
 ---  
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
+import VersionSnippet from './tutorial_version_snippet.mdx'
 
 <UniversalMap setup='active' connect='inactive' create='inactive' validate='inactive'/> 
 
@@ -49,9 +50,7 @@ great_expectations --version
 
 This should return something like:
 
-```console
-great_expectations, version 0.13.46
-```
+<VersionSnippet />
 
 For detailed installation instructions, see [How to install Great Expectations locally](../../guides/setup/installation/local.md).
 
