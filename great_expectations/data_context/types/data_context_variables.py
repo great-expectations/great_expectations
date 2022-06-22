@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Optional
 
+from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     ConcurrencyConfig,
@@ -71,7 +72,7 @@ class DataContextVariables(ABC):
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         raise NotImplementedError
 
-    def get_key(self) -> ConfigurationIdentifier:
+    def get_key(self) -> DataContextKey:
         key: ConfigurationIdentifier = ConfigurationIdentifier(
             configuration_key="data_context"
         )
@@ -298,10 +299,10 @@ class DataContextVariables(ABC):
 class EphemeralDataContextVariables(DataContextVariables):
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         from great_expectations.data_context.store.data_context_variables_store import (
-            DataContextVariablesStore,
+            DataContextStore,
         )
 
-        store: DataContextVariablesStore = DataContextVariablesStore(
+        store: DataContextStore = DataContextStore(
             store_name="ephemeral_data_context_variables_store",
             store_backend=None,  # Defaults to InMemoryStoreBackend
             runtime_environment=None,
@@ -328,14 +329,14 @@ class FileDataContextVariables(DataContextVariables):
 
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         from great_expectations.data_context.store.data_context_variables_store import (
-            DataContextVariablesStore,
+            DataContextStore,
         )
 
         store_backend: dict = {
             "class_name": "InlineStoreBackend",
             "data_context": self.data_context,
         }
-        store: DataContextVariablesStore = DataContextVariablesStore(
+        store: DataContextStore = DataContextStore(
             store_name="file_data_context_variables_store",
             store_backend=store_backend,
             runtime_environment=None,
@@ -371,7 +372,7 @@ class CloudDataContextVariables(DataContextVariables):
 
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         from great_expectations.data_context.store.data_context_variables_store import (
-            DataContextVariablesStore,
+            DataContextStore,
         )
 
         store_backend: dict = {
@@ -384,7 +385,7 @@ class CloudDataContextVariables(DataContextVariables):
             },
             "suppress_store_backend_id": True,
         }
-        store: DataContextVariablesStore = DataContextVariablesStore(
+        store: DataContextStore = DataContextStore(
             store_name="cloud_data_context_variables_store",
             store_backend=store_backend,
             runtime_environment=None,

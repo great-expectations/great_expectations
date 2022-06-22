@@ -2,9 +2,9 @@ from great_expectations.data_context.store.configuration_store import Configurat
 from great_expectations.data_context.types.base import DataContextConfig
 
 
-class DataContextVariablesStore(ConfigurationStore):
+class DataContextStore(ConfigurationStore):
     """
-    A DataContextVariablesStore manages config variables for the DataContext.
+    A DataContextStore manages persistence around DataContextConfigs.
     """
 
     _configuration_class = DataContextConfig
