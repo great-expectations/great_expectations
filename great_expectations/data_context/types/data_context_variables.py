@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     ConcurrencyConfig,
@@ -11,7 +10,10 @@ from great_expectations.data_context.types.base import (
     NotebookConfig,
     ProgressBarsConfig,
 )
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+    GeCloudIdentifier,
+)
 from great_expectations.data_context.util import substitute_config_variable
 
 
@@ -69,12 +71,10 @@ class DataContextVariables(ABC):
     def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
         raise NotImplementedError
 
-    def _get_key(self, attr: DataContextVariableSchema) -> DataContextVariableKey:
-        # Chetan - 20220607 - As it stands, DataContextVariables can only perform CRUD on entire objects.
-        # The DataContextVariablesKey, when used with an appropriate Store and StoreBackend, gives the ability to modify
-        # individual elements of nested config objects.
-
-        key: DataContextVariableKey = DataContextVariableKey(resource_type=attr.value)
+    def _get_key(self) -> ConfigurationIdentifier:
+        key: ConfigurationIdentifier = ConfigurationIdentifier(
+            configuration_key="data-context"
+        )
         return key
 
     def _set(self, attr: DataContextVariableSchema, value: Any) -> None:
@@ -86,6 +86,10 @@ class DataContextVariables(ABC):
         val: Any = self.config[key]
         substituted_val: Any = substitute_config_variable(val, self.substitutions)
         return substituted_val
+
+    def save_config(self) -> None:
+        key: ConfigurationIdentifier = self._get_key()
+        self.store.set(key=key, value=self.config)
 
     def set_config_version(self, config_version: float) -> None:
         """
@@ -289,10 +293,6 @@ class DataContextVariables(ABC):
         """
         return self._get(DataContextVariableSchema.PROGRESS_BARS)
 
-    def save_config(self) -> None:
-        key: DataContextVariableKey = self._get_key("data-context")
-        self.store.set(key=key, value=self.config)
-
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
@@ -391,8 +391,6 @@ class CloudDataContextVariables(DataContextVariables):
         )
         return store
 
-    def _get_key(
-        self, attr: "DataContextVariablesSchema"  # noqa: F821
-    ) -> GeCloudIdentifier:
-        key: GeCloudIdentifier = GeCloudIdentifier(resource_type=attr.value)
+    def _get_key(self) -> GeCloudIdentifier:
+        key: GeCloudIdentifier = GeCloudIdentifier(resource_type="data_context")
         return key
