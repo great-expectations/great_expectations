@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Set, Type
+from typing import Dict, List, Optional, Set, Type
 
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
@@ -109,7 +109,7 @@ class DataAssistantDispatcher:
 
         return cls._registered_data_assistants.get(name)
 
-    def __dir__(self):
+    def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable tab completion on "DataAssistantDispatcher" objects.
         """
