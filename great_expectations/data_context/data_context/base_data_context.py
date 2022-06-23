@@ -1,6 +1,5 @@
 import copy
 import datetime
-import errno
 import logging
 import os
 import sys
@@ -103,7 +102,6 @@ from great_expectations.data_context.util import (
     load_class,
     parse_substitution_variable,
     substitute_all_config_variables,
-    substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -365,6 +363,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 context_root_dir=context_root_dir,
                 runtime_environment=runtime_environment,
             )
+            self._context_root_directory = self._data_context.root_directory
         else:
             self._data_context = EphemeralDataContext(
                 project_config=project_config, runtime_environment=runtime_environment
@@ -373,6 +372,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
         self._project_config = self._data_context._project_config
         self.runtime_environment = self._data_context.runtime_environment or {}
+        self._config_variables = self._data_context.config_variables
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -760,6 +760,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def root_directory(self):
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located."""
+        # TODO: after the migration is complete, this can be moved to FileDataContext
         return self._context_root_directory
 
     @property
@@ -919,11 +920,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return instance_id
 
     @property
-    def config_variables(self):
-        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
-        return dict(self._load_config_variables_file())
-
-    @property
     def config(self) -> DataContextConfig:
         return self._project_config
 
@@ -932,39 +928,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     # Internal helper methods
     #
     #####
-
-    def _load_config_variables_file(self) -> dict:
-        """
-        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
-        have already been interpolated before being sent from the Cloud API.
-        """
-        if self.ge_cloud_mode:
-            return {}
-        config_variables_file_path = cast(
-            DataContextConfig, self.get_config()
-        ).config_variables_file_path
-        if config_variables_file_path:
-            try:
-                # If the user specifies the config variable path with an environment variable, we want to substitute it
-                defined_path = substitute_config_variable(
-                    config_variables_file_path, dict(os.environ)
-                )
-                if not os.path.isabs(defined_path):
-                    # A BaseDataContext will not have a root directory; in that case use the current directory
-                    # for any non-absolute path
-                    root_directory = self.root_directory or os.curdir
-                else:
-                    root_directory = ""
-                var_path = os.path.join(root_directory, defined_path)
-                with open(var_path) as config_variables_file:
-                    return yaml.load(config_variables_file) or {}
-            except OSError as e:
-                if e.errno != errno.ENOENT:
-                    raise
-                logger.debug("Generating empty config variables file.")
-                return {}
-        else:
-            return {}
 
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
@@ -1005,26 +968,26 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         )
 
-    def _determine_substitutions(self) -> dict:
-        """Aggregates substitutions from the project's config variables file, any environment variables, and
-        the runtime environment.
-
-        Returns: A dictionary containing all possible substitutions that can be applied to a given object
-                 using `substitute_all_config_variables`.
-        """
-        substituted_config_variables: dict = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-
-        substitutions = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
-
-        return substitutions
+    # def _determine_substitutions(self) -> dict:
+    #     """Aggregates substitutions from the project's config variables file, any environment variables, and
+    #     the runtime environment.
+    #
+    #     Returns: A dictionary containing all possible substitutions that can be applied to a given object
+    #              using `substitute_all_config_variables`.
+    #     """
+    #     substituted_config_variables: dict = substitute_all_config_variables(
+    #         self.config_variables,
+    #         dict(os.environ),
+    #         self.DOLLAR_SIGN_ESCAPE_STRING,
+    #     )
+    #
+    #     substitutions = {
+    #         **substituted_config_variables,
+    #         **dict(os.environ),
+    #         **self.runtime_environment,
+    #     }
+    #
+    #     return substitutions
 
     def escape_all_config_variables(
         self,

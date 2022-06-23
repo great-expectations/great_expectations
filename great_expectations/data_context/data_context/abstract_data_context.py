@@ -3,18 +3,20 @@ import copy
 import json
 import logging
 import os
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Mapping, Optional, Union
 
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     anonymizedUsageStatisticsSchema,
 )
+from great_expectations.data_context.util import substitute_all_config_variables
 
 logger = logging.getLogger(__name__)
 
 
-class AbstractDataContext(ABC):
+class AbstractDataContext(ConfigPeer):
     """
     Base class for all DataContexts that contain all context-agnostic data context operations.
 
@@ -27,6 +29,7 @@ class AbstractDataContext(ABC):
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
+    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     def __init__(self, runtime_environment: dict):
         """
@@ -37,6 +40,7 @@ class AbstractDataContext(ABC):
                 override both those set in config_variables.yml and the environment
         """
         self.runtime_environment = runtime_environment
+        self._config_variables = self._load_config_variables()
 
     @abstractmethod
     def _init_variables(self) -> None:
@@ -112,6 +116,12 @@ class AbstractDataContext(ABC):
             )
 
         return config_with_global_config_overrides
+
+    def _load_config_variables(self):
+        """
+        Get all config variables from default location. This method is most-significantly overridden in the FileDataContext
+        """
+        return {}
 
     @staticmethod
     def _get_global_config_value(
@@ -208,3 +218,33 @@ class AbstractDataContext(ABC):
             conf_file_section="anonymous_usage_statistics",
             conf_file_option="usage_statistics_url",
         )
+
+    # properties
+    @property
+    def config_variables(self):
+        return self._config_variables
+
+    @property
+    def config(self) -> DataContextConfig:
+        return DataContextConfig()
+
+    def _determine_substitutions(self) -> dict:
+        """Aggregates substitutions from the project's config variables file, any environment variables, and
+        the runtime environment.
+
+        Returns: A dictionary containing all possible substitutions that can be applied to a given object
+                 using `substitute_all_config_variables`.
+        """
+        substituted_config_variables: dict = substitute_all_config_variables(
+            self.config_variables,
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
+        return substitutions
