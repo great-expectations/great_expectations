@@ -1215,12 +1215,14 @@ class ExpectationConfiguration(SerializableDictDot):
         """
         atomic_renderer_prefix: str = "atomic.prescriptive"
         renderer_names: List[str] = _get_renderer_names_with_renderer_prefix(
-            renderer_prefix=atomic_renderer_prefix
+            object_name=self.expectation_type,
+            renderer_prefix=atomic_renderer_prefix,
         )
         if len(renderer_names) == 0:
             legacy_renderer_prefix: str = "renderer.prescriptive"
             renderer_names = _get_renderer_names_with_renderer_prefix(
-                renderer_prefix=legacy_renderer_prefix
+                object_name=self.expectation_type,
+                renderer_prefix=legacy_renderer_prefix,
             )
 
         renderer_tuple: Optional[tuple]
