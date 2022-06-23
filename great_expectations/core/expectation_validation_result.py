@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import Optional
+from typing import Callable, List, Optional, Union
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
@@ -15,7 +15,12 @@ from great_expectations.core.util import (
     ensure_json_serializable,
     in_jupyter_notebook,
 )
+from great_expectations.expectations.registry import (
+    get_renderer_impl,
+    get_renderer_names,
+)
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
+from great_expectations.render.types import RenderedContent
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -67,6 +72,7 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
+        self.rendered_content = self._get_rendered_content()
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -181,6 +187,51 @@ class ExpectationValidationResult(SerializableDictDot):
         would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
         """
         return json.dumps(self.to_json_dict(), indent=2)
+
+    def _get_rendered_content(self) -> List[RenderedContent]:
+        """Returns rendered content from the diagnostic renderer for the expectation configuration associated with
+        this ExpectationValidationResult.
+
+        If an atomic renderer is defined, only atomic renderers will be returned.
+        Otherwise, only legacy renderers will be returned.
+        """
+        atomic_renderer_prefix: str = "atomic.diagnostic"
+        renderer_names: List[str] = self._get_renderer_names_from_renderer_prefix(
+            renderer_prefix=atomic_renderer_prefix
+        )
+        if len(renderer_names) == 0:
+            legacy_renderer_prefix: str = "renderer.diagnostic"
+            renderer_names = self._get_renderer_names_from_renderer_prefix(
+                renderer_prefix=legacy_renderer_prefix
+            )
+
+        renderer_tuple: Optional[tuple]
+        renderer_fn: Callable
+        renderer_rendered_content: Union[RenderedContent, List[RenderedContent]]
+        rendered_content: List[RenderedContent] = []
+        for renderer_name in renderer_names:
+            renderer_tuple = get_renderer_impl(
+                object_name=self.expectation_type, renderer_type=renderer_name
+            )
+            if renderer_tuple is not None:
+                # index 0 is expectation class-name and index 1 is implementation of renderer
+                renderer_fn = renderer_tuple[1] if renderer_tuple else None
+                renderer_rendered_content = renderer_fn(result=self)
+                if isinstance(renderer_rendered_content, list):
+                    rendered_content.extend(renderer_rendered_content)
+                else:
+                    rendered_content.append(renderer_rendered_content)
+
+        return rendered_content
+
+    def _get_renderer_names_from_renderer_prefix(
+        self, renderer_prefix: str
+    ) -> List[str]:
+        return [
+            renderer_name
+            for renderer_name in get_renderer_names(object_name=self.expectation_type)
+            if renderer_prefix in renderer_name
+        ]
 
     @staticmethod
     def validate_result_dict(result):
