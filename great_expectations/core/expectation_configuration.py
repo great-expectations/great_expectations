@@ -1211,7 +1211,8 @@ class ExpectationConfiguration(SerializableDictDot):
     def _get_rendered_content(self) -> List[RenderedContent]:
         """Returns rendered content from the prescriptive renderer for this expectation configuration.
 
-        If an atomic renderer is defined, it will be used, otherwise use legacy renderers.
+        If an atomic renderer is defined, only atomic renderers will be returned.
+        Otherwise, only legacy renderers will be returned.
         """
         atomic_renderer_prefix: str = "atomic.prescriptive"
         renderer_names: List[str] = self._get_renderer_names_from_renderer_prefix(
