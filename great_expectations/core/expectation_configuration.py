@@ -2,7 +2,7 @@ import copy
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 import jsonpatch
 from pyparsing import ParseResults
@@ -23,7 +23,10 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
     ParserError,
 )
-from great_expectations.expectations.registry import get_expectation_impl
+from great_expectations.expectations.registry import (
+    get_expectation_impl,
+    get_renderer_impl,
+)
 from great_expectations.marshmallow__shade import (
     Schema,
     ValidationError,
@@ -950,7 +953,6 @@ class ExpectationConfiguration(SerializableDictDot):
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
-        rendered_content: Optional[dict] = None,
     ) -> None:
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -971,6 +973,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
+        self._rendered_content = self._get_rendered_content()
 
     def process_evaluation_parameters(
         self,
@@ -1064,6 +1067,10 @@ class ExpectationConfiguration(SerializableDictDot):
     @kwargs.setter
     def kwargs(self, value: dict) -> None:
         self._kwargs = value
+
+    @property
+    def rendered_content(self) -> dict:
+        return self._rendered_content
 
     def _get_default_custom_kwargs(self) -> dict:
         # NOTE: this is a holdover until class-first expectations control their
@@ -1198,6 +1205,16 @@ class ExpectationConfiguration(SerializableDictDot):
         )
         runtime_kwargs.update(success_kwargs)
         return runtime_kwargs
+
+    def _get_rendered_content(self) -> Optional[dict]:
+        """Returns a rendered and serialized prescriptive renderer for the given expectation"""
+        renderer_tuple: tuple = get_renderer_impl(
+            object_name=self.expectation_type, renderer_type="renderer.prescriptive"
+        )
+        # index 0 is Expectation class-name and index 1 is implementation of renderer
+        renderer_fn: Callable = renderer_tuple[1] if renderer_tuple else None
+        rendered_content = renderer_fn(configuration=self)
+        return rendered_content
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"
@@ -1395,7 +1412,6 @@ class ExpectationConfigurationSchema(Schema):
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema, required=False, allow_none=True
     )
-    rendered_content = fields.Dict(required=False, allow_none=True)
 
     REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context"]
 
