@@ -72,7 +72,8 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
-        self.rendered_content = self._get_rendered_content()
+        if expectation_config is not None:
+            self.rendered_content = self._get_rendered_content()
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -195,15 +196,17 @@ class ExpectationValidationResult(SerializableDictDot):
         If an atomic renderer is defined, only atomic renderers will be returned.
         Otherwise, only legacy renderers will be returned.
         """
+        expectation_type: str = self.expectation_config.expectation_type
+
         atomic_renderer_prefix: str = "atomic.diagnostic"
         renderer_names: List[str] = _get_renderer_names_with_renderer_prefix(
-            object_name=self.expectation_config.expectation_type,
+            object_name=expectation_type,
             renderer_prefix=atomic_renderer_prefix,
         )
         if len(renderer_names) == 0:
             legacy_renderer_prefix: str = "renderer.diagnostic"
             renderer_names = _get_renderer_names_with_renderer_prefix(
-                object_name=self.expectation_config.expectation_type,
+                object_name=expectation_type,
                 renderer_prefix=legacy_renderer_prefix,
             )
 
@@ -213,7 +216,7 @@ class ExpectationValidationResult(SerializableDictDot):
         rendered_content: List[RenderedContent] = []
         for renderer_name in renderer_names:
             renderer_tuple = get_renderer_impl(
-                object_name=self.expectation_type, renderer_type=renderer_name
+                object_name=expectation_type, renderer_type=renderer_name
             )
             if renderer_tuple is not None:
                 # index 0 is expectation class-name and index 1 is implementation of renderer
