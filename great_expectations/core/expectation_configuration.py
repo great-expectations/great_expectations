@@ -1246,12 +1246,11 @@ class ExpectationConfiguration(SerializableDictDot):
     def _get_renderer_names_from_renderer_prefix(
         self, renderer_prefix: str
     ) -> List[str]:
-        renderer_names: List[str] = [
+        return [
             renderer_name
             for renderer_name in get_renderer_names(object_name=self.expectation_type)
             if renderer_prefix in renderer_name
         ]
-        return renderer_names
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"
