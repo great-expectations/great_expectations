@@ -34,6 +34,7 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
+from great_expectations.render.types import RenderedContent
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -1208,13 +1209,18 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def _get_rendered_content(self) -> Optional[dict]:
         """Returns a rendered and serialized prescriptive renderer for the given expectation"""
-        renderer_tuple: tuple = get_renderer_impl(
+        renderer_tuple: Optional[tuple] = get_renderer_impl(
             object_name=self.expectation_type, renderer_type="renderer.prescriptive"
         )
-        # index 0 is Expectation class-name and index 1 is implementation of renderer
-        renderer_fn: Callable = renderer_tuple[1] if renderer_tuple else None
-        rendered_content = renderer_fn(configuration=self)
-        return rendered_content
+        renderer_fn: Optional[Callable]
+        rendered_content: Optional[Union[RenderedContent, list[RenderedContent]]]
+        if renderer_tuple is not None:
+            # index 0 is expectation class-name and index 1 is implementation of renderer
+            renderer_fn = renderer_tuple[1] if renderer_tuple else None
+            rendered_content = renderer_fn(configuration=self)
+            return rendered_content
+        else:
+            return None
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"
