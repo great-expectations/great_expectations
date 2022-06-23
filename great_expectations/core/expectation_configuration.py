@@ -1209,7 +1209,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return runtime_kwargs
 
     def _get_rendered_content(self) -> List[RenderedContent]:
-        """Returns a rendered and serialized prescriptive renderer for the given expectation"""
+        """Returns rendered content from the prescriptive renderer for this expectation configuration"""
         atomic_renderer_prefix: str = "atomic.prescriptive"
         renderer_names: List[str] = self._get_renderer_names_from_renderer_prefix(
             renderer_prefix=atomic_renderer_prefix
