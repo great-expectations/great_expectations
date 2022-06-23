@@ -26,7 +26,7 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     get_renderer_impl,
-    get_renderer_names,
+    get_renderer_names_with_renderer_prefix,
 )
 from great_expectations.marshmallow__shade import (
     Schema,
@@ -1214,12 +1214,12 @@ class ExpectationConfiguration(SerializableDictDot):
         Otherwise, only legacy renderers will be returned.
         """
         atomic_renderer_prefix: str = "atomic.prescriptive"
-        renderer_names: List[str] = self._get_renderer_names_from_renderer_prefix(
+        renderer_names: List[str] = get_renderer_names_with_renderer_prefix(
             renderer_prefix=atomic_renderer_prefix
         )
         if len(renderer_names) == 0:
             legacy_renderer_prefix: str = "renderer.prescriptive"
-            renderer_names = self._get_renderer_names_from_renderer_prefix(
+            renderer_names = get_renderer_names_with_renderer_prefix(
                 renderer_prefix=legacy_renderer_prefix
             )
 
@@ -1241,15 +1241,6 @@ class ExpectationConfiguration(SerializableDictDot):
                     rendered_content.append(renderer_rendered_content)
 
         return rendered_content
-
-    def _get_renderer_names_from_renderer_prefix(
-        self, renderer_prefix: str
-    ) -> List[str]:
-        return [
-            renderer_name
-            for renderer_name in get_renderer_names(object_name=self.expectation_type)
-            if renderer_prefix in renderer_name
-        ]
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"

@@ -68,6 +68,16 @@ def get_renderer_names(object_name: str) -> List[str]:
     return list(_registered_renderers.get(object_name, {}).keys())
 
 
+def get_renderer_names_with_renderer_prefix(
+    object_name: str, renderer_prefix: str
+) -> List[str]:
+    return [
+        renderer_name
+        for renderer_name in get_renderer_names(object_name=object_name)
+        if renderer_prefix in renderer_name
+    ]
+
+
 def get_renderer_impls(object_name: str) -> List[str]:
     return list(_registered_renderers.get(object_name, {}).values())
 
