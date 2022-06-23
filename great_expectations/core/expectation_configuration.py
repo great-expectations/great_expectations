@@ -35,7 +35,7 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-from great_expectations.render.types import RenderedContent
+from great_expectations.render.types import RenderedAtomicContentSchema, RenderedContent
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -955,6 +955,7 @@ class ExpectationConfiguration(SerializableDictDot):
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
+        rendered_content: Optional[dict] = None,
     ) -> None:
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -975,6 +976,9 @@ class ExpectationConfiguration(SerializableDictDot):
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
+        if rendered_content is None:
+            rendered_content = {}
+        self._rendered_content = rendered_content
 
     def process_evaluation_parameters(
         self,
@@ -1443,6 +1447,11 @@ class ExpectationConfigurationSchema(Schema):
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema, required=False, allow_none=True
+    )
+    rendered_content = fields.List(
+        fields.Nested(
+            lambda: RenderedAtomicContentSchema, required=False, allow_none=True
+        )
     )
 
     REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context"]

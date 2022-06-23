@@ -20,7 +20,7 @@ from great_expectations.expectations.registry import (
     get_renderer_impl,
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.render.types import RenderedContent
+from great_expectations.render.types import RenderedAtomicContentSchema, RenderedContent
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -52,6 +52,7 @@ class ExpectationValidationResult(SerializableDictDot):
         result=None,
         meta=None,
         exception_info=None,
+        rendered_content=None,
     ) -> None:
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
@@ -72,6 +73,9 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
+        if rendered_content is None:
+            rendered_content = {}
+        self.rendered_content = rendered_content
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -320,6 +324,7 @@ class ExpectationValidationResultSchema(Schema):
     result = fields.Dict()
     meta = fields.Dict()
     exception_info = fields.Dict()
+    rendered_content = fields.List(fields.Nested(RenderedAtomicContentSchema))
 
     # noinspection PyUnusedLocal
     @pre_dump
