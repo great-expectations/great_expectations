@@ -1,6 +1,5 @@
 import copy
 import json
-from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
