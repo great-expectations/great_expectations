@@ -1,30 +1,39 @@
 ---
-name: stalebot
+# Reference: https://github.com/actions/stale#all-options
+
+name: StaleBot
 
 on:
- issues:
-   types: [reopened]  # TODO: Evaluate if sane
- schedule:
-   - cron: "0 0 * * *"
+  schedule:
+    - cron: '30 1 * * *'
 
 jobs:
+
   stale:
     runs-on: ubuntu-latest
     env:
       ACTIONS_STEP_DEBUG: true  # DEBUG: toggle to false
+
     steps:
-    - uses: actions/stale@latest  #  TODO: we're brave
+    - uses: actions/stale@v5
       with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        # TODO: evaluate if messages need tweaking
-        stale-issue-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-        stale-pr-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-        days-before-stale: 90  # NIT: This is a bit high
-        days-before-close: false  # DEBUG: settle on date with team
-        stale-issue-label: stale
-        stale-pr-label: stale
-        exempt-issue-label: stalebot-exempt  # TODO: include trage and core-team
-        exempt-pr-labels: stalebot-exempt  # NIT: Do not feel as though this should be expanded
-        operations-per-run: 30
-        main: 'lib/main.js'
+        # Debug
         debug-only: true  # DEBUG: Toggle to false
+        start-date: '2022-06-23T00:00:00Z' # ISO 8601 or RFC 2822
+
+        # General
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        days-before-stale: 30
+        days-before-close: 7  # Days after being marked stale until close, updates impact this
+
+        # Scope
+        only-pr-labels:
+
+
+        # Issue messages
+        stale-issue-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+        close-issue-message: 'We are closing this issue due to inactivity.'
+
+        # PR Messages
+        stale-pr-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+        close-pr-message: 'We are closing this PR due to inacitvity.'
