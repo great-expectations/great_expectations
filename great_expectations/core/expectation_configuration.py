@@ -950,6 +950,7 @@ class ExpectationConfiguration(SerializableDictDot):
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
+        rendered_content: Optional[dict] = None,
     ) -> None:
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -1394,6 +1395,7 @@ class ExpectationConfigurationSchema(Schema):
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema, required=False, allow_none=True
     )
+    rendered_content = fields.Dict(required=False, allow_none=True)
 
     REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context"]
 

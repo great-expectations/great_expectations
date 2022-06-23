@@ -740,7 +740,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     .properties(width=chart_pixel_width, height=400, autosize="fit")
                 )
 
-                chart = bars.to_json()
+                chart = bars.to_dict()
             elif partition_object.get("values"):
                 values = partition_object["values"]
 
@@ -754,7 +754,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     )
                     .properties(width=chart_pixel_width, height=400, autosize="fit")
                 )
-                chart = bars.to_json()
+                chart = bars.to_dict()
 
             if header:
                 expected_distribution = RenderedGraphContent(
