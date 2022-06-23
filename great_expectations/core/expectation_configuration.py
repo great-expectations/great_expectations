@@ -24,9 +24,9 @@ from great_expectations.exceptions import (
     ParserError,
 )
 from great_expectations.expectations.registry import (
+    _get_renderer_names_with_renderer_prefix,
     get_expectation_impl,
     get_renderer_impl,
-    get_renderer_names_with_renderer_prefix,
 )
 from great_expectations.marshmallow__shade import (
     Schema,
@@ -1214,12 +1214,12 @@ class ExpectationConfiguration(SerializableDictDot):
         Otherwise, only legacy renderers will be returned.
         """
         atomic_renderer_prefix: str = "atomic.prescriptive"
-        renderer_names: List[str] = get_renderer_names_with_renderer_prefix(
+        renderer_names: List[str] = _get_renderer_names_with_renderer_prefix(
             renderer_prefix=atomic_renderer_prefix
         )
         if len(renderer_names) == 0:
             legacy_renderer_prefix: str = "renderer.prescriptive"
-            renderer_names = get_renderer_names_with_renderer_prefix(
+            renderer_names = _get_renderer_names_with_renderer_prefix(
                 renderer_prefix=legacy_renderer_prefix
             )
 
