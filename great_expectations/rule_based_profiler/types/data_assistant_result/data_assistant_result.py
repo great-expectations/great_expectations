@@ -53,7 +53,6 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_res
     PlotResult,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
-from great_expectations.types.attributes import Attributes
 
 ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
 
