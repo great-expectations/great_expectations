@@ -975,7 +975,6 @@ class ExpectationConfiguration(SerializableDictDot):
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
-        self._rendered_content = self._get_rendered_content()
 
     def process_evaluation_parameters(
         self,
