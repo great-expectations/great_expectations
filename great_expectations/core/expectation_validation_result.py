@@ -72,8 +72,6 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
-        if expectation_config is not None:
-            self.rendered_content = self._get_rendered_content()
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -189,9 +187,9 @@ class ExpectationValidationResult(SerializableDictDot):
         """
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def _get_rendered_content(self) -> List[RenderedContent]:
-        """Returns rendered content from the diagnostic renderer for the expectation configuration associated with
-        this ExpectationValidationResult.
+    def render(self):
+        """Renders content from the diagnostic renderer for the expectation configuration associated with
+        this ExpectationValidationResult to self.rendered_content.
 
         If an atomic renderer is defined, only atomic renderers will be returned.
         Otherwise, only legacy renderers will be returned.
@@ -227,7 +225,7 @@ class ExpectationValidationResult(SerializableDictDot):
                 else:
                     rendered_content.append(renderer_rendered_content)
 
-        return rendered_content
+        self.rendered_content = rendered_content
 
     @staticmethod
     def validate_result_dict(result):

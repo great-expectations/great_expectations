@@ -1073,6 +1073,10 @@ class ExpectationConfiguration(SerializableDictDot):
     def rendered_content(self) -> dict:
         return self._rendered_content
 
+    @rendered_content.setter
+    def rendered_content(self, value: dict) -> dict:
+        self._rendered_content = value
+
     def _get_default_custom_kwargs(self) -> dict:
         # NOTE: this is a holdover until class-first expectations control their
         # defaults, and so defaults are inherited.
@@ -1207,8 +1211,8 @@ class ExpectationConfiguration(SerializableDictDot):
         runtime_kwargs.update(success_kwargs)
         return runtime_kwargs
 
-    def _get_rendered_content(self) -> List[RenderedContent]:
-        """Returns rendered content from the prescriptive renderer for this expectation configuration.
+    def render(self):
+        """Renders content from the prescriptive renderer for this expectation configuration to self.rendered_content.
 
         If an atomic renderer is defined, only atomic renderers will be returned.
         Otherwise, only legacy renderers will be returned.
@@ -1242,7 +1246,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 else:
                     rendered_content.append(renderer_rendered_content)
 
-        return rendered_content
+        self.rendered_content = rendered_content
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"

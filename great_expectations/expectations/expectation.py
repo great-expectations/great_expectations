@@ -857,10 +857,12 @@ class Expectation(metaclass=MetaExpectation):
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )
+        configuration.render()
         evr = validator.graph_validate(
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
         )[0]
+        evr.render()
 
         return evr
 
