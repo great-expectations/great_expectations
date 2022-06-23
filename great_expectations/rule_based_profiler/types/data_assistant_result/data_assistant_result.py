@@ -175,6 +175,9 @@ class DataAssistantResult(SerializableDictDot):
             "profiler_execution_time": convert_to_json_serializable(
                 data=self.profiler_execution_time
             ),
+            "rule_execution_time": convert_to_json_serializable(
+                data=self.rule_execution_time
+            ),
             "metrics_by_domain": [
                 {
                     "domain_id": domain.id,
