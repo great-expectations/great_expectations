@@ -31,6 +31,8 @@ class RuleBasedProfilerResult(SerializableDictDot):
     ]
     expectation_configurations: List[ExpectationConfiguration]
     citation: dict
+    execution_time: float
+    rule_execution_time: Dict[str, float]
     usage_statistics_handler: Optional[UsageStatisticsHandler] = None
 
     def to_dict(self) -> dict:
@@ -50,7 +52,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
                         data=fully_qualified_parameter_names
                     ),
                 }
-                for domain, fully_qualified_parameter_names in self.json_serialized_fully_qualified_parameter_name.items()
+                for domain, fully_qualified_parameter_names in self.fully_qualified_parameter_names_by_domain.items()
             ],
             "parameter_values_for_fully_qualified_parameter_names_by_domain": [
                 {
@@ -67,6 +69,8 @@ class RuleBasedProfilerResult(SerializableDictDot):
                 for expectation_configuration in self.expectation_configurations
             ],
             "citation": self.citation,
+            "execution_time": self.execution_time,
+            "usage_statistics_handler": self.usage_statistics_handler.__class__.__name__,
         }
 
     def to_json_dict(self) -> dict:
