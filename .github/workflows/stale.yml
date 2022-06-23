@@ -1,28 +1,60 @@
-name: stalebot
+---
+# Reference: https://github.com/actions/stale#all-options
+
+name: StaleBot
 
 on:
- issues:
-   types: [reopened]
- schedule:
-   - cron: "0 0 * * *"
+  schedule:
+    - cron: '30 1 * * *'
 
 jobs:
+
   stale:
     runs-on: ubuntu-latest
     env:
-      ACTIONS_STEP_DEBUG: true
+      ACTIONS_STEP_DEBUG: true  # DEBUG: toggle to false
+
     steps:
-    - uses: actions/stale@v2
+    - uses: actions/stale@v5
       with:
+        # Debug
+        debug-only: true  # DEBUG: Toggle to false
+        start-date: '2022-06-23T00:00:00Z'  # ISO 8601 or RFC 2822
+
+        # General
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-issue-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-        stale-pr-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-        days-before-stale: 90
-        days-before-close: 7
-        stale-issue-label: stale
-        stale-pr-label: stale
-        exempt-issue-label: stalebot-exempt
-        exempt-pr-labels: stalebot-exempt
-        operations-per-run: 30
-        main: 'lib/main.js'
-        debug-only: false
+        days-before-stale: 30
+        days-before-close: 7  # Days after being marked stale until close, updates impact this
+        days-before-pr-stale: -1  # NIT: Disable auto flag PR. toggled until team meeting
+        days-before-pr-close: -1  # NIT: Disable auto-close for PR. toggled until team meeting.
+
+        # Scope
+        only-pr-labels: community
+
+        # Issue messages
+        stale-issue-message: >
+          Is this issue still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?
+
+          This issue has been automatically marked as stale because it has not had recent activity.
+          It will be closed if no further activity occurs. Thank you for your contributions.
+
+        close-issue-message: >
+          We are closing this issue due to inactivity.
+
+          This action is done automatically by StaleBot.
+
+          Please validate this is still an issue, and create a new issue with up-to-date information if any problem presists 🙂
+
+        # PR Messages
+        stale-pr-message: >
+          Is this PR still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?
+
+          This issue has been automatically marked as stale because it has not had recent activity.
+          It will be closed if no further activity occurs. Thank you for your contributions.
+
+        close-pr-message: >
+          We are closing this PR due to inacitvity.
+
+          This action is done automatically by StaleBot.
+
+          Please reach out if you need anything further. 🙂
