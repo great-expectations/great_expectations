@@ -219,7 +219,15 @@ class DataAssistantResult(SerializableDictDot):
                 ).strftime("%Y%m%dT%H%M%S.%fZ"),
                 "great_expectations_version": ge_version,
             }
-            verbose: bool = os.getenv("GE_TROUBLESHOOTING", False)
+
+            verbose: Union[bool, str] = str(
+                os.getenv("GE_TROUBLESHOOTING", False)
+            ).lower()
+            if verbose != "true":
+                verbose = "false"
+
+            verbose = json.loads(verbose)
+
             if verbose:
                 rule_name_to_rule_stats_map: Dict[str, RuleStats] = {}
                 rule_stats: RuleStats
