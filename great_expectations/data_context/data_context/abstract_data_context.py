@@ -234,6 +234,12 @@ class AbstractDataContext(ConfigPeer):
             self._config_variables = self._load_config_variables()
         return self._config_variables
 
+    def _update_config_variables(self) -> None:
+        """
+        only if we need to update the cache
+        """
+        self._config_variables = self._load_config_variables()
+
     def _determine_substitutions(self) -> dict:
         """Aggregates substitutions from the project's config variables file, any environment variables, and
         the runtime environment.
