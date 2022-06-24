@@ -16,7 +16,7 @@ jobs:
     - uses: actions/stale@v5
       with:
         # Debug
-        start-date: '2022-06-23T00:00:00Z'  # ISO 8601 or RFC 2822
+        start-date: '2022-05-23T00:00:00Z'  # ISO 8601 or RFC 2822
 
 
         # General
