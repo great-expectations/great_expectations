@@ -826,7 +826,9 @@ def get_atomic_rendered_content_for_object(
 
     renderer_tuple: Optional[tuple]
     renderer_fn: Callable
-    renderer_rendered_content: Union[RenderedContent, List[RenderedContent]]
+    renderer_rendered_content: Optional[
+        Union[RenderedContent, List[RenderedContent]]
+    ] = None
     rendered_content: List[RenderedContent] = []
     for renderer_name in renderer_names:
         renderer_tuple = get_renderer_impl(
@@ -840,7 +842,9 @@ def get_atomic_rendered_content_for_object(
             elif isinstance(object, ExpectationValidationResult):
                 renderer_rendered_content = renderer_fn(result=object)
 
-            if isinstance(renderer_rendered_content, list):
+            if renderer_rendered_content is None:
+                pass
+            elif isinstance(renderer_rendered_content, list):
                 rendered_content.extend(renderer_rendered_content)
             else:
                 rendered_content.append(renderer_rendered_content)
