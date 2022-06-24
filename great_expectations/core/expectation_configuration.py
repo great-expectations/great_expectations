@@ -1221,15 +1221,17 @@ class ExpectationConfiguration(SerializableDictDot):
         If an atomic renderer is defined, only atomic renderers will be returned.
         Otherwise, only legacy renderers will be returned.
         """
+        expectation_type: str = self.expectation_type
+
         atomic_renderer_prefix: str = "atomic.prescriptive"
         renderer_names: List[str] = _get_renderer_names_with_renderer_prefix(
-            object_name=self.expectation_type,
+            object_name=expectation_type,
             renderer_prefix=atomic_renderer_prefix,
         )
         if len(renderer_names) == 0:
             legacy_renderer_prefix: str = "renderer.prescriptive"
             renderer_names = _get_renderer_names_with_renderer_prefix(
-                object_name=self.expectation_type,
+                object_name=expectation_type,
                 renderer_prefix=legacy_renderer_prefix,
             )
 
@@ -1239,7 +1241,7 @@ class ExpectationConfiguration(SerializableDictDot):
         rendered_content: List[RenderedContent] = []
         for renderer_name in renderer_names:
             renderer_tuple = get_renderer_impl(
-                object_name=self.expectation_type, renderer_type=renderer_name
+                object_name=expectation_type, renderer_type=renderer_name
             )
             if renderer_tuple is not None:
                 # index 0 is expectation class-name and index 1 is implementation of renderer
