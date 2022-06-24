@@ -24,8 +24,8 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.registry import (
-    _get_renderer_names_with_renderer_prefix,
     get_renderer_impl,
+    get_renderer_names_with_renderer_prefix,
 )
 from great_expectations.render.types import RenderedContent
 from great_expectations.types import SerializableDictDot
@@ -802,15 +802,15 @@ def _get_atomic_rendered_content_for_object(
         legacy_renderer_prefix = "legacy.diagnostic"
     else:
         raise ValueError(
-            f"renderer_type must be one of 'prescriptive' or 'diagnostic' but {renderer_type} was provided"
+            f"renderer_type must be one of 'prescriptive' or 'diagnostic' but '{renderer_type}' was provided"
         )
 
-    renderer_names: List[str] = _get_renderer_names_with_renderer_prefix(
+    renderer_names: List[str] = get_renderer_names_with_renderer_prefix(
         object_name=expectation_type,
         renderer_prefix=atomic_renderer_prefix,
     )
     if len(renderer_names) == 0:
-        renderer_names = _get_renderer_names_with_renderer_prefix(
+        renderer_names = get_renderer_names_with_renderer_prefix(
             object_name=expectation_type,
             renderer_prefix=legacy_renderer_prefix,
         )
@@ -825,7 +825,7 @@ def _get_atomic_rendered_content_for_object(
         )
         if renderer_tuple is not None:
             # index 0 is expectation class-name and index 1 is implementation of renderer
-            renderer_fn = renderer_tuple[1] if renderer_tuple else None
+            renderer_fn = renderer_tuple[1]
             if isinstance(object, ExpectationConfiguration):
                 renderer_rendered_content = renderer_fn(configuration=object)
             elif isinstance(object, ExpectationValidationResult):
