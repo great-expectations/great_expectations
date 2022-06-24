@@ -1306,7 +1306,7 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
 
 
-def test_load_config_variables_file(
+def test_load_config_variables_property(
     basic_data_context_config, tmp_path_factory, monkeypatch
 ):
     # Setup:
@@ -1332,7 +1332,7 @@ def test_load_config_variables_file(
         assert config_vars["env"] == "dev"
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
-        config_vars = context._load_config_variables_file()
+        config_vars = context.config_variables()
         assert config_vars["env"] == "prod"
     except Exception:
         raise
