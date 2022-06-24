@@ -45,7 +45,6 @@ class FileDataContext(AbstractDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
-        print("hello")
         super().__init__(runtime_environment=runtime_environment)
         # move this down here too
         if context_root_dir is not None:
@@ -56,7 +55,6 @@ class FileDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        self._config_variables = self._load_config_variables()
 
     def _init_variables(self) -> FileDataContextVariables:
         raise NotImplementedError
@@ -100,7 +98,7 @@ class FileDataContext(AbstractDataContext):
             return {}
 
     @property
-    def root_directory(self):
+    def root_directory(self) -> str:
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located."""
         return self._context_root_directory

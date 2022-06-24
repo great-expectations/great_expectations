@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from abc import abstractmethod
-from typing import Mapping, Optional, Union
+from typing import Dict, Mapping, Optional, Union
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.data_context.types.base import (
@@ -40,6 +40,9 @@ class AbstractDataContext(ConfigPeer):
                 override both those set in config_variables.yml and the environment
         """
         self.runtime_environment = runtime_environment
+        # these attributes that are set downstream.
+        self._config_variables = None
+        self._project_config = None
 
     @abstractmethod
     def _init_variables(self) -> None:
@@ -116,9 +119,9 @@ class AbstractDataContext(ConfigPeer):
 
         return config_with_global_config_overrides
 
-    def _load_config_variables(self):
+    def _load_config_variables(self) -> Dict:
         """
-        Get all config variables from default location. This method is most-significantly overridden in the FileDataContext
+        Get all config variables from default location (empty in the case of AbstractDataContext) Overriden by FileDataContext
         """
         return {}
 
@@ -220,14 +223,13 @@ class AbstractDataContext(ConfigPeer):
 
     # properties
     @property
-    def config_variables(self):
+    def config_variables(self) -> Dict:
+        """
+        Cached version of config variables, so that you dont have to load it from file each time.
+        """
         if not self._config_variables:
             self._config_variables = self._load_config_variables()
         return self._config_variables
-
-    @property
-    def config(self) -> DataContextConfig:
-        return DataContextConfig()
 
     def _determine_substitutions(self) -> dict:
         """Aggregates substitutions from the project's config variables file, any environment variables, and
@@ -252,4 +254,10 @@ class AbstractDataContext(ConfigPeer):
 
     @property
     def config(self) -> DataContextConfig:
+        """
+        Required because of ConfigPeer
+
+        Returns:
+            DataContextConfig
+        """
         return self._project_config
