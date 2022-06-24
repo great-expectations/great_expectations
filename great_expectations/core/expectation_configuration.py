@@ -32,7 +32,8 @@ from great_expectations.marshmallow__shade import (
     post_load,
 )
 from great_expectations.render.renderer import InlineRenderer
-from great_expectations.render.types import RenderedAtomicContentSchema
+
+# from great_expectations.render.types import RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -1419,9 +1420,7 @@ class ExpectationConfigurationSchema(Schema):
         lambda: ExpectationContextSchema, required=False, allow_none=True
     )
     rendered_content = fields.List(
-        fields.Nested(
-            lambda: RenderedAtomicContentSchema, required=False, allow_none=True
-        )
+        fields.Nested(lambda: Any, required=False, allow_none=True)
     )
 
     REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context"]
