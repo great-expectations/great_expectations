@@ -1431,7 +1431,7 @@ def test_list_checkpoints_on_context_with_checkpoint(empty_context_with_checkpoi
     assert context.list_checkpoints() == ["my_checkpoint"]
 
 
-def test_list_checkpoints_on_context_with_twwo_checkpoints(
+def test_list_checkpoints_on_context_with_two_checkpoints(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint

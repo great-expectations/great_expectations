@@ -41,13 +41,3 @@ class CloudDataContext(AbstractDataContext):
 
     def _init_variables(self) -> CloudDataContextVariables:
         raise NotImplementedError
-
-    def _load_config_variables(self) -> dict:
-        """
-        Returns config variables in GE cloud mode. In this case, config variables
-        have already been interpolated before being sent from the CLOUD API.
-
-        Returns:
-            empty dictionary for now
-        """
-        return {}

@@ -407,6 +407,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # plugins are built.
         self.validation_operators = {}
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
+        #
         if (
             "validation_operators" in self.get_config().commented_map
             and self.config.validation_operators
@@ -446,9 +447,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._project_config = self._data_context._project_config
         self.runtime_environment = self._data_context.runtime_environment or {}
         self._config_variables = self._data_context.config_variables
-
-        if isinstance(self._data_context, FileDataContext):
-            self._context_root_directory = self._data_context.root_directory
 
     def _build_store_from_config(
         self, store_name: str, store_config: dict
