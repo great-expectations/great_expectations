@@ -11,9 +11,9 @@ from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
 from great_expectations.core.util import (
-    _get_atomic_rendered_content_for_object,
     convert_to_json_serializable,
     ensure_json_serializable,
+    get_atomic_rendered_content_for_object,
     in_jupyter_notebook,
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
@@ -200,7 +200,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
         self.rendered_content: List[
             RenderedContent
-        ] = _get_atomic_rendered_content_for_object(
+        ] = get_atomic_rendered_content_for_object(
             object=self, renderer_type=renderer_type, expectation_type=expectation_type
         )
 

@@ -14,9 +14,9 @@ from great_expectations.core.evaluation_parameters import (
 )
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import (
-    _get_atomic_rendered_content_for_object,
     convert_to_json_serializable,
     ensure_json_serializable,
+    get_atomic_rendered_content_for_object,
     nested_update,
 )
 from great_expectations.exceptions import (
@@ -1223,7 +1223,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
         self.rendered_content: List[
             RenderedContent
-        ] = _get_atomic_rendered_content_for_object(
+        ] = get_atomic_rendered_content_for_object(
             object=self, renderer_type=renderer_type, expectation_type=expectation_type
         )
 
