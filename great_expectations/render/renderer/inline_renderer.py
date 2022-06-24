@@ -5,7 +5,6 @@ from great_expectations.expectations.registry import (
     get_renderer_names_with_renderer_prefix,
 )
 from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import RenderedAtomicContent
 
 
 class InlineRenderer(Renderer):
@@ -17,7 +16,7 @@ class InlineRenderer(Renderer):
 
         self._render_object = render_object
 
-    def get_atomic_rendered_content_for_object(self) -> List[RenderedAtomicContent]:
+    def get_atomic_rendered_content_for_object(self) -> List["RenderedAtomicContent"]:
         """Gets RenderedAtomicContent for a given ExpectationConfiguration or ExpectationValidationResult.
 
         Returns:
@@ -63,9 +62,9 @@ class InlineRenderer(Renderer):
         renderer_tuple: Optional[tuple]
         renderer_fn: Callable
         renderer_rendered_content: Union[
-            RenderedAtomicContent, List[RenderedAtomicContent]
+            "RenderedAtomicContent", List["RenderedAtomicContent"]
         ]
-        rendered_content: List[RenderedAtomicContent] = []
+        rendered_content: List["RenderedAtomicContent"] = []
         for renderer_name in renderer_names:
             renderer_tuple = get_renderer_impl(
                 object_name=expectation_type, renderer_type=renderer_name
@@ -85,5 +84,5 @@ class InlineRenderer(Renderer):
 
         return rendered_content
 
-    def render(self) -> List[RenderedAtomicContent]:
+    def render(self) -> List["RenderedAtomicContent"]:
         return self.get_atomic_rendered_content_for_object()
