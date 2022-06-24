@@ -311,11 +311,11 @@ from dataprofiler import Data, Profiler
 
 # Load a CSV file with a schema
 data1 = Data("file_a.csv")
-profile1 = Profiler(data)
+profile1 = Profiler(data1)
 
 # Load another CSV file with the same schema
 data2 = Data("file_b.csv")
-profile2 = Profiler(data)
+profile2 = Profiler(data2)
 
 profile3 = profile1 + profile2
 
