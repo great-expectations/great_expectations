@@ -4,6 +4,7 @@ import errno
 import json
 import logging
 import os
+import sys
 from abc import ABC, abstractmethod
 from typing import Dict, Mapping, Optional, Union, cast
 
@@ -49,6 +50,32 @@ class AbstractDataContext(ABC):
         self._config_variables = None
         self._project_config = None
 
+        # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
+        self._in_memory_instance_id = (
+            None  # This variable *may* be used in case we cannot save an instance id
+        )
+
+    # public methods
+    def get_config_with_variables_substituted(
+        self, config: Optional[DataContextConfig] = None
+    ) -> DataContextConfig:
+        """
+        Substitute vars in config of form ${var} or $(var) with values found in the following places,
+        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        be optional in GE Cloud mode).
+        """
+        if not config:
+            config = self._project_config
+
+        substitutions: dict = self._determine_substitutions()
+        return DataContextConfig(
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
+        )
+
+    # private methods
     @abstractmethod
     def _init_variables(self) -> None:
         raise NotImplementedError
@@ -131,7 +158,7 @@ class AbstractDataContext(ABC):
 
         """
         config_variables_file_path: str = cast(
-            DataContextConfig, self._project_config
+            DataContextConfig, self.config
         ).config_variables_file_path
         if config_variables_file_path:
             try:
@@ -258,6 +285,10 @@ class AbstractDataContext(ABC):
 
     # properties
     @property
+    def config(self) -> DataContextConfig:
+        return self._project_config
+
+    @property
     def config_variables(self) -> Dict:
         """Loads config variables into cache, by calling _load_config_variables()
 
@@ -293,3 +324,7 @@ class AbstractDataContext(ABC):
         }
 
         return substitutions
+
+    @property
+    def project_config_with_variables_substituted(self) -> DataContextConfig:
+        return self.get_config_with_variables_substituted()

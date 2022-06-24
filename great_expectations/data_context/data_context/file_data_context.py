@@ -1,4 +1,6 @@
 import logging
+import os
+import sys
 from typing import Mapping, Optional, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -40,6 +42,36 @@ class FileDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
+        if self.plugins_directory is not None and os.path.exists(
+            self.plugins_directory
+        ):
+            sys.path.append(self.plugins_directory)
+
+    # private methods
 
     def _init_variables(self) -> FileDataContextVariables:
         raise NotImplementedError
+
+    def _normalize_absolute_or_relative_path(
+        self, path: Optional[str]
+    ) -> Optional[str]:
+        if path is None:
+            return
+        if os.path.isabs(path):
+            return path
+        else:
+            return os.path.join(self.root_directory, path)
+
+    # properties
+    @property
+    def plugins_directory(self):
+        """The directory in which custom plugin modules should be placed."""
+        return self._normalize_absolute_or_relative_path(
+            self.project_config_with_variables_substituted.plugins_directory
+        )
+
+    @property
+    def root_directory(self):
+        """The root directory for configuration objects in the data context; the location in which
+        ``great_expectations.yml`` is located."""
+        return self._context_root_directory
