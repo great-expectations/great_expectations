@@ -259,9 +259,7 @@ class AbstractDataContext(ABC):
     # properties
     @property
     def config_variables(self) -> Dict:
-        """Loads config variables into cache, so they are not loaded from file each time.
-
-           Calls _load_config_variables() which is overridden in FileDataContext to load config_variables file
+        """Loads config variables into cache, by calling _load_config_variables()
 
         Returns: A dictionary containing config_variables from file or empty dictionary.
         """
@@ -270,8 +268,8 @@ class AbstractDataContext(ABC):
         return self._config_variables
 
     def _update_config_variables(self) -> None:
-        """
-        only if we need to update the cache
+        """Updates config_variables cache by re-calling _load_config_variables(). Necessary after running methods that modify config
+        AND could contain config_variables for credentials (example is add_datasource())
         """
         self._config_variables = self._load_config_variables()
 
