@@ -11,15 +11,13 @@ jobs:
 
   stale:
     runs-on: ubuntu-latest
-    env:
-      ACTIONS_STEP_DEBUG: true  # DEBUG: toggle to false
 
     steps:
     - uses: actions/stale@v5
       with:
         # Debug
-        debug-only: true  # DEBUG: Toggle to false
         start-date: '2022-06-23T00:00:00Z'  # ISO 8601 or RFC 2822
+
 
         # General
         repo-token: ${{ secrets.GITHUB_TOKEN }}
