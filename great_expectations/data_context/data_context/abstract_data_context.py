@@ -40,7 +40,6 @@ class AbstractDataContext(ConfigPeer):
                 override both those set in config_variables.yml and the environment
         """
         self.runtime_environment = runtime_environment
-        self._config_variables = self._load_config_variables()
 
     @abstractmethod
     def _init_variables(self) -> None:
@@ -250,3 +249,7 @@ class AbstractDataContext(ConfigPeer):
         }
 
         return substitutions
+
+    @property
+    def config(self) -> DataContextConfig:
+        return self._project_config
