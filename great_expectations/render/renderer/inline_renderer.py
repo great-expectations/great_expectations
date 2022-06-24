@@ -1,7 +1,7 @@
 from typing import Callable, List, Optional, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.core import (
+    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
