@@ -16,9 +16,7 @@ from great_expectations.core.util import (
     in_jupyter_notebook,
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.render.renderer.inline_renderer import (
-    get_atomic_rendered_content_for_object,
-)
+from great_expectations.render.renderer import InlineRenderer
 from great_expectations.render.types import RenderedAtomicContentSchema, RenderedContent
 from great_expectations.types import SerializableDictDot
 
@@ -197,11 +195,9 @@ class ExpectationValidationResult(SerializableDictDot):
         If an atomic renderer is defined, only atomic renderers will be returned.
         Otherwise, only legacy renderers will be returned.
         """
-        self.rendered_content: List[
-            RenderedContent
-        ] = get_atomic_rendered_content_for_object(
-            render_object=self,
-        )
+        inline_renderer: InlineRenderer = InlineRenderer(render_object=self)
+
+        self.rendered_content: List[RenderedContent] = inline_renderer.render()
 
     @staticmethod
     def validate_result_dict(result):
