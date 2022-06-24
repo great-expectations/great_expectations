@@ -1213,18 +1213,15 @@ class ExpectationConfiguration(SerializableDictDot):
         return runtime_kwargs
 
     def render(self) -> None:
-        """Renders content from the prescriptive renderer for this expectation configuration to self.rendered_content.
+        """Renders content using the prescriptive renderer for this expectation configuration to self.rendered_content.
 
         If an atomic renderer is defined, only atomic renderers will be returned.
         Otherwise, only legacy renderers will be returned.
         """
-        expectation_type: str = self.expectation_type
-        renderer_type: str = "prescriptive"
-
         self.rendered_content: List[
             RenderedContent
         ] = get_atomic_rendered_content_for_object(
-            object=self, renderer_type=renderer_type, expectation_type=expectation_type
+            object=self,
         )
 
     def applies_to_same_domain(

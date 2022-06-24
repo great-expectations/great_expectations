@@ -789,20 +789,29 @@ def get_sql_dialect_floating_point_infinity_value(
 
 def get_atomic_rendered_content_for_object(
     object: Union[ExpectationConfiguration, ExpectationValidationResult],
-    renderer_type: str,
-    expectation_type: str,
 ) -> List[RenderedContent]:
+    """Gets RenderedAtomicContent for a given ExpectationConfiguration or ExpectationValidationResult.
+
+    Args:
+        object: An ExpectationConfiguration or ExpectationValidationResult for which to return rendered_content.
+
+    Returns:
+        A list of RenderedAtomicContents for a given ExpectationConfiguration or ExpectationValidationResult.
+    """
+    expectation_type: str
     atomic_renderer_prefix: str
     legacy_renderer_prefix: str
-    if renderer_type == "prescriptive":
+    if isinstance(object, ExpectationConfiguration):
+        expectation_type = object.expectation_type
         atomic_renderer_prefix = "atomic.prescriptive"
         legacy_renderer_prefix = "legacy.prescriptive"
-    elif renderer_type == "diagnostic":
+    elif isinstance(object, ExpectationValidationResult):
+        expectation_type = object.expectation_config.expectation_type
         atomic_renderer_prefix = "atomic.diagnostic"
         legacy_renderer_prefix = "legacy.diagnostic"
     else:
         raise ValueError(
-            f"renderer_type must be one of 'prescriptive' or 'diagnostic' but '{renderer_type}' was provided"
+            f"object must be of type ExpectationConfiguration or ExpectationValidationResult, but an object of type {type(object)} was passed"
         )
 
     renderer_names: List[str] = get_renderer_names_with_renderer_prefix(
@@ -830,10 +839,6 @@ def get_atomic_rendered_content_for_object(
                 renderer_rendered_content = renderer_fn(configuration=object)
             elif isinstance(object, ExpectationValidationResult):
                 renderer_rendered_content = renderer_fn(result=object)
-            else:
-                raise ValueError(
-                    f"object must be of type ExpectationConfiguration or ExpectationValidationResult, but and object of type {type(object)} was passed"
-                )
 
             if isinstance(renderer_rendered_content, list):
                 rendered_content.extend(renderer_rendered_content)

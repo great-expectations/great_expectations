@@ -189,19 +189,16 @@ class ExpectationValidationResult(SerializableDictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     def render(self) -> None:
-        """Renders content from the diagnostic renderer for the expectation configuration associated with
+        """Renders content using the diagnostic renderer for the expectation configuration associated with
         this ExpectationValidationResult to self.rendered_content.
 
         If an atomic renderer is defined, only atomic renderers will be returned.
         Otherwise, only legacy renderers will be returned.
         """
-        expectation_type: str = self.expectation_config.expectation_type
-        renderer_type: str = "diagnostic"
-
         self.rendered_content: List[
             RenderedContent
         ] = get_atomic_rendered_content_for_object(
-            object=self, renderer_type=renderer_type, expectation_type=expectation_type
+            object=self,
         )
 
     @staticmethod
