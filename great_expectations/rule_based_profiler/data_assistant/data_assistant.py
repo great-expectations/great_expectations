@@ -653,6 +653,8 @@ def run_profiler_on_data(
     )
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
+    result.profiler_execution_time = rule_based_profiler_result.execution_time
+    result.rule_execution_time = rule_based_profiler_result.rule_execution_time
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
     result.expectation_configurations = (
         rule_based_profiler_result.expectation_configurations
