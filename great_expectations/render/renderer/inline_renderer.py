@@ -21,7 +21,7 @@ class InlineRenderer(Renderer):
 
         self._render_object = render_object
 
-    def render(self):
+    def render(self) -> List[RenderedContent]:
         return self.get_atomic_rendered_content_for_object()
 
     def get_atomic_rendered_content_for_object(self) -> List[RenderedContent]:
