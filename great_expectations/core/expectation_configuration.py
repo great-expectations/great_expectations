@@ -31,7 +31,7 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-from great_expectations.render.renderer import InlineRenderer
+from great_expectations.render.renderer.inline_renderer import InlineRenderer
 
 # from great_expectations.render.types import RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot

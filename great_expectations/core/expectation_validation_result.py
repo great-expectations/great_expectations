@@ -16,7 +16,7 @@ from great_expectations.core.util import (
     in_jupyter_notebook,
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.render.renderer import InlineRenderer
+from great_expectations.render.renderer.inline_renderer import InlineRenderer
 from great_expectations.render.types import RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 
