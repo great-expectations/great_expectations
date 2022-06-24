@@ -8,7 +8,7 @@ import sys
 import uuid
 from collections import OrderedDict
 from collections.abc import Mapping
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
 import dateutil.parser
@@ -17,8 +17,17 @@ import pandas as pd
 from IPython import get_ipython
 
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_validation_result import (
+    ExpectationValidationResult,
+)
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.expectations.registry import (
+    _get_renderer_names_with_renderer_prefix,
+    get_renderer_impl,
+)
+from great_expectations.render.types import RenderedContent
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
 
@@ -776,3 +785,59 @@ def get_sql_dialect_floating_point_infinity_value(
             return res["NegativeInfinity"]
         else:
             return res["PositiveInfinity"]
+
+
+def _get_atomic_rendered_content_for_object(
+    object: Union[ExpectationConfiguration, ExpectationValidationResult],
+    renderer_type: str,
+    expectation_type: str,
+) -> List[RenderedContent]:
+    atomic_renderer_prefix: str
+    legacy_renderer_prefix: str
+    if renderer_type == "prescriptive":
+        atomic_renderer_prefix = "atomic.prescriptive"
+        legacy_renderer_prefix = "legacy.prescriptive"
+    elif renderer_type == "diagnostic":
+        atomic_renderer_prefix = "atomic.diagnostic"
+        legacy_renderer_prefix = "legacy.diagnostic"
+    else:
+        raise ValueError(
+            f"renderer_type must be one of 'prescriptive' or 'diagnostic' but {renderer_type} was provided"
+        )
+
+    renderer_names: List[str] = _get_renderer_names_with_renderer_prefix(
+        object_name=expectation_type,
+        renderer_prefix=atomic_renderer_prefix,
+    )
+    if len(renderer_names) == 0:
+        renderer_names = _get_renderer_names_with_renderer_prefix(
+            object_name=expectation_type,
+            renderer_prefix=legacy_renderer_prefix,
+        )
+
+    renderer_tuple: Optional[tuple]
+    renderer_fn: Callable
+    renderer_rendered_content: Union[RenderedContent, List[RenderedContent]]
+    rendered_content: List[RenderedContent] = []
+    for renderer_name in renderer_names:
+        renderer_tuple = get_renderer_impl(
+            object_name=expectation_type, renderer_type=renderer_name
+        )
+        if renderer_tuple is not None:
+            # index 0 is expectation class-name and index 1 is implementation of renderer
+            renderer_fn = renderer_tuple[1] if renderer_tuple else None
+            if isinstance(object, ExpectationConfiguration):
+                renderer_rendered_content = renderer_fn(configuration=object)
+            elif isinstance(object, ExpectationValidationResult):
+                renderer_rendered_content = renderer_fn(result=object)
+            else:
+                raise ValueError(
+                    f"object must be of type ExpectationConfiguration or ExpectationValidationResult, but and object of type {type(object)} was passed"
+                )
+
+            if isinstance(renderer_rendered_content, list):
+                rendered_content.extend(renderer_rendered_content)
+            else:
+                rendered_content.append(renderer_rendered_content)
+
+    return rendered_content

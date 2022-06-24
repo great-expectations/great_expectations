@@ -2,7 +2,7 @@ import copy
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import jsonpatch
 from pyparsing import ParseResults
@@ -14,6 +14,7 @@ from great_expectations.core.evaluation_parameters import (
 )
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import (
+    _get_atomic_rendered_content_for_object,
     convert_to_json_serializable,
     ensure_json_serializable,
     nested_update,
@@ -23,11 +24,7 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
     ParserError,
 )
-from great_expectations.expectations.registry import (
-    _get_renderer_names_with_renderer_prefix,
-    get_expectation_impl,
-    get_renderer_impl,
-)
+from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.marshmallow__shade import (
     Schema,
     ValidationError,
@@ -1222,37 +1219,13 @@ class ExpectationConfiguration(SerializableDictDot):
         Otherwise, only legacy renderers will be returned.
         """
         expectation_type: str = self.expectation_type
+        renderer_type: str = "prescriptive"
 
-        atomic_renderer_prefix: str = "atomic.prescriptive"
-        renderer_names: List[str] = _get_renderer_names_with_renderer_prefix(
-            object_name=expectation_type,
-            renderer_prefix=atomic_renderer_prefix,
+        self.rendered_content: List[
+            RenderedContent
+        ] = _get_atomic_rendered_content_for_object(
+            object=self, renderer_type=renderer_type, expectation_type=expectation_type
         )
-        if len(renderer_names) == 0:
-            legacy_renderer_prefix: str = "renderer.prescriptive"
-            renderer_names = _get_renderer_names_with_renderer_prefix(
-                object_name=expectation_type,
-                renderer_prefix=legacy_renderer_prefix,
-            )
-
-        renderer_tuple: Optional[tuple]
-        renderer_fn: Callable
-        renderer_rendered_content: Union[RenderedContent, List[RenderedContent]]
-        rendered_content: List[RenderedContent] = []
-        for renderer_name in renderer_names:
-            renderer_tuple = get_renderer_impl(
-                object_name=expectation_type, renderer_type=renderer_name
-            )
-            if renderer_tuple is not None:
-                # index 0 is expectation class-name and index 1 is implementation of renderer
-                renderer_fn = renderer_tuple[1] if renderer_tuple else None
-                renderer_rendered_content = renderer_fn(configuration=self)
-                if isinstance(renderer_rendered_content, list):
-                    rendered_content.extend(renderer_rendered_content)
-                else:
-                    rendered_content.append(renderer_rendered_content)
-
-        self.rendered_content = rendered_content
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"
