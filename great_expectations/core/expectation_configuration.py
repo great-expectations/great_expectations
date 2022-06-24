@@ -32,10 +32,7 @@ from great_expectations.marshmallow__shade import (
     post_load,
 )
 from great_expectations.render.renderer import InlineRenderer
-from great_expectations.render.types import (
-    RenderedAtomicContent,
-    RenderedAtomicContentSchema,
-)
+from great_expectations.render.types import RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -955,7 +952,7 @@ class ExpectationConfiguration(SerializableDictDot):
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
-        rendered_content: Optional[dict] = None,
+        rendered_content: Optional[List[Any]] = None,
     ) -> None:
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -1223,7 +1220,7 @@ class ExpectationConfiguration(SerializableDictDot):
         """
         inline_renderer: InlineRenderer = InlineRenderer(render_object=self)
 
-        self.rendered_content: List[RenderedAtomicContent] = inline_renderer.render()
+        self.rendered_content = inline_renderer.render()
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"
