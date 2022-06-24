@@ -147,7 +147,10 @@ class AbstractDataContext(ABC):
                     root_directory: str = ""
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
-                    res = dict(yaml.load(config_variables_file))
+                    res = dict(
+                        yaml.load(config_variables_file)
+                    )  # TODO this is returning TextIO directly. Adjust to return
+                    # TextIOWrapper or str
                     return res or {}
             except OSError as e:
                 if e.errno != errno.ENOENT:

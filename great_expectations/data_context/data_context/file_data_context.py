@@ -1,8 +1,6 @@
 import logging
 from typing import Mapping, Optional, Union
 
-from ruamel.yaml import YAML
-
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -12,11 +10,6 @@ from great_expectations.data_context.types.data_context_variables import (
 )
 
 logger = logging.getLogger(__name__)
-
-# TODO: check if this can be refactored to use YAMLHandler class
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
 
 
 class FileDataContext(AbstractDataContext):
@@ -50,9 +43,3 @@ class FileDataContext(AbstractDataContext):
 
     def _init_variables(self) -> FileDataContextVariables:
         raise NotImplementedError
-
-    @property
-    def root_directory(self) -> str:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located."""
-        return self._context_root_directory

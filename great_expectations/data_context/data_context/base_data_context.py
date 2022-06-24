@@ -772,7 +772,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def root_directory(self):
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located."""
-        # TODO: after the migration is complete, this can be moved to FileDataContext
         return self._context_root_directory
 
     @property
