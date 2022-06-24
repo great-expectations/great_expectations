@@ -17,7 +17,10 @@ from great_expectations.core.util import (
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
 from great_expectations.render.renderer import InlineRenderer
-from great_expectations.render.types import RenderedAtomicContentSchema, RenderedContent
+from great_expectations.render.types import (
+    RenderedAtomicContent,
+    RenderedAtomicContentSchema,
+)
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -197,7 +200,7 @@ class ExpectationValidationResult(SerializableDictDot):
         """
         inline_renderer: InlineRenderer = InlineRenderer(render_object=self)
 
-        self.rendered_content: List[RenderedContent] = inline_renderer.render()
+        self.rendered_content: List[RenderedAtomicContent] = inline_renderer.render()
 
     @staticmethod
     def validate_result_dict(result):
