@@ -787,7 +787,7 @@ def get_sql_dialect_floating_point_infinity_value(
             return res["PositiveInfinity"]
 
 
-def _get_atomic_rendered_content_for_object(
+def get_atomic_rendered_content_for_object(
     object: Union[ExpectationConfiguration, ExpectationValidationResult],
     renderer_type: str,
     expectation_type: str,
