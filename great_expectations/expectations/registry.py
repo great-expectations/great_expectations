@@ -65,7 +65,7 @@ def register_renderer(
 
 
 def get_renderer_names(object_name: str) -> List[str]:
-    """Gets renderer names for a given object.
+    """Gets renderer names for a given Expectation or Metric.
 
     Args:
         object_name: The name of an Expectation or Metric for which to get renderer names.
@@ -79,7 +79,7 @@ def get_renderer_names(object_name: str) -> List[str]:
 def get_renderer_names_with_renderer_prefix(
     object_name: str, renderer_prefix: str
 ) -> List[str]:
-    """Gets renderer names, with a given prefix, for a given object.
+    """Gets renderer names, with a given prefix, for a given Expectation or Metric.
 
     Args:
         object_name: The name of an Expectation or Metric for which to get renderer names.
