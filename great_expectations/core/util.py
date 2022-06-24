@@ -796,7 +796,7 @@ def get_atomic_rendered_content_for_object(
         object: An ExpectationConfiguration or ExpectationValidationResult for which to return rendered_content.
 
     Returns:
-        A list of RenderedAtomicContents for a given ExpectationConfiguration or ExpectationValidationResult.
+        A list of RenderedAtomicContent objects for a given ExpectationConfiguration or ExpectationValidationResult.
     """
     expectation_type: str
     atomic_renderer_prefix: str
@@ -804,11 +804,11 @@ def get_atomic_rendered_content_for_object(
     if isinstance(object, ExpectationConfiguration):
         expectation_type = object.expectation_type
         atomic_renderer_prefix = "atomic.prescriptive"
-        legacy_renderer_prefix = "legacy.prescriptive"
+        legacy_renderer_prefix = "renderer.prescriptive"
     elif isinstance(object, ExpectationValidationResult):
         expectation_type = object.expectation_config.expectation_type
         atomic_renderer_prefix = "atomic.diagnostic"
-        legacy_renderer_prefix = "legacy.diagnostic"
+        legacy_renderer_prefix = "renderer.diagnostic"
     else:
         raise ValueError(
             f"object must be of type ExpectationConfiguration or ExpectationValidationResult, but an object of type {type(object)} was passed"
