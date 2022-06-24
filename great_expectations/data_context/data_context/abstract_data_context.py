@@ -7,8 +7,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import Dict, Mapping, Optional, Union, cast
 
-from ruamel.yaml import YAML
-
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     anonymizedUsageStatisticsSchema,
@@ -19,10 +18,7 @@ from great_expectations.data_context.util import (
 )
 
 logger = logging.getLogger(__name__)
-
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 
 class AbstractDataContext(ABC):
