@@ -1848,11 +1848,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             config = kwargs
 
-        # update so that we can make sure that it works
-        # TODO: this is terrible see if it can be fixed
-        self._data_context._update_config_variables()
-        self._config_variables = self._data_context.config_variables
-
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = self._instantiate_datasource_from_config_and_update_project_config(
@@ -1868,6 +1863,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
+
+        self._data_context._update_config_variables()
+        self._apply_temporary_overrides()
+
         self._datasource_store.set_by_name(
             datasource_name=name, datasource_config=datasource_config
         )
