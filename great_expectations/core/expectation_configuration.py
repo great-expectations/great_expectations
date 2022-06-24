@@ -16,7 +16,6 @@ from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
-    get_atomic_rendered_content_for_object,
     nested_update,
 )
 from great_expectations.exceptions import (
@@ -31,6 +30,9 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_dump,
     post_load,
+)
+from great_expectations.render.renderer.inline_renderer import (
+    get_atomic_rendered_content_for_object,
 )
 from great_expectations.render.types import RenderedAtomicContentSchema, RenderedContent
 from great_expectations.types import SerializableDictDot
@@ -1221,7 +1223,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self.rendered_content: List[
             RenderedContent
         ] = get_atomic_rendered_content_for_object(
-            object=self,
+            render_object=self,
         )
 
     def applies_to_same_domain(
