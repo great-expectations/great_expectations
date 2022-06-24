@@ -372,6 +372,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
         self._project_config = self._data_context._project_config
         self.runtime_environment = self._data_context.runtime_environment or {}
+        print("so I even do this?")
         self._config_variables = self._data_context.config_variables
 
         # Init plugin support
@@ -911,7 +912,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @property
     def instance_id(self):
-        instance_id = self._load_config_variables_file().get("instance_id")
+        instance_id = self.config_variables.get("instance_id")
         if instance_id is None:
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
@@ -1046,7 +1047,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        config_variables = self._load_config_variables_file()
+        config_variables = self.config_variables
         value = self.escape_all_config_variables(
             value,
             self.DOLLAR_SIGN_ESCAPE_STRING,

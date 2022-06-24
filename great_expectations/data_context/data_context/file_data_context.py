@@ -45,6 +45,7 @@ class FileDataContext(AbstractDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
+        print("hello")
         super().__init__(runtime_environment=runtime_environment)
         # move this down here too
         if context_root_dir is not None:
@@ -65,9 +66,12 @@ class FileDataContext(AbstractDataContext):
         have already been interpolated before being sent from the Cloud API.
         """
         print("runningg me!!!")
+        help = self.get_config()
+        print(f"help me : {help}")
         config_variables_file_path = cast(
             DataContextConfig, self.get_config()
         ).config_variables_file_path
+        print(f"running me :{config_variables_file_path}")
         if config_variables_file_path:
             try:
                 # If the user specifies the config variable path with an environment variable, we want to substitute it
@@ -83,7 +87,9 @@ class FileDataContext(AbstractDataContext):
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
-                    return yaml.load(config_variables_file) or {}
+                    res = yaml.load(config_variables_file)
+                    print(f"this is res: {res}")
+                    return res or {}
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise

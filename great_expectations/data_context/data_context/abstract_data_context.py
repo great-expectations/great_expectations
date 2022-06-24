@@ -222,6 +222,8 @@ class AbstractDataContext(ConfigPeer):
     # properties
     @property
     def config_variables(self):
+        if not self._config_variables:
+            self._config_variables = self._load_config_variables()
         return self._config_variables
 
     @property
