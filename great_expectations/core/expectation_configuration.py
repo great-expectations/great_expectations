@@ -1078,7 +1078,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return self._rendered_content
 
     @rendered_content.setter
-    def rendered_content(self, value: dict) -> dict:
+    def rendered_content(self, value: dict):
         self._rendered_content = value
 
     def _get_default_custom_kwargs(self) -> dict:
