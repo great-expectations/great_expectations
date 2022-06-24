@@ -1078,7 +1078,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return self._rendered_content
 
     @rendered_content.setter
-    def rendered_content(self, value: dict):
+    def rendered_content(self, value: dict) -> None:
         self._rendered_content = value
 
     def _get_default_custom_kwargs(self) -> dict:
@@ -1215,7 +1215,7 @@ class ExpectationConfiguration(SerializableDictDot):
         runtime_kwargs.update(success_kwargs)
         return runtime_kwargs
 
-    def render(self):
+    def render(self) -> None:
         """Renders content from the prescriptive renderer for this expectation configuration to self.rendered_content.
 
         If an atomic renderer is defined, only atomic renderers will be returned.

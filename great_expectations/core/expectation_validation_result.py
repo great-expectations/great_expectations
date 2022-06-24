@@ -191,7 +191,7 @@ class ExpectationValidationResult(SerializableDictDot):
         """
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def render(self):
+    def render(self) -> None:
         """Renders content from the diagnostic renderer for the expectation configuration associated with
         this ExpectationValidationResult to self.rendered_content.
 
