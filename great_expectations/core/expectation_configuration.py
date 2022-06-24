@@ -31,10 +31,11 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-from great_expectations.render.renderer.inline_renderer import InlineRenderer
-
-# from great_expectations.render.types import RenderedAtomicContentSchema
+from great_expectations.render.types import RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
+
+# from great_expectations.render.renderer.inline_renderer import InlineRenderer
+
 
 logger = logging.getLogger(__name__)
 
@@ -1213,15 +1214,15 @@ class ExpectationConfiguration(SerializableDictDot):
         runtime_kwargs.update(success_kwargs)
         return runtime_kwargs
 
-    def render(self) -> None:
-        """Renders content using the prescriptive renderer for this expectation configuration to self.rendered_content.
-
-        If an atomic renderer is defined, only atomic renderers will be returned.
-        Otherwise, only legacy renderers will be returned.
-        """
-        inline_renderer: InlineRenderer = InlineRenderer(render_object=self)
-
-        self.rendered_content = inline_renderer.render()
+    # def render(self) -> None:
+    #     """Renders content using the prescriptive renderer for this expectation configuration to self.rendered_content.
+    #
+    #     If an atomic renderer is defined, only atomic renderers will be returned.
+    #     Otherwise, only legacy renderers will be returned.
+    #     """
+    #     inline_renderer: InlineRenderer = InlineRenderer(render_object=self)
+    #
+    #     self.rendered_content = inline_renderer.render()
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"
@@ -1420,7 +1421,9 @@ class ExpectationConfigurationSchema(Schema):
         lambda: ExpectationContextSchema, required=False, allow_none=True
     )
     rendered_content = fields.List(
-        fields.Nested(lambda: Any, required=False, allow_none=True)
+        fields.Nested(
+            lambda: RenderedAtomicContentSchema, required=False, allow_none=True
+        )
     )
 
     REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context"]

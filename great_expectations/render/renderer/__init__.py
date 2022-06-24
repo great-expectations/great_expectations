@@ -5,6 +5,7 @@ from .column_section_renderer import (
     ValidationResultsColumnSectionRenderer,
 )
 from .email_renderer import EmailRenderer
+from .inline_renderer import InlineRenderer
 from .microsoft_teams_renderer import MicrosoftTeamsRenderer
 from .opsgenie_renderer import OpsgenieRenderer
 from .page_renderer import (

@@ -63,6 +63,7 @@ from great_expectations.expectations.registry import (
     register_renderer,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render.renderer import InlineRenderer
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     CollapseContent,
@@ -857,12 +858,16 @@ class Expectation(metaclass=MetaExpectation):
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )
-        configuration.render()
+        configuration_inline_renderer: InlineRenderer = InlineRenderer(
+            render_object=configuration
+        )
+        configuration_inline_renderer.render()
         evr = validator.graph_validate(
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
         )[0]
-        evr.render()
+        evr_inline_renderer: InlineRenderer = InlineRenderer(render_object=evr)
+        evr_inline_renderer.render()
 
         return evr
 
