@@ -1332,7 +1332,7 @@ def test_load_config_variables_property(
         assert config_vars["env"] == "dev"
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
-        config_vars = context.config_variables()
+        config_vars = context.config_variables
         assert config_vars["env"] == "prod"
     except Exception:
         raise
