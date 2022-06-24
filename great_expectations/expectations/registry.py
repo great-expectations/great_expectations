@@ -71,7 +71,7 @@ def get_renderer_names(object_name: str) -> List[str]:
         object_name: The name of an Expectation or Metric for which to get renderer names.
 
     Returns:
-        A list of renderer names for the object.
+        A list of renderer names for the Expectation or Metric.
     """
     return list(_registered_renderers.get(object_name, {}).keys())
 
@@ -86,7 +86,7 @@ def get_renderer_names_with_renderer_prefix(
         renderer_prefix: The prefix of the renderers for which to return.
 
     Returns:
-        A list of renderer names for the given prefix and object.
+        A list of renderer names for the given prefix and Expectation or Metric.
     """
     return [
         renderer_name
