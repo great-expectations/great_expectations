@@ -355,7 +355,6 @@ class DataContext(BaseDataContext):
         self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
-        print(f"this is data _context:{project_config}")
         super().__init__(
             project_config,
             context_root_directory,

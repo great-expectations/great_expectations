@@ -224,8 +224,11 @@ class AbstractDataContext(ConfigPeer):
     # properties
     @property
     def config_variables(self) -> Dict:
-        """
-        Cached version of config variables, so that you dont have to load it from file each time.
+        """Loads config variables into cache, so they are not loaded from file each time.
+
+           Calls _load_config_variables() which is overridden in FileDataContext to load config_variables file
+
+        Returns: A dictionary containing config_variables from file or empty dictionary.
         """
         if not self._config_variables:
             self._config_variables = self._load_config_variables()

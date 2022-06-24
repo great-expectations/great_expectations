@@ -363,16 +363,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 context_root_dir=context_root_dir,
                 runtime_environment=runtime_environment,
             )
-            self._context_root_directory = self._data_context.root_directory
         else:
             self._data_context = EphemeralDataContext(
                 project_config=project_config, runtime_environment=runtime_environment
             )
 
-        # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
-        self._project_config = self._data_context._project_config
-        self.runtime_environment = self._data_context.runtime_environment or {}
-        self._config_variables = self._data_context.config_variables
+        # TODO: remove this method once refactor of DataContext is complete
+        self._apply_temporary_overrides()
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -435,6 +432,23 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
+
+    def _apply_temporary_overrides(self) -> None:
+        """
+        This is a helper method that only exists during the DataContext refactor that is occuring 202206.
+
+        Until the composition-pattern is complete for BaseDataContext, we have to load the private properties from the
+        private self._data_context object into properties in self
+
+        This is a helper method that performs this loading.
+        """
+        # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
+        self._project_config = self._data_context._project_config
+        self.runtime_environment = self._data_context.runtime_environment or {}
+        self._config_variables = self._data_context.config_variables
+
+        if isinstance(self._data_context, FileDataContext):
+            self._context_root_directory = self._data_context.root_directory
 
     def _build_store_from_config(
         self, store_name: str, store_config: dict
@@ -967,27 +981,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
             )
         )
-
-    # def _determine_substitutions(self) -> dict:
-    #     """Aggregates substitutions from the project's config variables file, any environment variables, and
-    #     the runtime environment.
-    #
-    #     Returns: A dictionary containing all possible substitutions that can be applied to a given object
-    #              using `substitute_all_config_variables`.
-    #     """
-    #     substituted_config_variables: dict = substitute_all_config_variables(
-    #         self.config_variables,
-    #         dict(os.environ),
-    #         self.DOLLAR_SIGN_ESCAPE_STRING,
-    #     )
-    #
-    #     substitutions = {
-    #         **substituted_config_variables,
-    #         **dict(os.environ),
-    #         **self.runtime_environment,
-    #     }
-    #
-    #     return substitutions
 
     def escape_all_config_variables(
         self,
