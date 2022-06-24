@@ -27,6 +27,7 @@ class InlineRenderer(Renderer):
             "ExpectationConfiguration", "ExpectationValidationResult"
         ] = self._render_object
 
+        # This workaround was required to avoid circular imports
         render_object_type: str
         if hasattr(render_object, "expectation_type"):
             render_object_type = "ExpectationConfiguration"
