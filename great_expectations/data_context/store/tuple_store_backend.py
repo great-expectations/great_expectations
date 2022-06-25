@@ -1102,8 +1102,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         if copy_properties.status != "success":
             dest_blob.abort_copy(copy_properties.id)
             raise StoreBackendError(
-                "Unable to copy blob %s with status %s"
-                % (source_blob_path, copy_properties.status)
+                f"Unable to copy blob {source_blob_path} with status {copy_properties.status}"
             )
         source_blob.delete_blob()
 

@@ -162,8 +162,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             ]
             if len(path) != 1:
                 raise BatchKwargsError(
-                    "Unable to identify partition %s for asset %s"
-                    % (partition_id, data_asset_name),
+                    f"Unable to identify partition {partition_id} for asset {data_asset_name}",
                     {data_asset_name: data_asset_name, partition_id: partition_id},
                 )
             batch_kwargs = self._build_batch_kwargs_from_path(
@@ -264,9 +263,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 try:
                     return matches.group(match_group_id)
                 except IndexError:
-                    logger.warning(
-                        "No match group %d in path %s" % (match_group_id, path)
-                    )
+                    logger.warning(f"No match group {match_group_id} in path {path}")
                     return (
                         datetime.datetime.now(datetime.timezone.utc).strftime(
                             "%Y%m%dT%H%M%S.%fZ"
