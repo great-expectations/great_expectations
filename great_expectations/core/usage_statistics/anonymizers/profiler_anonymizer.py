@@ -88,7 +88,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
         for name, rule in rules.items():
             anonymized_rule: dict = self._anonymize_rule(name, rule)
             anonymized_rules.append(anonymized_rule)
-            logger.debug("Anonymized rule %s", name)
+            logger.debug(f"Anonymized rule {name}")
 
         return anonymized_rules
 
