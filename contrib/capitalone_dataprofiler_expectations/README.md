@@ -499,3 +499,5 @@ Authors: Anh Truong, Austin Walters, Jeremy Goodsitt
 2020 https://arxiv.org/abs/2012.09597
 The AAAI-21 Workshop on Knowledge Discovery from Unstructured Data in Financial Services
 ```
+
+GE Integration Author: Taylor Turner ([taylorfturner](https://github.com/taylorfturner))
