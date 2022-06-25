@@ -33,11 +33,11 @@ class EphemeralDataContext(AbstractDataContext):
                 override both those set in config_variables.yml and the environment
 
         """
-        super().__init__(runtime_environment=runtime_environment)
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
         self._config_variables = self._load_config_variables()
+        super().__init__(runtime_environment=runtime_environment)
 
     def _init_variables(self) -> EphemeralDataContextVariables:
         raise NotImplementedError

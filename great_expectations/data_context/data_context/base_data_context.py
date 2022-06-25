@@ -2,7 +2,6 @@ import copy
 import datetime
 import logging
 import os
-import sys
 import traceback
 import uuid
 import warnings
@@ -371,17 +370,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # TODO: remove this method once refactor of DataContext is complete
         self._apply_temporary_overrides()
 
-        # Init plugin support
-        if self.plugins_directory is not None and os.path.exists(
-            self.plugins_directory
-        ):
-            sys.path.append(self.plugins_directory)
-
-        # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
-        self._in_memory_instance_id = (
-            None  # This variable *may* be used in case we cannot save an instance id
-        )
-
+        # # Init plugin support
+        # if self.plugins_directory is not None and os.path.exists(
+        #     self.plugins_directory
+        # ):
+        #     sys.path.append(self.plugins_directory)
+        #
+        # # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
+        # self._in_memory_instance_id = (
+        #     None  # This variable *may* be used in case we cannot save an instance id
+        # )
+        #
         # Init stores
         self._stores = {}
         self._init_stores(self.project_config_with_variables_substituted.stores)
@@ -390,6 +389,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._data_context_id = self._construct_data_context_id()
 
         # Override the project_config data_context_id if an expectations_store was already set up
+        print(f"data_context_id: {self._data_context_id}")
         self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
         self._initialize_usage_statistics(
             self.project_config_with_variables_substituted.anonymous_usage_statistics
@@ -446,6 +446,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._project_config = self._data_context._project_config
         self.runtime_environment = self._data_context.runtime_environment or {}
         self._config_variables = self._data_context.config_variables
+        self._in_memory_instance_id = self._data_context._in_memory_instance_id
 
     def _build_store_from_config(
         self, store_name: str, store_config: dict
@@ -627,15 +628,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
-    def _normalize_absolute_or_relative_path(
-        self, path: Optional[str]
-    ) -> Optional[str]:
-        if path is None:
-            return
-        if os.path.isabs(path):
-            return path
-        else:
-            return os.path.join(self.root_directory, path)
+    # def _normalize_absolute_or_relative_path(
+    #     self, path: Optional[str]
+    # ) -> Optional[str]:
+    #     if path is None:
+    #         return
+    #     if os.path.isabs(path):
+    #         return path
+    #     else:
+    #         return os.path.join(self.root_directory, path)
 
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
@@ -919,15 +920,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
         )
 
-    @property
-    def instance_id(self):
-        instance_id = self.config_variables.get("instance_id")
-        if instance_id is None:
-            if self._in_memory_instance_id is not None:
-                return self._in_memory_instance_id
-            instance_id = str(uuid.uuid4())
-            self._in_memory_instance_id = instance_id
-        return instance_id
+    # @property
+    # def instance_id(self):
+    #     instance_id = self.config_variables.get("instance_id")
+    #     if instance_id is None:
+    #         if self._in_memory_instance_id is not None:
+    #             return self._in_memory_instance_id
+    #         instance_id = str(uuid.uuid4())
+    #         self._in_memory_instance_id = instance_id
+    #     return instance_id
 
     @property
     def config(self) -> DataContextConfig:
