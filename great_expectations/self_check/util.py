@@ -91,6 +91,8 @@ except ImportError:
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
+
+    # noinspection PyPep8Naming
     from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 
     SQLITE_TYPES = {
@@ -111,6 +113,7 @@ except (ImportError, KeyError):
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
+    # noinspection PyPep8Naming
     import sqlalchemy_bigquery as sqla_bigquery
     import sqlalchemy_bigquery as BigQueryDialect
 
@@ -673,7 +676,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
-            table_name = generate_test_table_name()
+            table_name = generate_test_table_name().lower()
 
         df.to_sql(
             name=table_name,
@@ -681,6 +684,7 @@ def get_dataset(
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
+            method="multi",
         )
 
         # Build a SqlAlchemyDataset using that database
@@ -1495,7 +1499,6 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            "expect_column_stdev_to_be_between",
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",

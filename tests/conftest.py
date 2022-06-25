@@ -187,7 +187,6 @@ def build_test_backends_list(metafunc):
     return [
         (backend_name_class_name_map.get(backend_name) or backend_name)
         for backend_name in test_backend_names
-        if backend_name != "trino"  # <--------- maybe remove that
     ]
 
 
@@ -4208,6 +4207,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "name": "row_count_range",
                         "metric_name": "table.row_count",
+                        "metric_multi_batch_parameter_builder_name": None,
                         "metric_domain_kwargs": None,
                         "metric_value_kwargs": None,
                         "replace_nan_with_zero": True,
@@ -4259,6 +4259,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "name": "min_range",
                         "metric_name": "column.min",
+                        "metric_multi_batch_parameter_builder_name": None,
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "metric_value_kwargs": None,
                         "enforce_numeric_metric": True,
@@ -4279,6 +4280,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "name": "max_range",
                         "metric_name": "column.max",
+                        "metric_multi_batch_parameter_builder_name": None,
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "metric_value_kwargs": None,
                         "enforce_numeric_metric": True,
