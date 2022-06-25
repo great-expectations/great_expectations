@@ -88,8 +88,8 @@ The format for a structured profile is below:
             "min": [null, float, str],
             "max": [null, float, str],
             "mode": float,
-            "median", float, 
-            "median_absolute_deviation", float,
+            "median": float, 
+            "median_absolute_deviation": float,
             "sum": float,
             "mean": float,
             "variance": float,
@@ -165,6 +165,100 @@ The format for an unstructured profile is below:
     }
 }
 ```
+# Profile Statistic Descriptions
+
+### Structured Profile
+
+#### global_stats:
+
+* `samples_used` - number of input data samples used to generate this profile
+* `column_count` - the number of columns contained in the input dataset
+* `row_count` - the number of rows contained in the input dataset
+* `row_has_null_ratio` - the proportion of rows that contain at least one null value to the total number of rows
+* `row_is_null_ratio` - the proportion of rows that are fully comprised of null values (null rows) to the total number of rows
+* `unique_row_ratio` - the proportion of distinct rows in the input dataset to the total number of rows
+* `duplicate_row_count` - the number of rows that occur more than once in the input dataset
+* `file_type` - the format of the file containing the input dataset (ex: .csv)
+* `encoding` - the encoding of the file containing the input dataset (ex: UTF-8)
+* `correlation_matrix` - matrix of shape `column_count` x `column_count` containing the correlation coefficients between each column in the dataset 
+* `chi2_matrix` - matrix of shape `column_count` x `column_count` containing the chi-square statistics between each column in the dataset
+* `profile_schema` - a description of the format of the input dataset labeling each column and its index in the dataset
+    * `string` - the label of the column in question and its index in the profile schema
+* `times` - the duration of time it took to generate the global statistics for this dataset in milliseconds
+
+#### data_stats:
+
+* `column_name` - the label/title of this column in the input dataset
+* `data_type` - the primitive python data type that is contained within this column
+* `data_label` - the label/entity of the data in this column as determined by the Labeler component
+* `categorical` - ‘true’ if this column contains categorical data
+* `order` - the way in which the data in this column is ordered, if any, otherwise “random”
+* `samples` - a small subset of data entries from this column
+* `statistics` - statistical information on the column
+    * `sample_size` - number of input data samples used to generate this profile
+    * `null_count` - the number of null entries in the sample
+    * `null_types` - a list of the different null types present within this sample
+    * `null_types_index` - a dict containing each null type and a respective list of the indicies that it is present within this sample
+    * `data_type_representation` - the percentage of samples used identifying as each data_type
+    * `min` - minimum value in the sample
+    * `max` - maximum value in the sample
+    * `mode` - mode of the entries in the sample
+    * `median` - median of the entries in the sample
+    * `median_absolute_deviation` - the median absolute deviation of the entries in the sample
+    * `sum` - the total of all sampled values from the column
+    * `mean` - the average of all entries in the sample
+    * `variance` - the variance of all entries in the sample
+    * `stddev` - the standard deviation of all entries in the sample
+    * `skewness` - the statistical skewness of all entries in the sample
+    * `kurtosis` - the statistical kurtosis of all entries in the sample
+    * `num_zeros` - the number of entries in this sample that have the value 0
+    * `num_negatives` - the number of entries in this sample that have a value less than 0
+    * `histogram` - contains histogram relevant information
+        * `bin_counts` - the number of entries within each bin
+        * `bin_edges` - the thresholds of each bin
+    * `quantiles` - the value at each percentile in the order they are listed based on the entries in the sample
+    * `vocab` - a list of the characters used within the entries in this sample
+    * `avg_predictions` - average of the data label prediction confidences across all data points sampled
+    * `categories` - a list of each distinct category within the sample if `categorial` = 'true'
+    * `unique_count` - the number of distinct entries in the sample
+    * `unique_ratio` - the proportion of the number of distinct entries in the sample to the total number of entries in the sample
+    * `categorical_count` - number of entries sampled for each category if `categorical` = 'true'
+    * `gini_impurity` - measure of how often a randomly chosen element from the set would be incorrectly labeled if it was randomly labeled according to the distribution of labels in the subset
+    * `unalikeability` - a value denoting how frequently entries differ from one another within the sample
+    * `precision` - a dict of statistics with respect to the number of digits in a number for each sample
+    * `times` - the duration of time it took to generate this sample's statistics in milliseconds
+    * `format` - list of possible datetime formats
+
+### Unstructured Profile
+
+#### global_stats:
+
+* `samples_used` - number of input data samples used to generate this profile
+* `empty_line_count` - the number of empty lines in the input data
+* `file_type` - the file type of the input data (ex: .txt)
+* `encoding` - file encoding of the input data file (ex: UTF-8)
+* `memory_size` - size of the input data in MB
+* `times` - duration of time it took to generate this profile in milliseconds
+
+#### data_stats:
+
+* `data_label` - labels and statistics on the labels of the input data
+    * `entity_counts` - the number of times a specific label or entity appears inside the input data
+        * `word_level` - the number of words counted within each label or entity
+        * `true_char_level` - the number of characters counted within each label or entity as determined by the model
+        * `postprocess_char_level` - the number of characters counted within each label or entity as determined by the postprocessor
+    * `entity_percentages` - the percentages of each label or entity within the input data
+        * `word_level` - the percentage of words in the input data that are contained within each label or entity
+        * `true_char_level` - the percentage of characters in the input data that are contained within each label or entity as determined by the model
+        * `postprocess_char_level` - the percentage of characters in the input data that are contained within each label or entity as determined by the postprocessor
+    * `times` - the duration of time it took for the data labeler to predict on the data
+* `statistics` - statistics of the input data
+    * `vocab` - a list of each character in the input data
+    * `vocab_count` - the number of occurrences of each distinct character in the input data
+    * `words` - a list of each word in the input data
+    * `word_count` - the number of occurrences of each distinct word in the input data
+    * `times` - the duration of time it took to generate the vocab and words statistics in milliseconds
+
 # Support
 
 ### Supported Data Formats
@@ -405,5 +499,3 @@ Authors: Anh Truong, Austin Walters, Jeremy Goodsitt
 2020 https://arxiv.org/abs/2012.09597
 The AAAI-21 Workshop on Knowledge Discovery from Unstructured Data in Financial Services
 ```
-
-GE Integration Author: Taylor Turner ([taylorfturner](https://github.com/taylorfturner))
