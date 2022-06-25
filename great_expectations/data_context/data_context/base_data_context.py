@@ -1,8 +1,6 @@
-import configparser
 import copy
 import datetime
 import errno
-import json
 import logging
 import os
 import sys
@@ -19,9 +17,6 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.data_context.data_context.ephemeral_data_context import (
-    EphemeralDataContext,
-)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -66,6 +61,15 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.store.profiler_store import ProfilerStore
@@ -82,7 +86,6 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     GeCloudConfig,
     ProgressBarsConfig,
-    anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
@@ -128,6 +131,8 @@ except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 logger = logging.getLogger(__name__)
+
+# TODO: check if this can be refactored to use YAMLHandler class
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
@@ -255,11 +260,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
-    FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
-    GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser("~/.great_expectations/great_expectations.conf"),
-        "/etc/great_expectations.conf",
-    ]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
     TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
         "ExpectationsStore",
@@ -334,11 +334,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """DataContext constructor
 
         Args:
-            context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file \
-            based on conventions for project subdirectories.
+            context_root_dir: location to look for the ``great_expectations.yml`` file. If None, searches for the file
+                based on conventions for project subdirectories.
             runtime_environment: a dictionary of config variables that
-            override both those set in config_variables.yml and the environment
-
+                override both those set in config_variables.yml and the environment
+            ge_cloud_mode: boolean flag that describe whether DataContext is being instantiated by ge_cloud
+           ge_cloud_config: config for ge_cloud
         Returns:
             None
         """
@@ -348,15 +349,30 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
-        self._project_config = self._apply_global_config_overrides(
-            config=project_config
-        )
-
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
 
-        self.runtime_environment = runtime_environment or {}
+        if self._ge_cloud_mode:
+            self._data_context = CloudDataContext(
+                project_config=project_config,
+                runtime_environment=runtime_environment,
+                ge_cloud_config=ge_cloud_config,
+            )
+        elif self._context_root_directory:
+            self._data_context = FileDataContext(
+                project_config=project_config,
+                context_root_dir=context_root_dir,
+                runtime_environment=runtime_environment,
+            )
+        else:
+            self._data_context = EphemeralDataContext(
+                project_config=project_config, runtime_environment=runtime_environment
+            )
+
+        # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
+        self._project_config = self._data_context._project_config
+        self.runtime_environment = self._data_context.runtime_environment or {}
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -508,121 +524,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
                 pass
-
-    def _apply_global_config_overrides(
-        self, config: DataContextConfig
-    ) -> DataContextConfig:
-        # check for global usage statistics opt out
-        validation_errors = {}
-
-        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
-
-        if self._check_global_usage_statistics_opt_out():
-            logger.info(
-                "Usage statistics is disabled globally. Applying override to project_config."
-            )
-            config_with_global_config_overrides.anonymous_usage_statistics.enabled = (
-                False
-            )
-
-        # check for global data_context_id
-        global_data_context_id = self._get_global_config_value(
-            environment_variable="GE_DATA_CONTEXT_ID",
-            conf_file_section="anonymous_usage_statistics",
-            conf_file_option="data_context_id",
-        )
-        if global_data_context_id:
-            data_context_id_errors = anonymizedUsageStatisticsSchema.validate(
-                {"data_context_id": global_data_context_id}
-            )
-            if not data_context_id_errors:
-                logger.info(
-                    "data_context_id is defined globally. Applying override to project_config."
-                )
-                config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = (
-                    global_data_context_id
-                )
-            else:
-                validation_errors.update(data_context_id_errors)
-        # check for global usage_statistics url
-        global_usage_statistics_url = self._get_global_config_value(
-            environment_variable="GE_USAGE_STATISTICS_URL",
-            conf_file_section="anonymous_usage_statistics",
-            conf_file_option="usage_statistics_url",
-        )
-        if global_usage_statistics_url:
-            usage_statistics_url_errors = anonymizedUsageStatisticsSchema.validate(
-                {"usage_statistics_url": global_usage_statistics_url}
-            )
-            if not usage_statistics_url_errors:
-                logger.info(
-                    "usage_statistics_url is defined globally. Applying override to project_config."
-                )
-                config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = (
-                    global_usage_statistics_url
-                )
-            else:
-                validation_errors.update(usage_statistics_url_errors)
-        if validation_errors:
-            logger.warning(
-                "The following globally-defined config variables failed validation:\n{}\n\n"
-                "Please fix the variables if you would like to apply global values to project_config.".format(
-                    json.dumps(validation_errors, indent=2)
-                )
-            )
-        return config_with_global_config_overrides
-
-    @classmethod
-    def _get_global_config_value(
-        cls,
-        environment_variable: Optional[str] = None,
-        conf_file_section=None,
-        conf_file_option=None,
-    ) -> Optional[str]:
-        assert (conf_file_section and conf_file_option) or (
-            not conf_file_section and not conf_file_option
-        ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
-        if environment_variable and os.environ.get(environment_variable, False):
-            return os.environ.get(environment_variable)
-        if conf_file_section and conf_file_option:
-            for config_path in BaseDataContext.GLOBAL_CONFIG_PATHS:
-                config = configparser.ConfigParser()
-                config.read(config_path)
-                config_value = config.get(
-                    conf_file_section, conf_file_option, fallback=None
-                )
-                if config_value:
-                    return config_value
-        return None
-
-    @staticmethod
-    def _check_global_usage_statistics_opt_out() -> bool:
-        if os.environ.get("GE_USAGE_STATS", False):
-            ge_usage_stats = os.environ.get("GE_USAGE_STATS")
-            if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
-                return True
-            else:
-                logger.warning(
-                    "GE_USAGE_STATS environment variable must be one of: {}".format(
-                        BaseDataContext.FALSEY_STRINGS
-                    )
-                )
-        for config_path in BaseDataContext.GLOBAL_CONFIG_PATHS:
-            config = configparser.ConfigParser()
-            states = config.BOOLEAN_STATES
-            for falsey_string in BaseDataContext.FALSEY_STRINGS:
-                states[falsey_string] = False
-            states["TRUE"] = True
-            states["True"] = True
-            config.BOOLEAN_STATES = states
-            config.read(config_path)
-            try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
-                    return True
-            except (ValueError, configparser.Error):
-                pass
-        return False
 
     def _construct_data_context_id(self) -> str:
         """
@@ -1142,7 +1043,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             input value with all `$` characters replaced with the escape string
         """
-
         if isinstance(value, dict) or isinstance(value, OrderedDict):
             return {
                 k: self.escape_all_config_variables(
