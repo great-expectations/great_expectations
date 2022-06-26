@@ -60,9 +60,6 @@ class AbstractDataContext(ABC):
         self._in_memory_instance_id = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
-        # # Init stores
-        # self._stores = {}
-        # self._init_stores(self.project_config_with_variables_substituted.stores)
 
     @abstractmethod
     def _init_variables(self) -> None:
