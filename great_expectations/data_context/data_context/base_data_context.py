@@ -1,6 +1,5 @@
 import copy
 import datetime
-import errno
 import logging
 import os
 import sys
@@ -103,7 +102,6 @@ from great_expectations.data_context.util import (
     load_class,
     parse_substitution_variable,
     substitute_all_config_variables,
-    substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -370,9 +368,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 project_config=project_config, runtime_environment=runtime_environment
             )
 
-        # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
-        self._project_config = self._data_context._project_config
-        self.runtime_environment = self._data_context.runtime_environment or {}
+        # TODO: remove this method once refactor of DataContext is complete
+        self._apply_temporary_overrides()
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -435,6 +432,20 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
+
+    def _apply_temporary_overrides(self) -> None:
+        """
+        This is a helper method that only exists during the DataContext refactor that is occuring 202206.
+
+        Until the composition-pattern is complete for BaseDataContext, we have to load the private properties from the
+        private self._data_context object into properties in self
+
+        This is a helper method that performs this loading.
+        """
+        # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
+        self._project_config = self._data_context._project_config
+        self.runtime_environment = self._data_context.runtime_environment or {}
+        self._config_variables = self._data_context.config_variables
 
     def _build_store_from_config(
         self, store_name: str, store_config: dict
@@ -910,18 +921,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @property
     def instance_id(self):
-        instance_id = self._load_config_variables_file().get("instance_id")
+        instance_id = self.config_variables.get("instance_id")
         if instance_id is None:
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
             instance_id = str(uuid.uuid4())
             self._in_memory_instance_id = instance_id
         return instance_id
-
-    @property
-    def config_variables(self):
-        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
-        return dict(self._load_config_variables_file())
 
     @property
     def config(self) -> DataContextConfig:
@@ -932,39 +938,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     # Internal helper methods
     #
     #####
-
-    def _load_config_variables_file(self) -> dict:
-        """
-        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
-        have already been interpolated before being sent from the Cloud API.
-        """
-        if self.ge_cloud_mode:
-            return {}
-        config_variables_file_path = cast(
-            DataContextConfig, self.get_config()
-        ).config_variables_file_path
-        if config_variables_file_path:
-            try:
-                # If the user specifies the config variable path with an environment variable, we want to substitute it
-                defined_path = substitute_config_variable(
-                    config_variables_file_path, dict(os.environ)
-                )
-                if not os.path.isabs(defined_path):
-                    # A BaseDataContext will not have a root directory; in that case use the current directory
-                    # for any non-absolute path
-                    root_directory = self.root_directory or os.curdir
-                else:
-                    root_directory = ""
-                var_path = os.path.join(root_directory, defined_path)
-                with open(var_path) as config_variables_file:
-                    return yaml.load(config_variables_file) or {}
-            except OSError as e:
-                if e.errno != errno.ENOENT:
-                    raise
-                logger.debug("Generating empty config variables file.")
-                return {}
-        else:
-            return {}
 
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
@@ -1004,27 +977,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
             )
         )
-
-    def _determine_substitutions(self) -> dict:
-        """Aggregates substitutions from the project's config variables file, any environment variables, and
-        the runtime environment.
-
-        Returns: A dictionary containing all possible substitutions that can be applied to a given object
-                 using `substitute_all_config_variables`.
-        """
-        substituted_config_variables: dict = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-
-        substitutions = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
-
-        return substitutions
 
     def escape_all_config_variables(
         self,
@@ -1083,7 +1035,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        config_variables = self._load_config_variables_file()
+        config_variables = self.config_variables
         value = self.escape_all_config_variables(
             value,
             self.DOLLAR_SIGN_ESCAPE_STRING,
@@ -1907,6 +1859,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
+
+        self._data_context._update_config_variables()
+        self._apply_temporary_overrides()
+
         self._datasource_store.set_by_name(
             datasource_name=name, datasource_config=datasource_config
         )
