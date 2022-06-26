@@ -1,17 +1,24 @@
 import configparser
 import copy
+import errno
 import json
 import logging
 import os
 from abc import ABC, abstractmethod
-from typing import Mapping, Optional, Union
+from typing import Dict, Mapping, Optional, Union, cast
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     anonymizedUsageStatisticsSchema,
 )
+from great_expectations.data_context.util import (
+    substitute_all_config_variables,
+    substitute_config_variable,
+)
 
 logger = logging.getLogger(__name__)
+yaml = YAMLHandler()
 
 
 class AbstractDataContext(ABC):
@@ -27,6 +34,7 @@ class AbstractDataContext(ABC):
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
+    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     def __init__(self, runtime_environment: dict):
         """
@@ -37,6 +45,9 @@ class AbstractDataContext(ABC):
                 override both those set in config_variables.yml and the environment
         """
         self.runtime_environment = runtime_environment
+        # these attributes that are set downstream.
+        self._config_variables = None
+        self._project_config = None
 
     @abstractmethod
     def _init_variables(self) -> None:
@@ -112,6 +123,42 @@ class AbstractDataContext(ABC):
             )
 
         return config_with_global_config_overrides
+
+    def _load_config_variables(self) -> Dict:
+        """
+        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
+        have already been interpolated before being sent from the Cloud API.
+
+        """
+        config_variables_file_path: str = cast(
+            DataContextConfig, self._project_config
+        ).config_variables_file_path
+        if config_variables_file_path:
+            try:
+                # If the user specifies the config variable path with an environment variable, we want to substitute it
+                defined_path: str = substitute_config_variable(
+                    config_variables_file_path, dict(os.environ)
+                )
+                if not os.path.isabs(defined_path) and hasattr(self, "root_directory"):
+                    # A BaseDataContext will not have a root directory; in that case use the current directory
+                    # for any non-absolute path
+                    root_directory: str = self.root_directory or os.curdir
+                else:
+                    root_directory: str = ""
+                var_path = os.path.join(root_directory, defined_path)
+                with open(var_path) as config_variables_file:
+                    res = dict(
+                        yaml.load(config_variables_file)
+                    )  # TODO this is returning TextIO directly. Adjust to return
+                    # TextIOWrapper or str
+                    return res or {}
+            except OSError as e:
+                if e.errno != errno.ENOENT:
+                    raise
+                logger.debug("Generating empty config variables file.")
+                return {}
+        else:
+            return {}
 
     @staticmethod
     def _get_global_config_value(
@@ -208,3 +255,41 @@ class AbstractDataContext(ABC):
             conf_file_section="anonymous_usage_statistics",
             conf_file_option="usage_statistics_url",
         )
+
+    # properties
+    @property
+    def config_variables(self) -> Dict:
+        """Loads config variables into cache, by calling _load_config_variables()
+
+        Returns: A dictionary containing config_variables from file or empty dictionary.
+        """
+        if not self._config_variables:
+            self._config_variables = self._load_config_variables()
+        return self._config_variables
+
+    def _update_config_variables(self) -> None:
+        """Updates config_variables cache by re-calling _load_config_variables(). Necessary after running methods that modify config
+        AND could contain config_variables for credentials (example is add_datasource())
+        """
+        self._config_variables = self._load_config_variables()
+
+    def _determine_substitutions(self) -> dict:
+        """Aggregates substitutions from the project's config variables file, any environment variables, and
+        the runtime environment.
+
+        Returns: A dictionary containing all possible substitutions that can be applied to a given object
+                 using `substitute_all_config_variables`.
+        """
+        substituted_config_variables: dict = substitute_all_config_variables(
+            self.config_variables,
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
+        return substitutions
