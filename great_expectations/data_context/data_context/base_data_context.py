@@ -354,6 +354,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._data_context = CloudDataContext(
                 project_config=project_config,
                 runtime_environment=runtime_environment,
+                context_root_dir=context_root_dir,
                 ge_cloud_config=ge_cloud_config,
             )
         elif self._context_root_directory:

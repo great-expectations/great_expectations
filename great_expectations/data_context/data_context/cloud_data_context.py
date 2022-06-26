@@ -26,6 +26,7 @@ class CloudDataContext(AbstractDataContext):
     def __init__(
         self,
         project_config: Union[DataContextConfig, Mapping],
+        context_root_dir: str,
         runtime_environment: dict,
         ge_cloud_config: GeCloudConfig,
     ) -> None:
@@ -40,6 +41,7 @@ class CloudDataContext(AbstractDataContext):
         """
         self._ge_cloud_mode = True  # property needed for backward compatibility
         self._ge_cloud_config = ge_cloud_config
+        self._context_root_directory = context_root_dir
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )

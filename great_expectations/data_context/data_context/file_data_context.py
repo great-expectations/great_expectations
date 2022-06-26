@@ -23,8 +23,8 @@ class FileDataContext(AbstractDataContext):
     def __init__(
         self,
         project_config: Union[DataContextConfig, Mapping],
-        context_root_dir: Optional[str] = None,
-        runtime_environment: Optional[dict] = None,
+        context_root_dir: str,
+        runtime_environment: dict,
     ) -> None:
         """FileDataContext constructor
 
