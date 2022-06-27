@@ -4,7 +4,7 @@
 name: StaleBot
 
 on:
-  workflow_dispatch:  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idsecretsinherit
+  workflow_dispatch:  # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#defining-inputs-for-manually-triggered-workflows
   schedule:
     - cron: '30 1 * * *'
 
