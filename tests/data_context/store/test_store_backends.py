@@ -16,6 +16,9 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.data_context import BaseDataContext
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.data_context.store import (
     GeCloudStoreBackend,
     InMemoryStoreBackend,
@@ -31,9 +34,6 @@ from great_expectations.data_context.store.inline_store_backend import (
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
-)
-from great_expectations.data_context.types.data_context_variables import (
-    DataContextVariableSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,

@@ -4,6 +4,13 @@ from unittest import mock
 import pytest
 
 from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.data_context_variables import (
+    CloudDataContextVariables,
+    DataContextVariables,
+    DataContextVariableSchema,
+    EphemeralDataContextVariables,
+    FileDataContextVariables,
+)
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     ConcurrencyConfig,
@@ -12,13 +19,6 @@ from great_expectations.data_context.types.base import (
     NotebookTemplateConfig,
     ProgressBarsConfig,
     dataContextConfigSchema,
-)
-from great_expectations.data_context.types.data_context_variables import (
-    CloudDataContextVariables,
-    DataContextVariables,
-    DataContextVariableSchema,
-    EphemeralDataContextVariables,
-    FileDataContextVariables,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,

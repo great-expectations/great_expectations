@@ -4,11 +4,11 @@ import pytest
 
 from great_expectations.core.data_context_key import DataContextVariableKey, StringKey
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.store.datasource_store import DatasourceStore
-from great_expectations.data_context.types.base import DatasourceConfig
-from great_expectations.data_context.types.data_context_variables import (
+from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
+from great_expectations.data_context.store.datasource_store import DatasourceStore
+from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
