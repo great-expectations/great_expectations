@@ -2749,8 +2749,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             total_data_assets = len(available_data_asset_name_list)
             if not dry_run:
                 logger.info(
-                    "Profiling the white-listed data assets: %s, alphabetically."
-                    % (",".join(data_assets))
+                    f"Profiling the white-listed data assets: {','.join(data_assets)}, alphabetically."
                 )
         else:
             if not profile_all_data_assets:
@@ -2770,13 +2769,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             ]
         if not dry_run:
             logger.info(
-                "Profiling all %d data assets from batch kwargs generator %s"
-                % (len(available_data_asset_name_list), batch_kwargs_generator_name)
+                f"Profiling all {len(available_data_asset_name_list)} data assets from batch kwargs generator {batch_kwargs_generator_name}"
             )
         else:
             logger.info(
-                "Found %d data assets from batch kwargs generator %s"
-                % (len(available_data_asset_name_list), batch_kwargs_generator_name)
+                f"Found {len(available_data_asset_name_list)} data assets from batch kwargs generator {batch_kwargs_generator_name}"
             )
 
         profiling_results["success"] = True
@@ -2812,8 +2809,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     logger.warning(err.message)
                 except OSError as err:
                     logger.warning(
-                        "IOError while profiling %s. (Perhaps a loading error?) Skipping."
-                        % name[1]
+                        f"IOError while profiling {name[1]}. (Perhaps a loading error?) Skipping."
                     )
                     logger.debug(str(err))
                     skipped_data_assets += 1
@@ -2828,21 +2824,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 datetime.datetime.now() - total_start_time
             ).total_seconds()
             logger.info(
-                """
-    Profiled %d of %d named data assets, with %d total rows and %d columns in %.2f seconds.
-    Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs."""
-                % (
-                    len(data_asset_names_to_profiled),
-                    total_data_assets,
-                    total_rows,
-                    total_columns,
-                    total_duration,
-                    total_expectations,
-                )
+                f"""
+    Profiled {len(data_asset_names_to_profiled)} of {total_data_assets} named data assets, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
+    Generated, evaluated, and stored {total_expectations} Expectations during profiling. Please review results using data-docs."""
             )
             if skipped_data_assets > 0:
                 logger.warning(
-                    "Skipped %d data assets due to errors." % skipped_data_assets
+                    f"Skipped {skipped_data_assets} data assets due to errors."
                 )
 
         profiling_results["success"] = True
@@ -2977,8 +2965,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         if not profiler.validate(batch):
             raise ge_exceptions.ProfilerError(
-                "batch '%s' is not a valid batch for the '%s' profiler"
-                % (name, profiler.__name__)
+                f"batch '{name}' is not a valid batch for the '{profiler.__name__}' profiler"
             )
 
         # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
@@ -3023,21 +3010,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         duration = (datetime.datetime.now() - start_time).total_seconds()
         # noinspection PyUnboundLocalVariable
         logger.info(
-            "\tProfiled %d columns using %d rows from %s (%.3f sec)"
-            % (new_column_count, row_count, name, duration)
+            f"\tProfiled {new_column_count} columns using {row_count} rows from {name} ({duration:.3f} sec)"
         )
 
         total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
         logger.info(
-            """
-Profiled the data asset, with %d total rows and %d columns in %.2f seconds.
-Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs."""
-            % (
-                total_rows,
-                total_columns,
-                total_duration,
-                total_expectations,
-            )
+            f"""
+Profiled the data asset, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
+Generated, evaluated, and stored {total_expectations} Expectations during profiling. Please review results using data-docs."""
         )
 
         profiling_results["success"] = True
