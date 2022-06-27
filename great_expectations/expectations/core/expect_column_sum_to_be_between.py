@@ -105,6 +105,7 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="column_sum_range_estimator",
         metric_name="column.sum",
+        metric_multi_batch_parameter_builder_name=None,
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,

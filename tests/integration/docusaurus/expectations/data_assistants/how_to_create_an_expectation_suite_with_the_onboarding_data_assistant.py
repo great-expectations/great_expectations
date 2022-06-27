@@ -16,9 +16,6 @@ import great_expectations as ge
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
-)
 
 yaml = YAMLHandler()
 
@@ -110,7 +107,7 @@ exclude_column_names = [
 # </snippet>
 
 # <snippet>
-onboarding_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+result = context.assistants.onboarding.run(
     batch_request=multi_batch_all_years_batch_request,
     # include_column_names=include_column_names,
     exclude_column_names=exclude_column_names,
@@ -166,7 +163,7 @@ validator = context.get_validator(
 # Save your Expectation Suite
 
 # <snippet>
-validator.expectation_suite = onboarding_assistant_result.get_expectation_suite(
+validator.expectation_suite = result.get_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )
 # </snippet>
