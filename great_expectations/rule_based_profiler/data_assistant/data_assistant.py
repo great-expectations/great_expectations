@@ -76,7 +76,7 @@ class MetaDataAssistant(ABCMeta):
             )
 
             # noinspection PyTypeChecker
-            DataAssistantDispatcher.register_data_assistant(data_assistant=newclass)
+            DataAssistantDispatcher._register_data_assistant(data_assistant=newclass)
 
         return newclass
 
@@ -378,7 +378,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     def __init__(
         self,
         name: str,
-        validator: Validator,
+        validator: Optional[Validator],
     ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
@@ -395,9 +395,12 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._validator = validator
 
-        self._batches = self._validator.batches
-
-        self._data_context = self._validator.data_context
+        if validator is None:
+            self._data_context = None
+            self._batches = None
+        else:
+            self._data_context = self._validator.data_context
+            self._batches = self._validator.batches
 
         variables: Optional[Dict[str, Any]] = self.get_variables() or {}
         self._profiler = RuleBasedProfiler(
@@ -650,6 +653,8 @@ def run_profiler_on_data(
     )
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
+    result.profiler_execution_time = rule_based_profiler_result.execution_time
+    result.rule_execution_time = rule_based_profiler_result.rule_execution_time
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
     result.expectation_configurations = (
         rule_based_profiler_result.expectation_configurations

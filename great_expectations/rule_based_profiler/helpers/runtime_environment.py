@@ -22,7 +22,13 @@ class RuntimeEnvironmentColumnDomainTypeDirectivesKeys(Enum):  # isort:skip
     EXCLUDE_COLUMN_NAME_SUFFIXES = "exclude_column_name_suffixes"
     INCLUDE_SEMANTIC_TYPES = "include_semantic_types"
     EXCLUDE_SEMANTIC_TYPES = "exclude_semantic_types"
+    ALLOWED_SEMANTIC_TYPES_PASSTHROUGH = "allowed_semantic_types_passthrough"
     CARDINALITY_LIMIT_MODE = "cardinality_limit_mode"
+    MAX_UNIQUE_VALUES = "max_unique_values"
+    MAX_PROPORTION_UNIQUE = "max_proportion_unique"
+    MAX_UNEXPECTED_VALUES = "max_unexpected_values"
+    MAX_UNEXPECTED_RATIO = "max_unexpected_ratio"
+    MIN_MAX_UNEXPECTED_VALUES_PROPORTION = "min_max_unexpected_values_proportion"
 
 
 class RuntimeEnvironmentColumnPairDomainTypeDirectivesKeys(Enum):  # isort:skip
