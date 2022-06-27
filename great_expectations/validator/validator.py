@@ -49,6 +49,7 @@ from great_expectations.expectations.registry import (
     list_registered_expectation_implementations,
 )
 from great_expectations.marshmallow__shade import ValidationError
+from great_expectations.render.renderer import InlineRenderer
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -976,11 +977,19 @@ class Validator:
         result: ExpectationValidationResult
         for configuration in processed_configurations:
             try:
+                configuration_inline_renderer: InlineRenderer = InlineRenderer(
+                    render_object=configuration
+                )
+                configuration_inline_renderer.render()
                 result = configuration.metrics_validate(
                     metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
                 )
+                result_inline_renderer: InlineRenderer = InlineRenderer(
+                    render_object=result
+                )
+                result_inline_renderer.render()
                 evrs.append(result)
             except Exception as err:
                 if catch_exceptions:
