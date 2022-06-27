@@ -15,8 +15,9 @@ from great_expectations.core.util import (
     ensure_json_serializable,
     in_jupyter_notebook,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.render.renderer import InlineRenderer
 from great_expectations.render.types import RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 
@@ -70,6 +71,24 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
+        inline_renderer = {
+            "class_name": "InlineRenderer",
+            "render_object": self,
+        }
+        module_name = "great_expectations.render.renderer.inline_renderer"
+        self._inline_renderer = instantiate_class_from_config(
+            config=inline_renderer,
+            runtime_environment={},
+            config_defaults={
+                "module_name": inline_renderer.get("module_name", module_name)
+            },
+        )
+        if not self._inline_renderer:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=inline_renderer["class_name"],
+            )
         if rendered_content is None:
             rendered_content = {}
         self.rendered_content = rendered_content
@@ -195,9 +214,7 @@ class ExpectationValidationResult(SerializableDictDot):
         If an atomic renderer is defined, only atomic renderers will be returned.
         Otherwise, only legacy renderers will be returned.
         """
-        inline_renderer: InlineRenderer = InlineRenderer(render_object=self)
-
-        self.rendered_content = inline_renderer.render()
+        self.rendered_content = self._inline_renderer.render()
 
     @staticmethod
     def validate_result_dict(result):
