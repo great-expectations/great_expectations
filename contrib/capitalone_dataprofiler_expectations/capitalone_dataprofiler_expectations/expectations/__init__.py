@@ -6,3 +6,12 @@ from .expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal
 from .expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold import (
     ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold,
 )
+from .expect_column_values_confidence_for_data_label_to_be_less_than_or_equal_to_threshold import (
+    ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold
+)
+from .expect_column_values_to_be_equal_to_or_greater_than_profile_min import (
+    ExpectColumnValuesToBeEqualToOrGreaterThanProfileMin
+)
+from .expect_column_values_to_be_equal_to_or_less_than_profile_max import (
+    ExpectColumnValuesToBeEqualToOrLessThanProfileMax
+)
