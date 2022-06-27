@@ -359,7 +359,7 @@ class AbstractDataContext(ABC):
         }
 
         return substitutions
-      
+
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
     ) -> DataContextConfig:
