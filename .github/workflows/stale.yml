@@ -3,7 +3,8 @@
 
 name: StaleBot
 
-on:
+on:  # yamllint disable-line rule:truthy
+  workflow_dispatch:  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idsecretsinherit
   schedule:
     - cron: '30 1 * * *'
 
@@ -15,7 +16,7 @@ jobs:
       ACTIONS_STEP_DEBUG: true  # DEBUG: toggle to false
 
     steps:
-    - uses: actions/stale@v5
+    - uses: actions/stale@v5   # yamllint disable-line rule:indentation
       with:
         # Debug
         debug-only: true  # DEBUG: Toggle to false
@@ -24,9 +25,9 @@ jobs:
         # General
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         days-before-stale: 30
-        days-before-close: 7  # Days after being marked stale until close, updates impact this
-        days-before-pr-stale: -1  # NIT: Disable auto flag PR. toggled until team meeting
-        days-before-pr-close: -1  # NIT: Disable auto-close for PR. toggled until team meeting.
+        days-before-close: 7
+        days-before-pr-stale: -1
+        days-before-pr-close: -1
 
         # Scope
         only-pr-labels: community
