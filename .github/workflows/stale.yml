@@ -3,7 +3,7 @@
 
 name: StaleBot
 
-on:  # yamllint disable-line rule:truthy
+on:
   workflow_dispatch:  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idsecretsinherit
   schedule:
     - cron: '30 1 * * *'
@@ -16,7 +16,7 @@ jobs:
       ACTIONS_STEP_DEBUG: true  # DEBUG: toggle to false
 
     steps:
-    - uses: actions/stale@v5   # yamllint disable-line rule:indentation
+    - uses: actions/stale@v5
       with:
         # Debug
         debug-only: true  # DEBUG: Toggle to false
