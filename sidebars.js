@@ -129,7 +129,8 @@ module.exports = {
             'guides/connecting_to_your_data/database/postgres',
             'guides/connecting_to_your_data/database/redshift',
             'guides/connecting_to_your_data/database/snowflake',
-            'guides/connecting_to_your_data/database/sqlite'
+            'guides/connecting_to_your_data/database/sqlite',
+            'guides/connecting_to_your_data/database/trino'
           ]
         },
         {
