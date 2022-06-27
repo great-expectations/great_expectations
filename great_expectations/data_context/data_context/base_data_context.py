@@ -69,9 +69,6 @@ from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.store import Store, TupleStoreBackend
-from great_expectations.data_context.store.expectations_store import ExpectationsStore
-from great_expectations.data_context.store.profiler_store import ProfilerStore
-from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
@@ -258,52 +255,52 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     GE_YML = "great_expectations.yml"
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
-    TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
-        "ExpectationsStore",
-        "ValidationsStore",
-        "HtmlSiteStore",
-        "EvaluationParameterStore",
-        "MetricStore",
-        "SqlAlchemyQueryStore",
-        "CheckpointStore",
-        "ProfilerStore",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES = [
-        "Datasource",
-        "SimpleSqlalchemyDatasource",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES = [
-        "InferredAssetFilesystemDataConnector",
-        "ConfiguredAssetFilesystemDataConnector",
-        "InferredAssetS3DataConnector",
-        "ConfiguredAssetS3DataConnector",
-        "InferredAssetAzureDataConnector",
-        "ConfiguredAssetAzureDataConnector",
-        "InferredAssetGCSDataConnector",
-        "ConfiguredAssetGCSDataConnector",
-        "InferredAssetSqlDataConnector",
-        "ConfiguredAssetSqlDataConnector",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
-        "Checkpoint",
-        "SimpleCheckpoint",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
-        "RuleBasedProfiler",
-    ]
-    ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
-        "__substitution_error__",
-        "__yaml_parse_error__",
-        "__custom_subclass_not_core_ge__",
-        "__class_name_not_provided__",
-    ]
-    ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES = (
-        TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
-    )
+    # TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
+    #     "ExpectationsStore",
+    #     "ValidationsStore",
+    #     "HtmlSiteStore",
+    #     "EvaluationParameterStore",
+    #     "MetricStore",
+    #     "SqlAlchemyQueryStore",
+    #     "CheckpointStore",
+    #     "ProfilerStore",
+    # ]
+    # TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES = [
+    #     "Datasource",
+    #     "SimpleSqlalchemyDatasource",
+    # ]
+    # TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES = [
+    #     "InferredAssetFilesystemDataConnector",
+    #     "ConfiguredAssetFilesystemDataConnector",
+    #     "InferredAssetS3DataConnector",
+    #     "ConfiguredAssetS3DataConnector",
+    #     "InferredAssetAzureDataConnector",
+    #     "ConfiguredAssetAzureDataConnector",
+    #     "InferredAssetGCSDataConnector",
+    #     "ConfiguredAssetGCSDataConnector",
+    #     "InferredAssetSqlDataConnector",
+    #     "ConfiguredAssetSqlDataConnector",
+    # ]
+    # TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
+    #     "Checkpoint",
+    #     "SimpleCheckpoint",
+    # ]
+    # TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
+    #     "RuleBasedProfiler",
+    # ]
+    # ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
+    #     "__substitution_error__",
+    #     "__yaml_parse_error__",
+    #     "__custom_subclass_not_core_ge__",
+    #     "__class_name_not_provided__",
+    # ]
+    # ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES = (
+    #     TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
+    #     + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
+    #     + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
+    #     + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
+    #     + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
+    # )
 
     _data_context = None
 
@@ -371,10 +368,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # TODO: remove this method once refactor of DataContext is complete
         self._apply_temporary_overrides()
 
-        # Init stores
-        self._stores = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
-
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
 
@@ -436,81 +429,82 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self.runtime_environment = self._data_context.runtime_environment or {}
         self._config_variables = self._data_context.config_variables
         self._in_memory_instance_id = self._data_context._in_memory_instance_id
+        self._stores = self._data_context._stores
 
-    def _build_store_from_config(
-        self, store_name: str, store_config: dict
-    ) -> Optional[Store]:
-        module_name = "great_expectations.data_context.store"
-        # Set expectations_store.store_backend_id to the data_context_id from the project_config if
-        # the expectations_store does not yet exist by:
-        # adding the data_context_id from the project_config
-        # to the store_config under the key manually_initialize_store_backend_id
-        if (store_name == self.expectations_store_name) and store_config.get(
-            "store_backend"
-        ):
-            store_config["store_backend"].update(
-                {
-                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-                }
-            )
+    # def _build_store_from_config(
+    #     self, store_name: str, store_config: dict
+    # ) -> Optional[Store]:
+    #     module_name = "great_expectations.data_context.store"
+    #     # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+    #     # the expectations_store does not yet exist by:
+    #     # adding the data_context_id from the project_config
+    #     # to the store_config under the key manually_initialize_store_backend_id
+    #     if (store_name == self.expectations_store_name) and store_config.get(
+    #         "store_backend"
+    #     ):
+    #         store_config["store_backend"].update(
+    #             {
+    #                 "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+    #             }
+    #         )
+    #
+    #     # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+    #     if (
+    #         store_name not in [store["name"] for store in self.list_active_stores()]
+    #         and store_config.get("store_backend") is not None
+    #     ):
+    #         store_config["store_backend"].update({"suppress_store_backend_id": True})
+    #
+    #     new_store = build_store_from_config(
+    #         store_name=store_name,
+    #         store_config=store_config,
+    #         module_name=module_name,
+    #         runtime_environment={
+    #             "root_directory": self.root_directory,
+    #         },
+    #     )
+    #     self._stores[store_name] = new_store
+    #     return new_store
 
-        # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
-        if (
-            store_name not in [store["name"] for store in self.list_active_stores()]
-            and store_config.get("store_backend") is not None
-        ):
-            store_config["store_backend"].update({"suppress_store_backend_id": True})
+    # def _init_stores(self, store_configs: Dict[str, dict]) -> None:
+    #     """Initialize all Stores for this DataContext.
+    #
+    #     Stores are a good fit for reading/writing objects that:
+    #         1. follow a clear key-value pattern, and
+    #         2. are usually edited programmatically, using the Context
+    #
+    #     Note that stores do NOT manage plugins.
+    #     """
+    #     for store_name, store_config in store_configs.items():
+    #         self._build_store_from_config(store_name, store_config)
+    #
+    #     # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
+    #     # As such, it must be instantiated separately.
+    #     self._init_datasource_store()
 
-        new_store = build_store_from_config(
-            store_name=store_name,
-            store_config=store_config,
-            module_name=module_name,
-            runtime_environment={
-                "root_directory": self.root_directory,
-            },
-        )
-        self._stores[store_name] = new_store
-        return new_store
-
-    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
-        """Initialize all Stores for this DataContext.
-
-        Stores are a good fit for reading/writing objects that:
-            1. follow a clear key-value pattern, and
-            2. are usually edited programmatically, using the Context
-
-        Note that stores do NOT manage plugins.
-        """
-        for store_name, store_config in store_configs.items():
-            self._build_store_from_config(store_name, store_config)
-
-        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
-        # As such, it must be instantiated separately.
-        self._init_datasource_store()
-
-    def _init_datasource_store(self) -> None:
-        """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
-
-        Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default
-        implementation is provided based on the user's environment but is not customizable.
-        """
-        from great_expectations.data_context.store.datasource_store import (
-            DatasourceStore,
-        )
-
-        store_name: str = "datasource_store"  # Never explicitly referenced but adheres to the convention set by other internal Stores
-        store_backend: dict = {"class_name": "InlineStoreBackend"}
-        runtime_environment: dict = {
-            "root_directory": self.root_directory,
-            "data_context": self,  # By passing this value in our runtime_environment, we ensure that the same exact context (memory address and all) is supplied to the Store backend
-        }
-
-        datasource_store: DatasourceStore = DatasourceStore(
-            store_name=store_name,
-            store_backend=store_backend,
-            runtime_environment=runtime_environment,
-        )
-        self._datasource_store = datasource_store
+    # def _init_datasource_store(self) -> None:
+    #     """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
+    #
+    #     Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default
+    #     implementation is provided based on the user's environment but is not customizable.
+    #     """
+    #     from great_expectations.data_context.store.datasource_store import (
+    #         DatasourceStore,
+    #     )
+    #
+    #     store_name: str = "datasource_store"  # Never explicitly referenced but adheres to the convention set by other internal Stores
+    #     store_backend: dict = {"class_name": "InlineStoreBackend"}
+    #     runtime_environment: dict = {
+    #         "root_directory": self.root_directory,
+    #         "data_context": self,  # By passing this value in our runtime_environment, we ensure that the same exact context (memory address and all) is supplied to the Store backend
+    #     }
+    #
+    #     datasource_store: DatasourceStore = DatasourceStore(
+    #         store_name=store_name,
+    #         store_backend=store_backend,
+    #         runtime_environment=runtime_environment,
+    #     )
+    #     self._datasource_store = datasource_store
 
     def _init_datasources(self) -> None:
         for datasource_name in self._datasource_store.list_keys():
@@ -784,114 +778,114 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def notebooks(self):
         return self.project_config_with_variables_substituted.notebooks
 
-    @property
-    def stores(self):
-        """A single holder for all Stores in this context"""
-        return self._stores
+    # @property
+    # def stores(self):
+    #     """A single holder for all Stores in this context"""
+    #     return self._stores
 
     @property
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
 
-    @property
-    def checkpoint_store_name(self):
-        try:
-            return self.project_config_with_variables_substituted.checkpoint_store_name
-        except AttributeError:
-            from great_expectations.data_context.store.checkpoint_store import (
-                CheckpointStore,
-            )
+    # @property
+    # def checkpoint_store_name(self):
+    #     try:
+    #         return self.project_config_with_variables_substituted.checkpoint_store_name
+    #     except AttributeError:
+    #         from great_expectations.data_context.store.checkpoint_store import (
+    #             CheckpointStore,
+    #         )
+    #
+    #         if CheckpointStore.default_checkpoints_exist(
+    #             directory_path=self.root_directory
+    #         ):
+    #             return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+    #         if self.root_directory:
+    #             error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+    #         else:
+    #             error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create a `checkpoints` directory in your Great Expectations project " f"directory.\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+    #         raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
+    #
+    # @property
+    # def checkpoint_store(self) -> "CheckpointStore":  # noqa: F821
+    #     checkpoint_store_name: str = self.checkpoint_store_name
+    #     try:
+    #         return self.stores[checkpoint_store_name]
+    #     except KeyError:
+    #         from great_expectations.data_context.store.checkpoint_store import (
+    #             CheckpointStore,
+    #         )
+    #
+    #         if CheckpointStore.default_checkpoints_exist(
+    #             directory_path=self.root_directory
+    #         ):
+    #             logger.warning(
+    #                 f'Checkpoint store named "{checkpoint_store_name}" is not a configured store, so will try to use default Checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+    #             )
+    #             return self._build_store_from_config(
+    #                 checkpoint_store_name,
+    #                 DataContextConfigDefaults.DEFAULT_STORES.value[
+    #                     checkpoint_store_name
+    #                 ],
+    #             )
+    #         raise ge_exceptions.StoreConfigurationError(
+    #             f'Attempted to access the Checkpoint store named "{checkpoint_store_name}", which is not a configured store.'
+    #         )
+    #
+    # @property
+    # def profiler_store_name(self) -> str:
+    #     try:
+    #         return self.project_config_with_variables_substituted.profiler_store_name
+    #     except AttributeError:
+    #         if BaseDataContext._default_profilers_exist(
+    #             directory_path=self.root_directory
+    #         ):
+    #             return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
+    #         if self.root_directory:
+    #             error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+    #         else:
+    #             error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create a `profilers` directory in your Great Expectations project " f"directory.\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+    #         raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
-            if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory
-            ):
-                return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-            if self.root_directory:
-                error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-            else:
-                error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create a `checkpoints` directory in your Great Expectations project " f"directory.\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-            raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
+    # @property
+    # def profiler_store(self) -> ProfilerStore:
+    #     profiler_store_name: str = self.profiler_store_name
+    #     try:
+    #         return self.stores[profiler_store_name]
+    #     except KeyError:
+    #         if BaseDataContext._default_profilers_exist(
+    #             directory_path=self.root_directory
+    #         ):
+    #             logger.warning(
+    #                 f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+    #             )
+    #             return self._build_store_from_config(
+    #                 profiler_store_name,
+    #                 DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],
+    #             )
+    #         raise ge_exceptions.StoreConfigurationError(
+    #             f'Attempted to access the Profiler store named "{profiler_store_name}", which is not a configured store.'
+    #         )
 
-    @property
-    def checkpoint_store(self) -> "CheckpointStore":  # noqa: F821
-        checkpoint_store_name: str = self.checkpoint_store_name
-        try:
-            return self.stores[checkpoint_store_name]
-        except KeyError:
-            from great_expectations.data_context.store.checkpoint_store import (
-                CheckpointStore,
-            )
+    # @staticmethod
+    # def _default_profilers_exist(directory_path: Optional[str]) -> bool:
+    #     if not directory_path:
+    #         return False
+    #
+    #     profiler_directory_path: str = os.path.join(
+    #         directory_path,
+    #         DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
+    #     )
+    #     return os.path.isdir(profiler_directory_path)
 
-            if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory
-            ):
-                logger.warning(
-                    f'Checkpoint store named "{checkpoint_store_name}" is not a configured store, so will try to use default Checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-                )
-                return self._build_store_from_config(
-                    checkpoint_store_name,
-                    DataContextConfigDefaults.DEFAULT_STORES.value[
-                        checkpoint_store_name
-                    ],
-                )
-            raise ge_exceptions.StoreConfigurationError(
-                f'Attempted to access the Checkpoint store named "{checkpoint_store_name}", which is not a configured store.'
-            )
-
-    @property
-    def profiler_store_name(self) -> str:
-        try:
-            return self.project_config_with_variables_substituted.profiler_store_name
-        except AttributeError:
-            if BaseDataContext._default_profilers_exist(
-                directory_path=self.root_directory
-            ):
-                return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
-            if self.root_directory:
-                error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-            else:
-                error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create a `profilers` directory in your Great Expectations project " f"directory.\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-            raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
-
-    @property
-    def profiler_store(self) -> ProfilerStore:
-        profiler_store_name: str = self.profiler_store_name
-        try:
-            return self.stores[profiler_store_name]
-        except KeyError:
-            if BaseDataContext._default_profilers_exist(
-                directory_path=self.root_directory
-            ):
-                logger.warning(
-                    f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-                )
-                return self._build_store_from_config(
-                    profiler_store_name,
-                    DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],
-                )
-            raise ge_exceptions.StoreConfigurationError(
-                f'Attempted to access the Profiler store named "{profiler_store_name}", which is not a configured store.'
-            )
-
-    @staticmethod
-    def _default_profilers_exist(directory_path: Optional[str]) -> bool:
-        if not directory_path:
-            return False
-
-        profiler_directory_path: str = os.path.join(
-            directory_path,
-            DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
-        )
-        return os.path.isdir(profiler_directory_path)
-
-    @property
-    def expectations_store_name(self) -> Optional[str]:
-        return self.project_config_with_variables_substituted.expectations_store_name
-
-    @property
-    def expectations_store(self) -> ExpectationsStore:
-        return self.stores[self.expectations_store_name]
+    # @property
+    # def expectations_store_name(self) -> Optional[str]:
+    #     return self.project_config_with_variables_substituted.expectations_store_name
+    #
+    # @property
+    # def expectations_store(self) -> ExpectationsStore:
+    #     return self.stores[self.expectations_store_name]
 
     @property
     def data_context_id(self):
@@ -909,44 +903,44 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     #
     #####
 
-    def get_config_with_variables_substituted(
-        self, config: Optional[DataContextConfig] = None
-    ) -> DataContextConfig:
-        """
-        Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
-        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
-        be optional in GE Cloud mode).
-        """
-        if not config:
-            config = self.config
-
-        substitutions: dict = self._determine_substitutions()
-
-        if self.ge_cloud_mode:
-            ge_cloud_config_variable_defaults = {
-                "plugins_directory": self._normalize_absolute_or_relative_path(
-                    DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
-                ),
-                "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
-            }
-            for config_variable, value in ge_cloud_config_variable_defaults.items():
-                if substitutions.get(config_variable) is None:
-                    logger.info(
-                        f'Config variable "{config_variable}" was not found in environment or global config ('
-                        f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
-                        f"like to "
-                        f"use a different value, please specify it in an environment variable or in a "
-                        f"great_expectations.conf file located at one of the above paths, in a section named "
-                        f'"ge_cloud_config".'
-                    )
-                    substitutions[config_variable] = value
-
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
+    # def get_config_with_variables_substituted(
+    #     self, config: Optional[DataContextConfig] = None
+    # ) -> DataContextConfig:
+    #     """
+    #     Substitute vars in config of form ${var} or $(var) with values found in the following places,
+    #     in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+    #     environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+    #     be optional in GE Cloud mode).
+    #     """
+    #     if not config:
+    #         config = self.config
+    #
+    #     substitutions: dict = self._determine_substitutions()
+    #
+    #     if self.ge_cloud_mode:
+    #         ge_cloud_config_variable_defaults = {
+    #             "plugins_directory": self._normalize_absolute_or_relative_path(
+    #                 DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
+    #             ),
+    #             "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
+    #         }
+    #         for config_variable, value in ge_cloud_config_variable_defaults.items():
+    #             if substitutions.get(config_variable) is None:
+    #                 logger.info(
+    #                     f'Config variable "{config_variable}" was not found in environment or global config ('
+    #                     f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
+    #                     f"like to "
+    #                     f"use a different value, please specify it in an environment variable or in a "
+    #                     f"great_expectations.conf file located at one of the above paths, in a section named "
+    #                     f'"ge_cloud_config".'
+    #                 )
+    #                 substitutions[config_variable] = value
+    #
+    #     return DataContextConfig(
+    #         **substitute_all_config_variables(
+    #             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+    #         )
+    #     )
 
     def escape_all_config_variables(
         self,
@@ -2017,38 +2011,38 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             stores.append(masked_config)
         return stores
 
-    def list_active_stores(self):
-        """
-        List active Stores on this context. Active stores are identified by setting the following parameters:
-            expectations_store_name,
-            validations_store_name,
-            evaluation_parameter_store_name,
-            checkpoint_store_name
-            profiler_store_name
-        """
-        active_store_names: List[str] = [
-            self.expectations_store_name,
-            self.validations_store_name,
-            self.evaluation_parameter_store_name,
-        ]
-
-        try:
-            active_store_names.append(self.checkpoint_store_name)
-        except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
-            logger.info(
-                "Checkpoint store is not configured; omitting it from active stores"
-            )
-
-        try:
-            active_store_names.append(self.profiler_store_name)
-        except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
-            logger.info(
-                "Profiler store is not configured; omitting it from active stores"
-            )
-
-        return [
-            store for store in self.list_stores() if store["name"] in active_store_names
-        ]
+    # def list_active_stores(self):
+    #     """
+    #     List active Stores on this context. Active stores are identified by setting the following parameters:
+    #         expectations_store_name,
+    #         validations_store_name,
+    #         evaluation_parameter_store_name,
+    #         checkpoint_store_name
+    #         profiler_store_name
+    #     """
+    #     active_store_names: List[str] = [
+    #         self.expectations_store_name,
+    #         self.validations_store_name,
+    #         self.evaluation_parameter_store_name,
+    #     ]
+    #
+    #     try:
+    #         active_store_names.append(self.checkpoint_store_name)
+    #     except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
+    #         logger.info(
+    #             "Checkpoint store is not configured; omitting it from active stores"
+    #         )
+    #
+    #     try:
+    #         active_store_names.append(self.profiler_store_name)
+    #     except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
+    #         logger.info(
+    #             "Profiler store is not configured; omitting it from active stores"
+    #         )
+    #
+    #     return [
+    #         store for store in self.list_stores() if store["name"] in active_store_names
+    #     ]
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
@@ -2358,23 +2352,23 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             target_store_name,
         )
 
-    @property
-    def evaluation_parameter_store(self):
-        return self.stores[self.evaluation_parameter_store_name]
-
-    @property
-    def evaluation_parameter_store_name(self):
-        return (
-            self.project_config_with_variables_substituted.evaluation_parameter_store_name
-        )
-
-    @property
-    def validations_store_name(self):
-        return self.project_config_with_variables_substituted.validations_store_name
-
-    @property
-    def validations_store(self) -> ValidationsStore:
-        return self.stores[self.validations_store_name]
+    # @property
+    # def evaluation_parameter_store(self):
+    #     return self.stores[self.evaluation_parameter_store_name]
+    #
+    # @property
+    # def evaluation_parameter_store_name(self):
+    #     return (
+    #         self.project_config_with_variables_substituted.evaluation_parameter_store_name
+    #     )
+    #
+    # @property
+    # def validations_store_name(self):
+    #     return self.project_config_with_variables_substituted.validations_store_name
+    #
+    # @property
+    # def validations_store(self) -> ValidationsStore:
+    #     return self.stores[self.validations_store_name]
 
     @property
     def assistants(self) -> DataAssistantDispatcher:
