@@ -76,9 +76,7 @@ class DataContextVariables(ABC):
         """
         Generates the appropriate Store key to retrieve/store configs.
         """
-        key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key="data_context"
-        )
+        key: ConfigurationIdentifier = ConfigurationIdentifier(configuration_key="")
         return key
 
     def _set(self, attr: DataContextVariableSchema, value: Any) -> None:

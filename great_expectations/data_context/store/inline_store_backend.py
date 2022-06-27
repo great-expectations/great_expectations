@@ -55,26 +55,39 @@ class InlineStoreBackend(StoreBackend):
     def config(self) -> dict:
         return self._config
 
-    def _get(self, key: Tuple[str, str]) -> Any:
-        config_var_type: str = key[0]
-        config_var_name: str = key[1]
-
-        variable_config: Any = self._data_context.config[config_var_type]
-
-        if config_var_name:
-            return variable_config[config_var_name]
-        return variable_config
-
-    def _set(self, key: Tuple[str, str], value: Any, **kwargs: dict) -> None:
-        config_var_type: str = key[0]
-        config_var_name: str = key[1]
+    def _get(self, key: Tuple[str, ...]) -> Any:
+        (
+            resource_type,
+            resource_name,
+        ) = InlineStoreBackend._determine_resource_type_and_name(key)
 
         project_config: DataContextConfig = self._data_context.config
 
-        if config_var_name:
-            project_config[config_var_type][config_var_name] = value
+        if not resource_type:
+            return project_config
+
+        variable_config: Any = project_config[resource_type]
+
+        if resource_name:
+            return variable_config[resource_name]
+
+        return variable_config
+
+    def _set(self, key: Tuple[str, ...], value: Any, **kwargs: dict) -> None:
+        (
+            resource_type,
+            resource_name,
+        ) = InlineStoreBackend._determine_resource_type_and_name(key)
+
+        project_config: DataContextConfig = self._data_context.config
+
+        if not resource_type:
+            project_config = value
         else:
-            project_config[config_var_type] = value
+            if resource_name:
+                project_config[resource_type][resource_name] = value
+            else:
+                project_config[resource_type] = value
 
         try:
             self._data_context._save_project_config()
@@ -84,13 +97,13 @@ class InlineStoreBackend(StoreBackend):
             )
 
     def _move(
-        self, source_key: Tuple[str, str], dest_key: Tuple[str, str], **kwargs: dict
+        self, source_key: Tuple[str, ...], dest_key: Tuple[str, ...], **kwargs: dict
     ) -> None:
         raise StoreBackendError(
             "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"
         )
 
-    def list_keys(self, prefix: Tuple[str, str] = ()) -> List[str]:
+    def list_keys(self, prefix: Tuple[str, ...] = ()) -> List[str]:
         """
         See `StoreBackend.list_keys` for more information.
 
@@ -119,12 +132,14 @@ class InlineStoreBackend(StoreBackend):
 
         return keys
 
-    def remove_key(self, key: Tuple[str, str]) -> None:
+    def remove_key(self, key: Tuple[str, ...]) -> None:
         """
         See `StoreBackend.remove_key` for more information.
         """
-        resource_type: str = key[0]
-        resource_name: str = key[1]
+        (
+            resource_type,
+            resource_name,
+        ) = InlineStoreBackend._determine_resource_type_and_name(key)
 
         if not resource_name:
             raise StoreBackendError(
@@ -144,9 +159,11 @@ class InlineStoreBackend(StoreBackend):
                 f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} is not file-system enabled: {e}"
             )
 
-    def _has_key(self, key: Tuple[str, str]) -> bool:
-        resource_type: str = key[0]
-        resource_name: str = key[1]
+    def _has_key(self, key: Tuple[str, ...]) -> bool:
+        (
+            resource_type,
+            resource_name,
+        ) = InlineStoreBackend._determine_resource_type_and_name(key)
 
         if len(key) == 1:
             return resource_type in self._data_context.config
@@ -156,17 +173,25 @@ class InlineStoreBackend(StoreBackend):
 
         return False
 
-    def _validate_key(self, key: Tuple[str, str]) -> None:
-        if len(key) != 2:
-            raise TypeError(
-                f"Keys used in {self.__class__.__name__} must be composed of two parts: a variable type and an optional name"
-            )
+    def _validate_key(self, key: Tuple[str, ...]) -> None:
+        type_: str = key[0]
 
-        type_, _ = key
-
-        if not isinstance(
-            type_, DataContextVariableSchema
-        ) and not DataContextVariableSchema.has_value(type_):
+        if (
+            type_
+            and not isinstance(type_, DataContextVariableSchema)
+            and not DataContextVariableSchema.has_value(type_)
+        ):
             raise TypeError(
                 f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextVariableSchema.__name__}; invalid type {type(type_)} found"
             )
+
+    @staticmethod
+    def _determine_resource_type_and_name(key: Tuple[str, ...]) -> Tuple[str, str]:
+        resource_type: str = key[0]
+        resource_name: str
+        if len(key) > 1:
+            resource_name = key[1]
+        else:
+            resource_name = ""
+
+        return resource_type, resource_name
