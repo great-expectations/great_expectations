@@ -71,8 +71,6 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
-    DEFAULT_USAGE_STATISTICS_URL,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     ConcurrencyConfig,
@@ -93,7 +91,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
-    build_store_from_config,
     instantiate_class_from_config,
     load_class,
     parse_substitution_variable,
