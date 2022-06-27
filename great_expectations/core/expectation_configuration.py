@@ -31,7 +31,8 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-from great_expectations.render.renderer import InlineRenderer
+
+# from great_expectations.render.renderer import InlineRenderer
 from great_expectations.render.types import RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 
@@ -1212,15 +1213,15 @@ class ExpectationConfiguration(SerializableDictDot):
         runtime_kwargs.update(success_kwargs)
         return runtime_kwargs
 
-    def render(self) -> None:
-        """Renders content using the prescriptive renderer for this expectation configuration to self.rendered_content.
-
-        If an atomic renderer is defined, only atomic renderers will be returned.
-        Otherwise, only legacy renderers will be returned.
-        """
-        inline_renderer: InlineRenderer = InlineRenderer(render_object=self)
-
-        self.rendered_content = inline_renderer.render()
+    # def render(self) -> None:
+    #     """Renders content using the prescriptive renderer for this expectation configuration to self.rendered_content.
+    #
+    #     If an atomic renderer is defined, only atomic renderers will be returned.
+    #     Otherwise, only legacy renderers will be returned.
+    #     """
+    #     inline_renderer: InlineRenderer = InlineRenderer(render_object=self)
+    #
+    #     self.rendered_content = inline_renderer.render()
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"
