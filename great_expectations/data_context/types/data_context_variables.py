@@ -73,6 +73,9 @@ class DataContextVariables(ABC):
         raise NotImplementedError
 
     def get_key(self) -> DataContextKey:
+        """
+        Generates the appropriate Store key to retrieve/store configs.
+        """
         key: ConfigurationIdentifier = ConfigurationIdentifier(
             configuration_key="data_context"
         )
@@ -89,6 +92,9 @@ class DataContextVariables(ABC):
         return substituted_val
 
     def save_config(self) -> None:
+        """
+        Persist any changes made to variables utilizing the configured Store.
+        """
         key: ConfigurationIdentifier = self.get_key()
         self.store.set(key=key, value=self.config)
 
@@ -393,5 +399,8 @@ class CloudDataContextVariables(DataContextVariables):
         return store
 
     def get_key(self) -> GeCloudIdentifier:
+        """
+        Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
+        """
         key: GeCloudIdentifier = GeCloudIdentifier(resource_type="data_context")
         return key
