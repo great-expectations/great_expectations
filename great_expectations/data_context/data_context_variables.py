@@ -302,12 +302,12 @@ class DataContextVariables(ABC):
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
     def _init_store(self) -> "DataContextStore":  # noqa: F821
-        from great_expectations.data_context.store.data_context_variables_store import (
+        from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
 
         store: DataContextStore = DataContextStore(
-            store_name="ephemeral_data_context_variables_store",
+            store_name="ephemeral_data_context_store",
             store_backend=None,  # Defaults to InMemoryStoreBackend
             runtime_environment=None,
         )
@@ -332,7 +332,7 @@ class FileDataContextVariables(DataContextVariables):
             )
 
     def _init_store(self) -> "DataContextStore":  # noqa: F821
-        from great_expectations.data_context.store.data_context_variables_store import (
+        from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
 
@@ -341,7 +341,7 @@ class FileDataContextVariables(DataContextVariables):
             "data_context": self.data_context,
         }
         store: DataContextStore = DataContextStore(
-            store_name="file_data_context_variables_store",
+            store_name="file_data_context_store",
             store_backend=store_backend,
             runtime_environment=None,
         )
@@ -375,7 +375,7 @@ class CloudDataContextVariables(DataContextVariables):
             )
 
     def _init_store(self) -> "DataContextStore":  # noqa: F821
-        from great_expectations.data_context.store.data_context_variables_store import (
+        from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
 
@@ -390,7 +390,7 @@ class CloudDataContextVariables(DataContextVariables):
             "suppress_store_backend_id": True,
         }
         store: DataContextStore = DataContextStore(
-            store_name="cloud_data_context_variables_store",
+            store_name="cloud_data_context_store",
             store_backend=store_backend,
             runtime_environment=None,
         )
