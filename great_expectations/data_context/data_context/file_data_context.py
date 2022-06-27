@@ -39,6 +39,7 @@ class FileDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
+        # we can only have the Abstract logic going after these DataContext-specific parameters are instantiated
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_variables(self) -> FileDataContextVariables:
