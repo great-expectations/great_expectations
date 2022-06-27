@@ -77,7 +77,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if class_name is None:
         logger.warning(
             "Instantiating class from config without an explicit class_name is dangerous. Consider adding "
-            "an explicit class_name for %s" % config.get("name")
+            f"an explicit class_name for {config.get('name')}"
         )
         try:
             class_name = config_defaults.pop("class_name")
@@ -167,7 +167,7 @@ def format_dict_for_error_message(dict_):
 
 def substitute_config_variable(
     template_str, config_variables_dict, dollar_sign_escape_string: str = r"\$"
-):
+) -> Optional[str]:
     """
     This method takes a string, and if it contains a pattern ${SOME_VARIABLE} or $SOME_VARIABLE,
     returns a string where the pattern is replaced with the value of SOME_VARIABLE,
