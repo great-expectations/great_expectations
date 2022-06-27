@@ -1747,39 +1747,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             stores.append(masked_config)
         return stores
 
-    # def list_active_stores(self):
-    #     """
-    #     List active Stores on this context. Active stores are identified by setting the following parameters:
-    #         expectations_store_name,
-    #         validations_store_name,
-    #         evaluation_parameter_store_name,
-    #         checkpoint_store_name
-    #         profiler_store_name
-    #     """
-    #     active_store_names: List[str] = [
-    #         self.expectations_store_name,
-    #         self.validations_store_name,
-    #         self.evaluation_parameter_store_name,
-    #     ]
-    #
-    #     try:
-    #         active_store_names.append(self.checkpoint_store_name)
-    #     except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
-    #         logger.info(
-    #             "Checkpoint store is not configured; omitting it from active stores"
-    #         )
-    #
-    #     try:
-    #         active_store_names.append(self.profiler_store_name)
-    #     except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
-    #         logger.info(
-    #             "Profiler store is not configured; omitting it from active stores"
-    #         )
-    #
-    #     return [
-    #         store for store in self.list_stores() if store["name"] in active_store_names
-    #     ]
-
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
 
@@ -2087,24 +2054,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             validation_results,
             target_store_name,
         )
-
-    # @property
-    # def evaluation_parameter_store(self):
-    #     return self.stores[self.evaluation_parameter_store_name]
-    #
-    # @property
-    # def evaluation_parameter_store_name(self):
-    #     return (
-    #         self.project_config_with_variables_substituted.evaluation_parameter_store_name
-    #     )
-    #
-    # @property
-    # def validations_store_name(self):
-    #     return self.project_config_with_variables_substituted.validations_store_name
-    #
-    # @property
-    # def validations_store(self) -> ValidationsStore:
-    #     return self.stores[self.validations_store_name]
 
     @property
     def assistants(self) -> DataAssistantDispatcher:
