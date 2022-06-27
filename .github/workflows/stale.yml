@@ -20,7 +20,7 @@ jobs:
       with:
         # Debug
         debug-only: true  # DEBUG: Toggle to false
-        start-date: '2022-06-23T00:00:00Z'  # ISO 8601 or RFC 2822
+        start-date: '2022-01-01T00:00:00Z'  # ISO 8601 or RFC 2822
 
         # General
         repo-token: ${{ secrets.GITHUB_TOKEN }}
