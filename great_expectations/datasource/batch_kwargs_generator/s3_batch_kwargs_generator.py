@@ -129,8 +129,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         self, data_asset_name, reader_method=None, reader_options=None, limit=None
     ):
         logger.debug(
-            "Beginning S3GlobReaderBatchKwargsGenerator _get_iterator for data_asset_name: %s"
-            % data_asset_name
+            f"Beginning S3GlobReaderBatchKwargsGenerator _get_iterator for data_asset_name: {data_asset_name}"
         )
 
         if data_asset_name not in self._assets:
@@ -206,8 +205,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
             if batch_kwargs is None:
                 raise BatchKwargsError(
-                    "Unable to identify partition %s for asset %s"
-                    % (partition_id, data_asset_name),
+                    f"Unable to identify partition {partition_id} for asset {data_asset_name}",
                     {data_asset_name: data_asset_name, partition_id: partition_id},
                 )
 
@@ -372,9 +370,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 try:
                     return matches.group(match_group_id)
                 except IndexError:
-                    logger.warning(
-                        "No match group %d in key %s" % (match_group_id, key)
-                    )
+                    logger.warning(f"No match group {match_group_id} in key {key}")
                     return (
                         datetime.datetime.now(datetime.timezone.utc).strftime(
                             "%Y%m%dT%H%M%S.%fZ"

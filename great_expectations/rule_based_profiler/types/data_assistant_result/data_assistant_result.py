@@ -1,8 +1,9 @@
 import copy
 import datetime
 import json
+import os
 from collections import defaultdict, namedtuple
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
 
 import altair as alt
@@ -24,6 +25,7 @@ from great_expectations.core.util import (
     nested_update,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.config import RuleConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
     sanitize_parameter_name,
@@ -54,6 +56,36 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_res
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
 ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
+
+
+@dataclass
+class RuleStats(SerializableDictDot):
+    """
+    This class encapsulates basic "Rule" execution statistics.
+    """
+
+    num_domains: int = 0
+    domains_count_by_domain_type: Dict[MetricDomainTypes, int] = field(
+        default_factory=dict
+    )
+    domains_by_domain_type: Dict[MetricDomainTypes, List[dict]] = field(
+        default_factory=dict
+    )
+    num_parameter_builders: int = 0
+    num_expectation_configuration_builders: int = 0
+    execution_time: Optional[float] = None
+
+    def to_dict(self) -> dict:
+        """
+        Returns dictionary equivalent of this object.
+        """
+        return asdict(self)
+
+    def to_json_dict(self) -> dict:
+        """
+        Returns JSON dictionary equivalent of this object.
+        """
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 @dataclass
@@ -97,10 +129,12 @@ class DataAssistantResult(SerializableDictDot):
     ALLOWED_KEYS = {
         "batch_id_to_batch_identifier_display_name_map",
         "profiler_config",
+        "profiler_execution_time",
+        "rule_execution_time",
         "metrics_by_domain",
         "expectation_configurations",
-        "execution_time",
         "citation",
+        "execution_time",
         "usage_statistics_handler",
     }
 
@@ -112,10 +146,18 @@ class DataAssistantResult(SerializableDictDot):
         Dict[str, Set[Tuple[str, Any]]]
     ] = None
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
+    profiler_execution_time: Optional[
+        float
+    ] = None  # Effective Rule-Based Profiler total execution time (in seconds).
+    rule_execution_time: Optional[
+        Dict[str, float]
+    ] = None  # Effective Rule-Based Profiler per-Rule execution time (in seconds).
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
-    execution_time: Optional[float] = None  # Execution time (in seconds).
+    execution_time: Optional[
+        float
+    ] = None  # Overall DataAssistant execution time (in seconds).
     usage_statistics_handler: Optional[UsageStatisticsHandler] = None
 
     def to_dict(self) -> dict:
@@ -130,6 +172,12 @@ class DataAssistantResult(SerializableDictDot):
                 data=self.batch_id_to_batch_identifier_display_name_map
             ),
             "profiler_config": self.profiler_config.to_json_dict(),
+            "profiler_execution_time": convert_to_json_serializable(
+                data=self.profiler_execution_time
+            ),
+            "rule_execution_time": convert_to_json_serializable(
+                data=self.rule_execution_time
+            ),
             "metrics_by_domain": [
                 {
                     "domain_id": domain.id,
@@ -170,7 +218,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def __repr__(self) -> str:
         """
-        # TODO: <Alex>6/22/2022</Alex>
+        # TODO: <Alex>6/23/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
         would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
         """
@@ -183,25 +231,103 @@ class DataAssistantResult(SerializableDictDot):
                 for key, value in json_dict.items()
                 if key in DataAssistantResult.IN_JUPYTER_NOTEBOOK_KEYS
             }
-            json_dict.update(
-                {
-                    "num_profiler_rules": len(self.profiler_config.rules),
-                    "num_domains": len(self.metrics_by_domain),
-                    "num_expectation_configurations": len(
-                        self.expectation_configurations
-                    ),
-                    "auto_generated_at": datetime.datetime.now(
-                        datetime.timezone.utc
-                    ).strftime("%Y%m%dT%H%M%S.%fZ"),
-                    "great_expectations_version": ge_version,
-                }
-            )
+            additional_info: dict = {
+                "num_profiler_rules": len(self.profiler_config.rules),
+                "num_expectation_configurations": len(self.expectation_configurations),
+                "auto_generated_at": datetime.datetime.now(
+                    datetime.timezone.utc
+                ).strftime("%Y%m%dT%H%M%S.%fZ"),
+                "great_expectations_version": ge_version,
+            }
+
+            verbose: Union[bool, str] = str(
+                os.getenv("GE_TROUBLESHOOTING", False)
+            ).lower()
+            if verbose != "true":
+                verbose = "false"
+
+            verbose = json.loads(verbose)
+
+            if verbose:
+                rule_name_to_rule_stats_map: Dict[str, RuleStats] = {}
+
+                rule_domains: List[Domain] = list(self.metrics_by_domain.keys())
+
+                rule_stats: RuleStats
+                domains: List[Domain]
+                domain: Domain
+                domain_as_json_dict: dict
+                num_domains: int
+
+                rule_name: str
+                rule_config: RuleConfig
+                for rule_name, rule_config in self.profiler_config.rules.items():
+                    domains = list(
+                        filter(
+                            lambda element: element.rule_name == rule_name,
+                            rule_domains,
+                        )
+                    )
+                    num_domains = len(domains)
+
+                    rule_stats = rule_name_to_rule_stats_map.get(rule_name)
+                    if rule_stats is None:
+                        rule_stats = RuleStats(
+                            num_domains=num_domains,
+                            num_parameter_builders=len(
+                                rule_config["parameter_builders"]
+                            ),
+                            num_expectation_configuration_builders=len(
+                                rule_config["expectation_configuration_builders"]
+                            ),
+                        )
+                        rule_name_to_rule_stats_map[rule_name] = rule_stats
+                        rule_stats.execution_time = self.rule_execution_time[rule_name]
+
+                    if num_domains > 0:
+                        for domain in domains:
+                            if (
+                                rule_stats.domains_count_by_domain_type.get(
+                                    domain.domain_type
+                                )
+                                is None
+                            ):
+                                rule_stats.domains_count_by_domain_type[
+                                    domain.domain_type
+                                ] = 0
+
+                            if (
+                                rule_stats.domains_by_domain_type.get(
+                                    domain.domain_type
+                                )
+                                is None
+                            ):
+                                rule_stats.domains_by_domain_type[
+                                    domain.domain_type
+                                ] = []
+
+                            rule_stats.domains_count_by_domain_type[
+                                domain.domain_type
+                            ] += 1
+
+                            domain_as_json_dict = domain.to_json_dict()
+                            domain_as_json_dict.pop("domain_type")
+                            domain_as_json_dict.pop("rule_name")
+                            rule_stats.domains_by_domain_type[
+                                domain.domain_type
+                            ].append(domain_as_json_dict)
+
+                    additional_info.update(
+                        convert_to_json_serializable(data=rule_name_to_rule_stats_map)
+                    )
+
+            json_dict.update(additional_info)
 
         return json.dumps(json_dict, indent=2)
 
     def __str__(self) -> str:
         """
-        # TODO: <Alex>6/22/2022</Alex>
+        # TODO: <Alex>6/23/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
         would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
         """

@@ -302,6 +302,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 batch_request=batch_request,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
                 reconciliation_directives=reconciliation_directives,
+                rule_state=RuleState(),
             )
             self.rule_states.append(rule_state)
             progress_bar.update(1)
@@ -326,6 +327,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     "variables": convert_variables_to_dict(variables=self.variables),
                     "rules": effective_rules_configs,
                 },
+            },
+            execution_time=sum(
+                [rule_state.execution_time for rule_state in self.rule_states]
+            ),
+            rule_execution_time={
+                rule_state.rule.name: rule_state.execution_time
+                for rule_state in self.rule_states
             },
             usage_statistics_handler=self._usage_statistics_handler,
         )

@@ -484,7 +484,7 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
-        name="how_to_configure_credentials",
+        name="how_to_configure_credentials_postgres",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,

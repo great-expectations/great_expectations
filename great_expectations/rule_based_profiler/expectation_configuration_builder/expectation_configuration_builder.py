@@ -32,7 +32,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             List[ParameterBuilderConfig]
         ] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         The ExpectationConfigurationBuilder will build ExpectationConfiguration objects for a Domain from the Rule.
@@ -63,10 +63,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 
     def build_expectation_configuration(

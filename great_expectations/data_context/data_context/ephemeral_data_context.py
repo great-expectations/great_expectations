@@ -37,6 +37,7 @@ class EphemeralDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
+        self._config_variables = self._load_config_variables()
 
     def _init_variables(self) -> EphemeralDataContextVariables:
         raise NotImplementedError
