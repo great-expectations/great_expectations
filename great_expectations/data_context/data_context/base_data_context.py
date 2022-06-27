@@ -75,7 +75,6 @@ from great_expectations.data_context.store.validations_store import ValidationsS
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
-    DEFAULT_USAGE_STATISTICS_URL,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     ConcurrencyConfig,
