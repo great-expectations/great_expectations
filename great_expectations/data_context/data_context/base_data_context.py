@@ -381,6 +381,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._config_variables = self._data_context.config_variables
         self._in_memory_instance_id = self._data_context._in_memory_instance_id
         self._stores = self._data_context._stores
+        self._datasource_store = self._data_context._datasource_store
 
     def _init_datasources(self) -> None:
         for datasource_name in self._datasource_store.list_keys():
@@ -1729,20 +1730,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             datasources.append(masked_config)
 
         return datasources
-
-    def list_stores(self):
-        """List currently-configured Stores on this context"""
-
-        stores = []
-        for (
-            name,
-            value,
-        ) in self.project_config_with_variables_substituted.stores.items():
-            store_config = copy.deepcopy(value)
-            store_config["name"] = name
-            masked_config = PasswordMasker.sanitize_config(store_config)
-            stores.append(masked_config)
-        return stores
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""

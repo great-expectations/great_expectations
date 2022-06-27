@@ -16,11 +16,13 @@ from great_expectations.data_context.store.expectations_store import Expectation
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.types.base import (
+    CURRENT_GE_CONFIG_VERSION,
     DataContextConfig,
     DataContextConfigDefaults,
     anonymizedUsageStatisticsSchema,
 )
 from great_expectations.data_context.util import (
+    PasswordMasker,
     build_store_from_config,
     substitute_all_config_variables,
     substitute_config_variable,
@@ -306,6 +308,20 @@ class AbstractDataContext(ABC):
                 config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
             )
         )
+
+    def list_stores(self):
+        """List currently-configured Stores on this context"""
+
+        stores = []
+        for (
+            name,
+            value,
+        ) in self.project_config_with_variables_substituted.stores.items():
+            store_config = copy.deepcopy(value)
+            store_config["name"] = name
+            masked_config = PasswordMasker.sanitize_config(store_config)
+            stores.append(masked_config)
+        return stores
 
     def list_active_stores(self):
         """
