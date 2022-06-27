@@ -56,20 +56,20 @@ class DataContextVariables(ABC):
 
     config: DataContextConfig
     substitutions: Optional[dict] = None
-    _store: Optional["DataContextVariablesStore"] = None  # noqa: F821
+    _store: Optional["DataContextStore"] = None  # noqa: F821
 
     def __post_init__(self) -> None:
         if self.substitutions is None:
             self.substitutions = {}
 
     @property
-    def store(self) -> "DataContextVariablesStore":  # noqa: F821
+    def store(self) -> "DataContextStore":  # noqa: F821
         if self._store is None:
             self._store = self._init_store()
         return self._store
 
     @abstractmethod
-    def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
+    def _init_store(self) -> "DataContextStore":  # noqa: F821
         raise NotImplementedError
 
     def get_key(self) -> DataContextKey:
@@ -303,7 +303,7 @@ class DataContextVariables(ABC):
 
 @dataclass
 class EphemeralDataContextVariables(DataContextVariables):
-    def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
+    def _init_store(self) -> "DataContextStore":  # noqa: F821
         from great_expectations.data_context.store.data_context_variables_store import (
             DataContextStore,
         )
@@ -333,7 +333,7 @@ class FileDataContextVariables(DataContextVariables):
                 f"A reference to a data context is required for {self.__class__.__name__}"
             )
 
-    def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
+    def _init_store(self) -> "DataContextStore":  # noqa: F821
         from great_expectations.data_context.store.data_context_variables_store import (
             DataContextStore,
         )
@@ -341,6 +341,7 @@ class FileDataContextVariables(DataContextVariables):
         store_backend: dict = {
             "class_name": "InlineStoreBackend",
             "data_context": self.data_context,
+            "resource_type": None,
         }
         store: DataContextStore = DataContextStore(
             store_name="file_data_context_variables_store",
@@ -376,7 +377,7 @@ class CloudDataContextVariables(DataContextVariables):
                 f"All of the following attributes are required for{ self.__class__.__name__}:\n  self.ge_cloud_base_url\n  self.ge_cloud_organization_id\n  self.ge_cloud_access_token"
             )
 
-    def _init_store(self) -> "DataContextVariablesStore":  # noqa: F821
+    def _init_store(self) -> "DataContextStore":  # noqa: F821
         from great_expectations.data_context.store.data_context_variables_store import (
             DataContextStore,
         )
