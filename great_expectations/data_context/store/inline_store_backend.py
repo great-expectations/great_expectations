@@ -1,6 +1,7 @@
 import logging
 from typing import Any, List, Optional, Tuple
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -10,6 +11,8 @@ from great_expectations.exceptions.exceptions import StoreBackendError
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
+
+yaml = YAMLHandler()
 
 
 class InlineStoreBackend(StoreBackend):
@@ -59,7 +62,7 @@ class InlineStoreBackend(StoreBackend):
         (
             resource_type,
             resource_name,
-        ) = InlineStoreBackend._determine_resource_type_and_name(key)
+        ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
 
         project_config: DataContextConfig = self._data_context.config
 
@@ -77,11 +80,15 @@ class InlineStoreBackend(StoreBackend):
         (
             resource_type,
             resource_name,
-        ) = InlineStoreBackend._determine_resource_type_and_name(key)
+        ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
 
         project_config: DataContextConfig = self._data_context.config
 
         if not resource_type:
+            config_commented_map_from_yaml = yaml.load(value)
+            value = DataContextConfig.from_commented_map(
+                commented_map=config_commented_map_from_yaml
+            )
             project_config = value
         else:
             if resource_name:
@@ -139,7 +146,7 @@ class InlineStoreBackend(StoreBackend):
         (
             resource_type,
             resource_name,
-        ) = InlineStoreBackend._determine_resource_type_and_name(key)
+        ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
 
         if not resource_name:
             raise StoreBackendError(
@@ -163,30 +170,35 @@ class InlineStoreBackend(StoreBackend):
         (
             resource_type,
             resource_name,
-        ) = InlineStoreBackend._determine_resource_type_and_name(key)
+        ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
 
         if len(key) == 1:
             return resource_type in self._data_context.config
         elif len(key) == 2:
-            res = self._data_context.config.get(resource_type) or {}
+            res: dict = self._data_context.config.get(resource_type) or {}
             return resource_name in res
 
         return False
 
     def _validate_key(self, key: Tuple[str, ...]) -> None:
-        type_: str = key[0]
+        (
+            resource_type,
+            _,
+        ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
 
         if (
-            type_
-            and not isinstance(type_, DataContextVariableSchema)
-            and not DataContextVariableSchema.has_value(type_)
+            resource_type
+            and not isinstance(resource_type, DataContextVariableSchema)
+            and not DataContextVariableSchema.has_value(resource_type)
         ):
             raise TypeError(
-                f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextVariableSchema.__name__}; invalid type {type(type_)} found"
+                f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextVariableSchema.__name__}; invalid value ({resource_type}) of type {type(resource_type)} found"
             )
 
     @staticmethod
-    def _determine_resource_type_and_name(key: Tuple[str, ...]) -> Tuple[str, str]:
+    def _determine_resource_type_and_name_from_key(
+        key: Tuple[str, ...]
+    ) -> Tuple[str, str]:
         resource_type: str = key[0]
         resource_name: str
         if len(key) > 1:

@@ -411,9 +411,6 @@ def test_data_context_variables_save_config(
         "great_expectations.data_context.DataContext._save_project_config",
         autospec=True,
     ) as mock_save:
-        # CURRENTLY DOES NOT WORK DUE TO INLINE STORE BACKEND
-        # Do we really need the ability to update granular parts of the config?
-        # If not, we should refactor the DatasourceStore and other stores to remove this capability.
         file_data_context_variables.save_config()
 
         assert mock_save.call_count == 1
