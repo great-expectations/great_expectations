@@ -5,8 +5,6 @@ import logging
 import sys
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
-import tqdm
-
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
@@ -295,7 +293,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rule: Rule
         for rule in pbar_method(
             effective_rules,
-            desc="Profiling Dataset",
+            desc="Generating Expectations",
             disable=disable,
             position=0,
             leave=True,
