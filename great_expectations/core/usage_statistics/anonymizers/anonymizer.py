@@ -149,11 +149,15 @@ class Anonymizer(BaseAnonymizer):
         return anonymized_values
 
     def _anonymize_validation_operator_init_payload(
-        self, payload: Dict[str, "ValidationOperator"]  # noqa: F821
+        self, payload: Optional[Dict[str, "ValidationOperator"]]  # noqa: F821
     ) -> List[dict]:
+
         from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
             ValidationOperatorAnonymizer,
         )
+
+        if payload is None:
+            return []
 
         anonymizer = self._anonymizers[ValidationOperatorAnonymizer]
 

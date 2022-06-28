@@ -440,18 +440,18 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        if self.ge_cloud_mode:
-            logger.debug(
-                "ge_cloud_mode detected - skipping DataContext._save_project_config"
-            )
-            return
-        logger.debug("Starting DataContext._save_project_config")
-
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
+    # def _save_project_config(self) -> None:
+    #     """Save the current project to disk."""
+    #     if self.ge_cloud_mode:
+    #         logger.debug(
+    #             "ge_cloud_mode detected - skipping DataContext._save_project_config"
+    #         )
+    #         return
+    #     logger.debug("Starting DataContext._save_project_config")
+    #
+    #     config_filepath = os.path.join(self.root_directory, self.GE_YML)
+    #     with open(config_filepath, "w") as outfile:
+    #         self.config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")

@@ -240,7 +240,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         GE_UNCOMMITTED_DIR,
     ]
     GE_DIR = "great_expectations"
-    GE_YML = "great_expectations.yml"
+    GE_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
@@ -335,8 +335,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_config,
                 )
 
-        self._evaluation_parameter_dependencies_compiled = False
-        self._evaluation_parameter_dependencies = {}
+        # self._evaluation_parameter_dependencies_compiled = False
+        # self._evaluation_parameter_dependencies = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
 
@@ -367,6 +367,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._data_context_id = self._data_context._data_context_id
         self._usage_statistics_handler = self._data_context._usage_statistics_handler
         self._cached_datasources = self._data_context._cached_datasources
+        self._evaluation_parameter_dependencies_compiled = (
+            self._data_context._evaluation_parameter_dependencies_compiled
+        )
+        self._evaluation_parameter_dependencies = (
+            self._data_context._evaluation_parameter_dependencies
+        )
 
     # def _init_datasources(self) -> None:
     #     for datasource_name in self._datasource_store.list_keys():
@@ -1700,15 +1706,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     #     self._cached_datasources[datasource_name] = datasource
     #     return datasource
 
-    def list_expectation_suites(self):
-        """Return a list of available expectation suite keys."""
-        try:
-            keys = self.expectations_store.list_keys()
-        except KeyError as e:
-            raise ge_exceptions.InvalidConfigError(
-                f"Unable to find configured store: {str(e)}"
-            )
-        return keys
+    # def list_expectation_suites(self):
+    #     """Return a list of available expectation suite keys."""
+    #     try:
+    #         keys = self.expectations_store.list_keys()
+    #     except KeyError as e:
+    #         raise ge_exceptions.InvalidConfigError(
+    #             f"Unable to find configured store: {str(e)}"
+    #         )
+    #     return keys
 
     # def list_datasources(self) -> List[dict]:
     #     """List currently-configured datasources on this context. Masks passwords.
@@ -1877,22 +1883,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 f"expectation_suite {expectation_suite_name} not found"
             )
 
-    def list_expectation_suite_names(self) -> List[str]:
-        """
-        Lists the available expectation suite names. If in ge_cloud_mode, a list of
-        GE Cloud ids is returned instead.
-        """
-        if self.ge_cloud_mode:
-            return [
-                suite_key.ge_cloud_id for suite_key in self.list_expectation_suites()
-            ]
-
-        sorted_expectation_suite_names = [
-            i.expectation_suite_name for i in self.list_expectation_suites()
-        ]
-        sorted_expectation_suite_names.sort()
-        return sorted_expectation_suite_names
-
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
         args_payload_fn=save_expectation_suite_usage_statistics,
@@ -1915,40 +1905,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite",
-                ge_cloud_id=ge_cloud_id
-                if ge_cloud_id is not None
-                else str(expectation_suite.ge_cloud_id),
-            )
-            if self.expectations_store.has_key(key) and not overwrite_existing:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True.".format(
-                        ge_cloud_id
-                    )
-                )
-        else:
-            if expectation_suite_name is None:
-                key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite.expectation_suite_name
-                )
-            else:
-                expectation_suite.expectation_suite_name = expectation_suite_name
-                key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite_name
-                )
-            if self.expectations_store.has_key(key) and not overwrite_existing:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite with name {} already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True.".format(
-                        expectation_suite_name
-                    )
-                )
-
-        self._evaluation_parameter_dependencies_compiled = False
-        return self.expectations_store.set(key, expectation_suite, **kwargs)
+        super().save_expectation_suite(
+            expectation_suite,
+            expectation_suite_name,
+            overwrite_existing,
+            ge_cloud_id,
+            **kwargs,
+        )
+        self._apply_temporary_overrides()
 
     def _store_metrics(
         self, requested_metrics, validation_results, target_store_name
@@ -2029,20 +1993,20 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
 
-    def store_evaluation_parameters(
-        self, validation_results, target_store_name=None
-    ) -> None:
-        if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
-
-        if target_store_name is None:
-            target_store_name = self.evaluation_parameter_store_name
-
-        self._store_metrics(
-            self._evaluation_parameter_dependencies,
-            validation_results,
-            target_store_name,
-        )
+    # def store_evaluation_parameters(
+    #     self, validation_results, target_store_name=None
+    # ) -> None:
+    #     if not self._evaluation_parameter_dependencies_compiled:
+    #         self._compile_evaluation_parameter_dependencies()
+    #
+    #     if target_store_name is None:
+    #         target_store_name = self.evaluation_parameter_store_name
+    #
+    #     self._store_metrics(
+    #         self._evaluation_parameter_dependencies,
+    #         validation_results,
+    #         target_store_name,
+    #     )
 
     @property
     def assistants(self) -> DataAssistantDispatcher:

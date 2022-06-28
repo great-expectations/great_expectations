@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Mapping, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -19,6 +20,8 @@ class FileDataContext(AbstractDataContext):
     TODO: Most of the functionality in DataContext will be refactored into this class, and the current DataContext
     class will exist only for backwards-compatibility reasons.
     """
+
+    GE_YML = "great_expectations.yml"
 
     def __init__(
         self,
@@ -43,3 +46,11 @@ class FileDataContext(AbstractDataContext):
 
     def _init_variables(self) -> FileDataContextVariables:
         raise NotImplementedError
+
+    def _save_project_config(self) -> None:
+        """Save the current project to disk."""
+        logger.debug("Starting DataContext._save_project_config")
+
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+        with open(config_filepath, "w") as outfile:
+            self.config.to_yaml(outfile)

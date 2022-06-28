@@ -12,6 +12,7 @@ from typing import Dict, List, Mapping, Optional, Union, cast
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
@@ -26,6 +27,9 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
     datasourceConfigSchema,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
@@ -149,25 +153,16 @@ class AbstractDataContext(ABC):
         # Build the datasources we know about and have access to
         self._init_datasources()
 
+        self._evaluation_parameter_dependencies_compiled = False
+        self._evaluation_parameter_dependencies = {}
+
     @abstractmethod
     def _init_variables(self) -> None:
         raise NotImplementedError
 
-    def _construct_data_context_id(self) -> str:
-        # Choose the id of the currently-configured expectations store, if it is a persistent store
-        # overrridden in CloudDataContext : Note for Review
-        expectations_store = self._stores[
-            self.project_config_with_variables_substituted.expectations_store_name
-        ]
-        if isinstance(expectations_store.store_backend, TupleStoreBackend):
-            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
-            return expectations_store.store_backend_id_warnings_suppressed
-
-        # Otherwise choose the id stored in the project_config
-        else:
-            return (
-                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-            )
+    @abstractmethod
+    def _save_project_config(self) -> None:
+        raise NotImplementedError
 
     # Properties
     @property
@@ -529,6 +524,79 @@ class AbstractDataContext(ABC):
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(f"Datasource {datasource_name} not found")
+
+    def list_expectation_suite_names(self) -> List[str]:
+        """
+        Lists the available expectation suite names. If in ge_cloud_mode, a list of
+        GE Cloud ids is returned instead.
+        """
+        sorted_expectation_suite_names = [
+            i.expectation_suite_name for i in self.list_expectation_suites()
+        ]
+        sorted_expectation_suite_names.sort()
+        return sorted_expectation_suite_names
+
+    def list_expectation_suites(self):
+        """Return a list of available expectation suite keys."""
+        try:
+            keys = self.expectations_store.list_keys()
+        except KeyError as e:
+            raise ge_exceptions.InvalidConfigError(
+                f"Unable to find configured store: {str(e)}"
+            )
+        return keys
+
+    def save_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_suite_name: Optional[str] = None,
+        overwrite_existing: bool = True,
+        ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ):
+        """Save the provided expectation suite into the DataContext.
+
+        Args:
+            expectation_suite: the suite to save
+            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
+                be read from the suite
+
+        Returns:
+            None
+        """
+        if expectation_suite_name is None:
+            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite.expectation_suite_name
+            )
+        else:
+            expectation_suite.expectation_suite_name = expectation_suite_name
+            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
+        if self.expectations_store.has_key(key) and not overwrite_existing:
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True.".format(
+                    expectation_suite_name
+                )
+            )
+        self._evaluation_parameter_dependencies_compiled = False
+        return self.expectations_store.set(key, expectation_suite, **kwargs)
+
+    def store_evaluation_parameters(
+        self, validation_results, target_store_name=None
+    ) -> None:
+        if not self._evaluation_parameter_dependencies_compiled:
+            self._compile_evaluation_parameter_dependencies()
+
+        if target_store_name is None:
+            target_store_name = self.evaluation_parameter_store_name
+
+        self._store_metrics(
+            self._evaluation_parameter_dependencies,
+            validation_results,
+            target_store_name,
+        )
 
     @staticmethod
     def _default_profilers_exist(directory_path: Optional[str]) -> bool:
@@ -973,3 +1041,19 @@ class AbstractDataContext(ABC):
                 raise e
 
         return datasource
+
+    def _construct_data_context_id(self) -> str:
+        # Choose the id of the currently-configured expectations store, if it is a persistent store
+        # overrridden in CloudDataContext : Note for Review
+        expectations_store = self._stores[
+            self.project_config_with_variables_substituted.expectations_store_name
+        ]
+        if isinstance(expectations_store.store_backend, TupleStoreBackend):
+            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
+            return expectations_store.store_backend_id_warnings_suppressed
+
+        # Otherwise choose the id stored in the project_config
+        else:
+            return (
+                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+            )

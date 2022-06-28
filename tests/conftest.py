@@ -3138,6 +3138,10 @@ def alice_columnar_table_single_batch_context(
     context._usage_statistics_handler = UsageStatisticsHandler(
         context, "00000000-0000-0000-0000-00000000a004", "N/A"
     )
+    # TODO add helper method before submitting as PR
+    context._data_context._usage_statistics_handler = UsageStatisticsHandler(
+        context, "00000000-0000-0000-0000-00000000a004", "N/A"
+    )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
     data_path: str = os.path.join(context.root_directory, data_relative_path)
