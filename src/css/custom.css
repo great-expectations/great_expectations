@@ -182,3 +182,15 @@ div[role="tabpanel"]{
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
+
+
+.toc {
+  position: fixed;
+  /*background: #ccc;*/
+  right: 0;
+  top: 6em;
+  padding: 1em;
+  width: 24em;
+  height: 100vh;
+  line-height: 2;
+}
