@@ -157,13 +157,14 @@ class Validator:
 
         Additionally, note that Validators are used by Checkpoints under-the-hood.
 
-        :param execution_engine (ExecutionEngine):
-        :param interactive_evaluation (bool):
-        :param expectation_suite (Optional[ExpectationSuite]):
-        :param expectation_suite_name (Optional[str]):
-        :param data_context (Optional[DataContext]):
-        :param batches (Optional[List[Batch]]):
-        :param include_rendered_content (bool):
+        Args:
+            execution_engine: The ExecutionEngine to be used to perform validation
+            interactive_evaluation: Whether the Validator should perform evaluation when Expectations are added.
+            expectation_suite: The ExpectationSuite to validate.
+            expectation_suite_name: The name of the ExpectationSuite to validate.
+            data_context: The DataContext associated with this Validator.
+            batches: The batches for which to validate.
+            include_rendered_content: Whether the ExpectationValidationResult should return rendered_content.
 
         """
 
