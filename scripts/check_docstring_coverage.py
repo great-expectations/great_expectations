@@ -1,5 +1,6 @@
 import ast
 import glob
+import logging
 import subprocess
 from collections import defaultdict
 from typing import Dict, List, Tuple, cast
@@ -9,6 +10,8 @@ Diagnostics = Dict[str, List[Tuple[ast.FunctionDef, bool]]]
 DOCSTRING_ERROR_THRESHOLD: int = (
     1097  # This number is to be reduced as we document more public functions!
 )
+
+logger = logging.getLogger(__name__)
 
 
 def get_changed_files(branch: str) -> List[str]:
@@ -147,6 +150,11 @@ def review_diagnostics(diagnostics: Diagnostics, changed_files: List[str]) -> No
         total_failed <= DOCSTRING_ERROR_THRESHOLD
     ), f"""A public function without a docstring was introduced; please resolve the matter before merging.
                 We expect there to be {DOCSTRING_ERROR_THRESHOLD} or fewer violations of the style guide (actual: {total_failed})"""
+
+    if DOCSTRING_ERROR_THRESHOLD != total_failed:
+        logger.warning(
+            f"\nThe threshold needs to be updated! {DOCSTRING_ERROR_THRESHOLD} should be reduced to {total_failed}"
+        )
 
 
 if __name__ == "__main__":
