@@ -3,6 +3,10 @@ import logging
 import re
 import traceback
 
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.expectations.registry import get_renderer_impl
@@ -39,9 +43,9 @@ class ColumnSectionRenderer(Renderer):
         else:
             candidate_object = ge_object
         try:
-            if hasattr(candidate_object, "expectation_type"):
+            if isinstance(candidate_object, ExpectationConfiguration):
                 return candidate_object.kwargs["column"]
-            elif hasattr(candidate_object, "expectation_config"):
+            elif isinstance(candidate_object, ExpectationValidationResult):
                 return candidate_object.expectation_config.kwargs["column"]
             else:
                 raise ValueError(
