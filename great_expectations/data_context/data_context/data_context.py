@@ -12,6 +12,9 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -232,7 +235,7 @@ class DataContext(BaseDataContext):
     ) -> Dict[str, Optional[str]]:
         ge_cloud_base_url = (
             ge_cloud_base_url
-            or super()._get_global_config_value(
+            or CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_BASE_URL",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
@@ -247,14 +250,14 @@ class DataContext(BaseDataContext):
                 "deprecated in the next major release."
             )
         else:
-            ge_cloud_account_id = super()._get_global_config_value(
+            ge_cloud_account_id = CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_ACCOUNT_ID",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="account_id",
             )
 
         if ge_cloud_organization_id is None:
-            ge_cloud_organization_id = super()._get_global_config_value(
+            ge_cloud_organization_id = CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_ORGANIZATION_ID",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="organization_id",
@@ -263,7 +266,7 @@ class DataContext(BaseDataContext):
         ge_cloud_organization_id = ge_cloud_organization_id or ge_cloud_account_id
         ge_cloud_access_token = (
             ge_cloud_access_token
-            or super()._get_global_config_value(
+            or CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_ACCESS_TOKEN",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="access_token",
