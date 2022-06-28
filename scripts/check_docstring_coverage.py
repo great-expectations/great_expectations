@@ -153,7 +153,7 @@ def review_diagnostics(diagnostics: Diagnostics, changed_files: List[str]) -> No
 
     if DOCSTRING_ERROR_THRESHOLD != total_failed:
         logger.warning(
-            f"\nThe threshold needs to be updated! {DOCSTRING_ERROR_THRESHOLD} should be reduced to {total_failed}"
+            f"The threshold needs to be updated! {DOCSTRING_ERROR_THRESHOLD} should be reduced to {total_failed}"
         )
 
 
