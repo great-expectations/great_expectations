@@ -67,7 +67,7 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store import Store
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -758,15 +758,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        if datasource_name is None:
-            raise ValueError("Datasource names must be a datasource name")
-        else:
-            datasource = self.get_datasource(datasource_name=datasource_name)
-            if datasource:
-                self._datasource_store.delete_by_name(datasource_name)
-                del self._cached_datasources[datasource_name]
-            else:
-                raise ValueError(f"Datasource {datasource_name} not found")
+        # if datasource_name is None:
+        #     raise ValueError("Datasource names must be a datasource name")
+        # else:
+        #     datasource = self.get_datasource(datasource_name=datasource_name)
+        #     if datasource:
+        #         self._datasource_store.delete_by_name(datasource_name)
+        #         del self._cached_datasources[datasource_name]
+        #     else:
+        #         raise ValueError(f"Datasource {datasource_name} not found")
+        super().delete_datasource(datasource_name)
+        self._apply_temporary_overrides()
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None

@@ -474,8 +474,8 @@ class DataContext(BaseDataContext):
 
     def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
-
         super().delete_datasource(datasource_name=name)
+        self._save_project_config()
 
     @classmethod
     def find_context_root_dir(cls):
