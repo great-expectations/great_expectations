@@ -1,6 +1,11 @@
 from functools import wraps
 from typing import Any
 
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+
 
 def renderer(renderer_type, **kwargs):
     def wrapper(renderer_fn):
@@ -23,10 +28,10 @@ class Renderer:
 
     @classmethod
     def _get_expectation_type(cls, ge_object):
-        if hasattr(ge_object, "expectation_type"):
+        if isinstance(ge_object, ExpectationConfiguration):
             return ge_object.expectation_type
 
-        elif hasattr(ge_object, "expectation_config"):
+        elif isinstance(ge_object, ExpectationValidationResult):
             # This is a validation
             return ge_object.expectation_config.expectation_type
 
