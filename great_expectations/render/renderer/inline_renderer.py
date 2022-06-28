@@ -38,12 +38,10 @@ class InlineRenderer(Renderer):
         legacy_renderer_prefix: str
         if isinstance(render_object, ExpectationConfiguration):
             expectation_type = render_object.expectation_type
-            atomic_renderer_prefix = "atomic.prescriptive"
-            legacy_renderer_prefix = "renderer.prescriptive"
+            renderer_prefix = "atomic.prescriptive"
         elif isinstance(render_object, ExpectationValidationResult):
             expectation_type = render_object.expectation_config.expectation_type
-            atomic_renderer_prefix = "atomic.diagnostic"
-            legacy_renderer_prefix = "renderer.diagnostic"
+            renderer_prefix = "atomic.diagnostic"
         else:
             raise ValueError(
                 f"object must be of type ExpectationConfiguration or ExpectationValidationResult, but an object of type {type(render_object)} was passed"
@@ -51,13 +49,8 @@ class InlineRenderer(Renderer):
 
         renderer_names: List[str] = get_renderer_names_with_renderer_prefix(
             object_name=expectation_type,
-            renderer_prefix=atomic_renderer_prefix,
+            renderer_prefix=renderer_prefix,
         )
-        if len(renderer_names) == 0:
-            renderer_names = get_renderer_names_with_renderer_prefix(
-                object_name=expectation_type,
-                renderer_prefix=legacy_renderer_prefix,
-            )
 
         rendered_content: List[
             RenderedAtomicContent

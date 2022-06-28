@@ -500,18 +500,20 @@ class RenderedSectionContent(RenderedContent):
 class RenderedAtomicValue(DictDot):
     def __init__(
         self,
+        schema: Optional[dict] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        schema: Optional[dict] = None,
         header: Optional["RenderedAtomicValue"] = None,
         header_row: Optional[List["RenderedAtomicValue"]] = None,
         table: Optional[List[List["RenderedAtomicValue"]]] = None,
         graph: Optional[dict] = None,
+        kwargs: Optional[dict] = None,
     ) -> None:
+        self.schema: Optional[dict] = schema
+
         # StringValueType
         self.template: Optional[str] = template
         self.params: Optional[dict] = params
-        self.schema: Optional[dict] = schema
 
         # TableType
         self.header: Optional[RenderedAtomicValue] = header
@@ -521,15 +523,22 @@ class RenderedAtomicValue(DictDot):
         # GraphType
         self.graph: Optional[RenderedAtomicValue] = graph
 
+        # UnknownType
+        self.kwargs: Optional[dict] = kwargs
+
 
 class RenderedAtomicValueSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    # for StringType
+    schema = fields.Dict(required=False, allow_none=True)
+
+    # for UnknownType
+    kwargs = fields.Dict(required=False, allow_none=True)
+
+    # for StringValueType
     template = fields.String(required=False, allow_none=True)
     params = fields.Dict(required=False, allow_none=True)
-    schema = fields.Dict(required=False, allow_none=True)
 
     # for TableType
     header = fields.Dict(required=False, allow_none=True)
@@ -537,7 +546,7 @@ class RenderedAtomicValueSchema(Schema):
     table = fields.List(fields.List(fields.Dict, required=False, allow_none=True))
 
     # for GraphType
-    graph = fields.String(required=False, allow_none=True)
+    graph = fields.Dict(required=False, allow_none=True)
 
     @post_load
     def create_value_obj(self, data, **kwargs):
