@@ -47,8 +47,27 @@ class CloudDataContext(AbstractDataContext):
         )
         super().__init__(runtime_environment=runtime_environment)
 
+    @property
+    def ge_cloud_config(self) -> Optional[GeCloudConfig]:
+        return self._ge_cloud_config
+
+    @property
+    def ge_cloud_mode(self) -> bool:
+        return self._ge_cloud_mode
+
     def _init_variables(self) -> CloudDataContextVariables:
         raise NotImplementedError
+
+    def _construct_data_context_id(self) -> str:
+        """
+        Choose the id of the currently-configured expectations store, if available and a persistent store.
+        If not, it should choose the id stored in DataContextConfig.
+        Returns:
+            UUID to use as the data_context_id
+        """
+
+        # if in ge_cloud_mode, use ge_cloud_organization_id
+        return self.ge_cloud_config.organization_id
 
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None

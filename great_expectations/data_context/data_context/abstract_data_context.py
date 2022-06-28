@@ -9,24 +9,37 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import Dict, List, Mapping, Optional, Union, cast
 
+from ruamel.yaml.comments import CommentedMap
+
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.store import Store
+from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
+    AnonymizedUsageStatisticsConfig,
+    ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
+    DatasourceConfig,
     anonymizedUsageStatisticsSchema,
+    datasourceConfigSchema,
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
+    instantiate_class_from_config,
     substitute_all_config_variables,
     substitute_config_variable,
 )
+from great_expectations.datasource import LegacyDatasource
+from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.util import load_class, verify_dynamic_loading_support
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
@@ -120,9 +133,40 @@ class AbstractDataContext(ABC):
         self._stores = {}
         self._init_stores(self.project_config_with_variables_substituted.stores)
 
+        # Init data_context_id
+        self._data_context_id = self._construct_data_context_id()
+
+        # Override the project_config data_context_id if an expectations_store was already set up
+        self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
+        self._initialize_usage_statistics(
+            self.project_config_with_variables_substituted.anonymous_usage_statistics
+        )
+
+        # Store cached datasources but don't init them
+        self._cached_datasources = {}
+
+        # Build the datasources we know about and have access to
+        self._init_datasources()
+
     @abstractmethod
     def _init_variables(self) -> None:
         raise NotImplementedError
+
+    def _construct_data_context_id(self) -> str:
+        # Choose the id of the currently-configured expectations store, if it is a persistent store
+        # overrridden in CloudDataContext : Note for Review
+        expectations_store = self._stores[
+            self.project_config_with_variables_substituted.expectations_store_name
+        ]
+        if isinstance(expectations_store.store_backend, TupleStoreBackend):
+            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
+            return expectations_store.store_backend_id_warnings_suppressed
+
+        # Otherwise choose the id stored in the project_config
+        else:
+            return (
+                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+            )
 
     # Properties
     @property
@@ -289,6 +333,59 @@ class AbstractDataContext(ABC):
                 f'Attempted to access the Profiler store named "{profiler_store_name}", which is not a configured store.'
             )
 
+    @property
+    def concurrency(self) -> Optional[ConcurrencyConfig]:
+        return self.project_config_with_variables_substituted.concurrency
+
+    def add_datasource(
+        self, name: str, initialize: bool = True, **kwargs: dict
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+        """Add a new datasource to the data context, with configuration provided as kwargs.
+        Args:
+            name: the name for the new datasource to add
+            initialize: if False, add the datasource to the config, but do not
+                initialize it, for example if a user needs to debug database connectivity.
+            kwargs (keyword arguments): the configuration for the new datasource
+
+        Returns:
+            datasource (Datasource)
+        """
+        logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
+
+        module_name: str = kwargs.get("module_name", "great_expectations.datasource")
+        verify_dynamic_loading_support(module_name=module_name)
+        class_name: Optional[str] = kwargs.get("class_name")
+        datasource_class = load_class(module_name=module_name, class_name=class_name)
+
+        # For any class that should be loaded, it may control its configuration construction
+        # by implementing a classmethod called build_configuration
+        config: Union[CommentedMap, dict]
+        if hasattr(datasource_class, "build_configuration"):
+            config = datasource_class.build_configuration(**kwargs)
+        else:
+            config = kwargs
+
+        datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = self._instantiate_datasource_from_config_and_update_project_config(
+            name=name,
+            config=config,
+            initialize=initialize,
+        )
+        return datasource
+
+    def update_return_obj(self, data_asset, return_obj):
+        """Helper called by data_asset.
+
+        Args:
+            data_asset: The data_asset whose validation produced the current return object
+            return_obj: the return object to update
+
+        Returns:
+            return_obj: the return object, potentially changed into a widget by the configured expectation explorer
+        """
+        return return_obj
+
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
     ) -> DataContextConfig:
@@ -356,6 +453,63 @@ class AbstractDataContext(ABC):
         return [
             store for store in self.list_stores() if store["name"] in active_store_names
         ]
+
+    def get_datasource(
+        self, datasource_name: str = "default"
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+        """Get the named datasource
+
+        Args:
+            datasource_name (str): the name of the datasource from the configuration
+
+        Returns:
+            datasource (Datasource)
+        """
+        if datasource_name in self._cached_datasources:
+            return self._cached_datasources[datasource_name]
+
+        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
+            datasource_name=datasource_name
+        )
+
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        substitutions: dict = self._determine_substitutions()
+        config = substitute_all_config_variables(
+            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        )
+
+        datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = self._instantiate_datasource_from_config(
+            name=datasource_name, config=config
+        )
+        self._cached_datasources[datasource_name] = datasource
+        return datasource
+
+    def list_datasources(self) -> List[dict]:
+        """List currently-configured datasources on this context. Masks passwords.
+
+        Returns:
+            List(dict): each dictionary includes "name", "class_name", and "module_name" keys
+        """
+        datasources: List[dict] = []
+        substitutions: dict = self._determine_substitutions()
+        datasource_name: str
+        for datasource_name in self._datasource_store.list_keys():
+            datasource_config: DatasourceConfig = (
+                self._datasource_store.retrieve_by_name(datasource_name)
+            )
+            datasource_dict: dict = datasource_config.to_json_dict()
+            datasource_dict["name"] = datasource_name
+            substituted_config: dict = cast(
+                dict,
+                substitute_all_config_variables(
+                    datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+                ),
+            )
+            masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
+            datasources.append(masked_config)
+        return datasources
 
     @staticmethod
     def _default_profilers_exist(directory_path: Optional[str]) -> bool:
@@ -687,3 +841,116 @@ class AbstractDataContext(ABC):
         }
 
         return substitutions
+
+    def _initialize_usage_statistics(
+        self, usage_statistics_config: AnonymizedUsageStatisticsConfig
+    ) -> None:
+        """Initialize the usage statistics system."""
+        if not usage_statistics_config.enabled:
+            logger.info("Usage statistics is disabled; skipping initialization.")
+            self._usage_statistics_handler = None
+            return
+
+        self._usage_statistics_handler = UsageStatisticsHandler(
+            data_context=self,
+            data_context_id=self._data_context_id,
+            usage_statistics_url=usage_statistics_config.usage_statistics_url,
+        )
+
+    def _init_datasources(self) -> None:
+        for datasource_name in self._datasource_store.list_keys():
+            try:
+                datasource: Datasource = self.get_datasource(
+                    datasource_name=datasource_name
+                )
+                self._cached_datasources[datasource_name] = datasource
+            except ge_exceptions.DatasourceInitializationError as e:
+                logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
+                # this error will happen if our configuration contains datasources that GE can no longer connect to.
+                # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
+                # caught at the context.get_batch() step. So we just pass here.
+                pass
+
+    def _instantiate_datasource_from_config(
+        self, name: str, config: Union[dict, DatasourceConfig]
+    ) -> Union[LegacyDatasource, BaseDatasource]:
+        """Instantiate a new datasource to the data context, with configuration provided as kwargs.
+        Args:
+            name(str): name of datasource
+            config(dict): dictionary of configuration
+
+        Returns:
+            datasource (Datasource)
+        """
+        # We perform variable substitution in the datasource's config here before using the config
+        # to instantiate the datasource object. Variable substitution is a service that the data
+        # context provides. Datasources should not see unsubstituted variables in their config.
+
+        try:
+            datasource: Union[
+                LegacyDatasource, BaseDatasource
+            ] = self._build_datasource_from_config(name=name, config=config)
+        except Exception as e:
+            raise ge_exceptions.DatasourceInitializationError(
+                datasource_name=name, message=str(e)
+            )
+        return datasource
+
+    def _build_datasource_from_config(
+        self, name: str, config: Union[dict, DatasourceConfig]
+    ):
+        # We convert from the type back to a dictionary for purposes of instantiation
+        if isinstance(config, DatasourceConfig):
+            config = datasourceConfigSchema.dump(config)
+        config.update({"name": name})
+        # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
+        if config["class_name"] in [
+            "BaseDatasource",
+            "Datasource",
+        ]:
+            config.update({"data_context_root_directory": self.root_directory})
+        module_name = "great_expectations.datasource"
+        datasource = instantiate_class_from_config(
+            config=config,
+            runtime_environment={"data_context": self, "concurrency": self.concurrency},
+            config_defaults={"module_name": module_name},
+        )
+        if not datasource:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=config["class_name"],
+            )
+        return datasource
+
+    def _instantiate_datasource_from_config_and_update_project_config(
+        self, name: str, config: dict, initialize: bool = True
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+            CommentedMap(**config)
+        )
+
+        self._datasource_store.set_by_name(
+            datasource_name=name, datasource_config=datasource_config
+        )
+
+        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
+        substitutions: dict = self._determine_substitutions()
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        substituted_config: dict = substitute_all_config_variables(
+            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        )
+
+        datasource: Optional[Union[LegacyDatasource, BaseDatasource]] = None
+        if initialize:
+            try:
+                datasource = self._instantiate_datasource_from_config(
+                    name=name, config=substituted_config
+                )
+                self._cached_datasources[name] = datasource
+            except ge_exceptions.DatasourceInitializationError as e:
+                # Do not keep configuration that could not be instantiated.
+                self._datasource_store.delete_by_name(datasource_name=name)
+                raise e
+
+        return datasource
