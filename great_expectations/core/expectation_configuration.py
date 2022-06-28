@@ -31,7 +31,10 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-from great_expectations.render.types import RenderedAtomicContentSchema
+from great_expectations.render.types import (
+    RenderedAtomicContent,
+    RenderedAtomicContentSchema,
+)
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -951,7 +954,7 @@ class ExpectationConfiguration(SerializableDictDot):
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
-        rendered_content: Optional[List[Any]] = None,
+        rendered_content: Optional[List[RenderedAtomicContent]] = None,
     ) -> None:
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -1210,14 +1213,6 @@ class ExpectationConfiguration(SerializableDictDot):
         )
         runtime_kwargs.update(success_kwargs)
         return runtime_kwargs
-
-    # def render(self) -> None:
-    #     """Renders content using the prescriptive renderer for this expectation configuration to self.rendered_content.
-    #
-    #     If an atomic renderer is defined, only atomic renderers will be returned.
-    #     Otherwise, only legacy renderers will be returned.
-    #     """
-    #     self.rendered_content = self._inline_renderer.render()
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"
