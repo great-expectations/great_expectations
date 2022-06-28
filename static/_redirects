@@ -191,3 +191,5 @@
 /docs/guides/connecting_to_your_data/advanced/database_credentials https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
 
 /docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_airflow
+
+/docs/guides/expectations/how_to_create_and_edit_expectations_in_bulk.md https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file
