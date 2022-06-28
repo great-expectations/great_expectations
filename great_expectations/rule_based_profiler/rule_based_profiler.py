@@ -1111,7 +1111,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+            key = GeCloudIdentifier(resource_type="checkpoint", ge_cloud_id=ge_cloud_id)
         else:
             key = ConfigurationIdentifier(
                 configuration_key=config.name,
@@ -1160,7 +1160,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+            key = GeCloudIdentifier(resource_type="checkpoint", ge_cloud_id=ge_cloud_id)
         else:
             key = ConfigurationIdentifier(
                 configuration_key=name,
@@ -1208,7 +1208,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+            key = GeCloudIdentifier(resource_type="checkpoint", ge_cloud_id=ge_cloud_id)
         else:
             key = ConfigurationIdentifier(configuration_key=name)
 

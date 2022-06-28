@@ -215,7 +215,7 @@ class ExpectationsStore(Store):
         )
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
-                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+                resource_type="checkpoint", ge_cloud_id=str(uuid.uuid4())
             )
         else:
             test_key: ExpectationSuiteIdentifier = self.key_class(test_key_name)

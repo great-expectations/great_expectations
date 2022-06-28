@@ -32,7 +32,7 @@ class ProfilerStore(ConfigurationStore):
         test_key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
             test_key = self.key_class(
-                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+                resource_type="checkpoint", ge_cloud_id=str(uuid.uuid4())
             )
         else:
             test_key = self.key_class(configuration_key=test_profiler_name)

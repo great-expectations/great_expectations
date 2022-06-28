@@ -1333,7 +1333,7 @@ def test_GeCloudStoreBackend():
         "access_token": "1234",
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
-    ge_cloud_resource_type = "contract"
+    ge_cloud_resource_type = "checkpoint"
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
@@ -1352,12 +1352,12 @@ def test_GeCloudStoreBackend():
             ge_cloud_credentials=ge_cloud_credentials,
             ge_cloud_resource_type=ge_cloud_resource_type,
         )
-        my_store_backend.set(("contract", ""), my_simple_checkpoint_config_serialized)
+        my_store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
             json={
                 "data": {
-                    "type": "contract",
+                    "type": "checkpoint",
                     "attributes": {
                         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
                         "checkpoint_config": OrderedDict(
@@ -1397,7 +1397,7 @@ def test_GeCloudStoreBackend():
             )
             my_store_backend.get(
                 (
-                    "contract",
+                    "checkpoint",
                     "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                 )
             )
@@ -1438,7 +1438,7 @@ def test_GeCloudStoreBackend():
             )
             my_store_backend.remove_key(
                 (
-                    "contract",
+                    "checkpoint",
                     "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                 )
             )
@@ -1448,7 +1448,7 @@ def test_GeCloudStoreBackend():
                 "-8a42-3c35cce574c6",
                 json={
                     "data": {
-                        "type": "contract",
+                        "type": "checkpoint",
                         "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                         "attributes": {"deleted": True},
                     }

@@ -347,7 +347,7 @@ class BaseCheckpoint(ConfigPeer):
             checkpoint_identifier = None
             if self.data_context.ge_cloud_mode:
                 checkpoint_identifier = GeCloudIdentifier(
-                    resource_type="contract", ge_cloud_id=str(self.ge_cloud_id)
+                    resource_type="checkpoint", ge_cloud_id=str(self.ge_cloud_id)
                 )
 
             operator_run_kwargs = {}

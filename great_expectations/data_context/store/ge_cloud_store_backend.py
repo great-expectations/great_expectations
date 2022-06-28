@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     PAYLOAD_ATTRIBUTES_KEYS = {
         "suite_validation_result": "result",
-        "contract": "checkpoint_config",
+        "checkpoint": "checkpoint_config",
         "datasource": "datasource_config",
         "data_context": "data_context_config",
         "expectation_suite": "suite",

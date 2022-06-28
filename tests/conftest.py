@@ -2456,7 +2456,9 @@ def ge_cloud_profiler_id() -> str:
 
 @pytest.fixture
 def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
-    return GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_profiler_id)
+    return GeCloudIdentifier(
+        resource_type="checkpoint", ge_cloud_id=ge_cloud_profiler_id
+    )
 
 
 @pytest.fixture
