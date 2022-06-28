@@ -146,7 +146,7 @@ validator.expect_table_row_count_to_be_between(
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # <snippet>
-no_nesting = f"""
+no_nesting = """
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint

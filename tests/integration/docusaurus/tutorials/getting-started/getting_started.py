@@ -21,7 +21,7 @@ assert context
 # First configure a new Datasource and add to DataContext
 
 # <snippet>
-datasource_yaml = f"""
+datasource_yaml = """
 name: getting_started_datasource
 class_name: Datasource
 execution_engine:
@@ -123,7 +123,7 @@ validator.expectation_suite = suite
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv
-my_checkpoint_config = f"""
+my_checkpoint_config = """
 name: getting_started_checkpoint
 config_version: 1.0
 class_name: SimpleCheckpoint
@@ -165,7 +165,7 @@ assert checkpoint_result.run_results
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
 # <snippet>
-yaml_config = f"""
+yaml_config = """
 name: getting_started_checkpoint
 config_version: 1.0
 class_name: SimpleCheckpoint

@@ -7,7 +7,7 @@ CONNECTION_STRING = "sqlite:///data/yellow_tripdata.db"
 
 context = ge.get_context()
 
-datasource_yaml = f"""
+datasource_yaml = """
 name: my_sqlite_datasource
 class_name: Datasource
 execution_engine:

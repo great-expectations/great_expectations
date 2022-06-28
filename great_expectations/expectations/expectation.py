@@ -1254,7 +1254,7 @@ class Expectation(metaclass=MetaExpectation):
             )
             print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
             if error_message is None:
-                print(f"  PASSED")
+                print("  PASSED")
                 test_passed = True
                 error_diagnostics = None
             else:

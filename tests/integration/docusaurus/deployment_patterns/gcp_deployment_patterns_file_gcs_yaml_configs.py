@@ -215,7 +215,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # adding datasource
 # <snippet>
-datasource_yaml = rf"""
+datasource_yaml = r"""
 name: my_gcs_datasource
 class_name: Datasource
 execution_engine:

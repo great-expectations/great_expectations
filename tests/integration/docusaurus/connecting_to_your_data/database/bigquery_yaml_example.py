@@ -25,7 +25,7 @@ context = ge.get_context()
 # </snippet>
 
 # <snippet>
-datasource_yaml = f"""
+datasource_yaml = """
 name: my_bigquery_datasource
 class_name: Datasource
 execution_engine:

@@ -515,14 +515,14 @@ class Checkpoint(BaseCheckpoint):
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
         if batch_request_contains_batch_data(batch_request=batch_request):
             raise ValueError(
-                f"""Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
+                """Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
 constructor arguments.
 """
             )
 
         if batch_request_in_validations_contains_batch_data(validations=validations):
             raise ValueError(
-                f"""Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
+                """Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
 constructor arguments.
 """
             )

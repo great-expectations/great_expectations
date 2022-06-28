@@ -266,7 +266,7 @@ def build_gallery(
     if just_installed:
         print("\n\n\n=== (Uninstalling) ===")
         logger.info(
-            f"Uninstalling packages that were installed while running this script..."
+            "Uninstalling packages that were installed while running this script..."
         )
         for req in just_installed:
             logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")
@@ -293,12 +293,12 @@ def build_gallery(
         expectation_filenames_set - registered_expectations_set - failed_to_import_set
     )
     if failed_to_import_set:
-        expectation_tracebacks.write(f"\n\n----------------\n(Not a traceback)\n")
+        expectation_tracebacks.write("\n\n----------------\n(Not a traceback)\n")
         expectation_tracebacks.write("Expectations that failed to import:\n")
         for expectation in sorted(failed_to_import_set):
             expectation_tracebacks.write(f"- {expectation}\n")
     if non_matched_filenames:
-        expectation_tracebacks.write(f"\n\n----------------\n(Not a traceback)\n")
+        expectation_tracebacks.write("\n\n----------------\n(Not a traceback)\n")
         expectation_tracebacks.write(
             "Expectation filenames that don't match their defined Expectation name:\n"
         )
@@ -309,7 +309,7 @@ def build_gallery(
             list(registered_expectations_set - expectation_filenames_set)
         )
         expectation_tracebacks.write(
-            f"\nRegistered Expectation names that don't match:\n"
+            "\nRegistered Expectation names that don't match:\n"
         )
         for exp_name in bad_names:
             expectation_tracebacks.write(f"- {exp_name}\n")
@@ -323,20 +323,18 @@ def build_gallery(
             "expectations",
             "core",
         )
-        core_expectations_filename_set = set(
-            [
-                fname.rsplit(".", 1)[0]
-                for fname in os.listdir(core_dir)
-                if fname.startswith("expect_")
-            ]
-        )
+        core_expectations_filename_set = {
+            fname.rsplit(".", 1)[0]
+            for fname in os.listdir(core_dir)
+            if fname.startswith("expect_")
+        }
         core_expectations_not_in_gallery = core_expectations_filename_set - set(
             core_expectations
         )
         if core_expectations_not_in_gallery:
-            expectation_tracebacks.write(f"\n\n----------------\n(Not a traceback)\n")
+            expectation_tracebacks.write("\n\n----------------\n(Not a traceback)\n")
             expectation_tracebacks.write(
-                f"Core Expectation files not included in core_expectations:\n"
+                "Core Expectation files not included in core_expectations:\n"
             )
             for exp_name in sorted(core_expectations_not_in_gallery):
                 expectation_tracebacks.write(f"- {exp_name}\n")

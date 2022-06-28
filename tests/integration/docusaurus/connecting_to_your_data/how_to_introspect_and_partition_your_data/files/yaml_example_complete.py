@@ -7,7 +7,7 @@ from great_expectations.core.batch import BatchRequest
 
 context = ge.get_context()
 
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource

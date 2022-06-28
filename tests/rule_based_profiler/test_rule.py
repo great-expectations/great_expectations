@@ -309,7 +309,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         domain = column_Date_domain
     else:
         raise ValueError(
-            f'Supported "domain_name" parameter values are "age" and "date".'
+            'Supported "domain_name" parameter values are "age" and "date".'
         )
 
     if value_accessor is None:
@@ -317,7 +317,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
 
     if use_value_suffix:
         fully_qualified_parameter_name_for_value = (
-            f"{fully_qualified_parameter_name}.value{value_accessor}"
+            "{fully_qualified_parameter_name}.value{value_accessor}"
         )
     else:
         fully_qualified_parameter_name_for_value = (

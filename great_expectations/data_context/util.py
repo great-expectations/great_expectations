@@ -592,7 +592,7 @@ class PasswordMasker:
         # be defensive, since it would be logical to expect this method works with DataContextConfig
         if not isinstance(config, dict):
             raise TypeError(
-                f"PasswordMasker.sanitize_config expects param `config` "
+                "PasswordMasker.sanitize_config expects param `config` "
                 + f"to be of type Dict, not of type {type(config)}"
             )
 

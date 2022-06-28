@@ -127,7 +127,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             GESqlDialect.BIGQUERY: "bigquery://",
             GESqlDialect.SNOWFLAKE: "snowflake://",
             GESqlDialect.REDSHIFT: "redshift+psycopg2://",
-            GESqlDialect.AWSATHENA: f"awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
+            GESqlDialect.AWSATHENA: "awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
             GESqlDialect.DREMIO: "dremio://",
             GESqlDialect.TERADATASQL: "teradatasql://",
             GESqlDialect.TRINO: "trino://",

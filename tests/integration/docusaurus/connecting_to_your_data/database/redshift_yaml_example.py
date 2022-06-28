@@ -25,7 +25,7 @@ load_data_into_test_database(
 
 context = ge.get_context()
 
-datasource_yaml = f"""
+datasource_yaml = """
 name: my_redshift_datasource
 class_name: Datasource
 execution_engine:

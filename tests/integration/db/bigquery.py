@@ -39,7 +39,7 @@ yaml = YAMLHandler()
 
 context: DataContext = ge.get_context()
 
-datasource_yaml: str = f"""
+datasource_yaml: str = """
 name: my_bigquery_datasource
 class_name: Datasource
 execution_engine:

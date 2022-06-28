@@ -277,7 +277,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()',
+                    condition='col("b").notnull()',
                     condition_type=RowConditionParserType.GE,
                 )
             ],
@@ -308,7 +308,7 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()',
+                    condition='col("b").notnull()',
                     condition_type=RowConditionParserType.GE,
                 )
             ],
@@ -342,11 +342,11 @@ def test_get_domain_records_with_column_domain_and_filter_conditions_raises_erro
                 "condition_parser": "great_expectations__experimental__",
                 "filter_conditions": [
                     RowCondition(
-                        condition=f'col("b").notnull()',
+                        condition='col("b").notnull()',
                         condition_type=RowConditionParserType.GE,
                     ),
                     RowCondition(
-                        condition=f'col("c").notnull()',
+                        condition='col("c").notnull()',
                         condition_type=RowConditionParserType.GE,
                     ),
                 ],
@@ -369,7 +369,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "column_B": "b",
             "row_condition": 'col("b")>2',
             "condition_parser": "great_expectations__experimental__",
-            "ignore_row_if": "both_values_are_missing",
+            "ignore_row_i": "both_values_are_missing",
         }
     )
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
@@ -393,7 +393,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "column_B": "c",
             "row_condition": 'col("b")>2',
             "condition_parser": "great_expectations__experimental__",
-            "ignore_row_if": "either_value_is_missing",
+            "ignore_row_i": "either_value_is_missing",
         }
     )
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
@@ -417,7 +417,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "column_B": "c",
             "row_condition": 'col("a")<6',
             "condition_parser": "great_expectations__experimental__",
-            "ignore_row_if": "neither",
+            "ignore_row_i": "neither",
         }
     )
     domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
@@ -453,7 +453,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "column_list": ["a", "c"],
             "row_condition": 'col("b")>2',
             "condition_parser": "great_expectations__experimental__",
-            "ignore_row_if": "all_values_are_missing",
+            "ignore_row_i": "all_values_are_missing",
         }
     )
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
