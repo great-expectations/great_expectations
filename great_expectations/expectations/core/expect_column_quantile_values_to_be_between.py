@@ -152,6 +152,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="quantile_value_ranges_estimator",
         metric_name="column.quantile_values",
+        metric_multi_batch_parameter_builder_name=None,
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs={
             "quantiles": f"{VARIABLES_KEY}quantiles",
@@ -169,7 +170,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         quantile_value_ranges_estimator_parameter_builder_config,

@@ -212,7 +212,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return domain_builder
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.PROFILER_RUN.value,
+        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN.value,
         args_payload_fn=get_profiler_run_usage_statistics,
     )
     def run(
@@ -302,6 +302,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 batch_request=batch_request,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
                 reconciliation_directives=reconciliation_directives,
+                rule_state=RuleState(),
             )
             self.rule_states.append(rule_state)
             progress_bar.update(1)
@@ -327,6 +328,14 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     "rules": effective_rules_configs,
                 },
             },
+            execution_time=sum(
+                [rule_state.execution_time for rule_state in self.rule_states]
+            ),
+            rule_execution_time={
+                rule_state.rule.name: rule_state.execution_time
+                for rule_state in self.rule_states
+            },
+            usage_statistics_handler=self._usage_statistics_handler,
         )
 
     def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
@@ -1000,13 +1009,19 @@ class BaseRuleBasedProfiler(ConfigPeer):
     ) -> Optional[Any]:
         # Property values of collections types must be unique (use set for "list"/"tuple" and "update" for dictionary).
 
-        if isinstance(dest_property_value, list):
+        if isinstance(dest_property_value, list) and isinstance(
+            source_property_value, list
+        ):
             return list(set(dest_property_value + source_property_value))
 
-        if isinstance(dest_property_value, tuple):
+        if isinstance(dest_property_value, tuple) and isinstance(
+            source_property_value, tuple
+        ):
             return tuple(set(dest_property_value + source_property_value))
 
-        if isinstance(dest_property_value, dict):
+        if isinstance(dest_property_value, dict) and isinstance(
+            source_property_value, dict
+        ):
             return dict(dest_property_value, **source_property_value)
 
         return dest_property_value
@@ -1015,6 +1030,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def run_profiler(
         data_context: "BaseDataContext",  # noqa: F821
         profiler_store: ProfilerStore,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
@@ -1030,8 +1047,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return profiler.run(
             variables=variables,
             rules=rules,
-            batch_list=None,
-            batch_request=None,
+            batch_list=batch_list,
+            batch_request=batch_request,
             recompute_existing_parameter_values=False,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )

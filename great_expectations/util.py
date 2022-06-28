@@ -77,31 +77,35 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "batch": "batches",
     "checkpoint": "checkpoints",
     "data_asset": "data_assets",
+    "datasource": "datasources",
     "expectation": "expectations",
     "expectation_suite": "expectation_suites",
     "suite_validation_result": "suite_validation_results",
     "expectation_validation_result": "expectation_validation_results",
     "contract": "contracts",
     "rendered_data_doc": "rendered_data_docs",
+    "data_context_variable": "data_context_variables",
 }
 
 PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "batches": "batch",
     "checkpoints": "checkpoint",
     "data_assets": "data_asset",
+    "datasources": "datasource",
     "expectations": "expectation",
     "expectation_suites": "expectation_suite",
     "suite_validation_results": "suite_validation_result",
     "expectation_validation_results": "expectation_validation_result",
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
+    "data_context_variables": "data_context_variable",
 }
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
-def pluralize(singular_ge_noun):
+def pluralize(singular_ge_noun: str) -> str:
     """
     Pluralizes a Great Expectations singular noun
     """
@@ -114,7 +118,7 @@ def pluralize(singular_ge_noun):
         )
 
 
-def singularize(plural_ge_noun):
+def singularize(plural_ge_noun: str) -> str:
     """
     Singularizes a Great Expectations plural noun
     """
@@ -127,7 +131,7 @@ def singularize(plural_ge_noun):
         )
 
 
-def camel_to_snake(name):
+def camel_to_snake(name: str) -> str:
     name = p1.sub(r"\1_\2", name)
     return p2.sub(r"\1_\2", name).lower()
 
@@ -180,6 +184,7 @@ def measure_execution_time(
     execution_time_holder_object_reference_name: str = "execution_time_holder",
     execution_time_property_name: str = "execution_time",
     pretty_print: bool = True,
+    include_arguments: bool = True,
 ) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
         @wraps(func)
@@ -216,11 +221,19 @@ def measure_execution_time(
                     )
 
                 if pretty_print:
-                    bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-                    call_args: OrderedDict = bound_args.arguments
-                    print(
-                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} seconds."
-                    )
+                    if include_arguments:
+                        bound_args: BoundArguments = signature(func).bind(
+                            *args, **kwargs
+                        )
+                        call_args: OrderedDict = bound_args.arguments
+                        print(
+                            f"""Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} \
+seconds."""
+                        )
+                    else:
+                        print(
+                            f"Total execution time of function {func.__name__}(): {delta_t} seconds."
+                        )
 
         return compute_delta_t
 
@@ -918,8 +931,7 @@ def validate(
                 "When providing an expectation suite, expectation_suite_name cannot also be provided."
             )
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s"
-            % (data_asset_name, expectation_suite.expectation_suite_name)
+            f"Validating data_asset_name {data_asset_name} with expectation_suite_name {expectation_suite.expectation_suite_name}"
         )
 
     # If the object is already a DataAsset type, then this is purely a convenience method
@@ -1474,6 +1486,14 @@ def get_pyathena_potential_type(type_module, type_):
         # < 2.5 column type mapping
         potential_type = type_module._TYPE_MAPPINGS.get(type_)
 
+    return potential_type
+
+
+def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
+    """
+    Leverage on Trino Package to return sqlalchemy sql type
+    """
+    potential_type = type_module.parse_sqltype(type_)
     return potential_type
 
 

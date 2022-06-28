@@ -28,7 +28,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        metric_name: Optional[str] = None,
+        metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = False,
@@ -37,7 +37,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> None:
         """
@@ -55,13 +54,11 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -150,6 +147,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                     ].conditioned_metric_values,
                     np.ndarray,
                 )
+                and metric_computation_result.attributed_resolved_metrics[
+                    0
+                ].conditioned_metric_values.ndim
+                > 1
                 and metric_computation_result.attributed_resolved_metrics[
                     0
                 ].conditioned_metric_values.shape[1]

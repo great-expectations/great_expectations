@@ -29,6 +29,12 @@ logger = logging.getLogger(__name__)
 
 
 try:
+    from shapely.geometry import Point, Polygon
+except ImportError:
+    Point = None
+    Polygon = None
+
+try:
     import sqlalchemy
     from sqlalchemy.engine.row import LegacyRow
 except ImportError:
@@ -184,6 +190,9 @@ def convert_to_json_serializable(data):
         return data.isoformat()
 
     if isinstance(data, (uuid.UUID, bytes)):
+        return str(data)
+
+    if Polygon and isinstance(data, (Point, Polygon)):
         return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
@@ -357,8 +366,7 @@ def ensure_json_serializable(data):
 
     else:
         raise InvalidExpectationConfigurationError(
-            "%s is of type %s which cannot be serialized to json"
-            % (str(data), type(data).__name__)
+            f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
         )
 
 

@@ -1,5 +1,6 @@
 import os
 from typing import Any, Dict, List, Optional, cast
+from unittest import mock
 
 import altair as alt
 import nbconvert
@@ -8,6 +9,8 @@ import pytest
 from freezegun import freeze_time
 
 from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
@@ -140,8 +143,9 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
 
     explicit_instantiation_code: str = """
     validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
         data_context=context,
+        batch_list=None,
+        batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
         component_name="onboarding_data_assistant",
@@ -203,6 +207,33 @@ def test_onboarding_data_assistant_result_serialization(
     assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 8
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_onboarding_data_assistant_result_get_expectation_suite(
+    mock_emit,
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+):
+    expectation_suite_name: str = "my_suite"
+
+    suite: ExpectationSuite = (
+        bobby_onboarding_data_assistant_result.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+    )
+
+    assert suite is not None and len(suite.expectations) > 0
+
+    assert mock_emit.call_count == 1
+
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert (
+        actual_events[-1][0][0]["event"]
+        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
+    )
+
+
 def test_onboarding_data_assistant_metrics_count(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -251,9 +282,11 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
         is not None
         for parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.values()
         for parameter_node in parameter_values_for_fully_qualified_parameter_names.values()
-        for batch_id in parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-        ].keys()
+        for batch_id in (
+            parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY]
+            if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
+            else {}
+        ).keys()
     )
 
 
@@ -270,7 +303,27 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
         batch_request=batch_request,
+        # include_column_names=include_column_names,
+        # exclude_column_names=exclude_column_names,
+        # include_column_name_suffixes=include_column_name_suffixes,
+        # exclude_column_name_suffixes=exclude_column_name_suffixes,
+        # semantic_type_filter_module_name=semantic_type_filter_module_name,
+        # semantic_type_filter_class_name=semantic_type_filter_class_name,
+        # include_semantic_types=include_semantic_types,
+        # exclude_semantic_types=exclude_semantic_types,
+        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
+        # cardinality_limit_mode=CardinalityLimitMode.REL_100,
+        # max_unique_values=max_unique_values,
+        # max_proportion_unique=max_proportion_unique,
+        # column_value_uniqueness_rule={
+        #     "success_ratio": 0.8,
+        # },
+        # column_value_nullity_rule={
+        # },
+        # column_value_nonnullity_rule={
+        # },
         numeric_columns_rule={
+            "round_decimals": 12,
             "false_positive_rate": 0.1,
             "random_seed": 43792,
         },
@@ -288,7 +341,14 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         },
         categorical_columns_rule={
             "false_positive_rate": 0.1,
+            # "round_decimals": 4,
         },
+    )
+    assert (
+        data_assistant_result.profiler_config.rules["numeric_columns_rule"][
+            "variables"
+        ]["round_decimals"]
+        == 12
     )
     assert (
         data_assistant_result.profiler_config.rules["numeric_columns_rule"][
@@ -452,8 +512,8 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
 ) -> None:
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics()
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 40  # One for each low cardinality column
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
+    assert len(column_domain_charts) == 85
 
     columns: List[str] = [
         "VendorID",
@@ -470,7 +530,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     assert find_strings_in_nested_obj(column_domain_charts, columns)
 
 
-def test_onboarding_data_assistant_plot_include_column_names_filters_output(
+def test_onboarding_data_assistant_plot_metrics_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
     include_column_names: List[str] = ["passenger_count", "trip_distance"]
@@ -478,12 +538,12 @@ def test_onboarding_data_assistant_plot_include_column_names_filters_output(
         include_column_names=include_column_names
     )
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 6  # Normally 40 without filtering
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
+    assert len(column_domain_charts) == 11  # Normally 85 without filtering
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
-def test_onboarding_data_assistant_plot_exclude_column_names_filters_output(
+def test_onboarding_data_assistant_plot_metrics_exclude_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
     exclude_column_names: List[str] = ["VendorID", "passenger_count"]
@@ -491,8 +551,38 @@ def test_onboarding_data_assistant_plot_exclude_column_names_filters_output(
         exclude_column_names=exclude_column_names
     )
 
-    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 38
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
+    assert len(column_domain_charts) == 73
+    assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
+
+
+def test_onboarding_data_assistant_plot_expectations_and_metrics_include_column_names_filters_output(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+) -> None:
+    include_column_names: List[str] = ["passenger_count", "trip_distance"]
+    plot_result: PlotResult = (
+        bobby_onboarding_data_assistant_result.plot_expectations_and_metrics(
+            include_column_names=include_column_names
+        )
+    )
+
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
+    assert len(column_domain_charts) == 11  # Normally 85 without filtering
+    assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
+
+
+def test_onboarding_data_assistant_plot_expectations_and_metrics_exclude_column_names_filters_output(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+) -> None:
+    exclude_column_names: List[str] = ["VendorID", "passenger_count"]
+    plot_result: PlotResult = (
+        bobby_onboarding_data_assistant_result.plot_expectations_and_metrics(
+            exclude_column_names=exclude_column_names
+        )
+    )
+
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
+    assert len(column_domain_charts) == 73
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
@@ -588,7 +678,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
                 "field": "month",
                 "format": "",
                 "title": "Month",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -596,7 +686,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
                 "field": "name",
                 "format": "",
                 "title": "Name",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -604,7 +694,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
                 "field": "year",
                 "format": "",
                 "title": "Year",
-                "type": AltairDataTypes.NOMINAL.value,
+                "type": AltairDataTypes.ORDINAL.value,
             }
         ),
         alt.Tooltip(
@@ -641,15 +731,15 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         ),
         alt.Tooltip(
             **{
-                "field": "column_min",
+                "field": "column_distinct_values_count",
                 "format": ",",
-                "title": "Column Min",
+                "title": "Column Distinct Values Count",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
         ),
     ]
 
-    single_column_return_chart: alt.LayerChart = plot_result.charts[2]
+    single_column_return_chart: alt.LayerChart = plot_result.charts[3]
     layer_1: alt.Chart = single_column_return_chart.layer[1]
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
@@ -696,20 +786,3 @@ def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non
         new_cell=new_cell,
         implicit=True,
     )
-
-
-def test_onboarding_data_assistant_plot_non_sequential(
-    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
-) -> None:
-    sequential: bool = False
-    plot_metrics_result: PlotResult = (
-        bobby_onboarding_data_assistant_result.plot_metrics(sequential=sequential)
-    )
-
-    assert all([chart.mark == "bar" for chart in plot_metrics_result.charts])
-
-    plot_expectations_result: PlotResult = (
-        bobby_onboarding_data_assistant_result.plot_metrics(sequential=sequential)
-    )
-
-    assert all(chart.mark == "bar" for chart in plot_expectations_result.charts)

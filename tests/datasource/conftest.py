@@ -45,6 +45,8 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
 
     engine: sa.engine.Engine = sa.create_engine(get_sqlite_connection_url(db_file_path))
     conn: sa.engine.Connection = engine.connect()
+    raw_connection = engine.raw_connection()
+    raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
 
     # Build a SqlAlchemyDataset using that database
     return SqlAlchemyExecutionEngine(
