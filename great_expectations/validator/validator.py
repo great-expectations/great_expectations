@@ -976,13 +976,11 @@ class Validator:
         result: ExpectationValidationResult
         for configuration in processed_configurations:
             try:
-                # configuration.render()
                 result = configuration.metrics_validate(
                     metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
                 )
-                result.render()
                 evrs.append(result)
             except Exception as err:
                 if catch_exceptions:

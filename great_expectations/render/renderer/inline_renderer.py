@@ -10,22 +10,26 @@ from great_expectations.render.renderer.renderer import Renderer
 class InlineRenderer(Renderer):
     def __init__(
         self,
-        render_object: Union["ExpectationConfiguration", "ExpectationValidationResult"],
+        render_objects: List[
+            Union["ExpectationConfiguration", "ExpectationValidationResult"]
+        ],
     ) -> None:
         super().__init__()
 
-        self._render_object = render_object
+        self._render_objects = render_objects
 
-    def get_atomic_rendered_content_for_object(self) -> List["RenderedAtomicContent"]:
+    def get_atomic_rendered_content_for_object(
+        self,
+        render_object: Union["ExpectationConfiguration", "ExpectationValidationResult"],
+    ) -> List["RenderedAtomicContent"]:
         """Gets RenderedAtomicContent for a given ExpectationConfiguration or ExpectationValidationResult.
+
+        Args:
+            render_object: The object to render
 
         Returns:
             A list of RenderedAtomicContent objects for a given ExpectationConfiguration or ExpectationValidationResult.
         """
-        render_object: Union[
-            "ExpectationConfiguration", "ExpectationValidationResult"
-        ] = self._render_object
-
         # This workaround was required to avoid circular imports
         render_object_type: str
         if hasattr(render_object, "expectation_type"):
@@ -44,7 +48,7 @@ class InlineRenderer(Renderer):
             expectation_type = render_object.expectation_type
             atomic_renderer_prefix = "atomic.prescriptive"
             legacy_renderer_prefix = "renderer.prescriptive"
-        else:
+        elif render_object_type == "ExpectationValidationResult":
             expectation_type = render_object.expectation_config.expectation_type
             atomic_renderer_prefix = "atomic.diagnostic"
             legacy_renderer_prefix = "renderer.diagnostic"
@@ -59,6 +63,24 @@ class InlineRenderer(Renderer):
                 renderer_prefix=legacy_renderer_prefix,
             )
 
+        rendered_content: List[
+            "RenderedAtomicContent"
+        ] = self._get_rendered_content_from_renderer_names(
+            render_object=render_object,
+            render_object_type=render_object_type,
+            renderer_names=renderer_names,
+            expectation_type=expectation_type,
+        )
+
+        return rendered_content
+
+    def _get_rendered_content_from_renderer_names(
+        self,
+        render_object: Union["ExpectationConfiguration", "ExpectationValidationResult"],
+        render_object_type: str,
+        renderer_names: List[str],
+        expectation_type: str,
+    ) -> List["RenderedAtomicContent"]:
         renderer_tuple: Optional[tuple]
         renderer_fn: Callable
         renderer_rendered_content: Union[
@@ -85,4 +107,12 @@ class InlineRenderer(Renderer):
         return rendered_content
 
     def render(self) -> List["RenderedAtomicContent"]:
-        return self.get_atomic_rendered_content_for_object()
+        render_objects: List["RenderedAtomicContent"] = self._render_objects
+
+        rendered_content: List[List["RenderedAtomicContent"]] = []
+        for render_object in render_objects:
+            rendered_content.append(
+                self.get_atomic_rendered_content_for_object(render_object=render_object)
+            )
+
+        return rendered_content

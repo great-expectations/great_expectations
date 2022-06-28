@@ -861,6 +861,7 @@ class Expectation(metaclass=MetaExpectation):
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
         )[0]
+        evr.render()
 
         return evr
 
