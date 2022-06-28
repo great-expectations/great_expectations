@@ -71,10 +71,8 @@ from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
-    DatasourceConfig,
     GeCloudConfig,
     ProgressBarsConfig,
     dataContextConfigSchema,
@@ -88,9 +86,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
-    PasswordMasker,
     instantiate_class_from_config,
-    load_class,
     parse_substitution_variable,
     substitute_all_config_variables,
 )
@@ -106,10 +102,7 @@ from great_expectations.rule_based_profiler import (
     RuleBasedProfilerResult,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.util import (
-    filter_properties_dict,
-    verify_dynamic_loading_support,
-)
+from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
