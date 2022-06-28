@@ -78,6 +78,7 @@ class ExpectationValidationResult(SerializableDictDot):
         module_name = "great_expectations.render.renderer.inline_renderer"
         self._inline_renderer = instantiate_class_from_config(
             config=inline_renderer,
+            runtime_environment={},
             config_defaults={"module_name": module_name},
         )
         if not self._inline_renderer:
