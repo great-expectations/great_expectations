@@ -12,9 +12,6 @@ from typing import Dict, List, Mapping, Optional, Union, cast
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
-)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
@@ -40,6 +37,10 @@ from great_expectations.data_context.util import (
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.util import load_class, verify_dynamic_loading_support
+
+from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
+    UsageStatisticsHandler,
+)
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
