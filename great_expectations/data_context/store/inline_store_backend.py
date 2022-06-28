@@ -208,7 +208,7 @@ class InlineStoreBackend(StoreBackend):
     ) -> Tuple[DataContextVariableSchema, Optional[str]]:
         resource_type: DataContextVariableSchema = DataContextVariableSchema(key[0])
         resource_name: Optional[str] = None
-        if len(key) > 1:
+        if len(key) > 1 and key[1]:
             resource_name = key[1]
 
         return resource_type, resource_name

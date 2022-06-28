@@ -1565,13 +1565,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     # test invalid .set
     key = DataContextVariableKey(resource_type="my_fake_variable")
     tuple_ = key.to_tuple()
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(ValueError) as e:
         inline_store_backend.set(tuple_, "a_random_string_value")
 
-    assert (
-        "Keys in InlineStoreBackend must adhere to the schema defined by DataContextVariableSchema"
-        in str(e.value)
-    )
+    assert "'my_fake_variable' is not a valid DataContextVariableSchema" in str(e.value)
 
     # test valid .set
     key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
