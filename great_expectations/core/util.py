@@ -136,6 +136,16 @@ def in_databricks() -> bool:
 
 
 def determine_progress_bar_method_by_environment() -> Callable:
+    """
+    As tqdm has specific methods for progress bar creation and iteration,
+    we require a utility to determine which method to use.
+
+    If in a Jupyter notebook, we want to use `tqdm.notebook.tqdm`. Otherwise,
+    we default to the standard `tqdm.tqdm`. Please see the docs for more information: https://tqdm.github.io/
+
+    Returns:
+        The appropriate tqdm method for the environment in question.
+    """
     from tqdm import tqdm
     from tqdm.notebook import tqdm as tqdm_notebook
 
