@@ -19,6 +19,14 @@ class InlineStoreBackend(StoreBackend):
     """
     The InlineStoreBackend enables CRUD behavior with the fields noted in a user's project config (`great_expectations.yml`).
 
+    The primary value of the InlineStoreBackend is the ability to modify either the entire config or very granular parts of it through the
+    same interface. Whether it be replacing the entire config with a new one or tweaking an individual datasource nested within the config,
+    a user of the backend is able to do so through the same key structure.
+
+    For example:
+        ("data_context", "")             -> Key used to get/set an entire config
+        ("datasources", "my_datasource") -> Key used to get/set a specific datasource named "my_datasource"
+
     It performs these actions through a reference to a DataContext instance.
     Please note that is it only to be used with file-backed DataContexts (DataContext and FileDataContext).
     """
@@ -66,12 +74,12 @@ class InlineStoreBackend(StoreBackend):
 
         project_config: DataContextConfig = self._data_context.config
 
-        if not resource_type:
+        if resource_type is DataContextVariableSchema.DATA_CONTEXT:
             return project_config
 
         variable_config: Any = project_config[resource_type]
 
-        if resource_name:
+        if resource_name is not None:
             return variable_config[resource_name]
 
         return variable_config
@@ -84,24 +92,18 @@ class InlineStoreBackend(StoreBackend):
 
         project_config: DataContextConfig = self._data_context.config
 
-        if not resource_type:
+        if resource_type is DataContextVariableSchema.DATA_CONTEXT:
             config_commented_map_from_yaml = yaml.load(value)
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
             project_config = value
+        elif resource_name is not None:
+            project_config[resource_type][resource_name] = value
         else:
-            if resource_name:
-                project_config[resource_type][resource_name] = value
-            else:
-                project_config[resource_type] = value
+            project_config[resource_type] = value
 
-        try:
-            self._data_context._save_project_config()
-        except AttributeError as e:
-            logger.warning(
-                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} is not file-system enabled: {e}"
-            )
+        self._persist_changes()
 
     def _move(
         self, source_key: Tuple[str, ...], dest_key: Tuple[str, ...], **kwargs: dict
@@ -148,7 +150,11 @@ class InlineStoreBackend(StoreBackend):
             resource_name,
         ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
 
-        if not resource_name:
+        if resource_type is DataContextVariableSchema.DATA_CONTEXT:
+            raise StoreBackendError(
+                "InlineStoreBackend does not support the deletion of the overall DataContext project config"
+            )
+        if resource_name is None:
             raise StoreBackendError(
                 "InlineStoreBackend does not support the deletion of top level keys; the DataContext's config variables schema is immutable"
             )
@@ -159,12 +165,7 @@ class InlineStoreBackend(StoreBackend):
 
         del self._data_context.config[resource_type][resource_name]
 
-        try:
-            self._data_context._save_project_config()
-        except AttributeError as e:
-            logger.warning(
-                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} is not file-system enabled: {e}"
-            )
+        self._persist_changes()
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
         (
@@ -186,24 +187,28 @@ class InlineStoreBackend(StoreBackend):
             _,
         ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
 
-        if (
-            resource_type
-            and not isinstance(resource_type, DataContextVariableSchema)
-            and not DataContextVariableSchema.has_value(resource_type)
-        ):
+        if not isinstance(
+            resource_type, DataContextVariableSchema
+        ) and not DataContextVariableSchema.has_value(resource_type):
             raise TypeError(
                 f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextVariableSchema.__name__}; invalid value ({resource_type}) of type {type(resource_type)} found"
+            )
+
+    def _persist_changes(self) -> None:
+        try:
+            self._data_context._save_project_config()
+        except AttributeError as e:
+            logger.warning(
+                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} is not file-system enabled: {e}"
             )
 
     @staticmethod
     def _determine_resource_type_and_name_from_key(
         key: Tuple[str, ...]
-    ) -> Tuple[str, str]:
-        resource_type: str = key[0]
-        resource_name: str
+    ) -> Tuple[DataContextVariableSchema, Optional[str]]:
+        resource_type: DataContextVariableSchema = DataContextVariableSchema(key[0])
+        resource_name: Optional[str] = None
         if len(key) > 1:
             resource_name = key[1]
-        else:
-            resource_name = ""
 
         return resource_type, resource_name

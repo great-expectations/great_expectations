@@ -19,6 +19,7 @@ from great_expectations.data_context.util import substitute_config_variable
 
 
 class DataContextVariableSchema(str, enum.Enum):
+    DATA_CONTEXT = "data_context"  # If retrieving/setting the entire config at once
     CONFIG_VERSION = "config_version"
     DATASOURCES = "datasources"
     EXPECTATIONS_STORE_NAME = "expectations_store_name"
@@ -52,6 +53,11 @@ class DataContextVariables(ABC):
     are persisted for future usage (i.e. filesystem I/O or HTTP request to a Cloud endpoint).
 
     Should maintain parity with the `DataContextConfig`.
+
+    Args:
+        config:        A reference to the DataContextConfig to perform CRUD on.
+        substitutions: A dictionary used to perform substitutions of ${VARIABLES}; to be used with GET requests.
+        _store:        An instance of a DataContextStore with the appropriate backend to persist config changes.
     """
 
     config: DataContextConfig
@@ -76,7 +82,9 @@ class DataContextVariables(ABC):
         """
         Generates the appropriate Store key to retrieve/store configs.
         """
-        key: ConfigurationIdentifier = ConfigurationIdentifier(configuration_key="")
+        key: ConfigurationIdentifier = ConfigurationIdentifier(
+            configuration_key=DataContextVariableSchema.DATA_CONTEXT
+        )
         return key
 
     def _set(self, attr: DataContextVariableSchema, value: Any) -> None:
@@ -400,5 +408,7 @@ class CloudDataContextVariables(DataContextVariables):
         """
         Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
         """
-        key: GeCloudIdentifier = GeCloudIdentifier(resource_type="data_context")
+        key: GeCloudIdentifier = GeCloudIdentifier(
+            resource_type=DataContextVariableSchema.DATA_CONTEXT
+        )
         return key
