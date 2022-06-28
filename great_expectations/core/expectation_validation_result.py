@@ -74,7 +74,6 @@ class ExpectationValidationResult(SerializableDictDot):
         if rendered_content is None:
             rendered_content = {}
         self.rendered_content = rendered_content
-        self._inline_renderer = None
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -200,27 +199,27 @@ class ExpectationValidationResult(SerializableDictDot):
         If an atomic renderer is defined, only atomic renderers will be returned.
         Otherwise, only legacy renderers will be returned.
         """
-        inline_renderer = {
+        inline_renderer_config = {
             "class_name": "InlineRenderer",
             "render_object": self,
         }
         module_name = "great_expectations.render.renderer.inline_renderer"
-        self._inline_renderer = instantiate_class_from_config(
-            config=inline_renderer,
+        inline_renderer = instantiate_class_from_config(
+            config=inline_renderer_config,
             runtime_environment={},
             config_defaults={"module_name": module_name},
         )
-        if not self._inline_renderer:
+        if not inline_renderer:
             raise ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=inline_renderer["class_name"],
+                class_name=inline_renderer_config["class_name"],
             )
 
         (
             self.expectation_config.rendered_content,
             self.rendered_content,
-        ) = self._inline_renderer.render()
+        ) = inline_renderer.render()
 
     @staticmethod
     def validate_result_dict(result):
