@@ -972,22 +972,6 @@ class ExpectationConfiguration(SerializableDictDot):
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
-        # inline_renderer = {
-        #     "class_name": "InlineRenderer",
-        #     "render_object": self,
-        # }
-        # module_name = "great_expectations.render.renderer.inline_renderer"
-        # self._inline_renderer = instantiate_class_from_config(
-        #     config=inline_renderer,
-        #     runtime_environment={},
-        #     config_defaults={"module_name": module_name},
-        # )
-        # if not self._inline_renderer:
-        #     raise ClassInstantiationError(
-        #         module_name=module_name,
-        #         package_name=None,
-        #         class_name=inline_renderer["class_name"],
-        #     )
         if rendered_content is None:
             rendered_content = {}
         self._rendered_content = rendered_content
