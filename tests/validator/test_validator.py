@@ -33,6 +33,7 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
     ExpectColumnValueZScoresToBeLessThan,
 )
 from great_expectations.expectations.registry import get_expectation_impl
+from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
@@ -1198,3 +1199,50 @@ def test_validator_docstrings(multi_batch_taxi_validator):
     assert expectation_impl.__doc__.startswith(
         "Expect each column value to be in a given set"
     )
+
+
+def test_validator_include_rendered_content(
+    yellow_trip_pandas_data_context,
+):
+    context: DataContext = yellow_trip_pandas_data_context
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+    )
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    column: str = "fare_amount"
+    partition_object: Dict[str, List[float]] = {
+        "values": [1.0, 2.0],
+        "weights": [0.3, 0.7],
+    }
+
+    validator_exclude_rendered_content: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite=suite,
+    )
+    validation_result: ExpectationValidationResult = (
+        validator_exclude_rendered_content.expect_column_kl_divergence_to_be_less_than(
+            column=column,
+            partition_object=partition_object,
+        )
+    )
+    assert validation_result.expectation_config.rendered_content == {}
+    assert validation_result.rendered_content == {}
+
+    validator_include_rendered_content: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite=suite,
+        include_rendered_content=True,
+    )
+    validation_result: ExpectationValidationResult = (
+        validator_include_rendered_content.expect_column_kl_divergence_to_be_less_than(
+            column=column,
+            partition_object=partition_object,
+        )
+    )
+    assert isinstance(
+        validation_result.expectation_config.rendered_content[0], RenderedAtomicContent
+    )
+    assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
