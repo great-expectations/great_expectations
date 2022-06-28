@@ -18,7 +18,9 @@ from great_expectations.core.util import (
     ensure_json_serializable,
     nested_update,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
+    ClassInstantiationError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
     ParserError,
@@ -31,8 +33,6 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-
-# from great_expectations.render.renderer import InlineRenderer
 from great_expectations.render.types import RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 
@@ -974,6 +974,22 @@ class ExpectationConfiguration(SerializableDictDot):
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
+        inline_renderer = {
+            "class_name": "InlineRenderer",
+            "render_object": self,
+        }
+        module_name = "great_expectations.render.renderer.inline_renderer"
+        self._inline_renderer = instantiate_class_from_config(
+            config=inline_renderer,
+            runtime_environment={},
+            config_defaults={"module_name": module_name},
+        )
+        if not self._inline_renderer:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=inline_renderer["class_name"],
+            )
         if rendered_content is None:
             rendered_content = {}
         self._rendered_content = rendered_content
@@ -1213,15 +1229,13 @@ class ExpectationConfiguration(SerializableDictDot):
         runtime_kwargs.update(success_kwargs)
         return runtime_kwargs
 
-    # def render(self) -> None:
-    #     """Renders content using the prescriptive renderer for this expectation configuration to self.rendered_content.
-    #
-    #     If an atomic renderer is defined, only atomic renderers will be returned.
-    #     Otherwise, only legacy renderers will be returned.
-    #     """
-    #     inline_renderer: InlineRenderer = InlineRenderer(render_object=self)
-    #
-    #     self.rendered_content = inline_renderer.render()
+    def render(self) -> None:
+        """Renders content using the prescriptive renderer for this expectation configuration to self.rendered_content.
+
+        If an atomic renderer is defined, only atomic renderers will be returned.
+        Otherwise, only legacy renderers will be returned.
+        """
+        self.rendered_content = self._inline_renderer.render()
 
     def applies_to_same_domain(
         self, other_expectation_configuration: "ExpectationConfiguration"
