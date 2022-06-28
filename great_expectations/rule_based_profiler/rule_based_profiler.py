@@ -293,10 +293,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rule: Rule
         for rule in pbar_method(
             effective_rules,
-            desc="Generating Expectations",
+            desc="Generating Expectations:",
             disable=disable,
             position=0,
             leave=True,
+            bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
         ):
             rule_state = rule.run(
                 variables=effective_variables,

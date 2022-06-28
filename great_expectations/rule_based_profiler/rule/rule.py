@@ -142,9 +142,10 @@ class Rule(SerializableDictDot):
         domain: Domain
         for domain in pbar_method(
             domains,
-            desc="Profiling Dataset",
+            desc="Profiling Dataset:",
             position=1,
             leave=False,
+            bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
         ):
             rule_state.initialize_parameter_container_for_domain(domain=domain)
 
