@@ -1,0 +1,19 @@
+
+  ___              _     ___                  _        _   _
+ / __|_ _ ___ __ _| |_  | __|_ ___ __  ___ __| |_ __ _| |_(_)___ _ _  ___
+| (_ | '_/ -_) _` |  _| | _|\ \ / '_ \/ -_) _|  _/ _` |  _| / _ \ ' \(_-<
+ \___|_| \___\__,_|\__| |___/_\_\ .__/\___\__|\__\__,_|\__|_\___/_||_/__/
+                                |_|
+             ~ Always know what to expect from your data ~
+             
+Welcome to the Great Expectations Dev-Loop container! Designed to get your
+project up and running as quickly as possible, this container ships with
+many Great Expectations dependencies pre-installed.
+
+Access your project via a Jupyter server at port 5050.
+    Note: Jupyter password is available in the terminal which started the container
+Access DataDocs at port 5055.
+
+
+As a convenience, inside the container `great_expectations` is aliased to `ge`.
+______________________________________________________________________________

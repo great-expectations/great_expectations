@@ -62,7 +62,7 @@ docker_welcome_msg = """
              
 Welcome to the Great Expectations Dev-Loop container! Designed to get your
 project up and running as quickly as possible, this container ships with
-all Great Expectations dependencies pre-installed.
+common Great Expectations dependencies pre-installed.
 
 Access your project via a Jupyter server at port 5050 (random password generated below).
 Access DataDocs at port 5055.
