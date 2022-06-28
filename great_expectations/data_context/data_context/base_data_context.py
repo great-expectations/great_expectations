@@ -1556,11 +1556,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
-
+        print("hello")
+        # this is the problem
         self._data_context._update_config_variables()
         self._apply_temporary_overrides()
 
         self._datasource_store.set_by_name(
+            datasource_name=name, datasource_config=datasource_config
+        )
+        self._data_context._datasource_store.set_by_name(
             datasource_name=name, datasource_config=datasource_config
         )
 
