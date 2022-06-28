@@ -850,6 +850,7 @@ class Expectation(metaclass=MetaExpectation):
         interactive_evaluation=True,
         data_context=None,
         runtime_configuration=None,
+        include_rendered_content=False,
     ):
         if configuration is None:
             configuration = deepcopy(self.configuration)
@@ -861,7 +862,8 @@ class Expectation(metaclass=MetaExpectation):
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
         )[0]
-        evr.render()
+        if include_rendered_content:
+            evr.render()
 
         return evr
 

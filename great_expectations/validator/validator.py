@@ -148,6 +148,7 @@ class Validator:
             Any
         ] = None,  # Cannot type DataContext due to circular import
         batches: Optional[List[Batch]] = None,
+        include_rendered_content: bool = False,
         **kwargs,
     ) -> None:
         """
@@ -162,6 +163,7 @@ class Validator:
         :param expectation_suite_name (Optional[str]):
         :param data_context (Optional[DataContext]):
         :param batches (Optional[List[Batch]]):
+        :param include_rendered_content (bool):
 
         """
 
@@ -201,6 +203,8 @@ class Validator:
         ):
             # TODO: verify flow of default expectation arguments
             self.set_default_expectation_argument("include_config", True)
+
+        self._include_rendered_content = include_rendered_content
 
     def __dir__(self):
         """
