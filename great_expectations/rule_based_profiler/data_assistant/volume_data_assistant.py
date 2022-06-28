@@ -72,6 +72,8 @@ class VolumeDataAssistant(DataAssistant):
         return VolumeDataAssistantResult(
             batch_id_to_batch_identifier_display_name_map=data_assistant_result.batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
+            profiler_execution_time=data_assistant_result.profiler_execution_time,
+            rule_execution_time=data_assistant_result.rule_execution_time,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
