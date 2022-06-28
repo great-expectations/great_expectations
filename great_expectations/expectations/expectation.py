@@ -1717,18 +1717,16 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
-class TableQueryExpectation(TableExpectation, ABC):
-    metric_dependencies = ("table.query",)
-    success_keys = ("table.query",)
+class QueryExpectation(TableExpectation, ABC):
+
     default_kwarg_values = {
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
-        "query": None,
     }
 
-    domain_keys = ("batch_id", "table", "row_condition", "condition_parser", "query")
+    domain_keys = ("batch_id",)
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
@@ -1742,9 +1740,16 @@ class TableQueryExpectation(TableExpectation, ABC):
         try:
             assert (
                 "query" in configuration.kwargs or query
-            ), "'query' parameter is required for Table Query Expectations."
+            ), "'query' parameter is required for Query Expectations."
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+        try:
+            assert "{active_batch}" in query, (
+                "Your query appears to be hard-coded for a data asset. By not parameterizing your query with `{active_batch}`, "
+                "you may not be validating against your intended data asset."
+            )
+        except AssertionError as e:
+            warnings.warn(str(e), UserWarning)
 
 
 class ColumnExpectation(TableExpectation, ABC):

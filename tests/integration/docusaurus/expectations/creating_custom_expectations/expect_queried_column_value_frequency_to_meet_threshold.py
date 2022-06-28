@@ -4,7 +4,7 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_query_expectations
 """
 
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
@@ -13,17 +13,27 @@ from great_expectations.exceptions.exceptions import (
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
-    TableQueryExpectation,
+    QueryExpectation,
 )
 
 
-class ExpectQueriedColumnValueFrequencyToMeetThreshold(TableQueryExpectation):
+class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
 
+    metric_dependencies = ("query.column",)
+
+    query = """
+            SELECT {col},
+            CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch})
+            FROM {active_batch}
+            GROUP BY {col}
+            """
+
     success_keys = (
-        "query",
+        "column",
         "value",
         "threshold",
+        "query",
     )
 
     default_kwarg_values = {
@@ -31,9 +41,10 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(TableQueryExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
-        "query": None,
+        "column": None,
         "value": None,
         "threshold": 1,
+        "query": query,
     }
 
     def validate_configuration(
@@ -65,9 +76,10 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(TableQueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
-        query_result = metrics.get("table.query")
+        query_result = metrics.get("query.column")
         query_result = dict(query_result)
 
         if isinstance(value, list):
@@ -108,10 +120,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(TableQueryExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "query": "SELECT col2, "
-                        "CAST(COUNT(col2) AS float) / (SELECT COUNT(col2) FROM test) "
-                        "FROM test "
-                        "GROUP BY col2",
+                        "column": "col2",
                         "value": "a",
                         "threshold": 0.6,
                     },
@@ -123,10 +132,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(TableQueryExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "query": "SELECT col1, "
-                        "CAST(COUNT(col1) AS float) / (SELECT COUNT(col1) FROM test) "
-                        "FROM test "
-                        "GROUP BY col1",
+                        "column": "col1",
                         "value": 2,
                         "threshold": 1,
                     },
@@ -138,12 +144,27 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(TableQueryExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "query": "SELECT col2, "
-                        "CAST(COUNT(col2) AS float) / (SELECT COUNT(col2) FROM test) "
-                        "FROM test "
-                        "GROUP BY col2",
+                        "column": "col2",
                         "value": ["a", "b"],
                         "threshold": [0.6, 0.4],
+                    },
+                    "out": {"success": True},
+                    "only_for": ["postgresql"],
+                },
+                {
+                    "title": "multi_value_positive_test_static_data_asset",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "col2",
+                        "value": ["a", "b"],
+                        "threshold": [0.6, 0.4],
+                        "query": """
+                                 SELECT {col},
+                                 CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM test)
+                                 FROM test
+                                 GROUP BY {col}
+                                 """,
                     },
                     "out": {"success": True},
                     "only_for": ["postgresql"],
