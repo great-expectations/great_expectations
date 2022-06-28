@@ -199,7 +199,7 @@ class ExpectationValidationResult(SerializableDictDot):
         """
         inline_renderer = {
             "class_name": "InlineRenderer",
-            "render_objects": [self, self.expectation_config],
+            "render_object": self,
         }
         module_name = "great_expectations.render.renderer.inline_renderer"
         self._inline_renderer = instantiate_class_from_config(

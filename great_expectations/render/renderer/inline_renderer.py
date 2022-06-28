@@ -10,13 +10,11 @@ from great_expectations.render.renderer.renderer import Renderer
 class InlineRenderer(Renderer):
     def __init__(
         self,
-        render_objects: List[
-            Union["ExpectationConfiguration", "ExpectationValidationResult"]
-        ],
+        render_object: "ExpectationValidationResult",
     ) -> None:
         super().__init__()
 
-        self._render_objects = render_objects
+        self._render_object = render_object
 
     def get_atomic_rendered_content_for_object(
         self,
@@ -107,12 +105,8 @@ class InlineRenderer(Renderer):
         return rendered_content
 
     def render(self) -> List["RenderedAtomicContent"]:
-        render_objects: List["RenderedAtomicContent"] = self._render_objects
+        render_object: "ExpectationValidationResult" = self._render_object
 
-        rendered_content: List[List["RenderedAtomicContent"]] = []
-        for render_object in render_objects:
-            rendered_content.append(
-                self.get_atomic_rendered_content_for_object(render_object=render_object)
-            )
-
-        return rendered_content
+        return self.get_atomic_rendered_content_for_object(
+            render_object=render_object.expectation_config
+        ), self.get_atomic_rendered_content_for_object(render_object=render_object)
