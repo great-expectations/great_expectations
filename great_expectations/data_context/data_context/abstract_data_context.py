@@ -166,8 +166,8 @@ class AbstractDataContext(ABC):
 
     # Properties
     @property
-    def instance_id(self):
-        instance_id = self.config_variables.get("instance_id")
+    def instance_id(self) -> str:
+        instance_id: Optional[str] = self.config_variables.get("instance_id")
         if instance_id is None:
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
@@ -636,7 +636,7 @@ class AbstractDataContext(ABC):
             for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
                 config = configparser.ConfigParser()
                 config.read(config_path)
-                config_value = config.get(
+                config_value: Optional[str] = config.get(
                     conf_file_section, conf_file_option, fallback=None
                 )
                 if config_value:
