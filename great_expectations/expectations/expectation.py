@@ -850,8 +850,9 @@ class Expectation(metaclass=MetaExpectation):
         interactive_evaluation=True,
         data_context=None,
         runtime_configuration=None,
-        include_rendered_content=False,
     ):
+        include_rendered_content: bool = validator._include_rendered_content
+
         if configuration is None:
             configuration = deepcopy(self.configuration)
 
