@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import Optional
+from typing import Dict, Optional, Union
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
@@ -199,11 +199,11 @@ class ExpectationValidationResult(SerializableDictDot):
         If an atomic renderer is defined, only atomic renderers will be returned.
         Otherwise, only legacy renderers will be returned.
         """
-        inline_renderer_config = {
+        inline_renderer_config: Dict[str, Union[str, ExpectationValidationResult]] = {
             "class_name": "InlineRenderer",
             "render_object": self,
         }
-        module_name = "great_expectations.render.renderer.inline_renderer"
+        module_name: str = "great_expectations.render.renderer.inline_renderer"
         inline_renderer = instantiate_class_from_config(
             config=inline_renderer_config,
             runtime_environment={},

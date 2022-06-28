@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -60,7 +60,7 @@ class InlineRenderer(Renderer):
             )
 
         rendered_content: List[
-            "RenderedAtomicContent"
+            RenderedAtomicContent
         ] = self._get_rendered_content_from_renderer_names(
             render_object=render_object,
             renderer_names=renderer_names,
@@ -100,8 +100,8 @@ class InlineRenderer(Renderer):
 
         return rendered_content
 
-    def render(self) -> List["RenderedAtomicContent"]:
-        render_object: "ExpectationValidationResult" = self._render_object
+    def render(self) -> Tuple[List[RenderedAtomicContent], List[RenderedAtomicContent]]:
+        render_object: ExpectationValidationResult = self._render_object
 
         return self.get_atomic_rendered_content_for_object(
             render_object=render_object.expectation_config
