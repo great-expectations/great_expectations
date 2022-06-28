@@ -1502,6 +1502,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def add_datasource(
         self, name: str, initialize: bool = True, **kwargs: dict
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+        """
+
+        Args:
+            name ():
+            initialize ():
+            **kwargs ():
+
+        Returns:
+
+        """
         new_datasource = super().add_datasource(name, initialize, **kwargs)
         self._apply_temporary_overrides()
         return new_datasource
