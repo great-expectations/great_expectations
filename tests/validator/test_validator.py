@@ -1242,9 +1242,11 @@ def test_validator_include_rendered_content(
             partition_object=partition_object,
         )
     )
+    assert len(validation_result.expectation_config.rendered_content) == 1
     assert isinstance(
         validation_result.expectation_config.rendered_content[0], RenderedAtomicContent
     )
+    assert len(validation_result.rendered_content) == 1
     assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
 
 

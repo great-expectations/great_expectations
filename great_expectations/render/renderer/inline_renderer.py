@@ -54,7 +54,7 @@ class InlineRenderer(Renderer):
 
         rendered_content: List[
             RenderedAtomicContent
-        ] = self._get_rendered_content_from_renderer_names(
+        ] = self._get_atomic_rendered_content_from_renderer_names(
             render_object=render_object,
             renderer_names=renderer_names,
             expectation_type=expectation_type,
@@ -62,36 +62,62 @@ class InlineRenderer(Renderer):
 
         return rendered_content
 
-    def _get_rendered_content_from_renderer_names(
+    def _get_atomic_rendered_content_from_renderer_names(
         self,
         render_object: Union[ExpectationConfiguration, ExpectationValidationResult],
         renderer_names: List[str],
         expectation_type: str,
     ) -> List[RenderedAtomicContent]:
-        renderer_tuple: Optional[tuple]
-        renderer_fn: Callable
-        renderer_rendered_content: Union[
-            RenderedAtomicContent, List[RenderedAtomicContent]
-        ]
+        default_prescriptive_renderer_name: str = "atomic.prescriptive.kwargs"
         rendered_content: List[RenderedAtomicContent] = []
-        for renderer_name in renderer_names:
-            renderer_tuple = get_renderer_impl(
-                object_name=expectation_type, renderer_type=renderer_name
-            )
-            if renderer_tuple is not None:
-                # index 0 is expectation class-name and index 1 is implementation of renderer
-                renderer_fn = renderer_tuple[1]
-                if isinstance(render_object, ExpectationConfiguration):
-                    renderer_rendered_content = renderer_fn(configuration=render_object)
-                else:
-                    renderer_rendered_content = renderer_fn(result=render_object)
 
-                if isinstance(renderer_rendered_content, list):
-                    rendered_content.extend(renderer_rendered_content)
-                else:
+        for renderer_name in renderer_names:
+            if renderer_name != default_prescriptive_renderer_name:
+                try:
+                    renderer_rendered_content = (
+                        self._get_renderer_atomic_rendered_content(
+                            render_object=render_object,
+                            renderer_name=renderer_name,
+                            expectation_type=expectation_type,
+                        )
+                    )
                     rendered_content.append(renderer_rendered_content)
+                except Exception:
+                    pass
+
+        if len(rendered_content) == 0 and isinstance(
+            render_object, ExpectationConfiguration
+        ):
+            renderer_rendered_content = (
+                InlineRenderer._get_renderer_atomic_rendered_content(
+                    render_object=render_object,
+                    renderer_name=default_prescriptive_renderer_name,
+                    expectation_type=expectation_type,
+                )
+            )
+            rendered_content.append(renderer_rendered_content)
 
         return rendered_content
+
+    @staticmethod
+    def _get_renderer_atomic_rendered_content(
+        render_object: Union[ExpectationConfiguration, ExpectationValidationResult],
+        renderer_name: str,
+        expectation_type: str,
+    ) -> Optional[RenderedAtomicContent]:
+        renderer_rendered_content: Optional[RenderedAtomicContent] = None
+        renderer_tuple: Optional[tuple] = get_renderer_impl(
+            object_name=expectation_type, renderer_type=renderer_name
+        )
+        if renderer_tuple is not None:
+            # index 0 is expectation class-name and index 1 is implementation of renderer
+            renderer_fn: Callable = renderer_tuple[1]
+            if isinstance(render_object, ExpectationConfiguration):
+                renderer_rendered_content = renderer_fn(configuration=render_object)
+            else:
+                renderer_rendered_content = renderer_fn(result=render_object)
+
+        return renderer_rendered_content
 
     def render(self) -> Tuple[List[RenderedAtomicContent], List[RenderedAtomicContent]]:
         render_object: ExpectationValidationResult = self._render_object

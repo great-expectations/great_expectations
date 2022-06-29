@@ -204,9 +204,8 @@ class Expectation(metaclass=MetaExpectation):
         raise NotImplementedError
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.summary")
-    @render_evaluation_parameter_string
-    def _prescriptive_summary(
+    @renderer(renderer_type="atomic.prescriptive.kwargs")
+    def _prescriptive_kwargs(
         cls,
         configuration=None,
         result=None,
@@ -221,9 +220,73 @@ class Expectation(metaclass=MetaExpectation):
             {"schema": {"type": "UnknownType"}, "kwargs": configuration.kwargs}
         )
         rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.summary",
+            name="atomic.prescriptive.kwargs",
             value=value_obj,
             value_type="UnknownType",
+        )
+        return rendered
+
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        """
+        Template function that contains the logic that is shared by atomic.prescriptive.summary (GE Cloud) and
+        renderer.prescriptive (OSS GE)
+        """
+        if runtime_configuration is None:
+            runtime_configuration = {}
+
+        styling = runtime_configuration.get("styling")
+
+        template_str = "$expectation_type(**$kwargs)"
+
+        params_with_json_schema = {
+            "expectation_type": {
+                "schema": {"type": "string"},
+                "value": configuration.expectation_type,
+            },
+            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+        }
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    @render_evaluation_parameter_string
+    def _prescriptive_summary(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        (
+            template_str,
+            params_with_json_schema,
+            styling,
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": template_str,
+                "params": params_with_json_schema,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=value_obj,
+            value_type="StringValueType",
         )
         return rendered
 
