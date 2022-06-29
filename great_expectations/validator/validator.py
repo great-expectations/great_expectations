@@ -158,7 +158,7 @@ class Validator:
         Additionally, note that Validators are used by Checkpoints under-the-hood.
 
         Args:
-            execution_engine: The ExecutionEngine to be used to perform validation
+            execution_engine: The ExecutionEngine to be used to perform validation.
             interactive_evaluation: Whether the Validator should perform evaluation when Expectations are added.
             expectation_suite: The ExpectationSuite to validate.
             expectation_suite_name: The name of the ExpectationSuite to validate.

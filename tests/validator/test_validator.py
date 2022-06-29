@@ -1246,3 +1246,49 @@ def test_validator_include_rendered_content(
         validation_result.expectation_config.rendered_content[0], RenderedAtomicContent
     )
     assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
+
+
+def test_validator_include_rendered_content_evaluation_parameters(
+    yellow_trip_pandas_data_context,
+):
+    context: DataContext = yellow_trip_pandas_data_context
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+    )
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite=suite,
+        include_rendered_content=True,
+    )
+
+    validator.set_evaluation_parameter("upstream_row_count", 10000)
+
+    validation_result: ExpectationValidationResult = (
+        validator.expect_table_row_count_to_equal(
+            value={"$PARAMETER": "upstream_row_count"},
+            result_format={"result_format": "BOOLEAN_ONLY"},
+        )
+    )
+
+    assert (
+        validation_result.expectation_config.rendered_content[0].value.kwargs["value"]
+        == 10000
+    )
+
+    validator.set_evaluation_parameter("upstream_row_count", 8000)
+
+    validation_result: ExpectationValidationResult = (
+        validator.expect_table_row_count_to_equal(
+            value={"$PARAMETER": "upstream_row_count"},
+            result_format={"result_format": "BOOLEAN_ONLY"},
+        )
+    )
+
+    assert (
+        validation_result.expectation_config.rendered_content[0].value.kwargs["value"]
+        == 8000
+    )

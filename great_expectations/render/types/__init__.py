@@ -533,9 +533,6 @@ class RenderedAtomicValueSchema(Schema):
 
     schema = fields.Dict(required=False, allow_none=True)
 
-    # for UnknownType
-    kwargs = fields.Dict(required=False, allow_none=True)
-
     # for StringValueType
     template = fields.String(required=False, allow_none=True)
     params = fields.Dict(required=False, allow_none=True)
@@ -547,6 +544,9 @@ class RenderedAtomicValueSchema(Schema):
 
     # for GraphType
     graph = fields.Dict(required=False, allow_none=True)
+
+    # for UnknownType
+    kwargs = fields.Dict(required=False, allow_none=True)
 
     @post_load
     def create_value_obj(self, data, **kwargs):
