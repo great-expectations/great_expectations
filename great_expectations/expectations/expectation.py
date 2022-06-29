@@ -214,7 +214,7 @@ class Expectation(metaclass=MetaExpectation):
         **kwargs,
     ):
         """
-        Rendering function that is utilized by GE Cloud Front-end
+        Default rendering function that is utilized by GE Cloud Front-end if no other atomic renderers apply
         """
         value_obj = renderedAtomicValueSchema.load(
             {"schema": {"type": "UnknownType"}, "kwargs": configuration.kwargs}
@@ -756,10 +756,9 @@ class Expectation(metaclass=MetaExpectation):
             if not include_rendered_content:
                 evr = raw_response
             else:
-                evr = ExpectationValidationResult(
-                    result=raw_response,
-                    include_rendered_content=include_rendered_content,
-                )
+                raw_response_dict = raw_response.to_json_dict()
+                raw_response_dict["include_rendered_content"] = include_rendered_content
+                evr = ExpectationValidationResult(**raw_response)
             evr.expectation_config = configuration
         return evr
 
