@@ -1,10 +1,13 @@
+import logging
 import subprocess
 from collections import defaultdict
 from typing import Dict, List, Optional
 
 TYPE_HINT_ERROR_THRESHOLD: int = (
-    2545  # This number is to be reduced as we annotate more functions!
+    2529  # This number is to be reduced as we annotate more functions!
 )
+
+logger = logging.getLogger(__name__)
 
 
 def get_changed_files(branch: str) -> List[str]:
@@ -107,6 +110,11 @@ def render_deviations(changed_files: List[str], deviations: List[str]) -> None:
         threshold_is_surpassed is False
     ), f"""A function without proper type annotations was introduced; please resolve the matter before merging.
                 We expect there to be {TYPE_HINT_ERROR_THRESHOLD} or fewer violations of the style guide (actual: {error_count})"""
+
+    if TYPE_HINT_ERROR_THRESHOLD != error_count:
+        logger.warning(
+            f"The threshold needs to be updated! {TYPE_HINT_ERROR_THRESHOLD} should be reduced to {error_count}"
+        )
 
 
 def _build_deviations_dict(mypy_results: List[str]) -> Dict[str, List[str]]:

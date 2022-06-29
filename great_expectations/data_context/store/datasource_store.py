@@ -61,15 +61,15 @@ class DatasourceStore(Store):
         ]
         return [key for key in keys_without_store_backend_id]
 
-    def remove_key(self, key: Tuple[str, str]) -> None:
+    def remove_key(self, key: DataContextVariableKey) -> None:
         """
         See parent `Store.remove_key()` for more information
         """
-        return self._store_backend.remove_key(key)
+        return self._store_backend.remove_key(key.to_tuple())
 
     def serialize(
         self, key: Optional[Any], value: DatasourceConfig
-    ) -> Union[str, dict]:
+    ) -> Union[str, DatasourceConfig]:
         """
         See parent 'Store.serialize()' for more information
         """
@@ -77,7 +77,7 @@ class DatasourceStore(Store):
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._schema.dump(value)
-        return self._schema.dumps(value, indent=2, sort_keys=True)
+        return value
 
     def deserialize(
         self, key: Optional[Any], value: Union[dict, DatasourceConfig]
@@ -128,7 +128,21 @@ class DatasourceStore(Store):
         datasource_key: DataContextVariableKey = self._determine_datasource_key(
             datasource_name=datasource_name
         )
-        self.remove_key(datasource_key.to_tuple())
+        self.remove_key(datasource_key)
+
+    def set_by_name(
+        self, datasource_name: str, datasource_config: DatasourceConfig
+    ) -> None:
+        """Persists a DatasourceConfig in the store by a given name.
+
+        Args:
+            datasource_name: The name of the Datasource to retrieve.
+            datasource_config: The config object to persist using the StoreBackend.
+        """
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(
+            datasource_name=datasource_name
+        )
+        self.set(datasource_key, datasource_config)
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
         datasource_key: DataContextVariableKey = DataContextVariableKey(

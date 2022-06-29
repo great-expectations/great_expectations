@@ -288,7 +288,7 @@ class MetaSparkDFDataset(Dataset):
                     lit(False).alias("__null_val"),
                 )
             else:
-                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
 
             # since pyspark guaranteed each columns selected has the same number of rows, no need to do assert as in pandas
             # assert series_A.count() == (
@@ -449,7 +449,7 @@ class MetaSparkDFDataset(Dataset):
                     [*eval_cols, lit(False).alias("__null_val")]
                 )
             else:
-                raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
+                raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
 
             nonnull_df = boolean_mapped_skip_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
