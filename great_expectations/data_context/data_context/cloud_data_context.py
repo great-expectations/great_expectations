@@ -1,9 +1,7 @@
 import logging
 from typing import Mapping, Optional, Union
 
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
-)
+from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     DataContextConfig,
@@ -18,9 +16,9 @@ from great_expectations.data_context.util import substitute_all_config_variables
 logger = logging.getLogger(__name__)
 
 
-class CloudDataContext(AbstractDataContext):
+class CloudDataContext(FileDataContext):
     """
-    Subclass of AbstractDataContext that contains functionality necessary to hydrate state from cloud
+    Subclass of FileDataContext that contains functionality necessary to hydrate state from cloud
     """
 
     def __init__(
