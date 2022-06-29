@@ -1759,9 +1759,15 @@ class QueryExpectation(TableExpectation, ABC):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
+        "row_condition": None,
+        "condition_parser": None,
     }
 
-    domain_keys = ("batch_id",)
+    domain_keys = (
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]

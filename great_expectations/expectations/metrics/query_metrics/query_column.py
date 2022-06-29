@@ -39,12 +39,18 @@ class QueryColumn(QueryMetricProvider):
         active_batch, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
+
         if isinstance(active_batch, sa.sql.schema.Table):
             query = query.format(col=column, active_batch=active_batch)
         elif isinstance(active_batch, sa.sql.selectable.Subquery):
             query = query.format(col=column, active_batch=f"({active_batch})")
+        elif isinstance(active_batch, sa.sql.selectable.Select):
+            query = query.format(
+                col=column,
+                active_batch=f'({active_batch.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
+            )
         else:
-            query = query.format(col=column, active_batch=active_batch)
+            query = query.format(col=column, active_batch=f"({active_batch})")
 
         result = engine.execute(sa.text(query)).fetchall()
 

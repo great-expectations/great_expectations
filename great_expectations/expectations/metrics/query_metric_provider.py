@@ -6,4 +6,4 @@ logger = logging.getLogger(__name__)
 
 
 class QueryMetricProvider(MetricProvider):
-    domain_keys = ("batch_id",)
+    domain_keys = ("batch_id", "row_condition", "condition_parser")

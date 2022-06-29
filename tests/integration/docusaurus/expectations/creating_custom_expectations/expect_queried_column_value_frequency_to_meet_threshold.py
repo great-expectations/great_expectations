@@ -36,6 +36,8 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         "query",
     )
 
+    domain_keys = ("batch_id", "row_condition", "condition_parser")
+
     default_kwarg_values = {
         "result_format": "BASIC",
         "include_config": True,
@@ -165,6 +167,20 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                                  FROM test
                                  GROUP BY {col}
                                  """,
+                    },
+                    "out": {"success": True},
+                    "only_for": ["postgresql"],
+                },
+                {
+                    "title": "multi_value_positive_test_row_condition",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "col2",
+                        "value": ["a", "b"],
+                        "threshold": [0.6, 0.4],
+                        "row_condition": 'col("col1")==2',
+                        "condition_parser": "great_expectations__experimental__",
                     },
                     "out": {"success": True},
                     "only_for": ["postgresql"],
