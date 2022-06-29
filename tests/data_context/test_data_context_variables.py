@@ -425,13 +425,13 @@ def test_data_context_variables_save_config(
 
         assert mock_post.call_count == 1
         mock_post.assert_called_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-contexts",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
             json={
                 "data": {
-                    "type": "data_context",
+                    "type": "data_context_variables",
                     "attributes": {
                         "organization_id": ge_cloud_organization_id,
-                        "data_context_config": expected_config_dict,
+                        "data_context_variables": expected_config_dict,
                     },
                 }
             },
