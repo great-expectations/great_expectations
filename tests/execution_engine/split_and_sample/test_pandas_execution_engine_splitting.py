@@ -69,6 +69,21 @@ def simple_multi_year_pandas_df():
 
 
 @pytest.fixture
+def test_s3_files(s3, s3_bucket, test_df_small_csv):
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+        "alpha-1.csv",
+        "alpha-2.csv",
+    ]
+    for key in keys:
+        s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
+    return s3_bucket, keys
+
+
+@pytest.fixture
 def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
     bucket, keys = test_s3_files
     path = keys[0]
