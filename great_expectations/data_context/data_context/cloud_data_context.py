@@ -41,11 +41,14 @@ class CloudDataContext(FileDataContext):
         """
         self._ge_cloud_mode = True  # property needed for backward compatibility
         self._ge_cloud_config = ge_cloud_config
-        self._context_root_directory = context_root_dir
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        super().__init__(runtime_environment=runtime_environment)
+        super().__init__(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+        )
 
     def _init_variables(self) -> CloudDataContextVariables:
         raise NotImplementedError
