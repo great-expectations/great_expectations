@@ -1,7 +1,9 @@
 import logging
 from typing import Mapping, Optional, Union
 
-from great_expectations.data_context import FileDataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     DataContextConfig,
