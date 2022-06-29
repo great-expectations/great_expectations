@@ -756,9 +756,9 @@ class Expectation(metaclass=MetaExpectation):
             if not include_rendered_content:
                 evr = raw_response
             else:
-                raw_response_dict = raw_response.to_json_dict()
+                raw_response_dict: dict = raw_response.to_json_dict()
                 raw_response_dict["include_rendered_content"] = include_rendered_content
-                evr = ExpectationValidationResult(**raw_response)
+                evr = ExpectationValidationResult(**raw_response_dict)
             evr.expectation_config = configuration
         return evr
 
