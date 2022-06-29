@@ -20,7 +20,8 @@ class TaxiTestData:
     def test_column_name(self):
         return self._test_column_name
 
-    def years_in_taxi_data(self) -> List[datetime.datetime]:
+    @staticmethod
+    def years_in_taxi_data() -> List[datetime.datetime]:
         return (
             pd.date_range(start="2018-01-01", end="2020-12-31", freq="AS")
             .to_pydatetime()
@@ -30,7 +31,8 @@ class TaxiTestData:
     def year_batch_identifier_data(self) -> List[dict]:
         return [{DatePart.YEAR.value: dt.year} for dt in self.years_in_taxi_data()]
 
-    def months_in_taxi_data(self) -> List[datetime.datetime]:
+    @staticmethod
+    def months_in_taxi_data() -> List[datetime.datetime]:
         return (
             pd.date_range(start="2018-01-01", end="2020-12-31", freq="MS")
             .to_pydatetime()
