@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Mapping, Optional, Union, cast
 
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     anonymizedUsageStatisticsSchema,
@@ -48,9 +49,10 @@ class AbstractDataContext(ABC):
         # these attributes that are set downstream.
         self._config_variables = None
         self._project_config = None
+        self._variables = None
 
     @abstractmethod
-    def _init_variables(self) -> None:
+    def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
     def _apply_global_config_overrides(
@@ -257,6 +259,13 @@ class AbstractDataContext(ABC):
         )
 
     # properties
+
+    @property
+    def variables(self) -> DataContextVariables:
+        if not self._variables:
+            self._variables = self._init_variables()
+        return self._variables
+
     @property
     def config_variables(self) -> Dict:
         """Loads config variables into cache, by calling _load_config_variables()

@@ -40,6 +40,14 @@ class FileDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
+        self._variables = self._init_variables()
 
     def _init_variables(self) -> FileDataContextVariables:
-        raise NotImplementedError
+        substitutions: dict = self._determine_substitutions()
+
+        variables: FileDataContextVariables = FileDataContextVariables(
+            config=self._project_config,
+            substitutions=substitutions,
+            data_context=self,
+        )
+        return variables

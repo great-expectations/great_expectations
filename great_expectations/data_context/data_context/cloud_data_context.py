@@ -38,6 +38,19 @@ class CloudDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
+        self._variables = self._init_variables()
 
     def _init_variables(self) -> CloudDataContextVariables:
-        raise NotImplementedError
+        substitutions: dict = self._determine_substitutions()
+        ge_cloud_base_url: str = self._ge_cloud_config.base_url
+        ge_cloud_organization_id: str = self._ge_cloud_config.organization_id
+        ge_cloud_access_token: str = self._ge_cloud_config.access_token
+
+        variables: CloudDataContextVariables = CloudDataContextVariables(
+            config=self._project_config,
+            substitutions=substitutions,
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+            ge_cloud_access_token=ge_cloud_access_token,
+        )
+        return variables
