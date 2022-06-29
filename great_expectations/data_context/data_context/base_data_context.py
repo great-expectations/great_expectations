@@ -279,6 +279,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
+        print(f"I am here now: {context_root_dir}")
         if not BaseDataContext.validate_config(project_config):
             raise ge_exceptions.InvalidConfigError(
                 "Your project_config is not valid. Try using the CLI check-config command."
@@ -288,6 +289,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
+        print(f"I am here nowwwwwwwww: {self._context_root_directory}")
 
         if self._ge_cloud_mode:
             self._data_context = CloudDataContext(
@@ -297,12 +299,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 ge_cloud_config=ge_cloud_config,
             )
         elif self._context_root_directory:
+            print("this is where i sho9uld be")
             self._data_context = FileDataContext(
                 project_config=project_config,
                 context_root_dir=context_root_dir,
                 runtime_environment=runtime_environment,
             )
         else:
+            print("I shouldn't even be heree")
             self._data_context = EphemeralDataContext(
                 project_config=project_config, runtime_environment=runtime_environment
             )
@@ -427,6 +431,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     #         data_context_id=self._data_context_id,
     #         usage_statistics_url=usage_statistics_config.usage_statistics_url,
     #     )
+
+    def _save_project_config(self) -> None:
+        """Save the current project to disk."""
+        logger.debug("Starting DataContext._save_project_config")
+
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+        with open(config_filepath, "w") as outfile:
+            self.config.to_yaml(outfile)
 
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.

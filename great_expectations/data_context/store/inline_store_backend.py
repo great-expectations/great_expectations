@@ -77,6 +77,8 @@ class InlineStoreBackend(StoreBackend):
             project_config[config_var_type] = value
 
         try:
+            # this is the problem
+            # i end up with ephemeral
             self._data_context._save_project_config()
         except AttributeError as e:
             logger.warning(

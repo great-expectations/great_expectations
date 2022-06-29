@@ -106,6 +106,7 @@ class DataContext(BaseDataContext):
         Returns:
             DataContext
         """
+        # i think this is the issue of where the project directory is coming from
 
         if not os.path.isdir(project_root_dir):
             raise ge_exceptions.DataContextError(
@@ -134,7 +135,7 @@ class DataContext(BaseDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(ge_dir, runtime_environment=runtime_environment)
+        return cls(context_root_dir=ge_dir, runtime_environment=runtime_environment)
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir: str) -> bool:
@@ -353,7 +354,6 @@ class DataContext(BaseDataContext):
 
         context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
-
         project_config = self._load_project_config()
         super().__init__(
             project_config,
@@ -369,6 +369,7 @@ class DataContext(BaseDataContext):
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self.config)
         ):
+            # this will go to ephemeral because BaseInherits from ephemeral
             self._save_project_config()
 
     def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
