@@ -2955,11 +2955,22 @@
                 },
                 {
                   "content_block_type": "table",
-                  "header_row": [
-                    "Quantile",
-                    "Min Value",
-                    "Max Value"
-                  ],
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table",
+                        "table-sm",
+                        "table-unbordered",
+                        "col-4",
+                        "mt-2"
+                      ]
+                    },
+                    "parent": {
+                      "styles": {
+                        "list-style-type": "none"
+                      }
+                    }
+                  },
                   "table": [
                     [
                       "0.05",
@@ -2987,22 +2998,11 @@
                       "Any"
                     ]
                   ],
-                  "styling": {
-                    "body": {
-                      "classes": [
-                        "table",
-                        "table-sm",
-                        "table-unbordered",
-                        "col-4",
-                        "mt-2"
-                      ]
-                    },
-                    "parent": {
-                      "styles": {
-                        "list-style-type": "none"
-                      }
-                    }
-                  }
+                  "header_row": [
+                    "Quantile",
+                    "Min Value",
+                    "Max Value"
+                  ]
                 }
               ],
               {
@@ -3106,7 +3106,159 @@
                       }
                     }
                   },
-                  {"content_block_type": "graph", "styling": {"classes": ["col-4", "mt-2", "pl-1", "pr-1"], "parent": {"styles": {"list-style-type": "none"}}}, "graph": {"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}}, "data": {"name": "data-239befdaa7503a2ed2cd7283306bb6f7"}, "mark": "bar", "autosize": "fit", "encoding": {"tooltip": [{"type": "quantitative", "field": "bin_min"}, {"type": "quantitative", "field": "bin_max"}, {"type": "quantitative", "field": "fraction"}], "x": {"type": "ordinal", "field": "bin_min"}, "x2": {"field": "bin_max"}, "y": {"type": "quantitative", "field": "fraction"}}, "height": 400, "width": 250, "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json", "datasets": {"data-239befdaa7503a2ed2cd7283306bb6f7": [{"bin_min": 0.2, "bin_max": 4.1, "fraction": 0.04365079365079365}, {"bin_min": 4.1, "bin_max": 8.0, "fraction": 0.017195767195767195}, {"bin_min": 8.0, "bin_max": 12.0, "fraction": 0.015873015873015872}, {"bin_min": 12.0, "bin_max": 15.9, "fraction": 0.01984126984126984}, {"bin_min": 15.9, "bin_max": 19.8, "fraction": 0.10052910052910052}, {"bin_min": 19.8, "bin_max": 23.8, "fraction": 0.14814814814814814}, {"bin_min": 23.8, "bin_max": 27.7, "fraction": 0.1335978835978836}, {"bin_min": 27.7, "bin_max": 31.7, "fraction": 0.1111111111111111}, {"bin_min": 31.7, "bin_max": 35.6, "fraction": 0.082010582010582}, {"bin_min": 35.6, "bin_max": 39.5, "fraction": 0.08068783068783068}, {"bin_min": 39.5, "bin_max": 43.5, "fraction": 0.051587301587301584}, {"bin_min": 43.5, "bin_max": 47.4, "fraction": 0.05952380952380952}, {"bin_min": 47.4, "bin_max": 51.3, "fraction": 0.04894179894179894}, {"bin_min": 51.3, "bin_max": 55.3, "fraction": 0.0291005291005291}, {"bin_min": 55.3, "bin_max": 59.2, "fraction": 0.022486772486772486}, {"bin_min": 59.2, "bin_max": 63.1, "fraction": 0.017195767195767195}, {"bin_min": 63.1, "bin_max": 67.1, "fraction": 0.011904761904761904}, {"bin_min": 67.1, "bin_max": 71.0, "fraction": 0.006613756613756613}]}}}
+                  {
+                    "content_block_type": "graph",
+                    "styling": {
+                      "classes": [
+                        "col-4",
+                        "mt-2",
+                        "pl-1",
+                        "pr-1"
+                      ],
+                      "parent": {
+                        "styles": {
+                          "list-style-type": "none"
+                        }
+                      }
+                    },
+                    "graph": {
+                      "config": {
+                        "view": {
+                          "continuousWidth": 400,
+                          "continuousHeight": 300
+                        }
+                      },
+                      "data": {
+                        "name": "data-239befdaa7503a2ed2cd7283306bb6f7"
+                      },
+                      "mark": "bar",
+                      "autosize": "fit",
+                      "encoding": {
+                        "tooltip": [
+                          {
+                            "type": "quantitative",
+                            "field": "bin_min"
+                          },
+                          {
+                            "type": "quantitative",
+                            "field": "bin_max"
+                          },
+                          {
+                            "type": "quantitative",
+                            "field": "fraction"
+                          }
+                        ],
+                        "x": {
+                          "type": "ordinal",
+                          "field": "bin_min"
+                        },
+                        "x2": {
+                          "field": "bin_max"
+                        },
+                        "y": {
+                          "type": "quantitative",
+                          "field": "fraction"
+                        }
+                      },
+                      "height": 400,
+                      "width": 250,
+                      "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+                      "datasets": {
+                        "data-239befdaa7503a2ed2cd7283306bb6f7": [
+                          {
+                            "bin_min": 0.2,
+                            "bin_max": 4.1,
+                            "fraction": 0.04365079365079365
+                          },
+                          {
+                            "bin_min": 4.1,
+                            "bin_max": 8.0,
+                            "fraction": 0.017195767195767195
+                          },
+                          {
+                            "bin_min": 8.0,
+                            "bin_max": 12.0,
+                            "fraction": 0.015873015873015872
+                          },
+                          {
+                            "bin_min": 12.0,
+                            "bin_max": 15.9,
+                            "fraction": 0.01984126984126984
+                          },
+                          {
+                            "bin_min": 15.9,
+                            "bin_max": 19.8,
+                            "fraction": 0.10052910052910052
+                          },
+                          {
+                            "bin_min": 19.8,
+                            "bin_max": 23.8,
+                            "fraction": 0.14814814814814814
+                          },
+                          {
+                            "bin_min": 23.8,
+                            "bin_max": 27.7,
+                            "fraction": 0.1335978835978836
+                          },
+                          {
+                            "bin_min": 27.7,
+                            "bin_max": 31.7,
+                            "fraction": 0.1111111111111111
+                          },
+                          {
+                            "bin_min": 31.7,
+                            "bin_max": 35.6,
+                            "fraction": 0.082010582010582
+                          },
+                          {
+                            "bin_min": 35.6,
+                            "bin_max": 39.5,
+                            "fraction": 0.08068783068783068
+                          },
+                          {
+                            "bin_min": 39.5,
+                            "bin_max": 43.5,
+                            "fraction": 0.051587301587301584
+                          },
+                          {
+                            "bin_min": 43.5,
+                            "bin_max": 47.4,
+                            "fraction": 0.05952380952380952
+                          },
+                          {
+                            "bin_min": 47.4,
+                            "bin_max": 51.3,
+                            "fraction": 0.04894179894179894
+                          },
+                          {
+                            "bin_min": 51.3,
+                            "bin_max": 55.3,
+                            "fraction": 0.0291005291005291
+                          },
+                          {
+                            "bin_min": 55.3,
+                            "bin_max": 59.2,
+                            "fraction": 0.022486772486772486
+                          },
+                          {
+                            "bin_min": 59.2,
+                            "bin_max": 63.1,
+                            "fraction": 0.017195767195767195
+                          },
+                          {
+                            "bin_min": 63.1,
+                            "bin_max": 67.1,
+                            "fraction": 0.011904761904761904
+                          },
+                          {
+                            "bin_min": 67.1,
+                            "bin_max": 71.0,
+                            "fraction": 0.006613756613756613
+                          }
+                        ]
+                      }
+                    }
+                  }
                 ]
               }
             ]
@@ -4687,7 +4839,6 @@
   ],
   "data_asset_name": null,
   "full_data_asset_identifier": null,
-  "ge_cloud_id": null,
   "renderer_type": "ValidationResultsPageRenderer",
   "page_title": "Validations / default / 2020-03-22T17:02:47.671855Z",
   "utm_medium": "validation-results-page",
@@ -4696,5 +4847,6 @@
   "batch_kwargs": {
     "ge_batch_id": "f499679e-6c5e-11ea-8d20-acde48001122"
   },
-  "batch_spec": null
+  "batch_spec": null,
+  "ge_cloud_id": null
 }
