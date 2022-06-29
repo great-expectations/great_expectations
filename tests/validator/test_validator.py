@@ -1277,7 +1277,9 @@ def test_validator_include_rendered_content_evaluation_parameters(
     )
 
     assert (
-        validation_result.expectation_config.rendered_content[0].value.kwargs["value"]
+        validation_result.expectation_config.rendered_content[0].value.params["value"][
+            "value"
+        ]
         == 10000
     )
 
@@ -1291,6 +1293,8 @@ def test_validator_include_rendered_content_evaluation_parameters(
     )
 
     assert (
-        validation_result.expectation_config.rendered_content[0].value.kwargs["value"]
+        validation_result.expectation_config.rendered_content[0].value.params["value"][
+            "value"
+        ]
         == 8000
     )
