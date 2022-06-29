@@ -44,6 +44,5 @@ class EphemeralDataContext(AbstractDataContext):
 
     def _save_project_config(self) -> None:
         """Save the current project to disk."""
-        print("EphemeralDataContext doesn't really save_project_config")
         logger.debug("EphemeralDataContext doesn't really save_project_config")
         return
