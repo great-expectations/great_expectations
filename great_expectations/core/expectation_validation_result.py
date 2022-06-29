@@ -50,7 +50,7 @@ class ExpectationValidationResult(SerializableDictDot):
         result=None,
         meta=None,
         exception_info=None,
-        rendered_content=None,
+        include_rendered_content=False,
     ) -> None:
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
@@ -71,9 +71,8 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
-        if rendered_content is None:
-            rendered_content = {}
-        self.rendered_content = rendered_content
+        if include_rendered_content:
+            self.rendered_content = {}
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""

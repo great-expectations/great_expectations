@@ -705,6 +705,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
+        include_rendered_content: bool = False,
     ) -> ExpectationValidationResult:
         if configuration is None:
             configuration = self.configuration
@@ -732,22 +733,33 @@ class Expectation(metaclass=MetaExpectation):
             execution_engine=execution_engine,
         )
         evr: ExpectationValidationResult = self._build_evr(
-            raw_response=expectation_validation_result, configuration=configuration
+            raw_response=expectation_validation_result,
+            configuration=configuration,
+            include_rendered_content=include_rendered_content,
         )
         return evr
 
     @staticmethod
-    def _build_evr(raw_response, configuration) -> ExpectationValidationResult:
+    def _build_evr(
+        raw_response, configuration, include_rendered_content
+    ) -> ExpectationValidationResult:
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
         fails to return an EVR but returns the necessary components in a dictionary."""
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):
+                raw_response["include_rendered_content"] = include_rendered_content
                 evr = ExpectationValidationResult(**raw_response)
                 evr.expectation_config = configuration
             else:
                 raise GreatExpectationsError("Unable to build EVR")
         else:
-            evr = raw_response
+            if not include_rendered_content:
+                evr = raw_response
+            else:
+                evr = ExpectationValidationResult(
+                    result=raw_response,
+                    include_rendered_content=include_rendered_content,
+                )
             evr.expectation_config = configuration
         return evr
 
