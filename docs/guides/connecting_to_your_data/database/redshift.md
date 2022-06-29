@@ -30,11 +30,10 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 First, install the necessary dependencies for Great Expectations to connect to your Redshift database by running the following in your terminal:
 
 ```console
-pip install sqlalchemy
-pip install psycopg2
+pip install sqlalchemy sqlalchemy-redshift psycopg2
 
 # or if on macOS:
-pip install psycopg2-binary
+pip install sqlalchemy sqlalchemy-redshift psycopg2-binary
 ```
 
 ### 3. Add credentials
