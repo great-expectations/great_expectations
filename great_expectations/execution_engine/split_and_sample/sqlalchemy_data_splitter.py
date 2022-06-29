@@ -28,6 +28,7 @@ except ImportError:
     sa = None
 
 try:
+    import sqlalchemy.sql.functions.concat as concat
     from sqlalchemy.engine import LegacyRow
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList, Label
@@ -37,6 +38,7 @@ except ImportError:
     BinaryExpression = None
     BooleanClauseList = None
     Label = None
+    concat = None
 
 
 class SqlAlchemyDataSplitter(DataSplitter):
@@ -410,22 +412,30 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 ).label("concat_distinct_values")
             ]
         else:
+            """
+            # NOTE: <Alex>6/29/2022</Alex>
+            Certain SQLAlchemy-compliant backends (e.g., Amazon Redshift) allow only binary operators for "CONCAT".
+            """
+            concat_date_parts: concat = sa.func.concat(
+                "",
+                sa.cast(
+                    sa.func.extract(date_parts[0].value, sa.column(column_name)),
+                    sa.String,
+                ),
+            )
+
+            date_part: DatePart
+            for date_part in date_parts[1:]:
+                concat_date_parts = sa.func.concat(
+                    concat_date_parts,
+                    sa.cast(
+                        sa.func.extract(date_part.value, sa.column(column_name)),
+                        sa.String,
+                    ),
+                )
+
             concat_clause: List[Label] = [
-                sa.func.distinct(
-                    sa.func.concat(
-                        *[
-                            (
-                                sa.cast(
-                                    sa.func.extract(
-                                        date_part.value, sa.column(column_name)
-                                    ),
-                                    sa.String,
-                                )
-                            ).label(date_part.value)
-                            for date_part in date_parts
-                        ]
-                    )
-                ).label("concat_distinct_values"),
+                sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
             ]
 
         split_query: Selectable = sa.select(
@@ -479,7 +489,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def _execute_split_query(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
         split_query: Selectable,  # noqa: F821
     ) -> List[LegacyRow]:
         """Use the provided execution engine to run the split query and fetch all of the results.
