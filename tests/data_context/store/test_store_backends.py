@@ -16,6 +16,9 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.data_context import BaseDataContext
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.data_context.store import (
     GeCloudStoreBackend,
     InMemoryStoreBackend,
@@ -31,9 +34,6 @@ from great_expectations.data_context.store.inline_store_backend import (
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
-)
-from great_expectations.data_context.types.data_context_variables import (
-    DataContextVariableSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -1565,13 +1565,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     # test invalid .set
     key = DataContextVariableKey(resource_type="my_fake_variable")
     tuple_ = key.to_tuple()
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(ValueError) as e:
         inline_store_backend.set(tuple_, "a_random_string_value")
 
-    assert (
-        "Keys in InlineStoreBackend must adhere to the schema defined by DataContextVariableSchema"
-        in str(e.value)
-    )
+    assert "'my_fake_variable' is not a valid DataContextVariableSchema" in str(e.value)
 
     # test valid .set
     key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)

@@ -4,10 +4,10 @@ from typing import Mapping, Optional, Union
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.data_context.types.data_context_variables import (
+from great_expectations.data_context.data_context_variables import (
     EphemeralDataContextVariables,
 )
+from great_expectations.data_context.types.base import DataContextConfig
 
 logger = logging.getLogger(__name__)
 
