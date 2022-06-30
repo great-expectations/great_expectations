@@ -1,7 +1,5 @@
 import datetime
 import logging
-import os
-import random
 
 import numpy as np
 import pandas as pd
@@ -61,22 +59,6 @@ def spark_df_from_pandas_df():
         return spark_df
 
     return _construct_spark_df_from_pandas
-
-
-@pytest.fixture
-def test_folder_connection_path_tsv(tmp_path_factory):
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    path = str(tmp_path_factory.mktemp("test_folder_connection_path_tsv"))
-    df1.to_csv(path_or_buf=os.path.join(path, "test.tsv"), sep="\t", index=False)
-    return str(path)
-
-
-@pytest.fixture
-def test_folder_connection_path_parquet(tmp_path_factory):
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    path = str(tmp_path_factory.mktemp("test_folder_connection_path_parquet"))
-    df1.to_parquet(path=os.path.join(path, "test.parquet"))
-    return str(path)
 
 
 def test_reader_fn(spark_session, basic_spark_df_execution_engine):
@@ -552,144 +534,6 @@ def test_get_batch_data(test_sparkdf, basic_spark_df_execution_engine):
     ).dataframe
     assert test_sparkdf.count() == 120
     assert len(test_sparkdf.columns) == 10
-
-
-def test_get_batch_empty_splitter(
-    test_folder_connection_path_csv, basic_spark_df_execution_engine
-):
-    # reader_method not configured because spark will configure own reader by default
-    # reader_options are needed to specify the fact that the first line of test file is the header
-    test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
-        PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
-            reader_options={"header": True},
-            splitter_method=None,
-        )
-    ).dataframe
-    assert test_sparkdf.count() == 5
-    assert len(test_sparkdf.columns) == 2
-
-
-def test_get_batch_empty_splitter_tsv(
-    test_folder_connection_path_tsv, basic_spark_df_execution_engine
-):
-    # reader_method not configured because spark will configure own reader by default
-    # reader_options are needed to specify the fact that the first line of test file is the header
-    # reader_options are also needed to specify the separator (otherwise, comma will be used as the default separator)
-    test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
-        PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_tsv, "test.tsv"),
-            reader_options={"header": True, "sep": "\t"},
-            splitter_method=None,
-        )
-    ).dataframe
-    assert test_sparkdf.count() == 5
-    assert len(test_sparkdf.columns) == 2
-
-
-def test_get_batch_empty_splitter_parquet(
-    test_folder_connection_path_parquet, basic_spark_df_execution_engine
-):
-    # Note: reader method and reader_options are not needed, because
-    # SparkDFExecutionEngine automatically determines the file type as well as the schema of the Parquet file.
-    test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
-        PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_parquet, "test.parquet"),
-            splitter_method=None,
-        )
-    ).dataframe
-    assert test_sparkdf.count() == 5
-    assert len(test_sparkdf.columns) == 2
-
-
-# ### Sampling methods ###
-def test_get_batch_empty_sampler(test_sparkdf, basic_spark_df_execution_engine):
-    sampled_df = basic_spark_df_execution_engine.get_batch_data(
-        RuntimeDataBatchSpec(batch_data=test_sparkdf, sampling_method=None)
-    ).dataframe
-    assert sampled_df.count() == 120
-    assert len(sampled_df.columns) == 10
-
-
-def test_sample_using_random(test_sparkdf, basic_spark_df_execution_engine):
-    sampled_df = basic_spark_df_execution_engine.get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf, sampling_method="_sample_using_random"
-        )
-    ).dataframe
-    # The test dataframe contains 10 columns and 120 rows.
-    assert len(sampled_df.columns) == 10
-    assert 0 <= sampled_df.count() <= 120
-    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.1 (the equivalent of an
-    # unfair coin with the 10% chance of coming up as "heads").  Hence, we should never get as much as 20% of the rows.
-    assert sampled_df.count() < 25
-
-
-def test_sample_using_mod(test_sparkdf, basic_spark_df_execution_engine):
-    sampled_df = basic_spark_df_execution_engine.get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            sampling_method="_sample_using_mod",
-            sampling_kwargs={
-                "column_name": "id",
-                "mod": 5,
-                "value": 4,
-            },
-        )
-    ).dataframe
-    assert sampled_df.count() == 24
-    assert len(sampled_df.columns) == 10
-
-
-def test_sample_using_a_list(test_sparkdf, basic_spark_df_execution_engine):
-    sampled_df = basic_spark_df_execution_engine.get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            sampling_method="_sample_using_a_list",
-            sampling_kwargs={
-                "column_name": "id",
-                "value_list": [3, 5, 7, 11],
-            },
-        )
-    ).dataframe
-    assert sampled_df.count() == 4
-    assert len(sampled_df.columns) == 10
-
-
-def test_sample_using_md5_wrong_hash_function_name(
-    test_sparkdf, basic_spark_df_execution_engine
-):
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        # noinspection PyUnusedLocal
-        sampled_df = basic_spark_df_execution_engine.get_batch_data(
-            RuntimeDataBatchSpec(
-                batch_data=test_sparkdf,
-                sampling_method="_sample_using_hash",
-                sampling_kwargs={
-                    "column_name": "date",
-                    "hash_function_name": "I_wont_work",
-                },
-            )
-        ).dataframe
-
-
-def test_sample_using_md5(test_sparkdf, basic_spark_df_execution_engine):
-    sampled_df = basic_spark_df_execution_engine.get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            sampling_method="_sample_using_hash",
-            sampling_kwargs={
-                "column_name": "date",
-                "hash_function_name": "md5",
-            },
-        )
-    ).dataframe
-    assert sampled_df.count() == 10
-    assert len(sampled_df.columns) == 10
-
-    collected = sampled_df.collect()
-    for val in collected:
-        assert val.date in [datetime.date(2020, 1, 15), datetime.date(2020, 1, 29)]
 
 
 def test_split_on_multi_column_values_and_sample_using_random(

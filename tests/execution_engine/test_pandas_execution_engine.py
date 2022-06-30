@@ -1,6 +1,4 @@
-import datetime
 import os
-import random
 from unittest import mock
 
 import pandas as pd
@@ -493,76 +491,6 @@ def test_get_batch_with_no_s3_configured():
 
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         execution_engine_no_s3.get_batch_data(batch_spec=batch_spec)
-
-
-### Sampling methods ###
-
-
-def test_sample_using_random(test_df):
-    random.seed(1)
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(batch_data=test_df, sampling_method="_sample_using_random")
-    )
-    assert sampled_df.dataframe.shape == (13, 10)
-
-
-def test_sample_using_mod(test_df):
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            sampling_method="_sample_using_mod",
-            sampling_kwargs={
-                "column_name": "id",
-                "mod": 5,
-                "value": 4,
-            },
-        )
-    )
-    assert sampled_df.dataframe.shape == (24, 10)
-
-
-def test_sample_using_a_list(test_df):
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            sampling_method="_sample_using_a_list",
-            sampling_kwargs={
-                "column_name": "id",
-                "value_list": [3, 5, 7, 11],
-            },
-        )
-    )
-    assert sampled_df.dataframe.shape == (4, 10)
-
-
-def test_sample_using_md5(test_df):
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        # noinspection PyUnusedLocal
-        sampled_df = PandasExecutionEngine().get_batch_data(
-            RuntimeDataBatchSpec(
-                batch_data=test_df,
-                sampling_method="_sample_using_hash",
-                sampling_kwargs={
-                    "column_name": "date",
-                    "hash_function_name": "I_am_not_valid",
-                },
-            )
-        )
-
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            sampling_method="_sample_using_hash",
-            sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
-        )
-    )
-    assert sampled_df.dataframe.shape == (10, 10)
-    assert sampled_df.dataframe.date.isin(
-        [
-            datetime.date(2020, 1, 15),
-            datetime.date(2020, 1, 29),
-        ]
-    ).all()
 
 
 def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
