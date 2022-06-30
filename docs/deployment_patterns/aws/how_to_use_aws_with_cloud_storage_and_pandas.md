@@ -168,6 +168,8 @@ Since Validation Results may include examples of data (which could be sensitive 
 <CopyExistingValidationResultsToTheSBucketThisStepIsOptional />
 
 
+### **1.6 -** Host and share Data Docs on S3
+
 ## **Part 2: Connect to Data**
 
 ### **2.1 -** Choose how to run the code in this guide
