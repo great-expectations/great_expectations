@@ -1966,7 +1966,7 @@ def test_df(tmp_path_factory):
 
         datetime_list = [
             start_time
-            + datetime.timedelta(seconds=random.randrange(days_between_dates))
+            + datetime.timedelta(seconds=random.randrange(round(days_between_dates)))
             for i in range(k)
         ]
         datetime_list.sort()

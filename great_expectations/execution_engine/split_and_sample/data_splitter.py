@@ -64,7 +64,8 @@ class DataSplitter(abc.ABC):
 
         return getattr(self, splitter_method_name)
 
-    def _get_splitter_method_name(self, splitter_method_name: str) -> str:
+    @staticmethod
+    def _get_splitter_method_name(splitter_method_name: str) -> str:
         """Accept splitter methods with or without starting with `_`.
 
         Args:
@@ -78,8 +79,9 @@ class DataSplitter(abc.ABC):
         else:
             return splitter_method_name
 
+    @staticmethod
     def _convert_date_parts(
-        self, date_parts: Union[List[DatePart], List[str]]
+        date_parts: Union[List[DatePart], List[str]]
     ) -> List[DatePart]:
         """Convert a list of date parts to DatePart objects.
 

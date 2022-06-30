@@ -14,6 +14,7 @@ from ruamel.yaml.comments import CommentedMap
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.store.profiler_store import ProfilerStore
@@ -119,8 +120,9 @@ class AbstractDataContext(ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override both those set in config_variables.yml and the environment
         """
-        self.runtime_environment = runtime_environment or {}
+        self.runtime_environment = runtime_environment
         # these attributes that are set downstream.
+        self._variables = None
         self._config_variables = None
 
         # Init plugin support
@@ -157,7 +159,7 @@ class AbstractDataContext(ABC):
         self._evaluation_parameter_dependencies = {}
 
     @abstractmethod
-    def _init_variables(self) -> None:
+    def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
     @abstractmethod
@@ -842,7 +844,6 @@ class AbstractDataContext(ABC):
                     "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
                 }
             )
-
         # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
         if (
             store_name not in [store["name"] for store in self.list_active_stores()]
@@ -860,6 +861,30 @@ class AbstractDataContext(ABC):
         )
         self._stores[store_name] = new_store
         return new_store
+
+    # properties
+
+    @property
+    def variables(self) -> DataContextVariables:
+        if self._variables is None:
+            self._variables = self._init_variables()
+
+        # By always recalculating substitutions with each call, we ensure we stay up-to-date
+        # with the latest changes to env vars and config vars
+        substitutions: dict = self._determine_substitutions()
+        self._variables.substitutions = substitutions
+
+        return self._variables
+
+    @property
+    def config_variables(self) -> Dict:
+        """Loads config variables into cache, by calling _load_config_variables()
+
+        Returns: A dictionary containing config_variables from file or empty dictionary.
+        """
+        if not self._config_variables:
+            self._config_variables = self._load_config_variables()
+        return self._config_variables
 
     def _init_stores(self, store_configs: Dict[str, dict]) -> None:
         """Initialize all Stores for this DataContext.
@@ -901,6 +926,36 @@ class AbstractDataContext(ABC):
             runtime_environment=runtime_environment,
         )
         self._datasource_store = datasource_store
+        if hasattr(self, "_context_root_directory"):
+            return self._context_root_directory
+        return
+
+        @property
+        def project_config_with_variables_substituted(self) -> DataContextConfig:
+            return self.get_config_with_variables_substituted()
+
+        @property
+        def plugins_directory(self) -> Optional[str]:
+            """The directory in which custom plugin modules should be placed.
+
+            Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
+            """
+            return self._normalize_absolute_or_relative_path(
+                self.project_config_with_variables_substituted.plugins_directory
+            )
+
+        def _normalize_absolute_or_relative_path(
+            self, path: Optional[str]
+        ) -> Optional[str]:
+            """
+            Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
+            """
+            if path is None:
+                return
+            elif os.path.isabs(path):
+                return path
+            else:
+                return os.path.join(self.root_directory, path)
 
     def _update_config_variables(self) -> None:
         """Updates config_variables cache by re-calling _load_config_variables(). Necessary after running methods that modify config

@@ -3,9 +3,7 @@ import datetime
 import json
 import logging
 import sys
-from typing import Any, Dict, List, Optional, Set, Union
-
-from tqdm.auto import tqdm
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -21,7 +19,12 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_profiler_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import convert_to_json_serializable, nested_update
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    determine_progress_bar_method_by_environment,
+    nested_update,
+)
+from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -281,20 +284,21 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rule.name: rule.to_json_dict() for rule in effective_rules
         }
 
-        # noinspection PyProtectedMember,SpellCheckingInspection
-        progress_bar: tqdm = tqdm(
-            total=len(effective_rules),
-            desc="Profiling Dataset",
-            disable=disable,
-        )
-        progress_bar.update(0)
-        progress_bar.refresh()
         sys.stdout.write("\n")
         sys.stdout.flush()
 
+        pbar_method: Callable = determine_progress_bar_method_by_environment()
+
         rule_state: RuleState
         rule: Rule
-        for rule in effective_rules:
+        for rule in pbar_method(
+            effective_rules,
+            desc="Generating Expectations:",
+            disable=disable,
+            position=0,
+            leave=True,
+            bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
+        ):
             rule_state = rule.run(
                 variables=effective_variables,
                 batch_list=batch_list,
@@ -304,10 +308,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 rule_state=RuleState(),
             )
             self.rule_states.append(rule_state)
-            progress_bar.update(1)
-            progress_bar.refresh()
-
-        progress_bar.close()
 
         return RuleBasedProfilerResult(
             fully_qualified_parameter_names_by_domain=self.get_fully_qualified_parameter_names_by_domain(),

@@ -6,6 +6,9 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
+from great_expectations.data_context.data_context_variables import (
+    CloudDataContextVariables,
+)
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     DataContextConfig,
@@ -48,7 +51,9 @@ class CloudDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        super().__init__(runtime_environment=runtime_environment)
+        super().__init__(
+            runtime_environment=runtime_environment,
+        )
 
     def list_expectation_suite_names(self) -> List[str]:
         """
@@ -106,7 +111,7 @@ class CloudDataContext(AbstractDataContext):
 
         ge_cloud_config_variable_defaults = {
             "plugins_directory": self._normalize_absolute_or_relative_path(
-                DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
+                path=DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
             ),
             "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
         }

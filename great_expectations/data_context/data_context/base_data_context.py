@@ -70,6 +70,8 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.store import Store
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
+    CURRENT_GE_CONFIG_VERSION,
+    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     DataContextConfigDefaults,
@@ -288,6 +290,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
+        # initialize runtime_environment as empty dict if None
+        runtime_environment: dict = runtime_environment or {}
         if self._ge_cloud_mode:
             self._data_context = CloudDataContext(
                 project_config=project_config,
@@ -617,25 +621,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 webbrowser.open(url)
 
     @property
-    def root_directory(self):
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located."""
-        return self._context_root_directory
-
-    @property
-    def plugins_directory(self):
-        """The directory in which custom plugin modules should be placed."""
-        return self._normalize_absolute_or_relative_path(
-            self.project_config_with_variables_substituted.plugins_directory
-        )
-
-    @property
     def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
         return self._usage_statistics_handler
-
-    @property
-    def project_config_with_variables_substituted(self) -> DataContextConfig:
-        return self.get_config_with_variables_substituted()
 
     @property
     def anonymous_usage_statistics(self):
@@ -663,10 +650,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return (
             self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
         )
-
-    @property
-    def config(self) -> DataContextConfig:
-        return self._project_config
 
     #####
     #
