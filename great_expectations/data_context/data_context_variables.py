@@ -19,7 +19,9 @@ from great_expectations.data_context.util import substitute_config_variable
 
 
 class DataContextVariableSchema(str, enum.Enum):
-    DATA_CONTEXT = "data_context"  # If retrieving/setting the entire config at once
+    ALL_VARIABLES = (
+        "data_context_variables"  # If retrieving/setting the entire config at once
+    )
     CONFIG_VERSION = "config_version"
     DATASOURCES = "datasources"
     EXPECTATIONS_STORE_NAME = "expectations_store_name"
@@ -83,7 +85,7 @@ class DataContextVariables(ABC):
         Generates the appropriate Store key to retrieve/store configs.
         """
         key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=DataContextVariableSchema.DATA_CONTEXT
+            configuration_key=DataContextVariableSchema.ALL_VARIABLES
         )
         return key
 
@@ -390,7 +392,7 @@ class CloudDataContextVariables(DataContextVariables):
         store_backend: dict = {
             "class_name": "GeCloudStoreBackend",
             "ge_cloud_base_url": self.ge_cloud_base_url,
-            "ge_cloud_resource_type": "data_context",
+            "ge_cloud_resource_type": "data_context_variables",
             "ge_cloud_credentials": {
                 "access_token": self.ge_cloud_access_token,
                 "organization_id": self.ge_cloud_organization_id,
@@ -409,6 +411,6 @@ class CloudDataContextVariables(DataContextVariables):
         Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
         """
         key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type=DataContextVariableSchema.DATA_CONTEXT
+            resource_type=DataContextVariableSchema.ALL_VARIABLES
         )
         return key

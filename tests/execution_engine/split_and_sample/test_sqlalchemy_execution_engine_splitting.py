@@ -328,25 +328,16 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
 
     assert isinstance(result, sa.sql.Select)
 
-    query_str: str = (
+    expected_query_str: str = "SELECT distinct(concat(concat('', CAST(EXTRACT(year FROM column_name) AS VARCHAR)), CAST(EXTRACT(month FROM column_name) AS VARCHAR))) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name"
+    actual_query_str: str = (
         str(result.compile(compile_kwargs={"literal_binds": True}))
         .replace("\n", "")
         .replace(" ", "")
         .lower()
     )
     assert (
-        query_str
-        == (
-            "SELECT distinct(concat("
-            "CAST(EXTRACT(year FROM column_name) AS VARCHAR), CAST(EXTRACT(month FROM column_name) AS VARCHAR)"
-            ")) AS concat_distinct_values,"
-            "CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year,"
-            "CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month"
-            "FROM table_name"
-        )
-        .replace("\n", "")
-        .replace(" ", "")
-        .lower()
+        actual_query_str
+        == expected_query_str.replace("\n", "").replace(" ", "").lower()
     )
 
 
