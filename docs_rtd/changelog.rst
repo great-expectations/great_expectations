@@ -4,6 +4,35 @@
 Changelog
 #########
 
+0.15.12
+-----------------
+* [FEATURE] Add Rule Statistics to DataAssistantResult for display in Jupyter notebook (#5368)
+* [FEATURE] Include detailed Rule Execution statistics in jupyter notebook "repr" style output (#5375)
+* [FEATURE] Support datetime/date-part splitters on Amazon Redshift (#5408)
+* [DOCS] Capital One DataProfiler Expectations README Update (#5365) (thanks @stevensecreti)
+* [DOCS] Add Trino guide (#5287)
+* [DOCS] DOC-339 remove redundant how-to guide (#5396)
+* [DOCS] Capital One Data Profiler README update (#5387) (thanks @taylorfturner)
+* [DOCS] Add sqlalchemy-redshfit to dependencies in redshift doc (#5386)
+* [MAINTENANCE] Reduce output amount in Jupyter notebooks when displaying DataAssistantResult (#5362)
+* [MAINTENANCE] Update linter thresholds (#5367)
+* [MAINTENANCE] Move `_apply_global_config_overrides()` to AbstractDataContext (#5285) (thanks @Shinnnyshinshin)
+* [MAINTENANCE] WIP: [MAINTENANCE] stalebot configuration (#5301)
+* [MAINTENANCE] expect_column_values_to_be_equal_to_or_greater_than_profile_min (#5372) (thanks @stevensecreti)
+* [MAINTENANCE] expect_column_values_to_be_equal_to_or_less_than_profile_max (#5380) (thanks @stevensecreti)
+* [MAINTENANCE] Replace string formatting with f-string (#5225) (thanks @andyjessen)
+* [MAINTENANCE] Fix links in docs (#5340) (thanks @andyjessen)
+* [MAINTENANCE] Caching of `config_variables` in `DataContext` (#5376) (thanks @Shinnnyshinshin)
+* [MAINTENANCE] StaleBot Half DryRun (#5390)
+* [MAINTENANCE] StaleBot DryRun 2  (#5391)
+* [MAINTENANCE] file extentions applied to rel links (#5399)
+* [MAINTENANCE] Allow installing jinja2 version 3.1.0 and higher (#5382)
+* [MAINTENANCE] expect_column_values_confidence_for_data_label_to_be_less_than_or_equal_to_threshold (#5392) (thanks @stevensecreti)
+* [MAINTENANCE] Add warnings to internal linters if actual error count does not match threshold (#5401)
+* [MAINTENANCE] Ensure that changes made to env vars / config vars are recognized within subsequent calls of the same process (#5410)
+* [MAINTENANCE] Stack `RuleBasedProfiler` progress bars for better user experience (#5400)
+* [MAINTENANCE] Keep all Pandas Splitter Tests in a Dedicated Module (#5411)
+
 0.15.11
 -----------------
 * [FEATURE] Enable NumericMetricRangeMultiBatchParameterBuilder to use evaluation dependencies (#5323)
