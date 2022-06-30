@@ -747,25 +747,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 webbrowser.open(url)
 
     @property
-    def root_directory(self):
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located."""
-        return self._context_root_directory
-
-    @property
-    def plugins_directory(self):
-        """The directory in which custom plugin modules should be placed."""
-        return self._normalize_absolute_or_relative_path(
-            self.project_config_with_variables_substituted.plugins_directory
-        )
-
-    @property
     def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
         return self._usage_statistics_handler
-
-    @property
-    def project_config_with_variables_substituted(self) -> DataContextConfig:
-        return self.get_config_with_variables_substituted()
 
     @property
     def anonymous_usage_statistics(self):
@@ -897,10 +880,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return (
             self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
         )
-
-    @property
-    def config(self) -> DataContextConfig:
-        return self._project_config
 
     #####
     #
