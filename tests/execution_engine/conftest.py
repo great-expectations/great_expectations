@@ -1,8 +1,10 @@
 import datetime
 import random
 
+import boto3
 import pandas as pd
 import pytest
+from moto import mock_s3
 
 try:
     import pyspark
@@ -15,6 +17,19 @@ except ImportError:
     F = None
     IntegerType = None
     StringType = None
+
+
+@pytest.fixture
+def s3(aws_credentials):
+    with mock_s3():
+        yield boto3.client("s3", region_name="us-east-1")
+
+
+@pytest.fixture
+def s3_bucket(s3):
+    bucket: str = "test_bucket"
+    s3.create_bucket(Bucket=bucket)
+    return bucket
 
 
 @pytest.fixture

@@ -5,11 +5,10 @@ from pathlib import Path
 from typing import List
 from unittest import mock
 
-import boto3
 import pandas as pd
 import pytest
-from moto import mock_s3
 
+# noinspection PyBroadException
 try:
     from azure.storage.blob import BlobServiceClient
 except:
@@ -17,20 +16,13 @@ except:
 
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     GCSBatchSpec,
-    PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.id_dict import IDDict
-from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.execution_engine.execution_engine import (
-    ExecutionEngine,
-    MetricDomainTypes,
-)
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
     storage,
@@ -47,19 +39,6 @@ def aws_credentials():
     os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
     os.environ["AWS_SECURITY_TOKEN"] = "testing"
     os.environ["AWS_SESSION_TOKEN"] = "testing"
-
-
-@pytest.fixture
-def s3(aws_credentials):
-    with mock_s3():
-        yield boto3.client("s3", region_name="us-east-1")
-
-
-@pytest.fixture
-def s3_bucket(s3):
-    bucket: str = "test_bucket"
-    s3.create_bucket(Bucket=bucket)
-    return bucket
 
 
 @pytest.fixture
@@ -402,7 +381,6 @@ def test_get_compute_domain_with_no_domain_kwargs():
 def test_get_compute_domain_with_column_pair_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]})
-    expected_column_pair_df = df.drop(columns=["c"])
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -566,6 +544,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     )
     desired_metrics = (mean, stdev)
 
+    # noinspection PyUnusedLocal
     with pytest.raises(ge_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
@@ -727,6 +706,7 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
     assert split_df.dataframe.id.max() == 59
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
 )
