@@ -172,20 +172,7 @@ module.exports = {
           trackingID: 'UA-138955219-1',
           // Optional fields.
           anonymizeIP: true // Should IPs be anonymized?
-        },
-        // lastVersion: 'current',
-        // versions: {
-        //   // Example configuration:
-        //   // <WILL> may have to be fixed
-        //   current: {
-        //     label: 'docs',
-        //     path: 'docs'
-        //   },
-        //   '0.13.9': {
-        //     label: '0.13.9-docs',
-        //     path: '0.13.9'
-        //   }
-        // }
+        }
       }
     ]
   ]
