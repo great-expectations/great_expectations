@@ -96,8 +96,7 @@ class InlineRenderer(Renderer):
             render_object, ExpectationConfiguration
         ):
             logger.info(
-                f"""
-The following renderers failed to render Expectation "{expectation_type}": {non_default_prescriptive_renderer_names}.
+                f"""The following renderers failed to render Expectation "{expectation_type}": {non_default_prescriptive_renderer_names}.
 Default renderer "{default_prescriptive_renderer_name}" will be used to render prescriptive content for ExpectationConfiguration.
 """
             )
