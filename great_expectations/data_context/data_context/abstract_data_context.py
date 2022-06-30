@@ -66,7 +66,7 @@ class AbstractDataContext(ABC):
         raise NotImplementedError
 
     @property
-    def instance_id(self):
+    def instance_id(self) -> str:
         instance_id = self.config_variables.get("instance_id")
         if instance_id is None:
             if self._in_memory_instance_id is not None:
@@ -311,7 +311,7 @@ class AbstractDataContext(ABC):
         return self.get_config_with_variables_substituted()
 
     @property
-    def plugins_directory(self):
+    def plugins_directory(self) -> Optional[str]:
         """The directory in which custom plugin modules should be placed.
 
         Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
