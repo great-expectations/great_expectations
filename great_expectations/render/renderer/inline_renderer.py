@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, List, Optional, Tuple, Union
 
 from great_expectations.core import (
@@ -10,6 +11,8 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import RenderedAtomicContent
+
+logger = logging.getLogger(__name__)
 
 
 class InlineRenderer(Renderer):
@@ -69,25 +72,35 @@ class InlineRenderer(Renderer):
         expectation_type: str,
     ) -> List[RenderedAtomicContent]:
         default_prescriptive_renderer_name: str = "atomic.prescriptive.kwargs"
+        non_default_prescriptive_renderer_names: List[str] = [
+            renderer_name
+            for renderer_name in renderer_names
+            if renderer_name != default_prescriptive_renderer_name
+        ]
         rendered_content: List[RenderedAtomicContent] = []
 
-        for renderer_name in renderer_names:
-            if renderer_name != default_prescriptive_renderer_name:
-                try:
-                    renderer_rendered_content = (
-                        self._get_renderer_atomic_rendered_content(
-                            render_object=render_object,
-                            renderer_name=renderer_name,
-                            expectation_type=expectation_type,
-                        )
-                    )
-                    rendered_content.append(renderer_rendered_content)
-                except Exception:
-                    pass
+        for renderer_name in non_default_prescriptive_renderer_names:
+            try:
+                renderer_rendered_content = self._get_renderer_atomic_rendered_content(
+                    render_object=render_object,
+                    renderer_name=renderer_name,
+                    expectation_type=expectation_type,
+                )
+                rendered_content.append(renderer_rendered_content)
+            except Exception:
+                logger.info(
+                    f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type}".'
+                )
 
         if len(rendered_content) == 0 and isinstance(
             render_object, ExpectationConfiguration
         ):
+            logger.info(
+                f"""
+The following renderers failed to render Expectation "{expectation_type}": {non_default_prescriptive_renderer_names}.
+Default renderer "{default_prescriptive_renderer_name}" will be used to render prescriptive content for ExpectationConfiguration.
+"""
+            )
             renderer_rendered_content = (
                 InlineRenderer._get_renderer_atomic_rendered_content(
                     render_object=render_object,
