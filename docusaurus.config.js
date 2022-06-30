@@ -48,12 +48,6 @@ module.exports = {
     colorMode: {
       disableSwitch: true
     },
-    gtag: {
-      // You can also use your "G-" Measurement ID here.
-      trackingID: 'UA-138955219-1',
-      // Optional fields.
-      anonymizeIP: true // Should IPs be anonymized?
-    },
     zoomSelector: '.markdown :not(em) > img',
     announcementBar: {
       id: 'RTD_docs', // Link to RTD Docs
@@ -172,6 +166,12 @@ module.exports = {
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css')
+        },
+        gtag: {
+          // You can also use your "G-" Measurement ID here.
+          trackingID: 'UA-138955219-1',
+          // Optional fields.
+          anonymizeIP: true // Should IPs be anonymized?
         },
         // lastVersion: 'current',
         // versions: {
