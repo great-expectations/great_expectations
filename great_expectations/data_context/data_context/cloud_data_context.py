@@ -1,8 +1,8 @@
 import logging
 from typing import Mapping, Optional, Union
 
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
 )
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
@@ -18,9 +18,9 @@ from great_expectations.data_context.util import substitute_all_config_variables
 logger = logging.getLogger(__name__)
 
 
-class CloudDataContext(FileDataContext):
+class CloudDataContext(AbstractDataContext):
     """
-    Subclass of FileDataContext that contains functionality necessary to hydrate state from cloud
+    Subclass of AbstractDataContext that contains functionality necessary to hydrate state from cloud
     """
 
     def __init__(
@@ -41,12 +41,11 @@ class CloudDataContext(FileDataContext):
         """
         self._ge_cloud_mode = True  # property needed for backward compatibility
         self._ge_cloud_config = ge_cloud_config
+        self._context_root_directory = context_root_dir
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
         super().__init__(
-            project_config=project_config,
-            context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
 
@@ -69,7 +68,7 @@ class CloudDataContext(FileDataContext):
 
         ge_cloud_config_variable_defaults = {
             "plugins_directory": self._normalize_absolute_or_relative_path(
-                DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
+                path=DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
             ),
             "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
         }
