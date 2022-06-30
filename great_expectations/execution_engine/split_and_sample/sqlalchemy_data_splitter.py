@@ -181,18 +181,20 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
         return query
 
-    def split_on_whole_table(self, batch_identifiers: dict) -> bool:
+    @staticmethod
+    def split_on_whole_table(batch_identifiers: dict) -> bool:
         """'Split' by returning the whole table"""
 
         return True
 
-    def split_on_column_value(self, column_name: str, batch_identifiers: dict) -> bool:
+    @staticmethod
+    def split_on_column_value(column_name: str, batch_identifiers: dict) -> bool:
         """Split using the values in the named column"""
 
         return sa.column(column_name) == batch_identifiers[column_name]
 
+    @staticmethod
     def split_on_converted_datetime(
-        self,
         column_name: str,
         batch_identifiers: dict,
         date_format_string: str = "%Y-%m-%d",
@@ -207,8 +209,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
             == batch_identifiers[column_name]
         )
 
+    @staticmethod
     def split_on_divided_integer(
-        self, column_name: str, divisor: int, batch_identifiers: dict
+        column_name: str,
+        divisor: int,
+        batch_identifiers: dict,
     ) -> bool:
         """Divide the values in the named column by `divisor`, and split on that"""
 
@@ -217,15 +222,20 @@ class SqlAlchemyDataSplitter(DataSplitter):
             == batch_identifiers[column_name]
         )
 
+    @staticmethod
     def split_on_mod_integer(
-        self, column_name: str, mod: int, batch_identifiers: dict
+        column_name: str,
+        mod: int,
+        batch_identifiers: dict,
     ) -> bool:
         """Divide the values in the named column by `divisor`, and split on that"""
 
         return sa.column(column_name) % mod == batch_identifiers[column_name]
 
+    @staticmethod
     def split_on_multi_column_values(
-        self, column_names: List[str], batch_identifiers: dict
+        column_names: List[str],
+        batch_identifiers: dict,
     ) -> bool:
         """Split on the joint values in the named columns"""
 
@@ -236,8 +246,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
         )
 
+    @staticmethod
     def split_on_hashed_column(
-        self,
         column_name: str,
         hash_digits: int,
         batch_identifiers: dict,
@@ -310,6 +320,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         column_name. This data can be used to build BatchIdentifiers.
 
         Args:
+            execution_engine: SqlAlchemyExecutionEngine to be used for executing the query.
             table_name: table to split.
             column_name: column in table to use in determining split.
 
@@ -335,6 +346,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         column_name. This data can be used to build BatchIdentifiers.
 
         Args:
+            execution_engine: SqlAlchemyExecutionEngine to be used for executing the query.
             table_name: table to split.
             column_name: column in table to use in determining split.
 
@@ -360,6 +372,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         column_name. This data can be used to build BatchIdentifiers.
 
         Args:
+            execution_engine: SqlAlchemyExecutionEngine to be used for executing the query.
             table_name: table to split.
             column_name: column in table to use in determining split.
 
@@ -487,8 +500,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
             column_name, result, date_parts
         )
 
+    @staticmethod
     def _execute_split_query(
-        self,
         execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
         split_query: Selectable,  # noqa: F821
     ) -> List[LegacyRow]:
@@ -530,7 +543,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
         ]
         return data_for_batch_identifiers
 
-    def _get_column_names_from_splitter_kwargs(self, splitter_kwargs) -> List[str]:
+    @staticmethod
+    def _get_column_names_from_splitter_kwargs(splitter_kwargs) -> List[str]:
         column_names: List[str] = []
 
         if "column_names" in splitter_kwargs:
@@ -599,8 +613,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 f"Please provide a supported splitter method name, you provided: {splitter_method_name}"
             )
 
+    @staticmethod
     def _get_params_for_batch_identifiers_from_non_date_part_splitters(
-        self,
         column_names: List[str],
         rows: List[LegacyRow],
     ) -> List[dict]:
@@ -615,8 +629,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """
         return [dict(zip(column_names, row)) for row in rows]
 
+    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table(
-        self,
         table_name: str,
     ) -> Selectable:
         """
@@ -626,8 +640,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """
         return sa.select([sa.true()])
 
+    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_column_value(
-        self,
         table_name: str,
         column_name: str,
     ) -> Selectable:
@@ -640,8 +654,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
             .order_by(sa.column(column_name).asc())
         )
 
+    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime(
-        self,
         table_name: str,
         column_name: str,
         date_format_string: str = "%Y-%m-%d",
@@ -660,8 +674,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
             ]
         ).select_from(sa.text(table_name))
 
+    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer(
-        self, table_name: str, column_name: str, divisor: int
+        table_name: str,
+        column_name: str,
+        divisor: int,
     ) -> Selectable:
         """Divide the values in the named column by `divisor`, and split on that"""
         # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
@@ -670,8 +687,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
             [sa.func.distinct(sa.cast(sa.column(column_name) / divisor, sa.Integer))]
         ).select_from(sa.text(table_name))
 
+    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer(
-        self, table_name: str, column_name: str, mod: int
+        table_name: str,
+        column_name: str,
+        mod: int,
     ) -> Selectable:
         """Divide the values in the named column by `divisor`, and split on that"""
         # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
@@ -680,8 +700,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
             [sa.func.distinct(sa.cast(sa.column(column_name) % mod, sa.Integer))]
         ).select_from(sa.text(table_name))
 
+    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values(
-        self,
         table_name: str,
         column_names: List[str],
     ) -> Selectable:
@@ -694,8 +714,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
             .select_from(sa.text(table_name))
         )
 
+    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column(
-        self,
         table_name: str,
         column_name: str,
         hash_digits: int,
