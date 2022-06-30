@@ -1,0 +1,31 @@
+<!--
+This document is referenced in:
+
+docs/deployment_patterns/aws/how_to_use_aws_with_cloud_storage_and_pandas.md
+    "### 1.2) Create a virtual environment"
+-->
+
+Once you have confirmed that Python 3 is installed locally, you can create a virtual environment with venv.
+
+<details>
+<summary>Python Virtual Environments</summary>
+We have chosen to use venv for virtual environments in this guide, because it is included with Python 3. You are not limited to using venv, and can just as easily install Great Expectations into virtual environments with tools such as virtualenv, pyenv, etc.
+</details>
+
+Depending on whether you found that you needed to run `python` or `python3` in the previous step, you will run either:
+
+```console title="Terminal Command"
+python -m venv venv
+```
+
+or
+
+```console title="Terminal Command"
+python3 -m venv venv
+```
+
+This command will create a new directory called `venv` where your virtual environment is located. In order to activate the virtual environment run:
+
+```console title="Terminal Command"
+source venv/bin/activate
+```

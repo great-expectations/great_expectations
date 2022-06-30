@@ -1,0 +1,61 @@
+<!--
+
+---Import---
+import ConfiguringAValidationAction from './_configuring_a_validation_action.mdx'
+<ConfiguringAValidationAction />
+
+---Header---
+### 2. Configuring a Validation Action
+-->
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
+
+Once a `MetricStore` is available, a `StoreMetricsAction` validation <TechnicalTag tag="action" text="Action" /> can be added to your <TechnicalTag tag="checkpoint" text="Checkpoint" /> in order to save Metrics during Validation. This validation Action has three required fields:
+
+- The `class_name` field determines which class will be instantiated to execute this action, and must be `StoreMetricsAction`.
+- The `target_store_name` field defines which Store backend to use when persisting the metrics. This should match the key of the MetricStore you added in your `great_expectations.yml`, which in our example above is `metrics_store`.
+- The `requested_metrics` field identifies which Expectation Suites and Metrics to store. Please note that this API is likely to change in a future release.
+
+<TechnicalTag tag="validation_result" text="Validation Result" /> statistics are available using the following format:
+
+```yaml
+  expectation_suite_name:
+    statistics.<statistic name>
+```
+
+Values from inside a particular <TechnicalTag tag="expectation" text="Expectation's" /> `result` field are available using the following format:
+
+```yaml
+  expectation_suite_name:
+    - column:
+      <column name>:
+        <expectation name>.result.<value name>
+```
+
+In place of the Expectation Suite name, you may use `"*"` to denote that any Expectation Suite should match.
+
+:::note Note:
+If an Expectation Suite name is used as a key, those Metrics will only be added to the `MetricStore` when that Suite is run.
+When the wildcard `"*"` is used, those metrics will be added to the `MetricStore` for each Suite which runs in the Checkpoint.
+:::
+
+Here is an example yaml config for adding a `StoreMetricsAction` to the `taxi_data` dataset:
+
+```
+action_list:
+# ...
+- name: store_metrics
+  action:
+    class_name: StoreMetricsAction
+    target_store_name: metric_store  # This should match the name of the store configured above
+    requested_metrics:
+      public.taxi_data.warning:  # match a particular expectation suite
+        - column:
+            passenger_count:
+              - expect_column_values_to_not_be_null.result.element_count
+              - expect_column_values_to_not_be_null.result.partial_unexpected_list
+        - statistics.successful_expectations
+      "*":  # wildcard to match any expectation suite
+        - statistics.evaluated_expectations
+        - statistics.success_percent
+        - statistics.unsuccessful_expectations
+```

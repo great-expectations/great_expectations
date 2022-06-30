@@ -1,0 +1,18 @@
+<!--
+
+---Import---
+import ConfigureAnSBucket from './_configure_an_s_bucket.mdx'
+<ConfigureAnSBucket />
+
+---Header---
+### 1. Configure an S3 bucket
+-->
+
+You can configure an S3 bucket using the AWS CLI. Make sure you modify the bucket name and region for your situation.
+
+```bash title="Terminal"
+> aws s3api create-bucket --bucket data-docs.my_org --region us-east-1
+{
+    "Location": "/data-docs.my_org"
+}
+```

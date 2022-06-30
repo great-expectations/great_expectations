@@ -1,0 +1,42 @@
+<!--
+
+---Import---
+import ConfigureYourBucketPolicyToEnableAppropriateAccess from './_configure_your_bucket_policy_to_enable_appropriate_access.mdx'
+<ConfigureYourBucketPolicyToEnableAppropriateAccess />
+
+---Header---
+### 2. Configure your bucket policy to enable appropriate access
+-->
+
+The example policy below **enforces IP-based access** - modify the bucket name and IP addresses for your situation. After you have customized the example policy to suit your situation, save it to a file called ``ip-policy.json`` in your local directory.
+
+:::important
+
+Your policy should provide access only to appropriate users. Data Docs sites can include critical information about raw data and should generally **not** be publicly accessible.
+
+:::
+
+```json
+  {
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Sid": "Allow only based on source IP",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": [
+        "arn:aws:s3:::data-docs.my_org",
+        "arn:aws:s3:::data-docs.my_org/*"
+      ],
+      "Condition": {
+        "IpAddress": {
+          "aws:SourceIp": [
+            "192.168.0.1/32",
+            "2001:db8:1234:1234::/64"
+          ]
+        }
+      }
+    }
+    ]
+  }
+```

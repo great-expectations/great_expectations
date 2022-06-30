@@ -185,12 +185,20 @@ div[role="tabpanel"]{
 
 
 .toc {
+  max-height: calc(100vh - (var(--ifm-navbar-height) + 2rem));
+  overflow-y: auto;
   position: fixed;
+  top: calc(var(--ifm-navbar-height) + 2rem);
   /*background: #ccc;*/
   right: 0;
-  top: 6em;
-  padding: 1em;
-  width: 24em;
+  padding: 0 var(--ifm-spacing-horizontal);
+  --ifm-col-width:  calc(3 / 12 * 100%);
+  max-width: var(--ifm-col-width);
+  flex: 0 0 var(--ifm-col-width);
   height: 100vh;
   line-height: 2;
+    width: 100%;
+    box-sizing: border-box;
+        display: block;
+    font: var(--ifm-font-size-base) / var(--ifm-line-height-base) var(--ifm-font-family-base);
 }

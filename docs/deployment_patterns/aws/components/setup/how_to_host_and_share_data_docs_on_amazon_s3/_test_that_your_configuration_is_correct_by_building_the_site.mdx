@@ -1,0 +1,41 @@
+<!--
+
+---Import---
+import TestThatYourConfigurationIsCorrectByBuildingTheSite from './_test_that_your_configuration_is_correct_by_building_the_site.mdx'
+<TestThatYourConfigurationIsCorrectByBuildingTheSite />
+
+---Header---
+### 5. Test that your configuration is correct by building the site
+-->
+
+Use the following CLI command: ``great_expectations docs build --site-name s3_site``.
+
+```bash title="Terminal command"
+> great_expectations docs build --site-name s3_site
+```
+
+You will be informed of the Data Docs sites that will be built, and prompted to choose whether or not to proceed.
+
+```bash title="Terminal output"
+The following Data Docs sites will be built:
+
+ - s3_site: https://s3.amazonaws.com/data-docs.my_org/index.html
+
+Would you like to proceed? [Y/n]:
+```
+
+After answering in the afirmative by pressing the `return` key or entering `Y`, Great Expectations will begin building your Data Docs.  You should see the following in your terminal:
+
+```bash title="Terminal output"
+Building Data Docs...
+
+Done building Data Docs
+```
+
+If successful, the CLI will open your newly built S3 Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users with IP addresses appearing in the above policy.
+
+:::note
+
+Note you may want to use the `-y/--yes/--assume-yes` flag when running the `great_expectations docs build` command.  This flag skips the confirmation dialog, which can be useful for non-interactive environments.
+
+:::

@@ -1,0 +1,24 @@
+<!--
+
+---Import---
+import TestYourMetricstoreAndStoremetricsaction from './_test_your_metricstore_and_storemetricsaction.mdx'
+<TestYourMetricstoreAndStoremetricsaction />
+
+---Header---
+### 3. Test your MetricStore and StoreMetricsAction
+-->
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
+
+To test your `StoreMetricsAction`, run your Checkpoint from your code or the <TechnicalTag tag="cli" text="CLI" />:
+
+```python title="Python code"
+import great_expectations as ge
+
+context = ge.get_context()
+checkpoint_name = "your checkpoint name here"
+context.run_checkpoint(checkpoint_name=checkpoint_name)
+```
+
+```bash
+$ great_expectations checkpoint run <your checkpoint name>
+```

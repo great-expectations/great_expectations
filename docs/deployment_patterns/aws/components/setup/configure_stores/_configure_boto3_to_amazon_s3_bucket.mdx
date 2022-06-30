@@ -1,0 +1,25 @@
+<!--
+
+---Import---
+import ConfigureBotoToConnectToTheAmazonSBucketWhereValidationResultsWillBeStored from './_configure_boto_to_connect_to_the_amazon_s_bucket_where_validation_results_will_be_stored.mdx'
+<ConfigureBotoToConnectToTheAmazonSBucketWhereValidationResultsWillBeStored />
+
+---Header---
+### 1. Configure boto3 to connect to the Amazon S3 bucket where Validation results will be stored
+-->
+
+Python interacts with AWS through the `boto3` library.  Great Expectations makes use of this library in the background when working with AWS.  Therefore, although you will not need to use `boto3` directly, you will need to have it installed into your virtual environment.
+
+You can do this with the pip command:
+
+```bash title="Terminal command"
+python -m pip install boto3
+```
+
+or
+
+```bash title="Terminal command"
+python3 -m pip install boto3
+```
+
+For more detailed instructions on how to set up [boto3](https://github.com/boto/boto3) with AWS, and information on how you can use `boto3` from within Python, please reference [boto3's documentation site](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html).

@@ -1,0 +1,16 @@
+<!--
+
+---Import---
+import ApplyThePolicy from './_apply_the_policy.mdx'
+<ApplyThePolicy />
+
+---Header---
+### 3. Apply the policy
+-->
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
+
+Run the following <TechnicalTag relative="../../../" tag="cli" text="CLI" /> command to apply the policy:
+
+```bash title="Terminal command"
+> aws s3api put-bucket-policy --bucket data-docs.my_org --policy file://ip-policy.json
+```
