@@ -1918,6 +1918,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_name: str,
         datasource_config: DatasourceConfig,
     ) -> None:
+        """
+        Updates a DatasourceConfig that already exists in the store.
+
+        Args:
+            datasource_name: The name of the Datasource to update.
+            datasource_config: The config object to persist using the DatasourceStore.
+        """
         self._datasource_store.update_by_name(
             datasource_name=datasource_name, datasource_config=datasource_config
         )
