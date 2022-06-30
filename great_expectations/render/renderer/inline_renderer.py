@@ -28,7 +28,7 @@ class InlineRenderer(Renderer):
         """Gets RenderedAtomicContent for a given ExpectationConfiguration or ExpectationValidationResult.
 
         Args:
-            render_object: The object to render
+            render_object: The object to render.
 
         Returns:
             A list of RenderedAtomicContent objects for a given ExpectationConfiguration or ExpectationValidationResult.
@@ -120,6 +120,12 @@ class InlineRenderer(Renderer):
         return renderer_rendered_content
 
     def render(self) -> Tuple[List[RenderedAtomicContent], List[RenderedAtomicContent]]:
+        """Gets RenderedAtomicContent for a given ExpectationConfiguration or ExpectationValidationResult.
+
+        Returns:
+            A tuple containing RenderedAtomicContent objects for a given ExpectationConfiguration (index 0) and
+            ExpectationValidationResult (index 1).
+        """
         render_object: ExpectationValidationResult = self._render_object
 
         return self.get_atomic_rendered_content_for_object(
