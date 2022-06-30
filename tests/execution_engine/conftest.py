@@ -149,10 +149,10 @@ def gcs_batch_spec() -> GCSBatchSpec:
 
 
 @pytest.fixture
-def test_sparkdf(spark_session):
+def test_sparkdf(spark_session) -> "pyspark.sql.DataFrame":  # noqa: F821
     def generate_ascending_list_of_datetimes(
         n, start_date=datetime.date(2020, 1, 1), end_date=datetime.date(2020, 12, 31)
-    ):
+    ) -> List[datetime.datetime]:
         start_time = datetime.datetime(
             start_date.year, start_date.month, start_date.day
         )
@@ -166,23 +166,25 @@ def test_sparkdf(spark_session):
         datetime_list.sort()
         return datetime_list
 
-    k = 120
+    k: int = 120
     random.seed(1)
-    timestamp_list = generate_ascending_list_of_datetimes(
+    timestamp_list: List[datetime.datetime] = generate_ascending_list_of_datetimes(
         n=k, end_date=datetime.date(2020, 1, 31)
     )
-    date_list = [datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list]
+    date_list: List[datetime.date] = [
+        datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list
+    ]
 
     # noinspection PyUnusedLocal
-    batch_ids = [random.randint(0, 10) for i in range(k)]
+    batch_ids: List[int] = [random.randint(0, 10) for i in range(k)]
     batch_ids.sort()
     # noinspection PyUnusedLocal
-    session_ids = [random.randint(2, 60) for i in range(k)]
+    session_ids: List[int] = [random.randint(2, 60) for i in range(k)]
     session_ids = [i - random.randint(0, 2) for i in session_ids]
     session_ids.sort()
 
     # noinspection PyUnusedLocal
-    spark_df = spark_session.createDataFrame(
+    spark_df: "pyspark.sql.DataFrame" = spark_session.createDataFrame(  # noqa: F821
         data=pd.DataFrame(
             {
                 "id": range(k),
@@ -213,7 +215,7 @@ def test_sparkdf(spark_session):
 
 
 @pytest.fixture
-def test_folder_connection_path_tsv(tmp_path_factory):
+def test_folder_connection_path_tsv(tmp_path_factory) -> str:
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     path = str(tmp_path_factory.mktemp("test_folder_connection_path_tsv"))
     df1.to_csv(path_or_buf=os.path.join(path, "test.tsv"), sep="\t", index=False)
@@ -221,7 +223,7 @@ def test_folder_connection_path_tsv(tmp_path_factory):
 
 
 @pytest.fixture
-def test_folder_connection_path_parquet(tmp_path_factory):
+def test_folder_connection_path_parquet(tmp_path_factory) -> str:
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     path = str(tmp_path_factory.mktemp("test_folder_connection_path_parquet"))
     df1.to_parquet(path=os.path.join(path, "test.parquet"))
