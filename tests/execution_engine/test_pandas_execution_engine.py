@@ -1,15 +1,12 @@
 import datetime
 import os
 import random
-from pathlib import Path
-from typing import List
 from unittest import mock
 
-import boto3
 import pandas as pd
 import pytest
-from moto import mock_s3
 
+# noinspection PyBroadException
 try:
     from azure.storage.blob import BlobServiceClient
 except:
@@ -17,20 +14,8 @@ except:
 
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.batch_spec import (
-    AzureBatchSpec,
-    GCSBatchSpec,
-    PathBatchSpec,
-    RuntimeDataBatchSpec,
-    S3BatchSpec,
-)
-from great_expectations.core.id_dict import IDDict
-from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.execution_engine.execution_engine import (
-    ExecutionEngine,
-    MetricDomainTypes,
-)
+from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
     storage,
@@ -38,145 +23,6 @@ from great_expectations.execution_engine.pandas_execution_engine import (
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
-
-
-@pytest.fixture(scope="function")
-def aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-
-
-@pytest.fixture
-def s3(aws_credentials):
-    with mock_s3():
-        yield boto3.client("s3", region_name="us-east-1")
-
-
-@pytest.fixture
-def s3_bucket(s3):
-    bucket: str = "test_bucket"
-    s3.create_bucket(Bucket=bucket)
-    return bucket
-
-
-@pytest.fixture
-def test_df_small() -> pd.DataFrame:
-    return pd.DataFrame(data={"col1": [1, 0, 505], "col2": [3, 4, 101]})
-
-
-@pytest.fixture
-def test_df_small_csv_compressed(test_df_small, tmpdir) -> bytes:
-    path = Path(tmpdir) / "file.csv.gz"
-    test_df_small.to_csv(path, index=False, compression="gzip")
-    return path.read_bytes()
-
-
-@pytest.fixture
-def test_df_small_csv(test_df_small, tmpdir) -> bytes:
-    path = Path(tmpdir) / "file.csv"
-    test_df_small.to_csv(path, index=False)
-    return path.read_bytes()
-
-
-@pytest.fixture
-def test_s3_files(s3, s3_bucket, test_df_small_csv):
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    for key in keys:
-        s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_csv):
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.parquet",
-        "directory/B-2.parquet",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = Path(tmpdir) / "file.parquet"
-    test_df_small.to_parquet(path)
-    for key in keys:
-        if key.endswith(".parquet"):
-            with open(path, "rb") as f:
-                s3.put_object(Bucket=s3_bucket, Body=f, Key=key)
-        else:
-            s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def test_s3_files_compressed(s3, s3_bucket, test_df_small_csv_compressed):
-    keys: List[str] = [
-        "path/A-100.csv.gz",
-        "path/A-101.csv.gz",
-        "directory/B-1.csv.gz",
-        "directory/B-2.csv.gz",
-    ]
-
-    for key in keys:
-        s3.put_object(
-            Bucket=s3_bucket,
-            Body=test_df_small_csv_compressed,
-            Key=key,
-        )
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def azure_batch_spec() -> AzureBatchSpec:
-    container = "test_container"
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = keys[0]
-    full_path = os.path.join("mock_account.blob.core.windows.net", container, path)
-
-    batch_spec = AzureBatchSpec(
-        path=full_path,
-        reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
-    )
-    return batch_spec
-
-
-@pytest.fixture
-def gcs_batch_spec() -> GCSBatchSpec:
-    bucket = "test_bucket"
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = keys[0]
-    full_path = os.path.join("gs://", bucket, path)
-
-    batch_spec = GCSBatchSpec(
-        path=full_path,
-        reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
-    )
-    return batch_spec
 
 
 def test_constructor_with_boto3_options():
@@ -417,7 +263,6 @@ def test_get_compute_domain_with_no_domain_kwargs():
 def test_get_compute_domain_with_column_pair_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]})
-    expected_column_pair_df = df.drop(columns=["c"])
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -581,6 +426,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     )
     desired_metrics = (mean, stdev)
 
+    # noinspection PyUnusedLocal
     with pytest.raises(ge_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
@@ -742,6 +588,7 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
     assert split_df.dataframe.id.max() == 59
 
 
+# noinspection PyUnusedLocal
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
 )
