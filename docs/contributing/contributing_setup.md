@@ -79,7 +79,7 @@ pip install -c constraints-dev.txt -e ".[test]"
 - For extras that will install `pyodbc` **(`dremio` and `mssql`)**, you will need `unixodbc`
 
     ```
-    sudo apt-get install unixodbc-dev
+    sudo apt-get install -y unixodbc-dev
 
     or
 
