@@ -27,14 +27,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         "data_context": "data_context_config",
         "expectation_suite": "suite",
         "rendered_data_doc": "rendered_data_doc",
-        "data_context_variable": "value",
+        "data_context_variables": "data_context_variables",
     }
 
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {
         "expectation_suite": {"clause_id"},
         "rendered_data_doc": {"source_type", "source_id"},
         "suite_validation_result": {"contract_id", "expectation_suite_id"},
-        "data_context_variable": {"variable_type"},
     }
 
     def __init__(
