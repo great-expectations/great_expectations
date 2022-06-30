@@ -741,10 +741,13 @@ class Expectation(metaclass=MetaExpectation):
 
     @staticmethod
     def _build_evr(
-        raw_response, configuration, include_rendered_content
+        raw_response: Union[ExpectationValidationResult, dict],
+        configuration: ExpectationConfiguration,
+        include_rendered_content: bool,
     ) -> ExpectationValidationResult:
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
         fails to return an EVR but returns the necessary components in a dictionary."""
+        evr: ExpectationValidationResult
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):
                 raw_response["include_rendered_content"] = include_rendered_content
