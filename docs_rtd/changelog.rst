@@ -33,6 +33,7 @@ Changelog
 * [MAINTENANCE] Stack `RuleBasedProfiler` progress bars for better user experience (#5400)
 * [MAINTENANCE] Keep all Pandas Splitter Tests in a Dedicated Module (#5411)
 * [MAINTENANCE] Refactor DataContextVariables to only persist state to Store using explicit save command (#5366)
+* [MAINTENANCE] Refactor to put tests for splitting and sampling into modules for respective ExecutionEngine implementation (#5412)
 
 0.15.11
 -----------------
