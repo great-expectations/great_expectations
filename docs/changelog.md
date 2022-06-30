@@ -13,13 +13,13 @@ title: Changelog
 * [DOCS] Add sqlalchemy-redshfit to dependencies in redshift doc (#5386)
 * [MAINTENANCE] Reduce output amount in Jupyter notebooks when displaying DataAssistantResult (#5362)
 * [MAINTENANCE] Update linter thresholds (#5367)
-* [MAINTENANCE] Move `_apply_global_config_overrides()` to AbstractDataContext (#5285) (thanks @Shinnnyshinshin)
+* [MAINTENANCE] Move `_apply_global_config_overrides()` to AbstractDataContext (#5285)
 * [MAINTENANCE] WIP: [MAINTENANCE] stalebot configuration (#5301)
 * [MAINTENANCE] expect_column_values_to_be_equal_to_or_greater_than_profile_min (#5372) (thanks @stevensecreti)
 * [MAINTENANCE] expect_column_values_to_be_equal_to_or_less_than_profile_max (#5380) (thanks @stevensecreti)
 * [MAINTENANCE] Replace string formatting with f-string (#5225) (thanks @andyjessen)
 * [MAINTENANCE] Fix links in docs (#5340) (thanks @andyjessen)
-* [MAINTENANCE] Caching of `config_variables` in `DataContext` (#5376) (thanks @Shinnnyshinshin)
+* [MAINTENANCE] Caching of `config_variables` in `DataContext` (#5376)
 * [MAINTENANCE] StaleBot Half DryRun (#5390)
 * [MAINTENANCE] StaleBot DryRun 2  (#5391)
 * [MAINTENANCE] file extentions applied to rel links (#5399)
@@ -29,6 +29,7 @@ title: Changelog
 * [MAINTENANCE] Ensure that changes made to env vars / config vars are recognized within subsequent calls of the same process (#5410)
 * [MAINTENANCE] Stack `RuleBasedProfiler` progress bars for better user experience (#5400)
 * [MAINTENANCE] Keep all Pandas Splitter Tests in a Dedicated Module (#5411)
+* [MAINTENANCE] Refactor DataContextVariables to only persist state to Store using explicit save command (#5366)
 
 ### 0.15.11
 * [FEATURE] Enable NumericMetricRangeMultiBatchParameterBuilder to use evaluation dependencies (#5323)
