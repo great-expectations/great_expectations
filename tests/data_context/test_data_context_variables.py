@@ -1,29 +1,34 @@
-from typing import Any, Callable
+from typing import Any, Callable, cast
 from unittest import mock
 
 import pytest
 
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
-    ConcurrencyConfig,
-    NotebookConfig,
-    NotebookTemplateConfig,
-    ProgressBarsConfig,
-)
-from great_expectations.data_context.types.data_context_variables import (
+from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariables,
     DataContextVariableSchema,
     EphemeralDataContextVariables,
     FileDataContextVariables,
 )
+from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
+    ConcurrencyConfig,
+    DataContextConfig,
+    NotebookConfig,
+    NotebookTemplateConfig,
+    ProgressBarsConfig,
+    dataContextConfigSchema,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+)
 
 
 @pytest.fixture
 def data_context_config_dict() -> dict:
     config: dict = {
-        "config_version": 2.0,
+        "config_version": 3.0,
         "plugins_directory": "plugins/",
         "evaluation_parameter_store_name": "evaluation_parameter_store",
         "validations_store_name": "validations_store",
@@ -48,7 +53,7 @@ def data_context_config_dict() -> dict:
         "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
             enabled=True,
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
-            usage_statistics_url="https://www.my_usage_stats_url/test",
+            usage_statistics_url="https://app.greatexpectations.io/",
         ),
         "notebooks": None,
         "concurrency": None,
@@ -58,24 +63,30 @@ def data_context_config_dict() -> dict:
 
 
 @pytest.fixture
+def data_context_config(data_context_config_dict: dict) -> DataContextConfig:
+    config: DataContextConfig = DataContextConfig(**data_context_config_dict)
+    return config
+
+
+@pytest.fixture
 def ephemeral_data_context_variables(
-    data_context_config_dict: dict,
+    data_context_config: DataContextConfig,
 ) -> EphemeralDataContextVariables:
-    return EphemeralDataContextVariables(**data_context_config_dict)
+    return EphemeralDataContextVariables(config=data_context_config)
 
 
 @pytest.fixture
 def file_data_context_variables(
-    data_context_config_dict: dict, empty_data_context: DataContext
+    data_context_config: DataContextConfig, empty_data_context: DataContext
 ) -> FileDataContextVariables:
     return FileDataContextVariables(
-        data_context=empty_data_context, **data_context_config_dict
+        data_context=empty_data_context, config=data_context_config
     )
 
 
 @pytest.fixture
 def cloud_data_context_variables(
-    data_context_config_dict: dict,
+    data_context_config: DataContextConfig,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
@@ -84,7 +95,7 @@ def cloud_data_context_variables(
         ge_cloud_base_url=ge_cloud_base_url,
         ge_cloud_organization_id=ge_cloud_organization_id,
         ge_cloud_access_token=ge_cloud_access_token,
-        **data_context_config_dict,
+        config=data_context_config,
     )
 
 
@@ -222,7 +233,7 @@ def test_data_context_variables_get(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
-    data_context_config_dict: dict,
+    data_context_config: dict,
     crud_method: str,
     target_attr: DataContextVariableSchema,
 ) -> None:
@@ -230,7 +241,7 @@ def test_data_context_variables_get(
         method: Callable = getattr(type_, crud_method)
         res: Any = method()
 
-        expected_value: Any = data_context_config_dict[target_attr.value]
+        expected_value: Any = data_context_config[target_attr.value]
         assert res == expected_value
 
     # EphemeralDataContextVariables
@@ -241,6 +252,26 @@ def test_data_context_variables_get(
 
     # CloudDataContextVariables
     _test_variables_get(cloud_data_context_variables)
+
+
+def test_data_context_variables_get_with_substitutions(
+    data_context_config_dict: dict,
+) -> None:
+    env_var_name: str = "MY_CONFIG_VERSION"
+    value_associated_with_env_var: float = 7.0
+
+    data_context_config_dict[
+        DataContextVariableSchema.CONFIG_VERSION
+    ] = f"${env_var_name}"
+    config: DataContextConfig = DataContextConfig(**data_context_config_dict)
+    substitutions: dict = {
+        env_var_name: value_associated_with_env_var,
+    }
+
+    variables: DataContextVariables = EphemeralDataContextVariables(
+        config=config, substitutions=substitutions
+    )
+    assert variables.get_config_version() == value_associated_with_env_var
 
 
 @pytest.mark.parametrize(
@@ -336,15 +367,11 @@ def test_data_context_variables_set(
     crud_method: str,
     input_value: Any,
     target_attr: DataContextVariableSchema,
-    # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
-    ge_cloud_base_url: str,
-    ge_cloud_organization_id: str,
-    ge_cloud_access_token: str,
 ) -> None:
     def _test_variables_set(type_: DataContextVariables) -> None:
         method: Callable = getattr(type_, crud_method)
         method(input_value)
-        res: Any = getattr(type_, target_attr.value)
+        res: Any = type_.config[target_attr.value]
 
         assert res == input_value
 
@@ -352,28 +379,59 @@ def test_data_context_variables_set(
     _test_variables_set(ephemeral_data_context_variables)
 
     # FileDataContextVariables
+    _test_variables_set(file_data_context_variables)
+
+    # CloudDataContextVariables
+    _test_variables_set(cloud_data_context_variables)
+
+
+def test_data_context_variables_save_config(
+    ephemeral_data_context_variables: EphemeralDataContextVariables,
+    file_data_context_variables: FileDataContextVariables,
+    cloud_data_context_variables: CloudDataContextVariables,
+    # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+    ge_cloud_access_token: str,
+) -> None:
+
+    # EphemeralDataContextVariables
+    ephemeral_data_context_variables.save_config()
+    key: ConfigurationIdentifier = ephemeral_data_context_variables.get_key()
+    persisted_value: DataContextConfig = ephemeral_data_context_variables.store.get(
+        key=key
+    )
+    assert (
+        persisted_value.to_json_dict()
+        == ephemeral_data_context_variables.config.to_json_dict()
+    )
+
+    # FileDataContextVariables
     with mock.patch(
         "great_expectations.data_context.DataContext._save_project_config",
         autospec=True,
     ) as mock_save:
-        _test_variables_set(file_data_context_variables)
+        file_data_context_variables.save_config()
 
         assert mock_save.call_count == 1
 
     # CloudDataContextVariables
     with mock.patch("requests.post", autospec=True) as mock_post:
-        _test_variables_set(cloud_data_context_variables)
+        cloud_data_context_variables.save_config()
+
+        expected_config_dict: dict = cast(
+            dict, dataContextConfigSchema.dump(cloud_data_context_variables.config)
+        )
 
         assert mock_post.call_count == 1
         mock_post.assert_called_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
             json={
                 "data": {
-                    "type": "data_context_variable",
+                    "type": "data_context_variables",
                     "attributes": {
                         "organization_id": ge_cloud_organization_id,
-                        "value": input_value,
-                        "variable_type": target_attr.value,
+                        "data_context_variables": expected_config_dict,
                     },
                 }
             },
