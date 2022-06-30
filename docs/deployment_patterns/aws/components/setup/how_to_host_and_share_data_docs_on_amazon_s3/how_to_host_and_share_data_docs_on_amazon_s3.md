@@ -17,7 +17,7 @@ This guide will explain how to host and share <TechnicalTag relative="../../../"
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- [Set up a working deployment of Great Expectations](../../../../../tutorials/getting_started/tutorial_overview.md)
 - [Set up the AWS Command Line Interface](https://aws.amazon.com/cli/)
 
 </Prerequisites>
