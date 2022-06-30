@@ -8,7 +8,7 @@ import sys
 import uuid
 from collections import OrderedDict
 from collections.abc import Mapping
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
 import dateutil.parser
@@ -133,6 +133,25 @@ def in_databricks() -> bool:
         bool
     """
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
+
+
+def determine_progress_bar_method_by_environment() -> Callable:
+    """
+    As tqdm has specific methods for progress bar creation and iteration,
+    we require a utility to determine which method to use.
+
+    If in a Jupyter notebook, we want to use `tqdm.notebook.tqdm`. Otherwise,
+    we default to the standard `tqdm.tqdm`. Please see the docs for more information: https://tqdm.github.io/
+
+    Returns:
+        The appropriate tqdm method for the environment in question.
+    """
+    from tqdm import tqdm
+    from tqdm.notebook import tqdm as tqdm_notebook
+
+    if in_jupyter_notebook():
+        return tqdm_notebook
+    return tqdm
 
 
 def convert_to_json_serializable(data):
