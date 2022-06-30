@@ -2,13 +2,13 @@ import copy
 from typing import Any, List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
-)
-from great_expectations.data_context.types.data_context_variables import (
-    DataContextVariableSchema,
 )
 from great_expectations.util import filter_properties_dict
 
@@ -48,7 +48,7 @@ class DatasourceStore(Store):
         """
         See parent 'Store.list_keys()' for more information
         """
-        from great_expectations.data_context.types.data_context_variables import (
+        from great_expectations.data_context.data_context_variables import (
             DataContextVariableSchema,
         )
 
