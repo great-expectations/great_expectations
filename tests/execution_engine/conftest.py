@@ -149,7 +149,7 @@ def gcs_batch_spec() -> GCSBatchSpec:
 
 
 @pytest.fixture
-def test_sparkdf(spark_session) -> pyspark.sql.DataFrame:
+def test_sparkdf(spark_session) -> "pyspark.sql.DataFrame":  # noqa: F821
     def generate_ascending_list_of_datetimes(
         n, start_date=datetime.date(2020, 1, 1), end_date=datetime.date(2020, 12, 31)
     ) -> List[datetime.datetime]:
@@ -184,7 +184,7 @@ def test_sparkdf(spark_session) -> pyspark.sql.DataFrame:
     session_ids.sort()
 
     # noinspection PyUnusedLocal
-    spark_df: pyspark.sql.DataFrame = spark_session.createDataFrame(
+    spark_df: "pyspark.sql.DataFrame" = spark_session.createDataFrame(  # noqa: F821
         data=pd.DataFrame(
             {
                 "id": range(k),
