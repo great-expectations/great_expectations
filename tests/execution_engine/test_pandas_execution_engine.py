@@ -1,8 +1,6 @@
 import datetime
 import os
 import random
-from pathlib import Path
-from typing import List
 from unittest import mock
 
 import pandas as pd
@@ -16,12 +14,7 @@ except:
 
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch_spec import (
-    AzureBatchSpec,
-    GCSBatchSpec,
-    RuntimeDataBatchSpec,
-    S3BatchSpec,
-)
+from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
@@ -30,108 +23,6 @@ from great_expectations.execution_engine.pandas_execution_engine import (
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
-
-
-@pytest.fixture
-def test_df_small() -> pd.DataFrame:
-    return pd.DataFrame(data={"col1": [1, 0, 505], "col2": [3, 4, 101]})
-
-
-@pytest.fixture
-def test_df_small_csv_compressed(test_df_small, tmpdir) -> bytes:
-    path = Path(tmpdir) / "file.csv.gz"
-    test_df_small.to_csv(path, index=False, compression="gzip")
-    return path.read_bytes()
-
-
-@pytest.fixture
-def test_df_small_csv(test_df_small, tmpdir) -> bytes:
-    path = Path(tmpdir) / "file.csv"
-    test_df_small.to_csv(path, index=False)
-    return path.read_bytes()
-
-
-@pytest.fixture
-def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_csv):
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.parquet",
-        "directory/B-2.parquet",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = Path(tmpdir) / "file.parquet"
-    test_df_small.to_parquet(path)
-    for key in keys:
-        if key.endswith(".parquet"):
-            with open(path, "rb") as f:
-                s3.put_object(Bucket=s3_bucket, Body=f, Key=key)
-        else:
-            s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def test_s3_files_compressed(s3, s3_bucket, test_df_small_csv_compressed):
-    keys: List[str] = [
-        "path/A-100.csv.gz",
-        "path/A-101.csv.gz",
-        "directory/B-1.csv.gz",
-        "directory/B-2.csv.gz",
-    ]
-
-    for key in keys:
-        s3.put_object(
-            Bucket=s3_bucket,
-            Body=test_df_small_csv_compressed,
-            Key=key,
-        )
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def azure_batch_spec() -> AzureBatchSpec:
-    container = "test_container"
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = keys[0]
-    full_path = os.path.join("mock_account.blob.core.windows.net", container, path)
-
-    batch_spec = AzureBatchSpec(
-        path=full_path,
-        reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
-    )
-    return batch_spec
-
-
-@pytest.fixture
-def gcs_batch_spec() -> GCSBatchSpec:
-    bucket = "test_bucket"
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = keys[0]
-    full_path = os.path.join("gs://", bucket, path)
-
-    batch_spec = GCSBatchSpec(
-        path=full_path,
-        reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
-    )
-    return batch_spec
 
 
 def test_constructor_with_boto3_options():
