@@ -47,7 +47,7 @@ class AbstractDataContext(ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override both those set in config_variables.yml and the environment
         """
-        self.runtime_environment = runtime_environment or {}
+        self.runtime_environment = runtime_environment
         # these attributes that are set downstream.
         self._variables = None
         self._config_variables = None

@@ -349,6 +349,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
 
+        # initialize runtime_environment as empty dict if None
+        runtime_environment: dict = runtime_environment or {}
+
         if self._ge_cloud_mode:
             self._data_context = CloudDataContext(
                 project_config=project_config,
