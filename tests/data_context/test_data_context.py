@@ -2879,3 +2879,51 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     )
     checkpoint_result = checkpoint.run()
     assert checkpoint_result.get("success") is True
+
+
+def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
+    empty_data_context: DataContext, monkeypatch
+) -> None:
+    """
+    What does this test do and why?
+
+    Great Expectations recognizes changes made to environment variables within a program execution
+    and ensures that these changes are recognized in subsequent calls within the same process.
+
+    This is particularly relevant when performing substitutions within a user's project config.
+    """
+    context: DataContext = empty_data_context
+    env_var_name: str = "MY_PLUGINS_DIRECTORY"
+    env_var_value: str = "my_patched_value"
+
+    context.config.plugins_directory = f"${env_var_name}"
+    monkeypatch.setenv(env_var_name, env_var_value)
+
+    assert context.plugins_directory and context.plugins_directory.endswith(
+        env_var_value
+    )
+
+
+def test_modifications_to_config_vars_is_recognized_within_same_program_execution(
+    empty_data_context: DataContext,
+) -> None:
+    """
+    What does this test do and why?
+
+    Great Expectations recognizes changes made to config variables within a program execution
+    and ensures that these changes are recognized in subsequent calls within the same process.
+
+    This is particularly relevant when performing substitutions within a user's project config.
+    """
+    context: DataContext = empty_data_context
+    config_var_name: str = "my_plugins_dir"
+    config_var_value: str = "my_patched_value"
+
+    context.config.plugins_directory = f"${config_var_name}"
+    context.save_config_variable(
+        config_variable_name=config_var_name, value=config_var_value
+    )
+
+    assert context.plugins_directory and context.plugins_directory.endswith(
+        config_var_value
+    )

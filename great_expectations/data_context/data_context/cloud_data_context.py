@@ -10,10 +10,11 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     GeCloudConfig,
 )
-from great_expectations.data_context.types.data_context_variables import (
+from great_expectations.data_context.util import substitute_all_config_variables
+from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
 )
-from great_expectations.data_context.util import substitute_all_config_variables
+from great_expectations.data_context.types.base import DataContextConfig, GeCloudConfig
 
 logger = logging.getLogger(__name__)
 
