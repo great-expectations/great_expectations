@@ -32,15 +32,6 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from tests.expectations.test_util import get_table_columns_metric
 
 
-@pytest.fixture(scope="function")
-def aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-
-
 @pytest.fixture
 def test_df_small() -> pd.DataFrame:
     return pd.DataFrame(data={"col1": [1, 0, 505], "col2": [3, 4, 101]})
