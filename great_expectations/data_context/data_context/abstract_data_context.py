@@ -341,12 +341,9 @@ class AbstractDataContext(ABC):
         """
         Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
         """
-        if path is None:
-            return
-        if os.path.isabs(path):
+        if path is None or os.path.isabs(path):
             return path
-        else:
-            return os.path.join(self.root_directory, path)
+        return os.path.join(self.root_directory, path)
 
     def _update_config_variables(self) -> None:
         """Updates config_variables cache by re-calling _load_config_variables(). Necessary after running methods that modify config
