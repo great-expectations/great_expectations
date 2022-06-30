@@ -972,8 +972,8 @@ class ExpectationConfiguration(SerializableDictDot):
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
-        if include_rendered_content:
-            self.rendered_content = {}
+        self._include_rendered_content = include_rendered_content
+        self._rendered_content = {}
 
     def process_evaluation_parameters(
         self,
@@ -1370,8 +1370,15 @@ class ExpectationConfiguration(SerializableDictDot):
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine=None,
-        include_rendered_content: bool = False,
+        **kwargs,
     ):
+        # TODO: NF - feature flag to be updated upon feature release
+        include_rendered_content: bool
+        if "include_rendered_content" in kwargs:
+            include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            include_rendered_content = False
+
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).metrics_validate(
             metrics,

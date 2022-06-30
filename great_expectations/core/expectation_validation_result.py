@@ -50,8 +50,15 @@ class ExpectationValidationResult(SerializableDictDot):
         result=None,
         meta=None,
         exception_info=None,
-        include_rendered_content=False,
+        **kwargs,
     ) -> None:
+        # TODO: NF - feature flag to be updated upon feature release
+        include_rendered_content: bool
+        if "include_rendered_content" in kwargs:
+            self._include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            self._include_rendered_content = False
+
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
         self.success = success
@@ -71,8 +78,7 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
-        if include_rendered_content:
-            self.rendered_content = {}
+        self._rendered_content = {}
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -213,8 +219,8 @@ class ExpectationValidationResult(SerializableDictDot):
             )
 
         (
-            self.expectation_config.rendered_content,
-            self.rendered_content,
+            self.expectation_config._rendered_content,
+            self._rendered_content,
         ) = inline_renderer.render()
 
     @staticmethod
