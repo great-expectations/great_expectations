@@ -1228,8 +1228,8 @@ def test_validator_include_rendered_content(
             partition_object=partition_object,
         )
     )
-    validation_result.expectation_config._rendered_content = None
-    validation_result._rendered_content = None
+    assert validation_result.expectation_config.rendered_content is None
+    assert validation_result.rendered_content is None
 
     validator_include_rendered_content: Validator = context.get_validator(
         batch_request=batch_request,
@@ -1242,12 +1242,12 @@ def test_validator_include_rendered_content(
             partition_object=partition_object,
         )
     )
-    assert len(validation_result.expectation_config._rendered_content) == 1
+    assert len(validation_result.expectation_config.rendered_content) == 1
     assert isinstance(
-        validation_result.expectation_config._rendered_content[0], RenderedAtomicContent
+        validation_result.expectation_config.rendered_content[0], RenderedAtomicContent
     )
-    assert len(validation_result._rendered_content) == 1
-    assert isinstance(validation_result._rendered_content[0], RenderedAtomicContent)
+    assert len(validation_result.rendered_content) == 1
+    assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
 
 
 def test_validator_include_rendered_content_evaluation_parameters(

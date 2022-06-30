@@ -1036,7 +1036,7 @@ class Validator:
             evaluated_config = copy.deepcopy(configuration)
             evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
             if include_rendered_content:
-                evaluated_config.rendered_content = {}
+                evaluated_config._rendered_content = None
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: dict = (

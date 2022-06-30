@@ -78,7 +78,7 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
-        self._rendered_content = {}
+        self._rendered_content = None
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -193,6 +193,10 @@ class ExpectationValidationResult(SerializableDictDot):
         would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
         """
         return json.dumps(self.to_json_dict(), indent=2)
+
+    @property
+    def rendered_content(self) -> Optional[dict]:
+        return self._rendered_content
 
     def render(self) -> None:
         """Renders content using the:

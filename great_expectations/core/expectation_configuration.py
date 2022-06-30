@@ -973,7 +973,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
         self._include_rendered_content = include_rendered_content
-        self._rendered_content = {}
+        self._rendered_content = None
 
     def process_evaluation_parameters(
         self,
@@ -1067,6 +1067,10 @@ class ExpectationConfiguration(SerializableDictDot):
     @kwargs.setter
     def kwargs(self, value: dict) -> None:
         self._kwargs = value
+
+    @property
+    def rendered_content(self) -> Optional[dict]:
+        return self._rendered_content
 
     def _get_default_custom_kwargs(self) -> dict:
         # NOTE: this is a holdover until class-first expectations control their
