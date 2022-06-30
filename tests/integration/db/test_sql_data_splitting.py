@@ -131,6 +131,7 @@ if __name__ == "test_script_module":
             },
         }
 
+        # noinspection PyTypeChecker
         context.add_datasource(
             name=datasource_name,
             class_name="Datasource",
