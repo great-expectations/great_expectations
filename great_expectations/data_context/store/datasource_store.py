@@ -144,6 +144,21 @@ class DatasourceStore(Store):
         )
         self.set(datasource_key, datasource_config)
 
+    def update_by_name(
+        self, datasource_name: str, datasource_config: DatasourceConfig
+    ) -> None:
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(
+            datasource_name=datasource_name
+        )
+        if not self.has_key(datasource_key):
+            raise ValueError(
+                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
+            )
+
+        self.set_by_name(
+            datasource_name=datasource_name, datasource_config=datasource_config
+        )
+
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
         datasource_key: DataContextVariableKey = DataContextVariableKey(
             resource_type=DataContextVariableSchema.DATASOURCES,

@@ -1913,6 +1913,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         return datasource
 
+    def update_datasource(
+        self,
+        datasource_name: str,
+        datasource_config: DatasourceConfig,
+    ) -> None:
+        self._datasource_store.update_by_name(
+            datasource_name=datasource_name, datasource_config=datasource_config
+        )
+
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
