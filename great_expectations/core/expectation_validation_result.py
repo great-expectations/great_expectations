@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
@@ -18,7 +18,10 @@ from great_expectations.core.util import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.render.types import RenderedAtomicContentSchema
+from great_expectations.render.types import (
+    RenderedAtomicContent,
+    RenderedAtomicContentSchema,
+)
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -195,7 +198,7 @@ class ExpectationValidationResult(SerializableDictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @property
-    def rendered_content(self) -> Optional[dict]:
+    def rendered_content(self) -> List[RenderedAtomicContent]:
         return self._rendered_content
 
     def render(self) -> None:

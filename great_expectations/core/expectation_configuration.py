@@ -2,7 +2,7 @@ import copy
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import jsonpatch
 from pyparsing import ParseResults
@@ -31,7 +31,10 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-from great_expectations.render.types import RenderedAtomicContentSchema
+from great_expectations.render.types import (
+    RenderedAtomicContent,
+    RenderedAtomicContentSchema,
+)
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -1069,7 +1072,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self._kwargs = value
 
     @property
-    def rendered_content(self) -> Optional[dict]:
+    def rendered_content(self) -> List[RenderedAtomicContent]:
         return self._rendered_content
 
     def _get_default_custom_kwargs(self) -> dict:
