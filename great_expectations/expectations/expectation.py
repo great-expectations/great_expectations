@@ -207,11 +207,11 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type="atomic.prescriptive.kwargs")
     def _prescriptive_kwargs(
         cls,
-        configuration: ExpectationConfiguration = None,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
-        language: str = None,
-        runtime_configuration: dict = None,
-        **kwargs,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
         Default rendering function that is utilized by GE Cloud Front-end if no other atomic renderers apply
@@ -705,7 +705,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> ExpectationValidationResult:
         # TODO: NF - feature flag to be updated upon feature release
         include_rendered_content: bool
@@ -750,7 +750,7 @@ class Expectation(metaclass=MetaExpectation):
     def _build_evr(
         raw_response: Union[ExpectationValidationResult, dict],
         configuration: ExpectationConfiguration,
-        **kwargs,
+        **kwargs: dict,
     ) -> ExpectationValidationResult:
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
         fails to return an EVR but returns the necessary components in a dictionary."""

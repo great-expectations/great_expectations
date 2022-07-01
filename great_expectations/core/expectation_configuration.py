@@ -1377,7 +1377,7 @@ class ExpectationConfiguration(SerializableDictDot):
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: "ExecutionEngine" = None,  # noqa: F821
-        **kwargs,
+        **kwargs: dict,
     ):
         # TODO: NF - feature flag to be updated upon feature release
         include_rendered_content: bool

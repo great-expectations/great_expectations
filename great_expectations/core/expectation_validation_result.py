@@ -53,7 +53,7 @@ class ExpectationValidationResult(SerializableDictDot):
         result: Optional[dict] = None,
         meta: Optional[dict] = None,
         exception_info: Optional[dict] = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> None:
         # TODO: NF - feature flag to be updated upon feature release
         if "include_rendered_content" in kwargs:

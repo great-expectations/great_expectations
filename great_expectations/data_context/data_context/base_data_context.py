@@ -1689,7 +1689,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> Validator:
         """
         This method applies only to the new (V3) Datasource schema.
@@ -1792,7 +1792,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self,
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
-        **kwargs,
+        **kwargs: dict,
     ) -> Validator:
         # TODO: NF - feature flag to be updated upon feature release
         include_rendered_content: bool
