@@ -1073,6 +1073,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
+            persist_changes: Whether or not to save changes to disk.
 
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
@@ -1833,6 +1834,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             name: the name for the new datasource to add
             initialize: if False, add the datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
+            persist_changes: Whether or not to save changes to disk.
             kwargs (keyword arguments): the configuration for the new datasource
 
         Returns:
