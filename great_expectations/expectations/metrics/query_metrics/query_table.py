@@ -7,7 +7,7 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,
@@ -52,5 +52,30 @@ class QueryTable(QueryMetricProvider):
             query = query.format(active_batch=f"({active_batch})")
 
         result = engine.execute(sa.text(query)).fetchall()
+
+        return result
+
+    @metric_value(engine=SparkDFExecutionEngine)
+    def _spark(
+        cls,
+        execution_engine: SparkDFExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: dict,
+    ):
+        query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
+            "query"
+        )
+
+        engine = execution_engine.spark
+        active_batch, _, _ = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        )
+
+        active_batch.createOrReplaceTempView("active_batch")
+        query = query.format(active_batch="active_batch")
+
+        result = engine.sql(query).collect()
 
         return result

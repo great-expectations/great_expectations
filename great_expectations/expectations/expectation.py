@@ -12,7 +12,7 @@ from copy import deepcopy
 from inspect import isabstract
 from itertools import chain
 from numbers import Number
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 from unittest import TestCase
 
 import numpy as np
@@ -1760,6 +1760,32 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
 
 
 class QueryExpectation(TableExpectation, ABC):
+    """Base class for QueryExpectations.
+
+     QueryExpectations *must* have the following attributes set:
+         1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
+            expectation
+         2. `success_keys`: a tuple of the *keys* used to determine the success of
+            the expectation.
+
+    QueryExpectations *may* specify a `query` attribute, and specify that query in `default_kwarg_values`.
+    Doing so precludes the need to pass a query into the Expectation, but will override the default query if a query
+    is passed in.
+
+     They *may* optionally override `runtime_keys` and `default_kwarg_values`;
+         1. runtime_keys lists the keys that can be used to control output but will
+            not affect the actual success value of the expectation (such as result_format).
+         2. default_kwarg_values is a dictionary that will be used to fill unspecified
+            kwargs from the Expectation Configuration.
+
+     QueryExpectations *must* implement the following:
+         1. `_validate`
+
+     Additionally, they *may* provide implementations of:
+         1. `validate_configuration`, which should raise an error if the configuration
+            will not be usable for the Expectation
+         2. Data Docs rendering methods decorated with the @renderer decorator. See the
+    """
 
     default_kwarg_values = {
         "result_format": "BASIC",
@@ -1781,9 +1807,12 @@ class QueryExpectation(TableExpectation, ABC):
     ) -> None:
         super().validate_configuration(configuration)
 
-        query = configuration.kwargs.get("query") or self.default_kwarg_values.get(
+        query: str = configuration.kwargs.get("query") or self.default_kwarg_values.get(
             "query"
         )
+        row_condition: str = configuration.kwargs.get(
+            "row_condition"
+        ) or self.default_kwarg_values.get("row_condition")
 
         try:
             assert (
@@ -1792,7 +1821,7 @@ class QueryExpectation(TableExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         try:
-            parsed_query = {
+            parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
                 if x.lower() != ""
@@ -1809,12 +1838,19 @@ class QueryExpectation(TableExpectation, ABC):
             assert "{active_batch}" in parsed_query, (
                 "Your query appears to not be parameterized for a data asset. "
                 "By not parameterizing your query with `{active_batch}`, "
-                "you may not be validating against your intended data asset."
+                "you may not be validating against your intended data asset, or the expectation may fail."
             )
             assert all([re.match("{.*?}", x) for x in parsed_query]), (
                 "Your query appears to have hard-coded references to your data. "
                 "By not parameterizing your query with `{active_batch}`, {col}, etc., "
-                "you may not be validating against your intended data asset."
+                "you may not be validating against your intended data asset, or the expectation may fail."
+            )
+        except AssertionError as e:
+            warnings.warn(str(e), UserWarning)
+        try:
+            assert row_condition is None, (
+                "`row_condition` is an experimental feature. "
+                "Combining this functionality with QueryExpectations may result in unexpected behavior."
             )
         except AssertionError as e:
             warnings.warn(str(e), UserWarning)

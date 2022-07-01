@@ -59,3 +59,29 @@ class QueryColumn(QueryMetricProvider):
         result = engine.execute(sa.text(query)).fetchall()
 
         return result
+
+    @metric_value(engine=SparkDFExecutionEngine)
+    def _spark(
+        cls,
+        execution_engine: SparkDFExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: dict,
+    ):
+        column = metric_value_kwargs.get("column")
+        query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
+            "query"
+        )
+
+        engine = execution_engine.spark
+        active_batch, _, _ = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        )
+
+        active_batch.createOrReplaceTempView("active_batch")
+        query = query.format(col=column, active_batch="active_batch")
+
+        result = engine.sql(query).collect()
+
+        return result

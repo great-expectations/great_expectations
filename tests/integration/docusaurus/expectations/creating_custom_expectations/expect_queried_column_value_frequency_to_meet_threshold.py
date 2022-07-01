@@ -127,7 +127,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "threshold": 0.6,
                     },
                     "out": {"success": True},
-                    "only_for": ["postgresql"],
+                    "only_for": ["postgresql", "spark"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -139,7 +139,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "threshold": 1,
                     },
                     "out": {"success": False},
-                    "only_for": ["postgresql"],
+                    "only_for": ["postgresql", "spark"],
                 },
                 {
                     "title": "multi_value_positive_test",
@@ -151,7 +151,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "threshold": [0.6, 0.4],
                     },
                     "out": {"success": True},
-                    "only_for": ["postgresql"],
+                    "only_for": ["postgresql", "spark"],
                 },
                 {
                     "title": "multi_value_positive_test_static_data_asset",
@@ -183,7 +183,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "condition_parser": "great_expectations__experimental__",
                     },
                     "out": {"success": True},
-                    "only_for": ["postgresql"],
+                    "only_for": ["postgresql", "spark"],
                 },
             ],
         },
