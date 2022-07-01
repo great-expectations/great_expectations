@@ -15,8 +15,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
     TaxiSplittingTestCase,
-    TaxiSplittingTestCases,
-    TaxiTestData,
+    TaxiSplittingTestCasesBase,
 )
 from tests.test_utils import (
     LoadedTable,
@@ -65,50 +64,51 @@ def _is_dialect_athena(dialect: str) -> bool:
     return dialect == "awsathena"
 
 
-if __name__ == "test_script_module":
-
+def _get_loaded_table(dialect: str) -> LoadedTable:
     dialect, connection_string = get_connection_string_and_dialect(
         athena_db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
     )
     print(f"Testing dialect: {dialect}")
 
+    test_df: pd.DataFrame
+    table_name: str
+    loaded_table: LoadedTable
     if _is_dialect_athena(dialect):
         athena_db_name: str = get_awsathena_db_name(
             db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
         )
-        table_name: str = "ten_trips_from_each_month"
-        test_df: pd.DataFrame = load_and_concatenate_csvs(
+        table_name = "ten_trips_from_each_month"
+        test_df = load_and_concatenate_csvs(
             csv_paths=[
                 f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
             ],
             convert_column_names_to_datetime=["pickup_datetime", "dropoff_datetime"],
             load_full_dataset=True,
         )
-
+        loaded_table = LoadedTable(
+            table_name=table_name,
+            inserted_dataframe=test_df,
+        )
     else:
         print("Preemptively cleaning old tables")
         clean_up_tables_with_prefix(
             connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
         )
 
-        loaded_table: LoadedTable = _load_data(
-            connection_string=connection_string, dialect=dialect
-        )
+        loaded_table = _load_data(connection_string=connection_string, dialect=dialect)
 
-        test_df: pd.DataFrame = loaded_table.inserted_dataframe
-        table_name: str = loaded_table.table_name
+    return loaded_table
 
-    taxi_test_data: TaxiTestData = TaxiTestData(
-        test_df, test_column_name="pickup_datetime"
-    )
-    taxi_splitting_test_cases: TaxiSplittingTestCases = TaxiSplittingTestCases(
-        taxi_test_data
-    )
 
+def _execute_taxi_splitting_test_cases(
+    taxi_splitting_test_cases: TaxiSplittingTestCasesBase,
+    connection_string: str,
+    table_name: str,
+) -> None:
     test_cases: List[TaxiSplittingTestCase] = taxi_splitting_test_cases.test_cases()
 
+    test_case: TaxiSplittingTestCase
     for test_case in test_cases:
-
         print("Testing splitter method:", test_case.splitter_method_name)
 
         # 1. Setup
@@ -159,19 +159,33 @@ if __name__ == "test_script_module":
         )
         batch_definition_list: List[
             BatchDefinition
-        ] = data_connector.get_batch_definition_list_from_batch_request(batch_request)
+        ] = data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
 
         assert len(batch_definition_list) == test_case.num_expected_batch_definitions
 
-        expected_batch_definition_list: List[BatchDefinition] = [
-            BatchDefinition(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                batch_identifiers=IDDict({column_name: pickup_datetime}),
-            )
-            for pickup_datetime in test_case.expected_column_values
-        ]
+        expected_batch_definition_list: List[BatchDefinition]
+        if test_case.table_domain_test_case:
+            expected_batch_definition_list = [
+                BatchDefinition(
+                    datasource_name=datasource_name,
+                    data_connector_name=data_connector_name,
+                    data_asset_name=data_asset_name,
+                    batch_identifiers=IDDict({}),
+                )
+            ]
+        else:
+            column_value: dict
+            expected_batch_definition_list: List[BatchDefinition] = [
+                BatchDefinition(
+                    datasource_name=datasource_name,
+                    data_connector_name=data_connector_name,
+                    data_asset_name=data_asset_name,
+                    batch_identifiers=IDDict({column_name: column_value}),
+                )
+                for column_value in test_case.expected_column_values
+            ]
 
         assert set(batch_definition_list) == set(
             expected_batch_definition_list
@@ -193,9 +207,3 @@ if __name__ == "test_script_module":
             sa.select([sa.func.count()]).select_from(batch_data.selectable)
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
-
-    if not _is_dialect_athena(dialect):
-        print("Clean up tables used in this test")
-        clean_up_tables_with_prefix(
-            connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
-        )
