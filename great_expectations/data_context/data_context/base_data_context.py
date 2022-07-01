@@ -1082,9 +1082,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
-                self._datasource_store.delete_by_name(
-                    datasource_name, persist_changes=persist_changes
-                )
+                if persist_changes:
+                    self._datasource_store.delete_by_name(datasource_name)
+                else:
+                    del self.config.datasources[datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(f"Datasource {datasource_name} not found")
@@ -1876,11 +1877,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._data_context._update_config_variables()
         self._apply_temporary_overrides()
 
-        self._datasource_store.set_by_name(
-            datasource_name=name,
-            datasource_config=datasource_config,
-            persist_changes=persist_changes,
-        )
+        if persist_changes:
+            self._datasource_store.set_by_name(
+                datasource_name=name, datasource_config=datasource_config
+            )
+        else:
+            self.config.datasources[name] = datasource_config
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
@@ -1898,9 +1900,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
-                self._datasource_store.delete_by_name(
-                    datasource_name=name, persist_changes=persist_changes
-                )
+                if persist_changes:
+                    self._datasource_store.delete_by_name(datasource_name=name)
+                else:
+                    del self.config.datasources[name]
                 raise e
 
         return datasource
