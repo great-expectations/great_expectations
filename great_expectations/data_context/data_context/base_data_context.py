@@ -2,7 +2,6 @@ import copy
 import datetime
 import logging
 import os
-import sys
 import traceback
 import uuid
 import warnings
@@ -76,7 +75,6 @@ from great_expectations.data_context.store.validations_store import ValidationsS
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
-    DEFAULT_USAGE_STATISTICS_URL,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     ConcurrencyConfig,
@@ -351,10 +349,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
 
+        # initialize runtime_environment as empty dict if None
+        runtime_environment: dict = runtime_environment or {}
+
         if self._ge_cloud_mode:
             self._data_context = CloudDataContext(
                 project_config=project_config,
                 runtime_environment=runtime_environment,
+                context_root_dir=context_root_dir,
                 ge_cloud_config=ge_cloud_config,
             )
         elif self._context_root_directory:
@@ -370,17 +372,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         # TODO: remove this method once refactor of DataContext is complete
         self._apply_temporary_overrides()
-
-        # Init plugin support
-        if self.plugins_directory is not None and os.path.exists(
-            self.plugins_directory
-        ):
-            sys.path.append(self.plugins_directory)
-
-        # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
-        self._in_memory_instance_id = (
-            None  # This variable *may* be used in case we cannot save an instance id
-        )
 
         # Init stores
         self._stores = {}
@@ -446,6 +437,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._project_config = self._data_context._project_config
         self.runtime_environment = self._data_context.runtime_environment or {}
         self._config_variables = self._data_context.config_variables
+        self._in_memory_instance_id = self._data_context._in_memory_instance_id
 
     def _build_store_from_config(
         self, store_name: str, store_config: dict
@@ -627,16 +619,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
-    def _normalize_absolute_or_relative_path(
-        self, path: Optional[str]
-    ) -> Optional[str]:
-        if path is None:
-            return
-        if os.path.isabs(path):
-            return path
-        else:
-            return os.path.join(self.root_directory, path)
-
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
             if not os.path.isabs(resource_store["base_directory"]):
@@ -768,25 +750,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 webbrowser.open(url)
 
     @property
-    def root_directory(self):
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located."""
-        return self._context_root_directory
-
-    @property
-    def plugins_directory(self):
-        """The directory in which custom plugin modules should be placed."""
-        return self._normalize_absolute_or_relative_path(
-            self.project_config_with_variables_substituted.plugins_directory
-        )
-
-    @property
     def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
         return self._usage_statistics_handler
-
-    @property
-    def project_config_with_variables_substituted(self) -> DataContextConfig:
-        return self.get_config_with_variables_substituted()
 
     @property
     def anonymous_usage_statistics(self):
@@ -919,64 +884,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
         )
 
-    @property
-    def instance_id(self):
-        instance_id = self.config_variables.get("instance_id")
-        if instance_id is None:
-            if self._in_memory_instance_id is not None:
-                return self._in_memory_instance_id
-            instance_id = str(uuid.uuid4())
-            self._in_memory_instance_id = instance_id
-        return instance_id
-
-    @property
-    def config(self) -> DataContextConfig:
-        return self._project_config
-
     #####
     #
     # Internal helper methods
     #
     #####
-
-    def get_config_with_variables_substituted(
-        self, config: Optional[DataContextConfig] = None
-    ) -> DataContextConfig:
-        """
-        Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
-        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
-        be optional in GE Cloud mode).
-        """
-        if not config:
-            config = self.config
-
-        substitutions: dict = self._determine_substitutions()
-
-        if self.ge_cloud_mode:
-            ge_cloud_config_variable_defaults = {
-                "plugins_directory": self._normalize_absolute_or_relative_path(
-                    DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
-                ),
-                "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
-            }
-            for config_variable, value in ge_cloud_config_variable_defaults.items():
-                if substitutions.get(config_variable) is None:
-                    logger.info(
-                        f'Config variable "{config_variable}" was not found in environment or global config ('
-                        f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
-                        f"like to "
-                        f"use a different value, please specify it in an environment variable or in a "
-                        f"great_expectations.conf file located at one of the above paths, in a section named "
-                        f'"ge_cloud_config".'
-                    )
-                    substitutions[config_variable] = value
-
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
 
     def escape_all_config_variables(
         self,
@@ -2078,7 +1990,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         datasources: List[dict] = []
         substitutions: dict = self._determine_substitutions()
-
         datasource_name: str
         for datasource_name in self._datasource_store.list_keys():
             datasource_config: DatasourceConfig = (
@@ -2473,6 +2384,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
+
+    @property
+    def root_directory(self) -> Optional[str]:
+        if hasattr(self._data_context, "_context_root_directory"):
+            return self._data_context._context_root_directory
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
