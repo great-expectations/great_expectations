@@ -1,4 +1,5 @@
 import logging
+from enum import Enum
 
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -75,58 +76,57 @@ def add_values_with_json_schema_from_list_in_params(
     return params_with_json_schema
 
 
-valid_sql_tokens = {
-    "SELECT",
-    "*",
-    "DISTINCT",
-    "INTO",
-    "TOP",
-    "AS",
-    "FROM",
-    "WHERE",
-    "AND",
-    "OR",
-    "BETWEEN",
-    "LIKE",
-    "IN",
-    "IS",
-    "NULL",
-    "NOT",
-    "CREATE",
-    "DATABASE",
-    "TABLE",
-    "INDEX",
-    "VIEW",
-    "DROP",
-    "UPDATE",
-    "DELETE",
-    "ALTER",
-    "COLUMN",
-    "COUNT",
-    "SUM",
-    "AVG",
-    "MIN",
-    "MAX",
-    "GROUP",
-    "BY",
-    "HAVING",
-    "ORDER",
-    "DESC",
-    "OFFSET",
-    "FETCH",
-    "JOIN",
-    "INNER",
-    "LEFT",
-    "RIGHT",
-    "FULL",
-    "EXISTS",
-    "GRANT",
-    "REVOKE",
-    "SAVEPOINT",
-    "COMMIT",
-    "ROLLBACK",
-    "TRUNCATE",
-    "UNION",
-    "ALL",
-    "CAST",
-}
+class ValidSqlTokens(Enum):
+    SELECT = "SELECT"
+    ASTERISK = "*"
+    DISTINCT = "DISTINCT"
+    INTO = "INTO"
+    TOP = "TOP"
+    AS = "AS"
+    FROM = "FROM"
+    WHERE = "WHERE"
+    AND = "AND"
+    OR = "OR"
+    BETWEEN = "BETWEEN"
+    LIKE = "LIKE"
+    IN = "IN"
+    IS = "IS"
+    NULL = "NULL"
+    NOT = "NOT"
+    CREATE = "CREATE"
+    DATABASE = "DATABASE"
+    TABLE = "TABLE"
+    INDEX = "INDEX"
+    VIEW = "VIEW"
+    DROP = "DROP"
+    UPDATE = "UPDATE"
+    DELETE = "DELETE"
+    ALTER = "ALTER"
+    COLUMN = "COLUMN"
+    COUNT = "COUNT"
+    SUM = "SUM"
+    AVG = "AVG"
+    MIN = "MIN"
+    MAX = "MAX"
+    GROUP = "GROUP"
+    BY = "BY"
+    HAVING = "HAVING"
+    ORDER = "ORDER"
+    DESC = "DESC"
+    OFFSET = "OFFSET"
+    FETCH = "FETCH"
+    JOIN = "JOIN"
+    INNER = "INNER"
+    LEFT = "LEFT"
+    RIGHT = "RIGHT"
+    FULL = "FULL"
+    EXISTS = "EXISTS"
+    GRANT = "GRANT"
+    REVOKE = "REVOKE"
+    SAVEPOINT = "SAVEPOINT"
+    COMMIT = "COMMIT"
+    ROLLBACK = "ROLLBACK"
+    TRUNCATE = "TRUNCATE"
+    UNION = "UNION"
+    ALL = "ALL"
+    CAST = "CAST"
