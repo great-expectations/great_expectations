@@ -1,5 +1,6 @@
 import logging
-from typing import Mapping, Optional, Union
+import os
+from typing import Mapping, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -52,13 +53,3 @@ class FileDataContext(AbstractDataContext):
         config_filepath: str = os.path.join(self.root_directory, self.GE_YML)
         with open(config_filepath, "w") as outfile:
             self.config.to_yaml(outfile)
-
-    @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        """
-        return self._context_root_directory

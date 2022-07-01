@@ -1640,29 +1640,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
 
-    @property
-    def root_directory(self) -> Optional[str]:
-        if hasattr(self._data_context, "_context_root_directory"):
-            return self._data_context._context_root_directory
-
-    def _compile_evaluation_parameter_dependencies(self) -> None:
-        self._evaluation_parameter_dependencies = {}
-        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
-        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
-        for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
-            if not expectation_suite_dict:
-                continue
-            expectation_suite: ExpectationSuite = ExpectationSuite(
-                **expectation_suite_dict, data_context=self
-            )
-
-            dependencies = expectation_suite.get_evaluation_parameter_dependencies()
-            if len(dependencies) > 0:
-                nested_update(self._evaluation_parameter_dependencies, dependencies)
-
-        self._evaluation_parameter_dependencies_compiled = True
-
     def get_validation_result(
         self,
         expectation_suite_name,
