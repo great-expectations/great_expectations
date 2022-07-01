@@ -204,6 +204,29 @@ class Expectation(metaclass=MetaExpectation):
         raise NotImplementedError
 
     @classmethod
+    @renderer(renderer_type="atomic.prescriptive.kwargs")
+    def _prescriptive_kwargs(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs: dict,
+    ) -> RenderedAtomicContent:
+        """
+        Default rendering function that is utilized by GE Cloud Front-end if no other atomic renderers apply
+        """
+        value_obj = renderedAtomicValueSchema.load(
+            {"schema": {"type": "UnknownType"}, "kwargs": configuration.kwargs}
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.kwargs",
+            value=value_obj,
+            value_type="UnknownType",
+        )
+        return rendered
+
+    @classmethod
     def _atomic_prescriptive_template(
         cls,
         configuration=None,
@@ -222,10 +245,6 @@ class Expectation(metaclass=MetaExpectation):
         styling = runtime_configuration.get("styling")
 
         template_str = "$expectation_type(**$kwargs)"
-        params = {
-            "expectation_type": configuration.expectation_type,
-            "kwargs": configuration.kwargs,
-        }
 
         params_with_json_schema = {
             "expectation_type": {
@@ -682,11 +701,19 @@ class Expectation(metaclass=MetaExpectation):
 
     def metrics_validate(
         self,
-        metrics: Dict,
+        metrics: dict,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
+        **kwargs: dict,
     ) -> ExpectationValidationResult:
+        # TODO: NF - feature flag to be updated upon feature release
+        include_rendered_content: bool
+        if "include_rendered_content" in kwargs:
+            include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            include_rendered_content = False
+
         if configuration is None:
             configuration = self.configuration
 
@@ -713,22 +740,42 @@ class Expectation(metaclass=MetaExpectation):
             execution_engine=execution_engine,
         )
         evr: ExpectationValidationResult = self._build_evr(
-            raw_response=expectation_validation_result, configuration=configuration
+            raw_response=expectation_validation_result,
+            configuration=configuration,
+            include_rendered_content=include_rendered_content,
         )
         return evr
 
     @staticmethod
-    def _build_evr(raw_response, configuration) -> ExpectationValidationResult:
+    def _build_evr(
+        raw_response: Union[ExpectationValidationResult, dict],
+        configuration: ExpectationConfiguration,
+        **kwargs: dict,
+    ) -> ExpectationValidationResult:
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
         fails to return an EVR but returns the necessary components in a dictionary."""
+        # TODO: NF - feature flag to be updated upon feature release
+        include_rendered_content: bool
+        if "include_rendered_content" in kwargs:
+            include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            include_rendered_content = False
+
+        evr: ExpectationValidationResult
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):
+                raw_response["include_rendered_content"] = include_rendered_content
                 evr = ExpectationValidationResult(**raw_response)
                 evr.expectation_config = configuration
             else:
                 raise GreatExpectationsError("Unable to build EVR")
         else:
-            evr = raw_response
+            if not include_rendered_content:
+                evr = raw_response
+            else:
+                raw_response_dict: dict = raw_response.to_json_dict()
+                raw_response_dict["include_rendered_content"] = include_rendered_content
+                evr = ExpectationValidationResult(**raw_response_dict)
             evr.expectation_config = configuration
         return evr
 
@@ -851,6 +898,8 @@ class Expectation(metaclass=MetaExpectation):
         data_context=None,
         runtime_configuration=None,
     ):
+        include_rendered_content: bool = validator._include_rendered_content
+
         if configuration is None:
             configuration = deepcopy(self.configuration)
 
@@ -861,6 +910,8 @@ class Expectation(metaclass=MetaExpectation):
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
         )[0]
+        if include_rendered_content:
+            evr.render()
 
         return evr
 

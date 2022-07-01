@@ -135,7 +135,6 @@ class AbstractDataContext(ABC):
         self._in_memory_instance_id = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
-
         # Init stores
         self._stores = {}
         self._init_stores(self.project_config_with_variables_substituted.stores)
@@ -1112,3 +1111,23 @@ class AbstractDataContext(ABC):
             return (
                 self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
             )
+            
+    def get_config_with_variables_substituted(
+        self, config: Optional[DataContextConfig] = None
+    ) -> DataContextConfig:
+        """
+        Substitute vars in config of form ${var} or $(var) with values found in the following places,
+        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        be optional in GE Cloud mode).
+        """
+        if not config:
+            config = self._project_config
+
+        substitutions: dict = self._determine_substitutions()
+
+        return DataContextConfig(
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
+        )
