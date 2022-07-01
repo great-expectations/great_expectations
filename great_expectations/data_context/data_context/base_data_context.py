@@ -2,7 +2,6 @@ import copy
 import datetime
 import logging
 import os
-import sys
 import traceback
 import uuid
 import warnings
@@ -76,7 +75,6 @@ from great_expectations.data_context.store.validations_store import ValidationsS
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
-    DEFAULT_USAGE_STATISTICS_URL,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     ConcurrencyConfig,
@@ -351,10 +349,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
 
+        # initialize runtime_environment as empty dict if None
+        runtime_environment: dict = runtime_environment or {}
+
         if self._ge_cloud_mode:
             self._data_context = CloudDataContext(
                 project_config=project_config,
                 runtime_environment=runtime_environment,
+                context_root_dir=context_root_dir,
                 ge_cloud_config=ge_cloud_config,
             )
         elif self._context_root_directory:
@@ -370,17 +372,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         # TODO: remove this method once refactor of DataContext is complete
         self._apply_temporary_overrides()
-
-        # Init plugin support
-        if self.plugins_directory is not None and os.path.exists(
-            self.plugins_directory
-        ):
-            sys.path.append(self.plugins_directory)
-
-        # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
-        self._in_memory_instance_id = (
-            None  # This variable *may* be used in case we cannot save an instance id
-        )
 
         # Init stores
         self._stores = {}
@@ -446,6 +437,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._project_config = self._data_context._project_config
         self.runtime_environment = self._data_context.runtime_environment or {}
         self._config_variables = self._data_context.config_variables
+        self._in_memory_instance_id = self._data_context._in_memory_instance_id
 
     def _build_store_from_config(
         self, store_name: str, store_config: dict
@@ -627,16 +619,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
-    def _normalize_absolute_or_relative_path(
-        self, path: Optional[str]
-    ) -> Optional[str]:
-        if path is None:
-            return
-        if os.path.isabs(path):
-            return path
-        else:
-            return os.path.join(self.root_directory, path)
-
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
             if not os.path.isabs(resource_store["base_directory"]):
@@ -768,25 +750,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 webbrowser.open(url)
 
     @property
-    def root_directory(self):
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located."""
-        return self._context_root_directory
-
-    @property
-    def plugins_directory(self):
-        """The directory in which custom plugin modules should be placed."""
-        return self._normalize_absolute_or_relative_path(
-            self.project_config_with_variables_substituted.plugins_directory
-        )
-
-    @property
     def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
         return self._usage_statistics_handler
-
-    @property
-    def project_config_with_variables_substituted(self) -> DataContextConfig:
-        return self.get_config_with_variables_substituted()
 
     @property
     def anonymous_usage_statistics(self):
@@ -919,64 +884,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
         )
 
-    @property
-    def instance_id(self):
-        instance_id = self.config_variables.get("instance_id")
-        if instance_id is None:
-            if self._in_memory_instance_id is not None:
-                return self._in_memory_instance_id
-            instance_id = str(uuid.uuid4())
-            self._in_memory_instance_id = instance_id
-        return instance_id
-
-    @property
-    def config(self) -> DataContextConfig:
-        return self._project_config
-
     #####
     #
     # Internal helper methods
     #
     #####
-
-    def get_config_with_variables_substituted(
-        self, config: Optional[DataContextConfig] = None
-    ) -> DataContextConfig:
-        """
-        Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
-        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
-        be optional in GE Cloud mode).
-        """
-        if not config:
-            config = self.config
-
-        substitutions: dict = self._determine_substitutions()
-
-        if self.ge_cloud_mode:
-            ge_cloud_config_variable_defaults = {
-                "plugins_directory": self._normalize_absolute_or_relative_path(
-                    DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
-                ),
-                "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
-            }
-            for config_variable, value in ge_cloud_config_variable_defaults.items():
-                if substitutions.get(config_variable) is None:
-                    logger.info(
-                        f'Config variable "{config_variable}" was not found in environment or global config ('
-                        f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
-                        f"like to "
-                        f"use a different value, please specify it in an environment variable or in a "
-                        f"great_expectations.conf file located at one of the above paths, in a section named "
-                        f'"ge_cloud_config".'
-                    )
-                    substitutions[config_variable] = value
-
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
 
     def escape_all_config_variables(
         self,
@@ -1067,10 +979,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self, datasource_name: str) -> None:
+    def delete_datasource(
+        self, datasource_name: str, save_changes: bool = False
+    ) -> None:
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
+            save_changes: Whether or not to save changes to disk.
 
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
@@ -1080,7 +995,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
-                self._datasource_store.delete_by_name(datasource_name)
+                if save_changes:
+                    self._datasource_store.delete_by_name(datasource_name)
+                else:
+                    del self.config.datasources[datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(f"Datasource {datasource_name} not found")
@@ -1666,7 +1584,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
-        *,
         batch: Optional[Batch] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[BatchRequestBase] = None,
@@ -1690,11 +1607,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> Validator:
         """
         This method applies only to the new (V3) Datasource schema.
         """
+
+        # TODO: NF - feature flag to be updated upon feature release
+        include_rendered_content: bool
+        if "include_rendered_content" in kwargs:
+            include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            include_rendered_content = False
 
         if (
             sum(
@@ -1779,13 +1703,22 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
             batch_list=batch_list,
+            include_rendered_content=include_rendered_content,
         )
 
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
+        **kwargs: dict,
     ) -> Validator:
+        # TODO: NF - feature flag to be updated upon feature release
+        include_rendered_content: bool
+        if "include_rendered_content" in kwargs:
+            include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            include_rendered_content = False
+
         if len(batch_list) == 0:
             raise ge_exceptions.InvalidBatchRequestError(
                 """Validator could not be created because BatchRequest returned an empty batch_list.
@@ -1803,6 +1736,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             expectation_suite=expectation_suite,
             data_context=self,
             batches=batch_list,
+            include_rendered_content=include_rendered_content,
         )
         return validator
 
@@ -1817,13 +1751,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
-        self, name: str, initialize: bool = True, **kwargs: dict
+        self,
+        name: str,
+        initialize: bool = True,
+        save_changes: bool = False,
+        **kwargs: dict,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name: the name for the new datasource to add
             initialize: if False, add the datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
+            save_changes: Whether or not to save changes to disk.
             kwargs (keyword arguments): the configuration for the new datasource
 
         Returns:
@@ -1850,11 +1789,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             name=name,
             config=config,
             initialize=initialize,
+            save_changes=save_changes,
         )
         return datasource
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: dict, initialize: bool = True
+        self,
+        name: str,
+        config: dict,
+        initialize: bool = True,
+        save_changes: bool = False,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
@@ -1863,9 +1807,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._data_context._update_config_variables()
         self._apply_temporary_overrides()
 
-        self._datasource_store.set_by_name(
-            datasource_name=name, datasource_config=datasource_config
-        )
+        if save_changes:
+            self._datasource_store.set_by_name(
+                datasource_name=name, datasource_config=datasource_config
+            )
+        else:
+            self.config.datasources[name] = datasource_config
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
@@ -1883,7 +1830,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
-                self._datasource_store.delete_by_name(datasource_name=name)
+                if save_changes:
+                    self._datasource_store.delete_by_name(datasource_name=name)
+                else:
+                    del self.config.datasources[name]
                 raise e
 
         return datasource
@@ -1912,6 +1862,31 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 datasource_name=name, message=str(e)
             )
         return datasource
+
+    def update_datasource(
+        self,
+        datasource_name: str,
+        datasource: Union[LegacyDatasource, BaseDatasource],
+        save_changes: bool = False,
+    ) -> None:
+        """
+        Updates a DatasourceConfig that already exists in the store.
+
+        Args:
+            datasource_name: The name of the Datasource to update.
+            datasource_config: The config object to persist using the DatasourceStore.
+            save_changes: Whether or not to save changes to disk.
+        """
+        datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
+        datasource_config: DatasourceConfig = DatasourceConfig(**datasource_config_dict)
+
+        if save_changes:
+            self._datasource_store.update_by_name(
+                datasource_name=datasource_name, datasource_config=datasource_config
+            )
+        else:
+            self.config.datasources[datasource_name] = datasource_config
+            self._cached_datasources[datasource_name] = datasource_config
 
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
@@ -2015,7 +1990,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         datasources: List[dict] = []
         substitutions: dict = self._determine_substitutions()
-
         datasource_name: str
         for datasource_name in self._datasource_store.list_keys():
             datasource_config: DatasourceConfig = (
@@ -2410,6 +2384,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
+
+    @property
+    def root_directory(self) -> Optional[str]:
+        if hasattr(self._data_context, "_context_root_directory"):
+            return self._data_context._context_root_directory
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
