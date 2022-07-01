@@ -1376,7 +1376,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self,
         metrics: Dict,
         runtime_configuration: dict = None,
-        execution_engine=None,
+        execution_engine: "ExecutionEngine" = None,  # noqa: F821
         **kwargs,
     ):
         # TODO: NF - feature flag to be updated upon feature release
@@ -1386,7 +1386,7 @@ class ExpectationConfiguration(SerializableDictDot):
         else:
             include_rendered_content = False
 
-        expectation_impl = self._get_expectation_impl()
+        expectation_impl: "Expectation" = self._get_expectation_impl()  # noqa: F821
         return expectation_impl(self).metrics_validate(
             metrics,
             runtime_configuration=runtime_configuration,

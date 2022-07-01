@@ -47,7 +47,8 @@ class InlineRenderer(Renderer):
             renderer_prefix = "atomic.diagnostic"
         else:
             raise ValueError(
-                f"object must be of type ExpectationConfiguration or ExpectationValidationResult, but an object of type {type(render_object)} was passed"
+                f"""object must be of type ExpectationConfiguration or ExpectationValidationResult,
+but an object of type "{type(render_object)}" was passed."""
             )
 
         renderer_names: List[str] = get_renderer_names_with_renderer_prefix(
@@ -96,7 +97,8 @@ class InlineRenderer(Renderer):
             render_object, ExpectationConfiguration
         ):
             logger.info(
-                f"""The following renderers failed to render Expectation "{expectation_type}": {non_default_prescriptive_renderer_names}.
+                f"""The following renderers failed to render Expectation "{expectation_type}":
+{non_default_prescriptive_renderer_names}
 Default renderer "{default_prescriptive_renderer_name}" will be used to render prescriptive content for ExpectationConfiguration.
 """
             )

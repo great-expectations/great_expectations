@@ -56,7 +56,6 @@ class ExpectationValidationResult(SerializableDictDot):
         **kwargs,
     ) -> None:
         # TODO: NF - feature flag to be updated upon feature release
-        include_rendered_content: bool
         if "include_rendered_content" in kwargs:
             self._include_rendered_content = kwargs["include_rendered_content"]
         else:

@@ -207,12 +207,12 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type="atomic.prescriptive.kwargs")
     def _prescriptive_kwargs(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: ExpectationConfiguration = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: str = None,
+        runtime_configuration: dict = None,
         **kwargs,
-    ):
+    ) -> RenderedAtomicContent:
         """
         Default rendering function that is utilized by GE Cloud Front-end if no other atomic renderers apply
         """
