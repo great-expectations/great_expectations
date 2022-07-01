@@ -1067,10 +1067,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self, datasource_name: str) -> None:
+    def delete_datasource(
+        self, datasource_name: str, save_changes: bool = False
+    ) -> None:
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
+            save_changes: Whether or not to save changes to disk.
 
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
@@ -1080,7 +1083,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
-                self._datasource_store.delete_by_name(datasource_name)
+                if save_changes:
+                    self._datasource_store.delete_by_name(datasource_name)
+                else:
+                    del self.config.datasources[datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(f"Datasource {datasource_name} not found")
@@ -1817,13 +1823,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
-        self, name: str, initialize: bool = True, **kwargs: dict
+        self,
+        name: str,
+        initialize: bool = True,
+        save_changes: bool = False,
+        **kwargs: dict,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name: the name for the new datasource to add
             initialize: if False, add the datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
+            save_changes: Whether or not to save changes to disk.
             kwargs (keyword arguments): the configuration for the new datasource
 
         Returns:
@@ -1850,11 +1861,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             name=name,
             config=config,
             initialize=initialize,
+            save_changes=save_changes,
         )
         return datasource
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: dict, initialize: bool = True
+        self,
+        name: str,
+        config: dict,
+        initialize: bool = True,
+        save_changes: bool = False,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
@@ -1863,9 +1879,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._data_context._update_config_variables()
         self._apply_temporary_overrides()
 
-        self._datasource_store.set_by_name(
-            datasource_name=name, datasource_config=datasource_config
-        )
+        if save_changes:
+            self._datasource_store.set_by_name(
+                datasource_name=name, datasource_config=datasource_config
+            )
+        else:
+            self.config.datasources[name] = datasource_config
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
@@ -1883,7 +1902,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
-                self._datasource_store.delete_by_name(datasource_name=name)
+                if save_changes:
+                    self._datasource_store.delete_by_name(datasource_name=name)
+                else:
+                    del self.config.datasources[name]
                 raise e
 
         return datasource
