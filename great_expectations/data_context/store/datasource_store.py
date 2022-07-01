@@ -61,15 +61,11 @@ class DatasourceStore(Store):
         ]
         return [key for key in keys_without_store_backend_id]
 
-    def remove_key(
-        self, key: DataContextVariableKey, persist_changes: bool = True
-    ) -> None:
+    def remove_key(self, key: DataContextVariableKey) -> None:
         """
         See parent `Store.remove_key()` for more information
         """
-        return self._store_backend.remove_key(
-            key.to_tuple(), persist_changes=persist_changes
-        )
+        return self._store_backend.remove_key(key.to_tuple())
 
     def serialize(
         self, key: Optional[Any], value: DatasourceConfig
@@ -123,9 +119,7 @@ class DatasourceStore(Store):
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))
         return datasource_config
 
-    def delete_by_name(
-        self, datasource_name: str, persist_changes: bool = True
-    ) -> None:
+    def delete_by_name(self, datasource_name: str) -> None:
         """Deletes a DatasourceConfig persisted in the store by it's given name.
 
         Args:
@@ -134,13 +128,12 @@ class DatasourceStore(Store):
         datasource_key: DataContextVariableKey = self._determine_datasource_key(
             datasource_name=datasource_name
         )
-        self.remove_key(datasource_key, persist_changes=persist_changes)
+        self.remove_key(datasource_key)
 
     def set_by_name(
         self,
         datasource_name: str,
         datasource_config: DatasourceConfig,
-        persist_changes: bool = True,
     ) -> None:
         """Persists a DatasourceConfig in the store by a given name.
 
@@ -151,7 +144,7 @@ class DatasourceStore(Store):
         datasource_key: DataContextVariableKey = self._determine_datasource_key(
             datasource_name=datasource_name
         )
-        self.set(datasource_key, datasource_config, persist_changes=persist_changes)
+        self.set(datasource_key, datasource_config)
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
         datasource_key: DataContextVariableKey = DataContextVariableKey(

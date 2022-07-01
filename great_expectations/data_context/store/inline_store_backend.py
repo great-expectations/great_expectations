@@ -84,13 +84,7 @@ class InlineStoreBackend(StoreBackend):
 
         return variable_config
 
-    def _set(
-        self,
-        key: Tuple[str, ...],
-        value: Any,
-        persist_changes: bool = True,
-        **kwargs: dict,
-    ) -> None:
+    def _set(self, key: Tuple[str, ...], value: Any, **kwargs: dict) -> None:
         (
             resource_type,
             resource_name,
@@ -109,8 +103,7 @@ class InlineStoreBackend(StoreBackend):
         else:
             project_config[resource_type] = value
 
-        if persist_changes:
-            self._persist_changes()
+        self._persist_changes()
 
     def _move(
         self, source_key: Tuple[str, ...], dest_key: Tuple[str, ...], **kwargs: dict
@@ -148,7 +141,7 @@ class InlineStoreBackend(StoreBackend):
 
         return keys
 
-    def remove_key(self, key: Tuple[str, ...], persist_changes: bool = True) -> None:
+    def remove_key(self, key: Tuple[str, ...]) -> None:
         """
         See `StoreBackend.remove_key` for more information.
         """
@@ -172,8 +165,7 @@ class InlineStoreBackend(StoreBackend):
 
         del self._data_context.config[resource_type][resource_name]
 
-        if persist_changes:
-            self._persist_changes()
+        self._persist_changes()
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
         (
