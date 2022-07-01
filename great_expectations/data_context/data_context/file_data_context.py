@@ -38,8 +38,8 @@ class FileDataContext(AbstractDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
-        self._context_root_directory: str = context_root_dir
-        self._project_config: DataContextConfig = self._apply_global_config_overrides(
+        self._context_root_directory = context_root_dir
+        self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
         super().__init__(runtime_environment=runtime_environment)
@@ -49,7 +49,8 @@ class FileDataContext(AbstractDataContext):
 
     def _save_project_config(self) -> None:
         """Save the current project to disk."""
-        logger.debug("Starting FileDataContext._save_project_config")
-        config_filepath: str = os.path.join(self.root_directory, self.GE_YML)
+        logger.debug("Starting DataContext._save_project_config")
+
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
         with open(config_filepath, "w") as outfile:
             self.config.to_yaml(outfile)

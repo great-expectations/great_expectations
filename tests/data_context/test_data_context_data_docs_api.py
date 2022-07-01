@@ -381,6 +381,7 @@ def test_build_data_docs_skipping_index_does_not_build_index(
         },
     }
     context._project_config = config
+    # THIS IS WHAT NEEDS TO BE FIXED
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
     context._save_project_config()
