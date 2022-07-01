@@ -134,6 +134,7 @@ class DataContext(BaseDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
+        print(f"ge_dir: {ge_dir}")
         return cls(ge_dir, runtime_environment=runtime_environment)
 
     @classmethod
@@ -353,6 +354,9 @@ class DataContext(BaseDataContext):
 
         context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
+        print(
+            f"i am in the corect place with context_root directory: {context_root_directory}"
+        )
 
         project_config = self._load_project_config()
         super().__init__(
@@ -414,7 +418,7 @@ class DataContext(BaseDataContext):
             config = self._retrieve_data_context_config_from_ge_cloud()
             return config
 
-        path_to_yml = os.path.join(self.root_directory, self.GE_YML)
+        path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)

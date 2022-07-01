@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Union
+from typing import Mapping, Optional, Union
 
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -36,6 +36,7 @@ class FileDataContext(AbstractDataContext):
                 config_variables.yml and the environment
         """
         self._context_root_directory = context_root_dir
+        print("i thought this is supposed to work")
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
@@ -43,3 +44,13 @@ class FileDataContext(AbstractDataContext):
 
     def _init_variables(self) -> FileDataContextVariables:
         raise NotImplementedError
+
+    @property
+    def root_directory(self) -> Optional[str]:
+        """The root directory for configuration objects in the data context; the location in which
+        ``great_expectations.yml`` is located.
+
+        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
+
+        """
+        return self._context_root_directory

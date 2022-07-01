@@ -310,18 +310,6 @@ class AbstractDataContext(ABC):
         return self._project_config
 
     @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        """
-        if hasattr(self, "_context_root_directory"):
-            return self._context_root_directory
-        return
-
-    @property
     def project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
 

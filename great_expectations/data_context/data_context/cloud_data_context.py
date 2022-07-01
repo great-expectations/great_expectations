@@ -41,7 +41,6 @@ class CloudDataContext(AbstractDataContext):
         """
         self._ge_cloud_mode = True  # property needed for backward compatibility
         self._ge_cloud_config = ge_cloud_config
-        self._context_root_directory = context_root_dir
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
@@ -89,3 +88,14 @@ class CloudDataContext(AbstractDataContext):
                 config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
             )
         )
+
+    #
+    # @property
+    # def root_directory(self) -> Optional[str]:
+    #     """The root directory for configuration objects in the data context; the location in which
+    #     ``great_expectations.yml`` is located.
+    #
+    #     Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
+    #
+    #     """
+    #     return self._context_root_directory
