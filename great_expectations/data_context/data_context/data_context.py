@@ -134,7 +134,6 @@ class DataContext(BaseDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
-        print(f"ge_dir: {ge_dir}")
         return cls(ge_dir, runtime_environment=runtime_environment)
 
     @classmethod
@@ -354,9 +353,6 @@ class DataContext(BaseDataContext):
 
         context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
-        print(
-            f"i am in the corect place with context_root directory: {context_root_directory}"
-        )
 
         project_config = self._load_project_config()
         super().__init__(

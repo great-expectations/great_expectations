@@ -2322,10 +2322,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
 
-    @property
-    def root_directory(self) -> Optional[str]:
-        if hasattr(self._data_context, "_context_root_directory"):
-            return self._data_context._context_root_directory
+    # @property
+    # def root_directory(self) -> Optional[str]:
+    #     if hasattr(self._data_context, "_context_root_directory"):
+    #         return self._data_context._context_root_directory
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}

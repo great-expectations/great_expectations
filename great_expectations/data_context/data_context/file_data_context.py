@@ -36,7 +36,6 @@ class FileDataContext(AbstractDataContext):
                 config_variables.yml and the environment
         """
         self._context_root_directory = context_root_dir
-        print("i thought this is supposed to work")
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
