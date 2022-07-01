@@ -170,7 +170,7 @@ if __name__ == "test_script_module":
                 data_asset_name=data_asset_name,
                 batch_identifiers=IDDict({column_name: pickup_datetime}),
             )
-            for pickup_datetime in test_case.expected_pickup_datetimes
+            for pickup_datetime in test_case.expected_column_values
         ]
 
         assert set(batch_definition_list) == set(

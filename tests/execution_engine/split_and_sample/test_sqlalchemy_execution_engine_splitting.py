@@ -432,7 +432,7 @@ def test_sqlite_split(
         schema_name="main",
         splitter_method=test_case.splitter_method_name,
         splitter_kwargs=test_case.splitter_kwargs,
-        batch_identifiers={"pickup_datetime": test_case.expected_pickup_datetimes[0]},
+        batch_identifiers={"pickup_datetime": test_case.expected_column_values[0]},
     )
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
