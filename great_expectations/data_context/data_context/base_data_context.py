@@ -70,11 +70,10 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.store import Store
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
-    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     DataContextConfigDefaults,
+    DatasourceConfig,
     GeCloudConfig,
     ProgressBarsConfig,
     dataContextConfigSchema,
@@ -1467,7 +1466,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._apply_temporary_overrides()
         return new_datasource
 
-
     def update_datasource(
         self,
         datasource_name: str,
@@ -1480,7 +1478,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Args:
             datasource_name: The name of the Datasource to update.
             datasource_config: The config object to persist using the DatasourceStore.
-            save_changes: Whether or not to save changes to disk.
+            save_changes: do I save changes to disk?
         """
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
         datasource_config: DatasourceConfig = DatasourceConfig(**datasource_config_dict)
@@ -1768,21 +1766,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
-
-    # def store_evaluation_parameters(
-    #     self, validation_results, target_store_name=None
-    # ) -> None:
-    #     if not self._evaluation_parameter_dependencies_compiled:
-    #         self._compile_evaluation_parameter_dependencies()
-    #
-    #     if target_store_name is None:
-    #         target_store_name = self.evaluation_parameter_store_name
-    #
-    #     self._store_metrics(
-    #         self._evaluation_parameter_dependencies,
-    #         validation_results,
-    #         target_store_name,
-    #     )
 
     @property
     def assistants(self) -> DataAssistantDispatcher:
