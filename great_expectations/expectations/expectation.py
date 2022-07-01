@@ -17,7 +17,6 @@ from unittest import TestCase
 
 import numpy as np
 from dateutil.parser import parse
-from sqlalchemy.sql import sqltypes
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import (
@@ -67,6 +66,7 @@ from great_expectations.expectations.registry import (
     register_renderer,
 )
 from great_expectations.expectations.util import (
+    ValidSqlAlchemyTypes,
     ValidSqlTokens,
     render_evaluation_parameter_string,
 )
@@ -1886,7 +1886,12 @@ class QueryExpectation(TableExpectation, ABC):
                                     ValidSqlTokens.__members__.keys(),
                                 )
                             ),
-                            list(map(lambda z: z.lower(), dir(sqltypes))),
+                            list(
+                                map(
+                                    lambda z: z.lower(),
+                                    ValidSqlAlchemyTypes.__members__.keys(),
+                                )
+                            ),
                         ]
                     )
                 )
