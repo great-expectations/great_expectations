@@ -29,13 +29,6 @@ sqlite_batch_request = BatchRequest(
     batch_spec_passthrough={"create_temp_table": False},
 )
 
-spark_batch_request = BatchRequest(
-    datasource_name="my_spark_datasource",
-    data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="titanic",
-    batch_spec_passthrough={"create_temp_table": False},
-)
-
 
 @pytest.mark.parametrize(
     "batch_request,success,value,observed,row_condition",
@@ -120,14 +113,13 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 
 
 @pytest.mark.parametrize(
-    "batch_request,success,value,observed,row_condition",
+    "success,value,observed,row_condition",
     [
-        (spark_batch_request, False, 100, 1313, None),
-        (spark_batch_request, False, 100, 96, 'col("Age")<18'),
+        (False, 100, 1313, None),
+        (False, 100, 96, 'col("Age")<18'),
     ],
 )
 def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
-    batch_request,
     success,
     value,
     observed,
@@ -155,10 +147,9 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
 
 
 @pytest.mark.parametrize(
-    "batch_request,success,query,value,observed,row_condition",
+    "success,query,value,observed,row_condition",
     [
         (
-            spark_batch_request,
             True,
             "SELECT COUNT (*) FROM (SELECT * FROM {active_batch} LIMIT 100)",
             100,
@@ -168,7 +159,6 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     ],
 )
 def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_spark(
-    batch_request,
     success,
     query,
     value,

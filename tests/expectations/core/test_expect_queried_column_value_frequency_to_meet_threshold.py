@@ -4,10 +4,7 @@ import pytest
 import great_expectations.exceptions.exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context import DataContext
-from great_expectations.self_check.util import (
-    build_sa_validator_with_data,
-    build_spark_validator_with_data,
-)
+from great_expectations.self_check.util import build_spark_validator_with_data
 from great_expectations.validator.validator import (
     ExpectationValidationResult,
     Validator,
@@ -16,7 +13,7 @@ from tests.integration.docusaurus.expectations.creating_custom_expectations.expe
     ExpectQueriedColumnValueFrequencyToMeetThreshold,
 )
 
-runtime_batch_request = RuntimeBatchRequest(
+sqlite_runtime_batch_request = RuntimeBatchRequest(
     datasource_name="my_sqlite_db_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="titanic",
@@ -25,7 +22,7 @@ runtime_batch_request = RuntimeBatchRequest(
     batch_spec_passthrough={"create_temp_table": False},
 )
 
-batch_request = BatchRequest(
+sqlite_batch_request = BatchRequest(
     datasource_name="my_sqlite_db_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="titanic",
@@ -34,85 +31,233 @@ batch_request = BatchRequest(
 
 
 @pytest.mark.parametrize(
-    "batch_request,success,observed,row_condition",
+    "batch_request,success,observed,row_condition,warns",
     [
-        (runtime_batch_request, True, 0.54, None),
-        (batch_request, True, 0.6481340441736482, None),
-        (batch_request, False, 0.4791666666666667, 'col("Age")<18'),
-        (runtime_batch_request, True, 0.5, 'col("Age")>17'),
+        (sqlite_runtime_batch_request, True, 0.54, None, False),
+        (sqlite_batch_request, True, 0.6481340441736482, None, False),
+        (sqlite_batch_request, False, 0.4791666666666667, 'col("Age")<18', True),
+        (sqlite_runtime_batch_request, True, 0.5, 'col("Age")>17', True),
     ],
 )
-def test_expect_queried_column_value_frequency_to_meet_threshold(
+def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     batch_request,
     success,
     observed,
     row_condition,
+    warns,
     titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
-    result: ExpectationValidationResult = (
-        validator.expect_queried_column_value_frequency_to_meet_threshold(
-            column="Sex",
-            value="male",
-            threshold=0.5,
-            row_condition=row_condition,
-            condition_parser="great_expectations__experimental__",
+    if warns:
+        with pytest.warns(UserWarning):
+            result: ExpectationValidationResult = (
+                validator.expect_queried_column_value_frequency_to_meet_threshold(
+                    column="Sex",
+                    value="male",
+                    threshold=0.5,
+                    row_condition=row_condition,
+                    condition_parser="great_expectations__experimental__",
+                )
+            )
+    else:
+        result: ExpectationValidationResult = (
+            validator.expect_queried_column_value_frequency_to_meet_threshold(
+                column="Sex",
+                value="male",
+                threshold=0.5,
+                row_condition=row_condition,
+                condition_parser="great_expectations__experimental__",
+            )
         )
-    )
     assert (
         result["success"] == success and result["result"]["observed_value"] == observed
     )
 
 
 @pytest.mark.parametrize(
-    "batch_request,query,success,observed,row_condition",
+    "batch_request,query,success,observed,row_condition,warns",
     [
         (
-            batch_request,
+            sqlite_batch_request,
             "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM titanic GROUP BY {col}",
             True,
             0.6481340441736482,
             None,
+            True,
         ),
         (
-            runtime_batch_request,
+            sqlite_runtime_batch_request,
             "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM {active_batch} GROUP BY {col}",
             False,
             0.04112718964204113,
             None,
+            True,
         ),
         (
-            batch_request,
+            sqlite_batch_request,
             "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT(y) FROM wrong) FROM {active_batch} GROUP BY {col}",
             True,
             7.091666666666667,
             None,
+            True,
         ),
         (
-            batch_request,
+            sqlite_batch_request,
             "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM titanic) FROM {active_batch} GROUP BY {col}",
             False,
             0.2338156892612338,
             'col("Age")<35',
+            True,
+        ),
+        (
+            sqlite_batch_request,
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch}) / 2 FROM {active_batch} GROUP BY {col}",
+            False,
+            0.3240670220868241,
+            None,
+            False,
         ),
     ],
 )
-def test_expect_queried_column_value_frequency_to_meet_threshold_override_query(
+def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_sqlite(
     batch_request,
     query,
     success,
     observed,
     row_condition,
+    warns,
     titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
-    with pytest.warns(UserWarning):
+    if warns:
+        with pytest.warns(UserWarning):
+            result: ExpectationValidationResult = (
+                validator.expect_queried_column_value_frequency_to_meet_threshold(
+                    column="Sex",
+                    value="male",
+                    threshold=0.5,
+                    query=query,
+                    row_condition=row_condition,
+                    condition_parser="great_expectations__experimental__",
+                )
+            )
+    else:
+        result: ExpectationValidationResult = (
+            validator.expect_queried_column_value_frequency_to_meet_threshold(
+                column="Sex",
+                value="male",
+                threshold=0.5,
+                query=query,
+                row_condition=row_condition,
+                condition_parser="great_expectations__experimental__",
+            )
+        )
+    assert (
+        result["success"] == success and result["result"]["observed_value"] == observed
+    )
+
+
+@pytest.mark.parametrize(
+    "success,observed,row_condition,warns",
+    [
+        (True, 0.6481340441736482, None, False),
+        (False, 0.4791666666666667, 'col("Age")<18', True),
+        (True, 0.6393939393939394, 'col("Age")>17', True),
+    ],
+)
+def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
+    success,
+    observed,
+    row_condition,
+    warns,
+    spark_session,
+    basic_spark_df_execution_engine,
+):
+    df = pd.read_csv(
+        "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/Titanic.csv"
+    )
+
+    validator: Validator = build_spark_validator_with_data(df, spark_session)
+
+    if warns:
+        with pytest.warns(UserWarning):
+            result: ExpectationValidationResult = (
+                validator.expect_queried_column_value_frequency_to_meet_threshold(
+                    column="Sex",
+                    value="male",
+                    threshold=0.5,
+                    row_condition=row_condition,
+                    condition_parser="great_expectations__experimental__",
+                )
+            )
+    else:
+        result: ExpectationValidationResult = (
+            validator.expect_queried_column_value_frequency_to_meet_threshold(
+                column="Sex",
+                value="male",
+                threshold=0.5,
+                row_condition=row_condition,
+                condition_parser="great_expectations__experimental__",
+            )
+        )
+    assert (
+        result["success"] == success and result["result"]["observed_value"] == observed
+    )
+
+
+@pytest.mark.parametrize(
+    "query,success,observed,row_condition,warns",
+    [
+        (
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch}) / 2 FROM {active_batch} GROUP BY {col}",
+            False,
+            0.3240670220868241,
+            None,
+            False,
+        ),
+        (
+            "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch}) / 2 FROM {active_batch} GROUP BY {col}",
+            False,
+            0.3107287449392713,
+            'col("Age")<35',
+            True,
+        ),
+    ],
+)
+def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_spark(
+    query,
+    success,
+    observed,
+    row_condition,
+    warns,
+    spark_session,
+    basic_spark_df_execution_engine,
+):
+    df = pd.read_csv(
+        "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/Titanic.csv"
+    )
+
+    validator: Validator = build_spark_validator_with_data(df, spark_session)
+
+    if warns:
+        with pytest.warns(UserWarning):
+            result: ExpectationValidationResult = (
+                validator.expect_queried_column_value_frequency_to_meet_threshold(
+                    column="Sex",
+                    value="male",
+                    threshold=0.5,
+                    query=query,
+                    row_condition=row_condition,
+                    condition_parser="great_expectations__experimental__",
+                )
+            )
+    else:
         result: ExpectationValidationResult = (
             validator.expect_queried_column_value_frequency_to_meet_threshold(
                 column="Sex",
