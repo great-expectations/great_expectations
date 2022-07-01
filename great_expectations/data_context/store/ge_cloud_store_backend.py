@@ -1,7 +1,7 @@
 import logging
 from abc import ABCMeta
 from json import JSONDecodeError
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
