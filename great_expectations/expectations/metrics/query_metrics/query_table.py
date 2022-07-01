@@ -1,13 +1,11 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict
 
 from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,

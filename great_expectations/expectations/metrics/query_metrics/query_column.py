@@ -1,8 +1,6 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict
 
 from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
