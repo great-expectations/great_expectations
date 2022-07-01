@@ -544,7 +544,9 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
     content_block = rendered_validation_results["sections"][5]["content_blocks"][1][
         "table"
     ][10][2]["content_blocks"][1]
-    content_block["graph"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"])
+    content_block["graph"]["$schema"] = re.sub(
+        r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
+    )
 
     # with open(file_relative_path(__file__, "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_end_nc.json"), "w") as f:
     #     json.dump(rendered_validation_results, f, indent=2)
@@ -571,7 +573,9 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     content_block = rendered_validation_results["sections"][5]["content_blocks"][1][
         "table"
     ][10][2]["content_blocks"][1]
-    content_block["graph"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"])
+    content_block["graph"]["$schema"] = re.sub(
+        r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
+    )
 
     # with open(file_relative_path(__file__, "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start_nc.json"), "w") as f:
     #     json.dump(rendered_validation_results, f, indent=2)

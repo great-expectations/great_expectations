@@ -103,7 +103,7 @@ class InlineStoreBackend(StoreBackend):
         else:
             project_config[resource_type] = value
 
-        self._persist_changes()
+        self._save_changes()
 
     def _move(
         self, source_key: Tuple[str, ...], dest_key: Tuple[str, ...], **kwargs: dict
@@ -165,7 +165,7 @@ class InlineStoreBackend(StoreBackend):
 
         del self._data_context.config[resource_type][resource_name]
 
-        self._persist_changes()
+        self._save_changes()
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
         (
@@ -194,13 +194,8 @@ class InlineStoreBackend(StoreBackend):
                 f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextVariableSchema.__name__}; invalid value ({resource_type}) of type {type(resource_type)} found"
             )
 
-    def _persist_changes(self) -> None:
-        try:
-            self._data_context._save_project_config()
-        except AttributeError as e:
-            logger.warning(
-                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} is not file-system enabled: {e}"
-            )
+    def _save_changes(self) -> None:
+        self._data_context._save_project_config()
 
     @staticmethod
     def _determine_resource_type_and_name_from_key(
