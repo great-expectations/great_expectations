@@ -203,12 +203,7 @@ class InlineStoreBackend(StoreBackend):
             )
 
     def _persist_changes(self) -> None:
-        try:
-            self._data_context._save_project_config()
-        except AttributeError as e:
-            logger.warning(
-                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} is not file-system enabled: {e}"
-            )
+        self._data_context._save_project_config()
 
     @staticmethod
     def _determine_resource_type_and_name_from_key(
