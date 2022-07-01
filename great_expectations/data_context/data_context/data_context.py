@@ -24,7 +24,6 @@ from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     DataContextConfig,
-    DatasourceConfig,
     GeCloudConfig,
     dataContextConfigSchema,
 )
