@@ -1939,6 +1939,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self,
         datasource_name: str,
         datasource_config: DatasourceConfig,
+        save_changes: bool = False,
     ) -> None:
         """
         Updates a DatasourceConfig that already exists in the store.
@@ -1947,9 +1948,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             datasource_name: The name of the Datasource to update.
             datasource_config: The config object to persist using the DatasourceStore.
         """
-        self._datasource_store.update_by_name(
-            datasource_name=datasource_name, datasource_config=datasource_config
-        )
+        if save_changes:
+            self._datasource_store.update_by_name(
+                datasource_name=datasource_name, datasource_config=datasource_config
+            )
+        else:
+            self.config.datasources[datasource_name] = datasource_config
+            self._cached_datasources[datasource_name] = datasource_config
 
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
