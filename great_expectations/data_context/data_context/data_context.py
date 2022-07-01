@@ -467,14 +467,14 @@ class DataContext(BaseDataContext):
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(name=name, **kwargs)
+        ] = super().add_datasource(name=name, save_changes=True, **kwargs)
 
         return new_datasource
 
     def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
 
-        super().delete_datasource(datasource_name=name)
+        super().delete_datasource(datasource_name=name, save_changes=True)
 
     @classmethod
     def find_context_root_dir(cls):
