@@ -78,7 +78,6 @@ class InlineStoreBackend(StoreBackend):
             return project_config
 
         try:
-            # this is the problem
             self._data_context._save_project_config()
         except AttributeError as e:
             logger.warning(

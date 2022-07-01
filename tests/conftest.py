@@ -3135,10 +3135,8 @@ def alice_columnar_table_single_batch_context(
 ):
     context: DataContext = empty_data_context_stats_enabled
     # We need our salt to be consistent between runs to ensure idempotent anonymized values
-    context._usage_statistics_handler = UsageStatisticsHandler(
-        context, "00000000-0000-0000-0000-00000000a004", "N/A"
-    )
-    # TODO add helper method before submitting as PR
+    # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
+    # (ie. adjusted to be context._usage_statistics_handler)
     context._data_context._usage_statistics_handler = UsageStatisticsHandler(
         context, "00000000-0000-0000-0000-00000000a004", "N/A"
     )

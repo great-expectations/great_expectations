@@ -991,7 +991,6 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    print(f"ge_dir: {ge_dir}")
     empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
     assert DataContext.does_project_have_a_datasource_in_config_file(ge_dir) == True
 
