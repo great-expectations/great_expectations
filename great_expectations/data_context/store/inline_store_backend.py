@@ -77,13 +77,6 @@ class InlineStoreBackend(StoreBackend):
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             return project_config
 
-        try:
-            # this is the problem
-            self._data_context._save_project_config()
-        except AttributeError as e:
-            logger.warning(
-                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} is not file-system enabled: {e}"
-            )
         variable_config: Any = project_config[resource_type]
 
         if resource_name is not None:

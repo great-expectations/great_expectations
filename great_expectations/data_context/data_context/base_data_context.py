@@ -39,9 +39,7 @@ from great_expectations.core.batch import (
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
@@ -56,7 +54,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -70,8 +67,6 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.store import Store
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
-    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     DataContextConfigDefaults,
@@ -313,12 +308,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # TODO: remove this method once refactor of DataContext is complete
         self._apply_temporary_overrides()
 
-        # # Store cached datasources but don't init them
-        # self._cached_datasources = {}
-        #
-        # # Build the datasources we know about and have access to
-        # self._init_datasources()
-
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
@@ -337,11 +326,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_name,
                     validation_operator_config,
                 )
-
-        # self._evaluation_parameter_dependencies_compiled = False
-        # self._evaluation_parameter_dependencies = {}
-
-        self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -376,63 +360,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._evaluation_parameter_dependencies = (
             self._data_context._evaluation_parameter_dependencies
         )
-
-    # def _init_datasources(self) -> None:
-    #     for datasource_name in self._datasource_store.list_keys():
-    #         try:
-    #             datasource: Datasource = self.get_datasource(
-    #                 datasource_name=datasource_name
-    #             )
-    #             self._cached_datasources[datasource_name] = datasource
-    #         except ge_exceptions.DatasourceInitializationError as e:
-    #             logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
-    #             # this error will happen if our configuration contains datasources that GE can no longer connect to.
-    #             # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
-    #             # caught at the context.get_batch() step. So we just pass here.
-    #             pass
-
-    # def _construct_data_context_id(self) -> str:
-    #     """
-    #     Choose the id of the currently-configured expectations store, if available and a persistent store.
-    #     If not, it should choose the id stored in DataContextConfig.
-    #     Returns:
-    #         UUID to use as the data_context_id
-    #     """
-    #
-    #     # if in ge_cloud_mode, use ge_cloud_organization_id
-    #     if self.ge_cloud_mode:
-    #         return self.ge_cloud_config.organization_id
-    #     # Choose the id of the currently-configured expectations store, if it is a persistent store
-    #     expectations_store = self._stores[
-    #         self.project_config_with_variables_substituted.expectations_store_name
-    #     ]
-    #     if isinstance(expectations_store.store_backend, TupleStoreBackend):
-    #         # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
-    #         return expectations_store.store_backend_id_warnings_suppressed
-    #
-    #     # Otherwise choose the id stored in the project_config
-    #     else:
-    #         return (
-    #             self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-    #         )
-
-    # def _initialize_usage_statistics(
-    #     self, usage_statistics_config: AnonymizedUsageStatisticsConfig
-    # ) -> None:
-    #     """Initialize the usage statistics system."""
-    #     if not usage_statistics_config.enabled:
-    #         logger.info("Usage statistics is disabled; skipping initialization.")
-    #         self._usage_statistics_handler = None
-    #         return
-    #
-    #     self._usage_statistics_handler = UsageStatisticsHandler(
-    #         data_context=self,
-    #         data_context_id=self._data_context_id,
-    #         usage_statistics_url=usage_statistics_config.usage_statistics_url,
-    #     )
+        self._assistants = self._data_context._assistants
 
     def _save_project_config(self) -> None:
-        """Save the current project to disk."""
+        """Save the current project to disk. Overridden in BaseDataContext because EphemeralDataContext (parent class)
+        Does not have a great_expectations.yml file
+        """
         logger.debug("Starting DataContext._save_project_config")
 
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
@@ -628,10 +561,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def anonymous_usage_statistics(self):
         return self.project_config_with_variables_substituted.anonymous_usage_statistics
 
-    # @property
-    # def concurrency(self) -> Optional[ConcurrencyConfig]:
-    #     return self.project_config_with_variables_substituted.concurrency
-
     @property
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
         return self.project_config_with_variables_substituted.progress_bars
@@ -751,18 +680,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Args:
             datasource_name: The name of the datasource to delete.
 
-        Raises:
+        Raises
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        # if datasource_name is None:
-        #     raise ValueError("Datasource names must be a datasource name")
-        # else:
-        #     datasource = self.get_datasource(datasource_name=datasource_name)
-        #     if datasource:
-        #         self._datasource_store.delete_by_name(datasource_name)
-        #         del self._cached_datasources[datasource_name]
-        #     else:
-        #         raise ValueError(f"Datasource {datasource_name} not found")
         super().delete_datasource(datasource_name)
         self._apply_temporary_overrides()
 
@@ -1514,104 +1434,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._apply_temporary_overrides()
         return new_datasource
 
-    #     """Add a new datasource to the data context, with configuration provided as kwargs.
-    #     Args:
-    #         name: the name for the new datasource to add
-    #         initialize: if False, add the datasource to the config, but do not
-    #             initialize it, for example if a user needs to debug database connectivity.
-    #         kwargs (keyword arguments): the configuration for the new datasource
-    #
-    #     Returns:
-    #         datasource (Datasource)
-    #     """
-    #     logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
-    #
-    #     module_name: str = kwargs.get("module_name", "great_expectations.datasource")
-    #     verify_dynamic_loading_support(module_name=module_name)
-    #     class_name: Optional[str] = kwargs.get("class_name")
-    #     datasource_class = load_class(module_name=module_name, class_name=class_name)
-    #
-    #     # For any class that should be loaded, it may control its configuration construction
-    #     # by implementing a classmethod called build_configuration
-    #     config: Union[CommentedMap, dict]
-    #     if hasattr(datasource_class, "build_configuration"):
-    #         config = datasource_class.build_configuration(**kwargs)
-    #     else:
-    #         config = kwargs
-    #
-    #     datasource: Optional[
-    #         Union[LegacyDatasource, BaseDatasource]
-    #     ] = self._instantiate_datasource_from_config_and_update_project_config(
-    #         name=name,
-    #         config=config,
-    #         initialize=initialize,
-    #     )
-    #     return datasource
-    #
-    # def _instantiate_datasource_from_config_and_update_project_config(
-    #     self, name: str, config: dict, initialize: bool = True
-    # ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-    #     datasource_config: DatasourceConfig = datasourceConfigSchema.load(
-    #         CommentedMap(**config)
-    #     )
-    #     print("hello")
-    #     # this is the problem
-    #     self._data_context._update_config_variables()
-    #     self._apply_temporary_overrides()
-    #
-    #     self._datasource_store.set_by_name(
-    #         datasource_name=name, datasource_config=datasource_config
-    #     )
-    #     self._data_context._datasource_store.set_by_name(
-    #         datasource_name=name, datasource_config=datasource_config
-    #     )
-    #
-    #     # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
-    #     substitutions: dict = self._determine_substitutions()
-    #     config: dict = dict(datasourceConfigSchema.dump(datasource_config))
-    #     substituted_config: dict = substitute_all_config_variables(
-    #         config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-    #     )
-    #
-    #     datasource: Optional[Union[LegacyDatasource, BaseDatasource]] = None
-    #     if initialize:
-    #         try:
-    #             datasource = self._instantiate_datasource_from_config(
-    #                 name=name, config=substituted_config
-    #             )
-    #             self._cached_datasources[name] = datasource
-    #         except ge_exceptions.DatasourceInitializationError as e:
-    #             # Do not keep configuration that could not be instantiated.
-    #             self._datasource_store.delete_by_name(datasource_name=name)
-    #             raise e
-    #
-    #     return datasource
-
-    # def _instantiate_datasource_from_config(
-    #     self, name: str, config: Union[dict, DatasourceConfig]
-    # ) -> Union[LegacyDatasource, BaseDatasource]:
-    #     """Instantiate a new datasource to the data context, with configuration provided as kwargs.
-    #     Args:
-    #         name(str): name of datasource
-    #         config(dict): dictionary of configuration
-    #
-    #     Returns:
-    #         datasource (Datasource)
-    #     """
-    #     # We perform variable substitution in the datasource's config here before using the config
-    #     # to instantiate the datasource object. Variable substitution is a service that the data
-    #     # context provides. Datasources should not see unsubstituted variables in their config.
-    #
-    #     try:
-    #         datasource: Union[
-    #             LegacyDatasource, BaseDatasource
-    #         ] = self._build_datasource_from_config(name=name, config=config)
-    #     except Exception as e:
-    #         raise ge_exceptions.DatasourceInitializationError(
-    #             datasource_name=name, message=str(e)
-    #         )
-    #     return datasource
-
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
@@ -1636,101 +1458,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
-
-    # def _build_datasource_from_config(
-    #     self, name: str, config: Union[dict, DatasourceConfig]
-    # ):
-    #     # We convert from the type back to a dictionary for purposes of instantiation
-    #     if isinstance(config, DatasourceConfig):
-    #         config = datasourceConfigSchema.dump(config)
-    #     config.update({"name": name})
-    #     # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
-    #     if config["class_name"] in [
-    #         "BaseDatasource",
-    #         "Datasource",
-    #     ]:
-    #         config.update({"data_context_root_directory": self.root_directory})
-    #     module_name = "great_expectations.datasource"
-    #     datasource = instantiate_class_from_config(
-    #         config=config,
-    #         runtime_environment={"data_context": self, "concurrency": self.concurrency},
-    #         config_defaults={"module_name": module_name},
-    #     )
-    #     if not datasource:
-    #         raise ge_exceptions.ClassInstantiationError(
-    #             module_name=module_name,
-    #             package_name=None,
-    #             class_name=config["class_name"],
-    #         )
-    #     return datasource
-
-    # def get_datasource(
-    #     self, datasource_name: str = "default"
-    # ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-    #     """Get the named datasource
-    #
-    #     Args:
-    #         datasource_name (str): the name of the datasource from the configuration
-    #
-    #     Returns:
-    #         datasource (Datasource)
-    #     """
-    #     if datasource_name in self._cached_datasources:
-    #         return self._cached_datasources[datasource_name]
-    #
-    #     datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
-    #         datasource_name=datasource_name
-    #     )
-    #
-    #     config: dict = dict(datasourceConfigSchema.dump(datasource_config))
-    #     substitutions: dict = self._determine_substitutions()
-    #     config = substitute_all_config_variables(
-    #         config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-    #     )
-    #
-    #     datasource: Optional[
-    #         Union[LegacyDatasource, BaseDatasource]
-    #     ] = self._instantiate_datasource_from_config(
-    #         name=datasource_name, config=config
-    #     )
-    #     self._cached_datasources[datasource_name] = datasource
-    #     return datasource
-
-    # def list_expectation_suites(self):
-    #     """Return a list of available expectation suite keys."""
-    #     try:
-    #         keys = self.expectations_store.list_keys()
-    #     except KeyError as e:
-    #         raise ge_exceptions.InvalidConfigError(
-    #             f"Unable to find configured store: {str(e)}"
-    #         )
-    #     return keys
-
-    # def list_datasources(self) -> List[dict]:
-    #     """List currently-configured datasources on this context. Masks passwords.
-    #
-    #     Returns:
-    #         List(dict): each dictionary includes "name", "class_name", and "module_name" keys
-    #     """
-    #     datasources: List[dict] = []
-    #     substitutions: dict = self._determine_substitutions()
-    #     datasource_name: str
-    #     for datasource_name in self._datasource_store.list_keys():
-    #         datasource_config: DatasourceConfig = (
-    #             self._datasource_store.retrieve_by_name(datasource_name)
-    #         )
-    #         datasource_dict: dict = datasource_config.to_json_dict()
-    #         datasource_dict["name"] = datasource_name
-    #         substituted_config: dict = cast(
-    #             dict,
-    #             substitute_all_config_variables(
-    #                 datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-    #             ),
-    #         )
-    #         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
-    #         datasources.append(masked_config)
-    #
-    #     return datasources
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
@@ -1904,121 +1631,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         self._apply_temporary_overrides()
 
-    def _store_metrics(
-        self, requested_metrics, validation_results, target_store_name
-    ) -> None:
-        """
-        requested_metrics is a dictionary like this:
-
-              requested_metrics:
-                *:  # The asterisk here matches *any* expectation suite name
-                  # use the 'kwargs' key to request metrics that are defined by kwargs,
-                  # for example because they are defined only for a particular column
-                  # - column:
-                  #     Age:
-                  #        - expect_column_min_to_be_between.result.observed_value
-                    - statistics.evaluated_expectations
-                    - statistics.successful_expectations
-
-        Args:
-            requested_metrics:
-            validation_results:
-            target_store_name:
-
-        Returns:
-
-        """
-        expectation_suite_name = validation_results.meta["expectation_suite_name"]
-        run_id = validation_results.meta["run_id"]
-        data_asset_name = validation_results.meta.get("batch_kwargs", {}).get(
-            "data_asset_name"
-        )
-
-        for expectation_suite_dependency, metrics_list in requested_metrics.items():
-            if (expectation_suite_dependency != "*") and (
-                expectation_suite_dependency != expectation_suite_name
-            ):
-                continue
-
-            if not isinstance(metrics_list, list):
-                raise ge_exceptions.DataContextError(
-                    "Invalid requested_metrics configuration: metrics requested for "
-                    "each expectation suite must be a list."
-                )
-
-            for metric_configuration in metrics_list:
-                metric_configurations = (
-                    BaseDataContext._get_metric_configuration_tuples(
-                        metric_configuration
-                    )
-                )
-                for metric_name, metric_kwargs in metric_configurations:
-                    try:
-                        metric_value = validation_results.get_metric(
-                            metric_name, **metric_kwargs
-                        )
-                        self.stores[target_store_name].set(
-                            ValidationMetricIdentifier(
-                                run_id=run_id,
-                                data_asset_name=data_asset_name,
-                                expectation_suite_identifier=ExpectationSuiteIdentifier(
-                                    expectation_suite_name
-                                ),
-                                metric_name=metric_name,
-                                metric_kwargs_id=get_metric_kwargs_id(
-                                    metric_name, metric_kwargs
-                                ),
-                            ),
-                            metric_value,
-                        )
-                    except ge_exceptions.UnavailableMetricError:
-                        # This will happen frequently in larger pipelines
-                        logger.debug(
-                            "metric {} was requested by another expectation suite but is not available in "
-                            "this validation result.".format(metric_name)
-                        )
-
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
 
-    # def store_evaluation_parameters(
-    #     self, validation_results, target_store_name=None
-    # ) -> None:
-    #     if not self._evaluation_parameter_dependencies_compiled:
-    #         self._compile_evaluation_parameter_dependencies()
-    #
-    #     if target_store_name is None:
-    #         target_store_name = self.evaluation_parameter_store_name
-    #
-    #     self._store_metrics(
-    #         self._evaluation_parameter_dependencies,
-    #         validation_results,
-    #         target_store_name,
-    #     )
-
     @property
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
-
-    def _compile_evaluation_parameter_dependencies(self) -> None:
-        self._evaluation_parameter_dependencies = {}
-        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
-        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
-        for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
-            if not expectation_suite_dict:
-                continue
-            expectation_suite: ExpectationSuite = ExpectationSuite(
-                **expectation_suite_dict, data_context=self
-            )
-
-            dependencies = expectation_suite.get_evaluation_parameter_dependencies()
-            if len(dependencies) > 0:
-                nested_update(self._evaluation_parameter_dependencies, dependencies)
-
-        self._evaluation_parameter_dependencies_compiled = True
 
     def get_validation_result(
         self,
@@ -2087,18 +1707,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             if failed_only
             else results_dict
         )
-
-    # def update_return_obj(self, data_asset, return_obj):
-    #     """Helper called by data_asset.
-    #
-    #     Args:
-    #         data_asset: The data_asset whose validation produced the current return object
-    #         return_obj: the return object to update
-    #
-    #     Returns:
-    #         return_obj: the return object, potentially changed into a widget by the configured expectation explorer
-    #     """
-    #     return return_obj
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,
@@ -3435,61 +3043,3 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ]
 
         return instantiated_class, usage_stats_event_payload
-
-    @staticmethod
-    def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
-        if base_kwargs is None:
-            base_kwargs = {}
-
-        if isinstance(metric_configuration, str):
-            return [(metric_configuration, base_kwargs)]
-
-        metric_configurations_list = []
-        for kwarg_name in metric_configuration.keys():
-            if not isinstance(metric_configuration[kwarg_name], dict):
-                raise ge_exceptions.DataContextError(
-                    "Invalid metric_configuration: each key must contain a "
-                    "dictionary."
-                )
-            if (
-                kwarg_name == "metric_kwargs_id"
-            ):  # this special case allows a hash of multiple kwargs
-                for metric_kwargs_id in metric_configuration[kwarg_name].keys():
-                    if base_kwargs != {}:
-                        raise ge_exceptions.DataContextError(
-                            "Invalid metric_configuration: when specifying "
-                            "metric_kwargs_id, no other keys or values may be defined."
-                        )
-                    if not isinstance(
-                        metric_configuration[kwarg_name][metric_kwargs_id], list
-                    ):
-                        raise ge_exceptions.DataContextError(
-                            "Invalid metric_configuration: each value must contain a "
-                            "list."
-                        )
-                    metric_configurations_list += [
-                        (metric_name, {"metric_kwargs_id": metric_kwargs_id})
-                        for metric_name in metric_configuration[kwarg_name][
-                            metric_kwargs_id
-                        ]
-                    ]
-            else:
-                for kwarg_value in metric_configuration[kwarg_name].keys():
-                    base_kwargs.update({kwarg_name: kwarg_value})
-                    if not isinstance(
-                        metric_configuration[kwarg_name][kwarg_value], list
-                    ):
-                        raise ge_exceptions.DataContextError(
-                            "Invalid metric_configuration: each value must contain a "
-                            "list."
-                        )
-                    for nested_configuration in metric_configuration[kwarg_name][
-                        kwarg_value
-                    ]:
-                        metric_configurations_list += (
-                            BaseDataContext._get_metric_configuration_tuples(
-                                nested_configuration, base_kwargs=base_kwargs
-                            )
-                        )
-
-        return metric_configurations_list

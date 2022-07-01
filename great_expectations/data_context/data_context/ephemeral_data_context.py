@@ -33,16 +33,18 @@ class EphemeralDataContext(AbstractDataContext):
                 override both those set in config_variables.yml and the environment
 
         """
-        self._project_config = self._apply_global_config_overrides(
+        self._project_config: DataContextConfig = self._apply_global_config_overrides(
             config=project_config
         )
-        self._config_variables = self._load_config_variables()
+        self._config_variables: dict = self._load_config_variables()
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_variables(self) -> EphemeralDataContextVariables:
         raise NotImplementedError
 
     def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug("EphemeralDataContext doesn't really save_project_config")
+        """EphemeralDataContext doesn't have a project_config file (great_expectations.yml), so we just print a logger message"""
+        logger.debug(
+            "Attempting to _save_project_config() in EphemeralDataContext which doesn't have a project config file."
+        )
         return
