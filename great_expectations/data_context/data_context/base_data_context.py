@@ -1951,6 +1951,31 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         return datasource
 
+    def update_datasource(
+        self,
+        datasource_name: str,
+        datasource: Union[LegacyDatasource, BaseDatasource],
+        save_changes: bool = False,
+    ) -> None:
+        """
+        Updates a DatasourceConfig that already exists in the store.
+
+        Args:
+            datasource_name: The name of the Datasource to update.
+            datasource_config: The config object to persist using the DatasourceStore.
+            save_changes: Whether or not to save changes to disk.
+        """
+        datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
+        datasource_config: DatasourceConfig = DatasourceConfig(**datasource_config_dict)
+
+        if save_changes:
+            self._datasource_store.update_by_name(
+                datasource_name=datasource_name, datasource_config=datasource_config
+            )
+        else:
+            self.config.datasources[datasource_name] = datasource_config
+            self._cached_datasources[datasource_name] = datasource_config
+
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):

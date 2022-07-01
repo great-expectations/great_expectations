@@ -461,7 +461,7 @@ class DataContext(BaseDataContext):
         return new_store
 
     def add_datasource(
-        self, name, **kwargs
+        self, name: str, **kwargs: dict
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
 
@@ -470,6 +470,25 @@ class DataContext(BaseDataContext):
         ] = super().add_datasource(name=name, save_changes=True, **kwargs)
 
         return new_datasource
+
+    def update_datasource(
+        self,
+        datasource_name: str,
+        datasource: Union[LegacyDatasource, BaseDatasource],
+    ) -> None:
+        """
+        See parent `BaseDataContext.update_datasource` for more details.
+        Note that this method persists changes using an underlying Store.
+        """
+        logger.debug(
+            f"Starting DataContext.update_datasource for datasource {datasource_name}"
+        )
+
+        super().update_datasource(
+            datasource_name=datasource_name,
+            datasource=datasource,
+            save_changes=True,
+        )
 
     def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
