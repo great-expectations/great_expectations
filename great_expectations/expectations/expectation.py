@@ -1856,6 +1856,15 @@ class QueryExpectation(TableExpectation, ABC):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
+        """Raises an exception if the configuration is not viable for an expectation.
+
+        Args:
+              configuration: An ExpectationConfiguration
+
+        Raises:
+              InvalidExpectationConfigurationError: If no `query` is specified
+              UserWarning: If query is not parameterized, and/or row_condition is passed.
+        """
         super().validate_configuration(configuration)
 
         query: str = configuration.kwargs.get("query") or self.default_kwarg_values.get(
