@@ -475,15 +475,19 @@ class DataContext(BaseDataContext):
     def update_datasource(
         self,
         datasource_name: str,
-        datasource_config: DatasourceConfig,
+        datasource: Union[LegacyDatasource, BaseDatasource],
     ) -> None:
+        """
+        See parent `BaseDataContext.update_datasource` for more details.
+        Note that this method persists changes using an underlying Store.
+        """
         logger.debug(
             f"Starting DataContext.update_datasource for datasource {datasource_name}"
         )
 
         super().update_datasource(
             datasource_name=datasource_name,
-            datasource_config=datasource_config,
+            datasource=datasource,
             save_changes=True,
         )
 

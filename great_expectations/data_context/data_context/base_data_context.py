@@ -1938,7 +1938,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def update_datasource(
         self,
         datasource_name: str,
-        datasource_config: DatasourceConfig,
+        datasource: Union[LegacyDatasource, BaseDatasource],
         save_changes: bool = False,
     ) -> None:
         """
@@ -1947,7 +1947,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Args:
             datasource_name: The name of the Datasource to update.
             datasource_config: The config object to persist using the DatasourceStore.
+            save_changes: Whether or not to save changes to disk.
         """
+        datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
+        datasource_config: DatasourceConfig = DatasourceConfig(**datasource_config_dict)
+
         if save_changes:
             self._datasource_store.update_by_name(
                 datasource_name=datasource_name, datasource_config=datasource_config
