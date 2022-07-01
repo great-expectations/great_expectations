@@ -70,7 +70,6 @@ class CloudDataContext(AbstractDataContext):
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
 
-
     def _init_variables(self) -> CloudDataContextVariables:
         raise NotImplementedError
 
@@ -171,4 +170,3 @@ class CloudDataContext(AbstractDataContext):
 
         """
         return self._context_root_directory
-
