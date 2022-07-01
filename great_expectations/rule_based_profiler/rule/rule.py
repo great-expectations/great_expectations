@@ -1,9 +1,12 @@
 import copy
 import json
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    determine_progress_bar_method_by_environment,
+)
 from great_expectations.rule_based_profiler.config.base import (
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
@@ -134,8 +137,16 @@ class Rule(SerializableDictDot):
 
         rule_state.reset_parameter_containers()
 
+        pbar_method: Callable = determine_progress_bar_method_by_environment()
+
         domain: Domain
-        for domain in domains:
+        for domain in pbar_method(
+            domains,
+            desc="Profiling Dataset:",
+            position=1,
+            leave=False,
+            bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
+        ):
             rule_state.initialize_parameter_container_for_domain(domain=domain)
 
             parameter_builders: List[ParameterBuilder] = self.parameter_builders or []

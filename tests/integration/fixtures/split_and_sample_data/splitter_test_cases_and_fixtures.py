@@ -20,7 +20,8 @@ class TaxiTestData:
     def test_column_name(self):
         return self._test_column_name
 
-    def years_in_taxi_data(self) -> List[datetime.datetime]:
+    @staticmethod
+    def years_in_taxi_data() -> List[datetime.datetime]:
         return (
             pd.date_range(start="2018-01-01", end="2020-12-31", freq="AS")
             .to_pydatetime()
@@ -30,7 +31,8 @@ class TaxiTestData:
     def year_batch_identifier_data(self) -> List[dict]:
         return [{DatePart.YEAR.value: dt.year} for dt in self.years_in_taxi_data()]
 
-    def months_in_taxi_data(self) -> List[datetime.datetime]:
+    @staticmethod
+    def months_in_taxi_data() -> List[datetime.datetime]:
         return (
             pd.date_range(start="2018-01-01", end="2020-12-31", freq="MS")
             .to_pydatetime()
@@ -80,7 +82,7 @@ class TaxiSplittingTestCase:
     splitter_kwargs: dict
     num_expected_batch_definitions: int
     num_expected_rows_in_first_batch_definition: int
-    expected_pickup_datetimes: List[dict]
+    expected_column_values: List[dict]
 
 
 class TaxiSplittingTestCases:
@@ -106,21 +108,21 @@ class TaxiSplittingTestCases:
                 splitter_kwargs={"column_name": self.taxi_test_data.test_column_name},
                 num_expected_batch_definitions=3,
                 num_expected_rows_in_first_batch_definition=120,
-                expected_pickup_datetimes=self.taxi_test_data.year_batch_identifier_data(),
+                expected_column_values=self.taxi_test_data.year_batch_identifier_data(),
             ),
             TaxiSplittingTestCase(
                 splitter_method_name="split_on_year_and_month",
                 splitter_kwargs={"column_name": self.taxi_test_data.test_column_name},
                 num_expected_batch_definitions=36,
                 num_expected_rows_in_first_batch_definition=10,
-                expected_pickup_datetimes=self.taxi_test_data.year_month_batch_identifier_data(),
+                expected_column_values=self.taxi_test_data.year_month_batch_identifier_data(),
             ),
             TaxiSplittingTestCase(
                 splitter_method_name="split_on_year_and_month_and_day",
                 splitter_kwargs={"column_name": self.taxi_test_data.test_column_name},
                 num_expected_batch_definitions=299,
                 num_expected_rows_in_first_batch_definition=2,
-                expected_pickup_datetimes=self.taxi_test_data.year_month_day_batch_identifier_data(),
+                expected_column_values=self.taxi_test_data.year_month_day_batch_identifier_data(),
             ),
             TaxiSplittingTestCase(
                 splitter_method_name="split_on_date_parts",
@@ -130,7 +132,7 @@ class TaxiSplittingTestCases:
                 },
                 num_expected_batch_definitions=12,
                 num_expected_rows_in_first_batch_definition=30,
-                expected_pickup_datetimes=self.taxi_test_data.month_batch_identifier_data(),
+                expected_column_values=self.taxi_test_data.month_batch_identifier_data(),
             ),
             # Mix of types of date_parts, mixed case for string date part:
             TaxiSplittingTestCase(
@@ -141,6 +143,6 @@ class TaxiSplittingTestCases:
                 },
                 num_expected_batch_definitions=36,
                 num_expected_rows_in_first_batch_definition=10,
-                expected_pickup_datetimes=self.taxi_test_data.year_month_batch_identifier_data(),
+                expected_column_values=self.taxi_test_data.year_month_batch_identifier_data(),
             ),
         ]

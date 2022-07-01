@@ -366,6 +366,20 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
+        name="split_data_on_datetime_redshift",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    ),
+    IntegrationTestFixture(
         name="split_data_on_datetime_mssql",
         user_flow_script="tests/integration/db/test_sql_data_splitting.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -392,6 +406,48 @@ dockerized_db_tests = [
             ),
         ),
         extra_backend_dependencies=BackendDependencies.MYSQL,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
     ),
     IntegrationTestFixture(
         name="sample_data_using_limit_postgres",
@@ -509,20 +565,6 @@ cloud_snowflake_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
         util_script="tests/test_utils.py",
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_datetime_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
     ),
     IntegrationTestFixture(
         name="sample_data_using_limit_snowflake",
@@ -643,20 +685,6 @@ cloud_bigquery_tests = [
         name="gcp_deployment_patterns_file_bigquery_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_datetime_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     IntegrationTestFixture(
@@ -879,20 +907,6 @@ aws_integration_tests = [
         util_script="tests/test_utils.py",
     ),
     IntegrationTestFixture(
-        name="split_data_on_datetime_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.AWS,
-    ),
-    IntegrationTestFixture(
         name="sample_data_using_limit_awsathena",
         user_flow_script="tests/integration/db/test_sql_data_sampling.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -990,6 +1004,7 @@ def _execute_integration_test(
                 dest_dir = os.path.dirname(dest_file)
                 if not os.path.exists(dest_dir):
                     os.makedirs(dest_dir)
+
                 shutil.copyfile(src=source_file, dst=dest_file)
 
         # UAT Script
