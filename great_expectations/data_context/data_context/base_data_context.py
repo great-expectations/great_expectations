@@ -70,8 +70,6 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.store import Store
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
-    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     DataContextConfigDefaults,
