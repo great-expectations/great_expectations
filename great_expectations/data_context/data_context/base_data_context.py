@@ -1672,7 +1672,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
-        *,
         batch: Optional[Batch] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[BatchRequestBase] = None,
@@ -1696,11 +1695,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> Validator:
         """
         This method applies only to the new (V3) Datasource schema.
         """
+
+        # TODO: NF - feature flag to be updated upon feature release
+        include_rendered_content: bool
+        if "include_rendered_content" in kwargs:
+            include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            include_rendered_content = False
 
         if (
             sum(
@@ -1785,13 +1791,22 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
             batch_list=batch_list,
+            include_rendered_content=include_rendered_content,
         )
 
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
+        **kwargs: dict,
     ) -> Validator:
+        # TODO: NF - feature flag to be updated upon feature release
+        include_rendered_content: bool
+        if "include_rendered_content" in kwargs:
+            include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            include_rendered_content = False
+
         if len(batch_list) == 0:
             raise ge_exceptions.InvalidBatchRequestError(
                 """Validator could not be created because BatchRequest returned an empty batch_list.
@@ -1809,6 +1824,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             expectation_suite=expectation_suite,
             data_context=self,
             batches=batch_list,
+            include_rendered_content=include_rendered_content,
         )
         return validator
 
