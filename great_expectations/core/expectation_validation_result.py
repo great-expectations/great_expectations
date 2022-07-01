@@ -48,11 +48,11 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
 class ExpectationValidationResult(SerializableDictDot):
     def __init__(
         self,
-        success=None,
-        expectation_config=None,
-        result=None,
-        meta=None,
-        exception_info=None,
+        success: Optional[bool] = None,
+        expectation_config: Optional["ExpectationConfiguration"] = None,  # noqa: F821
+        result: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        exception_info: Optional[dict] = None,
         **kwargs,
     ) -> None:
         # TODO: NF - feature flag to be updated upon feature release

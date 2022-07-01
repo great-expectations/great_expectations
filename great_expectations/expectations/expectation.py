@@ -701,7 +701,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def metrics_validate(
         self,
-        metrics: Dict,
+        metrics: dict,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,

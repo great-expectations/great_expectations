@@ -78,8 +78,9 @@ but an object of type "{type(render_object)}" was passed."""
             for renderer_name in renderer_names
             if renderer_name != default_prescriptive_renderer_name
         ]
-        rendered_content: List[RenderedAtomicContent] = []
 
+        renderer_rendered_content: Optional[RenderedAtomicContent]
+        rendered_content: List[RenderedAtomicContent] = []
         for renderer_name in non_default_prescriptive_renderer_names:
             try:
                 renderer_rendered_content = self._get_renderer_atomic_rendered_content(
