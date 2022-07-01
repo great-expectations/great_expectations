@@ -233,11 +233,11 @@ def test_datasource_store_update_by_name(
         datasource_name=datasource_name, datasource_config=updated_datasource_config
     )
 
-    key: DataContextVariableKey = DataContextVariableKey(
+    key = DataContextVariableKey(
         resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name=datasource_name,
     )
-    actual_config: DatasourceConfig = cast(
+    actual_config = cast(
         DatasourceConfig, datasource_store_with_single_datasource.get(key=key)
     )
 
