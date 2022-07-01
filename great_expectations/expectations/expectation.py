@@ -13,7 +13,6 @@ from inspect import isabstract
 from itertools import chain
 from numbers import Number
 from typing import Dict, List, Optional, Set, Tuple, Union
-from unittest import TestCase
 
 import numpy as np
 from dateutil.parser import parse
