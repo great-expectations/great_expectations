@@ -1067,7 +1067,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self, datasource_name: str) -> None:
+    def delete_datasource(
+        self, datasource_name: str, persist_changes: bool = False
+    ) -> None:
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
@@ -1080,7 +1082,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
-                self._datasource_store.delete_by_name(datasource_name)
+                self._datasource_store.delete_by_name(
+                    datasource_name, persist_changes=persist_changes
+                )
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(f"Datasource {datasource_name} not found")
@@ -1817,7 +1821,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
-        self, name: str, initialize: bool = True, **kwargs: dict
+        self,
+        name: str,
+        initialize: bool = True,
+        persist_changes: bool = False,
+        **kwargs: dict,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
@@ -1850,11 +1858,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             name=name,
             config=config,
             initialize=initialize,
+            persist_changes=persist_changes,
         )
         return datasource
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: dict, initialize: bool = True
+        self,
+        name: str,
+        config: dict,
+        initialize: bool = True,
+        persist_changes: bool = False,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
@@ -1864,7 +1877,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._apply_temporary_overrides()
 
         self._datasource_store.set_by_name(
-            datasource_name=name, datasource_config=datasource_config
+            datasource_name=name,
+            datasource_config=datasource_config,
+            persist_changes=persist_changes,
         )
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
@@ -1883,7 +1898,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
-                self._datasource_store.delete_by_name(datasource_name=name)
+                self._datasource_store.delete_by_name(
+                    datasource_name=name, persist_changes=persist_changes
+                )
                 raise e
 
         return datasource
