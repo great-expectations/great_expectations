@@ -54,9 +54,9 @@ class ExpectationValidationResult(SerializableDictDot):
     ) -> None:
         # TODO: NF - feature flag to be updated upon feature release
         if "include_rendered_content" in kwargs:
-            self._include_rendered_content = kwargs["include_rendered_content"]
+            self.include_rendered_content = kwargs["include_rendered_content"]
         else:
-            self._include_rendered_content = False
+            self.include_rendered_content = False
 
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
@@ -77,7 +77,8 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
-        self._rendered_content = None
+        if self.include_rendered_content:
+            self.rendered_content = None
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -218,8 +219,8 @@ class ExpectationValidationResult(SerializableDictDot):
             )
 
         (
-            self.expectation_config._rendered_content,
-            self._rendered_content,
+            self.expectation_config.rendered_content,
+            self.rendered_content,
         ) = inline_renderer.render()
 
     @staticmethod
@@ -315,7 +316,6 @@ class ExpectationValidationResultSchema(Schema):
     result = fields.Dict()
     meta = fields.Dict()
     exception_info = fields.Dict()
-    rendered_content = fields.List(fields.Nested(RenderedAtomicContentSchema))
 
     # noinspection PyUnusedLocal
     @pre_dump
@@ -481,6 +481,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    rendered_content = fields.List(fields.Nested(RenderedAtomicContentSchema))
 
     # noinspection PyUnusedLocal
     @pre_dump
