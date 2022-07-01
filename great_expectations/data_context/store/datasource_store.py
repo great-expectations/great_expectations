@@ -131,9 +131,7 @@ class DatasourceStore(Store):
         self.remove_key(datasource_key)
 
     def set_by_name(
-        self,
-        datasource_name: str,
-        datasource_config: DatasourceConfig,
+        self, datasource_name: str, datasource_config: DatasourceConfig
     ) -> None:
         """Persists a DatasourceConfig in the store by a given name.
 
