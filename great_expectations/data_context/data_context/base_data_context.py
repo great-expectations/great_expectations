@@ -329,10 +329,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_name,
                     validation_operator_config,
                 )
-
-        # self._evaluation_parameter_dependencies_compiled = False
-        # self._evaluation_parameter_dependencies = {}
-
+        # TODO: Migrate to AbstractDataContext
         self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
@@ -565,10 +562,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def anonymous_usage_statistics(self):
         return self.project_config_with_variables_substituted.anonymous_usage_statistics
-
-    # @property
-    # def concurrency(self) -> Optional[ConcurrencyConfig]:
-    #     return self.project_config_with_variables_substituted.concurrency
 
     @property
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
@@ -1861,18 +1854,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             if failed_only
             else results_dict
         )
-
-    # def update_return_obj(self, data_asset, return_obj):
-    #     """Helper called by data_asset.
-    #
-    #     Args:
-    #         data_asset: The data_asset whose validation produced the current return object
-    #         return_obj: the return object to update
-    #
-    #     Returns:
-    #         return_obj: the return object, potentially changed into a widget by the configured expectation explorer
-    #     """
-    #     return return_obj
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,

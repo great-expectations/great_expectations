@@ -410,7 +410,6 @@ class AbstractDataContext(ABC):
         for (
             name,
             value,
-            # I wonder if it's because of the sql needing credentials and this not being loaded correctly?
         ) in self.project_config_with_variables_substituted.stores.items():
             store_config = copy.deepcopy(value)
             store_config["name"] = name
@@ -1111,7 +1110,7 @@ class AbstractDataContext(ABC):
             return (
                 self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
             )
-            
+
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
     ) -> DataContextConfig:

@@ -106,7 +106,6 @@ class DataContext(BaseDataContext):
         Returns:
             DataContext
         """
-        # i think this is the issue of where the project directory is coming from
 
         if not os.path.isdir(project_root_dir):
             raise ge_exceptions.DataContextError(
@@ -369,7 +368,6 @@ class DataContext(BaseDataContext):
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self.config)
         ):
-            # this will go to ephemeral because BaseInherits from ephemeral
             self._save_project_config()
 
     def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
@@ -440,19 +438,6 @@ class DataContext(BaseDataContext):
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
-
-    # def _save_project_config(self) -> None:
-    #     """Save the current project to disk."""
-    #     if self.ge_cloud_mode:
-    #         logger.debug(
-    #             "ge_cloud_mode detected - skipping DataContext._save_project_config"
-    #         )
-    #         return
-    #     logger.debug("Starting DataContext._save_project_config")
-    #
-    #     config_filepath = os.path.join(self.root_directory, self.GE_YML)
-    #     with open(config_filepath, "w") as outfile:
-    #         self.config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")

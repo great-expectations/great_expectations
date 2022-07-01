@@ -126,9 +126,9 @@ class UsageStatisticsHandler:
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
 
+        # <WILL> 20220701 - ValidationOperators have been deprecated, so some init_payloads will not have them included
         validation_operators = None
         if hasattr(self._data_context, "validation_operators"):
-            # TODO: add note before submitting
             validation_operators = self._data_context.validation_operators
 
         init_payload = {
