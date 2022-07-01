@@ -3,17 +3,21 @@ import glob
 import json
 import logging
 import os
+import re
 import traceback
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
+from itertools import chain
 from numbers import Number
 from typing import Dict, List, Optional, Tuple, Union
+from unittest import TestCase
 
 import numpy as np
 from dateutil.parser import parse
+from sqlalchemy.sql import sqltypes
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import (
@@ -62,7 +66,10 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.util import (
+    render_evaluation_parameter_string,
+    valid_sql_tokens,
+)
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     CollapseContent,
@@ -1785,8 +1792,28 @@ class QueryExpectation(TableExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         try:
-            assert "{active_batch}" in query, (
-                "Your query appears to be hard-coded for a data asset. By not parameterizing your query with `{active_batch}`, "
+            parsed_query = {
+                x
+                for x in re.split(", |\\(|\n|\\)| |/", query)
+                if x.lower() != ""
+                and x.lower()
+                not in set(
+                    chain.from_iterable(
+                        [
+                            list(map(lambda y: y.lower(), valid_sql_tokens)),
+                            list(map(lambda z: z.lower(), dir(sqltypes))),
+                        ]
+                    )
+                )
+            }
+            assert "{active_batch}" in parsed_query, (
+                "Your query appears to not be parameterized for a data asset. "
+                "By not parameterizing your query with `{active_batch}`, "
+                "you may not be validating against your intended data asset."
+            )
+            assert all([re.match("{.*?}", x) for x in parsed_query]), (
+                "Your query appears to have hard-coded references to your data. "
+                "By not parameterizing your query with `{active_batch}`, {col}, etc., "
                 "you may not be validating against your intended data asset."
             )
         except AssertionError as e:

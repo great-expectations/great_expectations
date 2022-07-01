@@ -14,12 +14,9 @@ from great_expectations.expectations.metrics.query_metric_provider import (
 )
 
 
-class QueryColumn(QueryMetricProvider):
-    metric_name = "query.column"
-    value_keys = (
-        "column",
-        "query",
-    )
+class QueryTable(QueryMetricProvider):
+    metric_name = "query.table"
+    value_keys = ("query",)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
@@ -30,7 +27,6 @@ class QueryColumn(QueryMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        column = metric_value_kwargs.get("column")
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
         )
@@ -41,20 +37,19 @@ class QueryColumn(QueryMetricProvider):
         )
 
         if isinstance(active_batch, sa.sql.schema.Table):
-            query = query.format(col=column, active_batch=active_batch)
+            query = query.format(active_batch=active_batch)
         elif isinstance(
             active_batch, sa.sql.selectable.Subquery
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(col=column, active_batch=f"({active_batch})")
+            query = query.format(active_batch=f"({active_batch})")
         elif isinstance(
             active_batch, sa.sql.selectable.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
             query = query.format(
-                col=column,
                 active_batch=f'({active_batch.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
-            query = query.format(col=column, active_batch=f"({active_batch})")
+            query = query.format(active_batch=f"({active_batch})")
 
         result = engine.execute(sa.text(query)).fetchall()
 
