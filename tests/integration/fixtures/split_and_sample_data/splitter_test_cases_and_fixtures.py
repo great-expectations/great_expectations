@@ -76,18 +76,11 @@ class TaxiTestData:
             ),
         )
 
-    @staticmethod
-    def passenger_counts() -> List[Optional[float]]:
-        return [
-            0.0,
-            1.0,
-            2.0,
-            3.0,
-            4.0,
-            5.0,
-            6.0,
-            None,
-        ]
+    def get_unique_test_column_values(self) -> List[Optional[Any]]:
+        return sorted(
+            self.test_df[self.test_column_name].unique().tolist(),
+            key=lambda element: (element is None, element),
+        )
 
 
 @dataclass
@@ -119,6 +112,36 @@ class TaxiSplittingTestCasesBase(ABC):
     @abstractmethod
     def test_cases(self) -> List[TaxiSplittingTestCase]:
         pass
+
+
+class TaxiSplittingTestCasesWholeTable(TaxiSplittingTestCasesBase):
+    def test_cases(self) -> List[TaxiSplittingTestCase]:
+        return [
+            TaxiSplittingTestCase(
+                table_domain_test_case=True,
+                splitter_method_name="split_on_whole_table",
+                splitter_kwargs={},
+                num_expected_batch_definitions=1,
+                num_expected_rows_in_first_batch_definition=360,
+                expected_column_values=None,
+            ),
+        ]
+
+
+class TaxiSplittingTestCasesColumnValue(TaxiSplittingTestCasesBase):
+    def test_cases(self) -> List[TaxiSplittingTestCase]:
+        return [
+            TaxiSplittingTestCase(
+                table_domain_test_case=False,
+                splitter_method_name="split_on_column_value",
+                splitter_kwargs={
+                    "column_name": self.taxi_test_data.test_column_name,
+                },
+                num_expected_batch_definitions=8,
+                num_expected_rows_in_first_batch_definition=9,
+                expected_column_values=self.taxi_test_data.get_unique_test_column_values(),
+            ),
+        ]
 
 
 class TaxiSplittingTestCasesDateTime(TaxiSplittingTestCasesBase):
@@ -170,35 +193,5 @@ class TaxiSplittingTestCasesDateTime(TaxiSplittingTestCasesBase):
                 num_expected_batch_definitions=36,
                 num_expected_rows_in_first_batch_definition=10,
                 expected_column_values=self.taxi_test_data.year_month_batch_identifier_data(),
-            ),
-        ]
-
-
-class TaxiSplittingTestCasesWholeTable(TaxiSplittingTestCasesBase):
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
-        return [
-            TaxiSplittingTestCase(
-                table_domain_test_case=True,
-                splitter_method_name="split_on_whole_table",
-                splitter_kwargs={},
-                num_expected_batch_definitions=1,
-                num_expected_rows_in_first_batch_definition=360,
-                expected_column_values=None,
-            ),
-        ]
-
-
-class TaxiSplittingTestCasesColumnValue(TaxiSplittingTestCasesBase):
-    def test_cases(self) -> List[TaxiSplittingTestCase]:
-        return [
-            TaxiSplittingTestCase(
-                table_domain_test_case=False,
-                splitter_method_name="split_on_column_value",
-                splitter_kwargs={
-                    "column_name": self.taxi_test_data.test_column_name,
-                },
-                num_expected_batch_definitions=8,
-                num_expected_rows_in_first_batch_definition=9,
-                expected_column_values=self.taxi_test_data.passenger_counts(),
             ),
         ]

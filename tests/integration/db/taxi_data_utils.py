@@ -94,7 +94,6 @@ def _get_loaded_table(dialect: str) -> LoadedTable:
         clean_up_tables_with_prefix(
             connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
         )
-
         loaded_table = _load_data(connection_string=connection_string, dialect=dialect)
 
     return loaded_table
