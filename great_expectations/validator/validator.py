@@ -976,8 +976,6 @@ class Validator:
             else:
                 raise err
 
-        include_rendered_content: bool = self._include_rendered_content
-
         configuration: ExpectationConfiguration
         result: ExpectationValidationResult
         for configuration in processed_configurations:
@@ -986,7 +984,6 @@ class Validator:
                     metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
-                    include_rendered_content=include_rendered_content,
                 )
                 evrs.append(result)
             except Exception as err:
@@ -1011,8 +1008,6 @@ class Validator:
         catch_exceptions: bool,
         runtime_configuration: Optional[dict] = None,
     ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
-        include_rendered_content: bool = self._include_rendered_content
-
         # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
         # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
         evrs: List[ExpectationValidationResult] = []
@@ -1031,8 +1026,6 @@ class Validator:
 
             evaluated_config = copy.deepcopy(configuration)
             evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
-            if include_rendered_content:
-                evaluated_config._rendered_content = None
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: dict = (
@@ -1069,7 +1062,6 @@ class Validator:
                         success=False,
                         exception_info=exception_info,
                         expectation_config=evaluated_config,
-                        include_rendered_content=include_rendered_content,
                     )
                     evrs.append(result)
                 else:
@@ -1103,8 +1095,6 @@ class Validator:
         evrs: List[ExpectationValidationResult],
         processed_configurations: List[ExpectationConfiguration],
     ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
-        include_rendered_content: bool = self._include_rendered_content
-
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
@@ -1131,7 +1121,6 @@ class Validator:
                         success=False,
                         exception_info=exception_info,
                         expectation_config=configuration,
-                        include_rendered_content=include_rendered_content,
                     )
                     evrs.append(result)
 

@@ -457,7 +457,7 @@ from great_expectations.validator.validator import Validator
         ),
     ],
 )
-def test_inline_renderer_rendered_content_serialization(
+def test_inline_renderer_rendered_content_return_value(
     alice_columnar_table_single_batch_context: DataContext,
     expectation_configuration: ExpectationConfiguration,
     expected_serialized_expectation_configuration_rendered_atomic_content: dict,

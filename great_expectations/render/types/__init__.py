@@ -1,7 +1,9 @@
+import json
 from copy import deepcopy
 from string import Template as pTemplate
 from typing import List, Optional
 
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
@@ -526,6 +528,24 @@ class RenderedAtomicValue(DictDot):
         # UnknownType
         self.kwargs: Optional[dict] = kwargs
 
+    def __repr__(self):
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def __str__(self):
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def to_json_dict(self):
+        d = renderedAtomicValueSchema.dump(self)
+        d["schema"] = convert_to_json_serializable(self.schema)
+        d["template"] = convert_to_json_serializable(self.template)
+        d["params"] = convert_to_json_serializable(self.params)
+        d["header"] = convert_to_json_serializable(self.header)
+        d["header_row"] = convert_to_json_serializable(self.header_row)
+        d["table"] = convert_to_json_serializable(self.table)
+        d["graph"] = convert_to_json_serializable(self.graph)
+        d["kwargs"] = convert_to_json_serializable(self.kwargs)
+        return d
+
 
 class RenderedAtomicValueSchema(Schema):
     class Meta:
@@ -564,10 +584,16 @@ class RenderedAtomicContent(RenderedContent):
         self.value = value
         self.value_type = value_type
 
+    def __repr__(self):
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def __str__(self):
+        return json.dumps(self.to_json_dict(), indent=2)
+
     def to_json_dict(self):
         d = super().to_json_dict()
         d["name"] = self.name
-        d["value"] = self.value.__dict__
+        d["value"] = self.value.to_json_dict()
         d["value_type"] = self.value_type
         return d
 

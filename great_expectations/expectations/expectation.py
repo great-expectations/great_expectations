@@ -705,7 +705,6 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-        include_rendered_content: bool = False,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
         if configuration is None:
@@ -736,7 +735,6 @@ class Expectation(metaclass=MetaExpectation):
         evr: ExpectationValidationResult = self._build_evr(
             raw_response=expectation_validation_result,
             configuration=configuration,
-            include_rendered_content=include_rendered_content,
         )
         return evr
 
@@ -744,7 +742,6 @@ class Expectation(metaclass=MetaExpectation):
     def _build_evr(
         raw_response: Union[ExpectationValidationResult, dict],
         configuration: ExpectationConfiguration,
-        include_rendered_content: bool = False,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
@@ -752,18 +749,13 @@ class Expectation(metaclass=MetaExpectation):
         evr: ExpectationValidationResult
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):
-                raw_response["include_rendered_content"] = include_rendered_content
                 evr = ExpectationValidationResult(**raw_response)
                 evr.expectation_config = configuration
             else:
                 raise GreatExpectationsError("Unable to build EVR")
         else:
-            if not include_rendered_content:
-                evr = raw_response
-            else:
-                raw_response_dict: dict = raw_response.to_json_dict()
-                raw_response_dict["include_rendered_content"] = include_rendered_content
-                evr = ExpectationValidationResult(**raw_response_dict)
+            raw_response_dict: dict = raw_response.to_json_dict()
+            evr = ExpectationValidationResult(**raw_response_dict)
             evr.expectation_config = configuration
         return evr
 

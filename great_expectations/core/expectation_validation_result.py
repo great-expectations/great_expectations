@@ -17,8 +17,17 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.render.types import RenderedAtomicContentSchema
+from great_expectations.marshmallow__shade import (
+    Schema,
+    fields,
+    post_dump,
+    post_load,
+    pre_dump,
+)
+from great_expectations.render.types import (
+    RenderedAtomicContent,
+    RenderedAtomicContentSchema,
+)
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -50,7 +59,7 @@ class ExpectationValidationResult(SerializableDictDot):
         result: Optional[dict] = None,
         meta: Optional[dict] = None,
         exception_info: Optional[dict] = None,
-        include_rendered_content: bool = False,
+        rendered_content: Optional[RenderedAtomicContent] = None,
         **kwargs: dict,
     ) -> None:
         if result and not self.validate_result_dict(result):
@@ -72,8 +81,7 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
-        if include_rendered_content:
-            self.rendered_content = None
+        self.rendered_content = rendered_content
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -331,6 +339,16 @@ class ExpectationValidationResultSchema(Schema):
             data.result = convert_to_json_serializable(data.result)
         elif isinstance(data, dict):
             data["result"] = convert_to_json_serializable(data.get("result"))
+        return data
+
+    REMOVE_KEYS_IF_NONE = ["rendered_content"]
+
+    @post_dump
+    def clean_null_attrs(self, data: dict, **kwargs):
+        data = deepcopy(data)
+        for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
         return data
 
     # noinspection PyUnusedLocal
