@@ -239,6 +239,71 @@ from great_expectations.validator.validator import Validator
                 }
             ],
         ),
+        pytest.param(
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_set",
+                kwargs={"column": "event_type", "value_set": [19, 22, 73]},
+            ),
+            [
+                {
+                    "name": "atomic.prescriptive.summary",
+                    "value": {
+                        "graph": None,
+                        "header": None,
+                        "header_row": None,
+                        "kwargs": None,
+                        "params": {
+                            "column": {
+                                "schema": {"type": "string"},
+                                "value": "event_type",
+                            },
+                            "condition_parser": {
+                                "schema": {"type": "string"},
+                                "value": None,
+                            },
+                            "mostly": {"schema": {"type": "number"}, "value": None},
+                            "mostly_pct": {"schema": {"type": "string"}, "value": None},
+                            "parse_strings_as_datetimes": {
+                                "schema": {"type": "boolean"},
+                                "value": None,
+                            },
+                            "row_condition": {
+                                "schema": {"type": "string"},
+                                "value": None,
+                            },
+                            "v__0": {"schema": {"type": "string"}, "value": 19},
+                            "v__1": {"schema": {"type": "string"}, "value": 22},
+                            "v__2": {"schema": {"type": "string"}, "value": 73},
+                            "value_set": {
+                                "schema": {"type": "array"},
+                                "value": [19, 22, 73],
+                            },
+                        },
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "table": None,
+                        "template": "$column values must belong to this set: $v__0 $v__1 "
+                        "$v__2.",
+                    },
+                    "value_type": "StringValueType",
+                }
+            ],
+            [
+                {
+                    "name": "atomic.diagnostic.observed_value",
+                    "value": {
+                        "graph": None,
+                        "header": None,
+                        "header_row": None,
+                        "kwargs": None,
+                        "params": {},
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "table": None,
+                        "template": "0% unexpected",
+                    },
+                    "value_type": "StringValueType",
+                }
+            ],
+        ),
     ],
 )
 def test_inline_renderer_rendered_content_serialization(
