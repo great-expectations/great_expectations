@@ -365,6 +365,7 @@ class BaseCheckpoint(ConfigPeer):
                     ),
                     result_format=result_format,
                     checkpoint_identifier=checkpoint_identifier,
+                    checkpoint_name=self.name,
                     **operator_run_kwargs,
                 )
             )
