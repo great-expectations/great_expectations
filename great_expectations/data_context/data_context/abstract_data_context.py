@@ -13,6 +13,9 @@ from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
+from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.data_context.store import Store, TupleStoreBackend
@@ -40,7 +43,7 @@ from great_expectations.data_context.util import (
     substitute_config_variable,
 )
 from great_expectations.datasource import LegacyDatasource
-from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
@@ -131,7 +134,8 @@ class AbstractDataContext(ABC):
         ):
             sys.path.append(self.plugins_directory)
 
-        # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
+        # We want to have directories set up before initializing usage statistics so
+        # that we can obtain a context instance id
         self._in_memory_instance_id = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
@@ -551,7 +555,6 @@ class AbstractDataContext(ABC):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        ge_cloud_id: Optional[str] = None,
         **kwargs,
     ):
         """Save the provided expectation suite into the DataContext.
@@ -560,6 +563,8 @@ class AbstractDataContext(ABC):
             expectation_suite: the suite to save
             expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
                 be read from the suite
+
+            overwrite_existing: bool setting whether to overwrite existing ExpectationSuite
 
         Returns:
             None
@@ -642,6 +647,64 @@ class AbstractDataContext(ABC):
                 if config_value:
                     return config_value
         return None
+
+    @staticmethod
+    def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
+        if base_kwargs is None:
+            base_kwargs = {}
+
+        if isinstance(metric_configuration, str):
+            return [(metric_configuration, base_kwargs)]
+
+        metric_configurations_list = []
+        for kwarg_name in metric_configuration.keys():
+            if not isinstance(metric_configuration[kwarg_name], dict):
+                raise ge_exceptions.DataContextError(
+                    "Invalid metric_configuration: each key must contain a "
+                    "dictionary."
+                )
+            if (
+                kwarg_name == "metric_kwargs_id"
+            ):  # this special case allows a hash of multiple kwargs
+                for metric_kwargs_id in metric_configuration[kwarg_name].keys():
+                    if base_kwargs != {}:
+                        raise ge_exceptions.DataContextError(
+                            "Invalid metric_configuration: when specifying "
+                            "metric_kwargs_id, no other keys or values may be defined."
+                        )
+                    if not isinstance(
+                        metric_configuration[kwarg_name][metric_kwargs_id], list
+                    ):
+                        raise ge_exceptions.DataContextError(
+                            "Invalid metric_configuration: each value must contain a "
+                            "list."
+                        )
+                    metric_configurations_list += [
+                        (metric_name, {"metric_kwargs_id": metric_kwargs_id})
+                        for metric_name in metric_configuration[kwarg_name][
+                            metric_kwargs_id
+                        ]
+                    ]
+            else:
+                for kwarg_value in metric_configuration[kwarg_name].keys():
+                    base_kwargs.update({kwarg_name: kwarg_value})
+                    if not isinstance(
+                        metric_configuration[kwarg_name][kwarg_value], list
+                    ):
+                        raise ge_exceptions.DataContextError(
+                            "Invalid metric_configuration: each value must contain a "
+                            "list."
+                        )
+                    for nested_configuration in metric_configuration[kwarg_name][
+                        kwarg_value
+                    ]:
+                        metric_configurations_list += (
+                            AbstractDataContext._get_metric_configuration_tuples(
+                                nested_configuration, base_kwargs=base_kwargs
+                            )
+                        )
+
+        return metric_configurations_list
 
     def _apply_global_config_overrides(
         self, config: Union[DataContextConfig, Mapping]
@@ -738,10 +801,7 @@ class AbstractDataContext(ABC):
                     root_directory: str = ""
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
-                    res = dict(
-                        yaml.load(config_variables_file)
-                    )  # TODO this is returning TextIO directly. Adjust to return
-                    # TextIOWrapper or str
+                    res = dict(yaml.load(config_variables_file.read()))
                     return res or {}
             except OSError as e:
                 if e.errno != errno.ENOENT:
@@ -874,16 +934,6 @@ class AbstractDataContext(ABC):
 
         return self._variables
 
-    @property
-    def config_variables(self) -> Dict:
-        """Loads config variables into cache, by calling _load_config_variables()
-
-        Returns: A dictionary containing config_variables from file or empty dictionary.
-        """
-        if not self._config_variables:
-            self._config_variables = self._load_config_variables()
-        return self._config_variables
-
     def _init_stores(self, store_configs: Dict[str, dict]) -> None:
         """Initialize all Stores for this DataContext.
 
@@ -910,12 +960,14 @@ class AbstractDataContext(ABC):
             DatasourceStore,
         )
 
-        store_name: str = "datasource_store"  # Never explicitly referenced but adheres to the convention set by other internal Stores
+        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
+        # to the convention set by other internal Stores
         store_backend: dict = {"class_name": "InlineStoreBackend"}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
             "data_context": self,
-            # By passing this value in our runtime_environment, we ensure that the same exact context (memory address and all) is supplied to the Store backend
+            # By passing this value in our runtime_environment,
+            # we ensure that the same exact context (memory address and all) is supplied to the Store backend
         }
 
         datasource_store: DatasourceStore = DatasourceStore(
@@ -928,36 +980,10 @@ class AbstractDataContext(ABC):
             return self._context_root_directory
         return
 
-        @property
-        def project_config_with_variables_substituted(self) -> DataContextConfig:
-            return self.get_config_with_variables_substituted()
-
-        @property
-        def plugins_directory(self) -> Optional[str]:
-            """The directory in which custom plugin modules should be placed.
-
-            Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-            """
-            return self._normalize_absolute_or_relative_path(
-                self.project_config_with_variables_substituted.plugins_directory
-            )
-
-        def _normalize_absolute_or_relative_path(
-            self, path: Optional[str]
-        ) -> Optional[str]:
-            """
-            Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-            """
-            if path is None:
-                return
-            elif os.path.isabs(path):
-                return path
-            else:
-                return os.path.join(self.root_directory, path)
-
     def _update_config_variables(self) -> None:
-        """Updates config_variables cache by re-calling _load_config_variables(). Necessary after running methods that modify config
-        AND could contain config_variables for credentials (example is add_datasource())
+        """Updates config_variables cache by re-calling _load_config_variables().
+        Necessary after running methods that modify config AND could contain config_variables for credentials
+        (example is add_datasource())
         """
         self._config_variables = self._load_config_variables()
 
@@ -1000,9 +1026,9 @@ class AbstractDataContext(ABC):
     def _init_datasources(self) -> None:
         for datasource_name in self._datasource_store.list_keys():
             try:
-                datasource: Datasource = self.get_datasource(
-                    datasource_name=datasource_name
-                )
+                datasource: Optional[
+                    Union[LegacyDatasource, BaseDatasource]
+                ] = self.get_datasource(datasource_name=datasource_name)
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
@@ -1102,7 +1128,8 @@ class AbstractDataContext(ABC):
             self.project_config_with_variables_substituted.expectations_store_name
         ]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
-            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
+            # suppress_warnings since a warning will already have been issued during the store creation
+            # if there was an invalid store config
             return expectations_store.store_backend_id_warnings_suppressed
 
         # Otherwise choose the id stored in the project_config
@@ -1111,22 +1138,95 @@ class AbstractDataContext(ABC):
                 self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
             )
 
-    def get_config_with_variables_substituted(
-        self, config: Optional[DataContextConfig] = None
-    ) -> DataContextConfig:
-        """
-        Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
-        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
-        be optional in GE Cloud mode).
-        """
-        if not config:
-            config = self._project_config
-
-        substitutions: dict = self._determine_substitutions()
-
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+    def _compile_evaluation_parameter_dependencies(self) -> None:
+        self._evaluation_parameter_dependencies = {}
+        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here:
+        # https://github.com/great-expectations/great_expectations/pull/3377
+        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
+        for key in self.expectations_store.list_keys():
+            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
+            if not expectation_suite_dict:
+                continue
+            expectation_suite: ExpectationSuite = ExpectationSuite(
+                **expectation_suite_dict, data_context=self
             )
+
+            dependencies = expectation_suite.get_evaluation_parameter_dependencies()
+            if len(dependencies) > 0:
+                nested_update(self._evaluation_parameter_dependencies, dependencies)
+
+        self._evaluation_parameter_dependencies_compiled = True
+
+    def _store_metrics(
+        self, requested_metrics, validation_results, target_store_name
+    ) -> None:
+        """
+        requested_metrics is a dictionary like this:
+
+              requested_metrics:
+                *:  # The asterisk here matches *any* expectation suite name
+                  # use the 'kwargs' key to request metrics that are defined by kwargs,
+                  # for example because they are defined only for a particular column
+                  # - column:
+                  #     Age:
+                  #        - expect_column_min_to_be_between.result.observed_value
+                    - statistics.evaluated_expectations
+                    - statistics.successful_expectations
+
+        Args:
+            requested_metrics:
+            validation_results:
+            target_store_name:
+
+        Returns:
+
+        """
+        expectation_suite_name = validation_results.meta["expectation_suite_name"]
+        run_id = validation_results.meta["run_id"]
+        data_asset_name = validation_results.meta.get("batch_kwargs", {}).get(
+            "data_asset_name"
         )
+
+        for expectation_suite_dependency, metrics_list in requested_metrics.items():
+            if (expectation_suite_dependency != "*") and (
+                expectation_suite_dependency != expectation_suite_name
+            ):
+                continue
+
+            if not isinstance(metrics_list, list):
+                raise ge_exceptions.DataContextError(
+                    "Invalid requested_metrics configuration: metrics requested for "
+                    "each expectation suite must be a list."
+                )
+
+            for metric_configuration in metrics_list:
+                metric_configurations = (
+                    AbstractDataContext._get_metric_configuration_tuples(
+                        metric_configuration
+                    )
+                )
+                for metric_name, metric_kwargs in metric_configurations:
+                    try:
+                        metric_value = validation_results.get_metric(
+                            metric_name, **metric_kwargs
+                        )
+                        self.stores[target_store_name].set(
+                            ValidationMetricIdentifier(
+                                run_id=run_id,
+                                data_asset_name=data_asset_name,
+                                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                                    expectation_suite_name
+                                ),
+                                metric_name=metric_name,
+                                metric_kwargs_id=get_metric_kwargs_id(
+                                    metric_name, metric_kwargs
+                                ),
+                            ),
+                            metric_value,
+                        )
+                    except ge_exceptions.UnavailableMetricError:
+                        # This will happen frequently in larger pipelines
+                        logger.debug(
+                            "metric {} was requested by another expectation suite but is not available in "
+                            "this validation result.".format(metric_name)
+                        )
