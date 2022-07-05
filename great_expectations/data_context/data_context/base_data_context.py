@@ -452,7 +452,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         ):
             store_config["store_backend"].update(
                 {
-                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                    "manually_initialize_store_backend_id": self._data_context.variables.get_anonymous_usage_statistics().data_context_id
                 }
             )
 
@@ -541,7 +541,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             return self.ge_cloud_config.organization_id
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
-            self.project_config_with_variables_substituted.expectations_store_name
+            self._data_context.variables.get_expectations_store_name()
         ]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
@@ -550,7 +550,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # Otherwise choose the id stored in the project_config
         else:
             return (
-                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                self._data_context.variables.get_anonymous_usage_statistics().data_context_id
             )
 
     def _initialize_usage_statistics(
@@ -598,7 +598,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self.config["validation_operators"][
             validation_operator_name
         ] = validation_operator_config
-        config = self.project_config_with_variables_substituted.validation_operators[
+        config = self._data_context.variables.get_validation_operators()[
             validation_operator_name
         ]
         module_name = "great_expectations.validation_operators"
