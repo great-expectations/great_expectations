@@ -131,6 +131,114 @@ from great_expectations.validator.validator import Validator
                 }
             ],
         ),
+        pytest.param(
+            ExpectationConfiguration(
+                expectation_type="expect_column_quantile_values_to_be_between",
+                kwargs={
+                    "column": "user_id",
+                    "quantile_ranges": {
+                        "quantiles": [0.0, 0.5, 1.0],
+                        "value_ranges": [
+                            [300000, 400000],
+                            [2000000, 4000000],
+                            [4000000, 10000000],
+                        ],
+                    },
+                },
+            ),
+            [
+                {
+                    "name": "atomic.prescriptive.summary",
+                    "value": {
+                        "graph": None,
+                        "header": {
+                            "schema": {"type": "StringValueType"},
+                            "value": {
+                                "params": {
+                                    "column": {
+                                        "schema": {"type": "string"},
+                                        "value": "user_id",
+                                    },
+                                    "condition_parser": {
+                                        "schema": {"type": "string"},
+                                        "value": None,
+                                    },
+                                    "mostly": {
+                                        "schema": {"type": "number"},
+                                        "value": None,
+                                    },
+                                    "row_condition": {
+                                        "schema": {"type": "string"},
+                                        "value": None,
+                                    },
+                                },
+                                "template": "$column quantiles must be within "
+                                "the following value ranges.",
+                            },
+                        },
+                        "header_row": [
+                            {"schema": {"type": "string"}, "value": "Quantile"},
+                            {"schema": {"type": "string"}, "value": "Min Value"},
+                            {"schema": {"type": "string"}, "value": "Max Value"},
+                        ],
+                        "kwargs": None,
+                        "params": None,
+                        "schema": {"type": "TableType"},
+                        "table": [
+                            [
+                                {"schema": {"type": "string"}, "value": "0.00"},
+                                {"schema": {"type": "number"}, "value": 300000},
+                                {"schema": {"type": "number"}, "value": 400000},
+                            ],
+                            [
+                                {"schema": {"type": "string"}, "value": "Median"},
+                                {"schema": {"type": "number"}, "value": 2000000},
+                                {"schema": {"type": "number"}, "value": 4000000},
+                            ],
+                            [
+                                {"schema": {"type": "string"}, "value": "1.00"},
+                                {"schema": {"type": "number"}, "value": 4000000},
+                                {"schema": {"type": "number"}, "value": 10000000},
+                            ],
+                        ],
+                        "template": None,
+                    },
+                    "value_type": "TableType",
+                }
+            ],
+            [
+                {
+                    "name": "atomic.diagnostic.observed_value",
+                    "value": {
+                        "graph": None,
+                        "header": None,
+                        "header_row": [
+                            {"schema": {"type": "string"}, "value": "Quantile"},
+                            {"schema": {"type": "string"}, "value": "Value"},
+                        ],
+                        "kwargs": None,
+                        "params": None,
+                        "schema": {"type": "TableType"},
+                        "table": [
+                            [
+                                {"schema": {"type": "string"}, "value": "0.00"},
+                                {"schema": {"type": "number"}, "value": 397433},
+                            ],
+                            [
+                                {"schema": {"type": "string"}, "value": "Median"},
+                                {"schema": {"type": "number"}, "value": 2388055},
+                            ],
+                            [
+                                {"schema": {"type": "string"}, "value": "1.00"},
+                                {"schema": {"type": "number"}, "value": 9488404},
+                            ],
+                        ],
+                        "template": None,
+                    },
+                    "value_type": "TableType",
+                }
+            ],
+        ),
     ],
 )
 def test_inline_renderer_rendered_content_serialization(
