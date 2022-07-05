@@ -1905,6 +1905,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
+        self._data_context.variables.config = project_config
 
     def _build_datasource_from_config(
         self, name: str, config: Union[dict, DatasourceConfig]
