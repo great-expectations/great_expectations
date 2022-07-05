@@ -40,9 +40,17 @@ class FileDataContext(AbstractDataContext):
             config=project_config
         )
         super().__init__(runtime_environment=runtime_environment)
+        self._variables = self._init_variables()
 
     def _init_variables(self) -> FileDataContextVariables:
-        raise NotImplementedError
+        substitutions: dict = self._determine_substitutions()
+
+        variables: FileDataContextVariables = FileDataContextVariables(
+            config=self._project_config,
+            substitutions=substitutions,
+            data_context=self,
+        )
+        return variables
 
     @property
     def root_directory(self) -> Optional[str]:

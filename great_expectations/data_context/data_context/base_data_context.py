@@ -755,19 +755,19 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @property
     def anonymous_usage_statistics(self):
-        return self.project_config_with_variables_substituted.anonymous_usage_statistics
+        return self._data_context.variables.get_anonymous_usage_statistics()
 
     @property
     def concurrency(self) -> Optional[ConcurrencyConfig]:
-        return self.project_config_with_variables_substituted.concurrency
+        return self._data_context.variables.get_concurrency()
 
     @property
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
-        return self.project_config_with_variables_substituted.progress_bars
+        return self._data_context.variables.get_progress_bars()
 
     @property
     def notebooks(self):
-        return self.project_config_with_variables_substituted.notebooks
+        return self._data_context.variables.get_notebooks()
 
     @property
     def stores(self):

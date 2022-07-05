@@ -38,6 +38,13 @@ class EphemeralDataContext(AbstractDataContext):
         )
         self._config_variables = self._load_config_variables()
         super().__init__(runtime_environment=runtime_environment)
+        self._variables = self._init_variables()
 
     def _init_variables(self) -> EphemeralDataContextVariables:
-        raise NotImplementedError
+        substitutions: dict = self._determine_substitutions()
+
+        variables: EphemeralDataContextVariables = EphemeralDataContextVariables(
+            config=self._project_config,
+            substitutions=substitutions,
+        )
+        return variables
