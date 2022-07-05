@@ -1801,7 +1801,7 @@ set as active.
                 etc.).
             only_return_failures (boolean): \
                 If True, expectation results are only returned when ``success = False`` \
-            checkpoint_name (str): \
+            checkpoint_name (string or None): \
                 Name of the Checkpoint which invoked this Validator.validate() call against an Expectation Suite. \
                 It will be added to `meta` field of the returned ExpectationSuiteValidationResult.
 
