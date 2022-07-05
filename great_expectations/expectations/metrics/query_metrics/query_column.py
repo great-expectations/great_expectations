@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
