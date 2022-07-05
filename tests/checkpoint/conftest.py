@@ -133,5 +133,5 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config_to_disk()
     return context

@@ -115,7 +115,7 @@ class AbstractDataContext(ABC):
         + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
     )
 
-    def __init__(self, runtime_environment: dict):
+    def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
         Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
 
@@ -123,6 +123,8 @@ class AbstractDataContext(ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override both those set in config_variables.yml and the environment
         """
+        if runtime_environment is None:
+            runtime_environment = {}
         self.runtime_environment = runtime_environment
         # these attributes that are set downstream.
         self._variables = None
@@ -166,7 +168,7 @@ class AbstractDataContext(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _save_project_config(self) -> None:
+    def _save_project_config_to_disk(self) -> None:
         """
         Each DataContext will define how its project_config will be saved.
             - FileDataContext : Filesystem.

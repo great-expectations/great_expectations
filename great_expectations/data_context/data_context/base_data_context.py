@@ -363,7 +363,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._data_context._evaluation_parameter_dependencies
         )
 
-    def _save_project_config(self) -> None:
+    def _save_project_config_to_disk(self) -> None:
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 

@@ -30,7 +30,7 @@ def empty_context_with_checkpoint_v1_stats_enabled(
     checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
     shutil.copy(fixture_path, checkpoints_file)
     # # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config_to_disk()
     return context
 
 

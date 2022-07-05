@@ -360,7 +360,7 @@ No manual upgrade steps are required.
                 DataContextConfig.from_commented_map(commented_map=config_commented_map)
             )
             self.data_context.set_config(project_config=data_context_config)
-            self.data_context._save_project_config()
+            self.data_context._save_project_config_to_disk()
 
             checkpoint_log_entry = {
                 "stores": {

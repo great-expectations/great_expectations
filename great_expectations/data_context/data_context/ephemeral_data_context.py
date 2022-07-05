@@ -47,7 +47,7 @@ class EphemeralDataContext(AbstractDataContext):
     def _init_variables(self) -> EphemeralDataContextVariables:
         raise NotImplementedError
 
-    def _save_project_config(self) -> None:
+    def _save_project_config_to_disk(self) -> None:
         """Since EphemeralDataContext does not have config as a file, display logging message instead"""
         logger.debug("EphemeralDataContext does not save project_config to file")
         return

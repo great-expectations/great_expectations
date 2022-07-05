@@ -104,7 +104,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         )
         self.data_context.set_config(project_config=data_context_config)
         # noinspection PyProtectedMember
-        self.data_context._save_project_config()
+        self.data_context._save_project_config_to_disk()
         self._update_upgrade_log()
 
     def _update_upgrade_log(self) -> None:
