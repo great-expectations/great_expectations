@@ -96,7 +96,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
                         "value": 5,
                     },
                     "out": {"success": True},
-                    "only_for": ["postgresql", "spark"],
+                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -106,7 +106,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
                         "value": 2,
                     },
                     "out": {"success": False},
-                    "only_for": ["postgresql", "spark"],
+                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "positive_test_static_data_asset",
@@ -120,7 +120,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
                                  """,
                     },
                     "out": {"success": True},
-                    "only_for": ["postgresql"],
+                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "positive_test_row_condition",
@@ -132,7 +132,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
                         "condition_parser": "great_expectations__experimental__",
                     },
                     "out": {"success": True},
-                    "only_for": ["postgresql", "spark"],
+                    "only_for": ["sqlite", "spark"],
                 },
             ],
         },
