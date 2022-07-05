@@ -169,6 +169,17 @@ class AbstractDataContext(ABC):
     def _save_project_config(self) -> None:
         raise NotImplementedError
 
+    @abstractmethod
+    def save_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_suite_name: Optional[str] = None,
+        overwrite_existing: bool = True,
+        ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ) -> None:
+        raise NotImplementedError
+
     # Properties
     @property
     def instance_id(self) -> str:
@@ -549,44 +560,6 @@ class AbstractDataContext(ABC):
                 f"Unable to find configured store: {str(e)}"
             )
         return keys
-
-    def save_expectation_suite(
-        self,
-        expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
-        overwrite_existing: bool = True,
-        **kwargs,
-    ):
-        """Save the provided expectation suite into the DataContext.
-
-        Args:
-            expectation_suite: the suite to save
-            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
-                be read from the suite
-
-            overwrite_existing: bool setting whether to overwrite existing ExpectationSuite
-
-        Returns:
-            None
-        """
-        if expectation_suite_name is None:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite.expectation_suite_name
-            )
-        else:
-            expectation_suite.expectation_suite_name = expectation_suite_name
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
-        if self.expectations_store.has_key(key) and not overwrite_existing:
-            raise ge_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(
-                    expectation_suite_name
-                )
-            )
-        self._evaluation_parameter_dependencies_compiled = False
-        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None

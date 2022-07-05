@@ -1669,13 +1669,21 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        super().save_expectation_suite(
-            expectation_suite,
-            expectation_suite_name,
-            overwrite_existing,
-            ge_cloud_id,
-            **kwargs,
-        )
+        if ge_cloud_id:
+            super().save_expectation_suite(
+                expectation_suite,
+                expectation_suite_name,
+                overwrite_existing,
+                ge_cloud_id,
+                **kwargs,
+            )
+        else:
+            super().save_expectation_suite(
+                expectation_suite,
+                expectation_suite_name,
+                overwrite_existing,
+                **kwargs,
+            )
         self._apply_temporary_overrides()
 
     def store_validation_result_metrics(
