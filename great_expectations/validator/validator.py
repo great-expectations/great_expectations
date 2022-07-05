@@ -1766,6 +1766,7 @@ set as active.
         only_return_failures: bool = False,
         run_name: Optional[str] = None,
         run_time: Optional[str] = None,
+        checkpoint_name: Optional[str] = None,
     ) -> Union[ExpectationValidationResult, ExpectationSuiteValidationResult]:
         # noinspection SpellCheckingInspection
         """Generates a JSON-formatted report describing the outcome of all expectations.
@@ -1800,6 +1801,9 @@ set as active.
                 etc.).
             only_return_failures (boolean): \
                 If True, expectation results are only returned when ``success = False`` \
+            checkpoint_name (string or None): \
+                Name of the Checkpoint which invoked this Validator.validate() call against an Expectation Suite. \
+                It will be added to `meta` field of the returned ExpectationSuiteValidationResult.
 
         Returns:
             A JSON-formatted dictionary containing a list of the validation results. \
@@ -2003,6 +2007,7 @@ set as active.
                     "batch_markers": self.active_batch_markers,
                     "active_batch_definition": self.active_batch_definition,
                     "validation_time": validation_time,
+                    "checkpoint_name": checkpoint_name,
                 },
             )
 
