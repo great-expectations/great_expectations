@@ -46,7 +46,7 @@ def test_open_docs_with_single_local_site(mock_webbrowser, empty_data_context):
 
 
 @pytest.fixture
-def context_with_multiple_built_sites(empty_data_context):
+def context_with_multiple_built_sites(empty_data_context: DataContext) -> DataContext:
     context = empty_data_context
     multi_sites = {
         "local_site": {
