@@ -375,7 +375,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         # Init stores
         self._stores = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
+        self._init_stores(self.variables.get_stores())
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -383,7 +383,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # Override the project_config data_context_id if an expectations_store was already set up
         self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
         self._initialize_usage_statistics(
-            self.project_config_with_variables_substituted.anonymous_usage_statistics
+            self.variables.get_anonymous_usage_statistics()
         )
 
         # Store cached datasources but don't init them
@@ -438,6 +438,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self.runtime_environment = self._data_context.runtime_environment or {}
         self._config_variables = self._data_context.config_variables
         self._in_memory_instance_id = self._data_context._in_memory_instance_id
+        self._variables = self._data_context.variables
 
     def _build_store_from_config(
         self, store_name: str, store_config: dict
@@ -452,7 +453,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         ):
             store_config["store_backend"].update(
                 {
-                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                    "manually_initialize_store_backend_id": self.variables.get_anonymous_usage_statistics().data_context_id
                 }
             )
 
@@ -540,18 +541,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         if self.ge_cloud_mode:
             return self.ge_cloud_config.organization_id
         # Choose the id of the currently-configured expectations store, if it is a persistent store
-        expectations_store = self._stores[
-            self.project_config_with_variables_substituted.expectations_store_name
-        ]
+        expectations_store = self._stores[self.variables.get_expectations_store_name()]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
             return expectations_store.store_backend_id_warnings_suppressed
 
         # Otherwise choose the id stored in the project_config
         else:
-            return (
-                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-            )
+            return self.variables.get_anonymous_usage_statistics().data_context_id
 
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
@@ -598,9 +595,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self.config["validation_operators"][
             validation_operator_name
         ] = validation_operator_config
-        config = self.project_config_with_variables_substituted.validation_operators[
-            validation_operator_name
-        ]
+        config = self.variables.get_validation_operators()[validation_operator_name]
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
             config=config,
@@ -629,9 +624,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
-        return list(
-            self.project_config_with_variables_substituted.data_docs_sites.keys()
-        )
+        return list(self.variables.get_data_docs_sites().keys())
 
     def get_docs_sites_urls(
         self,
@@ -660,9 +653,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        unfiltered_sites = (
-            self.project_config_with_variables_substituted.data_docs_sites
-        )
+        unfiltered_sites = self.variables.get_data_docs_sites()
 
         # Filter out sites that are not in site_names
         sites = (
@@ -755,19 +746,19 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @property
     def anonymous_usage_statistics(self):
-        return self.project_config_with_variables_substituted.anonymous_usage_statistics
+        return self.variables.get_anonymous_usage_statistics()
 
     @property
     def concurrency(self) -> Optional[ConcurrencyConfig]:
-        return self.project_config_with_variables_substituted.concurrency
+        return self.variables.get_concurrency()
 
     @property
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
-        return self.project_config_with_variables_substituted.progress_bars
+        return self.variables.get_progress_bars()
 
     @property
     def notebooks(self):
-        return self.project_config_with_variables_substituted.notebooks
+        return self.variables.get_notebooks()
 
     @property
     def stores(self):
@@ -782,7 +773,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def checkpoint_store_name(self):
         try:
-            return self.project_config_with_variables_substituted.checkpoint_store_name
+            return self.variables.get_checkpoint_store_name()
         except AttributeError:
             from great_expectations.data_context.store.checkpoint_store import (
                 CheckpointStore,
@@ -827,7 +818,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def profiler_store_name(self) -> str:
         try:
-            return self.project_config_with_variables_substituted.profiler_store_name
+            return self.variables.get_profiler_store_name()
         except AttributeError:
             if BaseDataContext._default_profilers_exist(
                 directory_path=self.root_directory
@@ -872,7 +863,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @property
     def expectations_store_name(self) -> Optional[str]:
-        return self.project_config_with_variables_substituted.expectations_store_name
+        return self.variables.get_expectations_store_name()
 
     @property
     def expectations_store(self) -> ExpectationsStore:
@@ -880,9 +871,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @property
     def data_context_id(self):
-        return (
-            self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-        )
+        return self.variables.get_anonymous_usage_statistics().data_context_id
 
     #####
     #
@@ -2015,7 +2004,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         for (
             name,
             value,
-        ) in self.project_config_with_variables_substituted.stores.items():
+        ) in self.variables.get_stores().items():
             store_config = copy.deepcopy(value)
             store_config["name"] = name
             masked_config = PasswordMasker.sanitize_config(store_config)
@@ -2062,9 +2051,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         for (
             name,
             value,
-        ) in (
-            self.project_config_with_variables_substituted.validation_operators.items()
-        ):
+        ) in self.variables.get_validation_operators().items():
             value["name"] = name
             validation_operators.append(value)
         return validation_operators
@@ -2369,13 +2356,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     @property
     def evaluation_parameter_store_name(self):
-        return (
-            self.project_config_with_variables_substituted.evaluation_parameter_store_name
-        )
+        return self.variables.get_evaluation_parameter_store_name()
 
     @property
     def validations_store_name(self):
-        return self.project_config_with_variables_substituted.validations_store_name
+        return self.variables.get_validations_store_name()
 
     @property
     def validations_store(self) -> ValidationsStore:
@@ -2530,7 +2515,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         index_page_locator_infos = {}
 
-        sites = self.project_config_with_variables_substituted.data_docs_sites
+        sites = self.variables.get_data_docs_sites()
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -2587,7 +2572,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             site_name (str): Optional, the name of the site to clean. If not
             specified, all sites will be cleaned.
         """
-        data_docs_sites = self.project_config_with_variables_substituted.data_docs_sites
+        data_docs_sites = self.variables.get_data_docs_sites()
         if not data_docs_sites:
             raise ge_exceptions.DataContextError(
                 "No data docs sites were found on this DataContext, therefore no sites will be cleaned.",
@@ -2607,7 +2592,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return all(cleaned)
 
     def _clean_data_docs_site(self, site_name: str) -> bool:
-        sites = self.project_config_with_variables_substituted.data_docs_sites
+        sites = self.variables.get_data_docs_sites()
         if not sites:
             return False
         site_config = sites.get(site_name)
