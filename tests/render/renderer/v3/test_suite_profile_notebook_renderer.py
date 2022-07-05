@@ -73,9 +73,6 @@ import pandas as pd
 import great_expectations as ge
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
-)
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError""",
     # Batch request
@@ -87,7 +84,7 @@ from great_expectations.exceptions import DataContextError""",
 """,
     # OnboardingDataAssistant instantiation/usage
     """\
-data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+result = context.assistants.onboarding.run(
     batch_request=batch_request,
     # include_column_names=include_column_names,
     exclude_column_names=exclude_column_names,
@@ -130,7 +127,7 @@ data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
     #     "round_decimals": 4,
     # },
 )
-validator.expectation_suite = data_assistant_result.get_expectation_suite(
+validator.expectation_suite = result.get_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )""",
 ]

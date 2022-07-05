@@ -156,12 +156,13 @@ class Validator:
 
         Additionally, note that Validators are used by Checkpoints under-the-hood.
 
-        :param execution_engine (ExecutionEngine):
-        :param interactive_evaluation (bool):
-        :param expectation_suite (Optional[ExpectationSuite]):
-        :param expectation_suite_name (Optional[str]):
-        :param data_context (Optional[DataContext]):
-        :param batches (Optional[List[Batch]]):
+        Args:
+            execution_engine: The ExecutionEngine to be used to perform validation.
+            interactive_evaluation: Whether the Validator should perform evaluation when Expectations are added.
+            expectation_suite: The ExpectationSuite to validate.
+            expectation_suite_name: The name of the ExpectationSuite to validate.
+            data_context: The DataContext associated with this Validator.
+            batches: The batches for which to validate.
 
         """
 
@@ -201,6 +202,12 @@ class Validator:
         ):
             # TODO: verify flow of default expectation arguments
             self.set_default_expectation_argument("include_config", True)
+
+        # TODO: NF - feature flag to be updated upon feature release
+        if "include_rendered_content" in kwargs:
+            self._include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            self._include_rendered_content = False
 
     def __dir__(self):
         """
@@ -972,6 +979,8 @@ class Validator:
             else:
                 raise err
 
+        include_rendered_content: bool = self._include_rendered_content
+
         configuration: ExpectationConfiguration
         result: ExpectationValidationResult
         for configuration in processed_configurations:
@@ -980,6 +989,7 @@ class Validator:
                     metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
+                    include_rendered_content=include_rendered_content,
                 )
                 evrs.append(result)
             except Exception as err:
@@ -1004,6 +1014,8 @@ class Validator:
         catch_exceptions: bool,
         runtime_configuration: Optional[dict] = None,
     ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
+        include_rendered_content: bool = self._include_rendered_content
+
         # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
         # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
         evrs: List[ExpectationValidationResult] = []
@@ -1022,6 +1034,8 @@ class Validator:
 
             evaluated_config = copy.deepcopy(configuration)
             evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
+            if include_rendered_content:
+                evaluated_config._rendered_content = None
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: dict = (
@@ -1058,6 +1072,7 @@ class Validator:
                         success=False,
                         exception_info=exception_info,
                         expectation_config=evaluated_config,
+                        include_rendered_content=include_rendered_content,
                     )
                     evrs.append(result)
                 else:
@@ -1091,6 +1106,8 @@ class Validator:
         evrs: List[ExpectationValidationResult],
         processed_configurations: List[ExpectationConfiguration],
     ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
+        include_rendered_content: bool = self._include_rendered_content
+
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
@@ -1117,6 +1134,7 @@ class Validator:
                         success=False,
                         exception_info=exception_info,
                         expectation_config=configuration,
+                        include_rendered_content=include_rendered_content,
                     )
                     evrs.append(result)
 
@@ -1626,9 +1644,8 @@ set as active.
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (
-                " Omitting %d expectation(s) that failed when last run; set "
+                f" Omitting {discards['failed_expectations']} expectation(s) that failed when last run; set "
                 "discard_failed_expectations=False to include them."
-                % discards["failed_expectations"]
             )
 
         for expectation in expectations:
@@ -1874,8 +1891,7 @@ set as active.
                     raise
                 except OSError:
                     raise GreatExpectationsError(
-                        "Unable to load expectation suite: IO error while reading %s"
-                        % expectation_suite
+                        f"Unable to load expectation suite: IO error while reading {expectation_suite}"
                     )
             elif not isinstance(expectation_suite, ExpectationSuite):
                 logger.error(

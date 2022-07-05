@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Set, Type
+from typing import Dict, List, Optional, Set, Type
 
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
@@ -32,7 +32,7 @@ class DataAssistantDispatcher:
         # _registered_data_assistants has both aliases and full names
         data_assistant_cls: Optional[
             Type[DataAssistant]
-        ] = DataAssistantDispatcher.get_data_assistant_impl(name=name)
+        ] = DataAssistantDispatcher._get_data_assistant_impl(name=name)
 
         # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".
         if data_assistant_cls is None:
@@ -56,7 +56,7 @@ class DataAssistantDispatcher:
         return data_assistant_runner
 
     @classmethod
-    def register_data_assistant(
+    def _register_data_assistant(
         cls,
         data_assistant: Type[DataAssistant],  # noqa: F821
     ) -> None:
@@ -66,8 +66,9 @@ class DataAssistantDispatcher:
         Args:
             data_assistant: "DataAssistant" class to be registered
         """
-        data_assistant_type = data_assistant.data_assistant_type
-        cls._register(data_assistant_type, data_assistant)
+        # TODO: <Alex>6/21/2022: Only alias is to be registered (leave formal type registration in as commented).</Alex>
+        # data_assistant_type = data_assistant.data_assistant_type
+        # cls._register(data_assistant_type, data_assistant)
 
         alias: Optional[str] = data_assistant.__alias__
         if alias is not None:
@@ -86,7 +87,7 @@ class DataAssistantDispatcher:
         registered_data_assistants[name] = data_assistant
 
     @classmethod
-    def get_data_assistant_impl(
+    def _get_data_assistant_impl(
         cls,
         name: Optional[str],
     ) -> Optional[Type[DataAssistant]]:
@@ -103,10 +104,12 @@ class DataAssistantDispatcher:
         """
         if name is None:
             return None
+
         name = name.lower()
+
         return cls._registered_data_assistants.get(name)
 
-    def __dir__(self):
+    def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable tab completion on "DataAssistantDispatcher" objects.
         """

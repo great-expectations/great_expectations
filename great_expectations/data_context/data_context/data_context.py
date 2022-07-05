@@ -12,6 +12,9 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -232,7 +235,7 @@ class DataContext(BaseDataContext):
     ) -> Dict[str, Optional[str]]:
         ge_cloud_base_url = (
             ge_cloud_base_url
-            or super()._get_global_config_value(
+            or CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_BASE_URL",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
@@ -247,14 +250,14 @@ class DataContext(BaseDataContext):
                 "deprecated in the next major release."
             )
         else:
-            ge_cloud_account_id = super()._get_global_config_value(
+            ge_cloud_account_id = CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_ACCOUNT_ID",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="account_id",
             )
 
         if ge_cloud_organization_id is None:
-            ge_cloud_organization_id = super()._get_global_config_value(
+            ge_cloud_organization_id = CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_ORGANIZATION_ID",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="organization_id",
@@ -263,7 +266,7 @@ class DataContext(BaseDataContext):
         ge_cloud_organization_id = ge_cloud_organization_id or ge_cloud_account_id
         ge_cloud_access_token = (
             ge_cloud_access_token
-            or super()._get_global_config_value(
+            or CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_ACCESS_TOKEN",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="access_token",
@@ -411,7 +414,7 @@ class DataContext(BaseDataContext):
             config = self._retrieve_data_context_config_from_ge_cloud()
             return config
 
-        path_to_yml = os.path.join(self.root_directory, self.GE_YML)
+        path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
@@ -437,7 +440,7 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def _save_project_config(self):
+    def _save_project_config(self) -> None:
         """Save the current project to disk."""
         if self.ge_cloud_mode:
             logger.debug(
@@ -458,21 +461,39 @@ class DataContext(BaseDataContext):
         return new_store
 
     def add_datasource(
-        self, name, **kwargs
+        self, name: str, **kwargs: dict
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(name=name, **kwargs)
-        self._save_project_config()
+        ] = super().add_datasource(name=name, save_changes=True, **kwargs)
 
         return new_datasource
+
+    def update_datasource(
+        self,
+        datasource_name: str,
+        datasource: Union[LegacyDatasource, BaseDatasource],
+    ) -> None:
+        """
+        See parent `BaseDataContext.update_datasource` for more details.
+        Note that this method persists changes using an underlying Store.
+        """
+        logger.debug(
+            f"Starting DataContext.update_datasource for datasource {datasource_name}"
+        )
+
+        super().update_datasource(
+            datasource_name=datasource_name,
+            datasource=datasource,
+            save_changes=True,
+        )
 
     def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
 
-        super().delete_datasource(datasource_name=name)
+        super().delete_datasource(datasource_name=name, save_changes=True)
 
     @classmethod
     def find_context_root_dir(cls):
