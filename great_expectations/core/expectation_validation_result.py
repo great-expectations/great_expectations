@@ -72,8 +72,7 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
-        self._include_rendered_content = include_rendered_content
-        if self._include_rendered_content:
+        if include_rendered_content:
             self.rendered_content = None
 
     def __eq__(self, other):
@@ -256,6 +255,10 @@ class ExpectationValidationResult(SerializableDictDot):
             myself["exception_info"] = convert_to_json_serializable(
                 myself["exception_info"]
             )
+        if "rendered_content" in myself:
+            myself["rendered_content"] = convert_to_json_serializable(
+                myself["rendered_content"]
+            )
         return myself
 
     def get_metric(self, metric_name, **kwargs):
@@ -307,11 +310,18 @@ class ExpectationValidationResult(SerializableDictDot):
 
 
 class ExpectationValidationResultSchema(Schema):
-    success = fields.Bool()
-    expectation_config = fields.Nested(ExpectationConfigurationSchema)
-    result = fields.Dict()
-    meta = fields.Dict()
-    exception_info = fields.Dict()
+    success = fields.Bool(required=False, allow_none=True)
+    expectation_config = fields.Nested(
+        lambda: ExpectationConfigurationSchema, required=False, allow_none=True
+    )
+    result = fields.Dict(required=False, allow_none=True)
+    meta = fields.Dict(required=False, allow_none=True)
+    exception_info = fields.Dict(required=False, allow_none=True)
+    rendered_content = fields.List(
+        fields.Nested(
+            lambda: RenderedAtomicContentSchema, required=False, allow_none=True
+        )
+    )
 
     # noinspection PyUnusedLocal
     @pre_dump
@@ -322,16 +332,6 @@ class ExpectationValidationResultSchema(Schema):
         elif isinstance(data, dict):
             data["result"] = convert_to_json_serializable(data.get("result"))
         return data
-
-    # # noinspection PyUnusedLocal
-    # @pre_dump
-    # def clean_empty(self, data, **kwargs):
-    #     # if not hasattr(data, 'meta'):
-    #     #     pass
-    #     # elif len(data.meta) == 0:
-    #     #     del data.meta
-    #     # return data
-    #     pass
 
     # noinspection PyUnusedLocal
     @post_load
@@ -477,7 +477,6 @@ class ExpectationSuiteValidationResultSchema(Schema):
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
-    rendered_content = fields.List(fields.Nested(RenderedAtomicContentSchema))
 
     # noinspection PyUnusedLocal
     @pre_dump
