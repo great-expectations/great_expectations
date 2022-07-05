@@ -48,7 +48,6 @@ def test_open_docs_with_single_local_site(mock_webbrowser, empty_data_context):
 @pytest.fixture
 def context_with_multiple_built_sites(empty_data_context):
     context = empty_data_context
-    config = context.project_config_with_variables_substituted
     multi_sites = {
         "local_site": {
             "class_name": "SiteBuilder",
@@ -67,8 +66,7 @@ def context_with_multiple_built_sites(empty_data_context):
             "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
         },
     }
-    config.data_docs_sites = multi_sites
-    context._project_config = config
+    context._data_context.variables.set_data_docs_sites(multi_sites)
     context.build_data_docs()
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 2

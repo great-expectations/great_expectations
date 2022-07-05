@@ -375,7 +375,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         # Init stores
         self._stores = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
+        self._init_stores(self._data_context.variables.get_stores())
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -383,7 +383,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # Override the project_config data_context_id if an expectations_store was already set up
         self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
         self._initialize_usage_statistics(
-            self.project_config_with_variables_substituted.anonymous_usage_statistics
+            self._data_context.variables.get_anonymous_usage_statistics()
         )
 
         # Store cached datasources but don't init them
@@ -629,9 +629,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
-        return list(
-            self.project_config_with_variables_substituted.data_docs_sites.keys()
-        )
+        return list(self._data_context.variables.get_data_docs_sites().keys())
 
     def get_docs_sites_urls(
         self,
@@ -660,9 +658,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        unfiltered_sites = (
-            self.project_config_with_variables_substituted.data_docs_sites
-        )
+        unfiltered_sites = self._data_context.variables.get_data_docs_sites()
 
         # Filter out sites that are not in site_names
         sites = (
@@ -782,7 +778,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def checkpoint_store_name(self):
         try:
-            return self.project_config_with_variables_substituted.checkpoint_store_name
+            return self._data_context.variables.get_checkpoint_store_name()
         except AttributeError:
             from great_expectations.data_context.store.checkpoint_store import (
                 CheckpointStore,
@@ -827,7 +823,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def profiler_store_name(self) -> str:
         try:
-            return self.project_config_with_variables_substituted.profiler_store_name
+            return self._data_context.variables.get_profiler_store_name()
         except AttributeError:
             if BaseDataContext._default_profilers_exist(
                 directory_path=self.root_directory
