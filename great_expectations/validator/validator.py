@@ -148,6 +148,7 @@ class Validator:
             Any
         ] = None,  # Cannot type DataContext due to circular import
         batches: Optional[List[Batch]] = None,
+        include_rendered_content: bool = False,
         **kwargs,
     ) -> None:
         """
@@ -163,7 +164,7 @@ class Validator:
             expectation_suite_name: The name of the ExpectationSuite to validate.
             data_context: The DataContext associated with this Validator.
             batches: The batches for which to validate.
-
+            include_rendered_content: Whether or not to include rendered_content in the ExpectationValidationResult.
         """
 
         self._data_context = data_context
@@ -203,11 +204,7 @@ class Validator:
             # TODO: verify flow of default expectation arguments
             self.set_default_expectation_argument("include_config", True)
 
-        # TODO: NF - feature flag to be updated upon feature release
-        if "include_rendered_content" in kwargs:
-            self._include_rendered_content = kwargs["include_rendered_content"]
-        else:
-            self._include_rendered_content = False
+        self._include_rendered_content = include_rendered_content
 
     def __dir__(self):
         """
