@@ -44,6 +44,9 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+    DataAssistantDispatcher,
+)
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
@@ -162,6 +165,8 @@ class AbstractDataContext(ABC):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
+        self._assistants = DataAssistantDispatcher(data_context=self)
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
@@ -359,6 +364,10 @@ class AbstractDataContext(ABC):
     @property
     def concurrency(self) -> Optional[ConcurrencyConfig]:
         return self.project_config_with_variables_substituted.concurrency
+
+    @property
+    def assistants(self) -> DataAssistantDispatcher:
+        return self._assistants
 
     def add_datasource(
         self, name: str, initialize: bool = True, **kwargs: dict

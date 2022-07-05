@@ -18,9 +18,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-    DataAssistantDispatcher,
-)
 
 try:
     from typing import Literal
@@ -326,8 +323,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_name,
                     validation_operator_config,
                 )
-        # TODO: Migrate to AbstractDataContext
-        self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -362,6 +357,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._evaluation_parameter_dependencies = (
             self._data_context._evaluation_parameter_dependencies
         )
+        self._assistants = self._data_context._assistants
 
     def _save_project_config_to_disk(self) -> None:
         """Save the current project to disk."""
@@ -1689,10 +1685,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
-
-    @property
-    def assistants(self) -> DataAssistantDispatcher:
-        return self._assistants
 
     @property
     def root_directory(self) -> Optional[str]:
