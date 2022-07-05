@@ -50,14 +50,9 @@ class ExpectationValidationResult(SerializableDictDot):
         result: Optional[dict] = None,
         meta: Optional[dict] = None,
         exception_info: Optional[dict] = None,
+        include_rendered_content: bool = False,
         **kwargs: dict,
     ) -> None:
-        # TODO: NF - feature flag to be updated upon feature release
-        if "include_rendered_content" in kwargs:
-            self.include_rendered_content = kwargs["include_rendered_content"]
-        else:
-            self.include_rendered_content = False
-
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
         self.success = success
@@ -77,7 +72,8 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
-        if self.include_rendered_content:
+        self._include_rendered_content = include_rendered_content
+        if self._include_rendered_content:
             self.rendered_content = None
 
     def __eq__(self, other):

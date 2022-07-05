@@ -705,15 +705,9 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
+        include_rendered_content: bool = False,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
-        # TODO: NF - feature flag to be updated upon feature release
-        include_rendered_content: bool
-        if "include_rendered_content" in kwargs:
-            include_rendered_content = kwargs["include_rendered_content"]
-        else:
-            include_rendered_content = False
-
         if configuration is None:
             configuration = self.configuration
 
@@ -750,17 +744,11 @@ class Expectation(metaclass=MetaExpectation):
     def _build_evr(
         raw_response: Union[ExpectationValidationResult, dict],
         configuration: ExpectationConfiguration,
+        include_rendered_content: bool = False,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
         fails to return an EVR but returns the necessary components in a dictionary."""
-        # TODO: NF - feature flag to be updated upon feature release
-        include_rendered_content: bool
-        if "include_rendered_content" in kwargs:
-            include_rendered_content = kwargs["include_rendered_content"]
-        else:
-            include_rendered_content = False
-
         evr: ExpectationValidationResult
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):

@@ -1375,15 +1375,9 @@ class ExpectationConfiguration(SerializableDictDot):
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: "ExecutionEngine" = None,  # noqa: F821
+        include_rendered_content: bool = False,
         **kwargs: dict,
     ):
-        # TODO: NF - feature flag to be updated upon feature release
-        include_rendered_content: bool
-        if "include_rendered_content" in kwargs:
-            include_rendered_content = kwargs["include_rendered_content"]
-        else:
-            include_rendered_content = False
-
         expectation_impl: "Expectation" = self._get_expectation_impl()  # noqa: F821
         return expectation_impl(self).metrics_validate(
             metrics,
