@@ -9,7 +9,7 @@ def test_store_list_with_zero_stores(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context._project_config.stores = {}
-    context._save_project_config()
+    context._save_project_config_to_disk()
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
@@ -35,7 +35,7 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
     context._project_config.validations_store_name = "expectations_store"
     context._project_config.evaluation_parameter_store_name = "expectations_store"
     context._project_config.profiler_store_name = "profiler_store"
-    context._save_project_config()
+    context._save_project_config_to_disk()
 
     runner = CliRunner(mix_stderr=False)
 

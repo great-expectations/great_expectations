@@ -104,7 +104,7 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
     )
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config_to_disk()
     return context
 
 

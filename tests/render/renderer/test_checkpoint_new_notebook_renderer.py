@@ -60,7 +60,7 @@ def assetless_dataconnector_context(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config_to_disk()
     return context
 
 

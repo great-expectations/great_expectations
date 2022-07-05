@@ -84,7 +84,7 @@ class CloudDataContext(AbstractDataContext):
         # if in ge_cloud_mode, use ge_cloud_organization_id
         return self.ge_cloud_config.organization_id
 
-    def _save_project_config(self) -> None:
+    def _save_project_config_to_disk(self) -> None:
         """Save the current project to disk."""
         if self.ge_cloud_mode:
             logger.debug(

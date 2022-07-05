@@ -28,7 +28,11 @@ from tests.execution_engine.split_and_sample.split_and_sample_test_cases import 
 
 # Here we add SqlAlchemyDataSplitter specific test cases to the generic test cases:
 from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
-    TaxiSplittingTestCases,
+    TaxiSplittingTestCase,
+    TaxiSplittingTestCasesBase,
+    TaxiSplittingTestCasesColumnValue,
+    TaxiSplittingTestCasesDateTime,
+    TaxiSplittingTestCasesWholeTable,
     TaxiTestData,
 )
 
@@ -392,6 +396,7 @@ def ten_trips_per_month_df() -> pd.DataFrame:
     column_names_to_convert: List[str] = ["pickup_datetime", "dropoff_datetime"]
     for column_name_to_convert in column_names_to_convert:
         df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+
     return df
 
 
@@ -401,23 +406,31 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
     return engine
 
 
-TAXI_SPLITTING_TEST_CASES: TaxiSplittingTestCases = TaxiSplittingTestCases(
-    taxi_test_data=TaxiTestData(
-        test_df=ten_trips_per_month_df(), test_column_name="pickup_datetime"
-    )
-)
-
-
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "test_case",
+    "taxi_test_cases",
     [
-        pytest.param(test_case, id=test_case.splitter_method_name)
-        for test_case in TAXI_SPLITTING_TEST_CASES.test_cases()
+        TaxiSplittingTestCasesWholeTable(
+            taxi_test_data=TaxiTestData(
+                test_df=ten_trips_per_month_df(),
+            )
+        ),
+        TaxiSplittingTestCasesColumnValue(
+            taxi_test_data=TaxiTestData(
+                test_df=ten_trips_per_month_df(),
+                test_column_name="passenger_count",
+            )
+        ),
+        TaxiSplittingTestCasesDateTime(
+            taxi_test_data=TaxiTestData(
+                test_df=ten_trips_per_month_df(),
+                test_column_name="pickup_datetime",
+            )
+        ),
     ],
 )
 def test_sqlite_split(
-    test_case, sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
+    taxi_test_cases, sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
 ):
     """What does this test and why?
     splitters should work with sqlite.
@@ -427,20 +440,39 @@ def test_sqlite_split(
         in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
     )
 
-    batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
-        table_name="test",
-        schema_name="main",
-        splitter_method=test_case.splitter_method_name,
-        splitter_kwargs=test_case.splitter_kwargs,
-        batch_identifiers={"pickup_datetime": test_case.expected_column_values[0]},
-    )
-    batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
+    test_cases: List[TaxiSplittingTestCase] = taxi_test_cases.test_cases()
+    test_case: TaxiSplittingTestCase
+    batch_spec: SqlAlchemyDatasourceBatchSpec
+    for test_case in test_cases:
+        if test_case.table_domain_test_case:
+            batch_spec = SqlAlchemyDatasourceBatchSpec(
+                table_name="test",
+                schema_name="main",
+                splitter_method=test_case.splitter_method_name,
+                splitter_kwargs=test_case.splitter_kwargs,
+                batch_identifiers={},
+            )
+        else:
+            batch_spec = SqlAlchemyDatasourceBatchSpec(
+                table_name="test",
+                schema_name="main",
+                splitter_method=test_case.splitter_method_name,
+                splitter_kwargs=test_case.splitter_kwargs,
+                batch_identifiers={
+                    taxi_test_cases.test_column_name: test_case.expected_column_values[
+                        0
+                    ]
+                },
+            )
 
-    # Right number of rows?
-    num_rows: int = batch_data.execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(batch_data.selectable)
-    ).scalar()
-    assert num_rows == test_case.num_expected_rows_in_first_batch_definition
+        batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
+
+        # Right number of rows?
+        num_rows: int = batch_data.execution_engine.engine.execute(
+            sa.select([sa.func.count()]).select_from(batch_data.selectable)
+        ).scalar()
+        # noinspection PyUnresolvedReferences
+        assert num_rows == test_case.num_expected_rows_in_first_batch_definition
 
 
 @pytest.mark.integration

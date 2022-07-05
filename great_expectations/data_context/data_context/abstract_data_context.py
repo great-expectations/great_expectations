@@ -115,7 +115,7 @@ class AbstractDataContext(ABC):
         + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
     )
 
-    def __init__(self, runtime_environment: dict):
+    def __init__(self, runtime_environment: Optional[dict] = None) -> None:
         """
         Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
 
@@ -123,7 +123,8 @@ class AbstractDataContext(ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override both those set in config_variables.yml and the environment
         """
-        # TODO:
+        if runtime_environment is None:
+            runtime_environment = {}
         self.runtime_environment = runtime_environment
         # these attributes that are set downstream.
         self._variables = None
@@ -167,7 +168,13 @@ class AbstractDataContext(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _save_project_config(self) -> None:
+    def _save_project_config_to_disk(self) -> None:
+        """
+        Each DataContext will define how its project_config will be saved.
+            - FileDataContext : Filesystem.
+            - CloudDataContext : Cloud endpoint
+            - Ephemeral : not saved, and logging message outputted
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -179,6 +186,9 @@ class AbstractDataContext(ABC):
         ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> None:
+        """
+        Each DataContext will define how ExpectationSuite will be saved.
+        """
         raise NotImplementedError
 
     # Properties
@@ -224,7 +234,7 @@ class AbstractDataContext(ABC):
         return self.get_config_with_variables_substituted()
 
     @property
-    def plugins_directory(self):
+    def plugins_directory(self) -> Optional[str]:
         """The directory in which custom plugin modules should be placed.
 
         Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
@@ -234,7 +244,7 @@ class AbstractDataContext(ABC):
         )
 
     @property
-    def stores(self):
+    def stores(self) -> dict:
         """A single holder for all Stores in this context"""
         return self._stores
 
@@ -613,7 +623,7 @@ class AbstractDataContext(ABC):
             return os.environ.get(environment_variable)
         if conf_file_section and conf_file_option:
             for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
-                config = configparser.ConfigParser()
+                config: configparser.ConfigParser = configparser.ConfigParser()
                 config.read(config_path)
                 config_value: Optional[str] = config.get(
                     conf_file_section, conf_file_option, fallback=None
@@ -1125,7 +1135,9 @@ class AbstractDataContext(ABC):
                 **expectation_suite_dict, data_context=self
             )
 
-            dependencies = expectation_suite.get_evaluation_parameter_dependencies()
+            dependencies: dict = (
+                expectation_suite.get_evaluation_parameter_dependencies()
+            )
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
 

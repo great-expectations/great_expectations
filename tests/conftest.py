@@ -759,7 +759,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config_to_disk()
 
     return context
 
@@ -922,7 +922,7 @@ def deterministic_asset_dataconnector_context(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config_to_disk()
     return context
 
 
@@ -1206,7 +1206,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # noinspection PyProtectedMember
-    context._save_project_config()
+    context._save_project_config_to_disk()
     return context
 
 

@@ -52,7 +52,7 @@ class FileDataContext(AbstractDataContext):
     def _init_variables(self) -> FileDataContextVariables:
         raise NotImplementedError
 
-    def _save_project_config(self) -> None:
+    def _save_project_config_to_disk(self) -> None:
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 

@@ -368,7 +368,7 @@ class DataContext(BaseDataContext):
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self.config)
         ):
-            self._save_project_config()
+            self._save_project_config_to_disk()
 
     def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
         """
@@ -443,7 +443,7 @@ class DataContext(BaseDataContext):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")
 
         new_store = super().add_store(store_name, store_config)
-        self._save_project_config()
+        self._save_project_config_to_disk()
         return new_store
 
     def add_datasource(
@@ -454,12 +454,11 @@ class DataContext(BaseDataContext):
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = super().add_datasource(name=name, **kwargs)
-        self._save_project_config()
+        self._save_project_config_to_disk()
         return new_datasource
 
     def update_datasource(
         self,
-        datasource_name: str,
         datasource: Union[LegacyDatasource, BaseDatasource],
     ) -> None:
         """
@@ -467,11 +466,10 @@ class DataContext(BaseDataContext):
         Note that this method persists changes using an underlying Store.
         """
         logger.debug(
-            f"Starting DataContext.update_datasource for datasource {datasource_name}"
+            f"Starting DataContext.update_datasource for datasource {datasource.name}"
         )
 
         super().update_datasource(
-            datasource_name=datasource_name,
             datasource=datasource,
             save_changes=True,
         )
@@ -479,7 +477,7 @@ class DataContext(BaseDataContext):
     def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
         super().delete_datasource(datasource_name=name)
-        self._save_project_config()
+        self._save_project_config_to_disk()
 
     @classmethod
     def find_context_root_dir(cls):
