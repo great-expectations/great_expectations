@@ -490,7 +490,7 @@ class RenderedSectionContent(RenderedContent):
         self.content_blocks = content_blocks
         self.section_name = section_name
 
-    def to_json_dict(self):
+    def to_json_dict(self) -> dict:
         d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
@@ -528,13 +528,14 @@ class RenderedAtomicValue(DictDot):
         # UnknownType
         self.kwargs: Optional[dict] = kwargs
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def to_json_dict(self):
+    def to_json_dict(self) -> dict:
+        """Returns RenderedAtomicValue as a json dictionary."""
         d = renderedAtomicValueSchema.dump(self)
         d["schema"] = convert_to_json_serializable(self.schema)
         d["template"] = convert_to_json_serializable(self.template)
@@ -584,13 +585,14 @@ class RenderedAtomicContent(RenderedContent):
         self.value = value
         self.value_type = value_type
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def to_json_dict(self):
+    def to_json_dict(self) -> dict:
+        """Returns RenderedAtomicContent as a json dictionary."""
         d = super().to_json_dict()
         d["name"] = self.name
         d["value"] = self.value.to_json_dict()
