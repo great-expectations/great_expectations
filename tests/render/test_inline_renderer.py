@@ -64,6 +64,7 @@ from great_expectations.validator.validator import Validator
                     "value_type": "StringValueType",
                 }
             ],
+            id="expect_table_row_count_to_equal",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -130,6 +131,7 @@ from great_expectations.validator.validator import Validator
                     "value_type": "StringValueType",
                 }
             ],
+            id="expect_column_min_to_be_between",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -238,6 +240,7 @@ from great_expectations.validator.validator import Validator
                     "value_type": "TableType",
                 }
             ],
+            id="expect_column_quantile_values_to_be_between",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -303,6 +306,7 @@ from great_expectations.validator.validator import Validator
                     "value_type": "StringValueType",
                 }
             ],
+            id="expect_column_values_to_be_in_set",
         ),
     ],
 )
