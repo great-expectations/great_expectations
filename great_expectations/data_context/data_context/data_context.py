@@ -473,7 +473,6 @@ class DataContext(BaseDataContext):
 
     def update_datasource(
         self,
-        datasource_name: str,
         datasource: Union[LegacyDatasource, BaseDatasource],
     ) -> None:
         """
@@ -481,11 +480,10 @@ class DataContext(BaseDataContext):
         Note that this method persists changes using an underlying Store.
         """
         logger.debug(
-            f"Starting DataContext.update_datasource for datasource {datasource_name}"
+            f"Starting DataContext.update_datasource for datasource {datasource.name}"
         )
 
         super().update_datasource(
-            datasource_name=datasource_name,
             datasource=datasource,
             save_changes=True,
         )
