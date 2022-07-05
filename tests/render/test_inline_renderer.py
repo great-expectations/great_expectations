@@ -333,8 +333,8 @@ def test_inline_renderer_rendered_content_serialization(
     inline_renderer: InlineRenderer = InlineRenderer(
         render_object=expectation_validation_result
     )
-    expectation_configuration_rendered_atomic_content: RenderedAtomicContent
-    expectation_validation_result_rendered_atomic_content: RenderedAtomicContent
+    expectation_configuration_rendered_atomic_content: List[RenderedAtomicContent]
+    expectation_validation_result_rendered_atomic_content: List[RenderedAtomicContent]
     (
         expectation_configuration_rendered_atomic_content,
         expectation_validation_result_rendered_atomic_content,
