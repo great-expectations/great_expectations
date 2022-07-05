@@ -1163,23 +1163,15 @@ class AbstractDataContext(ABC):
         """
         requested_metrics is a dictionary like this:
 
-              requested_metrics:
-                *:  # The asterisk here matches *any* expectation suite name
-                  # use the 'kwargs' key to request metrics that are defined by kwargs,
-                  # for example because they are defined only for a particular column
-                  # - column:
-                  #     Age:
-                  #        - expect_column_min_to_be_between.result.observed_value
-                    - statistics.evaluated_expectations
-                    - statistics.successful_expectations
-
-        Args:
-            requested_metrics:
-            validation_results:
-            target_store_name:
-
-        Returns:
-
+          requested_metrics:
+            *:  # The asterisk here matches *any* expectation suite name
+              # use the 'kwargs' key to request metrics that are defined by kwargs,
+              # for example because they are defined only for a particular column
+              # - column:
+              #     Age:
+              #        - expect_column_min_to_be_between.result.observed_value
+                - statistics.evaluated_expectations
+                - statistics.successful_expectations
         """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
