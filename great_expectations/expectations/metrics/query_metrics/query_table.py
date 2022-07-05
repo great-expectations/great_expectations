@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
@@ -24,7 +24,7 @@ class QueryTable(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ):
+    ) -> Union[List[Any], Any]:
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
         )
@@ -61,7 +61,7 @@ class QueryTable(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ):
+    ) -> Union[List[Any], Any]:
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
         )

@@ -27,7 +27,7 @@ class QueryColumn(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ):
+    ) -> Union[List[Any], Any]:
         column = metric_value_kwargs.get("column")
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
@@ -66,7 +66,7 @@ class QueryColumn(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ):
+    ) -> Union[List[Any], Any]:
         column = metric_value_kwargs.get("column")
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
