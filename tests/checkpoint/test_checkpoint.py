@@ -14,6 +14,7 @@ import great_expectations as ge
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.util import get_or_create_spark_application
@@ -21,6 +22,7 @@ from great_expectations.data_context.data_context.data_context import DataContex
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -1378,6 +1380,61 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_checkpoint_name_in_meta_when_run(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    checkpoint_name: str = "test_checkpoint_name"
+    # add checkpoint config
+    checkpoint_config: CheckpointConfig = CheckpointConfig(
+        name=checkpoint_name,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+        ],
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_basic_data_connector",
+                    "data_asset_name": "Titanic_1911",
+                }
+            }
+        ],
+    )
+    checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=checkpoint_config.name
+    )
+    context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
+    checkpoint: Checkpoint = context.get_checkpoint(checkpoint_config.name)
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    result: CheckpointResult = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+    validation_result_identifier: ValidationResultIdentifier = (
+        context.validations_store.list_keys()[0]
+    )
+    validation_result: ExpectationSuiteValidationResult = context.validations_store.get(
+        validation_result_identifier
+    )
+
+    assert "checkpoint_name" in validation_result.meta
+    assert validation_result.meta["checkpoint_name"] == checkpoint_name
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object(

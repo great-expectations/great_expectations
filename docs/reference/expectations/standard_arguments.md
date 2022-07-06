@@ -44,7 +44,7 @@ helpful markdown annotations to Expectations (shown below). These Expectation "n
 Expectation Suite pages in Data Docs.
 
 ```python
-my_df.expect_column_values_to_be_in_set(
+validator.expect_column_values_to_be_in_set(
     "my_column",
     ["a", "b", "c"],
     meta={
