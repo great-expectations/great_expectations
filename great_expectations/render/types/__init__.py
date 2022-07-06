@@ -544,23 +544,13 @@ class RenderedAtomicValue(DictDot):
     def to_json_dict(self) -> dict:
         """Returns RenderedAtomicValue as a json dictionary."""
         d = renderedAtomicValueSchema.dump(self)
-        if "schema" in d:
-            d["schema"] = self.schema
-        if "header" in d:
-            d["header"] = self.header
-        if "template" in d:
-            d["template"] = self.template
-        if "params" in d:
-            d["params"] = self.params
-        if "header_row" in d:
-            d["header_row"] = self.header_row
-        if "table" in d:
-            d["table"] = self.table
-        if "graph" in d:
-            d["graph"] = self.graph.to_json_dict()
-        if "kwargs" in d:
-            d["kwargs"] = self.kwargs
-        return d
+        json_dict: dict = {}
+        for key in d:
+            if key == "graph":
+                json_dict[key] = getattr(self, key).to_json_dict()
+            else:
+                json_dict[key] = getattr(self, key)
+        return json_dict
 
 
 class RenderedAtomicValueGraph(DictDot):
