@@ -513,7 +513,7 @@ class RenderedAtomicValue(DictDot):
         params: Optional[dict] = None,
         header_row: Optional[List["RenderedAtomicValue"]] = None,
         table: Optional[List[List["RenderedAtomicValue"]]] = None,
-        graph: Optional["RenderedAtomicValue"] = None,
+        graph: Optional[dict] = None,
         kwargs: Optional[dict] = None,
     ) -> None:
         self.schema: Optional[dict] = schema
@@ -528,7 +528,9 @@ class RenderedAtomicValue(DictDot):
         self.table: Optional[List[List[RenderedAtomicValue]]] = table
 
         # GraphType
-        self.graph: Optional[RenderedAtomicValue] = graph
+        self.graph: Optional[RenderedAtomicValueGraph] = RenderedAtomicValueGraph(
+            graph=graph
+        )
 
         # UnknownType
         self.kwargs: Optional[dict] = kwargs
@@ -555,10 +557,28 @@ class RenderedAtomicValue(DictDot):
         if "table" in d:
             d["table"] = self.table
         if "graph" in d:
-            d["graph"] = self.graph
+            d["graph"] = self.graph.to_json_dict()
         if "kwargs" in d:
             d["kwargs"] = self.kwargs
         return d
+
+
+class RenderedAtomicValueGraph(DictDot):
+    def __init__(
+        self,
+        graph: Optional[dict] = None,
+    ):
+        self.graph = graph
+
+    def __repr__(self) -> str:
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def __str__(self) -> str:
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def to_json_dict(self) -> dict:
+        """Returns RenderedAtomicValueGraph as a json dictionary."""
+        return self.graph
 
 
 class RenderedAtomicValueSchema(Schema):
