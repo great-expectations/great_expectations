@@ -359,7 +359,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         self._assistants = self._data_context._assistants
 
-    def _save_project_config_to_disk(self) -> None:
+    def _save_project_config(self) -> None:
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 
@@ -547,33 +547,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             if url is not None:
                 logger.debug(f"Opening Data Docs found here: {url}")
                 webbrowser.open(url)
-
-    @property
-    def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
-        return self._usage_statistics_handler
-
-    @property
-    def anonymous_usage_statistics(self):
-        return self.project_config_with_variables_substituted.anonymous_usage_statistics
-
-    @property
-    def progress_bars(self) -> Optional[ProgressBarsConfig]:
-        return self.project_config_with_variables_substituted.progress_bars
-
-    @property
-    def notebooks(self):
-        return self.project_config_with_variables_substituted.notebooks
-
-    @property
-    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
-        """A single holder for all Datasources in this context"""
-        return self._cached_datasources
-
-    @property
-    def data_context_id(self):
-        return (
-            self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-        )
 
     #####
     #
@@ -1439,13 +1412,20 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         **kwargs: dict,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """
+        Add named datasource, with options to initialize (and return) the datasource and save_config.
+
+        Current version will call super(), which preserves the `usage_statistics` decorator in the current method.
+        A subsequence refactor will migrate the `usage_statistics` to parent and sibling classes.
 
         Args:
-            name ():
-            initialize ():
-            **kwargs ():
+            name (str): Name of Datasource
+            initialize (bool): Should GE add and initialize the Datasource? If true then current
+                method will return initialized Datasource
+            save_changes (bool): should GE save the Datasource config?
+            **kwargs Optional[dict]: Additional kwargs that define Datasource initialization kwargs
 
         Returns:
+            Datasource that was added
 
         """
         new_datasource = super().add_datasource(name, initialize, **kwargs)
@@ -3094,61 +3074,3 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ]
 
         return instantiated_class, usage_stats_event_payload
-
-    # @staticmethod
-    # def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
-    #     if base_kwargs is None:
-    #         base_kwargs = {}
-    #
-    #     if isinstance(metric_configuration, str):
-    #         return [(metric_configuration, base_kwargs)]
-    #
-    #     metric_configurations_list = []
-    #     for kwarg_name in metric_configuration.keys():
-    #         if not isinstance(metric_configuration[kwarg_name], dict):
-    #             raise ge_exceptions.DataContextError(
-    #                 "Invalid metric_configuration: each key must contain a "
-    #                 "dictionary."
-    #             )
-    #         if (
-    #             kwarg_name == "metric_kwargs_id"
-    #         ):  # this special case allows a hash of multiple kwargs
-    #             for metric_kwargs_id in metric_configuration[kwarg_name].keys():
-    #                 if base_kwargs != {}:
-    #                     raise ge_exceptions.DataContextError(
-    #                         "Invalid metric_configuration: when specifying "
-    #                         "metric_kwargs_id, no other keys or values may be defined."
-    #                     )
-    #                 if not isinstance(
-    #                     metric_configuration[kwarg_name][metric_kwargs_id], list
-    #                 ):
-    #                     raise ge_exceptions.DataContextError(
-    #                         "Invalid metric_configuration: each value must contain a "
-    #                         "list."
-    #                     )
-    #                 metric_configurations_list += [
-    #                     (metric_name, {"metric_kwargs_id": metric_kwargs_id})
-    #                     for metric_name in metric_configuration[kwarg_name][
-    #                         metric_kwargs_id
-    #                     ]
-    #                 ]
-    #         else:
-    #             for kwarg_value in metric_configuration[kwarg_name].keys():
-    #                 base_kwargs.update({kwarg_name: kwarg_value})
-    #                 if not isinstance(
-    #                     metric_configuration[kwarg_name][kwarg_value], list
-    #                 ):
-    #                     raise ge_exceptions.DataContextError(
-    #                         "Invalid metric_configuration: each value must contain a "
-    #                         "list."
-    #                     )
-    #                 for nested_configuration in metric_configuration[kwarg_name][
-    #                     kwarg_value
-    #                 ]:
-    #                     metric_configurations_list += (
-    #                         BaseDataContext._get_metric_configuration_tuples(
-    #                             nested_configuration, base_kwargs=base_kwargs
-    #                         )
-    #                     )
-    #
-    #     return metric_configurations_list

@@ -68,7 +68,7 @@ class Anonymizer(BaseAnonymizer):
             for strategy in self._strategies
         }
 
-    def anonymize(self, obj: Optional[object] = None, **kwargs: Optional[Any]) -> Any:
+    def anonymize(self, obj: Optional[object] = None, **kwargs: Optional[dict]) -> Any:
         anonymizer: Optional[BaseAnonymizer] = self._get_anonymizer(obj=obj, **kwargs)
 
         if anonymizer is not None:
@@ -82,7 +82,7 @@ class Anonymizer(BaseAnonymizer):
             f"The type {type(obj)} cannot be handled by the Anonymizer; no suitable strategy found."
         )
 
-    def can_handle(self, obj: object, **kwargs: Optional[Any]) -> bool:
+    def can_handle(self, obj: object, **kwargs: Optional[dict]) -> bool:
         return self._get_anonymizer(obj=obj, **kwargs) is not None
 
     def _get_anonymizer(self, obj: object, **kwargs) -> Optional[BaseAnonymizer]:
@@ -92,9 +92,9 @@ class Anonymizer(BaseAnonymizer):
 
         return None
 
-    def anonymize_init_payload(self, init_payload: dict) -> dict:
-        anonymized_init_payload: dict = {}
-        anonymizer_funcs: dict = {
+    def anonymize_init_payload(self, init_payload: Dict[str, Any]) -> Dict[str, Any]:
+        anonymized_init_payload: Dict[str, Any] = {}
+        anonymizer_funcs: Dict[str, Any] = {
             "datasources": self._anonymize_datasources_init_payload,
             "stores": self._anonymize_stores_init_payload,
             "validation_operators": self._anonymize_validation_operator_init_payload,
@@ -110,7 +110,6 @@ class Anonymizer(BaseAnonymizer):
                 anonymized_init_payload[anonymized_key] = anonymizer_func(val)
             else:
                 anonymized_init_payload[key] = val
-
         return anonymized_init_payload
 
     def _anonymize_datasources_init_payload(self, payload: dict) -> List[dict]:

@@ -184,7 +184,7 @@ def titanic_data_context_with_spark_datasource(
         pretty_print=False,
     )
     # noinspection PyProtectedMember
-    context._save_project_config_to_disk()
+    context._save_project_config()
 
     csv_path: str
 

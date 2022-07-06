@@ -301,7 +301,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
 
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config_to_disk()
+    context._save_project_config()
     context = DataContext(ge_dir)
     context.build_data_docs()
 
@@ -341,7 +341,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
 
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config_to_disk()
+    context._save_project_config()
     context = DataContext(ge_dir)
     context.build_data_docs()
     data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")
@@ -383,7 +383,7 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     context._project_config = config
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config_to_disk()
+    context._save_project_config()
     del context
     context = DataContext(ge_dir)
     data_docs_dir = os.path.join(ge_dir, "uncommitted", "data_docs")

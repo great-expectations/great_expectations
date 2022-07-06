@@ -221,7 +221,7 @@ def context_with_two_sites(titanic_data_context_stats_enabled_config_version_3):
     temp_context = BaseDataContext(config, context_root_dir=context.root_directory)
     new_context = DataContext(context.root_directory)
     new_context.set_config(temp_context.get_config_with_variables_substituted())
-    new_context._save_project_config_to_disk()
+    new_context._save_project_config()
     assert new_context.get_site_names() == ["local_site", "team_site"]
     return new_context
 

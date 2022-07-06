@@ -244,7 +244,7 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
     context = ge.data_context.DataContext(context_path)
-    context._save_project_config_to_disk()
+    context._save_project_config()
     context_config_commented_map = dataContextConfigSchema.dump(
         ge.data_context.DataContext(context_path)._project_config
     )

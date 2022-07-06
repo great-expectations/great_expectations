@@ -7,6 +7,7 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.exceptions import DataContextError
 from great_expectations.exceptions.exceptions import StoreBackendError
 from great_expectations.util import filter_properties_dict
 
@@ -78,10 +79,11 @@ class InlineStoreBackend(StoreBackend):
             return project_config
 
         try:
-            self._data_context._save_project_config_to_disk()
-        except AttributeError as e:
-            logger.warning(
-                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} is not file-system enabled: {e}"
+            self._data_context._save_project_config()
+        except DataContextError as e:
+            logger.info(
+                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} "
+                f"is not file-system enabled. Continuing without saving config to disk..."
             )
         variable_config: Any = project_config[resource_type]
 
@@ -201,7 +203,14 @@ class InlineStoreBackend(StoreBackend):
             )
 
     def _save_changes(self) -> None:
-        self._data_context._save_project_config_to_disk()
+        # TODO: this logic will be cleaned up to not use self._data_context
+        try:
+            self._data_context._save_project_config()
+        except DataContextError as e:
+            logger.info(
+                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} "
+                f"is not file-system enabled. Continuing without saving config to disk..."
+            )
 
     @staticmethod
     def _determine_resource_type_and_name_from_key(
