@@ -530,7 +530,7 @@ class RenderedAtomicValue(DictDot):
         # GraphType
         self.graph: Optional[RenderedAtomicValueGraph] = RenderedAtomicValueGraph(
             graph=graph
-        ).graph
+        )
 
         # UnknownType
         self.kwargs: Optional[dict] = kwargs
@@ -557,7 +557,7 @@ class RenderedAtomicValue(DictDot):
         if "table" in d:
             d["table"] = self.table
         if "graph" in d:
-            d["graph"] = self.graph
+            d["graph"] = self.graph.to_json_dict()
         if "kwargs" in d:
             d["kwargs"] = self.kwargs
         return d
@@ -620,7 +620,9 @@ class RenderedAtomicValueSchema(Schema):
     def clean_null_attrs(self, data: dict, **kwargs):
         data = deepcopy(data)
         for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
-            if key in data and data[key] is None:
+            if key == "graph" and key in data and data[key].graph is None:
+                data.pop(key)
+            elif key in data and data[key] is None:
                 data.pop(key)
         return data
 
