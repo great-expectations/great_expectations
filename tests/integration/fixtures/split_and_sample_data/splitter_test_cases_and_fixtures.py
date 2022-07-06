@@ -76,11 +76,24 @@ class TaxiTestData:
             ),
         )
 
-    def get_unique_test_column_values(self) -> List[Optional[Any]]:
-        return sorted(
+    def get_unique_test_column_values(
+        self,
+        reverse: Optional[bool] = False,
+        move_null_to_front: Optional[bool] = False,
+        limit: Optional[int] = None,
+    ) -> List[Optional[Any]]:
+        column_values: List[Optional[Any]] = sorted(
             self.test_df[self.test_column_name].unique().tolist(),
             key=lambda element: (element is None, element),
+            reverse=reverse,
         )
+        if move_null_to_front:
+            column_values = [None] + column_values[0:-1]
+
+        if limit is None:
+            return column_values
+
+        return column_values[:limit]
 
 
 @dataclass
@@ -140,6 +153,25 @@ class TaxiSplittingTestCasesColumnValue(TaxiSplittingTestCasesBase):
                 num_expected_batch_definitions=8,
                 num_expected_rows_in_first_batch_definition=9,
                 expected_column_values=self.taxi_test_data.get_unique_test_column_values(),
+            ),
+        ]
+
+
+class TaxiSplittingTestCasesDividedInteger(TaxiSplittingTestCasesBase):
+    def test_cases(self) -> List[TaxiSplittingTestCase]:
+        return [
+            TaxiSplittingTestCase(
+                table_domain_test_case=False,
+                splitter_method_name="split_on_divided_integer",
+                splitter_kwargs={
+                    "column_name": self.taxi_test_data.test_column_name,
+                    "divisor": 3,
+                },
+                num_expected_batch_definitions=4,
+                num_expected_rows_in_first_batch_definition=14,
+                expected_column_values=self.taxi_test_data.get_unique_test_column_values(
+                    move_null_to_front=True, limit=4
+                ),
             ),
         ]
 
