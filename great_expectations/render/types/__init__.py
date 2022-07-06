@@ -618,6 +618,8 @@ class RenderedAtomicValueSchema(Schema):
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs):
+        """Removes the attributes in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE during serialization if
+        their values are None."""
         data = deepcopy(data)
         for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
             if key == "graph" and key in data and data[key].graph is None:
