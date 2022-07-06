@@ -4,6 +4,7 @@
 name: StaleBot
 
 on:
+  workflow_dispatch:  # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#defining-inputs-for-manually-triggered-workflows
   schedule:
     - cron: '30 1 * * *'
 
@@ -19,14 +20,14 @@ jobs:
       with:
         # Debug
         debug-only: true  # DEBUG: Toggle to false
-        start-date: '2022-06-23T00:00:00Z'  # ISO 8601 or RFC 2822
+        start-date: '2022-01-01T00:00:00Z'  # ISO 8601 or RFC 2822
 
         # General
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         days-before-stale: 30
-        days-before-close: 7  # Days after being marked stale until close, updates impact this
-        days-before-pr-stale: -1  # NIT: Disable auto flag PR. toggled until team meeting
-        days-before-pr-close: -1  # NIT: Disable auto-close for PR. toggled until team meeting.
+        days-before-close: 7
+        days-before-pr-stale: -1
+        days-before-pr-close: -1
 
         # Scope
         only-pr-labels: community

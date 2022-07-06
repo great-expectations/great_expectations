@@ -1,5 +1,5 @@
 ---
-title: How to connect to a Redshift database
+title: How to connect to a Trino database
 ---
 import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
@@ -10,12 +10,12 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you connect to data in a Redshift database.
+This guide will help you connect to data in a Trino database (formerly Presto SQL).
 This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
 <Prerequisites>
 
-- Have access to data in a Redshift database
+- Have access to data in a Trino database
 
 </Prerequisites>
 
@@ -27,13 +27,10 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 ### 2. Install required dependencies
 
-First, install the necessary dependencies for Great Expectations to connect to your Redshift database by running the following in your terminal:
+First, install the necessary dependencies for Great Expectations to connect to your Trino database by running the following in your terminal:
 
 ```console
-pip install sqlalchemy sqlalchemy-redshift psycopg2
-
-# or if on macOS:
-pip install sqlalchemy sqlalchemy-redshift psycopg2-binary
+pip install sqlalchemy trino
 ```
 
 ### 3. Add credentials
@@ -43,21 +40,19 @@ pip install sqlalchemy sqlalchemy-redshift psycopg2-binary
 For this guide we will use a `connection_string` like this:
 
 ```
-postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>
-```   
-
-**Note**: Depending on your Redshift cluster configuration, you may or may not need the `sslmode` parameter. For more details, please refer to Amazon's documentation for [configuring security options on Amazon Redshift](https://docs.aws.amazon.com/redshift/latest/mgmt/connecting-ssl-support.html).
+trino://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<CATALOG>/<SCHEMA>
+```
 
 ### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L3-L6
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/trino_yaml_example.py#L1-L4
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L26
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/trino_yaml_example.py#L17
 ```
 
 ### 5. Configure your Datasource
@@ -74,12 +69,12 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L28-L42
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/trino_yaml_example.py#L19-L33
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L51
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/trino_yaml_example.py#L42
 ```
 
 </TabItem>
@@ -88,12 +83,12 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L28-L45
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py#L21-L38
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L51
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py#L46
 ```
 
 </TabItem>
@@ -102,7 +97,7 @@ Run this code to test your configuration.
 
 You will see your database tables listed as `Available data_asset_names` in the output of `test_yaml_config()`.
 
-Feel free to adjust your configuration and re-run `test_yaml_config` as needed.
+Feel free to adjust your configuration and re-run `test_yaml_config()` as needed.
 
 ### 6. Save the Datasource configuration to your DataContext
 
@@ -118,14 +113,14 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L53
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/trino_yaml_example.py#L44
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L53
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py#L50
 ```
 
 </TabItem>
@@ -142,12 +137,12 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
   {label: 'Using a SQL query', value:'runtime_batch_request'},
   {label: 'Using a table name', value:'batch_request'},
   ]}>
-  
+
 <TabItem value="runtime_batch_request">
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L56-L70
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/trino_yaml_example.py#L47-L60
 ```
 
 </TabItem>
@@ -156,7 +151,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L76-L87
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/trino_yaml_example.py#L66-L77
 ```
 
 </TabItem>
@@ -169,8 +164,8 @@ Here is an example of loading data by specifying an existing table name.
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [redshift_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py)
-- [redshift_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py)
+- [trino_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/trino_yaml_example.py)
+- [trino_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py)
 
 ## Next Steps
 

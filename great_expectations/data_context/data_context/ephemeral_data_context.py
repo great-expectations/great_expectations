@@ -4,10 +4,10 @@ from typing import Mapping, Optional, Union
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.data_context.types.data_context_variables import (
+from great_expectations.data_context.data_context_variables import (
     EphemeralDataContextVariables,
 )
+from great_expectations.data_context.types.base import DataContextConfig
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +33,11 @@ class EphemeralDataContext(AbstractDataContext):
                 override both those set in config_variables.yml and the environment
 
         """
-        super().__init__(runtime_environment=runtime_environment)
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
+        self._config_variables = self._load_config_variables()
+        super().__init__(runtime_environment=runtime_environment)
 
     def _init_variables(self) -> EphemeralDataContextVariables:
         raise NotImplementedError

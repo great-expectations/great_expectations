@@ -414,7 +414,7 @@ class DataContext(BaseDataContext):
             config = self._retrieve_data_context_config_from_ge_cloud()
             return config
 
-        path_to_yml = os.path.join(self.root_directory, self.GE_YML)
+        path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
@@ -461,20 +461,37 @@ class DataContext(BaseDataContext):
         return new_store
 
     def add_datasource(
-        self, name, **kwargs
+        self, name: str, **kwargs: dict
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(name=name, **kwargs)
+        ] = super().add_datasource(name=name, save_changes=True, **kwargs)
 
         return new_datasource
+
+    def update_datasource(
+        self,
+        datasource: Union[LegacyDatasource, BaseDatasource],
+    ) -> None:
+        """
+        See parent `BaseDataContext.update_datasource` for more details.
+        Note that this method persists changes using an underlying Store.
+        """
+        logger.debug(
+            f"Starting DataContext.update_datasource for datasource {datasource.name}"
+        )
+
+        super().update_datasource(
+            datasource=datasource,
+            save_changes=True,
+        )
 
     def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
 
-        super().delete_datasource(datasource_name=name)
+        super().delete_datasource(datasource_name=name, save_changes=True)
 
     @classmethod
     def find_context_root_dir(cls):
