@@ -7,7 +7,7 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 class SlackRenderer(Renderer):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def render(

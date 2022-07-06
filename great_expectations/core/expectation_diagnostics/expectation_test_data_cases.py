@@ -26,7 +26,7 @@ class TestBackend:
 
     __test__ = False  # Tell pytest not to try to collect this class as a test
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         allowed_backend_names = ("pandas", "spark", "sqlalchemy")
         allowed_sql_dialects = ("sqlite", "postgresql", "mysql", "mssql", "bigquery")
         assert (
@@ -80,7 +80,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
         out,
         suppress_test_for=[],
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(
             title=title,
             input=kwargs["in"],
@@ -88,6 +88,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
             exact_match_out=exact_match_out,
             suppress_test_for=suppress_test_for,
             only_for=kwargs.get("only_for"),
+            include_in_gallery=kwargs.get("include_in_gallery", False),
         )
 
 
@@ -99,3 +100,4 @@ class ExpectationTestDataCases(SerializableDictDot):
     tests: List[ExpectationTestCase]
     schemas: Dict[Backend, Dict[str, str]] = field(default_factory=dict)
     test_backends: Optional[List[TestBackend]] = None
+    data_alt: Optional[TestData] = None

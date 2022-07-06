@@ -1,11 +1,18 @@
 import os
 
-from ruamel import yaml
-
+# <snippet>
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest
 
+# </snippet>
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
+
+# <snippet>
 context = ge.get_context()
+# </snippet>
+
 
 # NOTE: The following code is only for testing and depends on an environment
 # variable to set the gcp_project. You can replace the value with your own
@@ -21,7 +28,7 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 
 stores = great_expectations_yaml["stores"]
 pop_stores = ["checkpoint_store", "evaluation_parameter_store", "validations_store"]
@@ -45,7 +52,7 @@ stores:
 expectations_store_name: expectations_store
 """
 
-assert actual_existing_expectations_store == yaml.safe_load(
+assert actual_existing_expectations_store == yaml.load(
     expected_existing_expectations_store_yaml
 )
 
@@ -64,7 +71,7 @@ expectations_store_name: expectations_GCS_store
 """
 
 # replace example code with integration test configuration
-configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
+configured_expectations_store = yaml.load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
 ] = gcp_project
@@ -81,13 +88,13 @@ context.add_store(
     store_config=configured_expectations_store["stores"]["expectations_GCS_store"],
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 great_expectations_yaml["expectations_store_name"] = "expectations_GCS_store"
 great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
-    yaml.dump(great_expectations_yaml, f, default_flow_style=False)
+    yaml.dump(great_expectations_yaml, f)
 
 # adding validation results store
 
@@ -96,7 +103,7 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 
 stores = great_expectations_yaml["stores"]
 # popping the rest out so taht we can do the comparison. They aren't going anywhere dont worry
@@ -125,7 +132,7 @@ stores:
 
 validations_store_name: validations_store
 """
-assert actual_existing_validations_store == yaml.safe_load(
+assert actual_existing_validations_store == yaml.load(
     expected_existing_validations_store_yaml
 )
 
@@ -144,7 +151,7 @@ validations_store_name: validations_GCS_store
 """
 
 # replace example code with integration test configuration
-configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
+configured_validations_store = yaml.load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
 ] = gcp_project
@@ -161,13 +168,13 @@ context.add_store(
     store_config=configured_validations_store["stores"]["validations_GCS_store"],
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 great_expectations_yaml["validations_store_name"] = "validations_GCS_store"
 great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
-    yaml.dump(great_expectations_yaml, f, default_flow_style=False)
+    yaml.dump(great_expectations_yaml, f)
 
 # adding data docs store
 data_docs_site_yaml = """
@@ -199,14 +206,15 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
-great_expectations_yaml["data_docs_sites"] = yaml.safe_load(data_docs_site_yaml)[
+    great_expectations_yaml = yaml.load(f)
+great_expectations_yaml["data_docs_sites"] = yaml.load(data_docs_site_yaml)[
     "data_docs_sites"
 ]
 with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # adding datasource
+# <snippet>
 datasource_yaml = rf"""
 name: my_gcs_datasource
 class_name: Datasource
@@ -226,6 +234,8 @@ data_connectors:
             group_names:
                 - data_asset_name
 """
+# </snippet>
+
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -235,14 +245,19 @@ datasource_yaml = datasource_yaml.replace(
 )
 
 context.test_yaml_config(datasource_yaml)
-context.add_datasource(**yaml.safe_load(datasource_yaml))
+# <snippet>
+context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 
-# adding datasource
+# batch_request with data_asset_name
+# <snippet>
 batch_request = BatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
 )
+# </snippet>
+
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
@@ -250,6 +265,7 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
+# <snippet>
 context.create_expectation_suite(
     expectation_suite_name="test_gcs_suite", overwrite_existing=True
 )
@@ -257,6 +273,8 @@ context.create_expectation_suite(
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_gcs_suite"
 )
+# </snippet>
+
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
@@ -271,14 +289,19 @@ assert set(
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03",
 }
 
+# <snippet>
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
+# </snippet>
 
+# <snippet>
 validator.save_expectation_suite(discard_failed_expectations=False)
+# </snippet>
 
+# <snippet>
 my_checkpoint_name = "gcs_checkpoint"
 checkpoint_config = f"""
 name: {my_checkpoint_name}
@@ -292,12 +315,21 @@ validations:
       data_asset_name: <YOUR_DATA_ASSET_NAME>
     expectation_suite_name: test_gcs_suite
 """
+# </snippet>
+
 checkpoint_config = checkpoint_config.replace(
     "<YOUR_DATA_ASSET_NAME>",
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
 )
-context.add_checkpoint(**yaml.safe_load(checkpoint_config))
+
+# <snippet>
+context.add_checkpoint(**yaml.load(checkpoint_config))
+# </snippet>
+
+# <snippet>
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )
+# </snippet>
+
 assert checkpoint_result.success is True

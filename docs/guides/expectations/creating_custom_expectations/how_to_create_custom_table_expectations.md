@@ -67,18 +67,19 @@ python expect_table_columns_to_be_unique.py
 ```
 
 The template file is set up so that this will run the Expectation's `print_diagnostic_checklist()` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
-This guide will walk you through the first four steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](../../../contributing/contributing_maturity.md#contributing-expectations) at an Experimental level.
+This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](../../../contributing/contributing_maturity.md#contributing-expectations) at an Experimental level.
 
 ```
 Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
+    Passes all linting checks
 ...
 ```
 
-When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first four steps on the checklist.
+When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first five steps on the checklist.
 
 ### 4. Change the Expectation class name and add a docstring
 
@@ -117,10 +118,11 @@ At this point you can re-run your diagnostic checklist. You should see something
 $ python expect_table_columns_to_be_unique.py
 
 Completeness checklist for ExpectTableColumnsToBeUnique:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
+    Passes all linting checks
 ...
 ```
 
@@ -160,7 +162,7 @@ However, you should see that the tests you've written are now being caught and r
 $ python expect_table_columns_to_be_unique.py
 
 Completeness checklist for ExpectTableColumnsToBeUnique:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
@@ -272,10 +274,42 @@ Running your diagnostic checklist at this point should return something like thi
 $ python expect_table_columns_to_be_unique.py
 
 Completeness checklist for ExpectTableColumnsToBeUnique:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
+    Passes all linting checks
+...
+```
+
+### 8. Linting
+
+Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`. 
+
+If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
+
+```console
+black <PATH/TO/YOUR/EXPECTATION.py>
+isort <PATH/TO/YOUR/EXPECTATION.py>
+flake8 <PATH/TO/YOUR/EXPECTATION.py>
+pyupgrade <PATH/TO/YOUR/EXPECTATION.py> --py3-plus
+```
+
+:::info
+If desired, you can automate this to happen at commit time. See our [guidance on linting](../../../contributing/style_guides/code_style.md#linting) for more on this process.
+:::
+
+Once this is done, running your diagnostic checklist should now reflect your Custom Expectation as meeting our linting requirements:
+
+```
+$ python expect_table_columns_to_be_unique.py
+
+Completeness checklist for ExpectTableColumnsToBeUnique:
+  ✔ Has a valid library_metadata object
+  ✔ Has a docstring, including a one-line short description
+  ✔ Has at least one positive and negative example case, and all test cases pass
+  ✔ Has core logic and passes tests on at least one Execution Engine
+  ✔ Passes all linting checks
 ...
 ```
 
@@ -285,7 +319,7 @@ Congratulations!<br/>&#127881; You've just built your first Custom Expectation! 
 </b></p>
 </div>
 
-### 8. Contribution (Optional)
+### 9. Contribution (Optional)
 
 This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
@@ -305,5 +339,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_table_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py)
+- [expect_table_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py)
 :::

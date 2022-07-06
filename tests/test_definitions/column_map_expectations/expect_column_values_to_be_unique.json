@@ -51,6 +51,16 @@
         "unique": "NUMERIC",
         "null": "STRING",
         "mult_dup": "STRING"
+      },
+      "trino": {
+        "a": "VARCHAR",
+        "b": "VARCHAR",
+        "c": "INTEGER",
+        "d": "VARCHAR",
+        "n": "INTEGER",
+        "unique": "INTEGER",
+        "null": "VARCHAR",
+        "mult_dup": "VARCHAR"
       }
     },
     "tests" : [
@@ -137,9 +147,24 @@
           "unexpected_list": [1, 1],
           "unexpected_index_list": [0, 1]
         }
-      },{
+      },
+      {
+        "title": "positive_case_all_null_values_bigquery_nones",
+        "exact_match_out": false,
+        "only_for": ["bigquery"],
+        "in": {
+          "column": "null"
+        },
+        "out": {
+          "success": true,
+          "unexpected_list": ["None", "None", "None", "None"],
+          "unexpected_index_list": [0, 1, 2, 3]
+        }
+      },
+      {
         "title": "positive_case_all_null_values",
         "exact_match_out": false,
+        "suppress_test_for": ["trino", "bigquery"],
         "in": {
           "column": "null"
         },

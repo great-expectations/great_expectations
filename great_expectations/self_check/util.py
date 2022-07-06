@@ -4,8 +4,10 @@ import logging
 import os
 import platform
 import random
+import re
 import string
 import threading
+import traceback
 import warnings
 from functools import wraps
 from types import ModuleType
@@ -14,7 +16,6 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from pandas import DataFrame as pandas_DataFrame
 
 from great_expectations.core import (
     ExpectationConfigurationSchema,
@@ -36,6 +37,11 @@ from great_expectations.core.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.exceptions.exceptions import (
+    InvalidExpectationConfigurationError,
+    MetricProviderError,
+    MetricResolutionError,
+)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -85,6 +91,8 @@ except ImportError:
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
+
+    # noinspection PyPep8Naming
     from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 
     SQLITE_TYPES = {
@@ -105,6 +113,7 @@ except (ImportError, KeyError):
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
+    # noinspection PyPep8Naming
     import sqlalchemy_bigquery as sqla_bigquery
     import sqlalchemy_bigquery as BigQueryDialect
 
@@ -207,6 +216,8 @@ except (ImportError, KeyError):
 
 try:
     import sqlalchemy.dialects.mysql as mysqltypes
+
+    # noinspection PyPep8Naming
     from sqlalchemy.dialects.mysql import dialect as mysqlDialect
 
     MYSQL_TYPES = {
@@ -230,6 +241,8 @@ except (ImportError, KeyError):
 
 try:
     import sqlalchemy.dialects.mssql as mssqltypes
+
+    # noinspection PyPep8Naming
     from sqlalchemy.dialects.mssql import dialect as mssqlDialect
 
     MSSQL_TYPES = {
@@ -268,6 +281,42 @@ except (ImportError, KeyError):
     mssqlDialect = None
     MSSQL_TYPES = {}
 
+try:
+    import trino
+    import trino.sqlalchemy.datatype as trinotypes
+    from trino.sqlalchemy.dialect import TrinoDialect as trinoDialect
+
+    TRINO_TYPES = {
+        "BOOLEAN": trinotypes._type_map["boolean"],
+        "TINYINT": trinotypes._type_map["tinyint"],
+        "SMALLINT": trinotypes._type_map["smallint"],
+        "INT": trinotypes._type_map["int"],
+        "INTEGER": trinotypes._type_map["integer"],
+        "BIGINT": trinotypes._type_map["bigint"],
+        "REAL": trinotypes._type_map["real"],
+        "DOUBLE": trinotypes._type_map["double"],
+        "DECIMAL": trinotypes._type_map["decimal"],
+        "VARCHAR": trinotypes._type_map["varchar"],
+        "CHAR": trinotypes._type_map["char"],
+        "VARBINARY": trinotypes._type_map["varbinary"],
+        "JSON": trinotypes._type_map["json"],
+        "DATE": trinotypes._type_map["date"],
+        "TIME": trinotypes._type_map["time"],
+        "TIMESTAMP": trinotypes._type_map["timestamp"],
+    }
+except (ImportError, KeyError):
+    trino = None
+    trinotypes = None
+    trinoDialect = None
+    TRINO_TYPES = {}
+
+import tempfile
+
+# from tests.rule_based_profiler.conftest import ATOL, RTOL
+RTOL: float = 1.0e-7
+ATOL: float = 5.0e-2
+
+RX_FLOAT = re.compile(r".*\d\.\d+.*")
 
 SQL_DIALECT_NAMES = (
     "sqlite",
@@ -275,11 +324,12 @@ SQL_DIALECT_NAMES = (
     "mysql",
     "mssql",
     "bigquery",
+    "trino",
 )
 
 
 class SqlAlchemyConnectionManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self.lock = threading.Lock()
         self._connections = {}
 
@@ -304,7 +354,7 @@ connection_manager = SqlAlchemyConnectionManager()
 
 
 class LockingConnectionCheck:
-    def __init__(self, sa, connection_string):
+    def __init__(self, sa, connection_string) -> None:
         self.lock = threading.Lock()
         self.sa = sa
         self.connection_string = connection_string
@@ -367,6 +417,7 @@ def get_dataset(
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
+                    # noinspection PyUnresolvedReferences
                     type_ = getattr(pd.core.dtypes.dtypes, value)
                     # If this raises AttributeError it's okay: it means someone built a bad test
                 pandas_schema[key] = type_
@@ -484,6 +535,7 @@ def get_dataset(
 
         if table_name is None:
             table_name = generate_test_table_name()
+
         df.to_sql(
             name=table_name,
             con=engine,
@@ -543,6 +595,7 @@ def get_dataset(
 
         if table_name is None:
             table_name = generate_test_table_name()
+
         df.to_sql(
             name=table_name,
             con=engine,
@@ -556,19 +609,17 @@ def get_dataset(
         # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
         # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
         # rather than referring the table by name.
-        custom_sql = f"SELECT * FROM {table_name}"
+        custom_sql: str = f"SELECT * FROM {table_name}"
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
+
     elif dataset_type == "bigquery":
         if not create_engine:
             return None
         engine = _create_bigquery_engine()
-        schema = None
         if schemas and dataset_type in schemas:
             schema = schemas[dataset_type]
-            # BigQuery does not allow for column names to have spaces
-            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
 
         df.columns = df.columns.str.replace(" ", "_")
 
@@ -583,6 +634,62 @@ def get_dataset(
         custom_sql = f"SELECT * FROM {_bigquery_dataset()}.{table_name}"
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
+        )
+
+    elif dataset_type == "trino":
+        if not create_engine or not TRINO_TYPES:
+            return None
+
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        engine = _create_trino_engine(db_hostname)
+        sql_dtypes = {}
+        if schemas and "trino" in schemas and isinstance(engine.dialect, trinoDialect):
+            schema = schemas["trino"]
+            sql_dtypes = {col: TRINO_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
+
+        if table_name is None:
+            table_name = generate_test_table_name().lower()
+
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+            method="multi",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mssql":
@@ -639,6 +746,7 @@ def get_dataset(
 
         if table_name is None:
             table_name = generate_test_table_name()
+
         df.to_sql(
             name=table_name,
             con=engine,
@@ -655,7 +763,7 @@ def get_dataset(
     elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
 
-        SPARK_TYPES = {
+        spark_types = {
             "StringType": sparktypes.StringType,
             "IntegerType": sparktypes.IntegerType,
             "LongType": sparktypes.LongType,
@@ -686,7 +794,7 @@ def get_dataset(
                 spark_schema = sparktypes.StructType(
                     [
                         sparktypes.StructField(
-                            column, SPARK_TYPES[schema[column]](), True
+                            column, spark_types[schema[column]](), True
                         )
                         for column in schema
                     ]
@@ -740,7 +848,7 @@ def get_dataset(
                 spark_df = spark.createDataFrame(data_reshaped, string_schema)
                 for c in spark_df.columns:
                     spark_df = spark_df.withColumn(
-                        c, spark_df[c].cast(SPARK_TYPES[schema[c]]())
+                        c, spark_df[c].cast(spark_types[schema[c]]())
                     )
         elif len(data_reshaped) == 0:
             # if we have an empty dataset and no schema, need to assign an arbitrary type
@@ -765,7 +873,6 @@ def get_test_validator_with_data(
     execution_engine,
     data,
     schemas=None,
-    profiler=ColumnsExistProfiler,
     caching=True,
     table_name=None,
     sqlite_db_path=None,
@@ -807,10 +914,14 @@ def get_test_validator_with_data(
 
         return build_pandas_validator_with_data(df=df)
 
-    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
+    elif execution_engine in SQL_DIALECT_NAMES:
         if not create_engine:
             return None
-        return build_sa_validator_with_data(
+
+        if table_name is None:
+            table_name = generate_test_table_name().lower()
+
+        result = build_sa_validator_with_data(
             df=df,
             sa_engine_name=execution_engine,
             schemas=schemas,
@@ -818,11 +929,12 @@ def get_test_validator_with_data(
             table_name=table_name,
             sqlite_db_path=sqlite_db_path,
         )
+        return result
 
     elif execution_engine == "spark":
         import pyspark.sql.types as sparktypes
 
-        SPARK_TYPES = {
+        spark_types: dict = {
             "StringType": sparktypes.StringType,
             "IntegerType": sparktypes.IntegerType,
             "LongType": sparktypes.LongType,
@@ -854,7 +966,7 @@ def get_test_validator_with_data(
                 spark_schema = sparktypes.StructType(
                     [
                         sparktypes.StructField(
-                            column, SPARK_TYPES[schema[column]](), True
+                            column, spark_types[schema[column]](), True
                         )
                         for column in schema
                     ]
@@ -908,7 +1020,7 @@ def get_test_validator_with_data(
                 spark_df = spark.createDataFrame(data_reshaped, string_schema)
                 for c in spark_df.columns:
                     spark_df = spark_df.withColumn(
-                        c, spark_df[c].cast(SPARK_TYPES[schema[c]]())
+                        c, spark_df[c].cast(spark_types[schema[c]]())
                     )
         elif len(data_reshaped) == 0:
             # if we have an empty dataset and no schema, need to assign an arbitrary type
@@ -984,6 +1096,11 @@ def build_sa_validator_with_data(
         dialect_types["bigquery"] = BIGQUERY_TYPES
     except AttributeError:
         pass
+    try:
+        dialect_classes["trino"] = trinoDialect
+        dialect_types["trino"] = TRINO_TYPES
+    except AttributeError:
+        pass
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
@@ -1002,6 +1119,8 @@ def build_sa_validator_with_data(
         )
     elif sa_engine_name == "bigquery":
         engine = _create_bigquery_engine()
+    elif sa_engine_name == "trino":
+        engine = _create_trino_engine(db_hostname)
     else:
         engine = None
 
@@ -1012,12 +1131,6 @@ def build_sa_validator_with_data(
     # Add the data to the database as a new table
 
     if sa_engine_name == "bigquery":
-        schema = None
-        if schemas and sa_engine_name in schemas:
-            schema = schemas[sa_engine_name]
-            # bigquery does not allow column names to have spaces
-            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
-
         df.columns = df.columns.str.replace(" ", "_")
 
     sql_dtypes = {}
@@ -1058,9 +1171,19 @@ def build_sa_validator_with_data(
                     )
             elif type_ in ["DATETIME", "TIMESTAMP", "DATE"]:
                 df[col] = pd.to_datetime(df[col])
+            elif type_ in ["VARCHAR", "STRING"]:
+                df[col] = df[col].apply(str)
 
     if table_name is None:
         table_name = generate_test_table_name()
+
+    if sa_engine_name in [
+        "trino",
+    ]:
+        table_name = table_name.lower()
+        sql_insert_method = "multi"
+    else:
+        sql_insert_method = None
 
     df.to_sql(
         name=table_name,
@@ -1068,18 +1191,24 @@ def build_sa_validator_with_data(
         index=False,
         dtype=sql_dtypes,
         if_exists="replace",
+        method=sql_insert_method,
     )
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
-    return Validator(execution_engine=execution_engine, batches=(batch,))
+    return Validator(
+        execution_engine=execution_engine,
+        batches=[
+            batch,
+        ],
+    )
 
 
 def modify_locale(func):
     @wraps(func)
-    def locale_wrapper(*args, **kwargs):
+    def locale_wrapper(*args, **kwargs) -> None:
         old_locale = locale.setlocale(locale.LC_TIME, None)
         print(old_locale)
         # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
@@ -1117,7 +1246,12 @@ def build_spark_validator_with_data(
         df=df,
         batch_id=batch.id,
     )
-    return Validator(execution_engine=execution_engine, batches=(batch,))
+    return Validator(
+        execution_engine=execution_engine,
+        batches=[
+            batch,
+        ],
+    )
 
 
 def build_pandas_engine(
@@ -1221,7 +1355,7 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
+    if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v2_sql = [
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
@@ -1291,7 +1425,73 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
 
 
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
+    candidate_test_is_on_temporary_notimplemented_list_cfe_trino = [
+        "expect_column_distinct_values_to_contain_set",
+        "expect_column_max_to_be_between",
+        "expect_column_mean_to_be_between",
+        "expect_column_median_to_be_between",
+        "expect_column_min_to_be_between",
+        "expect_column_most_common_value_to_be_in_set",
+        "expect_column_quantile_values_to_be_between",
+        "expect_column_sum_to_be_between",
+        "expect_column_kl_divergence_to_be_less_than",
+        "expect_column_value_lengths_to_be_between",
+        "expect_column_values_to_be_between",
+        "expect_column_values_to_be_in_set",
+        "expect_column_values_to_be_in_type_list",
+        "expect_column_values_to_be_null",
+        "expect_column_values_to_be_of_type",
+        "expect_column_values_to_be_unique",
+        "expect_column_values_to_match_like_pattern",
+        "expect_column_values_to_match_like_pattern_list",
+        "expect_column_values_to_match_regex",
+        "expect_column_values_to_match_regex_list",
+        "expect_column_values_to_not_be_null",
+        "expect_column_values_to_not_match_like_pattern",
+        "expect_column_values_to_not_match_like_pattern_list",
+        "expect_column_values_to_not_match_regex",
+        "expect_column_values_to_not_match_regex_list",
+        "expect_column_pair_values_A_to_be_greater_than_B",
+        "expect_column_pair_values_to_be_equal",
+        "expect_column_pair_values_to_be_in_set",
+        "expect_compound_columns_to_be_unique",
+        "expect_select_column_values_to_be_unique_within_record",
+        "expect_table_column_count_to_be_between",
+        "expect_table_column_count_to_equal",
+        "expect_table_row_count_to_be_between",
+        "expect_table_row_count_to_equal",
+    ]
+    candidate_test_is_on_temporary_notimplemented_list_cfe_other_sql = [
+        "expect_column_values_to_be_increasing",
+        "expect_column_values_to_be_decreasing",
+        "expect_column_values_to_match_strftime_format",
+        "expect_column_values_to_be_dateutil_parseable",
+        "expect_column_values_to_be_json_parseable",
+        "expect_column_values_to_match_json_schema",
+        "expect_column_stdev_to_be_between",
+        # "expect_column_unique_value_count_to_be_between",
+        # "expect_column_proportion_of_unique_values_to_be_between",
+        # "expect_column_most_common_value_to_be_in_set",
+        # "expect_column_max_to_be_between",
+        # "expect_column_min_to_be_between",
+        # "expect_column_sum_to_be_between",
+        # "expect_column_pair_values_A_to_be_greater_than_B",
+        # "expect_column_pair_values_to_be_equal",
+        # "expect_column_pair_values_to_be_in_set",
+        # "expect_multicolumn_sum_to_equal",
+        # "expect_compound_columns_to_be_unique",
+        "expect_multicolumn_values_to_be_unique",
+        # "expect_select_column_values_to_be_unique_within_record",
+        "expect_column_pair_cramers_phi_value_to_be_less_than",
+        "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
+        "expect_column_chisquare_test_p_value_to_be_greater_than",
+        "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    ]
+    if context in ["trino"]:
+        return expectation_type in set(
+            candidate_test_is_on_temporary_notimplemented_list_cfe_trino
+        ).union(set(candidate_test_is_on_temporary_notimplemented_list_cfe_other_sql))
+    if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v3_sql = [
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
@@ -1299,7 +1499,6 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            "expect_column_stdev_to_be_between",
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
@@ -1364,6 +1563,7 @@ def build_test_backends_list(
     include_mssql=False,
     include_bigquery=False,
     include_aws=False,
+    include_trino=False,
     raise_exceptions_for_backends: bool = True,
 ) -> List[str]:
     """Attempts to identify supported backends by checking which imports are available."""
@@ -1375,8 +1575,8 @@ def build_test_backends_list(
 
     if include_spark:
         try:
-            import pyspark
-            from pyspark.sql import SparkSession
+            import pyspark  # noqa: F401
+            from pyspark.sql import SparkSession  # noqa: F401
         except ImportError:
             if raise_exceptions_for_backends is True:
                 raise ValueError(
@@ -1452,6 +1652,7 @@ def build_test_backends_list(
                 test_backends += ["mysql"]
 
         if include_mssql:
+            # noinspection PyUnresolvedReferences
             try:
                 engine = create_engine(
                     f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
@@ -1477,6 +1678,7 @@ def build_test_backends_list(
                 test_backends += ["mssql"]
 
         if include_bigquery:
+            # noinspection PyUnresolvedReferences
             try:
                 engine = _create_bigquery_engine()
                 conn = engine.connect()
@@ -1499,14 +1701,40 @@ def build_test_backends_list(
             aws_access_key_id: Optional[str] = os.getenv("AWS_ACCESS_KEY_ID")
             aws_secret_access_key: Optional[str] = os.getenv("AWS_SECRET_ACCESS_KEY")
             aws_session_token: Optional[str] = os.getenv("AWS_SESSION_TOKEN")
+            aws_config_file: Optional[str] = os.getenv("AWS_CONFIG_FILE")
             if (
                 not aws_access_key_id
                 and not aws_secret_access_key
                 and not aws_session_token
+                and not aws_config_file
             ):
-                logger.warning(
-                    f"AWS tests are requested, but credentials were not set up"
-                )
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "AWS tests are requested, but credentials were not set up"
+                    )
+                else:
+                    logger.warning(
+                        "AWS tests are requested, but credentials were not set up"
+                    )
+
+        if include_trino:
+            # noinspection PyUnresolvedReferences
+            try:
+                engine = _create_trino_engine(db_hostname)
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "trino tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"trino tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["trino"]
+
     return test_backends
 
 
@@ -1516,19 +1744,12 @@ def generate_expectation_tests(
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     raise_exceptions_for_backends: bool = False,
 ):
-    """
+    """Determine tests to run
 
     :param expectation_type: snake_case name of the expectation type
-    :param examples_config: a dictionary that defines the data and test cases for the expectation
-    :param expectation_execution_engines_dict: shows which backends/execution engines the
-            expectation is implemented for. It can be obtained from the output of the expectation's self_check method
-            Example:
-            {
-             "PandasExecutionEngine": True,
-             "SqlAlchemyExecutionEngine": False,
-             "SparkDFExecutionEngine": False
-            }
-    :return:
+    :param test_data_cases: list of ExpectationTestDataCases that has data, tests, schemas, and backends to use
+    :param execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics object specifying the engines the expectation is implemented for
+    :return: list of parametrized tests with loaded validators and accessible backends
     """
     parametrized_tests = []
 
@@ -1577,15 +1798,81 @@ def generate_expectation_tests(
             include_mysql=dialects_to_include.get("mysql", False),
             include_mssql=dialects_to_include.get("mssql", False),
             include_bigquery=dialects_to_include.get("bigquery", False),
+            include_trino=dialects_to_include.get("trino", False),
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
         for c in backends:
 
+            datasets = []
+
             try:
-                validator_with_data = get_test_validator_with_data(
-                    c, d["data"], d["schemas"]
-                )
+                if isinstance(d["data"], list):
+                    sqlite_db_path = generate_sqlite_db_path()
+                    for dataset in d["data"]:
+                        datasets.append(
+                            get_test_validator_with_data(
+                                c,
+                                dataset["data"],
+                                dataset.get("schemas"),
+                                table_name=dataset.get("dataset_name"),
+                                sqlite_db_path=sqlite_db_path,
+                            )
+                        )
+                    validator_with_data = datasets[0]
+                else:
+                    validator_with_data = get_test_validator_with_data(
+                        c, d["data"], d["schemas"]
+                    )
+            except Exception as e:
+                # Adding these print statements for build_gallery.py's console output
+                print("\n\n[[ Problem calling get_test_validator_with_data ]]")
+                print(f"expectation_type -> {expectation_type}")
+                print(f"c -> {c}\ne -> {e}")
+                print(f"d['data'] -> {d.get('data')}")
+                print(f"d['schemas'] -> {d.get('schemas')}")
+                print("DataFrame from data without any casting/conversion ->")
+                print(pd.DataFrame(d.get("data")))
+                print()
+
+                if "data_alt" in d and d["data_alt"] is not None:
+                    print("There is alternate data to try!!")
+                    try:
+                        if isinstance(d["data_alt"], list):
+                            sqlite_db_path = generate_sqlite_db_path()
+                            for dataset in d["data_alt"]:
+                                datasets.append(
+                                    get_test_validator_with_data(
+                                        c,
+                                        dataset["data_alt"],
+                                        dataset.get("schemas"),
+                                        table_name=dataset.get("dataset_name"),
+                                        sqlite_db_path=sqlite_db_path,
+                                    )
+                                )
+                            validator_with_data = datasets[0]
+                        else:
+                            validator_with_data = get_test_validator_with_data(
+                                c, d["data_alt"], d["schemas"]
+                            )
+                    except Exception as e2:
+                        print(
+                            "\n[[ STILL Problem calling get_test_validator_with_data ]]"
+                        )
+                        print(f"expectation_type -> {expectation_type}")
+                        print(f"c -> {c}\ne2 -> {e2}")
+                        print(f"d['data_alt'] -> {d.get('data_alt')}")
+                        print(
+                            "DataFrame from data_alt without any casting/conversion ->"
+                        )
+                        print(pd.DataFrame(d.get("data_alt")))
+                        print()
+                        continue
+                    else:
+                        print("\n[[ The alternate data worked!! ]]\n")
+                else:
+                    continue
+
             except Exception as e:
                 continue
 
@@ -1685,7 +1972,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test(data_asset, expectation_type, test):
+def evaluate_json_test(data_asset, expectation_type, test) -> None:
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -1746,14 +2033,13 @@ def evaluate_json_test(data_asset, expectation_type, test):
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_cfe(validator, expectation_type, test):
+def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=True):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
     NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
         of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
 
-    :param data_asset: (DataAsset) A great expectations DataAsset
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test
@@ -1767,7 +2053,8 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
               - unexpected_list
               - details
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
-    :return: None. asserts correctness of results.
+    :param raise_exception: (bool) If False, capture any failed AssertionError from the call to check_json_test_result and return with validation_result
+    :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
     expectation_suite = ExpectationSuite(
         "json_test_suite", data_context=validator._data_context
@@ -1802,23 +2089,44 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
             )
 
     kwargs = copy.deepcopy(test["input"])
+    error_message = None
+    stack_trace = None
 
-    if isinstance(test["input"], list):
-        result = getattr(validator, expectation_type)(*kwargs)
-    # As well as keyword arguments
+    try:
+        if isinstance(test["input"], list):
+            result = getattr(validator, expectation_type)(*kwargs)
+        # As well as keyword arguments
+        else:
+            runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
+            runtime_kwargs.update(kwargs)
+            result = getattr(validator, expectation_type)(**runtime_kwargs)
+    except (
+        MetricProviderError,
+        MetricResolutionError,
+        InvalidExpectationConfigurationError,
+    ) as e:
+        if raise_exception:
+            raise
+        error_message = str(e)
+        stack_trace = (traceback.format_exc(),)
+        result = None
     else:
-        runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
-        runtime_kwargs.update(kwargs)
-        result = getattr(validator, expectation_type)(**runtime_kwargs)
+        try:
+            check_json_test_result(
+                test=test,
+                result=result,
+                data_asset=validator.execution_engine.active_batch_data,
+            )
+        except Exception as e:
+            if raise_exception:
+                raise
+            error_message = str(e)
+            stack_trace = (traceback.format_exc(),)
 
-    check_json_test_result(
-        test=test,
-        result=result,
-        data_asset=validator.execution_engine.active_batch_data,
-    )
+    return (result, error_message, stack_trace)
 
 
-def check_json_test_result(test, result, data_asset=None):
+def check_json_test_result(test, result, data_asset=None) -> None:
     # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
     if "unexpected_list" in result["result"]:
         if ("result" in test["output"]) and (
@@ -1860,9 +2168,32 @@ def check_json_test_result(test, result, data_asset=None):
                 result["result"]["partial_unexpected_list"],
             )
 
+    # Determine if np.allclose(..) might be needed for float comparison
+    try_allclose = False
+    if "observed_value" in test["output"]:
+        if RX_FLOAT.match(repr(test["output"]["observed_value"])):
+            try_allclose = True
+
     # Check results
     if test["exact_match_out"] is True:
-        assert result == expectationValidationResultSchema.load(test["output"])
+        if "result" in result and "observed_value" in result["result"]:
+            if isinstance(result["result"]["observed_value"], (np.floating, float)):
+                assert np.allclose(
+                    result["result"]["observed_value"],
+                    expectationValidationResultSchema.load(test["output"])["result"][
+                        "observed_value"
+                    ],
+                    rtol=RTOL,
+                    atol=ATOL,
+                ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {expectationValidationResultSchema.load(test['output'])['result']['observed_value']}"
+            else:
+                assert result == expectationValidationResultSchema.load(
+                    test["output"]
+                ), f"{result} != {expectationValidationResultSchema.load(test['output'])}"
+        else:
+            assert result == expectationValidationResultSchema.load(
+                test["output"]
+            ), f"{result} != {expectationValidationResultSchema.load(test['output'])}"
     else:
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
@@ -1872,14 +2203,26 @@ def check_json_test_result(test, result, data_asset=None):
             # Apply our great expectations-specific test logic
 
             if key == "success":
-                assert result["success"] == value
+                if isinstance(value, (np.floating, float)):
+                    try:
+                        assert np.allclose(
+                            result["success"],
+                            value,
+                            rtol=RTOL,
+                            atol=ATOL,
+                        ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['success']} not np.allclose to {value}"
+
+                    except TypeError:
+                        assert (
+                            result["success"] == value
+                        ), f"{result['success']} != {value}"
 
             elif key == "observed_value":
                 if "tolerance" in test:
                     if isinstance(value, dict):
                         assert set(result["result"]["observed_value"].keys()) == set(
                             value.keys()
-                        )
+                        ), f"{set(result['result']['observed_value'].keys())} != {set(value.keys())}"
                         for k, v in value.items():
                             assert np.allclose(
                                 result["result"]["observed_value"][k],
@@ -1893,7 +2236,30 @@ def check_json_test_result(test, result, data_asset=None):
                             rtol=test["tolerance"],
                         )
                 else:
-                    assert result["result"]["observed_value"] == value
+                    if isinstance(value, dict) and "values" in value:
+                        try:
+                            assert np.allclose(
+                                result["result"]["observed_value"]["values"],
+                                value["values"],
+                                rtol=RTOL,
+                                atol=ATOL,
+                            ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']['values']} not np.allclose to {value['values']}"
+                        except TypeError as e:
+                            print(e)
+                            assert (
+                                result["result"]["observed_value"] == value
+                            ), f"{result['result']['observed_value']} != {value}"
+                    elif try_allclose:
+                        assert np.allclose(
+                            result["result"]["observed_value"],
+                            value,
+                            rtol=RTOL,
+                            atol=ATOL,
+                        ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {value}"
+                    else:
+                        assert (
+                            result["result"]["observed_value"] == value
+                        ), f"{result['result']['observed_value']} != {value}"
 
             # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
             # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
@@ -1906,15 +2272,28 @@ def check_json_test_result(test, result, data_asset=None):
                 elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
                     pass
                 else:
-                    assert result["result"]["unexpected_index_list"] == value
+                    assert (
+                        result["result"]["unexpected_index_list"] == value
+                    ), f"{result['result']['unexpected_index_list']} != {value}"
 
             elif key == "unexpected_list":
-                assert result["result"]["unexpected_list"] == value, (
-                    "expected "
-                    + str(value)
-                    + " but got "
-                    + str(result["result"]["unexpected_list"])
-                )
+                try:
+                    assert result["result"]["unexpected_list"] == value, (
+                        "expected "
+                        + str(value)
+                        + " but got "
+                        + str(result["result"]["unexpected_list"])
+                    )
+                except AssertionError as e:
+                    if type(result["result"]["unexpected_list"][0]) == list:
+                        unexpected_list_tup = [
+                            tuple(x) for x in result["result"]["unexpected_list"]
+                        ]
+                        assert (
+                            unexpected_list_tup == value
+                        ), f"{unexpected_list_tup} != {value}"
+                    else:
+                        raise
 
             elif key == "partial_unexpected_list":
                 assert result["result"]["partial_unexpected_list"] == value, (
@@ -1923,6 +2302,9 @@ def check_json_test_result(test, result, data_asset=None):
                     + " but got "
                     + str(result["result"]["partial_unexpected_list"])
                 )
+
+            elif key == "unexpected_count":
+                pass
 
             elif key == "details":
                 assert result["result"]["details"] == value
@@ -1957,7 +2339,9 @@ def check_json_test_result(test, result, data_asset=None):
                     )
 
             elif key == "traceback_substring":
-                assert result["exception_info"]["raised_exception"]
+                assert result["exception_info"][
+                    "raised_exception"
+                ], f"{result['exception_info']['raised_exception']}"
                 assert value in result["exception_info"]["exception_traceback"], (
                     "expected to find "
                     + value
@@ -2030,3 +2414,67 @@ def _bigquery_dataset() -> str:
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
         )
     return dataset
+
+
+def _create_trino_engine(
+    hostname: str = "localhost", schema_name: str = "schema"
+) -> Engine:
+    engine = create_engine(f"trino://test@{hostname}:8088/memory/{schema_name}")
+    from sqlalchemy import text
+    from trino.exceptions import TrinoUserError
+
+    with engine.begin() as conn:
+        try:
+            res = conn.execute(text(f"create schema {schema_name}"))
+        except TrinoUserError:
+            pass
+    return engine
+    # trino_user = os.getenv("GE_TEST_TRINO_USER")
+    # if not trino_user:
+    #     raise ValueError(
+    #         "Environment Variable GE_TEST_TRINO_USER is required to run trino expectation tests."
+    #     )
+
+    # trino_password = os.getenv("GE_TEST_TRINO_PASSWORD")
+    # if not trino_password:
+    #     raise ValueError(
+    #         "Environment Variable GE_TEST_TRINO_PASSWORD is required to run trino expectation tests."
+    #     )
+
+    # trino_account = os.getenv("GE_TEST_TRINO_ACCOUNT")
+    # if not trino_account:
+    #     raise ValueError(
+    #         "Environment Variable GE_TEST_TRINO_ACCOUNT is required to run trino expectation tests."
+    #     )
+
+    # trino_cluster = os.getenv("GE_TEST_TRINO_CLUSTER")
+    # if not trino_cluster:
+    #     raise ValueError(
+    #         "Environment Variable GE_TEST_TRINO_CLUSTER is required to run trino expectation tests."
+    #     )
+
+    # return create_engine(
+    #     f"trino://{trino_user}:{trino_password}@{trino_account}-{trino_cluster}.trino.galaxy.starburst.io:443/test_suite/test_ci"
+    # )
+
+
+def generate_sqlite_db_path():
+    """Creates a temporary directory and absolute path to an ephemeral sqlite_db within that temp directory.
+
+    Used to support testing of multi-table expectations without creating temp directories at import.
+
+    Returns:
+        str: An absolute path to the ephemeral db within the created temporary directory.
+    """
+    tmp_dir = str(tempfile.mkdtemp())
+    abspath = os.path.abspath(
+        os.path.join(
+            tmp_dir,
+            "sqlite_db"
+            + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+            + ".db",
+        )
+    )
+    return abspath

@@ -1,24 +1,22 @@
 from typing import Dict, List, Optional, Union
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+import numpy as np
+
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
-    MetricComputationDetails,
-    MetricComputationResult,
-    ParameterBuilder,
-)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    Attributes,
     Domain,
+    MetricComputationDetails,
+    MetricComputationResult,
     ParameterContainer,
 )
+from great_expectations.types.attributes import Attributes
 
 
 class MetricMultiBatchParameterBuilder(ParameterBuilder):
@@ -39,13 +37,8 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         Args:
             name: the name of this parameter -- this is user-specified parameter name (from configuration);
@@ -61,17 +54,11 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
         )
 
@@ -85,16 +72,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         self._reduce_scalar_metric = reduce_scalar_metric
 
     @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"{PARAMETER_KEY}{self.name}"
-
-    """
-    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
-    """
-
-    @property
     def metric_name(self) -> str:
         return self._metric_name
+
+    @metric_name.setter
+    def metric_name(self, value: str) -> None:
+        self._metric_name = value
 
     @property
     def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
@@ -158,21 +141,31 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
             if (
                 reduce_scalar_metric
+                and isinstance(
+                    metric_computation_result.attributed_resolved_metrics[
+                        0
+                    ].conditioned_metric_values,
+                    np.ndarray,
+                )
                 and metric_computation_result.attributed_resolved_metrics[
                     0
-                ].metric_values.shape[1]
+                ].conditioned_metric_values.ndim
+                > 1
+                and metric_computation_result.attributed_resolved_metrics[
+                    0
+                ].conditioned_metric_values.shape[1]
                 == 1
             ):
                 return Attributes(
                     {
                         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                             0
-                        ].metric_values[
+                        ].conditioned_metric_values[
                             :, 0
                         ],
                         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                             0
-                        ].attributed_metric_values,
+                        ].conditioned_attributed_metric_values,
                         FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
                     }
                 )
@@ -181,10 +174,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                 {
                     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                         0
-                    ].metric_values,
+                    ].conditioned_metric_values,
                     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                         0
-                    ].attributed_metric_values,
+                    ].conditioned_attributed_metric_values,
                     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
                 }
             )

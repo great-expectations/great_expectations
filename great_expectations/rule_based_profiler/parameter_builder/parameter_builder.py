@@ -1,9 +1,8 @@
 import copy
 import itertools
+import logging
 from abc import ABC, abstractmethod
-from collections import OrderedDict
-from dataclasses import asdict, dataclass, make_dataclass
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -26,72 +25,25 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
-    Attributes,
+    RAW_PARAMETER_KEY,
+    AttributedResolvedMetrics,
     Builder,
     Domain,
+    MetricComputationResult,
+    MetricValue,
+    MetricValues,
     ParameterContainer,
     build_parameter_container,
     get_fully_qualified_parameter_names,
 )
-from great_expectations.types import SerializableDictDot
+from great_expectations.types.attributes import Attributes
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-# TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
-MetricValue = Union[Any, List[Any], np.ndarray]
-MetricValues = Union[MetricValue, np.ndarray]
-MetricComputationDetails = Dict[str, Any]
-MetricComputationResult = make_dataclass(
-    "MetricComputationResult", ["attributed_resolved_metrics", "details"]
-)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
-@dataclass
-class AttributedResolvedMetrics(SerializableDictDot):
-    """
-    This class facilitates computing multiple metrics as one operation.
-
-    In order to gather results pertaining to diverse MetricConfiguration directives, computed metrics are augmented
-    with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
-    """
-
-    @staticmethod
-    def get_metric_values_from_attributed_metric_values(
-        attributed_metric_values: Optional[Dict[str, MetricValue]] = None,
-    ) -> MetricValues:
-        return np.array(list(attributed_metric_values.values()))
-
-    metric_attributes: Optional[Attributes] = None
-    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
-
-    def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
-        if self.metric_values_by_batch_id is None:
-            self.metric_values_by_batch_id = {}
-
-        if not isinstance(self.metric_values_by_batch_id, OrderedDict):
-            self.metric_values_by_batch_id = OrderedDict(self.metric_values_by_batch_id)
-
-        self.metric_values_by_batch_id[batch_id] = value
-
-    @property
-    def id(self) -> str:
-        return self.metric_attributes.to_id()
-
-    @property
-    def attributed_metric_values(self) -> Optional[Dict[str, MetricValue]]:
-        return self.metric_values_by_batch_id
-
-    @property
-    def metric_values(self) -> MetricValues:
-        return np.array(list(self.attributed_metric_values.values()))
-
-    def to_dict(self) -> dict:
-        return asdict(self)
-
-    def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=self.to_dict())
-
-
-class ParameterBuilder(Builder, ABC):
+class ParameterBuilder(ABC, Builder):
     """
     A ParameterBuilder implementation provides support for building Expectation Configuration Parameters suitable for
     use in other ParameterBuilders or in ConfigurationBuilders as part of profiling.
@@ -119,11 +71,8 @@ class ParameterBuilder(Builder, ABC):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
 
@@ -134,16 +83,9 @@ class ParameterBuilder(Builder, ABC):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            data_context: BaseDataContext associated with ParameterBuilder
         """
-        super().__init__(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            data_context=data_context,
-        )
+        super().__init__(data_context=data_context)
 
         self._name = name
 
@@ -156,18 +98,14 @@ class ParameterBuilder(Builder, ABC):
             data_context=self._data_context,
         )
 
-        self._json_serialize = json_serialize
-
     def build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         parameter_computation_impl: Optional[Callable] = None,
-        json_serialize: Optional[bool] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
         recompute_existing_parameter_values: bool = False,
     ) -> None:
         """
@@ -176,10 +114,8 @@ class ParameterBuilder(Builder, ABC):
             variables: attribute name/value pairs
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
             parameter_computation_impl: Object containing desired ParameterBuilder implementation.
-            json_serialize: If absent, use property value (in standard way, supporting variables look-up).
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
         """
         fully_qualified_parameter_names: List[
@@ -191,13 +127,14 @@ class ParameterBuilder(Builder, ABC):
         )
         if (
             recompute_existing_parameter_values
-            or self.fully_qualified_parameter_name
+            or self.raw_fully_qualified_parameter_name
+            not in fully_qualified_parameter_names
+            or self.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
             self.set_batch_list_or_batch_request(
                 batch_list=batch_list,
                 batch_request=batch_request,
-                force_batch_data=force_batch_data,
             )
 
             resolve_evaluation_dependencies(
@@ -219,33 +156,17 @@ class ParameterBuilder(Builder, ABC):
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
 
-            if json_serialize is None:
-                # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-                json_serialize = get_parameter_value_and_validate_return_type(
-                    domain=domain,
-                    parameter_reference=self.json_serialize,
-                    expected_return_type=bool,
-                    variables=variables,
-                    parameters=parameters,
-                )
-
             parameter_values: Dict[str, Any] = {
-                self.fully_qualified_parameter_name: convert_to_json_serializable(
+                self.raw_fully_qualified_parameter_name: parameter_computation_result,
+                self.json_serialized_fully_qualified_parameter_name: convert_to_json_serializable(
                     data=parameter_computation_result
-                )
-                if json_serialize
-                else parameter_computation_result,
+                ),
             }
 
             build_parameter_container(
                 parameter_container=parameters[domain.id],
                 parameter_values=parameter_values,
             )
-
-    @property
-    @abstractmethod
-    def fully_qualified_parameter_name(self) -> str:
-        pass
 
     @property
     def name(self) -> str:
@@ -264,8 +185,18 @@ class ParameterBuilder(Builder, ABC):
         return self._evaluation_parameter_builder_configs
 
     @property
-    def json_serialize(self) -> Union[str, bool]:
-        return self._json_serialize
+    def raw_fully_qualified_parameter_name(self) -> str:
+        """
+        This fully-qualified parameter name references "raw" "ParameterNode" output (including "Numpy" "dtype" values).
+        """
+        return f"{RAW_PARAMETER_KEY}{self.name}"
+
+    @property
+    def json_serialized_fully_qualified_parameter_name(self) -> str:
+        """
+        This fully-qualified parameter name references "JSON-serialized" "ParameterNode" output.
+        """
+        return f"{PARAMETER_KEY}{self.name}"
 
     @abstractmethod
     def _build_parameters(
@@ -346,6 +277,12 @@ class ParameterBuilder(Builder, ABC):
         significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
+        if not metric_name:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""Utilizing "{self.__class__.__name__}.get_metrics()" requires valid "metric_name" to be \
+specified (empty "metric_name" value detected)."""
+            )
+
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
             variables=variables,
@@ -353,7 +290,7 @@ class ParameterBuilder(Builder, ABC):
         )
         if not batch_ids:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
+                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of Batch identifiers."
             )
 
         """
@@ -466,9 +403,10 @@ class ParameterBuilder(Builder, ABC):
 
         for metric_configuration in metrics_to_resolve:
             if metric_configuration.id not in resolved_metrics:
-                raise ge_exceptions.ProfilerExecutionError(
+                logger.warning(
                     f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
                 )
+                continue
 
             resolved_metrics_sorted[metric_configuration.id] = resolved_metrics[
                 metric_configuration.id
@@ -486,6 +424,7 @@ class ParameterBuilder(Builder, ABC):
             )
             if attributed_resolved_metrics is None:
                 attributed_resolved_metrics = AttributedResolvedMetrics(
+                    batch_ids=batch_ids,
                     metric_attributes=metric_configuration.metric_value_kwargs,
                     metric_values_by_batch_id=None,
                 )
@@ -493,11 +432,14 @@ class ParameterBuilder(Builder, ABC):
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
-            resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
-            attributed_resolved_metrics.add_resolved_metric(
-                batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
-                value=resolved_metric_value,
-            )
+            if metric_configuration.id in resolved_metrics_sorted:
+                resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
+                attributed_resolved_metrics.add_resolved_metric(
+                    batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
+                    value=resolved_metric_value,
+                )
+            else:
+                continue
 
         # Step-8: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
 
@@ -506,7 +448,12 @@ class ParameterBuilder(Builder, ABC):
             metric_attributes_id,
             attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
-            if attributed_resolved_metrics.metric_values.ndim == 1:
+            if (
+                isinstance(
+                    attributed_resolved_metrics.conditioned_metric_values, np.ndarray
+                )
+                and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
+            ):
                 attributed_resolved_metrics.metric_values_by_batch_id = {
                     batch_id: [resolved_metric_value]
                     for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
@@ -532,7 +479,6 @@ class ParameterBuilder(Builder, ABC):
             )
 
         # Step-10: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
-
         return MetricComputationResult(
             attributed_resolved_metrics=list(attributed_resolved_metrics_map.values()),
             details={
@@ -584,55 +530,56 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
-        metric_values: MetricValues = attributed_resolved_metrics.metric_values
+        if not (enforce_numeric_metric or replace_nan_with_zero):
+            return attributed_resolved_metrics
 
-        # Outer-most dimension is data samples (e.g., one per Batch); the rest are dimensions of the actual metric.
-        metric_value_shape: tuple = metric_values.shape[1:]
+        metric_values_by_batch_id: Dict[str, MetricValue] = {}
 
-        # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
-        metric_value_shape_idx: int
-        axes: List[np.ndarray] = [
-            np.indices(dimensions=(metric_value_shape_idx,))[0]
-            for metric_value_shape_idx in metric_value_shape
-        ]
-        metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
-
-        # Generate all permutations of indexes for accessing estimates of every element of the multi-dimensional metric.
-        # Prefixing multi-dimensional index with "(slice(None, None, None),)" is equivalent to "[:,]" access.
-        metric_value_idx: tuple
-        metric_value_vector_indices: List[tuple] = [
-            (slice(None, None, None),) + metric_value_idx
-            for metric_value_idx in metric_value_indices
-        ]
-
-        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
-        metric_value_vector: np.ndarray
         batch_id: str
-        resolved_metric_value: Any
-        for metric_value_idx in metric_value_vector_indices:
-            # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
-            metric_value_vector = cast(np.ndarray, metric_values)[metric_value_idx]
-            if enforce_numeric_metric:
-                if not np.issubdtype(metric_value_vector.dtype, np.number):
-                    raise ge_exceptions.ProfilerExecutionError(
-                        message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(metric_value_vector.dtype)}" was computed).
-"""
-                    )
+        metric_values: MetricValues
+        for (
+            batch_id,
+            metric_values,
+        ) in attributed_resolved_metrics.conditioned_attributed_metric_values.items():
+            batch_metric_values: MetricValues = []
 
-                if np.any(np.isnan(metric_value_vector)):
-                    if not replace_nan_with_zero:
-                        raise ValueError(
-                            f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
+            metric_value_shape: tuple = metric_values.shape
+
+            # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
+            metric_value_shape_idx: int
+            axes: List[np.ndarray] = [
+                np.indices(dimensions=(metric_value_shape_idx,))[0]
+                for metric_value_shape_idx in metric_value_shape
+            ]
+            metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
+
+            metric_value_idx: tuple
+            for metric_value_idx in metric_value_indices:
+                metric_value: MetricValue = metric_values[metric_value_idx]
+                if enforce_numeric_metric:
+                    if not np.issubdtype(metric_value.dtype, np.number):
+                        raise ge_exceptions.ProfilerExecutionError(
+                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
+(value of type "{str(metric_value.dtype)}" was computed).
 """
                         )
 
-                    attributed_resolved_metrics.metric_values_by_batch_id = {
-                        batch_id: np.nan_to_num(
-                            metric_value_vector, copy=False, nan=0.0
-                        )
-                        for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
-                    }
+                    if np.isnan(metric_value):
+                        if not replace_nan_with_zero:
+                            raise ValueError(
+                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
+"""
+                            )
+
+                        batch_metric_values.append(0.0)
+                    else:
+                        batch_metric_values.append(metric_value)
+
+            metric_values_by_batch_id[batch_id] = batch_metric_values
+
+        attributed_resolved_metrics.metric_values_by_batch_id = (
+            metric_values_by_batch_id
+        )
 
         return attributed_resolved_metrics
 
@@ -678,7 +625,7 @@ class ParameterBuilder(Builder, ABC):
 
 def init_rule_parameter_builders(
     parameter_builder_configs: Optional[List[dict]] = None,
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
 ) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
     if parameter_builder_configs is None:
         return None
@@ -694,7 +641,7 @@ def init_rule_parameter_builders(
 
 def init_parameter_builder(
     parameter_builder_config: Union["ParameterBuilderConfig", dict],  # noqa: F821
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
 ) -> "ParameterBuilder":  # noqa: F821
     if not isinstance(parameter_builder_config, dict):
         parameter_builder_config = parameter_builder_config.to_dict()
@@ -726,12 +673,14 @@ def resolve_evaluation_dependencies(
     evaluation_parameter_builders: List[
         "ParameterBuilder"  # noqa: F821
     ] = parameter_builder.evaluation_parameter_builders
+
     if not evaluation_parameter_builders:
         return
 
     # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
     # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
-    # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name").
+    # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name");
+    # this list contains both, "raw" (for internal calculations) and "JSON-serialized" fully-qualified parameter names.
     if fully_qualified_parameter_names is None:
         fully_qualified_parameter_names = get_fully_qualified_parameter_names(
             domain=domain,
@@ -743,18 +692,15 @@ def resolve_evaluation_dependencies(
     # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
     evaluation_parameter_builder: "ParameterBuilder"  # noqa: F821
     for evaluation_parameter_builder in evaluation_parameter_builders:
-        fully_qualified_evaluation_parameter_builder_name: str = (
-            f"{PARAMETER_KEY}{evaluation_parameter_builder.name}"
-        )
-
         if (
-            fully_qualified_evaluation_parameter_builder_name
+            evaluation_parameter_builder.raw_fully_qualified_parameter_name
+            not in fully_qualified_parameter_names
+            or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
             evaluation_parameter_builder.set_batch_list_or_batch_request(
                 batch_list=parameter_builder.batch_list,
                 batch_request=parameter_builder.batch_request,
-                force_batch_data=False,
             )
 
             evaluation_parameter_builder.build_parameters(

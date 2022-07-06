@@ -28,6 +28,7 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
+import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
@@ -76,31 +77,35 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "batch": "batches",
     "checkpoint": "checkpoints",
     "data_asset": "data_assets",
+    "datasource": "datasources",
     "expectation": "expectations",
     "expectation_suite": "expectation_suites",
     "suite_validation_result": "suite_validation_results",
     "expectation_validation_result": "expectation_validation_results",
     "contract": "contracts",
     "rendered_data_doc": "rendered_data_docs",
+    "data_context_variables": "data_context_variables",
 }
 
 PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "batches": "batch",
     "checkpoints": "checkpoint",
     "data_assets": "data_asset",
+    "datasources": "datasource",
     "expectations": "expectation",
     "expectation_suites": "expectation_suite",
     "suite_validation_results": "suite_validation_result",
     "expectation_validation_results": "expectation_validation_result",
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
+    "data_context_variables": "data_context_variables",
 }
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
-def pluralize(singular_ge_noun):
+def pluralize(singular_ge_noun: str) -> str:
     """
     Pluralizes a Great Expectations singular noun
     """
@@ -113,7 +118,7 @@ def pluralize(singular_ge_noun):
         )
 
 
-def singularize(plural_ge_noun):
+def singularize(plural_ge_noun: str) -> str:
     """
     Singularizes a Great Expectations plural noun
     """
@@ -126,7 +131,7 @@ def singularize(plural_ge_noun):
         )
 
 
-def camel_to_snake(name):
+def camel_to_snake(name: str) -> str:
     name = p1.sub(r"\1_\2", name)
     return p2.sub(r"\1_\2", name).lower()
 
@@ -179,6 +184,7 @@ def measure_execution_time(
     execution_time_holder_object_reference_name: str = "execution_time_holder",
     execution_time_property_name: str = "execution_time",
     pretty_print: bool = True,
+    include_arguments: bool = True,
 ) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
         @wraps(func)
@@ -215,11 +221,19 @@ def measure_execution_time(
                     )
 
                 if pretty_print:
-                    bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-                    call_args: OrderedDict = bound_args.arguments
-                    print(
-                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} seconds."
-                    )
+                    if include_arguments:
+                        bound_args: BoundArguments = signature(func).bind(
+                            *args, **kwargs
+                        )
+                        call_args: OrderedDict = bound_args.arguments
+                        print(
+                            f"""Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} \
+seconds."""
+                        )
+                    else:
+                        print(
+                            f"Total execution time of function {func.__name__}(): {delta_t} seconds."
+                        )
 
         return compute_delta_t
 
@@ -917,8 +931,7 @@ def validate(
                 "When providing an expectation suite, expectation_suite_name cannot also be provided."
             )
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s"
-            % (data_asset_name, expectation_suite.expectation_suite_name)
+            f"Validating data_asset_name {data_asset_name} with expectation_suite_name {expectation_suite.expectation_suite_name}"
         )
 
     # If the object is already a DataAsset type, then this is purely a convenience method
@@ -1327,6 +1340,33 @@ def is_nan(value: Any) -> bool:
         return True
 
 
+def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
+    """
+    This method checks whether or not candidate object is subset of target object.
+    """
+    if isinstance(candidate, dict):
+        key: Any  # must be "hashable"
+        value: Any
+        return all(
+            key in target
+            and is_candidate_subset_of_target(candidate=val, target=target[key])
+            for key, val in candidate.items()
+        )
+
+    if isinstance(candidate, (list, set, tuple)):
+        subitem: Any
+        superitem: Any
+        return all(
+            any(
+                is_candidate_subset_of_target(subitem, superitem)
+                for superitem in target
+            )
+            for subitem in candidate
+        )
+
+    return candidate == target
+
+
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
         # noinspection PyUnusedLocal
@@ -1401,11 +1441,16 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this
     conversion takes place.
 
+    For versions of SQLAlchemy < 1.4 the implicit conversion to a subquery may not always work, so that
+    also needs to be handled here, using the old equivalent method.
+
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if version.parse(sa.__version__) >= version.parse("1.4"):
-        if isinstance(selectable, Select):
+    if isinstance(selectable, Select):
+        if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
+        else:
+            selectable = selectable.alias()
     return selectable
 
 
@@ -1444,6 +1489,14 @@ def get_pyathena_potential_type(type_module, type_):
     return potential_type
 
 
+def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
+    """
+    Leverage on Trino Package to return sqlalchemy sql type
+    """
+    potential_type = type_module.parse_sqltype(type_)
+    return potential_type
+
+
 def pandas_series_between_inclusive(
     series: pd.Series, min_value: int, max_value: int
 ) -> pd.Series:
@@ -1457,3 +1510,28 @@ def pandas_series_between_inclusive(
         metric_series = series.between(min_value, max_value, inclusive=True)
 
     return metric_series
+
+
+def numpy_quantile(
+    a: np.ndarray, q: float, method: str, axis: Optional[int] = None
+) -> np.ndarray:
+    """
+    As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
+    Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
+    """
+    quantile: np.ndarray
+    if version.parse(np.__version__) >= version.parse("1.22.0"):
+        quantile = np.quantile(
+            a=a,
+            q=q,
+            axis=axis,
+            method=method,
+        )
+    else:
+        quantile = np.quantile(
+            a=a,
+            q=q,
+            axis=axis,
+            interpolation=method,
+        )
+    return quantile

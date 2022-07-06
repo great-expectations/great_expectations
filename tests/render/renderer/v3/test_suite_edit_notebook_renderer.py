@@ -884,7 +884,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name\n        }\n    ]\n}\ncheckpoint = SimpleCheckpoint(\n    f"_tmp_checkpoint_{expectation_suite_name}",\n    context,\n    **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
+                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name\n        }\n    ]\n}\ncheckpoint = SimpleCheckpoint(\n    f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}",\n    context,\n    **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -1021,7 +1021,10 @@ def test_notebook_execution_with_pandas_backend(
         },
     ]
 
-    assert context.get_validation_result(expectation_suite_name="warning") == {}
+    assert (
+        context.get_validation_result(expectation_suite_name=expectation_suite_name)
+        == {}
+    )
 
     # Create notebook
     # do not want to actually send usage_message, since the function call is not the result of actual usage
@@ -1051,9 +1054,11 @@ def test_notebook_execution_with_pandas_backend(
 
     # Assertions about output
     context = DataContext(context_root_dir=root_dir)
-    obs_validation_result: ExpectationSuiteValidationResult = (
-        context.get_validation_result(expectation_suite_name="warning")
+    validator: Validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite_name=expectation_suite_name,
     )
+    obs_validation_result: ExpectationSuiteValidationResult = validator.validate()
     assert obs_validation_result.statistics == {
         "evaluated_expectations": 3,
         "successful_expectations": 2,
@@ -1177,7 +1182,7 @@ def test_notebook_execution_with_custom_notebooks(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name\n        }\n    ]\n}\ncheckpoint = SimpleCheckpoint(\n    f"_tmp_checkpoint_{expectation_suite_name}",\n    context,\n    **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
+                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name\n        }\n    ]\n}\ncheckpoint = SimpleCheckpoint(\n    f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}",\n    context,\n    **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
                 "outputs": [],
             },
         ],

@@ -1,4 +1,3 @@
-import json
 from copy import deepcopy
 from string import Template as pTemplate
 from typing import List, Optional
@@ -56,7 +55,7 @@ class RenderedContent:
 
 
 class RenderedComponentContent(RenderedContent):
-    def __init__(self, content_block_type, styling=None):
+    def __init__(self, content_block_type, styling=None) -> None:
         self.content_block_type = content_block_type
         if styling is None:
             styling = {}
@@ -78,7 +77,7 @@ class RenderedHeaderContent(RenderedComponentContent):
         header_row=None,
         styling=None,
         content_block_type="header",
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.header_row = header_row
@@ -108,7 +107,7 @@ class RenderedGraphContent(RenderedComponentContent):
         subheader=None,
         styling=None,
         content_block_type="graph",
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.graph = graph
         self.header = header
@@ -141,7 +140,7 @@ class RenderedTableContent(RenderedComponentContent):
         content_block_type="table",
         table_options=None,
         header_row_options=None,
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
@@ -177,7 +176,7 @@ class RenderedTableContent(RenderedComponentContent):
 class RenderedTabsContent(RenderedComponentContent):
     def __init__(
         self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.tabs = tabs
         self.header = header
@@ -212,7 +211,7 @@ class RenderedBootstrapTableContent(RenderedComponentContent):
         subheader=None,
         styling=None,
         content_block_type="bootstrap_table",
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.table_data = table_data
         self.table_columns = table_columns
@@ -252,7 +251,7 @@ class RenderedBootstrapTableContent(RenderedComponentContent):
 class RenderedContentBlockContainer(RenderedComponentContent):
     def __init__(
         self, content_blocks, styling=None, content_block_type="content_block_container"
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.content_blocks = content_blocks
 
@@ -265,7 +264,7 @@ class RenderedContentBlockContainer(RenderedComponentContent):
 
 
 class RenderedMarkdownContent(RenderedComponentContent):
-    def __init__(self, markdown, styling=None, content_block_type="markdown"):
+    def __init__(self, markdown, styling=None, content_block_type="markdown") -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.markdown = markdown
 
@@ -278,7 +277,7 @@ class RenderedMarkdownContent(RenderedComponentContent):
 class RenderedStringTemplateContent(RenderedComponentContent):
     def __init__(
         self, string_template, styling=None, content_block_type="string_template"
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.string_template = string_template
 
@@ -302,7 +301,7 @@ class RenderedBulletListContent(RenderedComponentContent):
         subheader=None,
         styling=None,
         content_block_type="bullet_list",
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
@@ -334,7 +333,7 @@ class ValueListContent(RenderedComponentContent):
         subheader=None,
         styling=None,
         content_block_type="value_list",
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
         self.subheader = subheader
@@ -359,7 +358,7 @@ class ValueListContent(RenderedComponentContent):
 class TextContent(RenderedComponentContent):
     def __init__(
         self, text, header=None, subheader=None, styling=None, content_block_type="text"
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.text = text
         self.header = header
@@ -392,7 +391,7 @@ class CollapseContent(RenderedComponentContent):
         styling=None,
         content_block_type="collapse",
         inline_link=False,
-    ):
+    ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.collapse_toggle_link = collapse_toggle_link
         self.header = header
@@ -438,7 +437,7 @@ class RenderedDocumentContent(RenderedContent):
         batch_kwargs=None,
         batch_spec=None,
         ge_cloud_id=None,
-    ):
+    ) -> None:
         if not isinstance(sections, list) and all(
             [isinstance(section, RenderedSectionContent) for section in sections]
         ):
@@ -475,7 +474,7 @@ class RenderedDocumentContent(RenderedContent):
 
 
 class RenderedSectionContent(RenderedContent):
-    def __init__(self, content_blocks, section_name=None):
+    def __init__(self, content_blocks, section_name=None) -> None:
         if not isinstance(content_blocks, list) and all(
             [
                 isinstance(content_block, RenderedComponentContent)
@@ -501,18 +500,20 @@ class RenderedSectionContent(RenderedContent):
 class RenderedAtomicValue(DictDot):
     def __init__(
         self,
+        schema: Optional[dict] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        schema: Optional[dict] = None,
         header: Optional["RenderedAtomicValue"] = None,
         header_row: Optional[List["RenderedAtomicValue"]] = None,
         table: Optional[List[List["RenderedAtomicValue"]]] = None,
         graph: Optional[dict] = None,
-    ):
+        kwargs: Optional[dict] = None,
+    ) -> None:
+        self.schema: Optional[dict] = schema
+
         # StringValueType
         self.template: Optional[str] = template
         self.params: Optional[dict] = params
-        self.schema: Optional[dict] = schema
 
         # TableType
         self.header: Optional[RenderedAtomicValue] = header
@@ -522,15 +523,19 @@ class RenderedAtomicValue(DictDot):
         # GraphType
         self.graph: Optional[RenderedAtomicValue] = graph
 
+        # UnknownType
+        self.kwargs: Optional[dict] = kwargs
+
 
 class RenderedAtomicValueSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    # for StringType
+    schema = fields.Dict(required=False, allow_none=True)
+
+    # for StringValueType
     template = fields.String(required=False, allow_none=True)
     params = fields.Dict(required=False, allow_none=True)
-    schema = fields.Dict(required=False, allow_none=True)
 
     # for TableType
     header = fields.Dict(required=False, allow_none=True)
@@ -538,7 +543,10 @@ class RenderedAtomicValueSchema(Schema):
     table = fields.List(fields.List(fields.Dict, required=False, allow_none=True))
 
     # for GraphType
-    graph = fields.String(required=False, allow_none=True)
+    graph = fields.Dict(required=False, allow_none=True)
+
+    # for UnknownType
+    kwargs = fields.Dict(required=False, allow_none=True)
 
     @post_load
     def create_value_obj(self, data, **kwargs):
@@ -551,7 +559,7 @@ class RenderedAtomicContent(RenderedContent):
         name: Optional[str] = None,
         value: Optional[RenderedAtomicValue] = None,
         value_type: Optional[str] = None,
-    ):
+    ) -> None:
         self.name = name
         self.value = value
         self.value_type = value_type

@@ -80,6 +80,7 @@ class GEDependencies:
             "ipywidgets",
             "isort",
             "mistune",
+            "mock-alchemy",
             "moto",
             "nbconvert",
             "openpyxl",
@@ -124,6 +125,7 @@ class GEDependencies:
         "freezegun",
         "ipywidgets",
         "mistune",
+        "mock-alchemy",
         "moto",
         "nbconvert",
         "pyfakefs",
@@ -133,13 +135,17 @@ class GEDependencies:
         "s3fs",
         "snapshottest",
         # "sqlalchemy",  # Not excluded from tracking
+        "trino",
+        "PyHive",
+        "thrift",
+        "thrift-sasl",
     ]
 
     GE_DEV_DEPENDENCIES: List[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(
         GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
     )
 
-    def __init__(self, requirements_relative_base_dir: str = "../../../"):
+    def __init__(self, requirements_relative_base_dir: str = "../../../") -> None:
         self._requirements_relative_base_dir = file_relative_path(
             __file__, requirements_relative_base_dir
         )
@@ -240,7 +246,7 @@ class GEDependencies:
         return dependency_names
 
 
-def main():
+def main() -> None:
     """Run this module to generate a list of packages from requirements files to update our static lists"""
     ge_dependencies: GEDependencies = GEDependencies()
     print("\n\nRequired Dependencies:\n\n")

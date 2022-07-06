@@ -27,6 +27,7 @@ from great_expectations.util import (
     generate_temporary_table_name,
     get_pyathena_potential_type,
     get_sqlalchemy_inspector,
+    get_trino_potential_type,
     import_library_module,
 )
 
@@ -75,7 +76,7 @@ except ImportError:
         Row = None
 
 try:
-    import psycopg2
+    import psycopg2  # noqa: F401
     import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
@@ -161,10 +162,15 @@ try:
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
     teradatasqlalchemy = None
+try:
+    import trino.sqlalchemy.datatype as trinotypes
+    import trino.sqlalchemy.dialect
+except ImportError:
+    trino = None
 
 
 class SqlAlchemyBatchReference:
-    def __init__(self, engine, table_name=None, schema=None, query=None):
+    def __init__(self, engine, table_name=None, schema=None, query=None) -> None:
         self._engine = engine
         if table_name is None and query is None:
             raise ValueError("Table_name or query must be specified")
@@ -193,7 +199,7 @@ class SqlAlchemyBatchReference:
 
 
 class MetaSqlAlchemyDataset(Dataset):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -528,11 +534,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         schema=None,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         if custom_sql and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
-            schema = None
+            if engine.dialect.name.lower() != "trino":
+                schema = None
             table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
@@ -560,6 +567,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
             temp_table_schema_name = None
+        if self.engine.dialect.name.lower() == "trino":
+            self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
+            temp_table_schema_name = schema
         else:
             try:
                 # use the schema name configured for the datasource
@@ -612,6 +622,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
             )
+        elif dialect_name == "trino":
+            # WARNING: Trino Support is experimental, functionality is not fully under test
+            self.dialect = import_library_module(module_name="trino.sqlalchemy.dialect")
+
         else:
             self.dialect = None
 
@@ -634,7 +648,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 and self.engine.dialect.dataset_id is None
             ):
                 raise ValueError(
-                    "No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
+                    "No BigQuery dataset specified. Please specify a "
                     "default dataset in engine url"
                 )
 
@@ -646,6 +660,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if self.generated_table_name is not None:
                 if self.engine.dialect.name.lower() == "bigquery":
                     logger.warning(f"Created permanent table {table_name}")
+                if self.engine.dialect.name.lower() == "trino":
+                    logger.warning(f"Created permanent view {schema}.{table_name}")
                 if self.engine.dialect.name.lower() == "awsathena":
                     logger.warning(f"Created permanent table default.{table_name}")
 
@@ -860,7 +876,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def get_column_median(self, column):
         # AWS Athena and presto have an special function that can be used to retrieve the median
-        if self.sql_engine_dialect.name.lower() == "awsathena":
+        if (
+            self.sql_engine_dialect.name.lower() == "awsathena"
+            or self.sql_engine_dialect.name.lower() == "trino"
+        ):
             element_values = self.engine.execute(
                 f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
             )
@@ -905,6 +924,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             return self._get_column_quantiles_awsathena(
                 column=column, quantiles=quantiles
             )
+        elif self.sql_engine_dialect.name.lower() == "trino":
+            return self._get_column_quantiles_trino(column=column, quantiles=quantiles)
         elif self.sql_engine_dialect.name.lower() == "bigquery":
             return self._get_column_quantiles_bigquery(
                 column=column, quantiles=quantiles
@@ -940,7 +961,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
 
     @classmethod
-    def _treat_quantiles_exception(cls, pe):
+    def _treat_quantiles_exception(cls, pe) -> None:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
@@ -977,6 +998,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
             quantiles_results_list = ast.literal_eval(quantiles_results)
             return quantiles_results_list
+
+        except ProgrammingError as pe:
+            self._treat_quantiles_exception(pe)
+
+    def _get_column_quantiles_trino(self, column: str, quantiles: Iterable) -> list:
+        # take note trino seem to be rounding up for approx_percentile
+        quantiles_list = list(quantiles)
+        quantiles_query = (
+            f"SELECT approx_percentile({column}, ARRAY{str(quantiles_list)}) as quantiles "
+            f"from (SELECT {column} from {self._table})"
+        )
+        try:
+            quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
+            return quantiles_results
 
         except ProgrammingError as pe:
             self._treat_quantiles_exception(pe)
@@ -1161,7 +1196,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 .select_from(self._table)
                 .where(sa.column(column) is not None)
             ).fetchone()
-        return float(res[0])
+        try:
+            result = float(res[0])
+        except TypeError:
+            logger.warning(
+                f"Having issue with stddev_samp on {column}, schema: {self._table.schema} table: {self._table.name}"
+            )
+            result = 0.0
+        return result
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins
@@ -1353,7 +1395,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         return convert_to_json_serializable(self.engine.execute(query).scalar())
 
-    def create_temporary_table(self, table_name, custom_sql, schema_name=None):
+    def create_temporary_table(self, table_name, custom_sql, schema_name=None) -> None:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         WARNING: this feature is new in v0.4.
@@ -1391,11 +1433,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # handle cases where dialect.name.lower() returns a byte string (e.g. databricks)
         if isinstance(engine_dialect, bytes):
             engine_dialect = str(engine_dialect, "utf-8")
-
         if engine_dialect == "bigquery":
             stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
+        elif engine_dialect == "trino":
+            stmt = f"CREATE OR REPLACE VIEW {schema_name}.{table_name} AS {custom_sql}"
         elif engine_dialect == "databricks":
-            stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
+            stmt = f"CREATE OR REPLACE TEMPORARY VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "dremio":
             stmt = f"CREATE OR REPLACE VDS {table_name} AS {custom_sql}"
         elif engine_dialect == "snowflake":
@@ -1695,7 +1738,17 @@ WHERE
                 return teradatatypes
         except (TypeError, AttributeError):
             pass
-
+        try:
+            if (
+                isinstance(
+                    self.sql_engine_dialect,
+                    trino.sqlalchemy.dialect.TrinoDialect,
+                )
+                and trinotypes is not None
+            ):
+                return trinotypes
+        except (TypeError, AttributeError):
+            pass
         return self.dialect
 
     @DocInherit
@@ -1742,6 +1795,12 @@ WHERE
                     potential_type = get_pyathena_potential_type(type_module, type_)
                     # In the case of the PyAthena dialect we need to verify that
                     # the type returned is indeed a type and not an instance.
+                    if not inspect.isclass(potential_type):
+                        real_type = type(potential_type)
+                    else:
+                        real_type = potential_type
+                elif type_module.__name__ == "trino.sqlalchemy.datatype":
+                    potential_type = get_trino_potential_type(type_module, type_)
                     if not inspect.isclass(potential_type):
                         real_type = type(potential_type)
                     else:
@@ -1800,6 +1859,13 @@ WHERE
                         potential_type = get_pyathena_potential_type(type_module, type_)
                         # In the case of the PyAthena dialect we need to verify that
                         # the type returned is indeed a type and not an instance.
+                        if not inspect.isclass(potential_type):
+                            real_type = type(potential_type)
+                        else:
+                            real_type = potential_type
+                        types.append(real_type)
+                    elif type_module.__name__ == "trino.sqlalchemy.datatype":
+                        potential_type = get_trino_potential_type(type_module, type_)
                         if not inspect.isclass(potential_type):
                             real_type = type(potential_type)
                         else:
@@ -2346,8 +2412,7 @@ WHERE
         )
         if like_pattern_expression is None:
             logger.warning(
-                "Like patterns are not supported for dialect %s"
-                % str(self.sql_engine_dialect)
+                f"Like patterns are not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 
@@ -2369,8 +2434,7 @@ WHERE
         )
         if like_pattern_expression is None:
             logger.warning(
-                "Like patterns are not supported for dialect %s"
-                % str(self.sql_engine_dialect)
+                f"Like patterns are not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 
@@ -2402,8 +2466,7 @@ WHERE
         )
         if like_pattern_expression is None:
             logger.warning(
-                "Like patterns are not supported for dialect %s"
-                % str(self.sql_engine_dialect)
+                f"Like patterns are not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 
@@ -2444,8 +2507,7 @@ WHERE
         )
         if like_pattern_expression is None:
             logger.warning(
-                "Like patterns are not supported for dialect %s"
-                % str(self.sql_engine_dialect)
+                f"Like patterns are not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 

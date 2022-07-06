@@ -11,9 +11,13 @@ from jinja2 import (
     Environment,
     FileSystemLoader,
     PackageLoader,
-    contextfilter,
     select_autoescape,
 )
+
+try:
+    from jinja2 import contextfilter
+except ImportError:
+    from jinja2 import pass_context as contextfilter
 
 from great_expectations import __version__ as ge_version
 from great_expectations.render.types import (
@@ -29,7 +33,7 @@ class NoOpTemplate:
 
 
 class PrettyPrintTemplate:
-    def render(self, document, indent=2):
+    def render(self, document, indent=2) -> None:
         print(json.dumps(document, indent=indent))
 
 
@@ -53,7 +57,9 @@ class DefaultJinjaView:
 
     _template = NoOpTemplate
 
-    def __init__(self, custom_styles_directory=None, custom_views_directory=None):
+    def __init__(
+        self, custom_styles_directory=None, custom_views_directory=None
+    ) -> None:
         self.custom_styles_directory = custom_styles_directory
         self.custom_views_directory = custom_views_directory
 
@@ -194,7 +200,9 @@ class DefaultJinjaView:
                 jinja_context, content_block=content_block, index=index
             )
 
-    def render_dict_values(self, context, dict_, index=None, content_block_id=None):
+    def render_dict_values(
+        self, context, dict_, index=None, content_block_id=None
+    ) -> None:
         for key, val in dict_.items():
             if key.startswith("_"):
                 continue
@@ -430,14 +438,14 @@ class DefaultJinjaView:
             )
         ).safe_substitute(template.get("params", {}))
 
-    def _validate_document(self, document):
+    def _validate_document(self, document) -> None:
         raise NotImplementedError
 
 
 class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
 
-    def _validate_document(self, document):
+    def _validate_document(self, document) -> None:
         assert isinstance(document, RenderedDocumentContent)
 
 
@@ -448,7 +456,7 @@ class DefaultJinjaIndexPageView(DefaultJinjaPageView):
 class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
 
-    def _validate_document(self, document):
+    def _validate_document(self, document) -> None:
         assert isinstance(
             document["section"], dict
         )  # For now low-level views take dicts
@@ -457,7 +465,7 @@ class DefaultJinjaSectionView(DefaultJinjaView):
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
 
-    def _validate_document(self, document):
+    def _validate_document(self, document) -> None:
         assert isinstance(
             document["content_block"], dict
         )  # For now low-level views take dicts

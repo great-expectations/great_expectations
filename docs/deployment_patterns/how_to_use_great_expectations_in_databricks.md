@@ -41,7 +41,7 @@ After that we will take care of some imports that will be used later. Choose you
 
 <Tabs
   groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file'
+  defaultValue='file-yaml'
   values={[
   {label: 'File-yaml', value:'file-yaml'},
   {label: 'File-python', value:'file-python'},
@@ -102,7 +102,7 @@ The root_directory here refers to the directory that will hold the data for your
 
 <Tabs
   groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file'
+  defaultValue='file-yaml'
   values={[
   {label: 'File-yaml', value:'file-yaml'},
   {label: 'File-python', value:'file-python'},
@@ -150,7 +150,7 @@ The root_directory here refers to the directory that will hold the data for your
 
 <Tabs
   groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file'
+  defaultValue='file-yaml'
   values={[
   {label: 'File-yaml', value:'file-yaml'},
   {label: 'File-python', value:'file-python'},
@@ -218,7 +218,7 @@ df = spark.read.format("csv")\
 
 <Tabs
   groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file'
+  defaultValue='file-yaml'
   values={[
   {label: 'File-yaml', value:'file-yaml'},
   {label: 'File-python', value:'file-python'},
@@ -351,7 +351,7 @@ This is the same method of interactive Expectation Suite editing used in the CLI
 
 <Tabs
   groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file'
+  defaultValue='file-yaml'
   values={[
   {label: 'File-yaml', value:'file-yaml'},
   {label: 'File-python', value:'file-python'},
@@ -435,7 +435,7 @@ Finally we save our Expectation Suite (all of the unique Expectation Configurati
 
 <Tabs
   groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file'
+  defaultValue='file-yaml'
   values={[
   {label: 'File-yaml', value:'file-yaml'},
   {label: 'File-python', value:'file-python'},

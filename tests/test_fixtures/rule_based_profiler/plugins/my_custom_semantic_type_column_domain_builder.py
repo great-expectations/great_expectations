@@ -1,9 +1,11 @@
 from typing import List, Optional, Union
 
 from great_expectations import DataContext
-from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.helpers.util import (
+    build_domains_from_column_names,
+)
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
@@ -20,18 +22,12 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: DataContext,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
         column_name_suffixes: Optional[List[str]] = None,
     ):
-        super().__init__(
-            data_context=data_context,
-            batch_list=batch_list,
-            batch_request=batch_request,
-        )
+        super().__init__(data_context=data_context)
 
         if semantic_types is None:
             semantic_types = ["user_id"]
@@ -63,6 +59,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """
@@ -93,14 +90,11 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         )
 
         column_name: str
-        domains: List[Domain] = [
-            Domain(
-                domain_type=MetricDomainTypes.COLUMN,
-                domain_kwargs={
-                    "column": column_name,
-                },
-            )
-            for column_name in candidate_column_names
-        ]
+        domains: List[Domain] = build_domains_from_column_names(
+            rule_name=rule_name,
+            column_names=candidate_column_names,
+            domain_type=self.domain_type,
+            table_column_name_to_inferred_semantic_domain_type_map=None,
+        )
 
         return domains

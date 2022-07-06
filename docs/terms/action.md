@@ -18,7 +18,7 @@ An Action is a Python class with a `run()` method that takes a <TechnicalTag rel
 
 ### Features and promises
 
-Actions are highly customizable.  Great Expectations comes with common Actions for such things as sending email or Slack notifications, updating <TechnicalTag relative="../" tag="data_docs" text="Data Docs" />, and storing <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> out of the box.  However, it is easy to create custom Actions by creating a subclass of Great Expectations' `ValidationAction` class and overwriting it's `_run()` method. This means that you can configure an Action to do literally anything you are capable of programming in Python in response to a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> <TechnicalTag relative="../" tag="validation" text="Validation" /> completing.
+Actions are highly customizable.  Great Expectations comes with common Actions for such things as sending email or Slack notifications, updating <TechnicalTag relative="../" tag="data_docs" text="Data Docs" />, and storing <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> out of the box.  However, it is easy to create custom Actions by creating a subclass of Great Expectations' `ValidationAction` class and overwriting its `_run()` method. This means that you can configure an Action to do literally anything you are capable of programming in Python in response to a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> <TechnicalTag relative="../" tag="validation" text="Validation" /> completing.
 
 ### Relationship to other objects
 

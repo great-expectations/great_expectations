@@ -59,7 +59,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         delimiter: str = "/",
         azure_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         """
         ConfiguredAssetDataConnector for connecting to Azure.
 

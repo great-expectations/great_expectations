@@ -112,7 +112,7 @@ class ExpectationsStore(Store):
         runtime_environment=None,
         store_name=None,
         data_context=None,
-    ):
+    ) -> None:
         self._expectationSuiteSchema = ExpectationSuiteSchema()
         # TODO: refactor so ExpectationStore can have access to DataContext. Currently used by usage_stats messages.
         self._data_context = data_context

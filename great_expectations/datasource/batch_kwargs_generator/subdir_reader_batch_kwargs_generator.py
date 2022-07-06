@@ -49,7 +49,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_options=None,
         known_extensions=None,
         reader_method=None,
-    ):
+    ) -> None:
         super().__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = self._default_reader_options
@@ -210,8 +210,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
     def _get_iterator(self, data_asset_name, reader_options=None, limit=None):
         logger.debug(
-            "Beginning SubdirReaderBatchKwargsGenerator _get_iterator for data_asset_name: %s"
-            % data_asset_name
+            f"Beginning SubdirReaderBatchKwargsGenerator _get_iterator for data_asset_name: {data_asset_name}"
         )
         # If the data asset is a file, then return the path.
         # Otherwise, use files in a subdir as batches
@@ -257,7 +256,9 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 ),
             )
 
-    def _build_batch_kwargs_path_iter(self, path_list, reader_options=None, limit=None):
+    def _build_batch_kwargs_path_iter(
+        self, path_list, reader_options=None, limit=None
+    ) -> None:
         for path in path_list:
             yield self._build_batch_kwargs_from_path(
                 path, reader_options=reader_options, limit=limit

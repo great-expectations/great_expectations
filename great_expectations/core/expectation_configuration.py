@@ -31,6 +31,7 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
+from great_expectations.render.types import RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -65,7 +66,7 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
 
 
 class ExpectationContext(SerializableDictDot):
-    def __init__(self, description: Optional[str] = None):
+    def __init__(self, description: Optional[str] = None) -> None:
         self._description = description
 
     @property
@@ -73,7 +74,7 @@ class ExpectationContext(SerializableDictDot):
         return self._description
 
     @description.setter
-    def description(self, value):
+    def description(self, value) -> None:
         self._description = value
 
 
@@ -950,7 +951,8 @@ class ExpectationConfiguration(SerializableDictDot):
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
-    ):
+        include_rendered_content: bool = False,
+    ) -> None:
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
                 "expectation_type must be a string"
@@ -970,6 +972,9 @@ class ExpectationConfiguration(SerializableDictDot):
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
+        self._include_rendered_content = include_rendered_content
+        if include_rendered_content:
+            self.rendered_content = None
 
     def process_evaluation_parameters(
         self,
@@ -1059,6 +1064,14 @@ class ExpectationConfiguration(SerializableDictDot):
     @property
     def kwargs(self) -> dict:
         return self._kwargs
+
+    @kwargs.setter
+    def kwargs(self, value: dict) -> None:
+        self._kwargs = value
+
+    @property
+    def include_rendered_content(self) -> str:
+        return self._include_rendered_content
 
     def _get_default_custom_kwargs(self) -> dict:
         # NOTE: this is a holdover until class-first expectations control their
@@ -1361,13 +1374,22 @@ class ExpectationConfiguration(SerializableDictDot):
         self,
         metrics: Dict,
         runtime_configuration: dict = None,
-        execution_engine=None,
+        execution_engine: "ExecutionEngine" = None,  # noqa: F821
+        **kwargs: dict,
     ):
-        expectation_impl = self._get_expectation_impl()
+        # TODO: NF - feature flag to be updated upon feature release
+        include_rendered_content: bool
+        if "include_rendered_content" in kwargs:
+            include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            include_rendered_content = False
+
+        expectation_impl: "Expectation" = self._get_expectation_impl()  # noqa: F821
         return expectation_impl(self).metrics_validate(
             metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
+            include_rendered_content=include_rendered_content,
         )
 
 
@@ -1389,6 +1411,11 @@ class ExpectationConfigurationSchema(Schema):
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema, required=False, allow_none=True
+    )
+    rendered_content = fields.List(
+        fields.Nested(
+            lambda: RenderedAtomicContentSchema, required=False, allow_none=True
+        )
     )
 
     REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context"]

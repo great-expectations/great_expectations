@@ -95,7 +95,7 @@ def test_setting_config_variables_is_visible_immediately(
         == "$replace_me"
     )
 
-    config_variables = context._load_config_variables_file()
+    config_variables = context.config_variables
     assert config_variables["replace_me"] == {"n1": "v1"}
 
     # the context's config has two config variables - one using the ${} syntax and the other - $.
@@ -162,7 +162,7 @@ def test_setting_config_variables_is_visible_immediately(
     )
 
     # Ensure that the value saved in config variables has escaped the $
-    config_variables_with_escaped_vars = context._load_config_variables_file()
+    config_variables_with_escaped_vars = context.config_variables
     assert (
         config_variables_with_escaped_vars["escaped_password"]
         == r"this_is_\$mypassword_escape_the_\$signs"
@@ -782,7 +782,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     for k, v in CONFIG_VARS.items():
         context.save_config_variable(k, v)
 
-    config_vars_file_contents = context._load_config_variables_file()
+    config_vars_file_contents = context.config_variables
 
     # Add escaping for DB_PWD since it is not of the form ${SOMEVAR} or $SOMEVAR
     CONFIG_VARS_WITH_ESCAPING = CONFIG_VARS.copy()
@@ -854,7 +854,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
         "escaped_curly", "${SOME_VAR}", skip_if_substitution_variable=False
     )
 
-    config_vars_file_contents = context._load_config_variables_file()
+    config_vars_file_contents = context.config_variables
 
     assert config_vars_file_contents["escaped"] == r"\$SOME_VAR"
     assert config_vars_file_contents["escaped_curly"] == r"\${SOME_VAR}"

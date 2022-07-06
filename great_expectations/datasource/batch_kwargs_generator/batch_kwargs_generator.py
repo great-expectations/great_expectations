@@ -164,7 +164,7 @@ class BatchKwargsGenerator:
     _batch_kwargs_type = BatchKwargs
     recognized_batch_parameters = set()
 
-    def __init__(self, name, datasource):
+    def __init__(self, name, datasource) -> None:
         self._name = name
         self._generator_config = {"class_name": self.__class__.__name__}
         self._data_asset_iterators = {}
@@ -176,10 +176,10 @@ class BatchKwargsGenerator:
     def name(self):
         return self._name
 
-    def _get_iterator(self, data_asset_name, **kwargs):
+    def _get_iterator(self, data_asset_name, **kwargs) -> None:
         raise NotImplementedError
 
-    def get_available_data_asset_names(self):
+    def get_available_data_asset_names(self) -> None:
         """Return the list of asset names known by this batch kwargs generator.
 
         Returns:
@@ -188,7 +188,9 @@ class BatchKwargsGenerator:
         raise NotImplementedError
 
     # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
+    def get_available_partition_ids(
+        self, generator_asset=None, data_asset_name=None
+    ) -> None:
         """
         Applies the current _partitioner to the batches available on data_asset_name and returns a list of valid
         partition_id strings that can be used to identify batches of data.
@@ -205,7 +207,9 @@ class BatchKwargsGenerator:
         return self._generator_config
 
     # TODO: deprecate generator_asset argument
-    def reset_iterator(self, generator_asset=None, data_asset_name=None, **kwargs):
+    def reset_iterator(
+        self, generator_asset=None, data_asset_name=None, **kwargs
+    ) -> None:
         assert (generator_asset and not data_asset_name) or (
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
@@ -280,8 +284,7 @@ class BatchKwargsGenerator:
         )
         if not param_keys <= recognized_params:
             logger.warning(
-                "Unrecognized batch_parameter(s): %s"
-                % str(param_keys - recognized_params)
+                f"Unrecognized batch_parameter(s): {str(param_keys - recognized_params)}"
             )
 
         batch_kwargs = self._build_batch_kwargs(batch_parameters)
@@ -290,7 +293,7 @@ class BatchKwargsGenerator:
         batch_kwargs["datasource"] = self._datasource.name
         return batch_kwargs
 
-    def _build_batch_kwargs(self, batch_parameters):
+    def _build_batch_kwargs(self, batch_parameters) -> None:
         raise NotImplementedError
 
     # TODO: deprecate generator_asset argument

@@ -1,17 +1,26 @@
 import copy
 import datetime
-import enum
 import logging
+import math
+import random
+import re
+import string
 import traceback
 import warnings
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
-
-from dateutil.parser import parse
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
+
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
+    SqlAlchemyDataSampler,
+)
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
+    SqlAlchemyDataSplitter,
+)
 
 del get_versions  # isort:skip
 
@@ -64,7 +73,7 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import LegacyRow
+    from sqlalchemy.engine import Dialect, Row
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import (
@@ -74,6 +83,8 @@ try:
         quoted_name,
     )
 except ImportError:
+    Row = None
+    Dialect = None
     reflection = None
     DefaultDialect = None
     Selectable = None
@@ -85,8 +96,8 @@ except ImportError:
 
 
 try:
-    import psycopg2
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
+    import psycopg2  # noqa: F401
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 
@@ -201,18 +212,6 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
-class DatePart(enum.Enum):
-    """SQL supported date parts for most dialects."""
-
-    YEAR = "year"
-    MONTH = "month"
-    WEEK = "week"
-    DAY = "day"
-    HOUR = "hour"
-    MINUTE = "minute"
-    SECOND = "second"
-
-
 class SqlAlchemyExecutionEngine(ExecutionEngine):
     def __init__(
         self,
@@ -226,7 +225,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
-    ):
+    ) -> None:
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
 
@@ -349,6 +348,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
+            if self._engine_backup.dialect.name.lower() == "sqlite" and not isinstance(
+                self._engine_backup, sa.engine.base.Connection
+            ):
+                raw_connection = self._engine_backup.raw_connection()
+                raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -356,7 +360,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event="execution_engine.sqlalchemy.connect",
+                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
                 event_payload={
                     "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
@@ -380,6 +384,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+        self._data_splitter = SqlAlchemyDataSplitter()
+        self._data_sampler = SqlAlchemyDataSampler()
+
     @property
     def credentials(self) -> Optional[dict]:
         return self._credentials
@@ -391,6 +398,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     @property
     def url(self) -> Optional[str]:
         return self._url
+
+    @property
+    def dialect(self) -> Dialect:
+        return self.engine.dialect
+
+    @property
+    def dialect_name(self) -> str:
+        """Retrieve the string name of the engine dialect in lowercase e.g. "postgresql".
+
+        Returns:
+            String representation of the sql dialect.
+        """
+        return self.engine.dialect.name.lower()
 
     def _build_engine(self, credentials: dict, **kwargs) -> "sa.engine.Engine":
         """
@@ -841,7 +861,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
-    ) -> dict:
+    ) -> Dict[Tuple[str, str, str], Any]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
@@ -875,9 +895,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
-            queries[domain_id]["select"].append(
-                engine_fn.label(metric_to_resolve.metric_name)
-            )
+            if self.engine.dialect.name == "clickhouse":
+                queries[domain_id]["select"].append(
+                    engine_fn.label(
+                        metric_to_resolve.metric_name.join(
+                            random.choices(string.ascii_lowercase, k=2)
+                        )
+                    )
+                )
+            else:
+                queries[domain_id]["select"].append(
+                    engine_fn.label(metric_to_resolve.metric_name)
+                )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             domain_kwargs = query["domain_kwargs"]
@@ -945,413 +974,69 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.engine.dispose()
 
-    ### Splitter methods for partitioning tables ###
-
-    def _split_on_whole_table(self, table_name: str, batch_identifiers: dict) -> bool:
-        """'Split' by returning the whole table"""
-
-        # return sa.column(column_name) == batch_identifiers[column_name]
-        return 1 == 1
-
-    def _split_on_column_value(
-        self, table_name: str, column_name: str, batch_identifiers: dict
-    ) -> bool:
-        """Split using the values in the named column"""
-
-        return sa.column(column_name) == batch_identifiers[column_name]
-
-    def _split_on_converted_datetime(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-        date_format_string: str = "%Y-%m-%d",
-    ) -> bool:
-        """Convert the values in the named column to the given date_format, and split on that"""
-
-        return (
-            sa.func.strftime(
-                date_format_string,
-                sa.column(column_name),
-            )
-            == batch_identifiers[column_name]
-        )
-
-    def split_on_year(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> BooleanClauseList:
-        """Split on year values in column_name.
+    def _get_splitter_method(self, splitter_method_name: str) -> Callable:
+        """Get the appropriate splitter method from the method name.
 
         Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
-                of {date_part: date_part_value}.
+            splitter_method_name: name of the splitter to retrieve.
 
         Returns:
-            List of boolean clauses based on whether the date_part value in the
-                batch identifier matches the date_part value in the column_name column.
+            splitter method.
         """
-        return self.split_on_date_parts(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_parts=[DatePart.YEAR],
-        )
+        return self._data_splitter.get_splitter_method(splitter_method_name)
 
-    def split_on_year_and_month(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> BooleanClauseList:
-        """Split on year and month values in column_name.
+    def execute_split_query(self, split_query: Selectable) -> List[Row]:
+        """Use the execution engine to run the split query and fetch all of the results.
 
         Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
-                of {date_part: date_part_value}.
+            split_query: Query to be executed as a sqlalchemy Selectable.
 
         Returns:
-            List of boolean clauses based on whether the date_part value in the
-                batch identifier matches the date_part value in the column_name column.
+            List of row results.
         """
-        return self.split_on_date_parts(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_parts=[DatePart.YEAR, DatePart.MONTH],
-        )
-
-    def split_on_year_and_month_and_day(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> BooleanClauseList:
-        """Split on year and month and day values in column_name.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
-                of {date_part: date_part_value}.
-
-        Returns:
-            List of boolean clauses based on whether the date_part value in the
-                batch identifier matches the date_part value in the column_name column.
-        """
-        return self.split_on_date_parts(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
-        )
-
-    def split_on_date_parts(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-        date_parts: Union[List[DatePart], List[str]],
-    ) -> BooleanClauseList:
-        """Split on date_part values in column_name.
-
-        Values are NOT truncated, for example this will return data for a
-        given month (if only month is chosen for date_parts) for ALL years.
-        This may be useful for viewing seasonality, but you can also specify
-        multiple date_parts to achieve date_trunc like behavior e.g.
-        year, month and day.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose date parts
-                will be used for splitting or key values of {date_part: date_part_value}
-            date_parts: part of the date to be used for splitting e.g.
-                DatePart.DAY or the case-insensitive string representation "day"
-
-        Returns:
-            List of boolean clauses based on whether the date_part value in the
-                batch identifier matches the date_part value in the column_name column.
-        """
-        if len(date_parts) == 0:
-            raise ge_exceptions.InvalidConfigError(
-                "date_parts are required when using split_on_date_parts."
+        if self.engine.dialect.name.lower() == "awsathena":
+            # Note: Athena does not support casting to string, only to varchar
+            # but sqlalchemy currently generates a query as `CAST(colname AS STRING)` instead
+            # of `CAST(colname AS VARCHAR)` with other dialects.
+            split_query: str = str(
+                split_query.compile(self.engine, compile_kwargs={"literal_binds": True})
             )
 
-        column_batch_identifiers: dict = batch_identifiers[column_name]
-        date_parts: List[DatePart] = [
-            DatePart(date_part.lower()) if isinstance(date_part, str) else date_part
-            for date_part in date_parts
-        ]
+            pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
+            split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
-        if isinstance(column_batch_identifiers, str):
-            column_batch_identifiers: datetime.datetime = parse(
-                column_batch_identifiers
-            )
+        return self.engine.execute(split_query).fetchall()
 
-        if isinstance(column_batch_identifiers, datetime.datetime):
-            query: BooleanClauseList = sa.and_(  # noqa: F821
-                *[
-                    sa.extract(date_part.value, sa.column(column_name))
-                    == getattr(column_batch_identifiers, date_part.value)
-                    for date_part in date_parts
-                ]
-            )
-        else:
-            query: BooleanClauseList = sa.and_(  # noqa: F821
-                *[
-                    sa.extract(date_part.value, sa.column(column_name))
-                    == column_batch_identifiers[date_part.value]
-                    for date_part in date_parts
-                ]
-            )
-
-        return query
-
-    def _split_on_divided_integer(
-        self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict
-    ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
-
-        return (
-            sa.cast(sa.column(column_name) / divisor, sa.Integer)
-            == batch_identifiers[column_name]
-        )
-
-    def _split_on_mod_integer(
-        self, table_name: str, column_name: str, mod: int, batch_identifiers: dict
-    ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
-
-        return sa.column(column_name) % mod == batch_identifiers[column_name]
-
-    def _split_on_multi_column_values(
-        self, table_name: str, column_names: List[str], batch_identifiers: dict
-    ) -> bool:
-        """Split on the joint values in the named columns"""
-
-        return sa.and_(
-            *(
-                sa.column(column_name) == column_value
-                for column_name, column_value in batch_identifiers.items()
-            )
-        )
-
-    def _split_on_hashed_column(
-        self,
-        table_name: str,
-        column_name: str,
-        hash_digits: int,
-        batch_identifiers: dict,
-    ) -> bool:
-        """Split on the hashed value of the named column"""
-
-        return (
-            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
-            == batch_identifiers[column_name]
-        )
-
-    ### Sampling methods ###
-
-    # _sample_using_limit
-    # _sample_using_random
-    # _sample_using_mod
-    # _sample_using_a_list
-    # _sample_using_md5
-
-    def _sample_using_mod(
-        self,
-        column_name: str,
-        mod: int,
-        value: int,
-    ) -> bool:
-        """Take the mod of named column, and only keep rows that match the given value"""
-        return sa.column(column_name) % mod == value
-
-    def _sample_using_a_list(
-        self,
-        column_name: str,
-        value_list: list,
-    ) -> bool:
-        """Match the values in the named column against value_list, and only keep the matches"""
-        return sa.column(column_name).in_(value_list)
-
-    def _sample_using_md5(
-        self,
-        column_name: str,
-        hash_digits: int = 1,
-        hash_value: str = "f",
-    ) -> bool:
-        """Hash the values in the named column, and split on that"""
-        return (
-            sa.func.right(
-                sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits
-            )
-            == hash_value
-        )
-
-    def get_data_for_batch_identifiers_year(
-        self, table_name: str, column_name: str
+    def get_data_for_batch_identifiers(
+        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
     ) -> List[dict]:
-        """Build batch_identifiers from a column split on year.
+        """Build data used to construct batch identifiers for the input table using the provided splitter config.
 
-        This method builds a query to select the unique date_parts from the
-        column_name. This data can be used to build BatchIdentifiers.
+        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
 
         Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
+            table_name: Table to split.
+            splitter_method_name: Desired splitter method to use.
+            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
 
         Returns:
-            List of dicts of the form [{column_name: {"year": 2022}}]
+            List of dicts of the form [{column_name: {"key": value}}]
         """
-        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
+        return self._data_splitter.get_data_for_batch_identifiers(
+            execution_engine=self,
             table_name=table_name,
-            column_name=column_name,
-            date_parts=[DatePart.YEAR],
+            splitter_method_name=splitter_method_name,
+            splitter_kwargs=splitter_kwargs,
         )
-
-    def get_data_for_batch_identifiers_year_and_month(
-        self, table_name: str, column_name: str
-    ) -> List[dict]:
-        """Build batch_identifiers from a column split on year and month.
-
-        This method builds a query to select the unique date_parts from the
-        column_name. This data can be used to build BatchIdentifiers.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-
-        Returns:
-            List of dicts of the form [{column_name: {"year": 2022, "month": 4}}]
-        """
-        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
-            table_name=table_name,
-            column_name=column_name,
-            date_parts=[DatePart.YEAR, DatePart.MONTH],
-        )
-
-    def get_data_for_batch_identifiers_year_and_month_and_day(
-        self, table_name: str, column_name: str
-    ) -> List[dict]:
-        """Build batch_identifiers from a column split on year and month and day.
-
-        This method builds a query to select the unique date_parts from the
-        column_name. This data can be used to build BatchIdentifiers.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-
-        Returns:
-            List of dicts of the form [{column_name: {"year": 2022, "month": 4, "day": 14}}]
-        """
-        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
-            table_name=table_name,
-            column_name=column_name,
-            date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
-        )
-
-    def get_data_for_batch_identifiers_for_split_on_date_parts(
-        self,
-        table_name: str,
-        column_name: str,
-        date_parts: Union[List[DatePart], List[str]],
-    ) -> List[dict]:
-        """Build batch_identifiers from a column split on a list of date parts.
-
-        This method builds a query to select the unique date_parts from the
-        column_name. This data can be used to build BatchIdentifiers.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            date_parts: part of the date to be used for splitting e.g.
-                DatePart.DAY or the case-insensitive string representation "day"
-
-        Returns:
-            List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
-        """
-        if len(date_parts) == 0:
-            raise ge_exceptions.InvalidConfigError(
-                "date_parts are required when using split_on_date_parts."
-            )
-
-        date_parts: List[DatePart] = [
-            DatePart(date_part.lower()) if isinstance(date_part, str) else date_part
-            for date_part in date_parts
-        ]
-
-        # NOTE: AJB 20220414 concatenating to find distinct values to support all dialects.
-        # There are more performant dialect-specific methods that can be implemented in
-        # future improvements.
-        if len(date_parts) == 1:
-            # MSSql does not accept single item concatenation
-            concat_clause: List[Label] = [
-                sa.func.distinct(
-                    sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
-                        date_parts[0].value
-                    )
-                ).label("concat_distinct_values")
-            ]
-        else:
-            concat_clause: List[Label] = [
-                sa.func.distinct(
-                    sa.func.concat(
-                        *[
-                            (
-                                sa.func.extract(date_part.value, sa.column(column_name))
-                            ).label(date_part.value)
-                            for date_part in date_parts
-                        ]
-                    )
-                ).label("concat_distinct_values"),
-            ]
-
-        split_query: Selectable = sa.select(
-            concat_clause
-            + [
-                sa.cast(
-                    sa.func.extract(date_part.value, sa.column(column_name)), sa.Integer
-                ).label(date_part.value)
-                for date_part in date_parts
-            ]
-        ).select_from(sa.text(table_name))
-
-        result: List[LegacyRow] = self.engine.execute(
-            split_query
-        ).fetchall()  # noqa: F821
-
-        data_for_batch_identifiers: List[dict] = [
-            {
-                column_name: {
-                    date_part.value: getattr(row, date_part.value)
-                    for date_part in date_parts
-                }
-            }
-            for row in result
-        ]
-
-        return data_for_batch_identifiers
 
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
-        table_name: str = batch_spec["table_name"]
         if "splitter_method" in batch_spec:
-            splitter_fn = getattr(self, batch_spec["splitter_method"])
+            splitter_fn: Callable = self._get_splitter_method(
+                splitter_method_name=batch_spec["splitter_method"]
+            )
             split_clause = splitter_fn(
-                table_name=table_name,
                 batch_identifiers=batch_spec["batch_identifiers"],
                 **batch_spec["splitter_kwargs"],
             )
@@ -1359,60 +1044,23 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             split_clause = True
 
-        if "sampling_method" in batch_spec:
-            if batch_spec["sampling_method"] == "_sample_using_limit":
-                # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
-                # so the business logic for building the query needs to be different.
-                if self.engine.dialect.name.lower() == "oracle":
-                    # limit doesn't compile properly for oracle so we will append rownum to query string later
-                    raw_query = (
-                        sa.select("*")
-                        .select_from(
-                            sa.table(
-                                table_name, schema=batch_spec.get("schema_name", None)
-                            )
-                        )
-                        .where(split_clause)
-                    )
-                    query = str(
-                        raw_query.compile(
-                            self.engine, compile_kwargs={"literal_binds": True}
-                        )
-                    )
-                    query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
-                    return query
-                else:
-                    return (
-                        sa.select("*")
-                        .select_from(
-                            sa.table(
-                                table_name, schema=batch_spec.get("schema_name", None)
-                            )
-                        )
-                        .where(split_clause)
-                        .limit(batch_spec["sampling_kwargs"]["n"])
-                    )
-            elif batch_spec["sampling_method"] == "_sample_using_random":
-                num_rows: int = self.engine.execute(
-                    sa.select([sa.func.count()])
-                    .select_from(
-                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                    )
-                    .where(split_clause)
-                ).scalar()
-                p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
-                sample_size: int = round(p * num_rows)
-                return (
-                    sa.select("*")
-                    .select_from(
-                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                    )
-                    .where(split_clause)
-                    .order_by(sa.func.random())
-                    .limit(sample_size)
+        table_name: str = batch_spec["table_name"]
+        sampling_method: Optional[str] = batch_spec.get("sampling_method")
+        if sampling_method is not None:
+            if sampling_method in [
+                "_sample_using_limit",
+                "sample_using_limit",
+                "_sample_using_random",
+                "sample_using_random",
+            ]:
+                sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
+                return sampler_fn(
+                    execution_engine=self,
+                    batch_spec=batch_spec,
+                    where_clause=split_clause,
                 )
             else:
-                sampler_fn = getattr(self, batch_spec["sampling_method"])
+                sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
                 return (
                     sa.select("*")
                     .select_from(
@@ -1421,10 +1069,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.and_(
                             split_clause,
-                            sampler_fn(**batch_spec["sampling_kwargs"]),
+                            sampler_fn(batch_spec),
                         )
                     )
                 )
+
         return (
             sa.select("*")
             .select_from(
@@ -1458,7 +1107,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_table_name: str = batch_spec.get("table_name", None)
 
         temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
-        temp_table_name: Optional[str] = batch_spec.get("bigquery_temp_table")
+
+        if batch_spec.get("bigquery_temp_table"):
+            # deprecated-v0.15.3
+            warnings.warn(
+                "BigQuery tables that are created as the result of a query are no longer created as "
+                "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
+                "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
+                "v0.15.3 and will be removed in v0.18.",
+                DeprecationWarning,
+            )
 
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
@@ -1473,7 +1131,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=self,
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
-                temp_table_name=temp_table_name,
                 create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,
@@ -1491,7 +1148,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,
-                temp_table_name=temp_table_name,
                 create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,

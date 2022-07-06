@@ -1,7 +1,7 @@
 import logging
 import warnings
 from collections import OrderedDict
-from typing import Union
+from typing import Optional, Union
 
 from dateutil.parser import parse
 
@@ -38,7 +38,7 @@ class ValidationOperator:
         self._validation_operator_config = None
 
     @property
-    def validation_operator_config(self):
+    def validation_operator_config(self) -> None:
         """
         This method builds the config dict of a particular validation operator. The "kwargs" key is what really
         distinguishes different validation operators.
@@ -77,7 +77,7 @@ class ValidationOperator:
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
-    ):
+    ) -> None:
         raise NotImplementedError
 
 
@@ -193,7 +193,7 @@ class ActionListValidationOperator(ValidationOperator):
         action_list,
         name,
         result_format={"result_format": "SUMMARY"},
-    ):
+    ) -> None:
         super().__init__()
         self.data_context = data_context
         self.name = name
@@ -286,7 +286,8 @@ class ActionListValidationOperator(ValidationOperator):
         catch_exceptions=None,
         result_format=None,
         checkpoint_identifier=None,
-    ):
+        checkpoint_name: Optional[str] = None,
+    ) -> ValidationOperatorResult:
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
@@ -351,6 +352,9 @@ class ActionListValidationOperator(ValidationOperator):
 
                 if catch_exceptions is not None:
                     batch_validate_arguments["catch_exceptions"] = catch_exceptions
+
+                if checkpoint_name is not None:
+                    batch_validate_arguments["checkpoint_name"] = checkpoint_name
 
                 batch_and_async_result_tuples.append(
                     (
@@ -618,7 +622,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         notify_on="all",
         notify_with=None,
         result_format={"result_format": "SUMMARY"},
-    ):
+    ) -> None:
         super().__init__(data_context, action_list, name)
 
         if expectation_suite_name_suffixes is None:

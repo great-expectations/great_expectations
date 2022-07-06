@@ -26,6 +26,7 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
@@ -61,7 +62,7 @@ class BaseCheckpoint(ConfigPeer):
         self,
         checkpoint_config: CheckpointConfig,
         data_context: "DataContext",  # noqa: F821
-    ):
+    ) -> None:
         # Note the gross typechecking to avoid a circular import
         if "DataContext" not in str(type(data_context)):
             raise TypeError("A Checkpoint requires a valid DataContext")
@@ -77,7 +78,7 @@ class BaseCheckpoint(ConfigPeer):
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
     #  while run_name_template also undergoes strftime datetime substitution
     @usage_statistics_enabled_method(
-        event_name="checkpoint.run",
+        event_name=UsageStatsEvents.CHECKPOINT_RUN.value,
         args_payload_fn=get_checkpoint_run_usage_statistics,
     )
     def run(
@@ -287,7 +288,7 @@ class BaseCheckpoint(ConfigPeer):
         run_id: Optional[Union[str, RunIdentifier]],
         idx: Optional[int] = 0,
         validation_dict: Optional[dict] = None,
-    ):
+    ) -> None:
         if validation_dict is None:
             validation_dict = {}
 
@@ -364,6 +365,7 @@ class BaseCheckpoint(ConfigPeer):
                     ),
                     result_format=result_format,
                     checkpoint_identifier=checkpoint_identifier,
+                    checkpoint_name=self.name,
                     **operator_run_kwargs,
                 )
             )
@@ -510,7 +512,7 @@ class Checkpoint(BaseCheckpoint):
         batches: Optional[List[dict]] = None,
         ge_cloud_id: Optional[UUID] = None,
         expectation_suite_ge_cloud_id: Optional[UUID] = None,
-    ):
+    ) -> None:
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
         if batch_request_contains_batch_data(batch_request=batch_request):
             raise ValueError(
@@ -860,7 +862,7 @@ class LegacyCheckpoint(Checkpoint):
         data_context,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-    ):
+    ) -> None:
         super().__init__(
             name=name,
             data_context=data_context,
@@ -887,7 +889,7 @@ class LegacyCheckpoint(Checkpoint):
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = None,
-    ):
+    ) -> ValidationOperatorResult:
         result_format = result_format or {"result_format": "SUMMARY"}
 
         if not assets_to_validate:
@@ -978,6 +980,7 @@ class LegacyCheckpoint(Checkpoint):
                     f'Could not find Validation Operator "{self.validation_operator_name}" when '
                     f'running Checkpoint "{self.name}". Using default action_list_operator.'
                 )
+
             results = self._run_default_validation_operator(
                 assets_to_validate=batches_to_validate,
                 run_id=run_id,
@@ -1039,7 +1042,7 @@ class SimpleCheckpoint(Checkpoint):
         notify_with: Union[str, List[str]] = "all",
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
-    ):
+    ) -> None:
         checkpoint_config: CheckpointConfig = self._configurator_class(
             name=name,
             data_context=data_context,
