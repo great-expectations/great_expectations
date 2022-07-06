@@ -353,6 +353,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ):
                 raw_connection = self._engine_backup.raw_connection()
                 raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
+                raw_connection.create_function("mod", 2, lambda n, m: n % m)
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -442,8 +443,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
+    @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
-        self, drivername: str, credentials: dict
+        drivername: str,
+        credentials: dict,
     ) -> Tuple["sa.engine.url.URL", Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
