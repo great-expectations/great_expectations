@@ -1964,6 +1964,9 @@ set as active.
                 configurations=expectations_to_evaluate,
                 runtime_configuration=runtime_configuration,
             )
+            if self._include_rendered_content:
+                for validation_result in results:
+                    validation_result.render()
             statistics = _calc_validation_statistics(results)
 
             if only_return_failures:

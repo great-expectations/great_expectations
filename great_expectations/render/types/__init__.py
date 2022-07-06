@@ -3,8 +3,13 @@ from copy import deepcopy
 from string import Template as pTemplate
 from typing import List, Optional
 
-from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
+from great_expectations.marshmallow__shade import (
+    INCLUDE,
+    Schema,
+    fields,
+    post_dump,
+    post_load,
+)
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
@@ -537,14 +542,22 @@ class RenderedAtomicValue(DictDot):
     def to_json_dict(self) -> dict:
         """Returns RenderedAtomicValue as a json dictionary."""
         d = renderedAtomicValueSchema.dump(self)
-        d["schema"] = convert_to_json_serializable(self.schema)
-        d["template"] = convert_to_json_serializable(self.template)
-        d["params"] = convert_to_json_serializable(self.params)
-        d["header"] = convert_to_json_serializable(self.header)
-        d["header_row"] = convert_to_json_serializable(self.header_row)
-        d["table"] = convert_to_json_serializable(self.table)
-        d["graph"] = convert_to_json_serializable(self.graph)
-        d["kwargs"] = convert_to_json_serializable(self.kwargs)
+        if "schema" in d:
+            d["schema"] = self.schema
+        if "template" in d:
+            d["template"] = self.template
+        if "params" in d:
+            d["params"] = self.params
+        if "header" in d:
+            d["header"] = self.header
+        if "header_row" in d:
+            d["header_row"] = self.header_row
+        if "table" in d:
+            d["table"] = self.table
+        if "graph" in d:
+            d["graph"] = self.graph
+        if "kwargs" in d:
+            d["kwargs"] = self.kwargs
         return d
 
 
@@ -553,13 +566,13 @@ class RenderedAtomicValueSchema(Schema):
         unknown = INCLUDE
 
     schema = fields.Dict(required=False, allow_none=True)
+    header = fields.Dict(required=False, allow_none=True)
 
     # for StringValueType
     template = fields.String(required=False, allow_none=True)
     params = fields.Dict(required=False, allow_none=True)
 
     # for TableType
-    header = fields.Dict(required=False, allow_none=True)
     header_row = fields.List(fields.Dict, required=False, allow_none=True)
     table = fields.List(fields.List(fields.Dict, required=False, allow_none=True))
 
@@ -572,6 +585,24 @@ class RenderedAtomicValueSchema(Schema):
     @post_load
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
+
+    REMOVE_KEYS_IF_NONE = [
+        "template",
+        "table",
+        "params",
+        "header_row",
+        "table",
+        "graph",
+        "kwargs",
+    ]
+
+    @post_dump
+    def clean_null_attrs(self, data: dict, **kwargs):
+        data = deepcopy(data)
+        for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
 
 
 class RenderedAtomicContent(RenderedContent):
