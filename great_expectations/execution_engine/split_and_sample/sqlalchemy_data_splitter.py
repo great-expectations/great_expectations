@@ -230,7 +230,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     ) -> bool:
         """Divide the values in the named column by `mod`, and split on that"""
         return (
-            sa.cast(sa.column(column_name), sa.Integer) % mod
+            sa.func.mod(sa.cast(sa.column(column_name), sa.Integer), mod)
             == batch_identifiers[column_name]
         )
 
@@ -648,8 +648,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         column_name: str,
     ) -> Selectable:
         """Split using the values in the named column"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
-
         return (
             sa.select([sa.func.distinct(sa.column(column_name))])
             .select_from(sa.text(table_name))
@@ -663,8 +661,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         date_format_string: str = "%Y-%m-%d",
     ) -> Selectable:
         """Convert the values in the named column to the given date_format, and split on that"""
-        # query = f"SELECT DISTINCT( strftime(\"{date_format_string}\", \"{self.column_name}\")) as my_var FROM {self.table_name}"
-
         return sa.select(
             [
                 sa.func.distinct(
@@ -683,8 +679,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         divisor: int,
     ) -> Selectable:
         """Divide the values in the named column by `divisor`, and split on that"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
-
         return sa.select(
             [sa.func.distinct(sa.cast(sa.column(column_name) / divisor, sa.Integer))]
         ).select_from(sa.text(table_name))
@@ -696,8 +690,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         mod: int,
     ) -> Selectable:
         """Divide the values in the named column by `mod`, and split on that"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\" % {mod}) AS my_var FROM {self.table_name}"
-
         return sa.select(
             [sa.func.distinct(sa.cast(sa.column(column_name), sa.Integer) % mod)]
         ).select_from(sa.text(table_name))
@@ -708,8 +700,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         column_names: List[str],
     ) -> Selectable:
         """Split on the joint values in the named columns"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
-
         return (
             sa.select([sa.column(column_name) for column_name in column_names])
             .distinct()
@@ -723,8 +713,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         hash_digits: int,
     ) -> Selectable:
         """Note: this method is experimental. It does not work with all SQL dialects."""
-        # query = f"SELECT MD5(\"{self.column_name}\") = {matching_hash}) AS hashed_var FROM {self.table_name}"
-
         return sa.select([sa.func.md5(sa.column(column_name))]).select_from(
             sa.text(table_name)
         )

@@ -103,6 +103,7 @@ def _execute_taxi_splitting_test_cases(
     taxi_splitting_test_cases: TaxiSplittingTestCasesBase,
     connection_string: str,
     table_name: str,
+    dialect: str,
 ) -> None:
     test_cases: List[TaxiSplittingTestCase] = taxi_splitting_test_cases.test_cases()
 
@@ -206,3 +207,10 @@ def _execute_taxi_splitting_test_cases(
             sa.select([sa.func.count()]).select_from(batch_data.selectable)
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
+
+        if not _is_dialect_athena(dialect):
+            print("Clean up tables used in this test")
+            clean_up_tables_with_prefix(
+                connection_string=connection_string,
+                table_prefix=f"{TAXI_DATA_TABLE_NAME}_",
+            )
