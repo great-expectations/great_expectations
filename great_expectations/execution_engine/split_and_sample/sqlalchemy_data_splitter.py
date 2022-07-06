@@ -228,9 +228,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
         mod: int,
         batch_identifiers: dict,
     ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
-
-        return sa.column(column_name) % mod == batch_identifiers[column_name]
+        """Divide the values in the named column by `mod`, and split on that"""
+        return (
+            sa.cast(sa.column(column_name), sa.Integer) % mod
+            == batch_identifiers[column_name]
+        )
 
     @staticmethod
     def split_on_multi_column_values(
@@ -693,11 +695,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
         column_name: str,
         mod: int,
     ) -> Selectable:
-        """Divide the values in the named column by `divisor`, and split on that"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
+        """Divide the values in the named column by `mod`, and split on that"""
+        # query = f"SELECT DISTINCT(\"{self.column_name}\" % {mod}) AS my_var FROM {self.table_name}"
 
         return sa.select(
-            [sa.func.distinct(sa.cast(sa.column(column_name) % mod, sa.Integer))]
+            [sa.func.distinct(sa.cast(sa.column(column_name), sa.Integer) % mod)]
         ).select_from(sa.text(table_name))
 
     @staticmethod

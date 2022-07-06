@@ -33,6 +33,7 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
     TaxiSplittingTestCasesColumnValue,
     TaxiSplittingTestCasesDateTime,
     TaxiSplittingTestCasesDividedInteger,
+    TaxiSplittingTestCasesModInteger,
     TaxiSplittingTestCasesWholeTable,
     TaxiTestData,
 )
@@ -423,6 +424,12 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
             )
         ),
         TaxiSplittingTestCasesDividedInteger(
+            taxi_test_data=TaxiTestData(
+                test_df=ten_trips_per_month_df(),
+                test_column_name="passenger_count",
+            )
+        ),
+        TaxiSplittingTestCasesModInteger(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
                 test_column_name="passenger_count",

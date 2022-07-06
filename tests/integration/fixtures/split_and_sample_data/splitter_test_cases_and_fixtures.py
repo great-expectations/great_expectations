@@ -171,7 +171,30 @@ class TaxiSplittingTestCasesDividedInteger(TaxiSplittingTestCasesBase):
                 num_expected_batch_definitions=4,
                 num_expected_rows_in_first_batch_definition=14,
                 expected_column_values=self.taxi_test_data.get_unique_test_column_values(
-                    move_null_to_front=True, limit=4
+                    reverse=False,
+                    move_null_to_front=True,
+                    limit=4,
+                ),
+            ),
+        ]
+
+
+class TaxiSplittingTestCasesModInteger(TaxiSplittingTestCasesBase):
+    def test_cases(self) -> List[TaxiSplittingTestCase]:
+        return [
+            TaxiSplittingTestCase(
+                table_domain_test_case=False,
+                splitter_method_name="split_on_mod_integer",
+                splitter_kwargs={
+                    "column_name": self.taxi_test_data.test_column_name,
+                    "mod": 3,
+                },
+                num_expected_batch_definitions=4,
+                num_expected_rows_in_first_batch_definition=14,
+                expected_column_values=self.taxi_test_data.get_unique_test_column_values(
+                    reverse=False,
+                    move_null_to_front=True,
+                    limit=4,
                 ),
             ),
         ]
