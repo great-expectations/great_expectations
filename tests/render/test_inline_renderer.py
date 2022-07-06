@@ -27,13 +27,10 @@ from great_expectations.validator.validator import Validator
                     "value_type": "StringValueType",
                     "name": "atomic.prescriptive.summary",
                     "value": {
-                        "header_row": None,
-                        "kwargs": None,
                         "graph": None,
                         "header": None,
                         "template": "Must have exactly $value rows.",
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "params": {
                             "value": {"schema": {"type": "number"}, "value": 3},
                             "row_condition": {
@@ -54,11 +51,8 @@ from great_expectations.validator.validator import Validator
                     "value": {
                         "graph": None,
                         "header": None,
-                        "header_row": None,
-                        "kwargs": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "template": "3",
                     },
                     "value_type": "StringValueType",
@@ -77,8 +71,6 @@ from great_expectations.validator.validator import Validator
                     "value": {
                         "graph": None,
                         "header": None,
-                        "header_row": None,
-                        "kwargs": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
@@ -108,7 +100,6 @@ from great_expectations.validator.validator import Validator
                             },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "template": "$column minimum value must be greater than or equal "
                         "to $min_value and less than or equal to $max_value.",
                     },
@@ -121,11 +112,8 @@ from great_expectations.validator.validator import Validator
                     "value": {
                         "graph": None,
                         "header": None,
-                        "header_row": None,
-                        "kwargs": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "template": "19",
                     },
                     "value_type": "StringValueType",
@@ -183,8 +171,6 @@ from great_expectations.validator.validator import Validator
                             {"schema": {"type": "string"}, "value": "Min Value"},
                             {"schema": {"type": "string"}, "value": "Max Value"},
                         ],
-                        "kwargs": None,
-                        "params": None,
                         "schema": {"type": "TableType"},
                         "table": [
                             [
@@ -203,7 +189,6 @@ from great_expectations.validator.validator import Validator
                                 {"schema": {"type": "number"}, "value": 10000000},
                             ],
                         ],
-                        "template": None,
                     },
                     "value_type": "TableType",
                 }
@@ -218,8 +203,6 @@ from great_expectations.validator.validator import Validator
                             {"schema": {"type": "string"}, "value": "Quantile"},
                             {"schema": {"type": "string"}, "value": "Value"},
                         ],
-                        "kwargs": None,
-                        "params": None,
                         "schema": {"type": "TableType"},
                         "table": [
                             [
@@ -235,7 +218,6 @@ from great_expectations.validator.validator import Validator
                                 {"schema": {"type": "number"}, "value": 9488404},
                             ],
                         ],
-                        "template": None,
                     },
                     "value_type": "TableType",
                 }
@@ -253,8 +235,6 @@ from great_expectations.validator.validator import Validator
                     "value": {
                         "graph": None,
                         "header": None,
-                        "header_row": None,
-                        "kwargs": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
@@ -283,7 +263,6 @@ from great_expectations.validator.validator import Validator
                             },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "template": "$column values must belong to this set: $v__0 $v__1 "
                         "$v__2.",
                     },
@@ -296,11 +275,8 @@ from great_expectations.validator.validator import Validator
                     "value": {
                         "graph": None,
                         "header": None,
-                        "header_row": None,
-                        "kwargs": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "template": "0% unexpected",
                     },
                     "value_type": "StringValueType",
@@ -382,12 +358,7 @@ from great_expectations.validator.validator import Validator
                                 "lower than $threshold.",
                             },
                         },
-                        "header_row": None,
-                        "kwargs": None,
-                        "params": None,
                         "schema": {"type": "GraphType"},
-                        "table": None,
-                        "template": None,
                     },
                     "value_type": "GraphType",
                 }
@@ -443,12 +414,7 @@ from great_expectations.validator.validator import Validator
                                 "template": "KL Divergence: $observed_value",
                             },
                         },
-                        "header_row": None,
-                        "kwargs": None,
-                        "params": None,
                         "schema": {"type": "GraphType"},
-                        "table": None,
-                        "template": None,
                     },
                     "value_type": "GraphType",
                 }
