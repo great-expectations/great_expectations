@@ -368,7 +368,6 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         statistics=None,
         meta=None,
         ge_cloud_id: Optional[UUID] = None,
-        checkpoint_name: Optional[str] = None,
     ) -> None:
         self.success = success
         if results is None:
