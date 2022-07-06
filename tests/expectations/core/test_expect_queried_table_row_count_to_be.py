@@ -2,15 +2,15 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions.exceptions
+from contrib.experimental.great_expectations_experimental.expectations.expect_queried_table_row_count_to_be import (
+    ExpectQueriedTableRowCountToBe,
+)
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.self_check.util import build_spark_validator_with_data
 from great_expectations.validator.validator import (
     ExpectationValidationResult,
     Validator,
-)
-from tests.integration.docusaurus.expectations.creating_custom_expectations.expect_queried_table_row_count_to_be import (
-    ExpectQueriedTableRowCountToBe,
 )
 
 sqlite_runtime_batch_request = RuntimeBatchRequest(
