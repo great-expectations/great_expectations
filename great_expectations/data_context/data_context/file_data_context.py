@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Mapping, Optional, Union
+from typing import Any, Dict, Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -52,7 +52,7 @@ class FileDataContext(AbstractDataContext):
     def _init_variables(self) -> FileDataContextVariables:
         raise NotImplementedError
 
-    def _save_project_config_to_disk(self) -> None:
+    def _save_project_config(self) -> None:
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 
@@ -65,7 +65,7 @@ class FileDataContext(AbstractDataContext):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        **kwargs,
+        **kwargs: Dict[str, Any],
     ):
         """Save the provided expectation suite into the DataContext.
 

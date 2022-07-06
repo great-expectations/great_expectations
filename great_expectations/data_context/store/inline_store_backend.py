@@ -79,7 +79,7 @@ class InlineStoreBackend(StoreBackend):
             return project_config
 
         try:
-            self._data_context._save_project_config_to_disk()
+            self._data_context._save_project_config()
         except DataContextError as e:
             logger.info(
                 f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} "
@@ -205,7 +205,7 @@ class InlineStoreBackend(StoreBackend):
     def _save_changes(self) -> None:
         # TODO: this logic will be cleaned up to not use self._data_context
         try:
-            self._data_context._save_project_config_to_disk()
+            self._data_context._save_project_config()
         except DataContextError as e:
             logger.info(
                 f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} "

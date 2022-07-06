@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Optional, Union
+from typing import Any, Dict, Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -47,19 +47,19 @@ class EphemeralDataContext(AbstractDataContext):
     def _init_variables(self) -> EphemeralDataContextVariables:
         raise NotImplementedError
 
-    def _save_project_config_to_disk(self) -> None:
+    def _save_project_config(self) -> None:
         """Since EphemeralDataContext does not have config as a file, display logging message instead"""
-        raise ge_exceptions.DataContextError(
-            "EphemeralDataContext has been asked to save project_config to file,"
-            "which is illegal. Please check your config and try again."
+        logger.debug(
+            "EphemeralDataContext has been detected - skipping DataContext._save_project_config"
         )
+        return None
 
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        **kwargs,
+        **kwargs: Dict[str, Any],
     ):
         """Save the provided expectation suite into the DataContext.
 

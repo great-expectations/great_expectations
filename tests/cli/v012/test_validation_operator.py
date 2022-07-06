@@ -281,7 +281,7 @@ def test_validation_operator_list_with_zero_validation_operators(
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context._project_config.validation_operators = {}
-    context._save_project_config_to_disk()
+    context._save_project_config()
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
@@ -356,7 +356,7 @@ def test_validation_operator_list_with_multiple_validation_operators(
             "slack_webhook": "https://hooks.slack.com/services/dummy",
         },
     )
-    context._save_project_config_to_disk()
+    context._save_project_config()
     expected_result = """[33mHeads up! This feature is Experimental. It may change. Please give us your feedback![0m[0m
 2 Validation Operators found:[0m
 [0m
