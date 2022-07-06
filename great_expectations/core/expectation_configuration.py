@@ -1071,7 +1071,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self._kwargs = value
 
     @property
-    def rendered_content(self) -> dict:
+    def rendered_content(self) -> Optional[List[RenderedAtomicContent]]:
         return self._rendered_content
 
     @rendered_content.setter
@@ -1422,7 +1422,7 @@ class ExpectationConfigurationSchema(Schema):
     REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context", "rendered_content"]
 
     @post_dump
-    def clean_null_attrs(self, data: dict, **kwargs):
+    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
         """Removes the attributes in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE during serialization if
         their values are None."""
         data = copy.deepcopy(data)

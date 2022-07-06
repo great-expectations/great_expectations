@@ -617,7 +617,7 @@ class RenderedAtomicValueSchema(Schema):
     ]
 
     @post_dump
-    def clean_null_attrs(self, data: dict, **kwargs):
+    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
         """Removes the attributes in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE during serialization if
         their values are None."""
         data = deepcopy(data)
