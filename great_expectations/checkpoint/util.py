@@ -206,7 +206,7 @@ def get_substituted_validation_dict(
             validation_dict.get("runtime_configuration", {}),
             dedup=True,
         ),
-        "expectation_suite_name": validation_dict.get("include_rendered_content")
+        "include_rendered_content": validation_dict.get("include_rendered_content")
         or substituted_runtime_config.get("include_rendered_content"),
     }
     if validation_dict.get("name") is not None:
