@@ -408,7 +408,7 @@ def test_data_context_variables_save_config(
 
     # FileDataContextVariables
     with mock.patch(
-        "great_expectations.data_context.DataContext._save_project_config",
+        "great_expectations.data_context.DataContext._save_project_config_to_disk",
         autospec=True,
     ) as mock_save:
         file_data_context_variables.save_config()

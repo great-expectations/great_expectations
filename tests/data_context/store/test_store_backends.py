@@ -1574,7 +1574,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
     tuple_ = key.to_tuple()
     with patch(
-        "great_expectations.data_context.DataContext._save_project_config"
+        "great_expectations.data_context.DataContext._save_project_config_to_disk"
     ) as mock_save:
         inline_store_backend.set(tuple_, new_config_version)
 
