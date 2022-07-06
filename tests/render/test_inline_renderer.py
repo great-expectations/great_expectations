@@ -292,7 +292,6 @@ from great_expectations.validator.validator import Validator
                     "name": "atomic.prescriptive.summary",
                     "value": {
                         "graph": {
-                            "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
                             "autosize": "fit",
                             "config": {
                                 "view": {
@@ -360,7 +359,6 @@ from great_expectations.validator.validator import Validator
                     "name": "atomic.diagnostic.observed_value",
                     "value": {
                         "graph": {
-                            "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
                             "autosize": "fit",
                             "config": {
                                 "view": {
@@ -453,12 +451,31 @@ def test_inline_renderer_rendered_content_return_value(
         rendered_atomic_content.to_json_dict()
         for rendered_atomic_content in expectation_configuration_rendered_atomic_content
     ]
+    if (
+        actual_serialized_expectation_configuration_rendered_atomic_content[0][
+            "value_type"
+        ]
+        == "GraphType"
+    ):
+        actual_serialized_expectation_configuration_rendered_atomic_content[0]["value"][
+            "graph"
+        ].pop("$schema")
+
     actual_serialized_expectation_validation_result_rendered_atomic_content: List[
         dict
     ] = [
         rendered_atomic_content.to_json_dict()
         for rendered_atomic_content in expectation_validation_result_rendered_atomic_content
     ]
+    if (
+        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
+            "value_type"
+        ]
+        == "GraphType"
+    ):
+        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
+            "value"
+        ]["graph"].pop("$schema")
 
     assert (
         actual_serialized_expectation_configuration_rendered_atomic_content
