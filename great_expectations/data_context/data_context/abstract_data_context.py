@@ -4,10 +4,13 @@ import errno
 import json
 import logging
 import os
+import sys
+import uuid
 from abc import ABC, abstractmethod
 from typing import Dict, Mapping, Optional, Union, cast
 
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     anonymizedUsageStatisticsSchema,
@@ -46,12 +49,33 @@ class AbstractDataContext(ABC):
         """
         self.runtime_environment = runtime_environment
         # these attributes that are set downstream.
+        self._variables = None
         self._config_variables = None
-        self._project_config = None
+
+        # Init plugin support
+        if self.plugins_directory is not None and os.path.exists(
+            self.plugins_directory
+        ):
+            sys.path.append(self.plugins_directory)
+
+        # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
+        self._in_memory_instance_id = (
+            None  # This variable *may* be used in case we cannot save an instance id
+        )
 
     @abstractmethod
-    def _init_variables(self) -> None:
+    def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
+
+    @property
+    def instance_id(self) -> str:
+        instance_id = self.config_variables.get("instance_id")
+        if instance_id is None:
+            if self._in_memory_instance_id is not None:
+                return self._in_memory_instance_id
+            instance_id = str(uuid.uuid4())
+            self._in_memory_instance_id = instance_id
+        return instance_id
 
     def _apply_global_config_overrides(
         self, config: Union[DataContextConfig, Mapping]
@@ -131,7 +155,8 @@ class AbstractDataContext(ABC):
 
         """
         config_variables_file_path: str = cast(
-            DataContextConfig, self._project_config
+            DataContextConfig,
+            self._project_config,  # TODO: see if this can be resolved in a better way
         ).config_variables_file_path
         if config_variables_file_path:
             try:
@@ -257,6 +282,19 @@ class AbstractDataContext(ABC):
         )
 
     # properties
+
+    @property
+    def variables(self) -> DataContextVariables:
+        if self._variables is None:
+            self._variables = self._init_variables()
+
+        # By always recalculating substitutions with each call, we ensure we stay up-to-date
+        # with the latest changes to env vars and config vars
+        substitutions: dict = self._determine_substitutions()
+        self._variables.substitutions = substitutions
+
+        return self._variables
+
     @property
     def config_variables(self) -> Dict:
         """Loads config variables into cache, by calling _load_config_variables()
@@ -266,6 +304,37 @@ class AbstractDataContext(ABC):
         if not self._config_variables:
             self._config_variables = self._load_config_variables()
         return self._config_variables
+
+    @property
+    def config(self) -> DataContextConfig:
+        return self._project_config
+
+    @property
+    def project_config_with_variables_substituted(self) -> DataContextConfig:
+        return self.get_config_with_variables_substituted()
+
+    @property
+    def plugins_directory(self) -> Optional[str]:
+        """The directory in which custom plugin modules should be placed.
+
+        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
+        """
+        return self._normalize_absolute_or_relative_path(
+            self.project_config_with_variables_substituted.plugins_directory
+        )
+
+    def _normalize_absolute_or_relative_path(
+        self, path: Optional[str]
+    ) -> Optional[str]:
+        """
+        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
+        """
+        if path is None:
+            return
+        elif os.path.isabs(path):
+            return path
+        else:
+            return os.path.join(self.root_directory, path)
 
     def _update_config_variables(self) -> None:
         """Updates config_variables cache by re-calling _load_config_variables(). Necessary after running methods that modify config
@@ -293,3 +362,23 @@ class AbstractDataContext(ABC):
         }
 
         return substitutions
+
+    def get_config_with_variables_substituted(
+        self, config: Optional[DataContextConfig] = None
+    ) -> DataContextConfig:
+        """
+        Substitute vars in config of form ${var} or $(var) with values found in the following places,
+        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        be optional in GE Cloud mode).
+        """
+        if not config:
+            config = self._project_config
+
+        substitutions: dict = self._determine_substitutions()
+
+        return DataContextConfig(
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
+        )

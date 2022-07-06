@@ -9,58 +9,30 @@ snapshots[
 ] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
-        "graph": """{
-  "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
-  "autosize": "fit",
-  "config": {
-    "view": {
-      "continuousHeight": 300,
-      "continuousWidth": 400
-    }
-  },
-  "data": {
-    "name": "data-c49f2d3d7bdab36f9ec81f5a314a430c"
-  },
-  "datasets": {
-    "data-c49f2d3d7bdab36f9ec81f5a314a430c": [
-      {
-        "fraction": 0.3754,
-        "values": 1
-      },
-      {
-        "fraction": 0.615,
-        "values": 2
-      },
-      {
-        "fraction": 0.0096,
-        "values": 4
-      }
-    ]
-  },
-  "encoding": {
-    "tooltip": [
-      {
-        "field": "values",
-        "type": "quantitative"
-      },
-      {
-        "field": "fraction",
-        "type": "quantitative"
-      }
-    ],
-    "x": {
-      "field": "values",
-      "type": "nominal"
-    },
-    "y": {
-      "field": "fraction",
-      "type": "quantitative"
-    }
-  },
-  "height": 400,
-  "mark": "bar",
-  "width": 250
-}""",
+        "graph": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+            "autosize": "fit",
+            "config": {"view": {"continuousHeight": 300, "continuousWidth": 400}},
+            "data": {"name": "data-c49f2d3d7bdab36f9ec81f5a314a430c"},
+            "datasets": {
+                "data-c49f2d3d7bdab36f9ec81f5a314a430c": [
+                    {"fraction": 0.3754, "values": 1},
+                    {"fraction": 0.615, "values": 2},
+                    {"fraction": 0.0096, "values": 4},
+                ]
+            },
+            "encoding": {
+                "tooltip": [
+                    {"field": "values", "type": "quantitative"},
+                    {"field": "fraction", "type": "quantitative"},
+                ],
+                "x": {"field": "values", "type": "nominal"},
+                "y": {"field": "fraction", "type": "quantitative"},
+            },
+            "height": 400,
+            "mark": "bar",
+            "width": 250,
+        },
         "header": {
             "schema": {"type": "StringValueType"},
             "value": {
@@ -74,6 +46,7 @@ snapshots[
             },
         },
         "header_row": None,
+        "kwargs": None,
         "params": None,
         "schema": {"type": "GraphType"},
         "table": None,
@@ -93,6 +66,7 @@ snapshots[
             {"schema": {"type": "string"}, "value": "Quantile"},
             {"schema": {"type": "string"}, "value": "Value"},
         ],
+        "kwargs": None,
         "params": None,
         "schema": {"type": "TableType"},
         "table": [
@@ -128,6 +102,7 @@ snapshots["test_atomic_diagnostic_observed_value_with_empty_result 1"] = {
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {},
         "schema": {"type": "com.superconductive.rendered.string"},
         "table": None,
@@ -142,6 +117,7 @@ snapshots["test_atomic_diagnostic_observed_value_with_numeric_observed_value 1"]
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {},
         "schema": {"type": "com.superconductive.rendered.string"},
         "table": None,
@@ -156,6 +132,7 @@ snapshots["test_atomic_diagnostic_observed_value_with_str_observed_value 1"] = {
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {},
         "schema": {"type": "com.superconductive.rendered.string"},
         "table": None,
@@ -170,6 +147,7 @@ snapshots["test_atomic_diagnostic_observed_value_with_unexpected_percent 1"] = {
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {},
         "schema": {"type": "com.superconductive.rendered.string"},
         "table": None,
@@ -184,6 +162,7 @@ snapshots["test_atomic_diagnostic_observed_value_without_result 1"] = {
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {},
         "schema": {"type": "com.superconductive.rendered.string"},
         "table": None,
@@ -200,6 +179,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -224,6 +204,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -252,6 +233,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -277,73 +259,33 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "graph": """{
-  "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
-  "autosize": "fit",
-  "config": {
-    "view": {
-      "continuousHeight": 300,
-      "continuousWidth": 400
-    }
-  },
-  "data": {
-    "name": "data-1cb20570b53cc3e67cb4883fd45e64cb"
-  },
-  "datasets": {
-    "data-1cb20570b53cc3e67cb4883fd45e64cb": [
-      {
-        "bin_max": 5,
-        "bin_min": 0,
-        "fraction": 0.2
-      },
-      {
-        "bin_max": 10,
-        "bin_min": 5,
-        "fraction": 0.3
-      },
-      {
-        "bin_max": 30,
-        "bin_min": 10,
-        "fraction": 0.1
-      },
-      {
-        "bin_max": 50,
-        "bin_min": 30,
-        "fraction": 0.4
-      }
-    ]
-  },
-  "encoding": {
-    "tooltip": [
-      {
-        "field": "bin_min",
-        "type": "quantitative"
-      },
-      {
-        "field": "bin_max",
-        "type": "quantitative"
-      },
-      {
-        "field": "fraction",
-        "type": "quantitative"
-      }
-    ],
-    "x": {
-      "field": "bin_min",
-      "type": "ordinal"
-    },
-    "x2": {
-      "field": "bin_max"
-    },
-    "y": {
-      "field": "fraction",
-      "type": "quantitative"
-    }
-  },
-  "height": 400,
-  "mark": "bar",
-  "width": 250
-}""",
+        "graph": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+            "autosize": "fit",
+            "config": {"view": {"continuousHeight": 300, "continuousWidth": 400}},
+            "data": {"name": "data-1cb20570b53cc3e67cb4883fd45e64cb"},
+            "datasets": {
+                "data-1cb20570b53cc3e67cb4883fd45e64cb": [
+                    {"bin_max": 5, "bin_min": 0, "fraction": 0.2},
+                    {"bin_max": 10, "bin_min": 5, "fraction": 0.3},
+                    {"bin_max": 30, "bin_min": 10, "fraction": 0.1},
+                    {"bin_max": 50, "bin_min": 30, "fraction": 0.4},
+                ]
+            },
+            "encoding": {
+                "tooltip": [
+                    {"field": "bin_min", "type": "quantitative"},
+                    {"field": "bin_max", "type": "quantitative"},
+                    {"field": "fraction", "type": "quantitative"},
+                ],
+                "x": {"field": "bin_min", "type": "ordinal"},
+                "x2": {"field": "bin_max"},
+                "y": {"field": "fraction", "type": "quantitative"},
+            },
+            "height": 400,
+            "mark": "bar",
+            "width": 250,
+        },
         "header": {
             "schema": {"type": "StringValueType"},
             "value": {
@@ -358,6 +300,7 @@ snapshots[
             },
         },
         "header_row": None,
+        "kwargs": None,
         "params": None,
         "schema": {"type": "GraphType"},
         "table": None,
@@ -372,6 +315,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_max_to_be_between 1"] 
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -397,6 +341,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_mean_to_be_between 1"]
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -419,6 +364,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_median_to_be_between 1
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -441,6 +387,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_min_to_be_between 1"] 
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -469,6 +416,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -494,6 +442,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column_A": {"schema": {"type": "string"}, "value": "foo"},
             "column_B": {"schema": {"type": "string"}, "value": "bar"},
@@ -513,6 +462,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column_A": {"schema": {"type": "string"}, "value": "foo"},
             "column_B": {"schema": {"type": "string"}, "value": "bar"},
@@ -542,6 +492,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column_A": {"schema": {"type": "string"}, "value": "foo"},
             "column_B": {"schema": {"type": "string"}, "value": "bar"},
@@ -570,6 +521,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -609,6 +561,7 @@ snapshots[
             {"schema": {"type": "string"}, "value": "Min Value"},
             {"schema": {"type": "string"}, "value": "Max Value"},
         ],
+        "kwargs": None,
         "params": None,
         "schema": {"type": "TableType"},
         "table": [
@@ -649,6 +602,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_stdev_to_be_between 1"
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -671,6 +625,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_sum_to_be_between 1"] 
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -693,6 +648,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_to_exist 1"] = {
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "column_index": {"schema": {"type": "number"}, "value": 5},
@@ -712,6 +668,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -738,6 +695,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -762,6 +720,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_value_lengths_to_equal
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -783,6 +742,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_between 1
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -809,6 +769,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -831,6 +792,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -856,6 +818,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_in_set 1"
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -887,6 +850,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -916,6 +880,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -943,6 +908,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -963,6 +929,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_null 1"] 
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -985,6 +952,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1005,6 +973,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_of_type 1
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1026,6 +995,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_unique 1"
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1048,6 +1018,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1069,6 +1040,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_match_regex 
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1092,6 +1064,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1121,6 +1094,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1144,6 +1118,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1172,6 +1147,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_not_be_null 
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1194,6 +1170,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1217,6 +1194,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1241,6 +1219,7 @@ snapshots["test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column_list": {
                 "schema": {"type": "array"},
@@ -1267,6 +1246,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column_list": {"schema": {"type": "array"}, "value": ["A", "B", "C"]},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
@@ -1293,6 +1273,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column_list": {
                 "schema": {"type": "array"},
@@ -1321,6 +1302,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "max_value": {"schema": {"type": "number"}, "value": None},
             "min_value": {"schema": {"type": "number"}, "value": 5},
@@ -1340,6 +1322,7 @@ snapshots["test_atomic_prescriptive_summary_expect_table_column_count_to_equal 1
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {"value": {"schema": {"type": "number"}, "value": 10}},
         "schema": {"type": "com.superconductive.rendered.string"},
         "table": None,
@@ -1356,6 +1339,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column_list": {"schema": {"type": "array"}, "value": ["a", "b", "c"]},
             "v__0": {"schema": {"type": "string"}, "value": "a"},
@@ -1375,6 +1359,7 @@ snapshots["test_atomic_prescriptive_summary_expect_table_columns_to_match_set 1"
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "column_list": {"schema": {"type": "array"}, "value": ["a", "b", "c"]},
             "exact_match": {"schema": {"type": "boolean"}, "value": True},
@@ -1392,6 +1377,7 @@ snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_be_between
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "condition_parser": {"schema": {"type": "string"}, "value": None},
             "max_value": {"schema": {"type": "number"}, "value": None},
@@ -1412,6 +1398,7 @@ snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_equal 1"] 
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "condition_parser": {"schema": {"type": "string"}, "value": None},
             "row_condition": {"schema": {"type": "string"}, "value": None},
@@ -1432,6 +1419,7 @@ snapshots[
         "graph": None,
         "header": None,
         "header_row": None,
+        "kwargs": None,
         "params": {
             "other_table_name": {
                 "schema": {"type": "string"},
