@@ -30,8 +30,8 @@ class CloudDataContext(AbstractDataContext):
         self,
         project_config: Union[DataContextConfig, Mapping],
         context_root_dir: str,
-        runtime_environment: dict,
         ge_cloud_config: GeCloudConfig,
+        runtime_environment: Optional[dict] = None,
     ) -> None:
         """
         CloudDataContext constructor

@@ -49,8 +49,10 @@ class EphemeralDataContext(AbstractDataContext):
 
     def _save_project_config_to_disk(self) -> None:
         """Since EphemeralDataContext does not have config as a file, display logging message instead"""
-        logger.debug("EphemeralDataContext does not save project_config to file")
-        return
+        raise ge_exceptions.DataContextError(
+            "EphemeralDataContext has been asked to save project_config to file,"
+            "which is illegal. Please check your config and try again."
+        )
 
     def save_expectation_suite(
         self,

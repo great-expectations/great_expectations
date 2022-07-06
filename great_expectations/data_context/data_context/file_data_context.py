@@ -32,7 +32,7 @@ class FileDataContext(AbstractDataContext):
         self,
         project_config: Union[DataContextConfig, Mapping],
         context_root_dir: str,
-        runtime_environment: dict,
+        runtime_environment: Optional[dict] = None,
     ) -> None:
         """FileDataContext constructor
 
