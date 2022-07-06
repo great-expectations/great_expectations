@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import Optional
+from typing import Dict, Optional, Union
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
@@ -15,7 +15,10 @@ from great_expectations.core.util import (
     ensure_json_serializable,
     in_jupyter_notebook,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
+from great_expectations.render.types import RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -42,12 +45,19 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
 class ExpectationValidationResult(SerializableDictDot):
     def __init__(
         self,
-        success=None,
-        expectation_config=None,
-        result=None,
-        meta=None,
-        exception_info=None,
+        success: Optional[bool] = None,
+        expectation_config: Optional["ExpectationConfiguration"] = None,  # noqa: F821
+        result: Optional[dict] = None,
+        meta: Optional[dict] = None,
+        exception_info: Optional[dict] = None,
+        **kwargs: dict,
     ) -> None:
+        # TODO: NF - feature flag to be updated upon feature release
+        if "include_rendered_content" in kwargs:
+            self.include_rendered_content = kwargs["include_rendered_content"]
+        else:
+            self.include_rendered_content = False
+
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
         self.success = success
@@ -67,6 +77,8 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
+        if self.include_rendered_content:
+            self.rendered_content = None
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -147,7 +159,7 @@ class ExpectationValidationResult(SerializableDictDot):
             # if invalid comparisons are attempted, the objects are not equal.
             return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         # TODO: <Alex>5/9/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
@@ -155,7 +167,6 @@ class ExpectationValidationResult(SerializableDictDot):
         """
         json_dict: dict = self.to_json_dict()
         if in_jupyter_notebook():
-            json_dict: dict = self.to_json_dict()
             if (
                 "expectation_config" in json_dict
                 and "kwargs" in json_dict["expectation_config"]
@@ -175,13 +186,42 @@ class ExpectationValidationResult(SerializableDictDot):
 
         return json.dumps(json_dict, indent=2)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         # TODO: <Alex>5/9/2022</Alex>
         This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
         would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
         """
         return json.dumps(self.to_json_dict(), indent=2)
+
+    def render(self) -> None:
+        """Renders content using the:
+        - atomic prescriptive renderer for the expectation configuration associated with this
+          ExpectationValidationResult to self.expectation_config.rendered_content
+        - atomic diagnostic renderer for the expectation configuration associated with this
+          ExpectationValidationResult to self.rendered_content.
+        """
+        inline_renderer_config: Dict[str, Union[str, ExpectationValidationResult]] = {
+            "class_name": "InlineRenderer",
+            "render_object": self,
+        }
+        module_name: str = "great_expectations.render.renderer.inline_renderer"
+        inline_renderer = instantiate_class_from_config(
+            config=inline_renderer_config,
+            runtime_environment={},
+            config_defaults={"module_name": module_name},
+        )
+        if not inline_renderer:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=inline_renderer_config["class_name"],
+            )
+
+        (
+            self.expectation_config.rendered_content,
+            self.rendered_content,
+        ) = inline_renderer.render()
 
     @staticmethod
     def validate_result_dict(result):
@@ -441,6 +481,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    rendered_content = fields.List(fields.Nested(RenderedAtomicContentSchema))
 
     # noinspection PyUnusedLocal
     @pre_dump

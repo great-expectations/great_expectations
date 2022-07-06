@@ -449,20 +449,38 @@ def delete_config_from_filesystem(
     )
 
 
+# noinspection PyPep8Naming
 def get_snowflake_connection_url() -> str:
     """Get snowflake connection url from environment variables.
 
     Returns:
-        String of the snowflake connection url.
+        String of the snowflake connection URL.
     """
-    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
     sfUser = os.environ.get("SNOWFLAKE_USER")
     sfPswd = os.environ.get("SNOWFLAKE_PW")
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
     sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
     sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
     sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"
 
-    return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+    return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
+
+
+def get_redshift_connection_url() -> str:
+    """Get Amazon Redshift connection url from environment variables.
+
+    Returns:
+        String of the Amazon Redshift connection URL.
+    """
+    host = os.environ.get("REDSHIFT_HOST")
+    port = os.environ.get("REDSHIFT_PORT")
+    user = os.environ.get("REDSHIFT_USERNAME")
+    pswd = os.environ.get("REDSHIFT_PASSWORD")
+    db = os.environ.get("REDSHIFT_DATABASE")
+    ssl = os.environ.get("REDSHIFT_SSLMODE")
+
+    return f"redshift+psycopg2://{user}:{pswd}@{host}:{port}/{db}?sslmode={ssl}"
 
 
 def get_bigquery_table_prefix() -> str:
@@ -877,6 +895,8 @@ def get_connection_string_and_dialect(
     dialect: str = db_config["dialect"]
     if dialect == "snowflake":
         connection_string: str = get_snowflake_connection_url()
+    elif dialect == "redshift":
+        connection_string: str = get_redshift_connection_url()
     elif dialect == "bigquery":
         connection_string: str = get_bigquery_connection_url()
     elif dialect == "awsathena":

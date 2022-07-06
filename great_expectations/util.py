@@ -84,7 +84,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "expectation_validation_result": "expectation_validation_results",
     "contract": "contracts",
     "rendered_data_doc": "rendered_data_docs",
-    "data_context_variable": "data_context_variables",
+    "data_context_variables": "data_context_variables",
 }
 
 PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
@@ -98,7 +98,7 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "expectation_validation_results": "expectation_validation_result",
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
-    "data_context_variables": "data_context_variable",
+    "data_context_variables": "data_context_variables",
 }
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
@@ -931,8 +931,7 @@ def validate(
                 "When providing an expectation suite, expectation_suite_name cannot also be provided."
             )
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s"
-            % (data_asset_name, expectation_suite.expectation_suite_name)
+            f"Validating data_asset_name {data_asset_name} with expectation_suite_name {expectation_suite.expectation_suite_name}"
         )
 
     # If the object is already a DataAsset type, then this is purely a convenience method

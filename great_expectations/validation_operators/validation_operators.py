@@ -1,7 +1,7 @@
 import logging
 import warnings
 from collections import OrderedDict
-from typing import Union
+from typing import Optional, Union
 
 from dateutil.parser import parse
 
@@ -286,6 +286,7 @@ class ActionListValidationOperator(ValidationOperator):
         catch_exceptions=None,
         result_format=None,
         checkpoint_identifier=None,
+        checkpoint_name: Optional[str] = None,
     ) -> ValidationOperatorResult:
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -351,6 +352,9 @@ class ActionListValidationOperator(ValidationOperator):
 
                 if catch_exceptions is not None:
                     batch_validate_arguments["catch_exceptions"] = catch_exceptions
+
+                if checkpoint_name is not None:
+                    batch_validate_arguments["checkpoint_name"] = checkpoint_name
 
                 batch_and_async_result_tuples.append(
                     (
