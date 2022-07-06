@@ -87,6 +87,7 @@ class TaxiTestData:
             key=lambda element: (element is None, element),
             reverse=reverse,
         )
+
         if move_null_to_front:
             column_values = [None] + column_values[0:-1]
 
