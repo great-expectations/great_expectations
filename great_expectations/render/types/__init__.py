@@ -508,22 +508,22 @@ class RenderedAtomicValue(DictDot):
     def __init__(
         self,
         schema: Optional[dict] = None,
+        header: Optional["RenderedAtomicValue"] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        header: Optional["RenderedAtomicValue"] = None,
         header_row: Optional[List["RenderedAtomicValue"]] = None,
         table: Optional[List[List["RenderedAtomicValue"]]] = None,
-        graph: Optional[dict] = None,
+        graph: Optional["RenderedAtomicValue"] = None,
         kwargs: Optional[dict] = None,
     ) -> None:
         self.schema: Optional[dict] = schema
+        self.header: Optional[RenderedAtomicValue] = header
 
         # StringValueType
         self.template: Optional[str] = template
         self.params: Optional[dict] = params
 
         # TableType
-        self.header: Optional[RenderedAtomicValue] = header
         self.header_row: Optional[List[RenderedAtomicValue]] = header_row
         self.table: Optional[List[List[RenderedAtomicValue]]] = table
 
@@ -544,12 +544,12 @@ class RenderedAtomicValue(DictDot):
         d = renderedAtomicValueSchema.dump(self)
         if "schema" in d:
             d["schema"] = self.schema
+        if "header" in d:
+            d["header"] = self.header
         if "template" in d:
             d["template"] = self.template
         if "params" in d:
             d["params"] = self.params
-        if "header" in d:
-            d["header"] = self.header
         if "header_row" in d:
             d["header_row"] = self.header_row
         if "table" in d:
