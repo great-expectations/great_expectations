@@ -27,7 +27,6 @@ from great_expectations.validator.validator import Validator
                     "value_type": "StringValueType",
                     "name": "atomic.prescriptive.summary",
                     "value": {
-                        "graph": None,
                         "header": None,
                         "template": "Must have exactly $value rows.",
                         "schema": {"type": "com.superconductive.rendered.string"},
@@ -49,7 +48,6 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.diagnostic.observed_value",
                     "value": {
-                        "graph": None,
                         "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
@@ -69,7 +67,6 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.prescriptive.summary",
                     "value": {
-                        "graph": None,
                         "header": None,
                         "params": {
                             "column": {
@@ -110,7 +107,6 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.diagnostic.observed_value",
                     "value": {
-                        "graph": None,
                         "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
@@ -140,7 +136,6 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.prescriptive.summary",
                     "value": {
-                        "graph": None,
                         "header": {
                             "schema": {"type": "StringValueType"},
                             "value": {
@@ -197,7 +192,6 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.diagnostic.observed_value",
                     "value": {
-                        "graph": None,
                         "header": None,
                         "header_row": [
                             {"schema": {"type": "string"}, "value": "Quantile"},
@@ -233,7 +227,6 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.prescriptive.summary",
                     "value": {
-                        "graph": None,
                         "header": None,
                         "params": {
                             "column": {
@@ -273,7 +266,6 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.diagnostic.observed_value",
                     "value": {
-                        "graph": None,
                         "header": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},

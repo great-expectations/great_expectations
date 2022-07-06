@@ -530,7 +530,7 @@ class RenderedAtomicValue(DictDot):
         # GraphType
         self.graph: Optional[RenderedAtomicValueGraph] = RenderedAtomicValueGraph(
             graph=graph
-        )
+        ).graph
 
         # UnknownType
         self.kwargs: Optional[dict] = kwargs
@@ -557,7 +557,7 @@ class RenderedAtomicValue(DictDot):
         if "table" in d:
             d["table"] = self.table
         if "graph" in d:
-            d["graph"] = self.graph.to_json_dict()
+            d["graph"] = self.graph
         if "kwargs" in d:
             d["kwargs"] = self.kwargs
         return d
