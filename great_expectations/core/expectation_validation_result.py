@@ -344,7 +344,9 @@ class ExpectationValidationResultSchema(Schema):
     REMOVE_KEYS_IF_NONE = ["rendered_content"]
 
     @post_dump
-    def clean_null_attrs(self, data: dict, **kwargs):
+    def clean_null_attrs(self, data: dict, **kwargs) -> dict:
+        """Removes the attributes in ExpectationValidationResultSchema.REMOVE_KEYS_IF_NONE during serialization if
+        their values are None."""
         data = deepcopy(data)
         for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:

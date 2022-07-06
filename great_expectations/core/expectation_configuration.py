@@ -1423,6 +1423,8 @@ class ExpectationConfigurationSchema(Schema):
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs):
+        """Removes the attributes in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE during serialization if
+        their values are None."""
         data = copy.deepcopy(data)
         for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
