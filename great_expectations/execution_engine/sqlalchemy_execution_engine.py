@@ -353,7 +353,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ):
                 raw_connection = self._engine_backup.raw_connection()
                 raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
-                raw_connection.create_function("mod", 2, lambda n, m: int(n) % int(m))
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -385,7 +384,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-        self._data_splitter = SqlAlchemyDataSplitter()
+        self._data_splitter = SqlAlchemyDataSplitter(
+            dialect=self.engine.dialect.name.lower()
+        )
         self._data_sampler = SqlAlchemyDataSampler()
 
     @property
