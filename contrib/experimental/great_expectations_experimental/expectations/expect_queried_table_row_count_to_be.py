@@ -1,7 +1,7 @@
 """
-This is a template for creating custom TableQueryExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_query_expectations
+This is an example of a Custom QueryExpectation.
+For detailed information on QueryQExpectations, please see:
+    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
 from typing import Any, Dict, Optional, Union
@@ -17,20 +17,27 @@ from great_expectations.expectations.expectation import (
 )
 
 
+# <snippet>
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
+    # </snippet>
+    # <snippet>
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
-
+    # </snippet>
+    # <snippet>
     metric_dependencies = ("query.table",)
-
+    # </snippet>
+    # <snippet>
     query = """
             SELECT COUNT(*)
             FROM {active_batch}
             """
-
+    # </snippet>
+    # <snippet>
     success_keys = (
         "value",
         "query",
     )
+    # </snippet>
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
@@ -57,6 +64,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    # <snippet>
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -75,6 +83,8 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
             "result": {"observed_value": query_result},
         }
 
+    # </snippet>
+    # <snippet>
     examples = [
         {
             "data": [
@@ -136,13 +146,17 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
             ],
         },
     ]
-
+    # </snippet>
     # This dictionary contains metadata for display in the public gallery
+    # <snippet>
     library_metadata = {
         "tags": ["query-based"],
         "contributors": ["@joegargery"],
     }
+    # </snippet
 
 
 if __name__ == "__main__":
+    # <snippet>
     ExpectQueriedTableRowCountToBe().print_diagnostic_checklist()
+    # </snippet

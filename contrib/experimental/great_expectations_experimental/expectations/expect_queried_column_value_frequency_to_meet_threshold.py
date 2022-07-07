@@ -1,7 +1,7 @@
 """
-This is a template for creating custom TableQueryExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_query_expectations
+This is an example of a Custom QueryExpectation.
+For detailed information on QueryQExpectations, please see:
+    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
 from typing import Any, Dict, Optional, Union
@@ -17,24 +17,31 @@ from great_expectations.expectations.expectation import (
 )
 
 
+# <snippet>
 class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
+    # </snippet>
+    # <snippet>
     """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
-
+    # </snippet>
+    # <snippet>
     metric_dependencies = ("query.column",)
-
+    # </snippet>
+    # <snippet>
     query = """
             SELECT {col},
             CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch})
             FROM {active_batch}
             GROUP BY {col}
             """
-
+    # </snippet>
+    # <snippet>
     success_keys = (
         "column",
         "value",
         "threshold",
         "query",
     )
+    # </snippet>
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
@@ -71,6 +78,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    # <snippet>
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -104,7 +112,9 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
             "success": success,
             "result": {"observed_value": query_result[value]},
         }
+        # </snippet>
 
+    # <snippet>
     examples = [
         {
             "data": [
@@ -188,13 +198,17 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
             ],
         },
     ]
-
+    # </snippet>
+    # <snippet>
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "tags": ["query-based"],
         "contributors": ["@joegargery"],
     }
+    # </snippet>
 
 
 if __name__ == "__main__":
+    # <snippet>
     ExpectQueriedColumnValueFrequencyToMeetThreshold().print_diagnostic_checklist()
+    # </snippet>
