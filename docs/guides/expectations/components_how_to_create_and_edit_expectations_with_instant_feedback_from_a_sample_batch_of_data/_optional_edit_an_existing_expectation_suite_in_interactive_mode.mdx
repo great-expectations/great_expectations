@@ -6,15 +6,3 @@ If you have an existing Expectation Suite that you wish to edit in Interactive M
 ```
 
 This will open a Jupyter Notebook that will show the Expectations currently configured for your Expectation Suite.  You can then add, delete, or otherwise edit these Expectations.  When you are done, you will simply save the Expectation Suite and overwrite the old Expectations with the new ones you have executed.
-
-:::tip
-
-If you wish to create an Expectation Suite from the CLI without opening a Jupyter Notebook, you can do so by including the `--no-jupyter` flag in your command to the CLI.
-
-```bash title="Terminal input"
-> great_expectations suite new --no-jupyter
-```
-
-This will create an empty Expectation Suite, which you can then edit in Interactive Mode by using the `great_expectations suite edit` command, or in an external script.
-
-:::
