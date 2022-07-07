@@ -185,6 +185,41 @@ class CloudDataContext(AbstractDataContext):
                 f"expectation_suite {expectation_suite_name} not found"
             )
 
+    def create_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        overwrite_existing: bool = False,
+        ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ) -> ExpectationSuite:
+        """Build a new expectation suite and save it into the data_context expectation store.
+
+        Args:
+            expectation_suite_name: The name of the expectation_suite to create
+            overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
+                already exists.
+            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
+
+        Returns:
+            A new (empty) expectation suite.
+        """
+        if not isinstance(overwrite_existing, bool):
+            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+
+        expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite_name=expectation_suite_name, data_context=self
+        )
+        key: GeCloudIdentifier = GeCloudIdentifier(
+            resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+        )
+        if self.expectations_store.has_key(key) and not overwrite_existing:
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True.".format(ge_cloud_id)
+            )
+        self.expectations_store.set(key, expectation_suite, **kwargs)
+        return expectation_suite
+
     @property
     def root_directory(self) -> Optional[str]:
         """The root directory for configuration objects in the data context; the location in which

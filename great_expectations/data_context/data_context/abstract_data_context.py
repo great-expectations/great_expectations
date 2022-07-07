@@ -7,7 +7,7 @@ import os
 import sys
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Mapping, Optional, Union, cast
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -51,13 +51,13 @@ from great_expectations.data_context.util import (
     substitute_config_variable,
 )
 from great_expectations.datasource import LegacyDatasource
-from great_expectations.datasource.new_datasource import BaseDatasource
+from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
 )
 from great_expectations.util import load_class, verify_dynamic_loading_support
-from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.validator.validator import Validator
 
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
     UsageStatisticsHandler,
@@ -821,17 +821,14 @@ class AbstractDataContext(ABC):
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GE Cloud ID
         Args:
             expectation_suite_name (str): the name for the Expectation Suite
-            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
 
         Returns:
             expectation_suite
         """
-        # TODO: CLOUD MODE ALERT
         key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name
         )
@@ -847,6 +844,144 @@ class AbstractDataContext(ABC):
             raise ge_exceptions.DataContextError(
                 f"expectation_suite {expectation_suite_name} not found"
             )
+
+    def create_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        overwrite_existing: bool = False,
+        **kwargs,
+    ) -> ExpectationSuite:
+        """Build a new expectation suite and save it into the data_context expectation store.
+
+        Args:
+            expectation_suite_name: The name of the expectation_suite to create
+            overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
+                already exists.
+
+        Returns:
+            A new (empty) expectation suite.
+        """
+        # TODO: determine whether cloud_id is going to cause me trouble
+        if not isinstance(overwrite_existing, bool):
+            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+
+        expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite_name=expectation_suite_name, data_context=self
+        )
+
+        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite_name
+        )
+        if self.expectations_store.has_key(key) and not overwrite_existing:
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True.".format(
+                    expectation_suite_name
+                )
+            )
+
+        self.expectations_store.set(key, expectation_suite, **kwargs)
+        return expectation_suite
+
+    def get_batch_list(
+        self,
+        datasource_name: Optional[str] = None,
+        data_connector_name: Optional[str] = None,
+        data_asset_name: Optional[str] = None,
+        *,
+        batch_request: Optional[BatchRequestBase] = None,
+        batch_data: Optional[Any] = None,
+        data_connector_query: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
+        limit: Optional[int] = None,
+        index: Optional[Union[int, list, tuple, slice, str]] = None,
+        custom_filter_function: Optional[Callable] = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[dict] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        **kwargs,
+    ) -> List[Batch]:
+        """Get the list of zero or more batches, based on a variety of flexible input types.
+        This method applies only to the new (V3) Datasource schema.
+
+        Args:
+            batch_request
+
+            datasource_name
+            data_connector_name
+            data_asset_name
+
+            batch_request
+            batch_data
+            query
+            path
+            runtime_parameters
+            data_connector_query
+            batch_identifiers
+            batch_filter_parameters
+
+            limit
+            index
+            custom_filter_function
+
+            sampling_method
+            sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
+
+            batch_spec_passthrough
+
+            **kwargs
+
+        Returns:
+            (Batch) The requested batch
+
+        `get_batch` is the main user-facing API for getting batches.
+        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
+        Instead, this method is intended to help the user pick the right parameters
+
+        This method attempts to return any number of batches, including an empty list.
+        """
+
+        batch_request = get_batch_request_from_acceptable_arguments(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            data_connector_query=data_connector_query,
+            batch_identifiers=batch_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
+            batch_filter_parameters=batch_filter_parameters,
+            batch_spec_passthrough=batch_spec_passthrough,
+            **kwargs,
+        )
+        datasource_name = batch_request.datasource_name
+        if datasource_name in self.datasources:
+            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        else:
+            raise ge_exceptions.DatasourceError(
+                datasource_name,
+                "The given datasource could not be retrieved from the DataContext; "
+                "please confirm that your configuration is accurate.",
+            )
+        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     @staticmethod
     def _default_profilers_exist(directory_path: Optional[str]) -> bool:

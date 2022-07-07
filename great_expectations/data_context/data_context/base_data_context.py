@@ -27,12 +27,7 @@ except ImportError:
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequestBase,
-    IDDict,
-    get_batch_request_from_acceptable_arguments,
-)
+from great_expectations.core.batch import Batch, BatchRequestBase, IDDict
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -1196,8 +1191,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         This method attempts to return any number of batches, including an empty list.
         """
-
-        batch_request = get_batch_request_from_acceptable_arguments(
+        return super().get_batch_list(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -1210,8 +1204,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             custom_filter_function=custom_filter_function,
             sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
             splitter_kwargs=splitter_kwargs,
+            splitter_method=splitter_method,
             runtime_parameters=runtime_parameters,
             query=query,
             path=path,
@@ -1219,15 +1213,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             batch_spec_passthrough=batch_spec_passthrough,
             **kwargs,
         )
-        datasource_name = batch_request.datasource_name
-        if datasource_name in self.datasources:
-            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
-        else:
-            raise ge_exceptions.DatasourceError(
-                datasource_name,
-                "The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
-            )
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     # def get_validator(
     #     self,
@@ -1506,54 +1491,54 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         send_usage_message(self, event, event_payload, success)
 
-    def create_expectation_suite(
-        self,
-        expectation_suite_name: str,
-        overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
-        **kwargs,
-    ) -> ExpectationSuite:
-        """Build a new expectation suite and save it into the data_context expectation store.
-
-        Args:
-            expectation_suite_name: The name of the expectation_suite to create
-            overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
-                already exists.
-
-        Returns:
-            A new (empty) expectation suite.
-        """
-        if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
-
-        expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
-        )
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
-            )
-            if self.expectations_store.has_key(key) and not overwrite_existing:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True.".format(
-                        ge_cloud_id
-                    )
-                )
-        else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
-            if self.expectations_store.has_key(key) and not overwrite_existing:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite with name {} already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True.".format(
-                        expectation_suite_name
-                    )
-                )
-
-        self.expectations_store.set(key, expectation_suite, **kwargs)
-        return expectation_suite
+    # def create_expectation_suite(
+    #     self,
+    #     expectation_suite_name: str,
+    #     overwrite_existing: bool = False,
+    #     ge_cloud_id: Optional[str] = None,
+    #     **kwargs,
+    # ) -> ExpectationSuite:
+    #     """Build a new expectation suite and save it into the data_context expectation store.
+    #
+    #     Args:
+    #         expectation_suite_name: The name of the expectation_suite to create
+    #         overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
+    #             already exists.
+    #
+    #     Returns:
+    #         A new (empty) expectation suite.
+    #     """
+    #     if not isinstance(overwrite_existing, bool):
+    #         raise ValueError("Parameter overwrite_existing must be of type BOOL")
+    #
+    #     expectation_suite: ExpectationSuite = ExpectationSuite(
+    #         expectation_suite_name=expectation_suite_name, data_context=self
+    #     )
+    #     if self.ge_cloud_mode:
+    #         key: GeCloudIdentifier = GeCloudIdentifier(
+    #             resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+    #         )
+    #         if self.expectations_store.has_key(key) and not overwrite_existing:
+    #             raise ge_exceptions.DataContextError(
+    #                 "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
+    #                 "expectation_suite, set overwrite_existing=True.".format(
+    #                     ge_cloud_id
+    #                 )
+    #             )
+    #     else:
+    #         key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+    #             expectation_suite_name=expectation_suite_name
+    #         )
+    #         if self.expectations_store.has_key(key) and not overwrite_existing:
+    #             raise ge_exceptions.DataContextError(
+    #                 "expectation_suite with name {} already exists. If you would like to overwrite this "
+    #                 "expectation_suite, set overwrite_existing=True.".format(
+    #                     expectation_suite_name
+    #                 )
+    #             )
+    #
+    #     self.expectations_store.set(key, expectation_suite, **kwargs)
+    #     return expectation_suite
 
     def delete_expectation_suite(
         self,
