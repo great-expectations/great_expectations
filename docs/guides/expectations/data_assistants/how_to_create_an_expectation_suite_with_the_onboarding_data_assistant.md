@@ -41,12 +41,12 @@ Data Assistants excel at automating the Profiling process across multiple batche
 
 This is the configuration that you will use for your Datasource:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L30-L48
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L27-L45
 ```
 
 And this is the configuration that you will use for your Batch Request:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L79-L84
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L76-L81
 ```
 
 ### 2. Prepare a new Expectation Suite
@@ -54,7 +54,7 @@ And this is the configuration that you will use for your Batch Request:
 Preparing a new Expectation Suite is done with the Data Context's `.create_expectation_suite(...)` method, as seen in
 this code example:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L69-L73
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L66-L70
 ```
 
 ### 3. Run the Onboarding Data Assistant
@@ -66,14 +66,14 @@ That said, there are numerous parameters available for the `run(...)` method of 
 
 For this guide, you will exclude the following columns:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L90-L109
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L87-L106
 ```
 
 The following code shows how to run the Onboarding Assistant.  In this code block, `context` is an instance of your Data
  Context.  All the parameters available to the Onboarding Data Assistant's `run(...)` method are listed in this example,
  but those that are not used in this guide are commented out.
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L113-L154
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L110-L151
 ```
 
 ### 4. Save your Expectation Suite
@@ -81,18 +81,18 @@ The following code shows how to run the Onboarding Assistant.  In this code bloc
 Once you have executed the Onboarding Data Assistant's `run(...)` method and generated Expectations for your data, you
  need to load them into your Expectation Suite and save them.  You will do this by using a Validator:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L160-L163
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L157-L160
 ```
 
 Once you have your Validator, you can load the Onboarding Data Assistant's Expectations into it with the following
  command:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L169-L171
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L166-L168
 ```
 
 And once the Expectation Suite has been populated in the Validator, you can save it like so:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L175
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L172
 ```
 
 ### 5. Test your Expectation Suite with a `SimpleCheckpoint`
@@ -100,13 +100,13 @@ And once the Expectation Suite has been populated in the Validator, you can save
 To verify that your Expectation Suite is working, you can use a `SimpleCheckpoint`.  First, you will configure one to
  operate with the Expectation Suite and Batch Request that you have already defined:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L181-L189
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L178-L186
 ```
 
 Once you have our `SimpleCheckpoint`'s configuration defined, you can instantiate a `SimpleCheckpoint` and run it.  You
  will check the `"success"` key of the `SimpleCheckpoint`'s results to verify that your Expectation Suite worked.
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L193-L198
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L190-L197
 ```
 
 ### 6. (Optional) Edit your Expectation Suite, save, and test again.
