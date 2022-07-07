@@ -7,7 +7,7 @@
 * [CodeSee Architecture Diagrams](codesee-arch-diagram.yml)
   - Generates a visualization of proposed changes to the codebase through the use of https://www.codesee.io/
 * [Release Prep](release-prep.yml)
-  - Prepares a weekly release PR through use of the `ge_releaser` CLI tool (see https://github.com/superconductive/ge_releaser for more details) - individual releases can be configured at [../release_schedule.json](../release_scheudule.json)
+  - Prepares a weekly release PR through use of the `ge_releaser` CLI tool (see https://github.com/superconductive/ge_releaser for more details) - individual releases can be configured at [../release_schedule.json](../release_schedule.json)
 * [Release Cut - WIP](release-cut.yml)
   - Cuts the actual weekly release after release prep through the `ge_releaser` CLI tool (see https://github.com/superconductive/ge_releaser for more details)
 * [StaleBot](stale.yml)
