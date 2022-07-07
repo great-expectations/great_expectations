@@ -353,6 +353,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ):
                 raw_connection = self._engine_backup.raw_connection()
                 raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
+                raw_connection.create_function("floor", 1, lambda x: math.floor(x))
                 raw_connection.create_function("mod", 2, lambda n, m: n % m)
 
         # Send a connect event to provide dialect type

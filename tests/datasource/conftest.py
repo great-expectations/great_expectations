@@ -48,6 +48,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
     conn: sa.engine.Connection = engine.connect()
     raw_connection = engine.raw_connection()
     raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
+    raw_connection.create_function("floor", 1, lambda x: math.floor(x))
     raw_connection.create_function("mod", 2, lambda n, m: n % m)
 
     # Build a SqlAlchemyDataset using that database
