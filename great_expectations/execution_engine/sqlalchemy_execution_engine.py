@@ -1073,6 +1073,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         )
                     )
                 )
+
         return (
             sa.select("*")
             .select_from(
