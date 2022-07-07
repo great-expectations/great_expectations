@@ -10,7 +10,7 @@ title: Changelog
 * [DOCS] DOC-322 update terminology to v3 (#5326)
 * [MAINTENANCE] Change property name of TaxiSplittingTestCase to make it more general (#5419)
 * [MAINTENANCE] Ensure that `BaseDataContext` does not persist `Datasource` changes by default (#5423)
-* [MAINTENANCE] Migration of `project_config_with_variables_substituted` to `AbstractDataContext` (#5385) (thanks @Shinnnyshinshin)
+* [MAINTENANCE] Migration of `project_config_with_variables_substituted` to `AbstractDataContext` (#5385)
 * [MAINTENANCE] Improve type hinting in `GeCloudStoreBackend` (#5427)
 * [MAINTENANCE] Test serialization of text, table, and bulleted list `rendered_content` in `ExpectationValidationResult` (#5438)
 * [MAINTENANCE] Refactor `datasource_name` out of `DataContext.update_datasource` (#5440)
