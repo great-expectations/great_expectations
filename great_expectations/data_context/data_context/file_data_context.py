@@ -49,17 +49,6 @@ class FileDataContext(AbstractDataContext):
         )
         super().__init__(runtime_environment=runtime_environment)
 
-    def _init_variables(self) -> FileDataContextVariables:
-        raise NotImplementedError
-
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug("Starting DataContext._save_project_config")
-
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
-
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -107,3 +96,17 @@ class FileDataContext(AbstractDataContext):
 
         """
         return self._context_root_directory
+
+    def _init_variables(self) -> FileDataContextVariables:
+        raise NotImplementedError
+
+    def _save_project_config(self) -> None:
+        """Save the current project to disk."""
+        logger.debug("Starting DataContext._save_project_config")
+        self._save_project_config_to_disk()
+
+    def _save_project_config_to_disk(self) -> None:
+        """Helper method to make save_project_config more explicit"""
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+        with open(config_filepath, "w") as outfile:
+            self.config.to_yaml(outfile)
