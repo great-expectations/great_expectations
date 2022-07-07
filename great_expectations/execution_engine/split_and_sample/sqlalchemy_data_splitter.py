@@ -219,7 +219,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
         batch_identifiers: dict,
     ) -> bool:
         """Divide the values in the named column by `divisor`, and split on that"""
-        if self._dialect == "awsathena":
+        if self._dialect in [
+            "awsathena",
+            "mssql",
+        ]:
             return (
                 sa.cast(
                     sa.func.truncate(
@@ -705,7 +708,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
         divisor: int,
     ) -> Selectable:
         """Divide the values in the named column by `divisor`, and split on that"""
-        if self._dialect == "awsathena":
+        if self._dialect in [
+            "awsathena",
+            "mssql",
+        ]:
             return sa.select(
                 [
                     sa.func.distinct(
