@@ -10,7 +10,6 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from itertools import chain
 from numbers import Number
 from typing import Dict, List, Optional, Set, Tuple, Union
 
@@ -65,9 +64,8 @@ from great_expectations.expectations.registry import (
     register_renderer,
 )
 from great_expectations.expectations.util import (
-    ValidSqlAlchemyTypes,
-    ValidSqlTokens,
     render_evaluation_parameter_string,
+    valid_tokens_and_types,
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
@@ -1883,26 +1881,7 @@ class QueryExpectation(TableExpectation, ABC):
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
-                if x.lower() != ""
-                and x.lower()
-                not in set(
-                    chain.from_iterable(
-                        [
-                            list(
-                                map(
-                                    lambda y: y.lower(),
-                                    ValidSqlTokens.__members__.keys(),
-                                )
-                            ),
-                            list(
-                                map(
-                                    lambda z: z.lower(),
-                                    ValidSqlAlchemyTypes.__members__.keys(),
-                                )
-                            ),
-                        ]
-                    )
-                )
+                if x.lower() != "" and x.lower() not in valid_tokens_and_types
             }
             assert "{active_batch}" in parsed_query, (
                 "Your query appears to not be parameterized for a data asset. "
