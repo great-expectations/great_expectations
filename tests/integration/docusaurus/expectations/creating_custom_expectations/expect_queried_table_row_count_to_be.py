@@ -17,24 +17,27 @@ from great_expectations.expectations.expectation import (
 )
 
 
-class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
-    """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
-
-    metric_dependencies = ("query.column",)
-
+# <snippet>
+class ExpectQueriedTableRowCountToBe(QueryExpectation):
+    # </snippet>
+    # <snippet>
+    """Expect the expect the number of rows returned from a queried table to equal a specified value."""
+    # </snippet>
+    # <snippet>
+    metric_dependencies = ("query.table",)
+    # </snippet>
+    # <snippet>
     query = """
-            SELECT {col},
-            CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch})
+            SELECT COUNT(*)
             FROM {active_batch}
-            GROUP BY {col}
             """
-
+    # </snippet>
+    # <snippet>
     success_keys = (
-        "column",
         "value",
-        "threshold",
         "query",
     )
+    # </snippet>
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
@@ -43,9 +46,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
-        "column": None,
         "value": None,
-        "threshold": 1,
         "query": query,
     }
 
@@ -54,23 +55,16 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     ) -> None:
         super().validate_configuration(configuration)
         value = configuration["kwargs"].get("value")
-        threshold = configuration["kwargs"].get("threshold")
 
         try:
             assert value is not None, "'value' must be specified"
-            assert (isinstance(threshold, (int, float)) and 0 < threshold <= 1) or (
-                isinstance(threshold, list)
-                and all(isinstance(x, (int, float)) for x in threshold)
-                and all([0 < x <= 1 for x in threshold])
-                and 0 < sum(threshold) <= 1
-            ), "'threshold' must be 1, a float between 0 and 1, or a list of floats whose sum is between 0 and 1"
-            if isinstance(threshold, list):
-                assert isinstance(value, list) and len(value) == len(
-                    threshold
-                ), "'value' and 'threshold' must contain the same number of arguments"
+            assert (
+                isinstance(value, int) and value >= 0
+            ), "`value` must be an integer greater than or equal to zero"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    # <snippet>
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -80,31 +74,17 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
 
         value = configuration["kwargs"].get("value")
-        threshold = configuration["kwargs"].get("threshold")
-        query_result = metrics.get("query.column")
-        query_result = dict(query_result)
+        query_result = metrics.get("query.table")[0][0]
 
-        if isinstance(value, list):
-            success = all(
-                query_result[value[i]] >= threshold[i] for i in range(len(value))
-            )
-
-            return {
-                "success": success,
-                "result": {
-                    "observed_value": [
-                        query_result[value[i]] for i in range(len(value))
-                    ]
-                },
-            }
-
-        success = query_result[value] >= threshold
+        success = query_result == value
 
         return {
             "success": success,
-            "result": {"observed_value": query_result[value]},
+            "result": {"observed_value": query_result},
         }
 
+    # </snippet>
+    # <snippet>
     examples = [
         {
             "data": [
@@ -122,9 +102,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "col2",
-                        "value": "a",
-                        "threshold": 0.6,
+                        "value": 5,
                     },
                     "out": {"success": True},
                     "only_for": ["sqlite", "spark"],
@@ -134,51 +112,31 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "col1",
                         "value": 2,
-                        "threshold": 1,
                     },
                     "out": {"success": False},
                     "only_for": ["sqlite", "spark"],
                 },
                 {
-                    "title": "multi_value_positive_test",
+                    "title": "positive_test_static_data_asset",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "col2",
-                        "value": ["a", "b"],
-                        "threshold": [0.6, 0.4],
-                    },
-                    "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
-                },
-                {
-                    "title": "multi_value_positive_test_static_data_asset",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {
-                        "column": "col2",
-                        "value": ["a", "b"],
-                        "threshold": [0.6, 0.4],
+                        "value": 5,
                         "query": """
-                                 SELECT {col},
-                                 CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM test)
+                                 SELECT COUNT(*)
                                  FROM test
-                                 GROUP BY {col}
                                  """,
                     },
                     "out": {"success": True},
                     "only_for": ["sqlite"],
                 },
                 {
-                    "title": "multi_value_positive_test_row_condition",
+                    "title": "positive_test_row_condition",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "col2",
-                        "value": ["a", "b"],
-                        "threshold": [0.6, 0.4],
+                        "value": 2,
                         "row_condition": 'col("col1")==2',
                         "condition_parser": "great_expectations__experimental__",
                     },
@@ -188,13 +146,33 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
             ],
         },
     ]
-
+    # </snippet>
     # This dictionary contains metadata for display in the public gallery
+    # <snippet>
     library_metadata = {
         "tags": ["query-based"],
         "contributors": ["@joegargery"],
     }
+    # </snippet
 
 
 if __name__ == "__main__":
-    ExpectQueriedColumnValueFrequencyToMeetThreshold().print_diagnostic_checklist()
+    # <snippet>
+    ExpectQueriedTableRowCountToBe().print_diagnostic_checklist()
+    # </snippet
+
+# Note to users: code below this line is only for integration testing -- ignore!
+
+diagnostics = ExpectQueriedTableRowCountToBe().run_diagnostics()
+
+for check in diagnostics["tests"]:
+    assert check["test_passed"] is True
+    assert check["error_diagnostics"] is None
+
+for check in diagnostics["errors"]:
+    assert check is None
+
+for check in diagnostics["maturity_checklist"]["experimental"]:
+    if check["message"] == "Passes all linting checks":
+        continue
+    assert check["passed"] is True

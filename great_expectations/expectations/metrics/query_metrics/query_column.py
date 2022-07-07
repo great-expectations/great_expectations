@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict
 
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
@@ -9,6 +9,9 @@ from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,
+)
+from great_expectations.rule_based_profiler.types.metric_computation_result import (
+    MetricValues,
 )
 
 
@@ -27,7 +30,7 @@ class QueryColumn(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> Union[List[Any], Any]:
+    ) -> MetricValues:
         column = metric_value_kwargs.get("column")
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
@@ -66,7 +69,7 @@ class QueryColumn(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> Union[List[Any], Any]:
+    ) -> MetricValues:
         column = metric_value_kwargs.get("column")
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
