@@ -304,7 +304,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 project_config=project_config, runtime_environment=runtime_environment
             )
 
-        # TODO: remove this method once refactor of DataContext is complete
+        # NOTE: <DataContextRefactor> This will ensure that parameters set in _data_context are persisted to self.
+        # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
+        # necessary properties / overrides
         self._apply_temporary_overrides()
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -324,7 +326,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_name,
                     validation_operator_config,
                 )
-        # TODO: Migrate to AbstractDataContext
+        # NOTE: <DataContextRefactor>  This will be migrated to AbstractDataContext, along with associated methods
+        # and properties.
         self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
@@ -337,14 +340,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def _apply_temporary_overrides(self) -> None:
         """
-        This is a helper method that only exists during the DataContext refactor that is occuring 202206.
+        This is a helper method that only exists during the DataContext refactor that is occurring 202206.
 
         Until the composition-pattern is complete for BaseDataContext, we have to load the private properties from the
         private self._data_context object into properties in self
 
         This is a helper method that performs this loading.
         """
-        # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
+        # NOTE: <DataContextRefactor> This remains a rather clunky way of ensuring that all necessary parameters and
+        # values from self._data_context are persisted to self.
         self._project_config = self._data_context._project_config
         self.runtime_environment = self._data_context.runtime_environment or {}
         self._config_variables = self._data_context.config_variables

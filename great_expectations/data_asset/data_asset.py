@@ -32,6 +32,9 @@ from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
 )
+from great_expectations.data_context.data_context.explorer_data_context import (
+    ExplorerDataContext,
+)
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.marshmallow__shade import ValidationError
 
@@ -330,7 +333,9 @@ class DataAsset:
 
                 return_obj = recursively_convert_to_json_serializable(return_obj)
 
-                if self._data_context is not None:
+                if self._data_context is not None and isinstance(
+                    self._data_context, ExplorerDataContext
+                ):
                     return_obj = self._data_context.update_return_obj(self, return_obj)
 
                 return return_obj
