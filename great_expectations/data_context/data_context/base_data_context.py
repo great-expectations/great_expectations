@@ -307,7 +307,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # NOTE: <DataContextRefactor> This will ensure that parameters set in _data_context are persisted to self.
         # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
         # necessary properties / overrides
-        self._apply_temporary_overrides()
+        self._synchronize_self_with_underlying_data_context()
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
@@ -338,7 +338,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
 
-    def _apply_temporary_overrides(self) -> None:
+    def _synchronize_self_with_underlying_data_context(self) -> None:
         """
         This is a helper method that only exists during the DataContext refactor that is occurring 202206.
 
@@ -661,7 +661,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             ValueError: If the datasource name isn't provided or cannot be found.
         """
         super().delete_datasource(datasource_name)
-        self._apply_temporary_overrides()
+        self._synchronize_self_with_underlying_data_context()
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -1435,7 +1435,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         """
         new_datasource = super().add_datasource(name, initialize, **kwargs)
-        self._apply_temporary_overrides()
+        self._synchronize_self_with_underlying_data_context()
         return new_datasource
 
     def update_datasource(
@@ -1665,7 +1665,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 overwrite_existing,
                 **kwargs,
             )
-        self._apply_temporary_overrides()
+        self._synchronize_self_with_underlying_data_context()
 
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
