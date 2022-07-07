@@ -240,7 +240,7 @@ Great Expectations provides a small number of simple, ready-to-use `query.*` Met
 
 Query Metric functions have the `@metric_value` decorator, with the appropriate `engine`. Metric functions can be complex, but they're often very short. Here's the definition for a Metric function to execute our parameterized query, and return the result.
 
-```python file=../../../../great_expectations/expectations/metrics/query_metrics/table_query.py#L20-L55
+```python file=../../../../great_expectations/expectations/metrics/query_metrics/query_table.py#L20-L55
 ```
 
 :::note
@@ -541,7 +541,7 @@ Great Expectations provides a small number of simple, ready-to-use `query.*` Met
 
 Query Metric functions have the `@metric_value` decorator, with the appropriate `engine`. Metric functions can be complex, but they're often very short. Here's the definition for a Metric function to execute our parameterized query, and return the result.
 
-```python file=../../../../great_expectations/expectations/metrics/query_metrics/table_query.py#L20-L55
+```python file=../../../../great_expectations/expectations/metrics/query_metrics/query_table.py#L20-L55
 ```
 
 :::note
