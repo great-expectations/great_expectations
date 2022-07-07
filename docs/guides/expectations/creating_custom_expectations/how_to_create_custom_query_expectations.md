@@ -156,7 +156,7 @@ Completeness checklist for ExpectQueriedTableRowCountToBe:
 Congratulations! You're one step closer to implementing a Custom Query Expectation.
 
 <details>
-<title>What about my Metric?</title>
+<summary>What about my Metric?</summary>
 If you've built a Custom Expectation before, you may have noticed that the template doesn't contain a <TechnicalTag tag="metric" text="Metric"/> class.
 
 While you are still able to create a Custom Metric for your Custom Expectation if needed, the nature of `QueryExpectations` 
@@ -264,7 +264,7 @@ Becomes:
   <summary>Other parameters</summary>
   <div>
     <p>
-        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success. `QueryExpectations` must include `"query"` in `success_keys`.
+        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success. <code>QueryExpectations</code> must include <code>"query"</code> in <code>success_keys</code>.
     </p>
     <p>
         <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
@@ -456,7 +456,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 Congratulations! You're one step closer to implementing a Custom Query Expectation.
 
 <details>
-<title>What about my Metric?</title>
+<summary>What about my Metric?</summary>
 If you've built a Custom Expectation before, you may have noticed that the template doesn't contain a <TechnicalTag tag="metric" text="Metric"/> class.
 
 While you are still able to create a Custom Metric for your Custom Expectation if needed, the nature of `QueryExpectations` 
@@ -567,7 +567,7 @@ Becomes:
   <summary>Other parameters</summary>
   <div>
     <p>
-        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success. `QueryExpectations` must include `"query"` in `success_keys`.
+        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success. <code>QueryExpectations</code> must include <code>"query"</code> in <code>success_keys</code>.
     </p>
     <p>
         <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
