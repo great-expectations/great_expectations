@@ -119,7 +119,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py#L21
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L21
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -127,7 +127,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py#L24
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L24
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -135,7 +135,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py#L161
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L161
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -172,7 +172,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py#L88-L148
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L88-L148
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -224,7 +224,7 @@ This:
 
 Becomes something like this:
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py#L30-L33
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L30-L33
 ```
 
 :::warning
@@ -257,7 +257,7 @@ This tuple:
 
 Becomes:
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py#L27
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L27
 ```
 
 <details>
@@ -281,7 +281,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py#L68-L74
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L68-L74
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -290,7 +290,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `query.table` Metric against our success keys:
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py#L68-L84
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L68-L84
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -419,7 +419,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L21
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L21
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -427,7 +427,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L24
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L24
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -435,7 +435,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L213
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L213
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -472,7 +472,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L118-L200
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L118-L200
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -524,7 +524,7 @@ This:
 
 Becomes something like this:
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L30-L35
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L30-L35
 ```
 
 :::warning
@@ -560,7 +560,7 @@ This tuple:
 
 Becomes:
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L27
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L27
 ```
 
 <details>
@@ -584,7 +584,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L82-L88
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L82-L88
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -593,7 +593,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `query.column` Metric against our success keys:
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L82-L114
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L82-L114
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -661,7 +661,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python file=../../../../contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L204-L207
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L204-L207
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
