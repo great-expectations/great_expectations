@@ -521,6 +521,12 @@ class DataAssistantResult(SerializableDictDot):
             charts=charts, theme=altair_theme
         )
 
+        display_chart: alt.Chart = (
+            DataAssistantResult._combine_themed_charts_into_single_display_chart(
+                themed_charts=themed_charts
+            )
+        )
+
         # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
         dropdown_title_color: str = altair_theme["legend"]["titleColor"]
         dropdown_title_font: str = altair_theme["font"]
@@ -543,9 +549,29 @@ class DataAssistantResult(SerializableDictDot):
         # max rows for Altair charts is set to 5,000 without this
         alt.data_transformers.disable_max_rows()
 
-        chart: alt.Chart
-        for chart in themed_charts:
-            chart.display()
+        display_chart.display()
+
+    @staticmethod
+    def _combine_themed_charts_into_single_display_chart(
+        themed_charts: List[alt.Chart],
+    ) -> alt.Chart:
+
+        display_chart_df: pd.DataFrame = pd.DataFrame(columns=["plot", ""])
+
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
+            name="plot",
+            alt_type=AltairDataTypes.NOMINAL.value,
+        )
+
+        chart_titles: List[str] = [chart.title for chart in themed_charts].sort()
+        input_dropdown: alt.binding_select = alt.binding_select(
+            options=chart_titles, name="Select Chart: "
+        )
+        selection: alt.selection_single = alt.selection_single(
+            empty="none",
+            bind=input_dropdown,
+            fields=[domain_plot_component.name],
+        )
 
     @staticmethod
     def _apply_theme(
