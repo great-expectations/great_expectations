@@ -1,3 +1,5 @@
+# To add an additional team, simply add a top-level key with a list of associated GitHub user handles
+
 core-team:
   - '@NathanFarmer'    # Nathan Farmer
   - '@Shinnnyshinshin' # Will Shin
