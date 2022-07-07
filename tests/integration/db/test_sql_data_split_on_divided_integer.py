@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 from tests.integration.db.taxi_data_utils import (
@@ -26,14 +25,7 @@ if __name__ == "test_script_module":
     table_name: str = loaded_table.table_name
     test_df: pd.DataFrame = loaded_table.inserted_dataframe
 
-    test_column_name: str = "passenger_count"
-    df_null: pd.DataFrame = test_df[test_df[test_column_name].isnull()]
-    df_null[test_column_name] = df_null[test_column_name].apply(
-        lambda x: None if np.isnan(x) else x
-    )
-    df_nonnull: pd.DataFrame = test_df[~test_df[test_column_name].isnull()]
-    df_nonnull[test_column_name] = df_nonnull[test_column_name].astype(int)
-    test_df = pd.concat([df_null, df_nonnull])
+    test_column_name: str = "pickup_location_id"
 
     taxi_test_data: TaxiTestData = TaxiTestData(
         test_df=test_df,

@@ -426,13 +426,13 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
         TaxiSplittingTestCasesDividedInteger(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
-                test_column_name="passenger_count",
+                test_column_name="pickup_location_id",
             )
         ),
         TaxiSplittingTestCasesModInteger(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
-                test_column_name="passenger_count",
+                test_column_name="pickup_location_id",
             )
         ),
         TaxiSplittingTestCasesDateTime(

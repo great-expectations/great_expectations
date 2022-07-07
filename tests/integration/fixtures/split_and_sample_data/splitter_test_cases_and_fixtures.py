@@ -76,25 +76,59 @@ class TaxiTestData:
             ),
         )
 
-    def get_unique_test_column_values(
+    def get_test_column_values(self) -> List[Optional[Any]]:
+        column_values: List[Optional[Any]] = self.test_df[
+            self.test_column_name
+        ].tolist()
+        return column_values
+
+    def get_unique_sorted_test_column_values(
         self,
         reverse: Optional[bool] = False,
         move_null_to_front: Optional[bool] = False,
         limit: Optional[int] = None,
     ) -> List[Optional[Any]]:
-        column_values: List[Optional[Any]] = sorted(
-            self.test_df[self.test_column_name].unique().tolist(),
+        column_values: List[Optional[Any]] = self.get_test_column_values()
+        column_values = list(set(column_values))
+        column_values = sorted(
+            column_values,
             key=lambda element: (element is None, element),
             reverse=reverse,
         )
 
-        if move_null_to_front:
-            column_values = [None] + column_values[0:-1]
+        column_value: Any
+        if (
+            move_null_to_front
+            and any([column_value is None for column_value in column_values])
+            and column_values[0] is not None
+            and column_values[-1] is None
+        ):
+            num_null_values: int = column_values.count(None)
+            column_values = list(filter(None, column_values))
+            column_values = num_null_values * [None] + column_values
 
         if limit is None:
             return column_values
 
         return column_values[:limit]
+
+    def get_divided_integer_test_column_values(
+        self, divisor: int
+    ) -> List[Optional[Any]]:
+        column_values: List[Optional[Any]] = self.get_test_column_values()
+
+        column_value: Any
+        column_values = [column_value // divisor for column_value in column_values]
+
+        return list(set(column_values))
+
+    def get_mod_integer_test_column_values(self, mod: int) -> List[Optional[Any]]:
+        column_values: List[Optional[Any]] = self.get_test_column_values()
+
+        column_value: Any
+        column_values = [column_value % mod for column_value in column_values]
+
+        return list(set(column_values))
 
 
 @dataclass
@@ -153,7 +187,9 @@ class TaxiSplittingTestCasesColumnValue(TaxiSplittingTestCasesBase):
                 },
                 num_expected_batch_definitions=8,
                 num_expected_rows_in_first_batch_definition=9,
-                expected_column_values=self.taxi_test_data.get_unique_test_column_values(),
+                expected_column_values=self.taxi_test_data.get_unique_sorted_test_column_values(
+                    reverse=False, move_null_to_front=False, limit=None
+                ),
             ),
         ]
 
@@ -166,14 +202,12 @@ class TaxiSplittingTestCasesDividedInteger(TaxiSplittingTestCasesBase):
                 splitter_method_name="split_on_divided_integer",
                 splitter_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
-                    "divisor": 3,
+                    "divisor": 5,
                 },
-                num_expected_batch_definitions=4,
-                num_expected_rows_in_first_batch_definition=14,
-                expected_column_values=self.taxi_test_data.get_unique_test_column_values(
-                    reverse=False,
-                    move_null_to_front=True,
-                    limit=4,
+                num_expected_batch_definitions=41,
+                num_expected_rows_in_first_batch_definition=2,
+                expected_column_values=self.taxi_test_data.get_divided_integer_test_column_values(
+                    divisor=5
                 ),
             ),
         ]
@@ -187,14 +221,12 @@ class TaxiSplittingTestCasesModInteger(TaxiSplittingTestCasesBase):
                 splitter_method_name="split_on_mod_integer",
                 splitter_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
-                    "mod": 3,
+                    "mod": 5,
                 },
-                num_expected_batch_definitions=4,
-                num_expected_rows_in_first_batch_definition=14,
-                expected_column_values=self.taxi_test_data.get_unique_test_column_values(
-                    reverse=False,
-                    move_null_to_front=True,
-                    limit=4,
+                num_expected_batch_definitions=5,
+                num_expected_rows_in_first_batch_definition=61,
+                expected_column_values=self.taxi_test_data.get_mod_integer_test_column_values(
+                    mod=5
                 ),
             ),
         ]
