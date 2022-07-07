@@ -219,14 +219,22 @@ class SqlAlchemyDataSplitter(DataSplitter):
         batch_identifiers: dict,
     ) -> bool:
         """Divide the values in the named column by `divisor`, and split on that"""
-        if self._dialect in [
-            "awsathena",
-            "mssql",
-        ]:
+        if self._dialect == "awsathena":
             return (
                 sa.cast(
                     sa.func.truncate(
                         sa.cast(sa.column(column_name), sa.Integer) / divisor
+                    ),
+                    sa.Integer,
+                )
+                == batch_identifiers[column_name]
+            )
+
+        if self._dialect == "mssql":
+            return (
+                sa.cast(
+                    sa.func.round(
+                        (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0, 1
                     ),
                     sa.Integer,
                 )
@@ -708,16 +716,29 @@ class SqlAlchemyDataSplitter(DataSplitter):
         divisor: int,
     ) -> Selectable:
         """Divide the values in the named column by `divisor`, and split on that"""
-        if self._dialect in [
-            "awsathena",
-            "mssql",
-        ]:
+        if self._dialect == "awsathena":
             return sa.select(
                 [
                     sa.func.distinct(
                         sa.cast(
                             sa.func.truncate(
                                 sa.cast(sa.column(column_name), sa.Integer) / divisor
+                            ),
+                            sa.Integer,
+                        )
+                    )
+                ]
+            ).select_from(sa.text(table_name))
+
+        if self._dialect == "mssql":
+            return sa.select(
+                [
+                    sa.func.distinct(
+                        sa.cast(
+                            sa.func.round(
+                                (sa.cast(sa.column(column_name), sa.Integer) / divisor),
+                                0,
+                                1,
                             ),
                             sa.Integer,
                         )
