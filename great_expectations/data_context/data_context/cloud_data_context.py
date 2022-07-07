@@ -1,5 +1,5 @@
 import logging
-from typing import List, Mapping, Optional, Union
+from typing import List, Mapping, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -156,6 +156,34 @@ class CloudDataContext(AbstractDataContext):
             )
         self._evaluation_parameter_dependencies_compiled = False
         self.expectations_store.set(key, expectation_suite, **kwargs)
+
+    def get_expectation_suite(
+        self,
+        expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> ExpectationSuite:
+        """Get an Expectation Suite by name or GE Cloud ID
+        Args:
+            expectation_suite_name (str): the name for the Expectation Suite
+            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
+
+        Returns:
+            expectation_suite
+        """
+        key: GeCloudIdentifier = GeCloudIdentifier(
+            resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+        )
+        if self.expectations_store.has_key(key):
+            expectations_schema_dict: dict = cast(
+                dict, self.expectations_store.get(key)
+            )
+            # create the ExpectationSuite from constructor
+            return ExpectationSuite(**expectations_schema_dict, data_context=self)
+
+        else:
+            raise ge_exceptions.DataContextError(
+                f"expectation_suite {expectation_suite_name} not found"
+            )
 
     @property
     def root_directory(self) -> Optional[str]:
