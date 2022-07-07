@@ -299,13 +299,6 @@ from great_expectations.validator.validator import Validator
                                     "continuousWidth": 400,
                                 }
                             },
-                            "data": {"name": "data-a04b648cbdd65328968ff668b11c3840"},
-                            "datasets": {
-                                "data-a04b648cbdd65328968ff668b11c3840": [
-                                    {"fraction": 0.3, "values": 2000000},
-                                    {"fraction": 0.7, "values": 6000000},
-                                ]
-                            },
                             "encoding": {
                                 "tooltip": [
                                     {"field": "values", "type": "quantitative"},
@@ -365,16 +358,6 @@ from great_expectations.validator.validator import Validator
                                     "continuousHeight": 300,
                                     "continuousWidth": 400,
                                 }
-                            },
-                            "data": {"name": "data-ffa3bd6113c0f98ab6ced98077dc7786"},
-                            "datasets": {
-                                "data-ffa3bd6113c0f98ab6ced98077dc7786": [
-                                    {"fraction": 0.0, "values": 2000000},
-                                    {"fraction": 0.0, "values": 6000000},
-                                    {"fraction": 0.3333333333333333, "values": 397433},
-                                    {"fraction": 0.3333333333333333, "values": 2388055},
-                                    {"fraction": 0.3333333333333333, "values": 9488404},
-                                ]
                             },
                             "encoding": {
                                 "tooltip": [
@@ -460,6 +443,12 @@ def test_inline_renderer_rendered_content_return_value(
         actual_serialized_expectation_configuration_rendered_atomic_content[0]["value"][
             "graph"
         ].pop("$schema")
+        actual_serialized_expectation_configuration_rendered_atomic_content[0]["value"][
+            "graph"
+        ].pop("data")
+        actual_serialized_expectation_configuration_rendered_atomic_content[0]["value"][
+            "graph"
+        ].pop("datasets")
 
     actual_serialized_expectation_validation_result_rendered_atomic_content: List[
         dict
@@ -476,6 +465,12 @@ def test_inline_renderer_rendered_content_return_value(
         actual_serialized_expectation_validation_result_rendered_atomic_content[0][
             "value"
         ]["graph"].pop("$schema")
+        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
+            "value"
+        ]["graph"].pop("data")
+        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
+            "value"
+        ]["graph"].pop("datasets")
 
     assert (
         actual_serialized_expectation_configuration_rendered_atomic_content
