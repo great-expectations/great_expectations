@@ -38,5 +38,4 @@ if __name__ == "test_script_module":
         taxi_splitting_test_cases=taxi_splitting_test_cases,
         connection_string=connection_string,
         table_name=table_name,
-        dialect=dialect,
     )
