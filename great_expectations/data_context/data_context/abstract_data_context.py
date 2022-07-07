@@ -956,8 +956,6 @@ class AbstractDataContext(ABC):
     ) -> Optional[str]:
         """
         Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        TODO: This method can probably be refactored out.
         """
         if path is None:
             return
