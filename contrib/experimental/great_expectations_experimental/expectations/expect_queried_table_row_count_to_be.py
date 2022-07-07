@@ -48,7 +48,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     ) -> None:
         super().validate_configuration(configuration)
         value = configuration["kwargs"].get("value")
-        threshold = configuration["kwargs"].get("threshold")
 
         try:
             assert value is not None, "'value' must be specified"
