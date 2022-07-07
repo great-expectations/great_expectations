@@ -4,6 +4,24 @@
 Changelog
 #########
 
+0.15.13
+-----------------
+* [FEATURE] Add atomic `rendered_content` to `ExpectationValidationResult` and `ExpectationConfiguration` (#5369)
+* [FEATURE] Add `DataContext.update_datasource` CRUD method (#5417)
+* [FEATURE] Refactor Splitter Testing Modules so as to Make them More General and Add Unit and Integration Tests for "split_on_whole_table" and "split_on_column_value" on SQLite and All Supported Major SQL Backends (#5430)
+* [FEATURE] Support underscore in the `condition_value` of a `row_condition` (#5393) (thanks @sp1thas)
+* [DOCS] DOC-322 update terminology to v3 (#5326)
+* [MAINTENANCE] Change property name of TaxiSplittingTestCase to make it more general (#5419)
+* [MAINTENANCE] Ensure that `BaseDataContext` does not persist `Datasource` changes by default (#5423)
+* [MAINTENANCE] Migration of `project_config_with_variables_substituted` to `AbstractDataContext` (#5385) (thanks @Shinnnyshinshin)
+* [MAINTENANCE] Improve type hinting in `GeCloudStoreBackend` (#5427)
+* [MAINTENANCE] Test serialization of text, table, and bulleted list `rendered_content` in `ExpectationValidationResult` (#5438)
+* [MAINTENANCE] Refactor `datasource_name` out of `DataContext.update_datasource` (#5440)
+* [MAINTENANCE] Add checkpoint name to validation results (#5442)
+* [MAINTENANCE] Remove checkpoint from top level of schema since it is captured in `meta` (#5445)
+* [MAINTENANCE] Add unit and integration tests for Splitting on Divided Integer (#5449)
+* [MAINTENANCE] Update cli with new default simple checkpoint name (#5450)
+
 0.15.12
 -----------------
 * [FEATURE] Add Rule Statistics to DataAssistantResult for display in Jupyter notebook (#5368)
