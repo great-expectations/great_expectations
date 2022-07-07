@@ -240,8 +240,8 @@ class ExecutionEngine(ABC):
         """The data from the currently-active batch."""
         if self.active_batch_data_id is None:
             return None
-        else:
-            return self.loaded_batch_data_dict.get(self.active_batch_data_id)
+
+        return self.loaded_batch_data_dict.get(self.active_batch_data_id)
 
     @property
     def loaded_batch_data_dict(self):
@@ -608,6 +608,7 @@ class ExecutionEngine(ABC):
                 logger.warning(
                     f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
                 )
+
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod
