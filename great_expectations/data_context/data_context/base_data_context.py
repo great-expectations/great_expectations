@@ -43,7 +43,6 @@ from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer 
     DatasourceAnonymizer,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
     add_datasource_usage_statistics,
     get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
@@ -69,7 +68,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     DatasourceConfig,
     GeCloudConfig,
-    ProgressBarsConfig,
     dataContextConfigSchema,
     datasourceConfigSchema,
 )

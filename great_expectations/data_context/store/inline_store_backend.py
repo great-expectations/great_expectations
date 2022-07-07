@@ -78,13 +78,8 @@ class InlineStoreBackend(StoreBackend):
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             return project_config
 
-        try:
-            self._data_context._save_project_config()
-        except DataContextError as e:
-            logger.info(
-                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} "
-                f"is not file-system enabled. Continuing without saving config to disk..."
-            )
+        # TODO: this logic will be cleaned up to not use `self._data_context`
+        self._data_context._save_project_config()
         variable_config: Any = project_config[resource_type]
 
         if resource_name is not None:
@@ -204,13 +199,7 @@ class InlineStoreBackend(StoreBackend):
 
     def _save_changes(self) -> None:
         # TODO: this logic will be cleaned up to not use self._data_context
-        try:
-            self._data_context._save_project_config()
-        except DataContextError as e:
-            logger.info(
-                f"DataContext of type {type(self._data_context)} used with {self.__class__.__name__} "
-                f"is not file-system enabled. Continuing without saving config to disk..."
-            )
+        self._data_context._save_project_config()
 
     @staticmethod
     def _determine_resource_type_and_name_from_key(
