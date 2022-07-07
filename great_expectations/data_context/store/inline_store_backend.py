@@ -7,7 +7,6 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.exceptions import DataContextError
 from great_expectations.exceptions.exceptions import StoreBackendError
 from great_expectations.util import filter_properties_dict
 
