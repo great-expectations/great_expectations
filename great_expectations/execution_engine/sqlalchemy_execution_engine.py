@@ -1,5 +1,6 @@
 import copy
 import datetime
+import hashlib
 import logging
 import math
 import random
@@ -353,6 +354,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ):
                 raw_connection = self._engine_backup.raw_connection()
                 raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
+                raw_connection.create_function(
+                    "md5",
+                    2,
+                    lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[
+                        -1 * d :
+                    ],
+                )
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(

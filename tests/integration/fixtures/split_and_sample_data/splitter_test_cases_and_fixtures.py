@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, List, Optional
@@ -130,6 +131,26 @@ class TaxiTestData:
 
         return list(set(column_values))
 
+    def get_hashed_test_column_values(self, hash_digits: int) -> List[Optional[Any]]:
+        """
+        hashlib.md5(string).hexdigest()
+        hashlib.md5(str(tuple_).encode("utf-8")).hexdigest()
+        [:num_digits]
+        """
+        column_values: List[Optional[Any]] = self.get_unique_sorted_test_column_values(
+            reverse=False, move_null_to_front=False, limit=None
+        )
+
+        column_value: Any
+        column_values = [
+            hashlib.md5(str(column_value).encode("utf-8")).hexdigest()[
+                -1 * hash_digits :
+            ]
+            for column_value in column_values
+        ]
+
+        return list(sorted(set(column_values)))
+
 
 @dataclass
 class TaxiSplittingTestCase:
@@ -240,14 +261,12 @@ class TaxiSplittingTestCasesHashedColumn(TaxiSplittingTestCasesBase):
                 splitter_method_name="split_on_hashed_column",
                 splitter_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
-                    "hash_digits": 1,
+                    "hash_digits": 2,
                 },
-                num_expected_batch_definitions=4,
-                num_expected_rows_in_first_batch_definition=14,
-                expected_column_values=self.taxi_test_data.get_unique_test_column_values(
-                    reverse=False,
-                    move_null_to_front=False,
-                    limit=None,
+                num_expected_batch_definitions=5,
+                num_expected_rows_in_first_batch_definition=5,
+                expected_column_values=self.taxi_test_data.get_hashed_test_column_values(
+                    hash_digits=2
                 ),
             ),
         ]

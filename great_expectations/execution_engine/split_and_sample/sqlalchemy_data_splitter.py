@@ -305,18 +305,21 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
         )
 
-    @staticmethod
     def split_on_hashed_column(
+        self,
         column_name: str,
         hash_digits: int,
         batch_identifiers: dict,
     ) -> bool:
         """Split on the hashed value of the named column"""
-        return (
-            sa.func.right(
-                sa.func.md5(sa.cast(sa.column(column_name), sa.String)), hash_digits
+        if self._dialect == "sqlite":
+            return (
+                sa.func.md5(sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits)
+                == batch_identifiers[column_name]
             )
-            == batch_identifiers[column_name]
+
+        raise NotImplementedError(
+            f'Splitter method "split_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
         )
 
     def get_data_for_batch_identifiers(
@@ -842,13 +845,24 @@ class SqlAlchemyDataSplitter(DataSplitter):
             .select_from(sa.text(table_name))
         )
 
-    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column(
+        self,
         table_name: str,
         column_name: str,
         hash_digits: int,
     ) -> Selectable:
         """Note: this method is experimental. It does not work with all SQL dialects."""
-        return sa.select(
-            [sa.func.md5(sa.cast(sa.column(column_name), sa.String))]
-        ).select_from(sa.text(table_name))
+        if self._dialect == "sqlite":
+            return sa.select(
+                [
+                    sa.func.distinct(
+                        sa.func.md5(
+                            sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits
+                        )
+                    )
+                ]
+            ).select_from(sa.text(table_name))
+
+        raise NotImplementedError(
+            f'Splitter method "split_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
+        )

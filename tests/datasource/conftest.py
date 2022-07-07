@@ -1,3 +1,4 @@
+import hashlib
 import math
 import os
 
@@ -48,6 +49,9 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
     conn: sa.engine.Connection = engine.connect()
     raw_connection = engine.raw_connection()
     raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
+    raw_connection.create_function(
+        "md5", 2, lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[-1 * d :]
+    )
 
     # Build a SqlAlchemyDataset using that database
     return SqlAlchemyExecutionEngine(
