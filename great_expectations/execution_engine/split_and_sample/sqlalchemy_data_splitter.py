@@ -217,7 +217,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     ) -> bool:
         """Divide the values in the named column by `divisor`, and split on that"""
         return (
-            sa.cast(sa.column(column_name), sa.Integer) / divisor
+            sa.func.floor(sa.cast(sa.column(column_name), sa.Integer) / divisor)
             == batch_identifiers[column_name]
         )
 
@@ -679,7 +679,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
     ) -> Selectable:
         """Divide the values in the named column by `divisor`, and split on that"""
         return sa.select(
-            [sa.func.distinct(sa.cast(sa.column(column_name), sa.Integer) / divisor)]
+            [
+                sa.func.distinct(
+                    sa.func.floor(sa.cast(sa.column(column_name), sa.Integer) / divisor)
+                )
+            ]
         ).select_from(sa.text(table_name))
 
     @staticmethod
