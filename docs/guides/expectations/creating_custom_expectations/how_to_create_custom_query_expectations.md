@@ -530,7 +530,7 @@ Becomes something like this:
 :::warning
 As noted above, `QueryExpectations` support parameterization of your <TechnicalTag tag="batch" text="Active Batch"/>, and can support parameterization of a column name.
 
-While parameterizing a column name with `{col}` is optional and supports flexibility in your Custom Expectations, <br/>
+While parameterizing a column name with `{col}` is optional and supports flexibility in your Custom Expectations, 
 we *strongly* recommend making use of batch parameterization, by querying against `{active_batch}`. 
 Not doing so could result in your Custom Expectation unintentionally being run against the wrong data!
 :::
