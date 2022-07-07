@@ -57,6 +57,12 @@ def test_expectation_self_check():
                 "samples": [],
             },
             {
+                "name": "atomic.prescriptive.kwargs",
+                "is_supported": True,
+                "is_standard": False,
+                "samples": [],
+            },
+            {
                 "name": "atomic.prescriptive.summary",
                 "is_supported": True,
                 "is_standard": False,
