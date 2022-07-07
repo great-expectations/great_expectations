@@ -77,8 +77,6 @@ class InlineStoreBackend(StoreBackend):
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             return project_config
 
-        # TODO: this logic will be cleaned up to not use `self._data_context`
-        self._data_context._save_project_config()
         variable_config: Any = project_config[resource_type]
 
         if resource_name is not None:
@@ -197,7 +195,7 @@ class InlineStoreBackend(StoreBackend):
             )
 
     def _save_changes(self) -> None:
-        # TODO: this logic will be cleaned up to not use self._data_context
+        # NOTE: <DataContextRefactor> This responsibility will be moved into DataContext Variables object
         self._data_context._save_project_config()
 
     @staticmethod

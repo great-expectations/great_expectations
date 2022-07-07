@@ -294,8 +294,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 project_config=project_config, runtime_environment=runtime_environment
             )
 
-        # TODO: remove this method once refactor of DataContext is complete
-        self._apply_temporary_overrides()
+        # NOTE: <DataContextRefactor> This will ensure that parameters set in _data_context are persisted to self.
+        # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
+        # necessary properties / overrides
+        self._synchronize_self_with_underlying_data_context()
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
@@ -323,16 +325,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
 
-    def _apply_temporary_overrides(self) -> None:
+    def _synchronize_self_with_underlying_data_context(self) -> None:
         """
-        This is a helper method that only exists during the DataContext refactor that is occuring 202206.
+        This is a helper method that only exists during the DataContext refactor that is occurring 202206.
 
         Until the composition-pattern is complete for BaseDataContext, we have to load the private properties from the
         private self._data_context object into properties in self
 
         This is a helper method that performs this loading.
         """
-        # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
+        # NOTE: <DataContextRefactor> This remains a rather clunky way of ensuring that all necessary parameters and
+        # values from self._data_context are persisted to self.
         self._project_config = self._data_context._project_config
         self.runtime_environment = self._data_context.runtime_environment or {}
         self._config_variables = self._data_context.config_variables
@@ -646,7 +649,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             ValueError: If the datasource name isn't provided or cannot be found.
         """
         super().delete_datasource(datasource_name)
-        self._apply_temporary_overrides()
+        self._synchronize_self_with_underlying_data_context()
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -1410,7 +1413,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         """
         new_datasource = super().add_datasource(name, initialize, **kwargs)
-        self._apply_temporary_overrides()
+        self._synchronize_self_with_underlying_data_context()
         return new_datasource
 
     def update_datasource(
@@ -1640,7 +1643,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 overwrite_existing,
                 **kwargs,
             )
-        self._apply_temporary_overrides()
+        self._synchronize_self_with_underlying_data_context()
 
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name

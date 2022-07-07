@@ -393,7 +393,10 @@ class Validator:
                     # Add a "success" object to the config
                     stored_config.success_on_last_run = validation_result.success
 
-                if self._data_context is not None:
+                # NOTE: <DataContextRefactor> Indirect way to checking whether _data_context is a ExplorerDataContext
+                if self._data_context is not None and hasattr(
+                    self._data_context, "update_return_obj"
+                ):
                     validation_result = self._data_context.update_return_obj(
                         self, validation_result
                     )

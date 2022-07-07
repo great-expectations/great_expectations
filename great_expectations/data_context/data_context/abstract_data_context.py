@@ -7,7 +7,10 @@ import os
 import sys
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.store import EvaluationParameterStore
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -36,6 +39,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
+    NotebookConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
     datasourceConfigSchema,
@@ -52,10 +56,6 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-    DataAssistantDispatcher,
-)
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
 
@@ -75,6 +75,8 @@ class AbstractDataContext(ABC):
     majority of DataContext functionality lives here.
     """
 
+    # NOTE: <DataContextRefactor> These can become a property like ExpectationsStore.__name__ or placed in a separate
+    # test_yml_config module so AbstractDataContext is not so cluttered.
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     GLOBAL_CONFIG_PATHS = [
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
@@ -135,12 +137,12 @@ class AbstractDataContext(ABC):
 
         Args:
             runtime_environment (dict): a dictionary of config variables that
-                override both those set in config_variables.yml and the environment
+                override those set in config_variables.yml and the environment
         """
         if runtime_environment is None:
             runtime_environment = {}
         self.runtime_environment = runtime_environment
-        # these attributes that are set downstream.
+        # These attributes that are set downstream.
         self._variables = None
         self._config_variables = None
 
@@ -218,7 +220,6 @@ class AbstractDataContext(ABC):
             self._in_memory_instance_id = instance_id
         return instance_id
 
-    # properties
     @property
     def config_variables(self) -> Dict:
         """Loads config variables into cache, by calling _load_config_variables()
@@ -231,16 +232,20 @@ class AbstractDataContext(ABC):
 
     @property
     def config(self) -> DataContextConfig:
+        """
+        Returns current DataContext's project_config
+        """
+        # NOTE: <DataContextRefactor> _project_config is currently only defined in child classes.
+        # See if this can this be also defined in AbstractDataContext as abstract property
         return self._project_config
 
     @property
     def root_directory(self) -> Optional[str]:
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
         """
+        # NOTE: <DataContextRefactor>  Why does this exist in AbstractDataContext? CloudDataContext and
+        # FileDataContext both use it. Determine whether this should stay here or in child classes
         if hasattr(self, "_context_root_directory"):
             return self._context_root_directory
         return None
@@ -251,10 +256,9 @@ class AbstractDataContext(ABC):
 
     @property
     def plugins_directory(self) -> Optional[str]:
-        """The directory in which custom plugin modules should be placed.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-        """
+        """The directory in which custom plugin modules should be placed."""
+        # NOTE: <DataContextRefactor>  Why does this exist in AbstractDataContext? CloudDataContext and
+        # FileDataContext both use it. Determine whether this should stay here or in child classes
         return self._normalize_absolute_or_relative_path(
             path=self.project_config_with_variables_substituted.plugins_directory
         )
@@ -273,17 +277,17 @@ class AbstractDataContext(ABC):
         return self.stores[self.expectations_store_name]
 
     @property
-    def evaluation_parameter_store_name(self):
+    def evaluation_parameter_store_name(self) -> Optional[str]:
         return (
             self.project_config_with_variables_substituted.evaluation_parameter_store_name
         )
 
     @property
-    def evaluation_parameter_store(self):
+    def evaluation_parameter_store(self) -> "EvaluationParameterStore":
         return self.stores[self.evaluation_parameter_store_name]
 
     @property
-    def validations_store_name(self):
+    def validations_store_name(self) -> Optional[str]:
         return self.project_config_with_variables_substituted.validations_store_name
 
     @property
@@ -291,7 +295,7 @@ class AbstractDataContext(ABC):
         return self.stores[self.validations_store_name]
 
     @property
-    def checkpoint_store_name(self):
+    def checkpoint_store_name(self) -> Optional[str]:
         try:
             return self.project_config_with_variables_substituted.checkpoint_store_name
         except AttributeError:
@@ -361,7 +365,7 @@ class AbstractDataContext(ABC):
             )
 
     @property
-    def profiler_store_name(self) -> str:
+    def profiler_store_name(self) -> Optional[str]:
         try:
             return self.project_config_with_variables_substituted.profiler_store_name
         except AttributeError:
@@ -467,18 +471,6 @@ class AbstractDataContext(ABC):
         )
         return datasource
 
-    def update_return_obj(self, data_asset, return_obj):
-        """Helper called by data_asset.
-
-        Args:
-            data_asset: The data_asset whose validation produced the current return object
-            return_obj: the return object to update
-
-        Returns:
-            return_obj: the return object, potentially changed into a widget by the configured expectation explorer
-        """
-        return return_obj
-
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
     ) -> DataContextConfig:
@@ -499,7 +491,7 @@ class AbstractDataContext(ABC):
             )
         )
 
-    def list_stores(self):
+    def list_stores(self) -> List[Store]:
         """List currently-configured Stores on this context"""
 
         stores = []
@@ -513,7 +505,7 @@ class AbstractDataContext(ABC):
             stores.append(masked_config)
         return stores
 
-    def list_active_stores(self):
+    def list_active_stores(self) -> List[Store]:
         """
         List active Stores on this context. Active stores are identified by setting the following parameters:
             expectations_store_name,
@@ -543,7 +535,9 @@ class AbstractDataContext(ABC):
             )
 
         return [
-            store for store in self.list_stores() if store["name"] in active_store_names
+            store
+            for store in self.list_stores()
+            if store.get("name") in active_store_names
         ]
 
     def get_datasource(
@@ -604,7 +598,7 @@ class AbstractDataContext(ABC):
         return datasources
 
     def delete_datasource(self, datasource_name: str) -> None:
-        """Delete a data source
+        """Delete a datasource
         Args:
             datasource_name: The name of the datasource to delete.
 
@@ -623,8 +617,7 @@ class AbstractDataContext(ABC):
 
     def list_expectation_suite_names(self) -> List[str]:
         """
-        Lists the available expectation suite names. If in ge_cloud_mode, a list of
-        GE Cloud ids is returned instead.
+        Lists the available expectation suite names.
         """
         sorted_expectation_suite_names = [
             i.expectation_suite_name for i in self.list_expectation_suites()
@@ -632,7 +625,7 @@ class AbstractDataContext(ABC):
         sorted_expectation_suite_names.sort()
         return sorted_expectation_suite_names
 
-    def list_expectation_suites(self):
+    def list_expectation_suites(self) -> Optional[List[str]]:
         """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
@@ -985,6 +978,9 @@ class AbstractDataContext(ABC):
 
     @staticmethod
     def _default_profilers_exist(directory_path: Optional[str]) -> bool:
+        """
+        Helper method. Do default profilers exist in directory_path?
+        """
         if not directory_path:
             return False
 
@@ -1029,7 +1025,9 @@ class AbstractDataContext(ABC):
         return None
 
     @staticmethod
-    def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
+    def _get_metric_configuration_tuples(
+        metric_configuration, base_kwargs=None
+    ) -> List[Tuple[str, Union[dict, Any]]]:
         if base_kwargs is None:
             base_kwargs = {}
 
@@ -1119,7 +1117,8 @@ class AbstractDataContext(ABC):
         config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
         usage_stats_opted_out: bool = self._check_global_usage_statistics_opt_out()
         # if usage_stats_opted_out then usage_statistics is false
-        # TODO: Refactor so that this becomes usage_stats_enabled (and we don't have to flip the boolean in our minds)
+        # NOTE: <DataContextRefactor> 202207 Refactor so that this becomes usage_stats_enabled
+        # (and we don't have to flip a boolean in our minds)
         if usage_stats_opted_out:
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
@@ -1213,6 +1212,8 @@ class AbstractDataContext(ABC):
         Returns:
             bool that tells you whether usage_statistics is opted out
         """
+        # NOTE: <DataContextRefactor> Refactor so that opt_out is no longer used, and we don't have to flip boolean in
+        # our minds.
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
@@ -1228,6 +1229,7 @@ class AbstractDataContext(ABC):
             states = config.BOOLEAN_STATES
             for falsey_string in AbstractDataContext.FALSEY_STRINGS:
                 states[falsey_string] = False
+
             states["TRUE"] = True
             states["True"] = True
             config.BOOLEAN_STATES = states
@@ -1301,7 +1303,6 @@ class AbstractDataContext(ABC):
         return new_store
 
     # properties
-
     @property
     def variables(self) -> DataContextVariables:
         if self._variables is None:
@@ -1319,7 +1320,7 @@ class AbstractDataContext(ABC):
         return self._usage_statistics_handler
 
     @property
-    def anonymous_usage_statistics(self):
+    def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
         return self.project_config_with_variables_substituted.anonymous_usage_statistics
 
     @property
@@ -1327,7 +1328,7 @@ class AbstractDataContext(ABC):
         return self.project_config_with_variables_substituted.progress_bars
 
     @property
-    def notebooks(self):
+    def notebooks(self) -> NotebookConfig:
         return self.project_config_with_variables_substituted.notebooks
 
     @property
@@ -1336,7 +1337,7 @@ class AbstractDataContext(ABC):
         return self._cached_datasources
 
     @property
-    def data_context_id(self):
+    def data_context_id(self) -> str:
         return (
             self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
         )
@@ -1391,7 +1392,7 @@ class AbstractDataContext(ABC):
         """
         self._config_variables = self._load_config_variables()
 
-    def _determine_substitutions(self) -> dict:
+    def _determine_substitutions(self) -> Dict:
         """Aggregates substitutions from the project's config variables file, any environment variables, and
         the runtime environment.
 
@@ -1404,7 +1405,7 @@ class AbstractDataContext(ABC):
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
-        substitutions = {
+        substitutions: dict = {
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
@@ -1428,6 +1429,7 @@ class AbstractDataContext(ABC):
         )
 
     def _init_datasources(self) -> None:
+        """Initialize the datasources in store"""
         for datasource_name in self._datasource_store.list_keys():
             try:
                 datasource: Optional[
@@ -1443,7 +1445,7 @@ class AbstractDataContext(ABC):
 
     def _instantiate_datasource_from_config(
         self, name: str, config: Union[dict, DatasourceConfig]
-    ) -> Union[LegacyDatasource, BaseDatasource]:
+    ) -> Datasource:
         """Instantiate a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name(str): name of datasource
@@ -1457,9 +1459,9 @@ class AbstractDataContext(ABC):
         # context provides. Datasources should not see unsubstituted variables in their config.
 
         try:
-            datasource: Union[
-                LegacyDatasource, BaseDatasource
-            ] = self._build_datasource_from_config(name=name, config=config)
+            datasource: Datasource = self._build_datasource_from_config(
+                name=name, config=config
+            )
         except Exception as e:
             raise ge_exceptions.DatasourceInitializationError(
                 datasource_name=name, message=str(e)
@@ -1468,7 +1470,7 @@ class AbstractDataContext(ABC):
 
     def _build_datasource_from_config(
         self, name: str, config: Union[dict, DatasourceConfig]
-    ):
+    ) -> Datasource:
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
@@ -1479,8 +1481,8 @@ class AbstractDataContext(ABC):
             "Datasource",
         ]:
             config.update({"data_context_root_directory": self.root_directory})
-        module_name = "great_expectations.datasource"
-        datasource = instantiate_class_from_config(
+        module_name: str = "great_expectations.datasource"
+        datasource: Datasource = instantiate_class_from_config(
             config=config,
             runtime_environment={"data_context": self, "concurrency": self.concurrency},
             config_defaults={"module_name": module_name},
@@ -1495,7 +1497,8 @@ class AbstractDataContext(ABC):
 
     def _instantiate_datasource_from_config_and_update_project_config(
         self, name: str, config: dict, initialize: bool = True
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+    ) -> Optional[Datasource]:
+        """ """
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
@@ -1511,10 +1514,10 @@ class AbstractDataContext(ABC):
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
-        datasource: Optional[Union[LegacyDatasource, BaseDatasource]] = None
+        datasource: Optional[Datasource] = None
         if initialize:
             try:
-                datasource = self._instantiate_datasource_from_config(
+                datasource: Datasource = self._instantiate_datasource_from_config(
                     name=name, config=substituted_config
                 )
                 self._cached_datasources[name] = datasource
@@ -1527,7 +1530,6 @@ class AbstractDataContext(ABC):
 
     def _construct_data_context_id(self) -> str:
         # Choose the id of the currently-configured expectations store, if it is a persistent store
-        # overrridden in CloudDataContext : Note for Review
         expectations_store = self._stores[
             self.project_config_with_variables_substituted.expectations_store_name
         ]
@@ -1570,12 +1572,12 @@ class AbstractDataContext(ABC):
         requested_metrics is a dictionary like this:
 
           requested_metrics:
-            *:  # The asterisk here matches *any* expectation suite name
-              # use the 'kwargs' key to request metrics that are defined by kwargs,
-              # for example because they are defined only for a particular column
-              # - column:
-              #     Age:
-              #        - expect_column_min_to_be_between.result.observed_value
+            *: The asterisk here matches *any* expectation suite name
+               use the 'kwargs' key to request metrics that are defined by kwargs,
+               for example because they are defined only for a particular column
+               - column:
+                   Age:
+                     - expect_column_min_to_be_between.result.observed_value
                 - statistics.evaluated_expectations
                 - statistics.successful_expectations
         """
