@@ -8,7 +8,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
-    parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 from great_expectations.rule_based_profiler.config import (
