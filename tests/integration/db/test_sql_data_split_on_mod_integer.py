@@ -27,6 +27,7 @@ if __name__ == "test_script_module":
     test_df: pd.DataFrame = loaded_table.inserted_dataframe
 
     test_column_name: str = "passenger_count"
+
     df_null: pd.DataFrame = test_df[test_df[test_column_name].isnull()]
     df_null[test_column_name] = df_null[test_column_name].apply(
         lambda x: None if np.isnan(x) else x

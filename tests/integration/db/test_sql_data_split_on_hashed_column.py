@@ -6,7 +6,7 @@ from tests.integration.db.taxi_data_utils import (
 )
 from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fixtures import (
     TaxiSplittingTestCasesBase,
-    TaxiSplittingTestCasesDateTime,
+    TaxiSplittingTestCasesHashedColumn,
     TaxiTestData,
 )
 from tests.test_utils import LoadedTable, get_connection_string_and_dialect
@@ -25,14 +25,14 @@ if __name__ == "test_script_module":
     table_name: str = loaded_table.table_name
     test_df: pd.DataFrame = loaded_table.inserted_dataframe
 
-    test_column_name: str = "pickup_datetime"
+    test_column_name: str = "pickup_location_id"
 
     taxi_test_data: TaxiTestData = TaxiTestData(
         test_df=test_df,
         test_column_name=test_column_name,
     )
     taxi_splitting_test_cases: TaxiSplittingTestCasesBase = (
-        TaxiSplittingTestCasesDateTime(taxi_test_data=taxi_test_data)
+        TaxiSplittingTestCasesHashedColumn(taxi_test_data=taxi_test_data)
     )
     _execute_taxi_splitting_test_cases(
         taxi_splitting_test_cases=taxi_splitting_test_cases,

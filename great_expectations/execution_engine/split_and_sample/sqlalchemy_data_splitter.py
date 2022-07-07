@@ -255,9 +255,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
         batch_identifiers: dict,
     ) -> bool:
         """Split on the hashed value of the named column"""
-
         return (
-            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
+            sa.func.right(
+                sa.func.md5(sa.cast(sa.column(column_name), sa.String)), hash_digits
+            )
             == batch_identifiers[column_name]
         )
 
@@ -713,6 +714,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         hash_digits: int,
     ) -> Selectable:
         """Note: this method is experimental. It does not work with all SQL dialects."""
-        return sa.select([sa.func.md5(sa.column(column_name))]).select_from(
-            sa.text(table_name)
-        )
+        return sa.select(
+            [sa.func.md5(sa.cast(sa.column(column_name), sa.String))]
+        ).select_from(sa.text(table_name))
