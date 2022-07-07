@@ -48,6 +48,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
     date_part e.g. SqlAlchemyDataSplitter.date_part.MONTH
     """
 
+    def __init__(self, dialect: str):
+        self._dialect = dialect
+
     DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
         "split_on_year": "get_data_for_batch_identifiers_year",
         "split_on_year_and_month": "get_data_for_batch_identifiers_year_and_month",
@@ -209,15 +212,39 @@ class SqlAlchemyDataSplitter(DataSplitter):
             == batch_identifiers[column_name]
         )
 
-    @staticmethod
     def split_on_divided_integer(
+        self,
         column_name: str,
         divisor: int,
         batch_identifiers: dict,
     ) -> bool:
         """Divide the values in the named column by `divisor`, and split on that"""
+        if self._dialect == "awsathena":
+            return (
+                sa.cast(
+                    sa.func.truncate(
+                        sa.cast(sa.column(column_name), sa.Integer) / divisor
+                    ),
+                    sa.Integer,
+                )
+                == batch_identifiers[column_name]
+            )
+
+        if self._dialect == "sqlite":
+            return (
+                sa.cast(
+                    (sa.cast(sa.column(column_name), sa.Integer) / divisor), sa.Integer
+                )
+                == batch_identifiers[column_name]
+            )
+
         return (
-            sa.func.floor(sa.cast(sa.column(column_name), sa.Integer) / divisor)
+            sa.cast(
+                sa.func.trunc(
+                    (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0
+                ),
+                sa.Integer,
+            )
             == batch_identifiers[column_name]
         )
 
@@ -671,17 +698,48 @@ class SqlAlchemyDataSplitter(DataSplitter):
             ]
         ).select_from(sa.text(table_name))
 
-    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer(
+        self,
         table_name: str,
         column_name: str,
         divisor: int,
     ) -> Selectable:
         """Divide the values in the named column by `divisor`, and split on that"""
+        if self._dialect == "awsathena":
+            return sa.select(
+                [
+                    sa.func.distinct(
+                        sa.cast(
+                            sa.func.truncate(
+                                sa.cast(sa.column(column_name), sa.Integer) / divisor
+                            ),
+                            sa.Integer,
+                        )
+                    )
+                ]
+            ).select_from(sa.text(table_name))
+
+        if self._dialect == "sqlite":
+            return sa.select(
+                [
+                    sa.func.distinct(
+                        sa.cast(
+                            (sa.cast(sa.column(column_name), sa.Integer) / divisor),
+                            sa.Integer,
+                        )
+                    )
+                ]
+            ).select_from(sa.text(table_name))
+
         return sa.select(
             [
                 sa.func.distinct(
-                    sa.func.floor(sa.cast(sa.column(column_name), sa.Integer) / divisor)
+                    sa.cast(
+                        sa.func.trunc(
+                            (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0
+                        ),
+                        sa.Integer,
+                    )
                 )
             ]
         ).select_from(sa.text(table_name))
