@@ -271,3 +271,27 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     assert (
         result["success"] == success and result["result"]["observed_value"] == observed
     )
+
+
+def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite_multi_value(
+    titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    validator: Validator = context.get_validator(batch_request=sqlite_batch_request)
+
+    with pytest.warns(UserWarning):
+        result: ExpectationValidationResult = (
+            validator.expect_queried_column_value_frequency_to_meet_threshold(
+                column="Sex",
+                value=["male", "female"],
+                threshold=[0.6, 0.3],
+                row_condition='col("Age")>17',
+                condition_parser="great_expectations__experimental__",
+            )
+        )
+
+    assert result["success"] == True and result["result"]["observed_value"] == [
+        0.6393939393939394,
+        0.3606060606060606,
+    ]
