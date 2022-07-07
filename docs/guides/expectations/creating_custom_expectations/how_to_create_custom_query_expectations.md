@@ -123,7 +123,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/query_expectation_template.py#25
+```python file=../../../../examples/expectations/query_expectation_template.py#L25
 ```
 
 with something like:
@@ -423,7 +423,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/query_expectation_template.py#25
+```python file=../../../../examples/expectations/query_expectation_template.py#L25
 ```
 
 with something like:
