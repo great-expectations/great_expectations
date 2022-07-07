@@ -114,5 +114,5 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines pytest-random-order
-              pytest $(GE_pytest_opts) --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest $(GE_pytest_opts) --random-order
             displayName: 'pytest'
