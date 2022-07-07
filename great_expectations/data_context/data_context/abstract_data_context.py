@@ -7,7 +7,10 @@ import os
 import sys
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.store import EvaluationParameterStore
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -18,11 +21,7 @@ from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context_variables import DataContextVariables
-from great_expectations.data_context.store import (
-    EvaluationParameterStore,
-    Store,
-    TupleStoreBackend,
-)
+from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
@@ -40,7 +39,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
@@ -275,7 +273,7 @@ class AbstractDataContext(ABC):
         )
 
     @property
-    def evaluation_parameter_store(self) -> EvaluationParameterStore:
+    def evaluation_parameter_store(self) -> "EvaluationParameterStore":
         return self.stores[self.evaluation_parameter_store_name]
 
     @property
