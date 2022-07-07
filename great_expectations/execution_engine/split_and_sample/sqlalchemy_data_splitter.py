@@ -270,13 +270,22 @@ class SqlAlchemyDataSplitter(DataSplitter):
             == batch_identifiers[column_name]
         )
 
-    @staticmethod
     def split_on_mod_integer(
+        self,
         column_name: str,
         mod: int,
         batch_identifiers: dict,
     ) -> bool:
         """Divide the values in the named column by `mod`, and split on that"""
+        if self._dialect in [
+            "sqlite",
+            "mssql",
+        ]:
+            return (
+                sa.cast(sa.column(column_name), sa.Integer) % mod
+                == batch_identifiers[column_name]
+            )
+
         return (
             sa.func.mod(sa.cast(sa.column(column_name), sa.Integer), mod)
             == batch_identifiers[column_name]
@@ -797,13 +806,21 @@ class SqlAlchemyDataSplitter(DataSplitter):
             ]
         ).select_from(sa.text(table_name))
 
-    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer(
+        self,
         table_name: str,
         column_name: str,
         mod: int,
     ) -> Selectable:
         """Divide the values in the named column by `mod`, and split on that"""
+        if self._dialect in [
+            "sqlite",
+            "mssql",
+        ]:
+            return sa.select(
+                [sa.func.distinct(sa.cast(sa.column(column_name), sa.Integer) % mod)]
+            ).select_from(sa.text(table_name))
+
         return sa.select(
             [
                 sa.func.distinct(
