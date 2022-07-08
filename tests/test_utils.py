@@ -553,8 +553,9 @@ def load_and_concatenate_csvs(
     dfs: List[pd.DataFrame] = []
     for csv_path in csv_paths:
         df = pd.read_csv(csv_path)
-        for column_name_to_convert in convert_column_names_to_datetime:
-            df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+        convert_string_columns_to_datetime(
+            df=df, column_names_to_convert=convert_column_names_to_datetime
+        )
         if not load_full_dataset:
             # Improving test performance by only loading the first 10 rows of our test data into the db
             df = df.head(10)
@@ -564,6 +565,21 @@ def load_and_concatenate_csvs(
     all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
 
     return all_dfs_concatenated
+
+
+def convert_string_columns_to_datetime(
+    df: pd.DataFrame, column_names_to_convert: Optional[List[str]] = None
+) -> None:
+    """
+    Converts specified columns (e.g., "pickup_datetime" and "dropoff_datetime") to datetime column type.
+    Side-effect: Passed DataFrame is modified (in-place).
+    """
+    if column_names_to_convert is None:
+        column_names_to_convert = []
+
+    column_name_to_convert: str
+    for column_name_to_convert in column_names_to_convert:
+        df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
 
 
 def load_data_into_test_database(
