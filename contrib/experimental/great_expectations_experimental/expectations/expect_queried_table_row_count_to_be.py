@@ -1,6 +1,6 @@
 """
 This is an example of a Custom QueryExpectation.
-For detailed information on QueryQExpectations, please see:
+For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
@@ -18,7 +18,6 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
-
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
 
     metric_dependencies = ("query.table",)

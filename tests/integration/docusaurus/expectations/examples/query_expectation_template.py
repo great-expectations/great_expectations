@@ -18,19 +18,29 @@ from great_expectations.expectations.expectation import (
 
 
 # This class defines the Expectation itself
+# <snippet>
 class ExpectQueryToMatchSomeCriteria(QueryExpectation):
+    # </snippet>
+    # <snippet>
     """TODO: Add a docstring here"""
+    # </snippet>
 
     # This is the id string of the Metric(s) used by this Expectation.
+    # <snippet>
     metric_dependencies = ("METRIC NAME GOES HERE",)
+    # </snippet>
 
     # This is the default, baked-in SQL Query for this QueryExpectation
+    # <snippet>
     query = """
             SQL QUERY GOES HERE
             """
+    # </snippet>
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
+    # <snippet>
     success_keys = ("query",)
+    # </snippet>
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
@@ -72,6 +82,7 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
+    # <snippet>
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -81,18 +92,26 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
         raise NotImplementedError
 
+    # </snippet>
+
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
+    # <snippet>
     examples = []
+    # </snippet>
 
     # This dictionary contains metadata for display in the public gallery
+    # <snippet>
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@your_name_here",  # Don't forget to add your github handle here!
         ],
     }
+    # </snippet
 
 
 if __name__ == "__main__":
+    # <snippet>
     ExpectQueryToMatchSomeCriteria().print_diagnostic_checklist()
+    # </snippet
