@@ -1,4 +1,3 @@
-import copy
 import datetime
 import logging
 import os
@@ -40,16 +39,13 @@ from great_expectations.core.batch import (
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
     add_datasource_usage_statistics,
     get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
@@ -57,7 +53,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -68,21 +63,14 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.store import Store, TupleStoreBackend
-from great_expectations.data_context.store.expectations_store import ExpectationsStore
-from great_expectations.data_context.store.profiler_store import ProfilerStore
-from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.store import Store
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
-    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
-    ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
     GeCloudConfig,
-    ProgressBarsConfig,
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
@@ -94,10 +82,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
-    PasswordMasker,
-    build_store_from_config,
     instantiate_class_from_config,
-    load_class,
     parse_substitution_variable,
     substitute_all_config_variables,
 )
@@ -113,10 +98,7 @@ from great_expectations.rule_based_profiler import (
     RuleBasedProfilerResult,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.util import (
-    filter_properties_dict,
-    verify_dynamic_loading_support,
-)
+from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -254,55 +236,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         GE_UNCOMMITTED_DIR,
     ]
     GE_DIR = "great_expectations"
-    GE_YML = "great_expectations.yml"
+    GE_YML = "great_expectations.yml"  # TODO: migrate this to FileDataContext. Still needed by DataContext
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
-    TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
-        "ExpectationsStore",
-        "ValidationsStore",
-        "HtmlSiteStore",
-        "EvaluationParameterStore",
-        "MetricStore",
-        "SqlAlchemyQueryStore",
-        "CheckpointStore",
-        "ProfilerStore",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES = [
-        "Datasource",
-        "SimpleSqlalchemyDatasource",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES = [
-        "InferredAssetFilesystemDataConnector",
-        "ConfiguredAssetFilesystemDataConnector",
-        "InferredAssetS3DataConnector",
-        "ConfiguredAssetS3DataConnector",
-        "InferredAssetAzureDataConnector",
-        "ConfiguredAssetAzureDataConnector",
-        "InferredAssetGCSDataConnector",
-        "ConfiguredAssetGCSDataConnector",
-        "InferredAssetSqlDataConnector",
-        "ConfiguredAssetSqlDataConnector",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
-        "Checkpoint",
-        "SimpleCheckpoint",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
-        "RuleBasedProfiler",
-    ]
-    ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
-        "__substitution_error__",
-        "__yaml_parse_error__",
-        "__custom_subclass_not_core_ge__",
-        "__class_name_not_provided__",
-    ]
-    ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES = (
-        TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
-    )
 
     _data_context = None
 
@@ -348,10 +284,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
-
         # initialize runtime_environment as empty dict if None
         runtime_environment: dict = runtime_environment or {}
-
         if self._ge_cloud_mode:
             self._data_context = CloudDataContext(
                 project_config=project_config,
@@ -370,28 +304,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 project_config=project_config, runtime_environment=runtime_environment
             )
 
-        # TODO: remove this method once refactor of DataContext is complete
-        self._apply_temporary_overrides()
-
-        # Init stores
-        self._stores = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
-
-        # Init data_context_id
-        self._data_context_id = self._construct_data_context_id()
-
-        # Override the project_config data_context_id if an expectations_store was already set up
-        self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
-        self._initialize_usage_statistics(
-            self.project_config_with_variables_substituted.anonymous_usage_statistics
-        )
-
-        # Store cached datasources but don't init them
-        self._cached_datasources = {}
-
-        # Build the datasources we know about and have access to
-        self._init_datasources()
-
+        # NOTE: <DataContextRefactor> This will ensure that parameters set in _data_context are persisted to self.
+        # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
+        # necessary properties / overrides
+        self._synchronize_self_with_underlying_data_context()
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
@@ -410,10 +326,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_name,
                     validation_operator_config,
                 )
-
-        self._evaluation_parameter_dependencies_compiled = False
-        self._evaluation_parameter_dependencies = {}
-
+        # NOTE: <DataContextRefactor>  This will be migrated to AbstractDataContext, along with associated methods
+        # and properties.
         self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
@@ -424,149 +338,40 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
 
-    def _apply_temporary_overrides(self) -> None:
+    def _synchronize_self_with_underlying_data_context(self) -> None:
         """
-        This is a helper method that only exists during the DataContext refactor that is occuring 202206.
+        This is a helper method that only exists during the DataContext refactor that is occurring 202206.
 
         Until the composition-pattern is complete for BaseDataContext, we have to load the private properties from the
         private self._data_context object into properties in self
 
         This is a helper method that performs this loading.
         """
-        # TODO: <WILL> This code will eventually go away when migration of logic to sibling classes is complete
+        # NOTE: <DataContextRefactor> This remains a rather clunky way of ensuring that all necessary parameters and
+        # values from self._data_context are persisted to self.
         self._project_config = self._data_context._project_config
         self.runtime_environment = self._data_context.runtime_environment or {}
         self._config_variables = self._data_context.config_variables
         self._in_memory_instance_id = self._data_context._in_memory_instance_id
-
-    def _build_store_from_config(
-        self, store_name: str, store_config: dict
-    ) -> Optional[Store]:
-        module_name = "great_expectations.data_context.store"
-        # Set expectations_store.store_backend_id to the data_context_id from the project_config if
-        # the expectations_store does not yet exist by:
-        # adding the data_context_id from the project_config
-        # to the store_config under the key manually_initialize_store_backend_id
-        if (store_name == self.expectations_store_name) and store_config.get(
-            "store_backend"
-        ):
-            store_config["store_backend"].update(
-                {
-                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-                }
-            )
-
-        # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
-        if (
-            store_name not in [store["name"] for store in self.list_active_stores()]
-            and store_config.get("store_backend") is not None
-        ):
-            store_config["store_backend"].update({"suppress_store_backend_id": True})
-
-        new_store = build_store_from_config(
-            store_name=store_name,
-            store_config=store_config,
-            module_name=module_name,
-            runtime_environment={
-                "root_directory": self.root_directory,
-            },
+        self._stores = self._data_context._stores
+        self._datasource_store = self._data_context._datasource_store
+        self._data_context_id = self._data_context._data_context_id
+        self._usage_statistics_handler = self._data_context._usage_statistics_handler
+        self._cached_datasources = self._data_context._cached_datasources
+        self._evaluation_parameter_dependencies_compiled = (
+            self._data_context._evaluation_parameter_dependencies_compiled
         )
-        self._stores[store_name] = new_store
-        return new_store
-
-    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
-        """Initialize all Stores for this DataContext.
-
-        Stores are a good fit for reading/writing objects that:
-            1. follow a clear key-value pattern, and
-            2. are usually edited programmatically, using the Context
-
-        Note that stores do NOT manage plugins.
-        """
-        for store_name, store_config in store_configs.items():
-            self._build_store_from_config(store_name, store_config)
-
-        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
-        # As such, it must be instantiated separately.
-        self._init_datasource_store()
-
-    def _init_datasource_store(self) -> None:
-        """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
-
-        Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default
-        implementation is provided based on the user's environment but is not customizable.
-        """
-        from great_expectations.data_context.store.datasource_store import (
-            DatasourceStore,
+        self._evaluation_parameter_dependencies = (
+            self._data_context._evaluation_parameter_dependencies
         )
 
-        store_name: str = "datasource_store"  # Never explicitly referenced but adheres to the convention set by other internal Stores
-        store_backend: dict = {"class_name": "InlineStoreBackend"}
-        runtime_environment: dict = {
-            "root_directory": self.root_directory,
-            "data_context": self,  # By passing this value in our runtime_environment, we ensure that the same exact context (memory address and all) is supplied to the Store backend
-        }
+    def _save_project_config(self) -> None:
+        """Save the current project to disk."""
+        logger.debug("Starting DataContext._save_project_config")
 
-        datasource_store: DatasourceStore = DatasourceStore(
-            store_name=store_name,
-            store_backend=store_backend,
-            runtime_environment=runtime_environment,
-        )
-        self._datasource_store = datasource_store
-
-    def _init_datasources(self) -> None:
-        for datasource_name in self._datasource_store.list_keys():
-            try:
-                datasource: Datasource = self.get_datasource(
-                    datasource_name=datasource_name
-                )
-                self._cached_datasources[datasource_name] = datasource
-            except ge_exceptions.DatasourceInitializationError as e:
-                logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
-                # this error will happen if our configuration contains datasources that GE can no longer connect to.
-                # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
-                # caught at the context.get_batch() step. So we just pass here.
-                pass
-
-    def _construct_data_context_id(self) -> str:
-        """
-        Choose the id of the currently-configured expectations store, if available and a persistent store.
-        If not, it should choose the id stored in DataContextConfig.
-        Returns:
-            UUID to use as the data_context_id
-        """
-
-        # if in ge_cloud_mode, use ge_cloud_organization_id
-        if self.ge_cloud_mode:
-            return self.ge_cloud_config.organization_id
-        # Choose the id of the currently-configured expectations store, if it is a persistent store
-        expectations_store = self._stores[
-            self.project_config_with_variables_substituted.expectations_store_name
-        ]
-        if isinstance(expectations_store.store_backend, TupleStoreBackend):
-            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
-            return expectations_store.store_backend_id_warnings_suppressed
-
-        # Otherwise choose the id stored in the project_config
-        else:
-            return (
-                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-            )
-
-    def _initialize_usage_statistics(
-        self, usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ) -> None:
-        """Initialize the usage statistics system."""
-        if not usage_statistics_config.enabled:
-            logger.info("Usage statistics is disabled; skipping initialization.")
-            self._usage_statistics_handler = None
-            return
-
-        self._usage_statistics_handler = UsageStatisticsHandler(
-            data_context=self,
-            data_context_id=self._data_context_id,
-            usage_statistics_url=usage_statistics_config.usage_statistics_url,
-        )
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+        with open(config_filepath, "w") as outfile:
+            self.config.to_yaml(outfile)
 
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -749,141 +554,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 logger.debug(f"Opening Data Docs found here: {url}")
                 webbrowser.open(url)
 
-    @property
-    def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
-        return self._usage_statistics_handler
-
-    @property
-    def anonymous_usage_statistics(self):
-        return self.project_config_with_variables_substituted.anonymous_usage_statistics
-
-    @property
-    def concurrency(self) -> Optional[ConcurrencyConfig]:
-        return self.project_config_with_variables_substituted.concurrency
-
-    @property
-    def progress_bars(self) -> Optional[ProgressBarsConfig]:
-        return self.project_config_with_variables_substituted.progress_bars
-
-    @property
-    def notebooks(self):
-        return self.project_config_with_variables_substituted.notebooks
-
-    @property
-    def stores(self):
-        """A single holder for all Stores in this context"""
-        return self._stores
-
-    @property
-    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
-        """A single holder for all Datasources in this context"""
-        return self._cached_datasources
-
-    @property
-    def checkpoint_store_name(self):
-        try:
-            return self.project_config_with_variables_substituted.checkpoint_store_name
-        except AttributeError:
-            from great_expectations.data_context.store.checkpoint_store import (
-                CheckpointStore,
-            )
-
-            if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory
-            ):
-                return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-            if self.root_directory:
-                error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-            else:
-                error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create a `checkpoints` directory in your Great Expectations project " f"directory.\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-            raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
-
-    @property
-    def checkpoint_store(self) -> "CheckpointStore":  # noqa: F821
-        checkpoint_store_name: str = self.checkpoint_store_name
-        try:
-            return self.stores[checkpoint_store_name]
-        except KeyError:
-            from great_expectations.data_context.store.checkpoint_store import (
-                CheckpointStore,
-            )
-
-            if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory
-            ):
-                logger.warning(
-                    f'Checkpoint store named "{checkpoint_store_name}" is not a configured store, so will try to use default Checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-                )
-                return self._build_store_from_config(
-                    checkpoint_store_name,
-                    DataContextConfigDefaults.DEFAULT_STORES.value[
-                        checkpoint_store_name
-                    ],
-                )
-            raise ge_exceptions.StoreConfigurationError(
-                f'Attempted to access the Checkpoint store named "{checkpoint_store_name}", which is not a configured store.'
-            )
-
-    @property
-    def profiler_store_name(self) -> str:
-        try:
-            return self.project_config_with_variables_substituted.profiler_store_name
-        except AttributeError:
-            if BaseDataContext._default_profilers_exist(
-                directory_path=self.root_directory
-            ):
-                return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
-            if self.root_directory:
-                error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-            else:
-                error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create a `profilers` directory in your Great Expectations project " f"directory.\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-            raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
-
-    @property
-    def profiler_store(self) -> ProfilerStore:
-        profiler_store_name: str = self.profiler_store_name
-        try:
-            return self.stores[profiler_store_name]
-        except KeyError:
-            if BaseDataContext._default_profilers_exist(
-                directory_path=self.root_directory
-            ):
-                logger.warning(
-                    f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-                )
-                return self._build_store_from_config(
-                    profiler_store_name,
-                    DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],
-                )
-            raise ge_exceptions.StoreConfigurationError(
-                f'Attempted to access the Profiler store named "{profiler_store_name}", which is not a configured store.'
-            )
-
-    @staticmethod
-    def _default_profilers_exist(directory_path: Optional[str]) -> bool:
-        if not directory_path:
-            return False
-
-        profiler_directory_path: str = os.path.join(
-            directory_path,
-            DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
-        )
-        return os.path.isdir(profiler_directory_path)
-
-    @property
-    def expectations_store_name(self) -> Optional[str]:
-        return self.project_config_with_variables_substituted.expectations_store_name
-
-    @property
-    def expectations_store(self) -> ExpectationsStore:
-        return self.stores[self.expectations_store_name]
-
-    @property
-    def data_context_id(self):
-        return (
-            self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-        )
-
     #####
     #
     # Internal helper methods
@@ -990,18 +660,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        if datasource_name is None:
-            raise ValueError("Datasource names must be a datasource name")
-        else:
-            datasource = self.get_datasource(datasource_name=datasource_name)
-            if datasource:
-                if save_changes:
-                    self._datasource_store.delete_by_name(datasource_name)
-                else:
-                    del self.config.datasources[datasource_name]
-                del self._cached_datasources[datasource_name]
-            else:
-                raise ValueError(f"Datasource {datasource_name} not found")
+        super().delete_datasource(datasource_name)
+        self._synchronize_self_with_underlying_data_context()
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -1745,111 +1405,26 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         save_changes: bool = False,
         **kwargs: dict,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        """Add a new datasource to the data context, with configuration provided as kwargs.
+        """
+        Add named datasource, with options to initialize (and return) the datasource and save_config.
+
+        Current version will call super(), which preserves the `usage_statistics` decorator in the current method.
+        A subsequence refactor will migrate the `usage_statistics` to parent and sibling classes.
+
         Args:
-            name: the name for the new datasource to add
-            initialize: if False, add the datasource to the config, but do not
-                initialize it, for example if a user needs to debug database connectivity.
-            save_changes: Whether or not to save changes to disk.
-            kwargs (keyword arguments): the configuration for the new datasource
+            name (str): Name of Datasource
+            initialize (bool): Should GE add and initialize the Datasource? If true then current
+                method will return initialized Datasource
+            save_changes (bool): should GE save the Datasource config?
+            **kwargs Optional[dict]: Additional kwargs that define Datasource initialization kwargs
 
         Returns:
-            datasource (Datasource)
+            Datasource that was added
+
         """
-        logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
-
-        module_name: str = kwargs.get("module_name", "great_expectations.datasource")
-        verify_dynamic_loading_support(module_name=module_name)
-        class_name: Optional[str] = kwargs.get("class_name")
-        datasource_class = load_class(module_name=module_name, class_name=class_name)
-
-        # For any class that should be loaded, it may control its configuration construction
-        # by implementing a classmethod called build_configuration
-        config: Union[CommentedMap, dict]
-        if hasattr(datasource_class, "build_configuration"):
-            config = datasource_class.build_configuration(**kwargs)
-        else:
-            config = kwargs
-
-        datasource: Optional[
-            Union[LegacyDatasource, BaseDatasource]
-        ] = self._instantiate_datasource_from_config_and_update_project_config(
-            name=name,
-            config=config,
-            initialize=initialize,
-            save_changes=save_changes,
-        )
-        return datasource
-
-    def _instantiate_datasource_from_config_and_update_project_config(
-        self,
-        name: str,
-        config: dict,
-        initialize: bool = True,
-        save_changes: bool = False,
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        datasource_config: DatasourceConfig = datasourceConfigSchema.load(
-            CommentedMap(**config)
-        )
-
-        self._data_context._update_config_variables()
-        self._apply_temporary_overrides()
-
-        if save_changes:
-            self._datasource_store.set_by_name(
-                datasource_name=name, datasource_config=datasource_config
-            )
-        else:
-            self.config.datasources[name] = datasource_config
-
-        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
-        substitutions: dict = self._determine_substitutions()
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
-        substituted_config: dict = substitute_all_config_variables(
-            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
-
-        datasource: Optional[Union[LegacyDatasource, BaseDatasource]] = None
-        if initialize:
-            try:
-                datasource = self._instantiate_datasource_from_config(
-                    name=name, config=substituted_config
-                )
-                self._cached_datasources[name] = datasource
-            except ge_exceptions.DatasourceInitializationError as e:
-                # Do not keep configuration that could not be instantiated.
-                if save_changes:
-                    self._datasource_store.delete_by_name(datasource_name=name)
-                else:
-                    del self.config.datasources[name]
-                raise e
-
-        return datasource
-
-    def _instantiate_datasource_from_config(
-        self, name: str, config: Union[dict, DatasourceConfig]
-    ) -> Union[LegacyDatasource, BaseDatasource]:
-        """Instantiate a new datasource to the data context, with configuration provided as kwargs.
-        Args:
-            name(str): name of datasource
-            config(dict): dictionary of configuration
-
-        Returns:
-            datasource (Datasource)
-        """
-        # We perform variable substitution in the datasource's config here before using the config
-        # to instantiate the datasource object. Variable substitution is a service that the data
-        # context provides. Datasources should not see unsubstituted variables in their config.
-
-        try:
-            datasource: Union[
-                LegacyDatasource, BaseDatasource
-            ] = self._build_datasource_from_config(name=name, config=config)
-        except Exception as e:
-            raise ge_exceptions.DatasourceInitializationError(
-                datasource_name=name, message=str(e)
-            )
-        return datasource
+        new_datasource = super().add_datasource(name, initialize, **kwargs)
+        self._synchronize_self_with_underlying_data_context()
+        return new_datasource
 
     def update_datasource(
         self,
@@ -1861,7 +1436,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         Args:
             datasource_config: The config object to persist using the DatasourceStore.
-            save_changes: Whether or not to save changes to disk.
+            save_changes: do I save changes to disk?
         """
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
         datasource_config: DatasourceConfig = DatasourceConfig(**datasource_config_dict)
@@ -1899,148 +1474,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
-
-    def _build_datasource_from_config(
-        self, name: str, config: Union[dict, DatasourceConfig]
-    ):
-        # We convert from the type back to a dictionary for purposes of instantiation
-        if isinstance(config, DatasourceConfig):
-            config = datasourceConfigSchema.dump(config)
-        config.update({"name": name})
-        # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
-        if config["class_name"] in [
-            "BaseDatasource",
-            "Datasource",
-        ]:
-            config.update({"data_context_root_directory": self.root_directory})
-        module_name = "great_expectations.datasource"
-        datasource = instantiate_class_from_config(
-            config=config,
-            runtime_environment={"data_context": self, "concurrency": self.concurrency},
-            config_defaults={"module_name": module_name},
-        )
-        if not datasource:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        return datasource
-
-    def get_datasource(
-        self, datasource_name: str = "default"
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        """Get the named datasource
-
-        Args:
-            datasource_name (str): the name of the datasource from the configuration
-
-        Returns:
-            datasource (Datasource)
-        """
-        if datasource_name in self._cached_datasources:
-            return self._cached_datasources[datasource_name]
-
-        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
-            datasource_name=datasource_name
-        )
-
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
-        substitutions: dict = self._determine_substitutions()
-        config = substitute_all_config_variables(
-            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
-
-        datasource: Optional[
-            Union[LegacyDatasource, BaseDatasource]
-        ] = self._instantiate_datasource_from_config(
-            name=datasource_name, config=config
-        )
-        self._cached_datasources[datasource_name] = datasource
-        return datasource
-
-    def list_expectation_suites(self):
-        """Return a list of available expectation suite keys."""
-        try:
-            keys = self.expectations_store.list_keys()
-        except KeyError as e:
-            raise ge_exceptions.InvalidConfigError(
-                f"Unable to find configured store: {str(e)}"
-            )
-        return keys
-
-    def list_datasources(self) -> List[dict]:
-        """List currently-configured datasources on this context. Masks passwords.
-
-        Returns:
-            List(dict): each dictionary includes "name", "class_name", and "module_name" keys
-        """
-        datasources: List[dict] = []
-        substitutions: dict = self._determine_substitutions()
-        datasource_name: str
-        for datasource_name in self._datasource_store.list_keys():
-            datasource_config: DatasourceConfig = (
-                self._datasource_store.retrieve_by_name(datasource_name)
-            )
-            datasource_dict: dict = datasource_config.to_json_dict()
-            datasource_dict["name"] = datasource_name
-            substituted_config: dict = cast(
-                dict,
-                substitute_all_config_variables(
-                    datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-                ),
-            )
-            masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
-            datasources.append(masked_config)
-
-        return datasources
-
-    def list_stores(self):
-        """List currently-configured Stores on this context"""
-
-        stores = []
-        for (
-            name,
-            value,
-        ) in self.project_config_with_variables_substituted.stores.items():
-            store_config = copy.deepcopy(value)
-            store_config["name"] = name
-            masked_config = PasswordMasker.sanitize_config(store_config)
-            stores.append(masked_config)
-        return stores
-
-    def list_active_stores(self):
-        """
-        List active Stores on this context. Active stores are identified by setting the following parameters:
-            expectations_store_name,
-            validations_store_name,
-            evaluation_parameter_store_name,
-            checkpoint_store_name
-            profiler_store_name
-        """
-        active_store_names: List[str] = [
-            self.expectations_store_name,
-            self.validations_store_name,
-            self.evaluation_parameter_store_name,
-        ]
-
-        try:
-            active_store_names.append(self.checkpoint_store_name)
-        except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
-            logger.info(
-                "Checkpoint store is not configured; omitting it from active stores"
-            )
-
-        try:
-            active_store_names.append(self.profiler_store_name)
-        except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
-            logger.info(
-                "Profiler store is not configured; omitting it from active stores"
-            )
-
-        return [
-            store for store in self.list_stores() if store["name"] in active_store_names
-        ]
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
@@ -2183,22 +1616,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 f"expectation_suite {expectation_suite_name} not found"
             )
 
-    def list_expectation_suite_names(self) -> List[str]:
-        """
-        Lists the available expectation suite names. If in ge_cloud_mode, a list of
-        GE Cloud ids is returned instead.
-        """
-        if self.ge_cloud_mode:
-            return [
-                suite_key.ge_cloud_id for suite_key in self.list_expectation_suites()
-            ]
-
-        sorted_expectation_suite_names = [
-            i.expectation_suite_name for i in self.list_expectation_suites()
-        ]
-        sorted_expectation_suite_names.sort()
-        return sorted_expectation_suite_names
-
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
         args_payload_fn=save_expectation_suite_usage_statistics,
@@ -2221,152 +1638,27 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite",
-                ge_cloud_id=ge_cloud_id
-                if ge_cloud_id is not None
-                else str(expectation_suite.ge_cloud_id),
+        if ge_cloud_id:
+            super().save_expectation_suite(
+                expectation_suite,
+                expectation_suite_name,
+                overwrite_existing,
+                ge_cloud_id,
+                **kwargs,
             )
-            if self.expectations_store.has_key(key) and not overwrite_existing:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True.".format(
-                        ge_cloud_id
-                    )
-                )
         else:
-            if expectation_suite_name is None:
-                key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite.expectation_suite_name
-                )
-            else:
-                expectation_suite.expectation_suite_name = expectation_suite_name
-                key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite_name
-                )
-            if self.expectations_store.has_key(key) and not overwrite_existing:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite with name {} already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True.".format(
-                        expectation_suite_name
-                    )
-                )
-
-        self._evaluation_parameter_dependencies_compiled = False
-        return self.expectations_store.set(key, expectation_suite, **kwargs)
-
-    def _store_metrics(
-        self, requested_metrics, validation_results, target_store_name
-    ) -> None:
-        """
-        requested_metrics is a dictionary like this:
-
-              requested_metrics:
-                *:  # The asterisk here matches *any* expectation suite name
-                  # use the 'kwargs' key to request metrics that are defined by kwargs,
-                  # for example because they are defined only for a particular column
-                  # - column:
-                  #     Age:
-                  #        - expect_column_min_to_be_between.result.observed_value
-                    - statistics.evaluated_expectations
-                    - statistics.successful_expectations
-
-        Args:
-            requested_metrics:
-            validation_results:
-            target_store_name:
-
-        Returns:
-
-        """
-        expectation_suite_name = validation_results.meta["expectation_suite_name"]
-        run_id = validation_results.meta["run_id"]
-        data_asset_name = validation_results.meta.get("batch_kwargs", {}).get(
-            "data_asset_name"
-        )
-
-        for expectation_suite_dependency, metrics_list in requested_metrics.items():
-            if (expectation_suite_dependency != "*") and (
-                expectation_suite_dependency != expectation_suite_name
-            ):
-                continue
-
-            if not isinstance(metrics_list, list):
-                raise ge_exceptions.DataContextError(
-                    "Invalid requested_metrics configuration: metrics requested for "
-                    "each expectation suite must be a list."
-                )
-
-            for metric_configuration in metrics_list:
-                metric_configurations = (
-                    BaseDataContext._get_metric_configuration_tuples(
-                        metric_configuration
-                    )
-                )
-                for metric_name, metric_kwargs in metric_configurations:
-                    try:
-                        metric_value = validation_results.get_metric(
-                            metric_name, **metric_kwargs
-                        )
-                        self.stores[target_store_name].set(
-                            ValidationMetricIdentifier(
-                                run_id=run_id,
-                                data_asset_name=data_asset_name,
-                                expectation_suite_identifier=ExpectationSuiteIdentifier(
-                                    expectation_suite_name
-                                ),
-                                metric_name=metric_name,
-                                metric_kwargs_id=get_metric_kwargs_id(
-                                    metric_name, metric_kwargs
-                                ),
-                            ),
-                            metric_value,
-                        )
-                    except ge_exceptions.UnavailableMetricError:
-                        # This will happen frequently in larger pipelines
-                        logger.debug(
-                            "metric {} was requested by another expectation suite but is not available in "
-                            "this validation result.".format(metric_name)
-                        )
+            super().save_expectation_suite(
+                expectation_suite,
+                expectation_suite_name,
+                overwrite_existing,
+                **kwargs,
+            )
+        self._synchronize_self_with_underlying_data_context()
 
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
-
-    def store_evaluation_parameters(
-        self, validation_results, target_store_name=None
-    ) -> None:
-        if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
-
-        if target_store_name is None:
-            target_store_name = self.evaluation_parameter_store_name
-
-        self._store_metrics(
-            self._evaluation_parameter_dependencies,
-            validation_results,
-            target_store_name,
-        )
-
-    @property
-    def evaluation_parameter_store(self):
-        return self.stores[self.evaluation_parameter_store_name]
-
-    @property
-    def evaluation_parameter_store_name(self):
-        return (
-            self.project_config_with_variables_substituted.evaluation_parameter_store_name
-        )
-
-    @property
-    def validations_store_name(self):
-        return self.project_config_with_variables_substituted.validations_store_name
-
-    @property
-    def validations_store(self) -> ValidationsStore:
-        return self.stores[self.validations_store_name]
 
     @property
     def assistants(self) -> DataAssistantDispatcher:
@@ -2376,24 +1668,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def root_directory(self) -> Optional[str]:
         if hasattr(self._data_context, "_context_root_directory"):
             return self._data_context._context_root_directory
-
-    def _compile_evaluation_parameter_dependencies(self) -> None:
-        self._evaluation_parameter_dependencies = {}
-        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
-        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
-        for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
-            if not expectation_suite_dict:
-                continue
-            expectation_suite: ExpectationSuite = ExpectationSuite(
-                **expectation_suite_dict, data_context=self
-            )
-
-            dependencies = expectation_suite.get_evaluation_parameter_dependencies()
-            if len(dependencies) > 0:
-                nested_update(self._evaluation_parameter_dependencies, dependencies)
-
-        self._evaluation_parameter_dependencies_compiled = True
 
     def get_validation_result(
         self,
@@ -2462,18 +1736,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             if failed_only
             else results_dict
         )
-
-    def update_return_obj(self, data_asset, return_obj):
-        """Helper called by data_asset.
-
-        Args:
-            data_asset: The data_asset whose validation produced the current return object
-            return_obj: the return object to update
-
-        Returns:
-            return_obj: the return object, potentially changed into a widget by the configured expectation explorer
-        """
-        return return_obj
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,
@@ -3810,61 +3072,3 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ]
 
         return instantiated_class, usage_stats_event_payload
-
-    @staticmethod
-    def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
-        if base_kwargs is None:
-            base_kwargs = {}
-
-        if isinstance(metric_configuration, str):
-            return [(metric_configuration, base_kwargs)]
-
-        metric_configurations_list = []
-        for kwarg_name in metric_configuration.keys():
-            if not isinstance(metric_configuration[kwarg_name], dict):
-                raise ge_exceptions.DataContextError(
-                    "Invalid metric_configuration: each key must contain a "
-                    "dictionary."
-                )
-            if (
-                kwarg_name == "metric_kwargs_id"
-            ):  # this special case allows a hash of multiple kwargs
-                for metric_kwargs_id in metric_configuration[kwarg_name].keys():
-                    if base_kwargs != {}:
-                        raise ge_exceptions.DataContextError(
-                            "Invalid metric_configuration: when specifying "
-                            "metric_kwargs_id, no other keys or values may be defined."
-                        )
-                    if not isinstance(
-                        metric_configuration[kwarg_name][metric_kwargs_id], list
-                    ):
-                        raise ge_exceptions.DataContextError(
-                            "Invalid metric_configuration: each value must contain a "
-                            "list."
-                        )
-                    metric_configurations_list += [
-                        (metric_name, {"metric_kwargs_id": metric_kwargs_id})
-                        for metric_name in metric_configuration[kwarg_name][
-                            metric_kwargs_id
-                        ]
-                    ]
-            else:
-                for kwarg_value in metric_configuration[kwarg_name].keys():
-                    base_kwargs.update({kwarg_name: kwarg_value})
-                    if not isinstance(
-                        metric_configuration[kwarg_name][kwarg_value], list
-                    ):
-                        raise ge_exceptions.DataContextError(
-                            "Invalid metric_configuration: each value must contain a "
-                            "list."
-                        )
-                    for nested_configuration in metric_configuration[kwarg_name][
-                        kwarg_value
-                    ]:
-                        metric_configurations_list += (
-                            BaseDataContext._get_metric_configuration_tuples(
-                                nested_configuration, base_kwargs=base_kwargs
-                            )
-                        )
-
-        return metric_configurations_list
