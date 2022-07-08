@@ -157,73 +157,58 @@ def progress_bars() -> ProgressBarsConfig:
 
 
 @pytest.mark.parametrize(
-    "crud_method,target_attr",
+    "target_attr",
     [
         pytest.param(
-            "get_config_version",
             DataContextVariableSchema.CONFIG_VERSION,
             id="config_version getter",
         ),
         pytest.param(
-            "get_config_variables_file_path",
             DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH,
             id="config_variables_file_path getter",
         ),
         pytest.param(
-            "get_plugins_directory",
             DataContextVariableSchema.PLUGINS_DIRECTORY,
             id="plugins_directory getter",
         ),
         pytest.param(
-            "get_expectations_store_name",
             DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
             id="expectations_store getter",
         ),
         pytest.param(
-            "get_validations_store_name",
             DataContextVariableSchema.VALIDATIONS_STORE_NAME,
             id="validations_store getter",
         ),
         pytest.param(
-            "get_evaluation_parameter_store_name",
             DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
             id="evaluation_parameter_store getter",
         ),
         pytest.param(
-            "get_checkpoint_store_name",
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store getter",
         ),
         pytest.param(
-            "get_profiler_store_name",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store getter",
         ),
+        pytest.param(DataContextVariableSchema.STORES, id="stores getter"),
         pytest.param(
-            "get_stores", DataContextVariableSchema.STORES, id="stores getter"
-        ),
-        pytest.param(
-            "get_data_docs_sites",
             DataContextVariableSchema.DATA_DOCS_SITES,
             id="data_docs_sites getter",
         ),
         pytest.param(
-            "get_anonymous_usage_statistics",
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics getter",
         ),
         pytest.param(
-            "get_notebooks",
             DataContextVariableSchema.NOTEBOOKS,
             id="notebooks getter",
         ),
         pytest.param(
-            "get_concurrency",
             DataContextVariableSchema.CONCURRENCY,
             id="concurrency getter",
         ),
         pytest.param(
-            "get_progress_bars",
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars getter",
         ),
@@ -234,12 +219,10 @@ def test_data_context_variables_get(
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
     data_context_config: dict,
-    crud_method: str,
     target_attr: DataContextVariableSchema,
 ) -> None:
     def _test_variables_get(type_: DataContextVariables) -> None:
-        method: Callable = getattr(type_, crud_method)
-        res: Any = method()
+        res: Any = getattr(type_, target_attr.value)
 
         expected_value: Any = data_context_config[target_attr.value]
         assert res == expected_value
@@ -271,89 +254,74 @@ def test_data_context_variables_get_with_substitutions(
     variables: DataContextVariables = EphemeralDataContextVariables(
         config=config, substitutions=substitutions
     )
-    assert variables.get_config_version() == value_associated_with_env_var
+    assert variables.config_version == value_associated_with_env_var
 
 
 @pytest.mark.parametrize(
-    "crud_method,input_value,target_attr",
+    "input_value,target_attr",
     [
         pytest.param(
-            "set_config_version",
             5.0,
             DataContextVariableSchema.CONFIG_VERSION,
             id="config_version setter",
         ),
         pytest.param(
-            "set_config_variables_file_path",
             "uncommitted/my_config_file.yml",
             DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH,
             id="config_variables_file_path setter",
         ),
         pytest.param(
-            "set_plugins_directory",
             "other_plugins/",
             DataContextVariableSchema.PLUGINS_DIRECTORY,
             id="plugins_directory setter",
         ),
         pytest.param(
-            "set_expectations_store_name",
             "my_expectations_store",
             DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
             id="expectations_store setter",
         ),
         pytest.param(
-            "set_validations_store_name",
             "my_validations_store",
             DataContextVariableSchema.VALIDATIONS_STORE_NAME,
             id="validations_store setter",
         ),
         pytest.param(
-            "set_evaluation_parameter_store_name",
             "my_evaluation_parameter_store",
             DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
             id="evaluation_parameter_store setter",
         ),
         pytest.param(
-            "set_checkpoint_store_name",
             "my_checkpoint_store",
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store setter",
         ),
         pytest.param(
-            "set_profiler_store_name",
             "my_profiler_store",
             DataContextVariableSchema.PROFILER_STORE_NAME,
             id="profiler_store setter",
         ),
+        pytest.param(stores, DataContextVariableSchema.STORES, id="stores setter"),
         pytest.param(
-            "set_stores", stores, DataContextVariableSchema.STORES, id="stores setter"
-        ),
-        pytest.param(
-            "set_data_docs_sites",
             data_docs_sites,
             DataContextVariableSchema.DATA_DOCS_SITES,
             id="data_docs_sites setter",
         ),
         pytest.param(
-            "set_anonymous_usage_statistics",
             anonymous_usage_statistics,
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics setter",
         ),
         pytest.param(
-            "set_notebooks",
             notebooks,
             DataContextVariableSchema.NOTEBOOKS,
             id="notebooks setter",
         ),
         pytest.param(
-            "set_concurrency",
             concurrency,
             DataContextVariableSchema.CONCURRENCY,
             id="concurrency setter",
         ),
         pytest.param(
-            "set_progress_bars",
             progress_bars,
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars setter",
@@ -364,13 +332,11 @@ def test_data_context_variables_set(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
-    crud_method: str,
     input_value: Any,
     target_attr: DataContextVariableSchema,
 ) -> None:
     def _test_variables_set(type_: DataContextVariables) -> None:
-        method: Callable = getattr(type_, crud_method)
-        method(input_value)
+        setattr(type_, target_attr.value, input_value)
         res: Any = type_.config[target_attr.value]
 
         assert res == input_value
