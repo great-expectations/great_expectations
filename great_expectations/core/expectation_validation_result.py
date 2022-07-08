@@ -17,8 +17,17 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.render.types import RenderedAtomicContentSchema
+from great_expectations.marshmallow__shade import (
+    Schema,
+    fields,
+    post_dump,
+    post_load,
+    pre_dump,
+)
+from great_expectations.render.types import (
+    RenderedAtomicContent,
+    RenderedAtomicContentSchema,
+)
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -50,14 +59,9 @@ class ExpectationValidationResult(SerializableDictDot):
         result: Optional[dict] = None,
         meta: Optional[dict] = None,
         exception_info: Optional[dict] = None,
+        rendered_content: Optional[RenderedAtomicContent] = None,
         **kwargs: dict,
     ) -> None:
-        # TODO: NF - feature flag to be updated upon feature release
-        if "include_rendered_content" in kwargs:
-            self.include_rendered_content = kwargs["include_rendered_content"]
-        else:
-            self.include_rendered_content = False
-
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
         self.success = success
@@ -77,8 +81,7 @@ class ExpectationValidationResult(SerializableDictDot):
             "exception_traceback": None,
             "exception_message": None,
         }
-        if self.include_rendered_content:
-            self.rendered_content = None
+        self.rendered_content = rendered_content
 
     def __eq__(self, other):
         """ExpectationValidationResult equality ignores instance identity, relying only on properties."""
@@ -260,6 +263,10 @@ class ExpectationValidationResult(SerializableDictDot):
             myself["exception_info"] = convert_to_json_serializable(
                 myself["exception_info"]
             )
+        if "rendered_content" in myself:
+            myself["rendered_content"] = convert_to_json_serializable(
+                myself["rendered_content"]
+            )
         return myself
 
     def get_metric(self, metric_name, **kwargs):
@@ -311,11 +318,18 @@ class ExpectationValidationResult(SerializableDictDot):
 
 
 class ExpectationValidationResultSchema(Schema):
-    success = fields.Bool()
-    expectation_config = fields.Nested(ExpectationConfigurationSchema)
-    result = fields.Dict()
-    meta = fields.Dict()
-    exception_info = fields.Dict()
+    success = fields.Bool(required=False, allow_none=True)
+    expectation_config = fields.Nested(
+        lambda: ExpectationConfigurationSchema, required=False, allow_none=True
+    )
+    result = fields.Dict(required=False, allow_none=True)
+    meta = fields.Dict(required=False, allow_none=True)
+    exception_info = fields.Dict(required=False, allow_none=True)
+    rendered_content = fields.List(
+        fields.Nested(
+            lambda: RenderedAtomicContentSchema, required=False, allow_none=True
+        )
+    )
 
     # noinspection PyUnusedLocal
     @pre_dump
@@ -327,15 +341,17 @@ class ExpectationValidationResultSchema(Schema):
             data["result"] = convert_to_json_serializable(data.get("result"))
         return data
 
-    # # noinspection PyUnusedLocal
-    # @pre_dump
-    # def clean_empty(self, data, **kwargs):
-    #     # if not hasattr(data, 'meta'):
-    #     #     pass
-    #     # elif len(data.meta) == 0:
-    #     #     del data.meta
-    #     # return data
-    #     pass
+    REMOVE_KEYS_IF_NONE = ["rendered_content"]
+
+    @post_dump
+    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
+        """Removes the attributes in ExpectationValidationResultSchema.REMOVE_KEYS_IF_NONE during serialization if
+        their values are None."""
+        data = deepcopy(data)
+        for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
 
     # noinspection PyUnusedLocal
     @post_load
@@ -481,7 +497,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
-    rendered_content = fields.List(fields.Nested(RenderedAtomicContentSchema))
+    checkpoint_name = fields.String(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @pre_dump

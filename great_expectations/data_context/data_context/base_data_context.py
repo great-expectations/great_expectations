@@ -1607,18 +1607,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
+        include_rendered_content: bool = False,
         **kwargs: dict,
     ) -> Validator:
         """
         This method applies only to the new (V3) Datasource schema.
         """
-
-        # TODO: NF - feature flag to be updated upon feature release
-        include_rendered_content: bool
-        if "include_rendered_content" in kwargs:
-            include_rendered_content = kwargs["include_rendered_content"]
-        else:
-            include_rendered_content = False
 
         if (
             sum(
@@ -1710,15 +1704,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self,
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
+        include_rendered_content: bool = False,
         **kwargs: dict,
     ) -> Validator:
-        # TODO: NF - feature flag to be updated upon feature release
-        include_rendered_content: bool
-        if "include_rendered_content" in kwargs:
-            include_rendered_content = kwargs["include_rendered_content"]
-        else:
-            include_rendered_content = False
-
         if len(batch_list) == 0:
             raise ge_exceptions.InvalidBatchRequestError(
                 """Validator could not be created because BatchRequest returned an empty batch_list.

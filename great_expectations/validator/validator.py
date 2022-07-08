@@ -148,6 +148,7 @@ class Validator:
             Any
         ] = None,  # Cannot type DataContext due to circular import
         batches: Optional[List[Batch]] = None,
+        include_rendered_content: bool = False,
         **kwargs,
     ) -> None:
         """
@@ -163,7 +164,7 @@ class Validator:
             expectation_suite_name: The name of the ExpectationSuite to validate.
             data_context: The DataContext associated with this Validator.
             batches: The batches for which to validate.
-
+            include_rendered_content: Whether or not to include rendered_content in the ExpectationValidationResult.
         """
 
         self._data_context = data_context
@@ -203,11 +204,7 @@ class Validator:
             # TODO: verify flow of default expectation arguments
             self.set_default_expectation_argument("include_config", True)
 
-        # TODO: NF - feature flag to be updated upon feature release
-        if "include_rendered_content" in kwargs:
-            self._include_rendered_content = kwargs["include_rendered_content"]
-        else:
-            self._include_rendered_content = False
+        self._include_rendered_content = include_rendered_content
 
     def __dir__(self):
         """
@@ -979,8 +976,6 @@ class Validator:
             else:
                 raise err
 
-        include_rendered_content: bool = self._include_rendered_content
-
         configuration: ExpectationConfiguration
         result: ExpectationValidationResult
         for configuration in processed_configurations:
@@ -989,7 +984,6 @@ class Validator:
                     metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
-                    include_rendered_content=include_rendered_content,
                 )
                 evrs.append(result)
             except Exception as err:
@@ -1014,8 +1008,6 @@ class Validator:
         catch_exceptions: bool,
         runtime_configuration: Optional[dict] = None,
     ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
-        include_rendered_content: bool = self._include_rendered_content
-
         # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
         # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
         evrs: List[ExpectationValidationResult] = []
@@ -1034,8 +1026,6 @@ class Validator:
 
             evaluated_config = copy.deepcopy(configuration)
             evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
-            if include_rendered_content:
-                evaluated_config._rendered_content = None
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: dict = (
@@ -1072,7 +1062,6 @@ class Validator:
                         success=False,
                         exception_info=exception_info,
                         expectation_config=evaluated_config,
-                        include_rendered_content=include_rendered_content,
                     )
                     evrs.append(result)
                 else:
@@ -1106,8 +1095,6 @@ class Validator:
         evrs: List[ExpectationValidationResult],
         processed_configurations: List[ExpectationConfiguration],
     ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
-        include_rendered_content: bool = self._include_rendered_content
-
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
@@ -1134,7 +1121,6 @@ class Validator:
                         success=False,
                         exception_info=exception_info,
                         expectation_config=configuration,
-                        include_rendered_content=include_rendered_content,
                     )
                     evrs.append(result)
 
@@ -1978,6 +1964,9 @@ set as active.
                 configurations=expectations_to_evaluate,
                 runtime_configuration=runtime_configuration,
             )
+            if self._include_rendered_content:
+                for validation_result in results:
+                    validation_result.render()
             statistics = _calc_validation_statistics(results)
 
             if only_return_failures:
