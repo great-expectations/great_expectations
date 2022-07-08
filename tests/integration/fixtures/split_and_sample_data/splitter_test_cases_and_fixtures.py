@@ -10,9 +10,30 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import D
 
 
 class TaxiTestData:
-    def __init__(self, test_df: pd.DataFrame, test_column_name: Optional[str] = None):
+    def __init__(
+        self,
+        test_df: pd.DataFrame,
+        test_column_name: Optional[str] = None,
+        test_column_names: Optional[List[str]] = None,
+    ):
         self._test_df = test_df
+
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    test_column_name is not None,
+                    test_column_names is not None,
+                ]
+            )
+            > 1
+        ):
+            raise ValueError(
+                f"No more than one of test_column_name or test_column_names can be specified."
+            )
+
         self._test_column_name = test_column_name
+        self._test_column_names = test_column_names
 
     @property
     def test_df(self) -> pd.DataFrame:
@@ -21,6 +42,10 @@ class TaxiTestData:
     @property
     def test_column_name(self) -> Optional[str]:
         return self._test_column_name
+
+    @property
+    def test_column_names(self) -> Optional[List[str]]:
+        return self._test_column_names
 
     @staticmethod
     def years_in_taxi_data() -> List[datetime.datetime]:
@@ -83,6 +108,12 @@ class TaxiTestData:
         ].tolist()
         return column_values
 
+    def get_test_multi_column_values(self) -> List[dict]:
+        multi_column_values: List[dict] = self.test_df[self.test_column_names].to_dict(
+            "records"
+        )
+        return multi_column_values
+
     def get_unique_sorted_test_column_values(
         self,
         reverse: Optional[bool] = False,
@@ -112,6 +143,47 @@ class TaxiTestData:
             return column_values
 
         return column_values[:limit]
+
+    def get_unique_sorted_test_multi_column_values(
+        self,
+        reverse: Optional[bool] = False,
+        limit: Optional[int] = None,
+    ) -> List[dict]:
+        multi_column_values: List[dict] = self.get_test_multi_column_values()
+        multi_column_values = sorted(
+            multi_column_values,
+            key=lambda element: sum(
+                map(
+                    ord,
+                    hashlib.md5(
+                        str(tuple(zip(element.keys(), element.values()))).encode(
+                            "utf-8"
+                        )
+                    ).hexdigest(),
+                )
+            ),
+            reverse=reverse,
+        )
+
+        unique_multi_column_values: List[dict] = []
+
+        hash_codes: List[str] = []
+        hash_code: str
+        dictionary_element: dict
+        for dictionary_element in multi_column_values:
+            hash_code = hashlib.md5(
+                str(
+                    tuple(zip(dictionary_element.keys(), dictionary_element.values()))
+                ).encode("utf-8")
+            ).hexdigest()
+            if hash_code not in hash_codes:
+                unique_multi_column_values.append(dictionary_element)
+                hash_codes.append(hash_code)
+
+        if limit is None:
+            return unique_multi_column_values
+
+        return unique_multi_column_values[:limit]
 
     def get_divided_integer_test_column_values(
         self, divisor: int
@@ -177,6 +249,10 @@ class TaxiSplittingTestCasesBase(ABC):
     @property
     def test_column_name(self) -> str:
         return self._taxi_test_data.test_column_name
+
+    @property
+    def test_column_names(self) -> List[str]:
+        return self._taxi_test_data.test_column_names
 
     @abstractmethod
     def test_cases(self) -> List[TaxiSplittingTestCase]:
@@ -267,6 +343,24 @@ class TaxiSplittingTestCasesHashedColumn(TaxiSplittingTestCasesBase):
                 num_expected_rows_in_first_batch_definition=5,
                 expected_column_values=self.taxi_test_data.get_hashed_test_column_values(
                     hash_digits=2
+                ),
+            ),
+        ]
+
+
+class TaxiSplittingTestCasesMultiColumnValues(TaxiSplittingTestCasesBase):
+    def test_cases(self) -> List[TaxiSplittingTestCase]:
+        return [
+            TaxiSplittingTestCase(
+                table_domain_test_case=False,
+                splitter_method_name="split_on_multi_column_values",
+                splitter_kwargs={
+                    "column_names": self.taxi_test_data.test_column_names,
+                },
+                num_expected_batch_definitions=9,
+                num_expected_rows_in_first_batch_definition=2,
+                expected_column_values=self.taxi_test_data.get_unique_sorted_test_multi_column_values(
+                    reverse=False, limit=None
                 ),
             ),
         ]

@@ -30,6 +30,7 @@ if __name__ == "test_script_module":
     taxi_test_data: TaxiTestData = TaxiTestData(
         test_df=test_df,
         test_column_name=test_column_name,
+        test_column_names=None,
     )
     taxi_splitting_test_cases: TaxiSplittingTestCasesBase = (
         TaxiSplittingTestCasesModInteger(taxi_test_data=taxi_test_data)
