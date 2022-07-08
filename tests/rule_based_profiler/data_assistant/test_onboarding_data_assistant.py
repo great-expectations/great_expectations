@@ -404,9 +404,9 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
 
 
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = (
         "data_assistant_result.plot_metrics(this_is_not_a_real_parameter=True)"
@@ -428,9 +428,9 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
 
 
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = "data_assistant_result.plot_metrics()"
 
@@ -448,9 +448,9 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
 
 
 def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = "data_assistant_result.plot_expectations_and_metrics()"
 
@@ -468,9 +468,9 @@ def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
 
 
 def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     theme = {"font": "Comic Sans MS"}
 
@@ -490,9 +490,9 @@ def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
 
 
 def test_onboarding_data_assistant_plot_prescriptive_theme_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     theme = {"font": "Comic Sans MS"}
 
@@ -762,9 +762,9 @@ def test_onboarding_data_assistant_plot_return_tooltip(
 
 
 def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = "data_assistant_result.plot_metrics(sequential=False)"
 
@@ -782,9 +782,9 @@ def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_noteb
 
 
 def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = (
         "data_assistant_result.plot_expectations_and_metrics(sequential=False)"
