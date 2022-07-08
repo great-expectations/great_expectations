@@ -544,7 +544,7 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "error_diagnostics",
         "validation_result",
     }
-    assert tests[3]["test_passed"] == False
+    assert tests[3]["test_passed"] is False
 
     assert set(tests[4].keys()) == {
         "test_title",
@@ -554,4 +554,4 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "error_diagnostics",
         "validation_result",
     }
-    assert tests[4]["test_passed"] == False
+    assert tests[4]["test_passed"] is False
