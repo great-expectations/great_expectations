@@ -106,207 +106,151 @@ class DataContextVariables(ABC):
         key: ConfigurationIdentifier = self.get_key()
         self.store.set(key=key, value=self.config)
 
-    def set_config_version(self, config_version: float) -> None:
-        """
-        Setter for `config_version`.
-        """
-        self._set(DataContextVariableSchema.CONFIG_VERSION, config_version)
-
-    def get_config_version(self) -> Optional[float]:
-        """
-        Getter for `config_version`.
-        """
+    @property
+    def config_version(self) -> Optional[float]:
         return self._get(DataContextVariableSchema.CONFIG_VERSION)
 
-    def set_config_variables_file_path(self, config_variables_file_path: str) -> None:
-        """
-        Setter for `config_variables_file_path`.
-        """
+    @config_version.setter
+    def config_version(self, config_version: float) -> None:
+        self._set(DataContextVariableSchema.CONFIG_VERSION, config_version)
+
+    @property
+    def config_variables_file_path(self) -> Optional[str]:
+        return self._get(DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH)
+
+    @config_variables_file_path.setter
+    def config_variables_file_path(self, config_variables_file_path: str) -> None:
         self._set(
             DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH,
             config_variables_file_path,
         )
 
-    def get_config_variables_file_path(self) -> Optional[str]:
-        """
-        Getter for `config_version`.
-        """
-        return self._get(DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH)
-
-    def set_plugins_directory(self, plugins_directory: str) -> None:
-        """
-        Setter for `plugins_directory`.
-        """
-        self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
-
-    def get_plugins_directory(self) -> Optional[str]:
-        """
-        Getter for `plugins_directory`.
-        """
+    @property
+    def plugins_directory(self) -> Optional[str]:
         return self._get(DataContextVariableSchema.PLUGINS_DIRECTORY)
 
-    def set_expectations_store_name(self, expectations_store_name: str) -> None:
-        """
-        Setter for `expectations_store_name`.
-        """
+    @plugins_directory.setter
+    def plugins_directory(self, plugins_directory: str) -> None:
+        self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
+
+    @property
+    def expectations_store_name(self) -> Optional[str]:
+        return self._get(DataContextVariableSchema.EXPECTATIONS_STORE_NAME)
+
+    @expectations_store_name.setter
+    def expectations_store_name(self, expectations_store_name: str) -> None:
         self._set(
             DataContextVariableSchema.EXPECTATIONS_STORE_NAME, expectations_store_name
         )
 
-    def get_expectations_store_name(self) -> Optional[str]:
-        """
-        Getter for `expectations_store_name`.
-        """
-        return self._get(DataContextVariableSchema.EXPECTATIONS_STORE_NAME)
+    @property
+    def validations_store_name(self) -> Optional[str]:
+        return self._get(DataContextVariableSchema.VALIDATIONS_STORE_NAME)
 
-    def set_validations_store_name(self, validations_store_name: str) -> None:
-        """
-        Setter for `validations_store_name`.
-        """
+    @validations_store_name.setter
+    def validations_store_name(self, validations_store_name: str) -> None:
         self._set(
             DataContextVariableSchema.VALIDATIONS_STORE_NAME, validations_store_name
         )
 
-    def get_validations_store_name(self) -> Optional[str]:
-        """
-        Getter for `validations_store_name`.
-        """
-        return self._get(DataContextVariableSchema.VALIDATIONS_STORE_NAME)
+    @property
+    def evaluation_parameter_store_name(self) -> Optional[str]:
+        return self._get(DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME)
 
-    def set_evaluation_parameter_store_name(
+    @evaluation_parameter_store_name.setter
+    def evaluation_parameter_store_name(
         self, evaluation_parameter_store_name: str
     ) -> None:
-        """
-        Setter for `evaluation_parameter_store_name`.
-        """
         self._set(
             DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
             evaluation_parameter_store_name,
         )
 
-    def get_evaluation_parameter_store_name(self) -> Optional[str]:
-        """
-        Getter for `evaluation_parameter_store_name`.
-        """
-        return self._get(DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME)
+    @property
+    def checkpoint_store_name(self) -> Optional[str]:
+        return self._get(DataContextVariableSchema.CHECKPOINT_STORE_NAME)
 
-    def set_checkpoint_store_name(self, checkpoint_store_name: str) -> None:
-        """
-        Setter for `checkpoint_store_name`.
-        """
+    @checkpoint_store_name.setter
+    def checkpoint_store_name(self, checkpoint_store_name: str) -> None:
         self._set(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             checkpoint_store_name,
         )
 
-    def get_checkpoint_store_name(self) -> Optional[str]:
-        """
-        Getter for `checkpoint_store_name`.
-        """
-        return self._get(DataContextVariableSchema.CHECKPOINT_STORE_NAME)
+    @property
+    def profiler_store_name(self) -> Optional[str]:
+        return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
 
-    def set_profiler_store_name(self, profiler_store_name: str) -> None:
-        """
-        Setter for `profiler_store_name`.
-        """
+    @profiler_store_name.setter
+    def profiler_store_name(self, profiler_store_name: str) -> None:
         self._set(
             DataContextVariableSchema.PROFILER_STORE_NAME,
             profiler_store_name,
         )
 
-    def get_profiler_store_name(self) -> Optional[str]:
-        """
-        Getter for `profiler_store_name`.
-        """
-        return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
-
-    def set_stores(self, stores: dict) -> None:
-        """
-        Setter for `stores`.
-        """
-        self._set(DataContextVariableSchema.STORES, stores)
-
-    def get_stores(self) -> Optional[dict]:
-        """
-        Getter for `stores`.
-        """
+    @property
+    def stores(self) -> Optional[dict]:
         return self._get(DataContextVariableSchema.STORES)
 
-    def set_data_docs_sites(self, data_docs_sites: dict) -> None:
-        """
-        Setter for `data_docs_sites`.
-        """
-        self._set(DataContextVariableSchema.DATA_DOCS_SITES, data_docs_sites)
+    @stores.setter
+    def stores(self, stores: dict) -> None:
+        self._set(DataContextVariableSchema.STORES, stores)
 
-    def get_data_docs_sites(self) -> Optional[dict]:
-        """
-        Getter for `data_docs_sites`.
-        """
+    @property
+    def data_docs_sites(self) -> Optional[dict]:
         return self._get(DataContextVariableSchema.DATA_DOCS_SITES)
 
-    def set_anonymous_usage_statistics(
+    @data_docs_sites.setter
+    def data_docs_sites(self, data_docs_sites: dict) -> None:
+        self._set(DataContextVariableSchema.DATA_DOCS_SITES, data_docs_sites)
+
+    @property
+    def anonymous_usage_statistics(
+        self,
+    ) -> Optional[AnonymizedUsageStatisticsConfig]:
+        return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
+
+    @anonymous_usage_statistics.setter
+    def anonymous_usage_statistics(
         self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig
     ) -> None:
-        """
-        Setter for `anonymous_usage_statistics`.
-        """
         self._set(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             anonymous_usage_statistics,
         )
 
-    def get_anonymous_usage_statistics(
-        self,
-    ) -> Optional[AnonymizedUsageStatisticsConfig]:
-        """
-        Getter for `anonymous_usage_statistics`.
-        """
-        return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
+    @property
+    def notebooks(self) -> Optional[NotebookConfig]:
+        return self._get(DataContextVariableSchema.NOTEBOOKS)
 
-    def set_notebooks(self, notebooks: NotebookConfig) -> None:
-        """
-        Setter for `notebooks`.
-        """
+    @notebooks.setter
+    def notebooks(self, notebooks: NotebookConfig) -> None:
         self._set(
             DataContextVariableSchema.NOTEBOOKS,
             notebooks,
         )
 
-    def get_notebooks(self) -> Optional[NotebookConfig]:
-        """
-        Getter for `notebooks`.
-        """
-        return self._get(DataContextVariableSchema.NOTEBOOKS)
+    @property
+    def concurrency(self) -> Optional[ConcurrencyConfig]:
+        return self._get(DataContextVariableSchema.CONCURRENCY)
 
-    def set_concurrency(self, concurrency: ConcurrencyConfig) -> None:
-        """
-        Setter for `concurrency`.
-        """
+    @concurrency.setter
+    def concurrency(self, concurrency: ConcurrencyConfig) -> None:
         self._set(
             DataContextVariableSchema.CONCURRENCY,
             concurrency,
         )
 
-    def get_concurrency(self) -> Optional[ConcurrencyConfig]:
-        """
-        Getter for `concurrency`.
-        """
-        return self._get(DataContextVariableSchema.CONCURRENCY)
+    @property
+    def progress_bars(self) -> Optional[ProgressBarsConfig]:
+        return self._get(DataContextVariableSchema.PROGRESS_BARS)
 
-    def set_progress_bars(self, progress_bars: ProgressBarsConfig) -> None:
-        """
-        Setter for `progress_bars`.
-        """
+    @progress_bars.setter
+    def progress_bars(self, progress_bars: ProgressBarsConfig) -> None:
         self._set(
             DataContextVariableSchema.PROGRESS_BARS,
             progress_bars,
         )
-
-    def get_progress_bars(self) -> Optional[ProgressBarsConfig]:
-        """
-        Getter for `progress_bars`.
-        """
-        return self._get(DataContextVariableSchema.PROGRESS_BARS)
 
 
 @dataclass
