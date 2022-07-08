@@ -29,6 +29,7 @@ from tests.render.test_util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
 
 
+@pytest.fixture
 def bobby_onboarding_data_assistant_result_usage_stats_enabled(
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> OnboardingDataAssistantResult:
@@ -228,14 +229,12 @@ def test_onboarding_data_assistant_result_serialization(
 )
 def test_onboarding_data_assistant_result_get_expectation_suite(
     mock_emit,
-    bobby_onboarding_data_assistant_result_usage_stats: OnboardingDataAssistantResult,
+    bobby_onboarding_data_assistant_result_usage_stats_enabled: OnboardingDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite = (
-        bobby_onboarding_data_assistant_result.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
+    suite: ExpectationSuite = bobby_onboarding_data_assistant_result_usage_stats_enabled.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
     )
 
     assert suite is not None and len(suite.expectations) > 0
