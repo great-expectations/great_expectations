@@ -306,6 +306,9 @@ class BaseCheckpoint(ConfigPeer):
             expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
                 "expectation_suite_ge_cloud_id"
             )
+            include_rendered_content: bool = substituted_validation_dict.get(
+                "include_rendered_content", False
+            )
 
             validator: Validator = self.data_context.get_validator(
                 batch_request=batch_request,
@@ -319,6 +322,7 @@ class BaseCheckpoint(ConfigPeer):
                     if self.data_context.ge_cloud_mode
                     else None
                 ),
+                include_rendered_content=include_rendered_content,
             )
 
             action_list: list = substituted_validation_dict.get("action_list")

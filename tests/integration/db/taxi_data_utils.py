@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 
 import pandas as pd
 import sqlalchemy as sa
@@ -117,7 +117,9 @@ def _execute_taxi_splitting_test_cases(
         datasource_name: str = "test_datasource"
         data_connector_name: str = "test_data_connector"
         data_asset_name: str = table_name  # Read from generated table name
+
         column_name: str = taxi_splitting_test_cases.test_column_name
+        column_names: List[str] = taxi_splitting_test_cases.test_column_names
 
         # 2. Set splitter in DataConnector config
         data_connector_config: dict = {
@@ -175,16 +177,32 @@ def _execute_taxi_splitting_test_cases(
                 )
             ]
         else:
-            column_value: dict
-            expected_batch_definition_list: List[BatchDefinition] = [
-                BatchDefinition(
-                    datasource_name=datasource_name,
-                    data_connector_name=data_connector_name,
-                    data_asset_name=data_asset_name,
-                    batch_identifiers=IDDict({column_name: column_value}),
+            column_value: Any
+            if column_name:
+                expected_batch_definition_list = [
+                    BatchDefinition(
+                        datasource_name=datasource_name,
+                        data_connector_name=data_connector_name,
+                        data_asset_name=data_asset_name,
+                        batch_identifiers=IDDict({column_name: column_value}),
+                    )
+                    for column_value in test_case.expected_column_values
+                ]
+            elif column_names:
+                dictionary_element: dict
+                expected_batch_definition_list = [
+                    BatchDefinition(
+                        datasource_name=datasource_name,
+                        data_connector_name=data_connector_name,
+                        data_asset_name=data_asset_name,
+                        batch_identifiers=IDDict(dictionary_element),
+                    )
+                    for dictionary_element in test_case.expected_column_values
+                ]
+            else:
+                raise ValueError(
+                    "Missing test_column_names or test_column_names attribute."
                 )
-                for column_value in test_case.expected_column_values
-            ]
 
         assert set(batch_definition_list) == set(
             expected_batch_definition_list
