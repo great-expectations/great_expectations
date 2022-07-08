@@ -2380,8 +2380,10 @@ def test_volume_data_assistant_result_get_expectation_suite(
 ):
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite = bobby_volume_data_assistant_result.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
+    suite: ExpectationSuite = (
+        bobby_volume_data_assistant_result_usage_stats_enabled.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
     )
 
     assert suite is not None and len(suite.expectations) > 0
