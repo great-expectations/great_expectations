@@ -158,7 +158,9 @@ class AbstractDataContext(ABC):
         self._data_context_id = self._construct_data_context_id()
 
         # Override the project_config data_context_id if an expectations_store was already set up
-        self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
+        self.variables.config.anonymous_usage_statistics.data_context_id = (
+            self._data_context_id
+        )
         self._initialize_usage_statistics(
             self.project_config_with_variables_substituted.anonymous_usage_statistics
         )

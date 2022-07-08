@@ -408,9 +408,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self.config["validation_operators"][
             validation_operator_name
         ] = validation_operator_config
-        config = self.project_config_with_variables_substituted.validation_operators[
-            validation_operator_name
-        ]
+        config = self.variables.validation_operators[validation_operator_name]
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
             config=config,
@@ -439,9 +437,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
-        return list(
-            self.project_config_with_variables_substituted.data_docs_sites.keys()
-        )
+        return list(self.variables.data_docs_sites.keys())
 
     def get_docs_sites_urls(
         self,
@@ -470,9 +466,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        unfiltered_sites = (
-            self.project_config_with_variables_substituted.data_docs_sites
-        )
+        unfiltered_sites = self.variables.data_docs_sites
 
         # Filter out sites that are not in site_names
         sites = (
@@ -1487,9 +1481,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         for (
             name,
             value,
-        ) in (
-            self.project_config_with_variables_substituted.validation_operators.items()
-        ):
+        ) in self.variables.validation_operators.items():
             value["name"] = name
             validation_operators.append(value)
         return validation_operators
@@ -1784,7 +1776,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         index_page_locator_infos = {}
 
-        sites = self.project_config_with_variables_substituted.data_docs_sites
+        sites = self.variables.data_docs_sites
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -1841,7 +1833,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             site_name (str): Optional, the name of the site to clean. If not
             specified, all sites will be cleaned.
         """
-        data_docs_sites = self.project_config_with_variables_substituted.data_docs_sites
+        data_docs_sites = self.variables.data_docs_sites
         if not data_docs_sites:
             raise ge_exceptions.DataContextError(
                 "No data docs sites were found on this DataContext, therefore no sites will be cleaned.",
@@ -1861,7 +1853,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return all(cleaned)
 
     def _clean_data_docs_site(self, site_name: str) -> bool:
-        sites = self.project_config_with_variables_substituted.data_docs_sites
+        sites = self.variables.data_docs_sites
         if not sites:
             return False
         site_config = sites.get(site_name)
