@@ -54,7 +54,7 @@ For more on Expectation naming conventions, see the [Expectations section](../..
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/505d8e294bcbfcf5b6469c8499e3add2a3f5ee3d/examples/expectations/query_expectation_template.py).
+You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/de8e0c57d47386182451165137a401a6718a7dbf/examples/expectations/query_expectation_template.py).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
@@ -115,7 +115,7 @@ Now we're going to begin laying the groundwork for the functionality of your Cus
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/query_expectation_template.py#L22
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L22
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -123,7 +123,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/query_expectation_template.py#L25
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L25
 ```
 
 with something like:
@@ -131,7 +131,7 @@ with something like:
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../examples/expectations/query_expectation_template.py#L116
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L116
 ```
 
 with this one:
@@ -219,7 +219,7 @@ To implement your query, replace the `query` attribute of your Custom Expectatio
 
 This:
 
-```python file=../../../../examples/expectations/query_expectation_template.py#L35-L37
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L35-L37
 ```
 
 Becomes something like this:
@@ -252,7 +252,7 @@ To connect this Metric to our Custom Expectation, we'll need to include the `met
 
 This tuple:
 
-```python file=../../../../examples/expectations/query_expectation_template.py#L30
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L30
 ```
 
 Becomes:
@@ -415,7 +415,7 @@ Now we're going to begin laying the groundwork for the functionality of your Cus
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/query_expectation_template.py#L22
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L22
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -423,7 +423,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/query_expectation_template.py#L25
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L25
 ```
 
 with something like:
@@ -431,7 +431,7 @@ with something like:
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../examples/expectations/query_expectation_template.py#L116
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L116
 ```
 
 with this one:
@@ -519,7 +519,7 @@ To implement your query, replace the `query` attribute of your Custom Expectatio
 
 This:
 
-```python file=../../../../examples/expectations/query_expectation_template.py#L35-L37
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L35-L37
 ```
 
 Becomes something like this:
@@ -555,7 +555,7 @@ In this case, we'll be using the `query.column` Metric, allowing us to parameter
 
 This tuple:
 
-```python file=../../../../examples/expectations/query_expectation_template.py#L30
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L30
 ```
 
 Becomes:
@@ -656,7 +656,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/query_expectation_template.py#L105-L110
+```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L105-L110
 ```
 
 would become
