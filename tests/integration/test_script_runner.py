@@ -1082,6 +1082,111 @@ dockerized_db_tests = [
         ),
         extra_backend_dependencies=BackendDependencies.MSSQL,
     ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for POSTGRESQL is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_postgres",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/postgres_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for REDSHIFT is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_redshift",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MSSQL is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_mssql",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/mssql_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.MSSQL,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MYSQL is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_mysql",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/mysql_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.MYSQL,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for SNOWFLAKE is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_snowflake",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for BIGQUERY is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_bigquery",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for AWS ATHENA is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_awsathena",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.AWS,
+    # ),
     IntegrationTestFixture(
         name="sample_data_using_limit_mysql",
         user_flow_script="tests/integration/db/test_sql_data_sampling.py",

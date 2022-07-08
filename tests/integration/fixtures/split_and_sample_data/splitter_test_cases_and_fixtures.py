@@ -7,6 +7,7 @@ from typing import Any, List, Optional
 import pandas as pd
 
 from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
+from tests.test_utils import convert_string_columns_to_datetime
 
 
 class TaxiTestData:
@@ -15,9 +16,8 @@ class TaxiTestData:
         test_df: pd.DataFrame,
         test_column_name: Optional[str] = None,
         test_column_names: Optional[List[str]] = None,
+        column_names_to_convert: Optional[List[str]] = None,
     ):
-        self._test_df = test_df
-
         if (
             sum(
                 bool(x)
@@ -34,6 +34,13 @@ class TaxiTestData:
 
         self._test_column_name = test_column_name
         self._test_column_names = test_column_names
+
+        # Convert specified columns (e.g., "pickup_datetime" and "dropoff_datetime") to datetime column type.
+        convert_string_columns_to_datetime(
+            df=test_df, column_names_to_convert=column_names_to_convert
+        )
+
+        self._test_df = test_df
 
     @property
     def test_df(self) -> pd.DataFrame:
@@ -65,6 +72,12 @@ class TaxiTestData:
             .to_pydatetime()
             .tolist()
         )
+
+    def get_unique_sorted_months_in_taxi_data(self) -> List[str]:
+        months: List[datetime.datetime] = sorted(set(self.months_in_taxi_data()))
+
+        month: datetime.datetime
+        return [month.strftime("%Y-%m-%d") for month in months]
 
     def year_month_batch_identifier_data(self) -> List[dict]:
         return [
@@ -415,5 +428,22 @@ class TaxiSplittingTestCasesDateTime(TaxiSplittingTestCasesBase):
                 num_expected_batch_definitions=36,
                 num_expected_rows_in_first_batch_definition=10,
                 expected_column_values=self.taxi_test_data.year_month_batch_identifier_data(),
+            ),
+        ]
+
+
+class TaxiSplittingTestCasesConvertedDateTime(TaxiSplittingTestCasesBase):
+    def test_cases(self) -> List[TaxiSplittingTestCase]:
+        return [
+            TaxiSplittingTestCase(
+                table_domain_test_case=False,
+                splitter_method_name="split_on_converted_datetime",
+                splitter_kwargs={
+                    "column_name": self.taxi_test_data.test_column_name,
+                    "date_format_string": "%Y-%m-%d",
+                },
+                num_expected_batch_definitions=9,
+                num_expected_rows_in_first_batch_definition=2,
+                expected_column_values=self.taxi_test_data.get_unique_sorted_months_in_taxi_data(),
             ),
         ]
