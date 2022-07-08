@@ -448,13 +448,9 @@ def test_update_datasource_persists_changes_with_store(
 ) -> None:
     context: DataContext = data_context_parameterized_expectation_suite
 
-    datasource_name: str
-    datasource_to_update: Datasource
-    datasource_name, datasource_to_update = tuple(context.datasources.items())[0]
+    datasource_to_update: Datasource = tuple(context.datasources.values())[0]
 
-    context.update_datasource(
-        datasource_name=datasource_name, datasource=datasource_to_update
-    )
+    context.update_datasource(datasource=datasource_to_update)
 
     assert mock_update_by_name.call_count == 1
 

@@ -2,7 +2,7 @@ import copy
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import jsonpatch
 from pyparsing import ParseResults
@@ -31,7 +31,10 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-from great_expectations.render.types import RenderedAtomicContentSchema
+from great_expectations.render.types import (
+    RenderedAtomicContent,
+    RenderedAtomicContentSchema,
+)
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -951,7 +954,7 @@ class ExpectationConfiguration(SerializableDictDot):
         success_on_last_run: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
-        include_rendered_content: bool = False,
+        rendered_content: Optional[List[RenderedAtomicContent]] = None,
     ) -> None:
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -972,9 +975,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
         self._expectation_context = expectation_context
-        self._include_rendered_content = include_rendered_content
-        if include_rendered_content:
-            self.rendered_content = None
+        self._rendered_content = rendered_content
 
     def process_evaluation_parameters(
         self,
@@ -1070,8 +1071,12 @@ class ExpectationConfiguration(SerializableDictDot):
         self._kwargs = value
 
     @property
-    def include_rendered_content(self) -> str:
-        return self._include_rendered_content
+    def rendered_content(self) -> Optional[List[RenderedAtomicContent]]:
+        return self._rendered_content
+
+    @rendered_content.setter
+    def rendered_content(self, value: Optional[List[RenderedAtomicContent]]) -> None:
+        self._rendered_content = value
 
     def _get_default_custom_kwargs(self) -> dict:
         # NOTE: this is a holdover until class-first expectations control their
@@ -1302,6 +1307,10 @@ class ExpectationConfiguration(SerializableDictDot):
             myself["expectation_context"] = convert_to_json_serializable(
                 myself["expectation_context"]
             )
+        if "rendered_content" in myself:
+            myself["rendered_content"] = convert_to_json_serializable(
+                myself["rendered_content"]
+            )
         return myself
 
     def get_evaluation_parameter_dependencies(self) -> dict:
@@ -1377,19 +1386,11 @@ class ExpectationConfiguration(SerializableDictDot):
         execution_engine: "ExecutionEngine" = None,  # noqa: F821
         **kwargs: dict,
     ):
-        # TODO: NF - feature flag to be updated upon feature release
-        include_rendered_content: bool
-        if "include_rendered_content" in kwargs:
-            include_rendered_content = kwargs["include_rendered_content"]
-        else:
-            include_rendered_content = False
-
         expectation_impl: "Expectation" = self._get_expectation_impl()  # noqa: F821
         return expectation_impl(self).metrics_validate(
             metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
-            include_rendered_content=include_rendered_content,
         )
 
 
@@ -1418,10 +1419,12 @@ class ExpectationConfigurationSchema(Schema):
         )
     )
 
-    REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context"]
+    REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context", "rendered_content"]
 
     @post_dump
-    def clean_null_attrs(self, data: dict, **kwargs):
+    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
+        """Removes the attributes in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE during serialization if
+        their values are None."""
         data = copy.deepcopy(data)
         for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:

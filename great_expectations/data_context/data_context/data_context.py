@@ -134,7 +134,7 @@ class DataContext(BaseDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(ge_dir, runtime_environment=runtime_environment)
+        return cls(context_root_dir=ge_dir, runtime_environment=runtime_environment)
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir: str) -> bool:
@@ -353,7 +353,6 @@ class DataContext(BaseDataContext):
 
         context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
-
         project_config = self._load_project_config()
         super().__init__(
             project_config,
@@ -440,19 +439,6 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        if self.ge_cloud_mode:
-            logger.debug(
-                "ge_cloud_mode detected - skipping DataContext._save_project_config"
-            )
-            return
-        logger.debug("Starting DataContext._save_project_config")
-
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
-
     def add_store(self, store_name, store_config):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")
 
@@ -467,13 +453,12 @@ class DataContext(BaseDataContext):
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(name=name, save_changes=True, **kwargs)
-
+        ] = super().add_datasource(name=name, **kwargs)
+        self._save_project_config()
         return new_datasource
 
     def update_datasource(
         self,
-        datasource_name: str,
         datasource: Union[LegacyDatasource, BaseDatasource],
     ) -> None:
         """
@@ -481,19 +466,18 @@ class DataContext(BaseDataContext):
         Note that this method persists changes using an underlying Store.
         """
         logger.debug(
-            f"Starting DataContext.update_datasource for datasource {datasource_name}"
+            f"Starting DataContext.update_datasource for datasource {datasource.name}"
         )
 
         super().update_datasource(
-            datasource_name=datasource_name,
             datasource=datasource,
             save_changes=True,
         )
 
     def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
-
-        super().delete_datasource(datasource_name=name, save_changes=True)
+        super().delete_datasource(datasource_name=name)
+        self._save_project_config()
 
     @classmethod
     def find_context_root_dir(cls):
