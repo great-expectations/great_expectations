@@ -195,6 +195,7 @@ class InlineStoreBackend(StoreBackend):
             )
 
     def _save_changes(self) -> None:
+        # NOTE: <DataContextRefactor> This responsibility will be moved into DataContext Variables object
         self._data_context._save_project_config()
 
     @staticmethod
