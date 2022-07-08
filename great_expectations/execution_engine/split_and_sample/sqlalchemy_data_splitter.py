@@ -48,6 +48,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
     date_part e.g. SqlAlchemyDataSplitter.date_part.MONTH
     """
 
+    def __init__(self, dialect: str):
+        self._dialect = dialect
+
     DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
         "split_on_year": "get_data_for_batch_identifiers_year",
         "split_on_year_and_month": "get_data_for_batch_identifiers_year_and_month",
@@ -209,28 +212,84 @@ class SqlAlchemyDataSplitter(DataSplitter):
             == batch_identifiers[column_name]
         )
 
-    @staticmethod
     def split_on_divided_integer(
+        self,
         column_name: str,
         divisor: int,
         batch_identifiers: dict,
     ) -> bool:
         """Divide the values in the named column by `divisor`, and split on that"""
+        if self._dialect == "sqlite":
+            return (
+                sa.cast(
+                    (sa.cast(sa.column(column_name), sa.Integer) / divisor), sa.Integer
+                )
+                == batch_identifiers[column_name]
+            )
+
+        if self._dialect == "mysql":
+            return (
+                sa.cast(
+                    sa.func.truncate(
+                        (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0
+                    ),
+                    sa.Integer,
+                )
+                == batch_identifiers[column_name]
+            )
+
+        if self._dialect == "mssql":
+            return (
+                sa.cast(
+                    sa.func.round(
+                        (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0, 1
+                    ),
+                    sa.Integer,
+                )
+                == batch_identifiers[column_name]
+            )
+
+        if self._dialect == "awsathena":
+            return (
+                sa.cast(
+                    sa.func.truncate(
+                        sa.cast(sa.column(column_name), sa.Integer) / divisor
+                    ),
+                    sa.Integer,
+                )
+                == batch_identifiers[column_name]
+            )
 
         return (
-            sa.cast(sa.column(column_name) / divisor, sa.Integer)
+            sa.cast(
+                sa.func.trunc(
+                    (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0
+                ),
+                sa.Integer,
+            )
             == batch_identifiers[column_name]
         )
 
-    @staticmethod
     def split_on_mod_integer(
+        self,
         column_name: str,
         mod: int,
         batch_identifiers: dict,
     ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
+        """Divide the values in the named column by `mod`, and split on that"""
+        if self._dialect in [
+            "sqlite",
+            "mssql",
+        ]:
+            return (
+                sa.cast(sa.column(column_name), sa.Integer) % mod
+                == batch_identifiers[column_name]
+            )
 
-        return sa.column(column_name) % mod == batch_identifiers[column_name]
+        return (
+            sa.func.mod(sa.cast(sa.column(column_name), sa.Integer), mod)
+            == batch_identifiers[column_name]
+        )
 
     @staticmethod
     def split_on_multi_column_values(
@@ -246,17 +305,21 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
         )
 
-    @staticmethod
     def split_on_hashed_column(
+        self,
         column_name: str,
         hash_digits: int,
         batch_identifiers: dict,
     ) -> bool:
         """Split on the hashed value of the named column"""
+        if self._dialect == "sqlite":
+            return (
+                sa.func.md5(sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits)
+                == batch_identifiers[column_name]
+            )
 
-        return (
-            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
-            == batch_identifiers[column_name]
+        raise NotImplementedError(
+            f'Splitter method "split_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
         )
 
     def get_data_for_batch_identifiers(
@@ -646,8 +709,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         column_name: str,
     ) -> Selectable:
         """Split using the values in the named column"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
-
         return (
             sa.select([sa.func.distinct(sa.column(column_name))])
             .select_from(sa.text(table_name))
@@ -661,8 +722,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         date_format_string: str = "%Y-%m-%d",
     ) -> Selectable:
         """Convert the values in the named column to the given date_format, and split on that"""
-        # query = f"SELECT DISTINCT( strftime(\"{date_format_string}\", \"{self.column_name}\")) as my_var FROM {self.table_name}"
-
         return sa.select(
             [
                 sa.func.distinct(
@@ -674,30 +733,104 @@ class SqlAlchemyDataSplitter(DataSplitter):
             ]
         ).select_from(sa.text(table_name))
 
-    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer(
+        self,
         table_name: str,
         column_name: str,
         divisor: int,
     ) -> Selectable:
         """Divide the values in the named column by `divisor`, and split on that"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
+        if self._dialect == "sqlite":
+            return sa.select(
+                [
+                    sa.func.distinct(
+                        sa.cast(
+                            (sa.cast(sa.column(column_name), sa.Integer) / divisor),
+                            sa.Integer,
+                        )
+                    )
+                ]
+            ).select_from(sa.text(table_name))
+
+        if self._dialect == "mysql":
+            return sa.select(
+                [
+                    sa.func.distinct(
+                        sa.cast(
+                            sa.func.truncate(
+                                (sa.cast(sa.column(column_name), sa.Integer) / divisor),
+                                0,
+                            ),
+                            sa.Integer,
+                        )
+                    )
+                ]
+            ).select_from(sa.text(table_name))
+
+        if self._dialect == "mssql":
+            return sa.select(
+                [
+                    sa.func.distinct(
+                        sa.cast(
+                            sa.func.round(
+                                (sa.cast(sa.column(column_name), sa.Integer) / divisor),
+                                0,
+                                1,
+                            ),
+                            sa.Integer,
+                        )
+                    )
+                ]
+            ).select_from(sa.text(table_name))
+
+        if self._dialect == "awsathena":
+            return sa.select(
+                [
+                    sa.func.distinct(
+                        sa.cast(
+                            sa.func.truncate(
+                                sa.cast(sa.column(column_name), sa.Integer) / divisor
+                            ),
+                            sa.Integer,
+                        )
+                    )
+                ]
+            ).select_from(sa.text(table_name))
 
         return sa.select(
-            [sa.func.distinct(sa.cast(sa.column(column_name) / divisor, sa.Integer))]
+            [
+                sa.func.distinct(
+                    sa.cast(
+                        sa.func.trunc(
+                            (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0
+                        ),
+                        sa.Integer,
+                    )
+                )
+            ]
         ).select_from(sa.text(table_name))
 
-    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer(
+        self,
         table_name: str,
         column_name: str,
         mod: int,
     ) -> Selectable:
-        """Divide the values in the named column by `divisor`, and split on that"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
+        """Divide the values in the named column by `mod`, and split on that"""
+        if self._dialect in [
+            "sqlite",
+            "mssql",
+        ]:
+            return sa.select(
+                [sa.func.distinct(sa.cast(sa.column(column_name), sa.Integer) % mod)]
+            ).select_from(sa.text(table_name))
 
         return sa.select(
-            [sa.func.distinct(sa.cast(sa.column(column_name) % mod, sa.Integer))]
+            [
+                sa.func.distinct(
+                    sa.func.mod(sa.cast(sa.column(column_name), sa.Integer), mod)
+                )
+            ]
         ).select_from(sa.text(table_name))
 
     @staticmethod
@@ -706,23 +839,30 @@ class SqlAlchemyDataSplitter(DataSplitter):
         column_names: List[str],
     ) -> Selectable:
         """Split on the joint values in the named columns"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
-
         return (
             sa.select([sa.column(column_name) for column_name in column_names])
             .distinct()
             .select_from(sa.text(table_name))
         )
 
-    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column(
+        self,
         table_name: str,
         column_name: str,
         hash_digits: int,
     ) -> Selectable:
         """Note: this method is experimental. It does not work with all SQL dialects."""
-        # query = f"SELECT MD5(\"{self.column_name}\") = {matching_hash}) AS hashed_var FROM {self.table_name}"
+        if self._dialect == "sqlite":
+            return sa.select(
+                [
+                    sa.func.distinct(
+                        sa.func.md5(
+                            sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits
+                        )
+                    )
+                ]
+            ).select_from(sa.text(table_name))
 
-        return sa.select([sa.func.md5(sa.column(column_name))]).select_from(
-            sa.text(table_name)
+        raise NotImplementedError(
+            f'Splitter method "split_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
         )
