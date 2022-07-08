@@ -1,6 +1,6 @@
 import datetime
 import os
-from typing import List
+from typing import List, Optional
 from unittest import mock
 
 import pandas as pd
@@ -31,6 +31,7 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
     TaxiSplittingTestCase,
     TaxiSplittingTestCasesBase,
     TaxiSplittingTestCasesColumnValue,
+    TaxiSplittingTestCasesConvertedDateTime,
     TaxiSplittingTestCasesDateTime,
     TaxiSplittingTestCasesDividedInteger,
     TaxiSplittingTestCasesHashedColumn,
@@ -39,6 +40,7 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
     TaxiSplittingTestCasesWholeTable,
     TaxiTestData,
 )
+from tests.test_utils import convert_string_columns_to_datetime
 
 SINGLE_DATE_PART_DATE_PARTS += [
     pytest.param(
@@ -395,18 +397,17 @@ def ten_trips_per_month_df() -> pd.DataFrame:
             "yellow_tripdata_sample_10_trips_from_each_month.csv",
         ),
     )
-    # Convert pickup_datetime to a datetime type column
     df: pd.DataFrame = pd.read_csv(csv_path)
-    column_names_to_convert: List[str] = ["pickup_datetime", "dropoff_datetime"]
-    for column_name_to_convert in column_names_to_convert:
-        df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
-
     return df
 
 
 @pytest.fixture
 def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(ten_trips_per_month_df(), sa)
+    df: pd.DataFrame = ten_trips_per_month_df()
+    convert_string_columns_to_datetime(
+        df=df, column_names_to_convert=["pickup_datetime", "dropoff_datetime"]
+    )
+    engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
     return engine
 
 
@@ -419,6 +420,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 test_df=ten_trips_per_month_df(),
                 test_column_name=None,
                 test_column_names=None,
+                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
         TaxiSplittingTestCasesColumnValue(
@@ -426,6 +428,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 test_df=ten_trips_per_month_df(),
                 test_column_name="passenger_count",
                 test_column_names=None,
+                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
         TaxiSplittingTestCasesDividedInteger(
@@ -433,6 +436,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 test_df=ten_trips_per_month_df(),
                 test_column_name="pickup_location_id",
                 test_column_names=None,
+                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
         TaxiSplittingTestCasesModInteger(
@@ -440,6 +444,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 test_df=ten_trips_per_month_df(),
                 test_column_name="pickup_location_id",
                 test_column_names=None,
+                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
         TaxiSplittingTestCasesHashedColumn(
@@ -447,6 +452,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 test_df=ten_trips_per_month_df(),
                 test_column_name="pickup_location_id",
                 test_column_names=None,
+                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
         TaxiSplittingTestCasesMultiColumnValues(
@@ -457,6 +463,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                     "rate_code_id",
                     "payment_type",
                 ],
+                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
         TaxiSplittingTestCasesDateTime(
@@ -464,6 +471,15 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 test_df=ten_trips_per_month_df(),
                 test_column_name="pickup_datetime",
                 test_column_names=None,
+                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
+            )
+        ),
+        TaxiSplittingTestCasesConvertedDateTime(
+            taxi_test_data=TaxiTestData(
+                test_df=ten_trips_per_month_df(),
+                test_column_name="pickup_datetime",
+                test_column_names=None,
+                column_names_to_convert=None,
             )
         ),
     ],
@@ -471,15 +487,11 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
 def test_sqlite_split(
     taxi_test_cases: TaxiSplittingTestCasesBase,
     sa,
-    in_memory_sqlite_taxi_ten_trips_per_month_execution_engine,
 ):
     """What does this test and why?
     splitters should work with sqlite.
     """
-
-    engine: SqlAlchemyExecutionEngine = (
-        in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
-    )
+    engine: SqlAlchemyExecutionEngine = build_sa_engine(taxi_test_cases.test_df, sa)
 
     test_cases: List[TaxiSplittingTestCase] = taxi_test_cases.test_cases()
     test_case: TaxiSplittingTestCase
