@@ -1,15 +1,19 @@
+import datetime
 import glob
 import json
 import logging
 import os
+import re
 import traceback
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Dict, List, Optional, Tuple, Union
+from numbers import Number
+from typing import Dict, List, Optional, Set, Tuple, Union
 
+import numpy as np
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
@@ -59,7 +63,10 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.util import (
+    render_evaluation_parameter_string,
+    valid_tokens_and_types,
+)
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     CollapseContent,
@@ -201,6 +208,29 @@ class Expectation(metaclass=MetaExpectation):
         raise NotImplementedError
 
     @classmethod
+    @renderer(renderer_type="atomic.prescriptive.kwargs")
+    def _prescriptive_kwargs(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs: dict,
+    ) -> RenderedAtomicContent:
+        """
+        Default rendering function that is utilized by GE Cloud Front-end if no other atomic renderers apply
+        """
+        value_obj = renderedAtomicValueSchema.load(
+            {"schema": {"type": "UnknownType"}, "kwargs": configuration.kwargs}
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.kwargs",
+            value=value_obj,
+            value_type="UnknownType",
+        )
+        return rendered
+
+    @classmethod
     def _atomic_prescriptive_template(
         cls,
         configuration=None,
@@ -219,10 +249,6 @@ class Expectation(metaclass=MetaExpectation):
         styling = runtime_configuration.get("styling")
 
         template_str = "$expectation_type(**$kwargs)"
-        params = {
-            "expectation_type": configuration.expectation_type,
-            "kwargs": configuration.kwargs,
-        }
 
         params_with_json_schema = {
             "expectation_type": {
@@ -679,10 +705,11 @@ class Expectation(metaclass=MetaExpectation):
 
     def metrics_validate(
         self,
-        metrics: Dict,
+        metrics: dict,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
+        **kwargs: dict,
     ) -> ExpectationValidationResult:
         if configuration is None:
             configuration = self.configuration
@@ -710,14 +737,20 @@ class Expectation(metaclass=MetaExpectation):
             execution_engine=execution_engine,
         )
         evr: ExpectationValidationResult = self._build_evr(
-            raw_response=expectation_validation_result, configuration=configuration
+            raw_response=expectation_validation_result,
+            configuration=configuration,
         )
         return evr
 
     @staticmethod
-    def _build_evr(raw_response, configuration) -> ExpectationValidationResult:
+    def _build_evr(
+        raw_response: Union[ExpectationValidationResult, dict],
+        configuration: ExpectationConfiguration,
+        **kwargs: dict,
+    ) -> ExpectationValidationResult:
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
         fails to return an EVR but returns the necessary components in a dictionary."""
+        evr: ExpectationValidationResult
         if not isinstance(raw_response, ExpectationValidationResult):
             if isinstance(raw_response, dict):
                 evr = ExpectationValidationResult(**raw_response)
@@ -725,7 +758,8 @@ class Expectation(metaclass=MetaExpectation):
             else:
                 raise GreatExpectationsError("Unable to build EVR")
         else:
-            evr = raw_response
+            raw_response_dict: dict = raw_response.to_json_dict()
+            evr = ExpectationValidationResult(**raw_response_dict)
             evr.expectation_config = configuration
         return evr
 
@@ -848,6 +882,8 @@ class Expectation(metaclass=MetaExpectation):
         data_context=None,
         runtime_configuration=None,
     ):
+        include_rendered_content: bool = validator._include_rendered_content
+
         if configuration is None:
             configuration = deepcopy(self.configuration)
 
@@ -858,6 +894,8 @@ class Expectation(metaclass=MetaExpectation):
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
         )[0]
+        if include_rendered_content:
+            evr.render()
 
         return evr
 
@@ -1249,10 +1287,14 @@ class Expectation(metaclass=MetaExpectation):
                 test=exp_test["test"],
                 raise_exception=False,
             )
+            print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
             if error_message is None:
+                print(f"  PASSED")
                 test_passed = True
                 error_diagnostics = None
             else:
+                print(f"  ERROR: {repr(error_message)}")
+                print(f"{stack_trace[0]}")
                 error_diagnostics = ExpectationErrorDiagnostics(
                     error_msg=error_message,
                     stack_trace=stack_trace,
@@ -1695,12 +1737,18 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 except TypeError:
                     pass
 
+        if not isinstance(metric_value, datetime.datetime) and np.isnan(metric_value):
+            return {"success": False, "result": {"observed_value": None}}
+
         # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
                 above_min = metric_value > min_value
             else:
-                above_min = metric_value >= min_value
+                above_min = (
+                    self._isclose(operand_a=metric_value, operand_b=min_value)
+                    or metric_value >= min_value
+                )
         else:
             above_min = True
 
@@ -1708,13 +1756,132 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 below_max = metric_value < max_value
             else:
-                below_max = metric_value <= max_value
+                below_max = (
+                    self._isclose(operand_a=metric_value, operand_b=min_value)
+                    or metric_value <= max_value
+                )
         else:
             below_max = True
 
         success = above_min and below_max
 
         return {"success": success, "result": {"observed_value": metric_value}}
+
+    @staticmethod
+    def _isclose(
+        operand_a: Union[datetime.datetime, Number],
+        operand_b: Union[datetime.datetime, Number],
+    ) -> bool:
+        """
+        Checks whether or not two numbers (or timestamps) are approximately close to one another.
+        """
+        operand_a_as_number: np.float64
+        operand_b_as_number: np.float64
+        if isinstance(operand_a, datetime.datetime):
+            operand_a_as_number = np.float64(int(operand_a.strftime("%Y%m%d%H%M%S")))
+            operand_b_as_number = np.float64(int(operand_b.strftime("%Y%m%d%H%M%S")))
+        else:
+            operand_a_as_number = np.float64(operand_a)
+            operand_b_as_number = np.float64(operand_b)
+
+        return np.isclose(operand_a_as_number, operand_b_as_number)
+
+
+class QueryExpectation(TableExpectation, ABC):
+    """Base class for QueryExpectations.
+
+     QueryExpectations *must* have the following attributes set:
+         1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
+            expectation
+         2. `success_keys`: a tuple of the *keys* used to determine the success of
+            the expectation.
+
+    QueryExpectations *may* specify a `query` attribute, and specify that query in `default_kwarg_values`.
+    Doing so precludes the need to pass a query into the Expectation, but will override the default query if a query
+    is passed in.
+
+     They *may* optionally override `runtime_keys` and `default_kwarg_values`;
+         1. runtime_keys lists the keys that can be used to control output but will
+            not affect the actual success value of the expectation (such as result_format).
+         2. default_kwarg_values is a dictionary that will be used to fill unspecified
+            kwargs from the Expectation Configuration.
+
+     QueryExpectations *must* implement the following:
+         1. `_validate`
+
+     Additionally, they *may* provide implementations of:
+         1. `validate_configuration`, which should raise an error if the configuration
+            will not be usable for the Expectation
+         2. Data Docs rendering methods decorated with the @renderer decorator. See the
+    """
+
+    default_kwarg_values = {
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": False,
+        "meta": None,
+        "row_condition": None,
+        "condition_parser": None,
+    }
+
+    domain_keys = (
+        "batch_id",
+        "row_condition",
+        "condition_parser",
+    )
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """Raises an exception if the configuration is not viable for an expectation.
+
+        Args:
+              configuration: An ExpectationConfiguration
+
+        Raises:
+              InvalidExpectationConfigurationError: If no `query` is specified
+              UserWarning: If query is not parameterized, and/or row_condition is passed.
+        """
+        super().validate_configuration(configuration)
+
+        query: str = configuration.kwargs.get("query") or self.default_kwarg_values.get(
+            "query"
+        )
+        row_condition: str = configuration.kwargs.get(
+            "row_condition"
+        ) or self.default_kwarg_values.get("row_condition")
+
+        try:
+            assert (
+                "query" in configuration.kwargs or query
+            ), "'query' parameter is required for Query Expectations."
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+        try:
+            parsed_query: Set[str] = {
+                x
+                for x in re.split(", |\\(|\n|\\)| |/", query)
+                if x.lower() != "" and x.lower() not in valid_tokens_and_types
+            }
+            assert "{active_batch}" in parsed_query, (
+                "Your query appears to not be parameterized for a data asset. "
+                "By not parameterizing your query with `{active_batch}`, "
+                "you may not be validating against your intended data asset, or the expectation may fail."
+            )
+            assert all([re.match("{.*?}", x) for x in parsed_query]), (
+                "Your query appears to have hard-coded references to your data. "
+                "By not parameterizing your query with `{active_batch}`, {col}, etc., "
+                "you may not be validating against your intended data asset, or the expectation may fail."
+            )
+        except AssertionError as e:
+            warnings.warn(str(e), UserWarning)
+        try:
+            assert row_condition is None, (
+                "`row_condition` is an experimental feature. "
+                "Combining this functionality with QueryExpectations may result in unexpected behavior."
+            )
+        except AssertionError as e:
+            warnings.warn(str(e), UserWarning)
 
 
 class ColumnExpectation(TableExpectation, ABC):

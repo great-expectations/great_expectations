@@ -57,6 +57,7 @@ def test_partition_parameter_builder_alice_continuous(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        evaluation_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -101,7 +102,7 @@ def test_partition_parameter_builder_alice_continuous(
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=parameter_builder.json_serialized_fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
@@ -124,6 +125,7 @@ def test_partition_parameter_builder_alice_categorical(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=False,
+        evaluation_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -167,7 +169,7 @@ def test_partition_parameter_builder_alice_categorical(
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=parameter_builder.json_serialized_fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
@@ -190,6 +192,7 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        evaluation_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -237,7 +240,7 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=parameter_builder.json_serialized_fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
@@ -254,6 +257,7 @@ def test_partition_parameter_builder_alice_continuous_check_serialized_keys(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        evaluation_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -263,12 +267,5 @@ def test_partition_parameter_builder_alice_continuous_check_serialized_keys(
         "module_name",
         "name",
         "bucketize_data",
-        "metric_name",
-        "metric_domain_kwargs",
-        "metric_value_kwargs",
-        "enforce_numeric_metric",
-        "replace_nan_with_zero",
-        "reduce_scalar_metric",
         "evaluation_parameter_builder_configs",
-        "json_serialize",
     }

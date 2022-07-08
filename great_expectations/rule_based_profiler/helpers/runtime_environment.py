@@ -1,9 +1,8 @@
 import logging
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.types import SerializableDictDot
@@ -12,33 +11,77 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class RuntimeEnvironmentColumnDomainTypeDirectivesKeys(Enum):
+class RuntimeEnvironmentTableDomainTypeDirectivesKeys(Enum):  # isort:skip
+    pass
+
+
+class RuntimeEnvironmentColumnDomainTypeDirectivesKeys(Enum):  # isort:skip
     INCLUDE_COLUMN_NAMES = "include_column_names"
     EXCLUDE_COLUMN_NAMES = "exclude_column_names"
     INCLUDE_COLUMN_NAME_SUFFIXES = "include_column_name_suffixes"
     EXCLUDE_COLUMN_NAME_SUFFIXES = "exclude_column_name_suffixes"
     INCLUDE_SEMANTIC_TYPES = "include_semantic_types"
     EXCLUDE_SEMANTIC_TYPES = "exclude_semantic_types"
+    ALLOWED_SEMANTIC_TYPES_PASSTHROUGH = "allowed_semantic_types_passthrough"
+    CARDINALITY_LIMIT_MODE = "cardinality_limit_mode"
+    MAX_UNIQUE_VALUES = "max_unique_values"
+    MAX_PROPORTION_UNIQUE = "max_proportion_unique"
+    MAX_UNEXPECTED_VALUES = "max_unexpected_values"
+    MAX_UNEXPECTED_RATIO = "max_unexpected_ratio"
+    MIN_MAX_UNEXPECTED_VALUES_PROPORTION = "min_max_unexpected_values_proportion"
 
 
-class RuntimeEnvironmentColumnPairDomainTypeDirectivesKeys(Enum):
+class RuntimeEnvironmentColumnPairDomainTypeDirectivesKeys(Enum):  # isort:skip
     pass
 
 
-class RuntimeEnvironmentMulticolumnDomainTypeDirectivesKeys(Enum):
+class RuntimeEnvironmentMulticolumnDomainTypeDirectivesKeys(Enum):  # isort:skip
     pass
 
 
-class RuntimeEnvironmentTableDomainTypeDirectivesKeys(Enum):
-    pass
-
-
-RuntimeEnvironmentDomainTypeDirectivesKeys = Union[
+RuntimeEnvironmentDomainTypeDirectivesKeys = Union[  # isort:skip
+    RuntimeEnvironmentTableDomainTypeDirectivesKeys,
     RuntimeEnvironmentColumnDomainTypeDirectivesKeys,
     RuntimeEnvironmentColumnPairDomainTypeDirectivesKeys,
     RuntimeEnvironmentMulticolumnDomainTypeDirectivesKeys,
-    RuntimeEnvironmentTableDomainTypeDirectivesKeys,
 ]
+
+
+@dataclass
+class RuntimeEnvironmentVariablesDirectives(SerializableDictDot):
+    rule_name: str
+    variables: Optional[Dict[str, Any]] = None
+
+    def to_dict(self) -> dict:
+        """
+        Returns dictionary equivalent of this object.
+        """
+        return asdict(self)
+
+    def to_json_dict(self) -> dict:
+        """
+        Returns JSON dictionary equivalent of this object.
+        """
+        return convert_to_json_serializable(data=self.to_dict())
+
+
+def build_variables_directives(
+    **kwargs: dict,
+) -> List[RuntimeEnvironmentVariablesDirectives]:
+    """
+    This method makes best-effort attempt to identify directives, supplied in "kwargs", as "variables", referenced by
+    components of "Rule" objects, identified by respective "rule_name" property as indicated, and return each of these
+    directives as part of dedicated "RuntimeEnvironmentVariablesDirectives" typed object for every "rule_name" (string).
+    """
+    rule_name: str
+    variables: Optional[Dict[str, Any]]
+    return [
+        RuntimeEnvironmentVariablesDirectives(
+            rule_name=rule_name,
+            variables=variables,
+        )
+        for rule_name, variables in kwargs.items()
+    ]
 
 
 @dataclass
@@ -96,7 +139,7 @@ def _build_specific_domain_type_directives(
         )
     )
 
-    key: RuntimeEnvironmentDomainTypeDirectivesKeys
+    key: str
     value: Any
     for key, value in kwargs.items():
         try:
@@ -105,9 +148,8 @@ def _build_specific_domain_type_directives(
                 domain_type_directives_keys(key)
             )
             domain_type_directives.directives[domain_type_directives_key] = value
-        except ValueError as e:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f'Unknown property "{key}" in "{domain_type_directives_keys}"; {e} was raised.'
-            )
+        except ValueError:
+            # Skip every directive that is not defined key in some "RuntimeEnvironmentDomainTypeDirectivesKeys" member.
+            pass
 
     return domain_type_directives

@@ -306,6 +306,9 @@ class BaseCheckpoint(ConfigPeer):
             expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
                 "expectation_suite_ge_cloud_id"
             )
+            include_rendered_content: bool = substituted_validation_dict.get(
+                "include_rendered_content", False
+            )
 
             validator: Validator = self.data_context.get_validator(
                 batch_request=batch_request,
@@ -319,6 +322,7 @@ class BaseCheckpoint(ConfigPeer):
                     if self.data_context.ge_cloud_mode
                     else None
                 ),
+                include_rendered_content=include_rendered_content,
             )
 
             action_list: list = substituted_validation_dict.get("action_list")
@@ -365,6 +369,7 @@ class BaseCheckpoint(ConfigPeer):
                     ),
                     result_format=result_format,
                     checkpoint_identifier=checkpoint_identifier,
+                    checkpoint_name=self.name,
                     **operator_run_kwargs,
                 )
             )
@@ -888,7 +893,7 @@ class LegacyCheckpoint(Checkpoint):
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = None,
-    ):
+    ) -> ValidationOperatorResult:
         result_format = result_format or {"result_format": "SUMMARY"}
 
         if not assets_to_validate:
@@ -979,6 +984,7 @@ class LegacyCheckpoint(Checkpoint):
                     f'Could not find Validation Operator "{self.validation_operator_name}" when '
                     f'running Checkpoint "{self.name}". Using default action_list_operator.'
                 )
+
             results = self._run_default_validation_operator(
                 assets_to_validate=batches_to_validate,
                 run_id=run_id,

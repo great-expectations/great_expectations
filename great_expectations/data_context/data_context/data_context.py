@@ -12,6 +12,9 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -35,42 +38,45 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
+# TODO: <WILL> Most of the logic here will be migrated to FileDataContext
 class DataContext(BaseDataContext):
-    """A DataContext represents a Great Expectations project. It organizes storage and access for
-    expectation suites, datasources, notification settings, and data fixtures.
+    """A DataContext represents a Great Expectations project. It is the primary entry point for a Great Expectations
+    deployment, with configurations and methods for all supporting components.
 
-    The DataContext is configured via a yml file stored in a directory called great_expectations; the configuration file
-    as well as managed expectation suites should be stored in version control.
+    The DataContext is configured via a yml file stored in a directory called great_expectations; this configuration
+    file as well as managed Expectation Suites should be stored in version control. There are other ways to create a
+    Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GE Cloud
+    (coming soon). Please refer to our documentation for more details.
 
-    Use the `create` classmethod to create a new empty config, or instantiate the DataContext
-    by passing the path to an existing data context root directory.
+    You can Validate data or generate Expectations using Execution Engines including:
 
-    DataContexts use data sources you're already familiar with. BatchKwargGenerators help introspect data stores and data execution
-    frameworks (such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. This
-    enables fetching, validation, profiling, and documentation of  your data in a way that is meaningful within your
-    existing infrastructure and work environment.
+     * SQL (multiple dialects supported)
+     * Spark
+     * Pandas
 
-    DataContexts use a datasource-based namespace, where each accessible type of data has a three-part
-    normalized *data_asset_name*, consisting of *datasource/generator/data_asset_name*.
+    Your data can be stored in common locations including:
 
-    - The datasource actually connects to a source of materialized data and returns Great Expectations DataAssets \
-      connected to a compute environment and ready for validation.
+     * databases / data warehouses
+     * files in s3, GCS, Azure, local storage
+     * dataframes (spark and pandas) loaded into memory
 
-    - The BatchKwargGenerator knows how to introspect datasources and produce identifying "batch_kwargs" that define \
-      particular slices of data.
+    Please see our documentation for examples on how to set up Great Expectations, connect to your data,
+    create Expectations, and Validate data.
 
-    - The data_asset_name is a specific name -- often a table name or other name familiar to users -- that \
-      batch kwargs generators can slice into batches.
+    Other configuration options you can apply to a DataContext besides how to access data include things like where to
+    store Expectations, Profilers, Checkpoints, Metrics, Validation Results and Data Docs and how those Stores are
+    configured. Take a look at our documentation for more configuration options.
 
-    An expectation suite is a collection of expectations ready to be applied to a batch of data. Since
-    in many projects it is useful to have different expectations evaluate in different contexts--profiling
-    vs. testing; warning vs. error; high vs. low compute; ML model or dashboard--suites provide a namespace
-    option for selecting which expectations a DataContext returns.
+    You can create or load a DataContext from disk via the following:
+    ```
+    import great_expectations as ge
+    ge.get_context()
+    ```
 
-    In many simple projects, the datasource or batch kwargs generator name may be omitted and the DataContext will infer
-    the correct name when there is no ambiguity.
+    --Public API--
 
-    Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
+    --Documentation--
+        https://docs.greatexpectations.io/docs/terms/data_context
     """
 
     @classmethod
@@ -83,14 +89,19 @@ class DataContext(BaseDataContext):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
-        `create` will not create a new "great_expectations" directory in the provided folder, provided one does not
+        `create` will create a new "great_expectations" directory in the provided folder, provided one does not
         already exist. Then, it will initialize a new DataContext in that folder and write the resulting config.
+
+        --Public API--
+
+        --Documentation--
+            https://docs.greatexpectations.io/docs/terms/data_context
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
             usage_statistics_enabled: boolean directive specifying whether or not to gather usage statistics
-            runtime_environment: a dictionary of config variables that
-            override both those set in config_variables.yml and the environment
+            runtime_environment: a dictionary of config variables that override both those set in
+                config_variables.yml and the environment
 
         Returns:
             DataContext
@@ -123,7 +134,7 @@ class DataContext(BaseDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(ge_dir, runtime_environment=runtime_environment)
+        return cls(context_root_dir=ge_dir, runtime_environment=runtime_environment)
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir: str) -> bool:
@@ -224,7 +235,7 @@ class DataContext(BaseDataContext):
     ) -> Dict[str, Optional[str]]:
         ge_cloud_base_url = (
             ge_cloud_base_url
-            or super()._get_global_config_value(
+            or CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_BASE_URL",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
@@ -239,14 +250,14 @@ class DataContext(BaseDataContext):
                 "deprecated in the next major release."
             )
         else:
-            ge_cloud_account_id = super()._get_global_config_value(
+            ge_cloud_account_id = CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_ACCOUNT_ID",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="account_id",
             )
 
         if ge_cloud_organization_id is None:
-            ge_cloud_organization_id = super()._get_global_config_value(
+            ge_cloud_organization_id = CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_ORGANIZATION_ID",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="organization_id",
@@ -255,7 +266,7 @@ class DataContext(BaseDataContext):
         ge_cloud_organization_id = ge_cloud_organization_id or ge_cloud_account_id
         ge_cloud_access_token = (
             ge_cloud_access_token
-            or super()._get_global_config_value(
+            or CloudDataContext._get_global_config_value(
                 environment_variable="GE_CLOUD_ACCESS_TOKEN",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="access_token",
@@ -267,7 +278,7 @@ class DataContext(BaseDataContext):
             "access_token": ge_cloud_access_token,
         }
 
-    # TODO: deprecate ge_cloud_ascount_id
+    # TODO: deprecate ge_cloud_account_id
     def get_ge_cloud_config(
         self,
         ge_cloud_base_url: Optional[str] = None,
@@ -342,7 +353,6 @@ class DataContext(BaseDataContext):
 
         context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
-
         project_config = self._load_project_config()
         super().__init__(
             project_config,
@@ -403,7 +413,7 @@ class DataContext(BaseDataContext):
             config = self._retrieve_data_context_config_from_ge_cloud()
             return config
 
-        path_to_yml = os.path.join(self.root_directory, self.GE_YML)
+        path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
@@ -429,19 +439,6 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def _save_project_config(self):
-        """Save the current project to disk."""
-        if self.ge_cloud_mode:
-            logger.debug(
-                "ge_cloud_mode detected - skipping DataContext._save_project_config"
-            )
-            return
-        logger.debug("Starting DataContext._save_project_config")
-
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
-
     def add_store(self, store_name, store_config):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")
 
@@ -450,7 +447,7 @@ class DataContext(BaseDataContext):
         return new_store
 
     def add_datasource(
-        self, name, **kwargs
+        self, name: str, **kwargs: dict
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
 
@@ -458,12 +455,27 @@ class DataContext(BaseDataContext):
             Union[LegacyDatasource, BaseDatasource]
         ] = super().add_datasource(name=name, **kwargs)
         self._save_project_config()
-
         return new_datasource
+
+    def update_datasource(
+        self,
+        datasource: Union[LegacyDatasource, BaseDatasource],
+    ) -> None:
+        """
+        See parent `BaseDataContext.update_datasource` for more details.
+        Note that this method persists changes using an underlying Store.
+        """
+        logger.debug(
+            f"Starting DataContext.update_datasource for datasource {datasource.name}"
+        )
+
+        super().update_datasource(
+            datasource=datasource,
+            save_changes=True,
+        )
 
     def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
-
         super().delete_datasource(datasource_name=name)
         self._save_project_config()
 

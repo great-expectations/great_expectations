@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -115,10 +115,7 @@ class DomainBuilderConfig(SerializableDictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".',
             )
 
     def to_json_dict(self) -> dict:
@@ -189,7 +186,6 @@ class ParameterBuilderConfig(SerializableDictDot):
         class_name: str,
         module_name: Optional[str] = None,
         evaluation_parameter_builder_configs: Optional[list] = None,
-        json_serialize: bool = True,
         **kwargs,
     ) -> None:
         self.module_name = module_name
@@ -199,15 +195,10 @@ class ParameterBuilderConfig(SerializableDictDot):
 
         self.evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
 
-        self.json_serialize = json_serialize
-
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{ self.__class__.__name__}".',
             )
 
     def to_json_dict(self) -> dict:
@@ -282,11 +273,6 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=False,
         allow_none=True,
     )
-    json_serialize = fields.Boolean(
-        required=False,
-        allow_none=True,
-        missing=True,
-    )
 
 
 class ExpectationConfigurationBuilderConfig(SerializableDictDot):
@@ -311,10 +297,7 @@ class ExpectationConfigurationBuilderConfig(SerializableDictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 
     def to_json_dict(self) -> dict:
@@ -521,31 +504,33 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         super().__init__(commented_map=commented_map)
 
     @classmethod
+    def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
+        """Override parent implementation to pop unnecessary attrs from config.
+
+        Please see parent BaseYamlConfig for more details.
+        """
+        try:
+            schema_instance: Any = cls._get_schema_instance()
+            config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
+            config.pop("class_name", None)
+            config.pop("module_name", None)
+            if isinstance(config, dict):
+                return cls.get_config_class()(commented_map=commented_map, **config)
+
+            return config
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading config.  See ValidationError for more details."
+            )
+            raise
+
+    @classmethod
     def get_config_class(cls) -> Type["RuleBasedProfilerConfig"]:  # noqa: F821
         return cls
 
     @classmethod
     def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:  # noqa: F821
         return RuleBasedProfilerConfigSchema
-
-    @classmethod
-    def from_commented_map(
-        cls, commented_map: CommentedMap
-    ) -> "RuleBasedProfilerConfig":
-        """Override parent implementation to pop unnecessary attrs from config.
-
-        Please see parent BaseYamlConfig for more details.
-        """
-        try:
-            config: dict = cls._get_schema_instance().load(commented_map)
-            config.pop("class_name", None)
-            config.pop("module_name", None)
-            return cls.get_config_class()(commented_map=commented_map, **config)
-        except ValidationError:
-            logger.error(
-                "Encountered errors during loading config.  See ValidationError for more details."
-            )
-            raise
 
     def to_json_dict(self) -> dict:
         """

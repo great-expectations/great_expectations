@@ -1,6 +1,8 @@
 import copy
 import datetime
+import hashlib
 import logging
+import math
 import random
 import re
 import string
@@ -347,6 +349,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
+            if self._engine_backup.dialect.name.lower() == "sqlite" and not isinstance(
+                self._engine_backup, sa.engine.base.Connection
+            ):
+                raw_connection = self._engine_backup.raw_connection()
+                raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
+                raw_connection.create_function(
+                    "md5",
+                    2,
+                    lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[
+                        -1 * d :
+                    ],
+                )
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -378,7 +392,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-        self._data_splitter = SqlAlchemyDataSplitter()
+        self._data_splitter = SqlAlchemyDataSplitter(
+            dialect=self.engine.dialect.name.lower()
+        )
         self._data_sampler = SqlAlchemyDataSampler()
 
     @property
@@ -436,8 +452,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
+    @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
-        self, drivername: str, credentials: dict
+        drivername: str,
+        credentials: dict,
     ) -> Tuple["sa.engine.url.URL", Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
@@ -1039,32 +1057,22 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             split_clause = True
 
         table_name: str = batch_spec["table_name"]
-        if "sampling_method" in batch_spec:
-            if batch_spec["sampling_method"] in [
+        sampling_method: Optional[str] = batch_spec.get("sampling_method")
+        if sampling_method is not None:
+            if sampling_method in [
                 "_sample_using_limit",
                 "sample_using_limit",
-            ]:
-                return self._data_sampler.sample_using_limit(
-                    execution_engine=self,
-                    batch_spec=batch_spec,
-                    where_clause=split_clause,
-                )
-            elif batch_spec["sampling_method"] in [
                 "_sample_using_random",
                 "sample_using_random",
             ]:
-                sampler_fn = self._data_sampler.get_sampler_method(
-                    batch_spec["sampling_method"]
-                )
+                sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
                 return sampler_fn(
                     execution_engine=self,
                     batch_spec=batch_spec,
                     where_clause=split_clause,
                 )
             else:
-                sampler_fn = self._data_sampler.get_sampler_method(
-                    batch_spec["sampling_method"]
-                )
+                sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
                 return (
                     sa.select("*")
                     .select_from(
@@ -1073,10 +1081,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.and_(
                             split_clause,
-                            sampler_fn(**batch_spec["sampling_kwargs"]),
+                            sampler_fn(batch_spec),
                         )
                     )
                 )
+
         return (
             sa.select("*")
             .select_from(

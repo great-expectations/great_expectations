@@ -1,3 +1,4 @@
+import ast
 import itertools
 import logging
 import traceback
@@ -21,12 +22,12 @@ from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
+logger = logging.getLogger(__name__)
+
 try:
     from trino.exceptions import TrinoUserError
 except ImportError:
     TrinoUserError = None
-
-logger = logging.getLogger(__name__)
 
 try:
     from sqlalchemy.exc import ProgrammingError
@@ -153,6 +154,13 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
                 table_row_count=table_row_count,
+            )
+        elif dialect.name.lower() == "awsathena":
+            return _get_column_quantiles_athena(
+                column=column,
+                quantiles=quantiles,
+                selectable=selectable,
+                sqlalchemy_engine=sqlalchemy_engine,
             )
         else:
             return _get_column_quantiles_generic_sqlalchemy(
@@ -352,6 +360,34 @@ def _get_column_quantiles_sqlite(
                 [list(quantile_result) for quantile_result in quantiles_results]
             )
         )
+    except ProgrammingError as pe:
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe
+
+
+def _get_column_quantiles_athena(
+    column,
+    quantiles: Iterable,
+    selectable,
+    sqlalchemy_engine,
+) -> list:
+    approx_percentiles = f"approx_percentile({column}, ARRAY{list(quantiles)})"
+    selects_approx: List[TextClause] = [sa.text(approx_percentiles)]
+    quantiles_query_approx: Select = sa.select(selects_approx).select_from(selectable)
+    try:
+        quantiles_results: Row = sqlalchemy_engine.execute(
+            quantiles_query_approx
+        ).fetchone()
+        # the ast literal eval is needed because the method is returning a json string and not a dict
+        results = ast.literal_eval(quantiles_results[0])
+        return results
+
+        return results
     except ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()

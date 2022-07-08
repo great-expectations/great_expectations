@@ -2,7 +2,7 @@ import copy
 import itertools
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -25,10 +25,12 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
+    RAW_PARAMETER_KEY,
     AttributedResolvedMetrics,
     Builder,
     Domain,
     MetricComputationResult,
+    MetricValue,
     MetricValues,
     ParameterContainer,
     build_parameter_container,
@@ -69,7 +71,6 @@ class ParameterBuilder(ABC, Builder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> None:
         """
@@ -82,7 +83,6 @@ class ParameterBuilder(ABC, Builder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with ParameterBuilder
         """
         super().__init__(data_context=data_context)
@@ -98,15 +98,12 @@ class ParameterBuilder(ABC, Builder):
             data_context=self._data_context,
         )
 
-        self._json_serialize = json_serialize
-
     def build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         parameter_computation_impl: Optional[Callable] = None,
-        json_serialize: Optional[bool] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
@@ -117,7 +114,6 @@ class ParameterBuilder(ABC, Builder):
             variables: attribute name/value pairs
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
             parameter_computation_impl: Object containing desired ParameterBuilder implementation.
-            json_serialize: If absent, use property value (in standard way, supporting variables look-up).
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
@@ -131,7 +127,9 @@ class ParameterBuilder(ABC, Builder):
         )
         if (
             recompute_existing_parameter_values
-            or self.fully_qualified_parameter_name
+            or self.raw_fully_qualified_parameter_name
+            not in fully_qualified_parameter_names
+            or self.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
             self.set_batch_list_or_batch_request(
@@ -158,22 +156,11 @@ class ParameterBuilder(ABC, Builder):
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
 
-            if json_serialize is None:
-                # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-                json_serialize = get_parameter_value_and_validate_return_type(
-                    domain=domain,
-                    parameter_reference=self.json_serialize,
-                    expected_return_type=bool,
-                    variables=variables,
-                    parameters=parameters,
-                )
-
             parameter_values: Dict[str, Any] = {
-                self.fully_qualified_parameter_name: convert_to_json_serializable(
+                self.raw_fully_qualified_parameter_name: parameter_computation_result,
+                self.json_serialized_fully_qualified_parameter_name: convert_to_json_serializable(
                     data=parameter_computation_result
-                )
-                if json_serialize
-                else parameter_computation_result,
+                ),
             }
 
             build_parameter_container(
@@ -198,15 +185,17 @@ class ParameterBuilder(ABC, Builder):
         return self._evaluation_parameter_builder_configs
 
     @property
-    def json_serialize(self) -> Union[str, bool]:
-        return self._json_serialize
-
-    @json_serialize.setter
-    def json_serialize(self, value: Union[str, bool]) -> None:
-        self._json_serialize = value
+    def raw_fully_qualified_parameter_name(self) -> str:
+        """
+        This fully-qualified parameter name references "raw" "ParameterNode" output (including "Numpy" "dtype" values).
+        """
+        return f"{RAW_PARAMETER_KEY}{self.name}"
 
     @property
-    def fully_qualified_parameter_name(self) -> str:
+    def json_serialized_fully_qualified_parameter_name(self) -> str:
+        """
+        This fully-qualified parameter name references "JSON-serialized" "ParameterNode" output.
+        """
         return f"{PARAMETER_KEY}{self.name}"
 
     @abstractmethod
@@ -460,8 +449,10 @@ specified (empty "metric_name" value detected)."""
             attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
             if (
-                isinstance(attributed_resolved_metrics.metric_values, np.ndarray)
-                and attributed_resolved_metrics.metric_values.ndim == 1
+                isinstance(
+                    attributed_resolved_metrics.conditioned_metric_values, np.ndarray
+                )
+                and attributed_resolved_metrics.conditioned_metric_values.ndim == 1
             ):
                 attributed_resolved_metrics.metric_values_by_batch_id = {
                     batch_id: [resolved_metric_value]
@@ -542,55 +533,53 @@ specified (empty "metric_name" value detected)."""
         if not (enforce_numeric_metric or replace_nan_with_zero):
             return attributed_resolved_metrics
 
-        metric_values: MetricValues = attributed_resolved_metrics.metric_values
+        metric_values_by_batch_id: Dict[str, MetricValue] = {}
 
-        # Outer-most dimension is data samples (e.g., one per Batch); the rest are dimensions of the actual metric.
-        metric_value_shape: tuple = metric_values.shape[1:]
-
-        # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
-        metric_value_shape_idx: int
-        axes: List[np.ndarray] = [
-            np.indices(dimensions=(metric_value_shape_idx,))[0]
-            for metric_value_shape_idx in metric_value_shape
-        ]
-        metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
-
-        # Generate all permutations of indexes for accessing estimates of every element of the multi-dimensional metric.
-        # Prefixing multi-dimensional index with "(slice(None, None, None),)" is equivalent to "[:,]" access.
-        metric_value_idx: tuple
-        metric_value_vector_indices: List[tuple] = [
-            (slice(None, None, None),) + metric_value_idx
-            for metric_value_idx in metric_value_indices
-        ]
-
-        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
-        metric_value_vector: np.ndarray
         batch_id: str
-        resolved_metric_value: Any
-        for metric_value_idx in metric_value_vector_indices:
-            # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
-            metric_value_vector = cast(np.ndarray, metric_values)[metric_value_idx]
-            if enforce_numeric_metric:
-                if not np.issubdtype(metric_value_vector.dtype, np.number):
-                    raise ge_exceptions.ProfilerExecutionError(
-                        message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(metric_value_vector.dtype)}" was computed).
-"""
-                    )
+        metric_values: MetricValues
+        for (
+            batch_id,
+            metric_values,
+        ) in attributed_resolved_metrics.conditioned_attributed_metric_values.items():
+            batch_metric_values: MetricValues = []
 
-                if np.any(np.isnan(metric_value_vector)):
-                    if not replace_nan_with_zero:
-                        raise ValueError(
-                            f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
+            metric_value_shape: tuple = metric_values.shape
+
+            # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
+            metric_value_shape_idx: int
+            axes: List[np.ndarray] = [
+                np.indices(dimensions=(metric_value_shape_idx,))[0]
+                for metric_value_shape_idx in metric_value_shape
+            ]
+            metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
+
+            metric_value_idx: tuple
+            for metric_value_idx in metric_value_indices:
+                metric_value: MetricValue = metric_values[metric_value_idx]
+                if enforce_numeric_metric:
+                    if not np.issubdtype(metric_value.dtype, np.number):
+                        raise ge_exceptions.ProfilerExecutionError(
+                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
+(value of type "{str(metric_value.dtype)}" was computed).
 """
                         )
 
-                    attributed_resolved_metrics.metric_values_by_batch_id = {
-                        batch_id: np.nan_to_num(
-                            metric_value_vector, copy=False, nan=0.0
-                        )
-                        for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
-                    }
+                    if np.isnan(metric_value):
+                        if not replace_nan_with_zero:
+                            raise ValueError(
+                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
+"""
+                            )
+
+                        batch_metric_values.append(0.0)
+                    else:
+                        batch_metric_values.append(metric_value)
+
+            metric_values_by_batch_id[batch_id] = batch_metric_values
+
+        attributed_resolved_metrics.metric_values_by_batch_id = (
+            metric_values_by_batch_id
+        )
 
         return attributed_resolved_metrics
 
@@ -690,7 +679,8 @@ def resolve_evaluation_dependencies(
 
     # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
     # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
-    # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name").
+    # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name");
+    # this list contains both, "raw" (for internal calculations) and "JSON-serialized" fully-qualified parameter names.
     if fully_qualified_parameter_names is None:
         fully_qualified_parameter_names = get_fully_qualified_parameter_names(
             domain=domain,
@@ -702,12 +692,10 @@ def resolve_evaluation_dependencies(
     # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
     evaluation_parameter_builder: "ParameterBuilder"  # noqa: F821
     for evaluation_parameter_builder in evaluation_parameter_builders:
-        fully_qualified_evaluation_parameter_builder_name: str = (
-            f"{PARAMETER_KEY}{evaluation_parameter_builder.name}"
-        )
-
         if (
-            fully_qualified_evaluation_parameter_builder_name
+            evaluation_parameter_builder.raw_fully_qualified_parameter_name
+            not in fully_qualified_parameter_names
+            or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
             evaluation_parameter_builder.set_batch_list_or_batch_request(

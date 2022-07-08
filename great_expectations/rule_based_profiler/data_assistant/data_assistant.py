@@ -17,6 +17,7 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 )
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (
     RuntimeEnvironmentDomainTypeDirectives,
+    RuntimeEnvironmentVariablesDirectives,
 )
 from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -24,6 +25,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
+    PartitionParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
     RegexPatternStringParameterBuilder,
@@ -74,7 +76,7 @@ class MetaDataAssistant(ABCMeta):
             )
 
             # noinspection PyTypeChecker
-            DataAssistantDispatcher.register_data_assistant(data_assistant=newclass)
+            DataAssistantDispatcher._register_data_assistant(data_assistant=newclass)
 
         return newclass
 
@@ -105,7 +107,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
     class CommonlyUsedParameterBuilders:
         def get_table_row_count_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -114,13 +115,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 metric_name="table.row_count",
                 metric_domain_kwargs=None,
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         @staticmethod
-        def get_table_columns_metric_multi_batch_parameter_builder(
-            json_serialize: Union[str, bool] = True,
-        ) -> ParameterBuilder:
+        def get_table_columns_metric_multi_batch_parameter_builder() -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
@@ -135,13 +133,11 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 replace_nan_with_zero=False,
                 reduce_scalar_metric=True,
                 evaluation_parameter_builder_configs=None,
-                json_serialize=json_serialize,
                 data_context=None,
             )
 
         def get_column_distinct_values_count_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -149,12 +145,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.distinct_values.count",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         def get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -162,12 +156,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column_values.unique.unexpected_count",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         def get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -175,12 +167,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column_values.nonnull.unexpected_count",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         def get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -188,27 +178,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column_values.null.unexpected_count",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
-            )
-
-        def get_column_histogram_metric_multi_batch_parameter_builder(
-            self,
-            json_serialize: Union[str, bool] = True,
-        ) -> ParameterBuilder:
-            """
-            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
-            """
-            return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name="column.histogram",
-                metric_value_kwargs={
-                    "bins": f"{VARIABLES_KEY}bins",
-                },
-                json_serialize=json_serialize,
             )
 
         def get_column_quantile_values_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -219,12 +192,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
                     "quantiles": f"{VARIABLES_KEY}quantiles",
                     "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
                 },
-                json_serialize=json_serialize,
             )
 
         def get_column_min_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -232,12 +203,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.min",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         def get_column_max_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -245,12 +214,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.max",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         def get_column_min_length_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -258,12 +225,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column_values.length.min",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         def get_column_max_length_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -271,12 +236,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column_values.length.max",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         def get_column_median_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -284,12 +247,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.median",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         def get_column_mean_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -297,12 +258,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.mean",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         def get_column_standard_deviation_metric_multi_batch_parameter_builder(
             self,
-            json_serialize: Union[str, bool] = True,
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -310,7 +269,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
             return self.build_numeric_metric_multi_batch_parameter_builder(
                 metric_name="column.standard_deviation",
                 metric_value_kwargs=None,
-                json_serialize=json_serialize,
             )
 
         @staticmethod
@@ -320,7 +278,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 Union[str, dict]
             ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
-            json_serialize: Union[str, bool] = True,
         ) -> MetricMultiBatchParameterBuilder:
             """
             This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
@@ -335,23 +292,32 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 replace_nan_with_zero=True,
                 reduce_scalar_metric=True,
                 evaluation_parameter_builder_configs=None,
-                json_serialize=json_serialize,
                 data_context=None,
             )
 
         @staticmethod
         def build_numeric_metric_range_multi_batch_parameter_builder(
-            metric_name: str,
+            metric_name: Optional[str] = None,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
-            json_serialize: Union[str, bool] = True,
+            evaluation_parameter_builder_configs: Optional[
+                List[ParameterBuilderConfig]
+            ] = None,
         ) -> NumericMetricRangeMultiBatchParameterBuilder:
             """
             This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """
+            metric_multi_batch_parameter_builder_name: Optional[str] = None
+            if metric_name is None:
+                metric_name = evaluation_parameter_builder_configs[0]["metric_name"]
+                metric_multi_batch_parameter_builder_name = (
+                    evaluation_parameter_builder_configs[0].name
+                )
+
             name: str = sanitize_parameter_name(name=f"{metric_name}.range")
             return NumericMetricRangeMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
+                metric_multi_batch_parameter_builder_name=metric_multi_batch_parameter_builder_name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=metric_value_kwargs,
                 enforce_numeric_metric=True,
@@ -365,19 +331,18 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
                 truncate_values=f"{VARIABLES_KEY}truncate_values",
                 round_decimals=f"{VARIABLES_KEY}round_decimals",
-                evaluation_parameter_builder_configs=None,
-                json_serialize=json_serialize,
+                evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
                 data_context=None,
             )
 
         @staticmethod
         def build_regex_pattern_string_parameter_builder(
             name: str,
-            json_serialize: Union[str, bool] = True,
         ) -> RegexPatternStringParameterBuilder:
             """
             This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
             """
+            name: str = sanitize_parameter_name(name=f"{name}")
             return RegexPatternStringParameterBuilder(
                 name=name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -385,7 +350,22 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 threshold=1.0,
                 candidate_regexes=None,
                 evaluation_parameter_builder_configs=None,
-                json_serialize=json_serialize,
+                data_context=None,
+            )
+
+        @staticmethod
+        def build_partition_parameter_builder(
+            name: str,
+            bucketize_data: Union[str, bool] = True,
+        ) -> PartitionParameterBuilder:
+            """
+            This method instantiates "PartitionParameterBuilder" class with specific arguments for given purpose.
+            """
+            name: str = sanitize_parameter_name(name=f"{name}")
+            return PartitionParameterBuilder(
+                name=name,
+                bucketize_data=bucketize_data,
+                evaluation_parameter_builder_configs=None,
                 data_context=None,
             )
 
@@ -398,7 +378,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     def __init__(
         self,
         name: str,
-        validator: Validator,
+        validator: Optional[Validator],
     ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
@@ -415,22 +395,26 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._validator = validator
 
-        self._batches = self._validator.batches
+        if validator is None:
+            self._data_context = None
+            self._batches = None
+        else:
+            self._data_context = self._validator.data_context
+            self._batches = self._validator.batches
 
         variables: Optional[Dict[str, Any]] = self.get_variables() or {}
-        rules: Optional[List[Rule]] = self.get_rules() or []
-
         self._profiler = RuleBasedProfiler(
             name=self.name,
             config_version=1.0,
             variables=variables,
-            data_context=self._validator.data_context,
+            data_context=self._data_context,
         )
 
         self._metrics_parameter_builders_by_domain = {}
 
-        rule: Rule
+        rules: Optional[List[Rule]] = self.get_rules() or []
 
+        rule: Rule
         for rule in rules:
             self.profiler.add_rule(rule=rule)
             self._metrics_parameter_builders_by_domain[
@@ -444,6 +428,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        variables_directives_list: Optional[
+            List[RuntimeEnvironmentVariablesDirectives]
+        ] = None,
         domain_type_directives_list: Optional[
             List[RuntimeEnvironmentDomainTypeDirectives]
         ] = None,
@@ -454,7 +441,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         Args:
             variables: attribute name/value pairs (overrides), commonly-used in Builder objects
             rules: name/(configuration-dictionary) (overrides)
-            domain_type_directives_list: additional/override runtime directives (can modify "BaseRuleBasedProfiler")
+            variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
+            domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
@@ -462,6 +450,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         data_assistant_result: DataAssistantResult = DataAssistantResult(
             batch_id_to_batch_identifier_display_name_map=self.batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
+            usage_statistics_handler=self._data_context._usage_statistics_handler,
         )
         run_profiler_on_data(
             data_assistant=self,
@@ -471,6 +460,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             rules=rules,
             batch_list=list(self._batches.values()),
             batch_request=None,
+            variables_directives_list=variables_directives_list,
             domain_type_directives_list=domain_type_directives_list,
         )
         return self._build_data_assistant_result(
@@ -571,7 +561,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         parameter_builder: ParameterBuilder
         fully_qualified_metrics_parameter_names_by_domain: Dict[Domain, List[str]] = {
             domain: [
-                parameter_builder.fully_qualified_parameter_name
+                parameter_builder.json_serialized_fully_qualified_parameter_name
                 for parameter_builder in parameter_builders
             ]
             for domain, parameter_builders in self.metrics_parameter_builders_by_domain.items()
@@ -623,6 +613,9 @@ def run_profiler_on_data(
     rules: Optional[Dict[str, Dict[str, Any]]] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+    variables_directives_list: Optional[
+        List[RuntimeEnvironmentVariablesDirectives]
+    ] = None,
     domain_type_directives_list: Optional[
         List[RuntimeEnvironmentDomainTypeDirectives]
     ] = None,
@@ -638,7 +631,8 @@ def run_profiler_on_data(
         rules: name/(configuration-dictionary) (overrides)
         batch_list: Explicit list of Batch objects to supply data at runtime
         batch_request: Explicit batch_request used to supply data at runtime
-        domain_type_directives_list: additional/override runtime directives (can modify "BaseRuleBasedProfiler")
+        variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
+        domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
     """
     if rules is None:
         rules = []
@@ -654,10 +648,13 @@ def run_profiler_on_data(
         batch_request=batch_request,
         recompute_existing_parameter_values=False,
         reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
+        variables_directives_list=variables_directives_list,
         domain_type_directives_list=domain_type_directives_list,
     )
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
+    result.profiler_execution_time = rule_based_profiler_result.execution_time
+    result.rule_execution_time = rule_based_profiler_result.rule_execution_time
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
     result.expectation_configurations = (
         rule_based_profiler_result.expectation_configurations
@@ -669,6 +666,9 @@ def build_map_metric_rule(
     rule_name: str,
     expectation_type: str,
     map_metric_name: str,
+    total_count_metric_multi_batch_parameter_builder_for_evaluations: Optional[
+        ParameterBuilder
+    ] = None,
     include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
     exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
     include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
@@ -711,23 +711,25 @@ def build_map_metric_rule(
 
     # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-    column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder(
-        json_serialize=True
+    column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+        DataAssistant.commonly_used_parameter_builders.get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder()
     )
-    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
-        json_serialize=True
+    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+        DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
     )
-    column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder(
-        json_serialize=True
+    column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+        DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
     )
 
     # Step-3: Set up "MeanUnexpectedMapMetricMultiBatchParameterBuilder" to compute "condition" for emitting "ExpectationConfiguration" (based on "Domain" data).
 
-    total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder(
-        json_serialize=False
-    )
-    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
-        json_serialize=False
+    if total_count_metric_multi_batch_parameter_builder_for_evaluations is None:
+        total_count_metric_multi_batch_parameter_builder_for_evaluations = (
+            DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
+        )
+
+    column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
+        DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
     )
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         ParameterBuilderConfig(
@@ -745,7 +747,6 @@ def build_map_metric_rule(
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-        json_serialize=True,
         data_context=None,
     )
 
@@ -756,18 +757,21 @@ def build_map_metric_rule(
             **column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.to_json_dict()
         ),
     ]
-    max_column_attribute_metric_mean_unexpected_value_ratio: float = 1.0e-2
     expect_column_values_to_be_attribute_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
         expectation_type=expectation_type,
         validation_parameter_builder_configs=validation_parameter_builder_configs,
         column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-        condition=f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {max_column_attribute_metric_mean_unexpected_value_ratio}",
+        condition=f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= 1.0 - {VARIABLES_KEY}success_ratio",
         meta={
-            "profiler_details": f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            "profiler_details": f"{column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
         },
     )
 
     # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+
+    variables: dict = {
+        "success_ratio": 7.5e-1,
+    }
 
     parameter_builders: List[ParameterBuilder] = [
         column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,
@@ -779,7 +783,7 @@ def build_map_metric_rule(
     ]
     rule: Rule = Rule(
         name=rule_name,
-        variables=None,
+        variables=variables,
         domain_builder=map_metric_column_domain_builder,
         parameter_builders=parameter_builders,
         expectation_configuration_builders=expectation_configuration_builders,
