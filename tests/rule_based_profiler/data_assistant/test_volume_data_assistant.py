@@ -2376,7 +2376,7 @@ def test_volume_data_assistant_result_serialization(
 )
 def test_volume_data_assistant_result_get_expectation_suite(
     mock_emit,
-    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result_usage_stats_enabled: VolumeDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
 
