@@ -556,22 +556,28 @@ class DataAssistantResult(SerializableDictDot):
         themed_charts: List[alt.Chart],
     ) -> alt.Chart:
 
-        display_chart_df: pd.DataFrame = pd.DataFrame(columns=["plot", ""])
+        chart_titles: List[str] = [chart.title for chart in themed_charts]
+        display_chart_df: pd.DataFrame = pd.DataFrame(
+            data=[chart_titles, themed_charts], columns=["chart_title", "chart"]
+        )
 
         domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name="plot",
             alt_type=AltairDataTypes.NOMINAL.value,
         )
 
-        chart_titles: List[str] = [chart.title for chart in themed_charts].sort()
         input_dropdown: alt.binding_select = alt.binding_select(
-            options=chart_titles, name="Select Chart: "
+            options=chart_titles.sort(), name="Select Chart: "
         )
         selection: alt.selection_single = alt.selection_single(
             empty="none",
             bind=input_dropdown,
             fields=[domain_plot_component.name],
         )
+
+        display_chart: alt.Chart = alt.Chart()
+
+        return display_chart
 
     @staticmethod
     def _apply_theme(
