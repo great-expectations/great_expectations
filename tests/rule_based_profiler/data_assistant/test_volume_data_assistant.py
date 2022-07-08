@@ -2141,6 +2141,25 @@ def bobby_volume_data_assistant_result(
 
 
 @pytest.fixture
+def bobby_volume_data_assistant_result_usage_stats_enabled(
+    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+) -> VolumeDataAssistantResult:
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        batch_request=batch_request
+    )
+
+    return cast(VolumeDataAssistantResult, data_assistant_result)
+
+
+@pytest.fixture
 def quentin_explicit_instantiation_result_actual_time(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
