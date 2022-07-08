@@ -1228,8 +1228,8 @@ def test_validator_include_rendered_content(
             partition_object=partition_object,
         )
     )
-    assert not hasattr(validation_result.expectation_config, "rendered_content")
-    assert not hasattr(validation_result, "rendered_content")
+    assert validation_result.expectation_config.rendered_content is None
+    assert validation_result.rendered_content is None
 
     validator_include_rendered_content: Validator = context.get_validator(
         batch_request=batch_request,
