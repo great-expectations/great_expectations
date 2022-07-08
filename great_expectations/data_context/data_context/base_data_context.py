@@ -1473,6 +1473,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
+        self.variables.config = project_config
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
