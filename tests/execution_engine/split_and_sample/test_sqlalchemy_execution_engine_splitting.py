@@ -33,6 +33,8 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
     TaxiSplittingTestCasesColumnValue,
     TaxiSplittingTestCasesDateTime,
     TaxiSplittingTestCasesDividedInteger,
+    TaxiSplittingTestCasesHashedColumn,
+    TaxiSplittingTestCasesModInteger,
     TaxiSplittingTestCasesWholeTable,
     TaxiTestData,
 )
@@ -73,7 +75,7 @@ def test_named_date_part_methods(
     """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params.
     For example, split_on_year.
     """
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
     column_name: str = "column_name"
     batch_identifiers: dict = {column_name: {"year": 2018, "month": 10, "day": 31}}
 
@@ -108,7 +110,7 @@ def test_split_on_date_parts_single_date_parts(
      or a datetime and also fail when parameters are invalid.
     """
 
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
     column_name: str = "column_name"
 
     result: sa.sql.elements.BooleanClauseList = data_splitter.split_on_date_parts(
@@ -153,7 +155,7 @@ def test_split_on_date_parts_multiple_date_parts(
      or a datetime and also fail when parameters are invalid.
     """
 
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
     column_name: str = "column_name"
 
     result: sa.sql.elements.BooleanClauseList = data_splitter.split_on_date_parts(
@@ -195,7 +197,7 @@ def test_get_data_for_batch_identifiers_year(
     mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
 ):
     """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
     table_name: str = "table_name"
     column_name: str = "column_name"
 
@@ -222,7 +224,7 @@ def test_get_data_for_batch_identifiers_year_and_month(
     mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
 ):
     """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
     table_name: str = "table_name"
     column_name: str = "column_name"
 
@@ -249,7 +251,7 @@ def test_get_data_for_batch_identifiers_year_and_month_and_day(
     mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
 ):
     """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
     table_name: str = "table_name"
     column_name: str = "column_name"
 
@@ -280,7 +282,7 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     query when passed a single element list of date_parts that is a string, DatePart enum object, or mixed case string.
     """
 
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
     table_name: str = "table_name"
     column_name: str = "column_name"
 
@@ -321,7 +323,7 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts should
     return the correct query when passed any valid set of parameters including multiple date parts.
     """
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
     table_name: str = "table_name"
     column_name: str = "column_name"
 
@@ -373,7 +375,7 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     ],
 )
 def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
 
     splitter_method_name_with_prefix = f"{underscore_prefix}{splitter_method_name}"
 
@@ -425,7 +427,19 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
         TaxiSplittingTestCasesDividedInteger(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
-                test_column_name="passenger_count",
+                test_column_name="pickup_location_id",
+            )
+        ),
+        TaxiSplittingTestCasesModInteger(
+            taxi_test_data=TaxiTestData(
+                test_df=ten_trips_per_month_df(),
+                test_column_name="pickup_location_id",
+            )
+        ),
+        TaxiSplittingTestCasesHashedColumn(
+            taxi_test_data=TaxiTestData(
+                test_df=ten_trips_per_month_df(),
+                test_column_name="pickup_location_id",
             )
         ),
         TaxiSplittingTestCasesDateTime(
