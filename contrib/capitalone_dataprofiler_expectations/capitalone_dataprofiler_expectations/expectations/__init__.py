@@ -16,5 +16,5 @@ from .expect_column_values_to_be_probabilistically_greater_than_or_equal_to_thre
     ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold,
 )
 from .expect_profile_numeric_columns_diff_between_threshold_range import (
-    ExpectProfileNumericColumnsDiffBetweenThresholdRange
+    ExpectProfileNumericColumnsDiffBetweenThresholdRange,
 )
