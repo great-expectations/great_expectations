@@ -6625,11 +6625,16 @@ def quentin_columnar_table_multi_batch():
 @pytest.fixture
 def quentin_columnar_table_multi_batch_data_context(
     tmp_path_factory,
+    monkeypatch,
 ) -> DataContext:
     """
     This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
     of each batch being equal to the original number per log file (10,000 rows).
     """
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
+
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -6671,19 +6676,6 @@ def quentin_columnar_table_multi_batch_data_context(
 
     context: DataContext = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
-
-    return context
-
-
-@pytest.fixture
-def quentin_columnar_table_multi_batch_data_context_usage_stats_enabled(
-    quentin_columnar_table_multi_batch_data_context, monkeypatch
-) -> DataContext:
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     return context
 
