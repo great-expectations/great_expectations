@@ -29,7 +29,7 @@ from tests.render.test_util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def bobby_onboarding_data_assistant_result(
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> OnboardingDataAssistantResult:
@@ -48,7 +48,7 @@ def bobby_onboarding_data_assistant_result(
     return cast(OnboardingDataAssistantResult, data_assistant_result)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def quentin_implicit_invocation_result_actual_time(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
@@ -68,7 +68,7 @@ def quentin_implicit_invocation_result_actual_time(
     return cast(OnboardingDataAssistantResult, data_assistant_result)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 @freeze_time("09/26/2019 13:42:41")
 def quentin_implicit_invocation_result_frozen_time(
     quentin_columnar_table_multi_batch_data_context,
