@@ -304,6 +304,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 project_config=project_config, runtime_environment=runtime_environment
             )
 
+        self._variables = None
+
         # NOTE: <DataContextRefactor> This will ensure that parameters set in _data_context are persisted to self.
         # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
         # necessary properties / overrides
