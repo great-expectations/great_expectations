@@ -28,4 +28,5 @@ from .metric_provider import (
     metric_value,
 )
 from .multicolumn_map_metrics import *
+from .query_metrics import *
 from .table_metrics import *
