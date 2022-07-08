@@ -552,6 +552,17 @@ class DataAssistantResult(SerializableDictDot):
         display_chart.display()
 
     @staticmethod
+    def _get_chart_titles(charts: List[alt.Chart]) -> List[str]:
+        chart_titles: List[str] = []
+        for chart in charts:
+            if isinstance(chart, alt.LayerChart):
+                chart_titles.append(chart.layer[0].title.text)
+            else:
+                chart_titles.append(chart.title.text)
+
+        return chart_titles
+
+    @staticmethod
     def _combine_themed_charts_into_single_display_chart(
         themed_charts: List[alt.Chart],
     ) -> alt.Chart:
@@ -580,17 +591,6 @@ class DataAssistantResult(SerializableDictDot):
         display_chart: alt.Chart = alt.Chart()
 
         return display_chart
-
-    @staticmethod
-    def _get_chart_titles(charts: List[alt.Chart]) -> List[str]:
-        chart_titles: List[str] = []
-        for chart in charts:
-            if isinstance(chart, alt.LayerChart):
-                chart_titles.append(chart.layer[0].title.text)
-            else:
-                chart_titles.append(chart.title.text)
-
-        return chart_titles
 
     @staticmethod
     def _apply_theme(
