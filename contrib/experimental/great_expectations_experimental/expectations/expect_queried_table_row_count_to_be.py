@@ -18,7 +18,6 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
-
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
 
     metric_dependencies = ("query.table",)
