@@ -29,8 +29,7 @@ from tests.render.test_util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
 
 
-@pytest.fixture(scope="module")
-def bobby_onboarding_data_assistant_result(
+def bobby_onboarding_data_assistant_result_usage_stats_enabled(
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> OnboardingDataAssistantResult:
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -49,10 +48,28 @@ def bobby_onboarding_data_assistant_result(
 
 
 @pytest.fixture(scope="module")
+def bobby_onboarding_data_assistant_result(
+    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+) -> OnboardingDataAssistantResult:
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        batch_request=batch_request
+    )
+
+    return cast(OnboardingDataAssistantResult, data_assistant_result)
+
+
+@pytest.fixture(scope="module")
 def quentin_implicit_invocation_result_actual_time(
-    quentin_columnar_table_multi_batch_data_context,
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
-):
+    quentin_columnar_table_multi_batch_data_context: DataContext,
+) -> OnboardingDataAssistantResult:
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
@@ -71,8 +88,7 @@ def quentin_implicit_invocation_result_actual_time(
 @pytest.fixture(scope="module")
 @freeze_time("09/26/2019 13:42:41")
 def quentin_implicit_invocation_result_frozen_time(
-    quentin_columnar_table_multi_batch_data_context,
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+    quentin_columnar_table_multi_batch_data_context: DataContext,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
@@ -212,7 +228,7 @@ def test_onboarding_data_assistant_result_serialization(
 )
 def test_onboarding_data_assistant_result_get_expectation_suite(
     mock_emit,
-    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+    bobby_onboarding_data_assistant_result_usage_stats: OnboardingDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
 
