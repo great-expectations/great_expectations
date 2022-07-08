@@ -76,7 +76,7 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispat
     DataAssistantDispatcher,
 )
 from great_expectations.util import load_class, verify_dynamic_loading_support
-from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.validator.validator import Validator
 
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
     UsageStatisticsHandler,
@@ -654,21 +654,6 @@ class AbstractDataContext(ABC):
             )
         return keys
 
-    def store_evaluation_parameters(
-        self, validation_results, target_store_name=None
-    ) -> None:
-        if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
-
-        if target_store_name is None:
-            target_store_name = self.evaluation_parameter_store_name
-
-        self._store_metrics(
-            self._evaluation_parameter_dependencies,
-            validation_results,
-            target_store_name,
-        )
-
     def get_validator(
         self,
         datasource_name: Optional[str] = None,
@@ -797,6 +782,17 @@ class AbstractDataContext(ABC):
         include_rendered_content: bool = False,
         **kwargs: dict,
     ) -> Validator:
+        """
+
+        Args:
+            expectation_suite ():
+            batch_list ():
+            include_rendered_content ():
+            **kwargs ():
+
+        Returns:
+
+        """
         if len(batch_list) == 0:
             raise ge_exceptions.InvalidBatchRequestError(
                 """Validator could not be created because BatchRequest returned an empty batch_list.
@@ -1009,6 +1005,16 @@ class AbstractDataContext(ABC):
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
+        """
+
+        Args:
+            requested_metrics ():
+            validation_results ():
+            target_store_name ():
+
+        Returns:
+
+        """
         self._store_metrics(requested_metrics, validation_results, target_store_name)
 
     @staticmethod

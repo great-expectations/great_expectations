@@ -27,12 +27,7 @@ except ImportError:
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequestBase,
-    IDDict,
-    get_batch_request_from_acceptable_arguments,
-)
+from great_expectations.core.batch import Batch, BatchRequestBase, IDDict
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -1311,6 +1306,24 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
+
+    def store_evaluation_parameters(
+        self, validation_results, target_store_name=None
+    ) -> None:
+        """
+        Stores ValidationResult EvaluationParameters to defined store
+        """
+        if not self._evaluation_parameter_dependencies_compiled:
+            self._compile_evaluation_parameter_dependencies()
+
+        if target_store_name is None:
+            target_store_name = self.evaluation_parameter_store_name
+
+        self._store_metrics(
+            self._evaluation_parameter_dependencies,
+            validation_results,
+            target_store_name,
+        )
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
