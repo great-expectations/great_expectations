@@ -2152,7 +2152,7 @@ def bobby_volume_data_assistant_result_usage_stats_enabled(
         "data_asset_name": "my_reports",
     }
 
-    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request
     )
 
