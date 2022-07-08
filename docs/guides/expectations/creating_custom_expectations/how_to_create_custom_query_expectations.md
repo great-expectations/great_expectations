@@ -54,7 +54,7 @@ For more on Expectation naming conventions, see the [Expectations section](../..
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/de8e0c57d47386182451165137a401a6718a7dbf/examples/expectations/query_expectation_template.py).
+You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/query_expectation_template.py).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
@@ -238,14 +238,14 @@ Metrics for `QueryExpectations` are a thin wrapper, allowing you to execute that
 
 Great Expectations provides a small number of simple, ready-to-use `query.*` Metrics that can plug into your Custom Expectation, or serve as a basis for your own custom Metrics.
 
-Query Metric functions have the `@metric_value` decorator, with the appropriate `engine`. Metric functions can be complex, but they're often very short. Here's the definition for a Metric function to execute our parameterized query, and return the result.
-
-```python file=../../../../great_expectations/expectations/metrics/query_metrics/query_table.py#L20-L55
-```
 
 :::note
+Query Metric functions have the `@metric_value` decorator, with the appropriate `engine`.
+
 The `@metric_value` decorator allows us to explicitly structure queries and directly access our compute domain. 
 While this can result in extra roundtrips to your database in some situations, it allows for advanced functionality and customization of your Custom Expectations.
+
+See an example of a `query.table` metric [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/metrics/query_metrics/query_table.py).
 :::
 
 To connect this Metric to our Custom Expectation, we'll need to include the `metric_name` for this Metric in our `metric_dependencies`.
@@ -354,7 +354,7 @@ For more on Expectation naming conventions, see the [Expectations section](../..
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/505d8e294bcbfcf5b6469c8499e3add2a3f5ee3d/examples/expectations/query_expectation_template.py).
+You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/query_expectation_template.py).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
@@ -539,14 +539,14 @@ Metrics for `QueryExpectations` are a thin wrapper, allowing you to execute that
 
 Great Expectations provides a small number of simple, ready-to-use `query.*` Metrics that can plug into your Custom Expectation, or serve as a basis for your own custom Metrics.
 
-Query Metric functions have the `@metric_value` decorator, with the appropriate `engine`. Metric functions can be complex, but they're often very short. Here's the definition for a Metric function to execute our parameterized query, and return the result.
-
-```python file=../../../../great_expectations/expectations/metrics/query_metrics/query_table.py#L20-L55
-```
 
 :::note
+Query Metric functions have the `@metric_value` decorator, with the appropriate `engine`.
+
 The `@metric_value` decorator allows us to explicitly structure queries and directly access our compute domain. 
 While this can result in extra roundtrips to your database in some situations, it allows for advanced functionality and customization of your Custom Expectations.
+
+See an example of a `query.column` metric [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/metrics/query_metrics/query_column.py).
 :::
 
 To connect this Metric to our Custom Expectation, we'll need to include the `metric_name` for this Metric in our `metric_dependencies`. 
@@ -670,6 +670,6 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full scripts used in this page, see them on GitHub:
-- [expect_queried_table_row_count_to_be.py](https://github.com/great-expectations/great_expectations/blob/505d8e294bcbfcf5b6469c8499e3add2a3f5ee3d/contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py)
-- [expect_queried_column_value_frequency_to_meet_threshold](https://github.com/great-expectations/great_expectations/blob/505d8e294bcbfcf5b6469c8499e3add2a3f5ee3d/contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py)
+- [expect_queried_table_row_count_to_be.py](https://github.com/great-expectations/great_expectations/blob/develop/contrib/experimental/great_expectations_experimental/expectations/expect_queried_table_row_count_to_be.py)
+- [expect_queried_column_value_frequency_to_meet_threshold](https://github.com/great-expectations/great_expectations/blob/develop/contrib/experimental/great_expectations_experimental/expectations/expect_queried_column_value_frequency_to_meet_threshold.py)
 :::
