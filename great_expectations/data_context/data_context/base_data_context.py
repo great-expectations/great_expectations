@@ -14,12 +14,8 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
-)
-from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-    DataAssistantDispatcher,
 )
 
 try:
@@ -33,7 +29,6 @@ from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import (
     Batch,
-    BatchDefinition,
     BatchRequestBase,
     IDDict,
     get_batch_request_from_acceptable_arguments,
@@ -326,9 +321,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_name,
                     validation_operator_config,
                 )
-        # NOTE: <DataContextRefactor>  This will be migrated to AbstractDataContext, along with associated methods
-        # and properties.
-        self._assistants = DataAssistantDispatcher(data_context=self)
+        # # NOTE: <DataContextRefactor>  This will be migrated to AbstractDataContext, along with associated methods
+        # # and properties.
+        # self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -364,6 +359,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._evaluation_parameter_dependencies = (
             self._data_context._evaluation_parameter_dependencies
         )
+        self._assistants = self._data_context._assistants
 
     def _save_project_config(self) -> None:
         """Save the current project to disk."""
@@ -1206,8 +1202,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         This method attempts to return any number of batches, including an empty list.
         """
-
-        batch_request = get_batch_request_from_acceptable_arguments(
+        return super().get_batch_list(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -1229,164 +1224,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             batch_spec_passthrough=batch_spec_passthrough,
             **kwargs,
         )
-        datasource_name = batch_request.datasource_name
-        if datasource_name in self.datasources:
-            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
-        else:
-            raise ge_exceptions.DatasourceError(
-                datasource_name,
-                "The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
-            )
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
-
-    def get_validator(
-        self,
-        datasource_name: Optional[str] = None,
-        data_connector_name: Optional[str] = None,
-        data_asset_name: Optional[str] = None,
-        batch: Optional[Batch] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        batch_request_list: Optional[List[BatchRequestBase]] = None,
-        batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[IDDict, dict]] = None,
-        batch_identifiers: Optional[dict] = None,
-        limit: Optional[int] = None,
-        index: Optional[Union[int, list, tuple, slice, str]] = None,
-        custom_filter_function: Optional[Callable] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        query: Optional[str] = None,
-        path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        expectation_suite_name: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        create_expectation_suite_with_name: Optional[str] = None,
-        include_rendered_content: bool = False,
-        **kwargs: dict,
-    ) -> Validator:
-        """
-        This method applies only to the new (V3) Datasource schema.
-        """
-
-        if (
-            sum(
-                bool(x)
-                for x in [
-                    expectation_suite is not None,
-                    expectation_suite_name is not None,
-                    create_expectation_suite_with_name is not None,
-                    expectation_suite_ge_cloud_id is not None,
-                ]
-            )
-            > 1
-        ):
-            raise ValueError(
-                f"No more than one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name can be specified"
-            )
-
-        if expectation_suite_ge_cloud_id is not None:
-            expectation_suite = self.get_expectation_suite(
-                ge_cloud_id=expectation_suite_ge_cloud_id
-            )
-        if expectation_suite_name is not None:
-            expectation_suite = self.get_expectation_suite(expectation_suite_name)
-        if create_expectation_suite_with_name is not None:
-            expectation_suite = self.create_expectation_suite(
-                expectation_suite_name=create_expectation_suite_with_name
-            )
-
-        if (
-            sum(
-                bool(x)
-                for x in [
-                    batch is not None,
-                    batch_list is not None,
-                    batch_request is not None,
-                    batch_request_list is not None,
-                ]
-            )
-            > 1
-        ):
-            raise ValueError(
-                "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"
-            )
-
-        if batch_list:
-            pass
-
-        elif batch:
-            batch_list: List = [batch]
-
-        else:
-            batch_list: List = []
-            if not batch_request_list:
-                batch_request_list = [batch_request]
-
-            for batch_request in batch_request_list:
-                batch_list.extend(
-                    self.get_batch_list(
-                        datasource_name=datasource_name,
-                        data_connector_name=data_connector_name,
-                        data_asset_name=data_asset_name,
-                        batch_request=batch_request,
-                        batch_data=batch_data,
-                        data_connector_query=data_connector_query,
-                        batch_identifiers=batch_identifiers,
-                        limit=limit,
-                        index=index,
-                        custom_filter_function=custom_filter_function,
-                        sampling_method=sampling_method,
-                        sampling_kwargs=sampling_kwargs,
-                        splitter_method=splitter_method,
-                        splitter_kwargs=splitter_kwargs,
-                        runtime_parameters=runtime_parameters,
-                        query=query,
-                        path=path,
-                        batch_filter_parameters=batch_filter_parameters,
-                        batch_spec_passthrough=batch_spec_passthrough,
-                        **kwargs,
-                    )
-                )
-
-        return self.get_validator_using_batch_list(
-            expectation_suite=expectation_suite,
-            batch_list=batch_list,
-            include_rendered_content=include_rendered_content,
-        )
-
-    def get_validator_using_batch_list(
-        self,
-        expectation_suite: ExpectationSuite,
-        batch_list: List[Batch],
-        include_rendered_content: bool = False,
-        **kwargs: dict,
-    ) -> Validator:
-        if len(batch_list) == 0:
-            raise ge_exceptions.InvalidBatchRequestError(
-                """Validator could not be created because BatchRequest returned an empty batch_list.
-                Please check your parameters and try again."""
-            )
-        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
-        # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        batch_definition: BatchDefinition = batch_list[-1].batch_definition
-        execution_engine: ExecutionEngine = self.datasources[
-            batch_definition.datasource_name
-        ].execution_engine
-        validator: Validator = Validator(
-            execution_engine=execution_engine,
-            interactive_evaluation=True,
-            expectation_suite=expectation_suite,
-            data_context=self,
-            batches=batch_list,
-            include_rendered_content=include_rendered_content,
-        )
-        return validator
 
     def list_validation_operator_names(self):
         if not self.validation_operators:
@@ -1504,118 +1341,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         send_usage_message(self, event, event_payload, success)
 
-    def create_expectation_suite(
-        self,
-        expectation_suite_name: str,
-        overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
-        **kwargs,
-    ) -> ExpectationSuite:
-        """Build a new expectation suite and save it into the data_context expectation store.
-
-        Args:
-            expectation_suite_name: The name of the expectation_suite to create
-            overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
-                already exists.
-
-        Returns:
-            A new (empty) expectation suite.
-        """
-        if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
-
-        expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
-        )
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
-            )
-            if self.expectations_store.has_key(key) and not overwrite_existing:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True.".format(
-                        ge_cloud_id
-                    )
-                )
-        else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
-            if self.expectations_store.has_key(key) and not overwrite_existing:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite with name {} already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True.".format(
-                        expectation_suite_name
-                    )
-                )
-
-        self.expectations_store.set(key, expectation_suite, **kwargs)
-        return expectation_suite
-
-    def delete_expectation_suite(
-        self,
-        expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ):
-        """Delete specified expectation suite from data_context expectation store.
-
-        Args:
-            expectation_suite_name: The name of the expectation_suite to create
-
-        Returns:
-            True for Success and False for Failure.
-        """
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                expectation_suite_name
-            )
-        if not self.expectations_store.has_key(key):
-            raise ge_exceptions.DataContextError(
-                "expectation_suite with name {} does not exist."
-            )
-        else:
-            self.expectations_store.remove_key(key)
-            return True
-
-    def get_expectation_suite(
-        self,
-        expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> ExpectationSuite:
-        """Get an Expectation Suite by name or GE Cloud ID
-        Args:
-            expectation_suite_name (str): the name for the Expectation Suite
-            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
-
-        Returns:
-            expectation_suite
-        """
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
-
-        if self.expectations_store.has_key(key):
-            expectations_schema_dict: dict = cast(
-                dict, self.expectations_store.get(key)
-            )
-            # create the ExpectationSuite from constructor
-            return ExpectationSuite(**expectations_schema_dict, data_context=self)
-
-        else:
-            raise ge_exceptions.DataContextError(
-                f"expectation_suite {expectation_suite_name} not found"
-            )
-
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
         args_payload_fn=save_expectation_suite_usage_statistics,
@@ -1659,10 +1384,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
-
-    @property
-    def assistants(self) -> DataAssistantDispatcher:
-        return self._assistants
 
     @property
     def root_directory(self) -> Optional[str]:
