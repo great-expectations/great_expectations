@@ -556,7 +556,9 @@ class DataAssistantResult(SerializableDictDot):
         themed_charts: List[alt.Chart],
     ) -> alt.Chart:
 
-        chart_titles: List[str] = [chart.title for chart in themed_charts]
+        chart_titles: List[str] = DataAssistantResult._get_chart_titles(
+            charts=themed_charts
+        )
         display_chart_df: pd.DataFrame = pd.DataFrame(
             data=[chart_titles, themed_charts], columns=["chart_title", "chart"]
         )
@@ -578,6 +580,17 @@ class DataAssistantResult(SerializableDictDot):
         display_chart: alt.Chart = alt.Chart()
 
         return display_chart
+
+    @staticmethod
+    def _get_chart_titles(charts: List[alt.Chart]) -> List[str]:
+        chart_titles: List[str] = []
+        for chart in charts:
+            if isinstance(chart, alt.LayerChart):
+                chart_titles.append(chart.layer[0].title.text)
+            else:
+                chart_titles.append(chart.title.text)
+
+        return chart_titles
 
     @staticmethod
     def _apply_theme(
