@@ -32,14 +32,6 @@ from great_expectations.validator.validator import Validator
                         "schema": {"type": "com.superconductive.rendered.string"},
                         "params": {
                             "value": {"schema": {"type": "number"}, "value": 3},
-                            "row_condition": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "condition_parser": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
                         },
                     },
                 }
