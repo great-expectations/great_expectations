@@ -14,6 +14,7 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -304,8 +305,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 project_config=project_config, runtime_environment=runtime_environment
             )
 
-        self._variables = None
-
         # NOTE: <DataContextRefactor> This will ensure that parameters set in _data_context are persisted to self.
         # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
         # necessary properties / overrides
@@ -331,6 +330,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # NOTE: <DataContextRefactor>  This will be migrated to AbstractDataContext, along with associated methods
         # and properties.
         self._assistants = DataAssistantDispatcher(data_context=self)
+
+    @property
+    def variables(self) -> DataContextVariables:
+        return self._data_context.variables
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
