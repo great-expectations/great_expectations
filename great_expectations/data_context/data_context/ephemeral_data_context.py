@@ -42,10 +42,15 @@ class EphemeralDataContext(AbstractDataContext):
             config=project_config
         )
         self._config_variables = self._load_config_variables()
+        self._variables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_variables(self) -> EphemeralDataContextVariables:
-        raise NotImplementedError
+        variables: EphemeralDataContextVariables = EphemeralDataContextVariables(
+            config=self._project_config,
+            substitutions={},
+        )
+        return variables
 
     def _save_project_config(self) -> None:
         """Since EphemeralDataContext does not have config as a file, display logging message instead"""

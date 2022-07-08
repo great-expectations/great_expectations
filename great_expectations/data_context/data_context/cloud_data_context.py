@@ -48,6 +48,7 @@ class CloudDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
+        self._variables = self._init_variables()
         super().__init__(
             runtime_environment=runtime_environment,
         )
@@ -68,7 +69,18 @@ class CloudDataContext(AbstractDataContext):
         return self._ge_cloud_mode
 
     def _init_variables(self) -> CloudDataContextVariables:
-        raise NotImplementedError
+        ge_cloud_base_url: str = self._ge_cloud_config.base_url
+        ge_cloud_organization_id: str = self._ge_cloud_config.organization_id
+        ge_cloud_access_token: str = self._ge_cloud_config.access_token
+
+        variables: CloudDataContextVariables = CloudDataContextVariables(
+            config=self._project_config,
+            substitutions={},
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+            ge_cloud_access_token=ge_cloud_access_token,
+        )
+        return variables
 
     def _construct_data_context_id(self) -> str:
         """

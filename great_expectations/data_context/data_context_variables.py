@@ -15,7 +15,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
-from great_expectations.data_context.util import substitute_config_variable
+from great_expectations.data_context.util import substitute_all_config_variables
 
 
 class DataContextVariableSchema(str, enum.Enum):
@@ -30,6 +30,7 @@ class DataContextVariableSchema(str, enum.Enum):
     CHECKPOINT_STORE_NAME = "checkpoint_store_name"
     PROFILER_STORE_NAME = "profiler_store_name"
     PLUGINS_DIRECTORY = "plugins_directory"
+    VALIDATION_OPERATORS = "validation_operators"
     STORES = "stores"
     DATA_DOCS_SITES = "data_docs_sites"
     NOTEBOOKS = "notebooks"
@@ -96,7 +97,7 @@ class DataContextVariables(ABC):
     def _get(self, attr: DataContextVariableSchema) -> Any:
         key: str = attr.value
         val: Any = self.config[key]
-        substituted_val: Any = substitute_config_variable(val, self.substitutions)
+        substituted_val: Any = substitute_all_config_variables(val, self.substitutions)
         return substituted_val
 
     def save_config(self) -> None:
@@ -132,6 +133,14 @@ class DataContextVariables(ABC):
     @plugins_directory.setter
     def plugins_directory(self, plugins_directory: str) -> None:
         self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
+
+    @property
+    def validation_operators(self) -> Optional[dict]:
+        return self._get(DataContextVariableSchema.VALIDATION_OPERATORS)
+
+    @validation_operators.setter
+    def validation_operators(self, validation_operators: dict) -> None:
+        self._set(DataContextVariableSchema.VALIDATION_OPERATORS, validation_operators)
 
     @property
     def expectations_store_name(self) -> Optional[str]:

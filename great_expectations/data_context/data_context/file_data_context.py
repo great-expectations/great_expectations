@@ -47,6 +47,7 @@ class FileDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
+        self._variables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 
     def save_expectation_suite(
@@ -98,7 +99,12 @@ class FileDataContext(AbstractDataContext):
         return self._context_root_directory
 
     def _init_variables(self) -> FileDataContextVariables:
-        raise NotImplementedError
+        variables: FileDataContextVariables = FileDataContextVariables(
+            config=self._project_config,
+            substitutions={},
+            data_context=self,
+        )
+        return variables
 
     def _save_project_config(self) -> None:
         """Save the current project to disk."""

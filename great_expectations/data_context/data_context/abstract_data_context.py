@@ -134,6 +134,7 @@ class AbstractDataContext(ABC):
         if runtime_environment is None:
             runtime_environment = {}
         self.runtime_environment = runtime_environment
+
         # These attributes that are set downstream.
         self._variables = None
         self._config_variables = None
