@@ -1177,9 +1177,7 @@ snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_equal 1"] 
     "name": "atomic.prescriptive.summary",
     "value": {
         "header": None,
-        "params": {
-            "value": {"schema": {"type": "number"}, "value": 10},
-        },
+       "params": {"value": {"schema": {"type": "number"}, "value": 10}},
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Must have exactly $value rows.",
     },
