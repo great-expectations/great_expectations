@@ -1162,7 +1162,6 @@ snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_be_between
     "value": {
         "header": None,
         "params": {
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
             "max_value": {"schema": {"type": "number"}, "value": None},
             "min_value": {"schema": {"type": "number"}, "value": 1},
             "strict_max": {"schema": {"type": "boolean"}, "value": None},
@@ -1179,8 +1178,6 @@ snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_equal 1"] 
     "value": {
         "header": None,
         "params": {
-            "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "row_condition": {"schema": {"type": "string"}, "value": None},
             "value": {"schema": {"type": "number"}, "value": 10},
         },
         "schema": {"type": "com.superconductive.rendered.string"},

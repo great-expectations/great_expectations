@@ -299,6 +299,9 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         )
         return string
 
+    def __eq__(self, other):
+        return str(self) == str(other)
+
 
 class RenderedBulletListContent(RenderedComponentContent):
     def __init__(
