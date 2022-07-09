@@ -536,9 +536,6 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
     rendered_validation_results = validation_results_page_renderer.render(
         titanic_profiled_evrs_1
     ).to_json_dict()
-    import pprint
-
-    pprint.pprint(rendered_validation_results["sections"])
 
     # replace version of vega-lite in res to match snapshot test
     content_block = rendered_validation_results["sections"][5]["content_blocks"][1][
@@ -547,10 +544,6 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
     content_block["graph"]["$schema"] = re.sub(
         r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
     )
-
-    # with open(file_relative_path(__file__, "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_end_nc.json"), "w") as f:
-    #     json.dump(rendered_validation_results, f, indent=2)
-    pprint.pprint(ValidationResultsPageRenderer_render_with_run_info_at_end)
     assert (
         rendered_validation_results
         == ValidationResultsPageRenderer_render_with_run_info_at_end
@@ -567,7 +560,6 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     rendered_validation_results = validation_results_page_renderer.render(
         titanic_profiled_evrs_1
     ).to_json_dict()
-    print(rendered_validation_results)
 
     # replace version of vega-lite in res to match snapshot test
     content_block = rendered_validation_results["sections"][5]["content_blocks"][1][
