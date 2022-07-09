@@ -3,6 +3,7 @@ from functools import wraps
 from inspect import Signature, signature
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigOutputModeType
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -191,6 +192,13 @@ class DataAssistantRunner:
         Returns:
             DataAssistantResult: The result object for the DataAssistant
         """
+        if batch_request is None:
+            data_assistant_name: str = self._data_assistant_cls.data_assistant_type
+            raise ge_exceptions.DataAssistantExecutionError(
+                message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be \
+specified (empty or missing "batch_request" detected)."""
+            )
+
         data_assistant: DataAssistant = self._build_data_assistant(
             batch_request=batch_request
         )
