@@ -3,6 +3,9 @@ from inspect import isabstract
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+)
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain_builder import (
@@ -447,10 +450,20 @@ class DataAssistant(metaclass=MetaDataAssistant):
         Returns:
             DataAssistantResult: The result object for the DataAssistant
         """
+        usage_statistics_handler: Optional[UsageStatisticsHandler]
+        if self._data_context is None:
+            usage_statistics_handler = None
+        else:
+            usage_statistics_handler = self._data_context._usage_statistics_handler
+
+        batches: Dict[str, Batch] = self._batches
+        if batches is None:
+            batches = {}
+
         data_assistant_result: DataAssistantResult = DataAssistantResult(
             batch_id_to_batch_identifier_display_name_map=self.batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
-            usage_statistics_handler=self._data_context._usage_statistics_handler,
+            usage_statistics_handler=usage_statistics_handler,
         )
         run_profiler_on_data(
             data_assistant=self,
@@ -458,7 +471,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             profiler=self.profiler,
             variables=variables,
             rules=rules,
-            batch_list=list(self._batches.values()),
+            batch_list=list(batches.values()),
             batch_request=None,
             variables_directives_list=variables_directives_list,
             domain_type_directives_list=domain_type_directives_list,
@@ -592,11 +605,15 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
         """
+        batches: Dict[str, Batch] = self._batches
+        if batches is None:
+            batches = {}
+
         batch_id: str
         batch: Batch
         return {
             batch_id: set(batch.batch_definition.batch_identifiers.items())
-            for batch_id, batch in self._batches.items()
+            for batch_id, batch in batches.items()
         }
 
 
