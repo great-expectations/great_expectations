@@ -13,21 +13,27 @@ from great_expectations.validator.validator import (
     Validator,
 )
 
-sqlite_runtime_batch_request = RuntimeBatchRequest(
-    datasource_name="my_sqlite_db_datasource",
-    data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="titanic",
-    runtime_parameters={"query": "SELECT * FROM titanic LIMIT 100"},
-    batch_identifiers={"default_identifier_name": "test_identifier"},
-    batch_spec_passthrough={"create_temp_table": False},
-)
 
-sqlite_batch_request = BatchRequest(
-    datasource_name="my_sqlite_db_datasource",
-    data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="titanic",
-    batch_spec_passthrough={"create_temp_table": False},
-)
+@pytest.fixture
+def sqlite_runtime_batch_request() -> RuntimeBatchRequest:
+    return RuntimeBatchRequest(
+        datasource_name="my_sqlite_db_datasource",
+        data_connector_name="default_runtime_data_connector_name",
+        data_asset_name="titanic",
+        runtime_parameters={"query": "SELECT * FROM titanic LIMIT 100"},
+        batch_identifiers={"default_identifier_name": "test_identifier"},
+        batch_spec_passthrough={"create_temp_table": False},
+    )
+
+
+@pytest.fixture
+def sqlite_batch_request() -> BatchRequest:
+    return BatchRequest(
+        datasource_name="my_sqlite_db_datasource",
+        data_connector_name="default_inferred_data_connector_name",
+        data_asset_name="titanic",
+        batch_spec_passthrough={"create_temp_table": False},
+    )
 
 
 @pytest.mark.parametrize(
