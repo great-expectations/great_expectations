@@ -120,18 +120,28 @@ class ProfilerError(GreatExpectationsError):
 
 
 class ProfilerConfigurationError(ProfilerError):
-    """A configuration error for a profiler."""
+    """A configuration error for a "RuleBasedProfiler" class."""
 
     pass
 
 
 class ProfilerExecutionError(ProfilerError):
-    """A runtime error for a profiler."""
+    """A runtime error for a "RuleBasedProfiler" class."""
 
     pass
 
 
 class ProfilerNotFoundError(ProfilerError):
+    pass
+
+
+class DataAssistantError(ProfilerError):
+    pass
+
+
+class DataAssistantExecutionError(DataAssistantError):
+    """A runtime error for a "DataAssistant" class."""
+
     pass
 
 

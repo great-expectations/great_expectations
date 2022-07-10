@@ -196,20 +196,24 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
         return sa.column(column_name) == batch_identifiers[column_name]
 
-    @staticmethod
     def split_on_converted_datetime(
+        self,
         column_name: str,
         batch_identifiers: dict,
         date_format_string: str = "%Y-%m-%d",
     ) -> bool:
         """Convert the values in the named column to the given date_format, and split on that"""
-
-        return (
-            sa.func.strftime(
-                date_format_string,
-                sa.column(column_name),
+        if self._dialect == "sqlite":
+            return (
+                sa.func.strftime(
+                    date_format_string,
+                    sa.column(column_name),
+                )
+                == batch_identifiers[column_name]
             )
-            == batch_identifiers[column_name]
+
+        raise NotImplementedError(
+            f'Splitter method "split_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'
         )
 
     def split_on_divided_integer(
@@ -715,23 +719,28 @@ class SqlAlchemyDataSplitter(DataSplitter):
             .order_by(sa.column(column_name).asc())
         )
 
-    @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime(
+        self,
         table_name: str,
         column_name: str,
         date_format_string: str = "%Y-%m-%d",
     ) -> Selectable:
         """Convert the values in the named column to the given date_format, and split on that"""
-        return sa.select(
-            [
-                sa.func.distinct(
-                    sa.func.strftime(
-                        date_format_string,
-                        sa.column(column_name),
+        if self._dialect == "sqlite":
+            return sa.select(
+                [
+                    sa.func.distinct(
+                        sa.func.strftime(
+                            date_format_string,
+                            sa.column(column_name),
+                        )
                     )
-                )
-            ]
-        ).select_from(sa.text(table_name))
+                ]
+            ).select_from(sa.text(table_name))
+
+        raise NotImplementedError(
+            f'Splitter method "split_on_converted_datetime" is not supported for "{self._dialect}" SQL dialect.'
+        )
 
     def get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer(
         self,
