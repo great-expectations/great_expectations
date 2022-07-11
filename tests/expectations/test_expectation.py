@@ -29,6 +29,7 @@ def fake_config(
     )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "fake_expectation_cls, config",
     [
@@ -61,6 +62,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
     ), "Default mostly success ratio is not 1"
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "fake_expectation_cls, config",
     itertools.chain(
@@ -108,6 +110,7 @@ def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
     ), "Default mostly success ratio is not 1"
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "fake_expectation_cls, config",
     [
