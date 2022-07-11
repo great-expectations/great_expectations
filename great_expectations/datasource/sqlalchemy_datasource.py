@@ -1,9 +1,9 @@
 import datetime
 import logging
+import os
 import warnings
 from pathlib import Path
 from string import Template
-import os
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
