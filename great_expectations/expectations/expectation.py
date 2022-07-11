@@ -2631,8 +2631,6 @@ def _validate_mostly_config(configuration: Optional[ExpectationConfiguration]) -
 
 
 def _mostly_success(
-    rows_considered_cnt: int, unexpected_cnt: int, threshold: float
+    rows_considered_cnt: int, unexpected_cnt: int, mostly: float
 ) -> bool:
-    return (
-        float((rows_considered_cnt - unexpected_cnt) / rows_considered_cnt) >= threshold
-    )
+    return float((rows_considered_cnt - unexpected_cnt) / rows_considered_cnt) >= mostly
