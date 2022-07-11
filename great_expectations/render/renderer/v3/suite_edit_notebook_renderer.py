@@ -106,9 +106,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def from_data_context(data_context: DataContext):
         suite_edit_notebook_config: Optional[NotebookConfig] = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
-            suite_edit_notebook_config = notebookConfigSchema.load(
-                data_context.notebooks.get("suite_edit")
-            )
+            suite_edit_notebook_config = data_context.notebooks.get("suite_edit")
 
         if suite_edit_notebook_config:
             return instantiate_class_from_config(
