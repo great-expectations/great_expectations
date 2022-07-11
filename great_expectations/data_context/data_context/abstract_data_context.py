@@ -1252,7 +1252,6 @@ class AbstractDataContext(ABC):
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
-                logger.debug("Generating empty config variables file.")
                 return {}
         else:
             return {}
