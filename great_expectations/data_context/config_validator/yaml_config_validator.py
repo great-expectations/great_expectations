@@ -100,7 +100,7 @@ class YamlConfigValidator:
 
     @property
     def config_variables(self):
-        return self._data_context._config_variables
+        return self._data_context.config_variables
 
     def test_yaml_config(
         self,

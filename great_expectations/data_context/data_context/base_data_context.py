@@ -1,16 +1,14 @@
 import datetime
 import logging
 import os
-import traceback
 import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Mapping, Optional, Union, cast
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -32,7 +30,7 @@ except ImportError:
     from typing_extensions import Literal
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import (
     Batch,
@@ -44,10 +42,6 @@ from great_expectations.core.batch import (
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
-    DatasourceAnonymizer,
-)
 from great_expectations.core.usage_statistics.usage_statistics import (
     add_datasource_usage_statistics,
     get_batch_list_usage_statistics,
@@ -87,11 +81,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     parse_substitution_variable,
-    substitute_all_config_variables,
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
-from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
@@ -101,7 +93,6 @@ from great_expectations.rule_based_profiler import (
     RuleBasedProfilerResult,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -334,9 +325,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._assistants = DataAssistantDispatcher(data_context=self)
 
         self._yaml_config_validator = YamlConfigValidator(
-            usage_stats_handler=self.usage_statistics_handler,
-            runtime_environment=runtime_environment,
-            config_variables=self.config_variables,
             data_context=self,
         )
 
