@@ -424,7 +424,7 @@ class AbstractDataContext(ABC):
         self,
         name: str,
         initialize: bool = True,
-        save_changes: bool = True,
+        save_changes: bool = False,
         **kwargs: dict,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
