@@ -1177,8 +1177,7 @@ class AbstractDataContext(ABC):
             self._datasource_store.set_by_name(
                 datasource_name=name, datasource_config=datasource_config
             )
-        else:
-            self.config.datasources[name] = datasource_config
+        self.config.datasources[name] = datasource_config
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
@@ -1198,8 +1197,7 @@ class AbstractDataContext(ABC):
                 # Do not keep configuration that could not be instantiated.
                 if save_changes:
                     self._datasource_store.delete_by_name(datasource_name=name)
-                else:
-                    del self.config.datasources[name]
+                del self.config.datasources[name]
                 raise e
 
         return datasource
