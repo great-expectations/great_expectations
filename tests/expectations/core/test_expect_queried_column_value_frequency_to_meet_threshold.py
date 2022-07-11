@@ -3,15 +3,29 @@ import pytest
 from contrib.experimental.great_expectations_experimental.expectations.expect_queried_column_value_frequency_to_meet_threshold import (
     ExpectQueriedColumnValueFrequencyToMeetThreshold,
 )
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.self_check.util import build_spark_validator_with_data
 from great_expectations.validator.validator import (
     ExpectationValidationResult,
     Validator,
 )
-from tests.expectations.core.conftest import (
-    sqlite_batch_request,
-    sqlite_runtime_batch_request,
+
+# TODO : turn this into a fixture
+sqlite_runtime_batch_request = RuntimeBatchRequest(
+    datasource_name="my_sqlite_db_datasource",
+    data_connector_name="default_runtime_data_connector_name",
+    data_asset_name="titanic",
+    runtime_parameters={"query": "SELECT * FROM titanic LIMIT 100"},
+    batch_identifiers={"default_identifier_name": "test_identifier"},
+    batch_spec_passthrough={"create_temp_table": False},
+)
+# TODO: turn this into fixture
+sqlite_batch_request = BatchRequest(
+    datasource_name="my_sqlite_db_datasource",
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name="titanic",
+    batch_spec_passthrough={"create_temp_table": False},
 )
 
 
