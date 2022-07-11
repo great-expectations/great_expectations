@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import pytest
 
@@ -13,6 +15,7 @@ from great_expectations.validator.validator import (
     Validator,
 )
 
+# TODO : turn this into a fixture
 sqlite_runtime_batch_request = RuntimeBatchRequest(
     datasource_name="my_sqlite_db_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -21,7 +24,7 @@ sqlite_runtime_batch_request = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "test_identifier"},
     batch_spec_passthrough={"create_temp_table": False},
 )
-
+# TODO: turn this into fixture
 sqlite_batch_request = BatchRequest(
     datasource_name="my_sqlite_db_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -178,11 +181,9 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     warns,
     spark_session,
     basic_spark_df_execution_engine,
+    titanic_df,
 ):
-    df = pd.read_csv(
-        "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/Titanic.csv"
-    )
-
+    df = titanic_df
     validator: Validator = build_spark_validator_with_data(df, spark_session)
 
     if warns:
@@ -238,10 +239,9 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     warns,
     spark_session,
     basic_spark_df_execution_engine,
+    titanic_df,
 ):
-    df = pd.read_csv(
-        "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/Titanic.csv"
-    )
+    df = titanic_df
 
     validator: Validator = build_spark_validator_with_data(df, spark_session)
 
