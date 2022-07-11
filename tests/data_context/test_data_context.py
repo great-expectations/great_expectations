@@ -441,6 +441,20 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
         ]
 
 
+@mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
+def test_update_datasource_persists_changes_with_store(
+    mock_update_by_name: mock.MagicMock,
+    data_context_parameterized_expectation_suite: DataContext,
+) -> None:
+    context: DataContext = data_context_parameterized_expectation_suite
+
+    datasource_to_update: Datasource = tuple(context.datasources.values())[0]
+
+    context.update_datasource(datasource=datasource_to_update)
+
+    assert mock_update_by_name.call_count == 1
+
+
 @freeze_time("09/26/2019 13:42:41")
 def test_data_context_get_validation_result(titanic_data_context):
     """

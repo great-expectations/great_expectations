@@ -3135,7 +3135,9 @@ def alice_columnar_table_single_batch_context(
 ):
     context: DataContext = empty_data_context_stats_enabled
     # We need our salt to be consistent between runs to ensure idempotent anonymized values
-    context._usage_statistics_handler = UsageStatisticsHandler(
+    # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
+    # (ie. adjusted to be context._usage_statistics_handler)
+    context._data_context._usage_statistics_handler = UsageStatisticsHandler(
         context, "00000000-0000-0000-0000-00000000a004", "N/A"
     )
     monkeypatch.chdir(context.root_directory)
@@ -6208,6 +6210,83 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     monkeypatch.delenv("GE_USAGE_STATS")
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
+    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "integration",
+                "fixtures",
+                "yellow_tripdata_pandas_fixture",
+                "great_expectations",
+                "great_expectations.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "random_subsamples",
+                "yellow_tripdata_7500_lines_sample_2019-01.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "random_subsamples",
+                "yellow_tripdata_8500_lines_sample_2019-02.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "random_subsamples",
+                "yellow_tripdata_9000_lines_sample_2019-03.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
+            )
+        ),
+    )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    return context
+
+
+@pytest.fixture(scope="module")
+def bobby_columnar_table_multi_batch_probabilistic_data_context(
+    tmp_path_factory,
+) -> DataContext:
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)

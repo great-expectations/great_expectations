@@ -1,7 +1,7 @@
 import logging
 from abc import ABCMeta
 from json import JSONDecodeError
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -93,13 +93,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         filter_properties_dict(properties=self._config, inplace=True)
 
     @property
-    def auth_headers(self):
+    def auth_headers(self) -> Dict[str, str]:
         return {
             "Content-Type": "application/vnd.api+json",
             "Authorization": f'Bearer {self.ge_cloud_credentials.get("access_token")}',
         }
 
-    def _get(self, key):
+    def _get(self, key: Tuple[str, ...]) -> dict:
         ge_cloud_url = self.get_url_for_key(key=key)
         try:
             response = requests.get(ge_cloud_url, headers=self.auth_headers)
@@ -117,7 +117,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self) -> None:
         pass
 
-    def _update(self, ge_cloud_id, value, **kwargs):
+    def _update(self, ge_cloud_id: str, value: Any, **kwargs: dict) -> bool:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -154,12 +154,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @property
-    def allowed_set_kwargs(self):
+    def allowed_set_kwargs(self) -> Set[str]:
         return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(
             self.ge_cloud_resource_type, set()
         )
 
-    def validate_set_kwargs(self, kwargs):
+    def validate_set_kwargs(self, kwargs: dict) -> Optional[bool]:
         kwarg_names = set(kwargs.keys())
         if len(kwarg_names) == 0:
             return True
@@ -169,7 +169,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             extra_kwargs = kwarg_names - self.allowed_set_kwargs
             raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')
 
-    def _set(self, key, value, **kwargs):
+    def _set(
+        self, key: Tuple[str, ...], value: Any, **kwargs: dict
+    ) -> Union[bool, GeCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
         ge_cloud_id = key[1]
 
@@ -217,22 +219,22 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @property
-    def ge_cloud_base_url(self):
+    def ge_cloud_base_url(self) -> str:
         return self._ge_cloud_base_url
 
     @property
-    def ge_cloud_resource_name(self):
+    def ge_cloud_resource_name(self) -> str:
         return self._ge_cloud_resource_name
 
     @property
-    def ge_cloud_resource_type(self):
+    def ge_cloud_resource_type(self) -> str:
         return self._ge_cloud_resource_type
 
     @property
-    def ge_cloud_credentials(self):
+    def ge_cloud_credentials(self) -> dict:
         return self._ge_cloud_credentials
 
-    def list_keys(self):
+    def list_keys(self) -> List[Tuple[str, Any]]:
         url = urljoin(
             self.ge_cloud_base_url,
             f"organizations/"
@@ -256,7 +258,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to list keys in GE Cloud Store Backend: {e}"
             )
 
-    def get_url_for_key(self, key, protocol=None):
+    def get_url_for_key(
+        self, key: Tuple[str, ...], protocol: Optional[Any] = None
+    ) -> str:
         ge_cloud_id = key[1]
         url = urljoin(
             self.ge_cloud_base_url,
@@ -300,7 +304,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to delete object in GE Cloud Store Backend: {e}"
             )
 
-    def _has_key(self, key):
+    def _has_key(self, key: Tuple[str, ...]) -> bool:
         all_keys = self.list_keys()
         return key in all_keys
 
