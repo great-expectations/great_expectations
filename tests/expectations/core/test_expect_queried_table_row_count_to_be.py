@@ -1,7 +1,5 @@
-import pandas as pd
 import pytest
 
-import great_expectations.exceptions.exceptions
 from contrib.experimental.great_expectations_experimental.expectations.expect_queried_table_row_count_to_be import (
     ExpectQueriedTableRowCountToBe,
 )
