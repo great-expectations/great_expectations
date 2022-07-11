@@ -432,6 +432,7 @@ class AbstractDataContext(ABC):
             name: the name for the new datasource to add
             initialize: if False, add the datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
+            save_changes (bool): should GE save the Datasource config?
             kwargs (keyword arguments): the configuration for the new datasource
 
         Returns:

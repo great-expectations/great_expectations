@@ -1423,7 +1423,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         """
         new_datasource = super().add_datasource(
-            name, initialize, save_changes, **kwargs
+            name=name, initialize=initialize, save_changes=save_changes, **kwargs
         )
         self._synchronize_self_with_underlying_data_context()
         return new_datasource
