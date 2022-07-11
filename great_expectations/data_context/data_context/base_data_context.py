@@ -316,9 +316,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_name,
                     validation_operator_config,
                 )
-        # # NOTE: <DataContextRefactor>  This will be migrated to AbstractDataContext, along with associated methods
-        # # and properties.
-        # self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -1306,24 +1303,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
-
-    def store_evaluation_parameters(
-        self, validation_results, target_store_name=None
-    ) -> None:
-        """
-        Stores ValidationResult EvaluationParameters to defined store
-        """
-        if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
-
-        if target_store_name is None:
-            target_store_name = self.evaluation_parameter_store_name
-
-        self._store_metrics(
-            self._evaluation_parameter_dependencies,
-            validation_results,
-            target_store_name,
-        )
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""

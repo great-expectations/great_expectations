@@ -20,10 +20,6 @@ from typing import (
     cast,
 )
 
-from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-    DataAssistantDispatcher,
-)
-
 if TYPE_CHECKING:
     from great_expectations.data_context.store import EvaluationParameterStore
 
@@ -512,7 +508,6 @@ class AbstractDataContext(ABC):
 
     def list_stores(self) -> List[Store]:
         """List currently-configured Stores on this context"""
-
         stores = []
         for (
             name,
@@ -633,6 +628,24 @@ class AbstractDataContext(ABC):
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(f"Datasource {datasource_name} not found")
+
+    def store_evaluation_parameters(
+        self, validation_results, target_store_name=None
+    ) -> None:
+        """
+        Stores ValidationResult EvaluationParameters to defined store
+        """
+        if not self._evaluation_parameter_dependencies_compiled:
+            self._compile_evaluation_parameter_dependencies()
+
+        if target_store_name is None:
+            target_store_name = self.evaluation_parameter_store_name
+
+        self._store_metrics(
+            self._evaluation_parameter_dependencies,
+            validation_results,
+            target_store_name,
+        )
 
     def list_expectation_suite_names(self) -> List[str]:
         """
@@ -953,7 +966,7 @@ class AbstractDataContext(ABC):
     def delete_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
-    ):
+    ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
 
         Args:
