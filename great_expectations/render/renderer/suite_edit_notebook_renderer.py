@@ -10,7 +10,6 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
     NotebookConfig,
     NotebookTemplateConfig,
-    notebookConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (

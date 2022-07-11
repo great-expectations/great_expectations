@@ -374,7 +374,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
         with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
+            self.variables.config.to_yaml(outfile)
 
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
