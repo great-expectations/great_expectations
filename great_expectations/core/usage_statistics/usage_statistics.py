@@ -588,12 +588,32 @@ def send_usage_message(
         handler: UsageStatisticsHandler = getattr(
             data_context, "_usage_statistics_handler", None
         )
-        message: dict = {
-            "event": event,
-            "event_payload": event_payload,
-            "success": success,
-        }
         if handler is not None:
+            message: dict = {
+                "event": event,
+                "event_payload": event_payload,
+                "success": success,
+            }
+            handler.emit(message)
+    except Exception:
+        pass
+
+
+def send_usage_message_from_handler(
+    event: str,
+    handler: Optional[UsageStatisticsHandler] = None,
+    event_payload: Optional[dict] = None,
+    success: Optional[bool] = None,
+) -> None:
+    """Send a usage statistics message using an already instantiated handler."""
+    # noinspection PyBroadException
+    try:
+        if handler is not None:
+            message: dict = {
+                "event": event,
+                "event_payload": event_payload,
+                "success": success,
+            }
             handler.emit(message)
     except Exception:
         pass

@@ -12,7 +12,7 @@ from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer 
     DatasourceAnonymizer,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
+    send_usage_message_from_handler,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import Store
@@ -86,51 +86,21 @@ class YamlConfigValidator:
 
     def __init__(
         self,
-        usage_stats_handler: UsageStatisticsHandler,
-        runtime_environment: Dict,
-        config_variables: Dict,
         data_context: AbstractDataContext,
     ):
-        self._usage_stats_handler = usage_stats_handler
-        self._runtime_environment = runtime_environment
-        self._config_variables = config_variables
         self._data_context = data_context
 
     @property
     def usage_stats_handler(self):
-        return self._usage_stats_handler
+        return self._data_context.usage_statistics_handler
 
     @property
     def runtime_environment(self):
-        return self._runtime_environment
+        return self._data_context.runtime_environment
 
     @property
     def config_variables(self):
-        return self._config_variables
-
-    @property
-
-    # def synchronize_config(self, config_variables: Dict):
-    #     """Synchronize configuration with caller."""
-    #     self._config_variables = config_variables
-    #
-    #
-    # def synchronize_then_test_yaml_config(
-    #     self,
-    #
-    #     yaml_config: str,
-    #     name: Optional[str] = None,
-    #     class_name: Optional[str] = None,
-    #     runtime_environment: Optional[dict] = None,
-    #     pretty_print: bool = True,
-    #     return_mode: Union[
-    #         Literal["instantiated_class"], Literal["report_object"]
-    #     ] = "instantiated_class",
-    #     shorten_tracebacks: bool = False,
-    # ):
-    #     self.synchronize_config()
-    #     self._test_yaml_config()
-    #     raise NotImplementedError
+        return self._data_context._config_variables
 
     def test_yaml_config(
         self,
@@ -248,8 +218,9 @@ class YamlConfigValidator:
                     name, config, runtime_environment, usage_stats_event_payload
                 )
 
-            self._usage_stats_handler.send_usage_message(
+            send_usage_message_from_handler(
                 event=usage_stats_event_name,
+                handler=self.usage_stats_handler,
                 event_payload=usage_stats_event_payload,
                 success=True,
             )
@@ -280,8 +251,9 @@ class YamlConfigValidator:
             ):
                 # add parent_class if it doesn't exist and class_name is one of our supported core GE types
                 usage_stats_event_payload["parent_class"] = class_name
-            self._usage_stats_handler.send_usage_message(
+            send_usage_message_from_handler(
                 event=usage_stats_event_name,
+                handler=self.usage_stats_handler,
                 event_payload=usage_stats_event_payload,
                 success=False,
             )
@@ -321,8 +293,9 @@ class YamlConfigValidator:
             usage_stats_event_payload: dict = {
                 "diagnostic_info": ["__substitution_error__"],
             }
-            self._usage_stats_handler.send_usage_message(
+            send_usage_message_from_handler(
                 event=usage_stats_event_name,
+                handler=self.usage_stats_handler,
                 event_payload=usage_stats_event_payload,
                 success=False,
             )
@@ -336,8 +309,9 @@ class YamlConfigValidator:
             usage_stats_event_payload: dict = {
                 "diagnostic_info": ["__yaml_parse_error__"],
             }
-            self._usage_stats_handler.send_usage_message(
+            send_usage_message_from_handler(
                 event=usage_stats_event_name,
+                handler=self.usage_stats_handler,
                 event_payload=usage_stats_event_payload,
                 success=False,
             )
