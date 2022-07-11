@@ -309,6 +309,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
         # necessary properties / overrides
         self._synchronize_self_with_underlying_data_context()
+
+        self._variables = self._init_variables()
+
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
@@ -330,10 +333,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # NOTE: <DataContextRefactor>  This will be migrated to AbstractDataContext, along with associated methods
         # and properties.
         self._assistants = DataAssistantDispatcher(data_context=self)
-
-    @property
-    def variables(self) -> DataContextVariables:
-        return self._data_context.variables
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -408,7 +407,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self.config["validation_operators"][
             validation_operator_name
         ] = validation_operator_config
-        config = self.variables.validation_operators[validation_operator_name]
+        config = self.project_config_with_variables_substituted.validation_operators[
+            validation_operator_name
+        ]
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
             config=config,
