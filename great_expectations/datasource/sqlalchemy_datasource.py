@@ -3,6 +3,7 @@ import logging
 import warnings
 from pathlib import Path
 from string import Template
+import os
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -214,6 +215,9 @@ class SqlAlchemyDatasource(LegacyDatasource):
         batch_kwargs_generators=None,
         **kwargs
     ) -> None:
+        # Add environment var to be picked up by snowflake-connector
+        os.environ["SF_PARTNER"] = "great_expectations_oss"
+
         if not sqlalchemy:
             raise DatasourceInitializationError(
                 name, "ModuleNotFoundError: No module named 'sqlalchemy'"

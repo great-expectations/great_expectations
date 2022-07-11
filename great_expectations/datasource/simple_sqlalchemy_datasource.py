@@ -1,5 +1,6 @@
 import copy
 import logging
+import os
 
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
@@ -26,6 +27,9 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         tables: dict = None,
         **kwargs
     ) -> None:
+        # Add environment var to be picked up by snowflake-connector
+        os.environ["SF_PARTNER"] = "great_expectations_oss"
+
         introspection = introspection or {}
         tables = tables or {}
 
