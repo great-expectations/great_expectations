@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Any, List
+from typing import Any, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -600,3 +600,13 @@ def check_sql_engine_dialect(
         return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)
     except (AttributeError, TypeError):
         return False
+
+
+def validate_mostly(mostly: Optional[Union[int, float]]) -> None:
+    if mostly is not None:
+        # Even though we type mostly as an int or float, we can't typecheck this whole project and
+        # need to verify the type.
+        assert isinstance(
+            mostly, (int, float)
+        ), "'mostly' parameter must be an integer or float"
+        assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
