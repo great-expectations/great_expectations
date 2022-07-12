@@ -27,23 +27,11 @@ from great_expectations.validator.validator import Validator
                     "value_type": "StringValueType",
                     "name": "atomic.prescriptive.summary",
                     "value": {
-                        "header_row": None,
-                        "kwargs": None,
-                        "graph": None,
                         "header": None,
                         "template": "Must have exactly $value rows.",
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "params": {
                             "value": {"schema": {"type": "number"}, "value": 3},
-                            "row_condition": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
-                            "condition_parser": {
-                                "schema": {"type": "string"},
-                                "value": None,
-                            },
                         },
                     },
                 }
@@ -52,13 +40,9 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.diagnostic.observed_value",
                     "value": {
-                        "graph": None,
                         "header": None,
-                        "header_row": None,
-                        "kwargs": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "template": "3",
                     },
                     "value_type": "StringValueType",
@@ -75,10 +59,7 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.prescriptive.summary",
                     "value": {
-                        "graph": None,
                         "header": None,
-                        "header_row": None,
-                        "kwargs": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
@@ -108,7 +89,6 @@ from great_expectations.validator.validator import Validator
                             },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "template": "$column minimum value must be greater than or equal "
                         "to $min_value and less than or equal to $max_value.",
                     },
@@ -119,13 +99,9 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.diagnostic.observed_value",
                     "value": {
-                        "graph": None,
                         "header": None,
-                        "header_row": None,
-                        "kwargs": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "template": "19",
                     },
                     "value_type": "StringValueType",
@@ -152,7 +128,6 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.prescriptive.summary",
                     "value": {
-                        "graph": None,
                         "header": {
                             "schema": {"type": "StringValueType"},
                             "value": {
@@ -183,8 +158,6 @@ from great_expectations.validator.validator import Validator
                             {"schema": {"type": "string"}, "value": "Min Value"},
                             {"schema": {"type": "string"}, "value": "Max Value"},
                         ],
-                        "kwargs": None,
-                        "params": None,
                         "schema": {"type": "TableType"},
                         "table": [
                             [
@@ -203,7 +176,6 @@ from great_expectations.validator.validator import Validator
                                 {"schema": {"type": "number"}, "value": 10000000},
                             ],
                         ],
-                        "template": None,
                     },
                     "value_type": "TableType",
                 }
@@ -212,14 +184,11 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.diagnostic.observed_value",
                     "value": {
-                        "graph": None,
                         "header": None,
                         "header_row": [
                             {"schema": {"type": "string"}, "value": "Quantile"},
                             {"schema": {"type": "string"}, "value": "Value"},
                         ],
-                        "kwargs": None,
-                        "params": None,
                         "schema": {"type": "TableType"},
                         "table": [
                             [
@@ -235,7 +204,6 @@ from great_expectations.validator.validator import Validator
                                 {"schema": {"type": "number"}, "value": 9488404},
                             ],
                         ],
-                        "template": None,
                     },
                     "value_type": "TableType",
                 }
@@ -251,10 +219,7 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.prescriptive.summary",
                     "value": {
-                        "graph": None,
                         "header": None,
-                        "header_row": None,
-                        "kwargs": None,
                         "params": {
                             "column": {
                                 "schema": {"type": "string"},
@@ -283,7 +248,6 @@ from great_expectations.validator.validator import Validator
                             },
                         },
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "template": "$column values must belong to this set: $v__0 $v__1 "
                         "$v__2.",
                     },
@@ -294,13 +258,9 @@ from great_expectations.validator.validator import Validator
                 {
                     "name": "atomic.diagnostic.observed_value",
                     "value": {
-                        "graph": None,
                         "header": None,
-                        "header_row": None,
-                        "kwargs": None,
                         "params": {},
                         "schema": {"type": "com.superconductive.rendered.string"},
-                        "table": None,
                         "template": "0% unexpected",
                     },
                     "value_type": "StringValueType",
@@ -308,9 +268,127 @@ from great_expectations.validator.validator import Validator
             ],
             id="expect_column_values_to_be_in_set",
         ),
+        pytest.param(
+            ExpectationConfiguration(
+                expectation_type="expect_column_kl_divergence_to_be_less_than",
+                kwargs={
+                    "column": "user_id",
+                    "partition_object": {
+                        "values": [2000000, 6000000],
+                        "weights": [0.3, 0.7],
+                    },
+                },
+            ),
+            [
+                {
+                    "name": "atomic.prescriptive.summary",
+                    "value": {
+                        "graph": {
+                            "autosize": "fit",
+                            "config": {
+                                "view": {
+                                    "continuousHeight": 300,
+                                    "continuousWidth": 400,
+                                }
+                            },
+                            "encoding": {
+                                "tooltip": [
+                                    {"field": "values", "type": "quantitative"},
+                                    {"field": "fraction", "type": "quantitative"},
+                                ],
+                                "x": {"field": "values", "type": "nominal"},
+                                "y": {"field": "fraction", "type": "quantitative"},
+                            },
+                            "height": 400,
+                            "mark": "bar",
+                            "width": 250,
+                        },
+                        "header": {
+                            "schema": {"type": "StringValueType"},
+                            "value": {
+                                "params": {
+                                    "column": {
+                                        "schema": {"type": "string"},
+                                        "value": "user_id",
+                                    },
+                                    "condition_parser": {
+                                        "schema": {"type": "string"},
+                                        "value": None,
+                                    },
+                                    "mostly": {
+                                        "schema": {"type": "number"},
+                                        "value": None,
+                                    },
+                                    "row_condition": {
+                                        "schema": {"type": "string"},
+                                        "value": None,
+                                    },
+                                    "threshold": {
+                                        "schema": {"type": "number"},
+                                        "value": None,
+                                    },
+                                },
+                                "template": "$column Kullback-Leibler (KL) "
+                                "divergence with respect to the "
+                                "following distribution must be "
+                                "lower than $threshold.",
+                            },
+                        },
+                        "schema": {"type": "GraphType"},
+                    },
+                    "value_type": "GraphType",
+                }
+            ],
+            [
+                {
+                    "name": "atomic.diagnostic.observed_value",
+                    "value": {
+                        "graph": {
+                            "autosize": "fit",
+                            "config": {
+                                "view": {
+                                    "continuousHeight": 300,
+                                    "continuousWidth": 400,
+                                }
+                            },
+                            "encoding": {
+                                "tooltip": [
+                                    {"field": "values", "type": "quantitative"},
+                                    {"field": "fraction", "type": "quantitative"},
+                                ],
+                                "x": {"field": "values", "type": "nominal"},
+                                "y": {"field": "fraction", "type": "quantitative"},
+                            },
+                            "height": 400,
+                            "mark": "bar",
+                            "width": 250,
+                        },
+                        "header": {
+                            "schema": {"type": "StringValueType"},
+                            "value": {
+                                "params": {
+                                    "observed_value": {
+                                        "schema": {"type": "string"},
+                                        "value": "None "
+                                        "(-infinity, "
+                                        "infinity, "
+                                        "or "
+                                        "NaN)",
+                                    }
+                                },
+                                "template": "KL Divergence: $observed_value",
+                            },
+                        },
+                        "schema": {"type": "GraphType"},
+                    },
+                    "value_type": "GraphType",
+                }
+            ],
+            id="expect_column_kl_divergence_to_be_less_than",
+        ),
     ],
 )
-def test_inline_renderer_rendered_content_serialization(
+def test_inline_renderer_rendered_content_return_value(
     alice_columnar_table_single_batch_context: DataContext,
     expectation_configuration: ExpectationConfiguration,
     expected_serialized_expectation_configuration_rendered_atomic_content: dict,
@@ -348,12 +426,43 @@ def test_inline_renderer_rendered_content_serialization(
         rendered_atomic_content.to_json_dict()
         for rendered_atomic_content in expectation_configuration_rendered_atomic_content
     ]
+    if (
+        actual_serialized_expectation_configuration_rendered_atomic_content[0][
+            "value_type"
+        ]
+        == "GraphType"
+    ):
+        actual_serialized_expectation_configuration_rendered_atomic_content[0]["value"][
+            "graph"
+        ].pop("$schema")
+        actual_serialized_expectation_configuration_rendered_atomic_content[0]["value"][
+            "graph"
+        ].pop("data")
+        actual_serialized_expectation_configuration_rendered_atomic_content[0]["value"][
+            "graph"
+        ].pop("datasets")
+
     actual_serialized_expectation_validation_result_rendered_atomic_content: List[
         dict
     ] = [
         rendered_atomic_content.to_json_dict()
         for rendered_atomic_content in expectation_validation_result_rendered_atomic_content
     ]
+    if (
+        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
+            "value_type"
+        ]
+        == "GraphType"
+    ):
+        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
+            "value"
+        ]["graph"].pop("$schema")
+        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
+            "value"
+        ]["graph"].pop("data")
+        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
+            "value"
+        ]["graph"].pop("datasets")
 
     assert (
         actual_serialized_expectation_configuration_rendered_atomic_content

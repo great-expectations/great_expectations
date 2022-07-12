@@ -28,6 +28,7 @@ if __name__ == "test_script_module":
     test_df: pd.DataFrame = loaded_table.inserted_dataframe
 
     test_column_name: str = "passenger_count"
+
     if _is_dialect_athena(dialect):
         df_null: pd.DataFrame = test_df[test_df[test_column_name].isnull()]
         df_null[test_column_name] = df_null[test_column_name].apply(
@@ -40,6 +41,7 @@ if __name__ == "test_script_module":
     taxi_test_data: TaxiTestData = TaxiTestData(
         test_df=test_df,
         test_column_name=test_column_name,
+        test_column_names=None,
     )
     taxi_splitting_test_cases: TaxiSplittingTestCasesBase = (
         TaxiSplittingTestCasesColumnValue(taxi_test_data=taxi_test_data)

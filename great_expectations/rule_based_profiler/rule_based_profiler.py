@@ -24,7 +24,6 @@ from great_expectations.core.util import (
     determine_progress_bar_method_by_environment,
     nested_update,
 )
-from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -231,6 +230,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         domain_type_directives_list: Optional[
             List[RuntimeEnvironmentDomainTypeDirectives]
         ] = None,
+        comment: Optional[str] = None,
     ) -> RuleBasedProfilerResult:
         """
         Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
@@ -244,6 +244,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             reconciliation_directives: directives for how each rule component should be overwritten
             variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
             domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
+            comment: Optional comment for "citation" of "ExpectationSuite" returned as part of "RuleBasedProfilerResult"
 
         Returns:
             "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
@@ -319,7 +320,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 "citation_date": convert_to_json_serializable(
                     data=datetime.datetime.now(datetime.timezone.utc)
                 ),
-                "comment": "Suite created by Rule-Based Profiler with the configuration included.",
+                "comment": comment
+                if comment
+                else "Created by Rule-Based Profiler with the configuration included.",
                 "profiler_config": {
                     "name": self.name,
                     "config_version": self.config_version,
@@ -1028,7 +1031,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def run_profiler(
         data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: ProfilerStore,
+        profiler_store: "ProfilerStore",  # noqa: F821
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
@@ -1050,12 +1053,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_request=batch_request,
             recompute_existing_parameter_values=False,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
+            variables_directives_list=None,
+            domain_type_directives_list=None,
+            comment=None,
         )
 
     @staticmethod
     def run_profiler_on_data(
         data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: ProfilerStore,
+        profiler_store: "ProfilerStore",  # noqa: F821
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
@@ -1080,13 +1086,16 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_request=batch_request,
             recompute_existing_parameter_values=False,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
+            variables_directives_list=None,
+            domain_type_directives_list=None,
+            comment=None,
         )
 
     @staticmethod
     def add_profiler(
         config: RuleBasedProfilerConfig,
         data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: ProfilerStore,
+        profiler_store: "ProfilerStore",  # noqa: F821
         ge_cloud_id: Optional[str] = None,
     ) -> "RuleBasedProfiler":  # noqa: F821
         if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
@@ -1149,7 +1158,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def get_profiler(
         data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: ProfilerStore,
+        profiler_store: "ProfilerStore",  # noqa: F821
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> "RuleBasedProfiler":  # noqa: F821
@@ -1197,7 +1206,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def delete_profiler(
-        profiler_store: ProfilerStore,
+        profiler_store: "ProfilerStore",  # noqa: F821
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
@@ -1225,7 +1234,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def list_profilers(
-        profiler_store: ProfilerStore,
+        profiler_store: "ProfilerStore",  # noqa: F821
         ge_cloud_mode: bool,
     ) -> List[str]:
         if ge_cloud_mode:
