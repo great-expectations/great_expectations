@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import logging
 import math
+import os
 import random
 import re
 import string
@@ -260,6 +261,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._connection_string = connection_string
         self._url = url
         self._create_temp_table = create_temp_table
+        os.environ["SF_PARTNER"] = "great_expectations_oss"
 
         if engine is not None:
             if credentials is not None:
