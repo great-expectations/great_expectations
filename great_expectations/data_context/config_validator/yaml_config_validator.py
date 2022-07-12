@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import os
 import traceback
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -43,6 +43,12 @@ from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+
+try:
+    from typing import Literal
+except ImportError:
+    # Fallback for python < 3.8
+    from typing_extensions import Literal
 
 yaml = YAMLHandler()
 
