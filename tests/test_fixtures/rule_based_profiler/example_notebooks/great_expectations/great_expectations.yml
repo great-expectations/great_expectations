@@ -16,35 +16,30 @@ config_version: 3.0
 datasources:
   taxi_multi_batch_datasource:
     data_connectors:
-      2018_data:
-        default_regex:
-          group_names: [data_asset_name, month]
-          pattern: (yellow_tripdata_sample_2018)-(\d.*)\.csv
+      default_inferred_data_connector_name:
         base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
-        module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetFilesystemDataConnector
-    execution_engine:
-      module_name: great_expectations.execution_engine
-      class_name: PandasExecutionEngine
-    module_name: great_expectations.datasource
-    class_name: Datasource
-  taxi_data_all_years:
-    data_connectors:
-      inferred_data_connector_all_years:
+        module_name: great_expectations.datasource.data_connector
+        default_regex:
+          group_names:
+            - data_asset_name
+            - month
+          pattern: (yellow_tripdata_sample_2018)-(\d.*)\.csv
+      default_inferred_data_connector_name_all_years:
+        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
+        class_name: InferredAssetFilesystemDataConnector
+        module_name: great_expectations.datasource.data_connector
         default_regex:
           group_names:
             - data_asset_name
             - year
             - month
-          pattern: (yellow_tripdata_sample)_(2018|2019|2020)-(\d.*)\.csv
-        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
-        module_name: great_expectations.datasource.data_connector
-        class_name: InferredAssetFilesystemDataConnector
-    execution_engine:
-      module_name: great_expectations.execution_engine
-      class_name: PandasExecutionEngine
-    module_name: great_expectations.datasource
+          pattern: (yellow_tripdata_sample)_(\d.*)-(\d.*)\.csv
     class_name: Datasource
+    module_name: great_expectations.datasource
+    execution_engine:
+      class_name: PandasExecutionEngine
+      module_name: great_expectations.execution_engine
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
@@ -111,7 +106,7 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
-  usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
   data_context_id: 57cfa461-1170-4b73-8299-09a30833d51e
+  usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
   enabled: false
 notebooks:
