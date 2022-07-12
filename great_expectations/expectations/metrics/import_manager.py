@@ -14,9 +14,11 @@ except ImportError:
     sa = None
 
 try:
+    import sqlalchemy.engine as sqlalchemy_engine
     from sqlalchemy.engine import reflection
 except ImportError:
     logger.debug("No SqlAlchemy module available.")
+    sqlalchemy_engine = None
     reflection = None
 
 try:
@@ -40,7 +42,9 @@ except ImportError:
     Window = None
 
 try:
+    import pyspark.sql as pyspark_sql
     from pyspark.sql import SQLContext
 except ImportError:
     logger.debug("No spark SQLContext available.")
+    pyspark_sql = None
     SQLContext = None

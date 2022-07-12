@@ -518,7 +518,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute)
         """
-        batch_id = domain_kwargs.get("batch_id")
+        data_object: SqlAlchemyBatchData
+
+        batch_id: Optional[str] = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.active_batch_data:
@@ -1054,7 +1056,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         else:
-            split_clause = True
+            split_clause = None
+
+        ret_val: Union[Selectable, str]
 
         table_name: str = batch_spec["table_name"]
         sampling_method: Optional[str] = batch_spec.get("sampling_method")
@@ -1066,33 +1070,65 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 "sample_using_random",
             ]:
                 sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
-                return sampler_fn(
-                    execution_engine=self,
-                    batch_spec=batch_spec,
-                    where_clause=split_clause,
-                )
+                if split_clause is None:
+                    ret_val = sampler_fn(
+                        execution_engine=self,
+                        batch_spec=batch_spec,
+                    )
+                else:
+                    ret_val = sampler_fn(
+                        execution_engine=self,
+                        batch_spec=batch_spec,
+                        where_clause=split_clause,
+                    )
+
+                return ret_val
             else:
                 sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
-                return (
-                    sa.select("*")
-                    .select_from(
-                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                    )
-                    .where(
-                        sa.and_(
-                            split_clause,
+                if split_clause is None:
+                    ret_val = (
+                        sa.select("*")
+                        .select_from(
+                            sa.table(
+                                table_name, schema=batch_spec.get("schema_name", None)
+                            )
+                        )
+                        .where(
                             sampler_fn(batch_spec),
                         )
                     )
-                )
+                else:
+                    ret_val = (
+                        sa.select("*")
+                        .select_from(
+                            sa.table(
+                                table_name, schema=batch_spec.get("schema_name", None)
+                            )
+                        )
+                        .where(
+                            sa.and_(
+                                split_clause,
+                                sampler_fn(batch_spec),
+                            )
+                        )
+                    )
 
-        return (
-            sa.select("*")
-            .select_from(
+                return ret_val
+
+        if split_clause is None:
+            ret_val = sa.select("*").select_from(
                 sa.table(table_name, schema=batch_spec.get("schema_name", None))
             )
-            .where(split_clause)
-        )
+        else:
+            ret_val = (
+                sa.select("*")
+                .select_from(
+                    sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                )
+                .where(split_clause)
+            )
+
+        return ret_val
 
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
