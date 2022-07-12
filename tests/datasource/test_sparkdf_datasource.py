@@ -103,7 +103,7 @@ def test_force_reuse_spark_context(
     data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
 ):
     """
-    Ensure that using an external sparkSession can be used by specfying the
+    Ensure that an external sparkSession can be reused by specifying the
     force_reuse_spark_context argument.
     """
     if "SparkDFDataset" not in test_backends:
@@ -142,6 +142,7 @@ def test_force_reuse_spark_context(
     spark.stop()
 
 
+# WILL MARKER
 def test_spark_kwargs_are_passed_through(
     data_context_parameterized_expectation_suite,
     tmp_path_factory,
@@ -150,7 +151,7 @@ def test_spark_kwargs_are_passed_through(
 ):
     """
     Ensure that an external SparkSession is not stopped when the spark_config matches
-    the one specfied in the GE Context.
+    the one specified in the GE Context.
     """
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
@@ -169,7 +170,7 @@ def test_spark_kwargs_are_passed_through(
     assert datasource_config["spark_config"] == dict(
         spark_session.sparkContext.getConf().getAll()
     )
-    assert datasource_config["force_reuse_spark_context"] == False
+    assert datasource_config["force_reuse_spark_context"] is False
 
     dataset_name = "test_spark_dataset_2"
     data_context_parameterized_expectation_suite.add_datasource(
