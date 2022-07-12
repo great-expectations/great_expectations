@@ -603,6 +603,14 @@ def check_sql_engine_dialect(
 
 
 def validate_mostly(mostly: Optional[Union[int, float]]) -> None:
+    """Validate mostly parameter is a number between 0 and 1 or None.
+
+    Args:
+        mostly: The mostly parameter for an expectation configuration.
+
+    Raises:
+        AssertionError: Raised is mostly is defined and not a number between 0 and 1.
+    """
     if mostly is not None:
         # Even though we type mostly as an int or float, we can't typecheck this whole project and
         # need to verify the type.
