@@ -308,6 +308,7 @@ def get_expectation_impl(expectation_name: str):
             DeprecationWarning,
         )
         expectation_name = renamed[expectation_name]
+
     return _registered_expectations.get(expectation_name)
 
 
