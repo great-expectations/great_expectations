@@ -20,6 +20,7 @@ try:
 except ImportError:
     logger.debug("No SqlAlchemy module available.")
     reflection = None
+    sqlalchemy_engine_Engine = None
     sqlalchemy_engine_Row = None
 
 try:
