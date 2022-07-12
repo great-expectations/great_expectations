@@ -1197,7 +1197,8 @@ class AbstractDataContext(ABC):
                 # Do not keep configuration that could not be instantiated.
                 if save_changes:
                     self._datasource_store.delete_by_name(datasource_name=name)
-                del self.config.datasources[name]
+                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
+                self.config.datasources.pop(name, None)
                 raise e
 
         return datasource

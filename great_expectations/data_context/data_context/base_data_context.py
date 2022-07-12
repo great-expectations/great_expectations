@@ -2844,6 +2844,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 name=datasource_name,
                 config=config,
                 initialize=True,
+                save_changes=False,
             ),
         )
 
