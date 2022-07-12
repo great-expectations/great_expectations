@@ -6,9 +6,12 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql,
+    pyspark_sql_DataFrame,
+    pyspark_sql_Row,
+    pyspark_sql_SparkSession,
     sa,
-    sqlalchemy_engine,
+    sqlalchemy_engine_Engine,
+    sqlalchemy_engine_Row,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
@@ -31,7 +34,7 @@ class QueryColumn(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[sqlalchemy_engine.Row]:
+    ) -> List[sqlalchemy_engine_Row]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
@@ -58,8 +61,8 @@ class QueryColumn(QueryMetricProvider):
         else:
             query = query.format(col=column, active_batch=f"({selectable})")
 
-        engine: sa.engine.Engine = execution_engine.engine
-        result: List[sqlalchemy_engine.Row] = engine.execute(sa.text(query)).fetchall()
+        engine: sqlalchemy_engine_Engine = execution_engine.engine
+        result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
         return result
 
@@ -71,12 +74,12 @@ class QueryColumn(QueryMetricProvider):
         metric_value_kwargs: dict,
         metrics: Dict[str, Any],
         runtime_configuration: dict,
-    ) -> List[pyspark_sql.Row]:
+    ) -> List[pyspark_sql_Row]:
         query: Optional[str] = metric_value_kwargs.get(
             "query"
         ) or cls.default_kwarg_values.get("query")
 
-        df: pyspark_sql.DataFrame
+        df: pyspark_sql_DataFrame
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
@@ -85,7 +88,7 @@ class QueryColumn(QueryMetricProvider):
         column: str = metric_value_kwargs.get("column")
         query = query.format(col=column, active_batch="tmp_view")
 
-        engine: pyspark_sql.SparkSession = execution_engine.spark
-        result: List[pyspark_sql.Row] = engine.sql(query).collect()
+        engine: pyspark_sql_SparkSession = execution_engine.spark
+        result: List[pyspark_sql_Row] = engine.sql(query).collect()
 
         return result
