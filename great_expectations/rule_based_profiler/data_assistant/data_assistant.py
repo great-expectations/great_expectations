@@ -658,6 +658,9 @@ def run_profiler_on_data(
     rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
         rule.name: rule.to_json_dict() for rule in rules
     }
+    comment: str = f"""Created by effective Rule-Based Profiler of {data_assistant.__class__.__name__} with the \
+configuration included.
+"""
     rule_based_profiler_result: RuleBasedProfilerResult = profiler.run(
         variables=variables,
         rules=rules_configs,
@@ -667,6 +670,7 @@ def run_profiler_on_data(
         reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         variables_directives_list=variables_directives_list,
         domain_type_directives_list=domain_type_directives_list,
+        comment=comment,
     )
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
