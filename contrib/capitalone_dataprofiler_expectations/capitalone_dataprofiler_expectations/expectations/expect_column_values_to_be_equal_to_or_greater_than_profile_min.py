@@ -111,7 +111,9 @@ class ExpectColumnValuesToBeEqualToOrGreaterThanProfileMin(ColumnMapExpectation)
 
     profileObj = dp.Profiler(df)
     profileReport = profileObj.report(report_options={"output_format": "compact"})
-    profileReport["global_stats"]["profile_schema"] = dict(profileReport["global_stats"]["profile_schema"])
+    profileReport["global_stats"]["profile_schema"] = dict(
+        profileReport["global_stats"]["profile_schema"]
+    )
 
     examples = [
         {
