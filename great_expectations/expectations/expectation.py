@@ -179,6 +179,7 @@ class Expectation(metaclass=MetaExpectation):
     ) -> None:
         if configuration is not None:
             self.validate_configuration(configuration)
+
         self._configuration = configuration
 
     @classmethod
