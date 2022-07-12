@@ -1,0 +1,26 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import EnsureLatestPip from "./_ensure_latest_pip.mdx"
+import EnsureLatestAnaconda from "./_ensure_latest_anaconda.mdx"
+
+The simplest way to install Great Expectations is through a package management tool.  Pip and Anaconda are the recommended tools for this purpose; you can use either of the two to install Great Expectations.
+
+<Tabs
+  groupId="pip-or-conda"
+  defaultValue='pip'
+  values={[
+  {label: 'pip', value:'pip'},
+  {label: 'conda', value:'conda'},
+  ]}>
+<TabItem value="pip">
+
+<EnsureLatestPip />
+
+</TabItem>
+<TabItem value="conda">
+
+<EnsureLatestAnaconda />
+
+</TabItem>
+</Tabs>
+

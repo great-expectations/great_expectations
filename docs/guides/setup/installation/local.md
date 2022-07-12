@@ -4,6 +4,7 @@ title: How to install Great Expectations locally
 
 import Preface from './components_local/_preface.mdx'
 import CheckPythonVersion from './components_local/_check_python_version.mdx'
+import ChooseInstallationMethod from './components_local/_choose_installation_method.mdx'
 import CreateAVirtualEnvironment from './components_local/_create_a_virtual_environment.mdx'
 import InstallGreatExpectations from './components_local/_install_great_expectations.mdx'
 import VerifyGeInstallSucceeded from './components_local/_verify_ge_install_succeeded.mdx'
@@ -16,6 +17,9 @@ import InstallCongratulations from '/docs/guides/setup/components/install_congra
 
 ### 1. Check Python version
 <CheckPythonVersion />
+
+### 2. Choose installation method
+<ChooseInstallationMethod />
 
 ### 2. Create a virtual environment
 <CreateAVirtualEnvironment />
