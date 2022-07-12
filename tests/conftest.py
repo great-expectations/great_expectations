@@ -864,6 +864,7 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
     spark_session,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
     tmp_path_factory,
+    test_backends,
     monkeypatch,
 ):
     context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
