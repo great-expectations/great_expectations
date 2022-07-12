@@ -800,9 +800,8 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 
 
 @pytest.fixture
-def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
     sa,
-    spark_session,
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
     tmp_path_factory,
     test_backends,
@@ -856,6 +855,19 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
             "my_sqlite_db_datasource", **yaml.load(datasource_config)
         )
 
+    return context
+
+
+@pytest.fixture
+def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
+    sa,
+    spark_session,
+    titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    tmp_path_factory,
+    test_backends,
+    monkeypatch,
+):
+    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     return context
 
 
@@ -3115,7 +3127,7 @@ def alice_columnar_table_single_batch(empty_data_context):
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
 
     expected_expectation_suite.add_citation(
-        comment="Suite created by Rule-Based Profiler with the configuration included.",
+        comment="Created by Rule-Based Profiler with the configuration included.",
         profiler_config=expected_effective_profiler_config,
     )
 
@@ -4465,7 +4477,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     }
 
     expected_expectation_suite_oneshot_estimator.add_citation(
-        comment="Suite created by Rule-Based Profiler with the configuration included.",
+        comment="Created by Rule-Based Profiler with the configuration included.",
         profiler_config=expected_effective_profiler_config,
     )
 
