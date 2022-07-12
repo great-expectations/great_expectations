@@ -207,8 +207,6 @@
                     "min_value": 0,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "row_condition": null,
-                    "condition_parser": null,
                     "strict_min": null,
                     "strict_max": null
                   },
