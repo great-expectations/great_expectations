@@ -2109,7 +2109,7 @@ def quentin_expected_expectation_suite(
                     "profiler_config": quentin_expected_rule_based_profiler_configuration(
                         name=name
                     ).to_json_dict(),
-                    "comment": "Suite created by Rule-Based Profiler with the configuration included.",
+                    "comment": "Created by effective Rule-Based Profiler of VolumeDataAssistant with the configuration included.\n",
                 }
             ]
         }
@@ -2121,8 +2121,27 @@ def quentin_expected_expectation_suite(
     return _expectation_suite
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def bobby_volume_data_assistant_result(
+    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+) -> VolumeDataAssistantResult:
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request
+    )
+
+    return cast(VolumeDataAssistantResult, data_assistant_result)
+
+
+@pytest.fixture
+def bobby_volume_data_assistant_result_usage_stats_enabled(
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> VolumeDataAssistantResult:
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -2376,12 +2395,14 @@ def test_volume_data_assistant_result_serialization(
 )
 def test_volume_data_assistant_result_get_expectation_suite(
     mock_emit,
-    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
+    bobby_volume_data_assistant_result_usage_stats_enabled: VolumeDataAssistantResult,
 ):
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite = bobby_volume_data_assistant_result.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
+    suite: ExpectationSuite = (
+        bobby_volume_data_assistant_result_usage_stats_enabled.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
     )
 
     assert suite is not None and len(suite.expectations) > 0
@@ -2823,9 +2844,9 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
 
 
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = (
         "data_assistant_result.plot_metrics(this_is_not_a_real_parameter=True)"
@@ -2847,9 +2868,9 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
 
 
 def test_volume_data_assistant_plot_descriptive_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = "data_assistant_result.plot_metrics()"
 
@@ -2867,9 +2888,9 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution(
 
 
 def test_volume_data_assistant_plot_prescriptive_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = "data_assistant_result.plot_expectations_and_metrics()"
 
@@ -2887,9 +2908,9 @@ def test_volume_data_assistant_plot_prescriptive_notebook_execution(
 
 
 def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     theme = {"font": "Comic Sans MS"}
 
@@ -2909,9 +2930,9 @@ def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
 
 
 def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     theme = {"font": "Comic Sans MS"}
 
@@ -3157,9 +3178,9 @@ def test_volume_data_assistant_plot_return_tooltip(
 
 
 def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = "data_assistant_result.plot_metrics(sequential=False)"
 
@@ -3177,9 +3198,9 @@ def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_
 
 
 def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     new_cell: str = (
         "data_assistant_result.plot_expectations_and_metrics(sequential=False)"

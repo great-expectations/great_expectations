@@ -108,6 +108,7 @@ class SqlAlchemyBatchData(BatchData):
             raise ValueError(
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
             )
+
         dialect: GESqlDialect = GESqlDialect(engine.dialect.name.lower())
         if table_name:
             # Suggestion: pull this block out as its own _function
@@ -135,6 +136,7 @@ class SqlAlchemyBatchData(BatchData):
             # mssql expects all temporary table names to have a prefix '#'
             if dialect == GESqlDialect.MSSQL:
                 generated_table_name = f"#{generated_table_name}"
+
             if selectable is not None:
                 if dialect in [GESqlDialect.ORACLE, GESqlDialect.MSSQL] and isinstance(
                     selectable, str
@@ -147,6 +149,7 @@ class SqlAlchemyBatchData(BatchData):
                         dialect=self.sql_engine_dialect,
                         compile_kwargs={"literal_binds": True},
                     )
+
             self._create_temporary_table(
                 temp_table_name=generated_table_name,
                 query=query,

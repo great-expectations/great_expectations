@@ -268,7 +268,7 @@ stages:
           postgres: postgres
 
         variables:
-          GE_pytest_opts: ''
+          GE_pytest_opts: '--postgresql --spark'
 
         strategy:
           matrix:
