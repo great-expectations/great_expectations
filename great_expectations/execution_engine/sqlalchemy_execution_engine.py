@@ -291,14 +291,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
 
         # these are two backends where temp_table_creation is not supported we set the default value to False.
-        if self.engine.dialect.name.lower() in [
+        if self.dialect_name in [
             "trino",
             "awsathena",  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
         ]:
             self._create_temp_table = False
 
         # Get the dialect **for purposes of identifying types**
-        if self.engine.dialect.name.lower() in [
+        if self.dialect_name in [
             "postgresql",
             "mysql",
             "sqlite",
@@ -310,24 +310,24 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
-        elif self.engine.dialect.name.lower() == "snowflake":
+        elif self.dialect_name == "snowflake":
             self.dialect_module = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
-        elif self.engine.dialect.name.lower() == "dremio":
+        elif self.dialect_name == "dremio":
             # WARNING: Dremio Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_dremio.pyodbc"
             )
-        elif self.engine.dialect.name.lower() == "redshift":
+        elif self.dialect_name == "redshift":
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
             )
-        elif self.engine.dialect.name.lower() == "bigquery":
+        elif self.dialect_name == "bigquery":
             self.dialect_module = import_library_module(
                 module_name=_BIGQUERY_MODULE_NAME
             )
-        elif self.engine.dialect.name.lower() == "teradatasql":
+        elif self.dialect_name == "teradatasql":
             # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
@@ -340,7 +340,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
         # Connection can be handled separately.
         self._engine_backup = None
-        if self.engine and self.engine.dialect.name.lower() in [
+        if self.engine and self.dialect_name in [
             "sqlite",
             "mssql",
             "snowflake",
@@ -392,9 +392,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-        self._data_splitter = SqlAlchemyDataSplitter(
-            dialect=self.engine.dialect.name.lower()
-        )
+        self._data_splitter = SqlAlchemyDataSplitter(dialect=self.dialect_name)
         self._data_sampler = SqlAlchemyDataSampler()
 
     @property
@@ -518,7 +516,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute)
         """
-        batch_id = domain_kwargs.get("batch_id")
+        data_object: SqlAlchemyBatchData
+
+        batch_id: Optional[str] = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.active_batch_data:
@@ -540,6 +540,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
             if domain_kwargs["table"] != data_object.selectable.name:
+                # noinspection PyProtectedMember
                 selectable = sa.Table(
                     domain_kwargs["table"],
                     sa.MetaData(),
@@ -1006,7 +1007,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             List of row results.
         """
-        if self.engine.dialect.name.lower() == "awsathena":
+        if self.dialect_name == "awsathena":
             # Note: Athena does not support casting to string, only to varchar
             # but sqlalchemy currently generates a query as `CAST(colname AS STRING)` instead
             # of `CAST(colname AS VARCHAR)` with other dialects.
@@ -1054,7 +1055,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         else:
-            split_clause = True
+            if self.dialect_name == "sqlite":
+                split_clause = sa.text("1 = 1")
+            else:
+                split_clause = sa.true()
 
         table_name: str = batch_spec["table_name"]
         sampling_method: Optional[str] = batch_spec.get("sampling_method")
@@ -1148,15 +1152,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            if self.engine.dialect.name.lower() == "oracle":
-                selectable: str = self._build_selectable_from_batch_spec(
-                    batch_spec=batch_spec
-                )
-            else:
-                selectable: Selectable = self._build_selectable_from_batch_spec(
-                    batch_spec=batch_spec
-                )
-
+            selectable: Union[Selectable, str] = self._build_selectable_from_batch_spec(
+                batch_spec=batch_spec
+            )
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,
