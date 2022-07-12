@@ -8,7 +8,6 @@ This guide will help you add an Athena instance (or a database) as a <TechnicalT
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
   - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
   - Installed the pyathena package for the Athena SQLAlchemy dialect (``pip install "pyathena[SQLAlchemy]"``)
 
