@@ -33,7 +33,6 @@ class QueryTable(QueryMetricProvider):
             "query"
         ) or cls.default_kwarg_values.get("query")
 
-        engine: sa.engine.Engine = execution_engine.engine
         selectable: Union[sa.sql.Selectable, str]
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
@@ -54,6 +53,7 @@ class QueryTable(QueryMetricProvider):
         else:
             query = query.format(active_batch=f"({selectable})")
 
+        engine: sa.engine.Engine = execution_engine.engine
         result: List[sqlalchemy_engine.Row] = engine.execute(sa.text(query)).fetchall()
 
         return result
