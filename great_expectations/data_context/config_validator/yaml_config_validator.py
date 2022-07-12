@@ -1,3 +1,14 @@
+"""Config Validator for YAML based configs.
+
+This validator evaluates YAML configurations of core Great Expectations components to give feedback on
+ whether they have been configured correctly. It is linked to a Data Context since it does update the
+ configuration of the Data Context in some cases if the configuration is valid.
+
+ Typical usage example:
+ import great_expectations as ge
+ context = ge.get_context()
+ context.test_yaml_config(my_config)
+"""
 from __future__ import annotations
 
 import os
@@ -37,6 +48,13 @@ yaml = YAMLHandler()
 
 
 class YamlConfigValidator:
+    """Helper class for validating YAML configurations of Great Expectations components.
+
+    Attributes:
+        data_context: The subclass of AbstractDataContext used to configure your Great
+            Expectations deployment. Stores configuration and is modified by test_yaml_config.
+    """
+
     TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
         "ExpectationsStore",
         "ValidationsStore",
@@ -88,6 +106,7 @@ class YamlConfigValidator:
         self,
         data_context: AbstractDataContext,
     ):
+        """Init YamlConfigValidator with a Data Context"""
         self._data_context = data_context
 
     @property
