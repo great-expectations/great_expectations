@@ -1,6 +1,8 @@
 import logging
-from typing import Mapping, Optional, Union
+from typing import List, Mapping, Optional, Union
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -13,6 +15,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     GeCloudConfig,
 )
+from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 
 logger = logging.getLogger(__name__)
@@ -27,8 +30,8 @@ class CloudDataContext(AbstractDataContext):
         self,
         project_config: Union[DataContextConfig, Mapping],
         context_root_dir: str,
-        runtime_environment: dict,
         ge_cloud_config: GeCloudConfig,
+        runtime_environment: Optional[dict] = None,
     ) -> None:
         """
         CloudDataContext constructor
@@ -49,8 +52,41 @@ class CloudDataContext(AbstractDataContext):
             runtime_environment=runtime_environment,
         )
 
+    def list_expectation_suite_names(self) -> List[str]:
+        """
+        Lists the available expectation suite names. If in ge_cloud_mode, a list of
+        GE Cloud ids is returned instead.
+        """
+        return [suite_key.ge_cloud_id for suite_key in self.list_expectation_suites()]
+
+    @property
+    def ge_cloud_config(self) -> Optional[GeCloudConfig]:
+        return self._ge_cloud_config
+
+    @property
+    def ge_cloud_mode(self) -> bool:
+        return self._ge_cloud_mode
+
     def _init_variables(self) -> CloudDataContextVariables:
         raise NotImplementedError
+
+    def _construct_data_context_id(self) -> str:
+        """
+        Choose the id of the currently-configured expectations store, if available and a persistent store.
+        If not, it should choose the id stored in DataContextConfig.
+        Returns:
+            UUID to use as the data_context_id
+        """
+
+        # if in ge_cloud_mode, use ge_cloud_organization_id
+        return self.ge_cloud_config.organization_id
+
+    def _save_project_config(self) -> None:
+        """Save the current project to disk."""
+        logger.debug(
+            "ge_cloud_mode detected - skipping DataContext._save_project_config"
+        )
+        return None
 
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
@@ -89,6 +125,37 @@ class CloudDataContext(AbstractDataContext):
                 config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
             )
         )
+
+    def save_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_suite_name: Optional[str] = None,
+        overwrite_existing: bool = True,
+        ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ) -> None:
+        """Save the provided expectation suite into the DataContext.
+
+        Args:
+            expectation_suite: the suite to save
+            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
+                be read from the suite
+        Returns:
+            None
+        """
+        key: GeCloudIdentifier = GeCloudIdentifier(
+            resource_type="expectation_suite",
+            ge_cloud_id=ge_cloud_id
+            if ge_cloud_id is not None
+            else str(expectation_suite.ge_cloud_id),
+        )
+        if self.expectations_store.has_key(key) and not overwrite_existing:
+            raise ge_exceptions.DataContextError(
+                f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. "
+                f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
+            )
+        self._evaluation_parameter_dependencies_compiled = False
+        self.expectations_store.set(key, expectation_suite, **kwargs)
 
     @property
     def root_directory(self) -> Optional[str]:
