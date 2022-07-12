@@ -166,9 +166,12 @@ def test_spark_kwargs_are_passed_through(
     datasource_config = data_context_parameterized_expectation_suite.get_datasource(
         dataset_name
     ).config
-    assert datasource_config["spark_config"] == dict(
-        spark_session.sparkContext.getConf().getAll()
-    )
+
+    actual_spark_config = datasource_config["spark_config"]
+    expected_spark_config = dict(spark_session.sparkContext.getConf().getAll())
+    for opt in actual_spark_config:
+        assert opt in expected_spark_config
+
     assert datasource_config["force_reuse_spark_context"] == False
 
     dataset_name = "test_spark_dataset_2"
