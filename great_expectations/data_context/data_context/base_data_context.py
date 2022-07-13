@@ -621,7 +621,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             skip_if_substitution_variable=skip_if_substitution_variable,
         )
         config_variables[config_variable_name] = value
-        config_variables_filepath = self.variables.config_variables_file_path
+        # Required to call _variables instead of variables property because we don't want to trigger substitutions
+        config = self._variables.config
+        config_variables_filepath = config.config_variables_file_path
         if not config_variables_filepath:
             raise ge_exceptions.InvalidConfigError(
                 "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
