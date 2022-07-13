@@ -13,6 +13,8 @@ from great_expectations.validator.validator import (
     Validator,
 )
 
+# a comment
+
 sqlite_runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     datasource_name="my_sqlite_db_datasource",
     data_connector_name="default_runtime_data_connector_name",
