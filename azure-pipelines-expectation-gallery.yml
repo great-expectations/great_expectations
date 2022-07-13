@@ -80,7 +80,7 @@ stages:
       - job: build_gallery
         variables:
           python.version: '3.7'
-          GE_pytest_pip_opts: '"pyspark<3.0.0" "cookiecutter==1.7.3" "google-cloud-bigquery-storage" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+          GE_pytest_pip_opts: '"cookiecutter==1.7.3" "google-cloud-bigquery-storage" --requirement requirements-dev.txt --constraint constraints-dev.txt'
           GE_pytest_opts: ''
 
         services:

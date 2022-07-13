@@ -275,7 +275,7 @@ stages:
             Python37:
               python.version: '3.7'
               pandas.version: 'latest'
-              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python38:
               python.version: '3.8'
               pandas.version: 'latest'
