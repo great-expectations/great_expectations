@@ -6,7 +6,7 @@ import pytest
 from great_expectations.data_context.util import file_relative_path
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def titanic_df() -> pd.DataFrame:
     path = file_relative_path(
         __file__,
