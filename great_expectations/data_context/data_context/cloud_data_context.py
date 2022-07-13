@@ -75,7 +75,6 @@ class CloudDataContext(AbstractDataContext):
 
         variables: CloudDataContextVariables = CloudDataContextVariables(
             config=self._project_config,
-            substitutions={},
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_organization_id=ge_cloud_organization_id,
             ge_cloud_access_token=ge_cloud_access_token,
@@ -110,7 +109,7 @@ class CloudDataContext(AbstractDataContext):
         be optional in GE Cloud mode).
         """
         if not config:
-            config = self.config
+            config = self._project_config
 
         substitutions: dict = self._determine_substitutions()
 

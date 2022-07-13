@@ -115,4 +115,4 @@ class FileDataContext(AbstractDataContext):
         """Helper method to make save_project_config more explicit"""
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
         with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
+            self.variables.config.to_yaml(outfile)

@@ -678,9 +678,11 @@ def test_site_builder_usage_statistics_disabled(
     site_builder_data_context_with_html_store_titanic_random,
 ):
     context = site_builder_data_context_with_html_store_titanic_random
-    context.variables.anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-        enabled=False,
-        data_context_id="f43d4897-385f-4366-82b0-1a8eda2bf79c",
+    context.variables.config.anonymous_usage_statistics = (
+        AnonymizedUsageStatisticsConfig(
+            enabled=False,
+            data_context_id="f43d4897-385f-4366-82b0-1a8eda2bf79c",
+        )
     )
     data_context_id = context.anonymous_usage_statistics["data_context_id"]
 

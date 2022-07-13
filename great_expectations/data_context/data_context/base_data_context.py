@@ -319,12 +319,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         if (
             "validation_operators" in self.get_config().commented_map
-            and self.config.validation_operators
+            and self._project_config.validation_operators
         ):
             for (
                 validation_operator_name,
                 validation_operator_config,
-            ) in self.config.validation_operators.items():
+            ) in self._project_config.validation_operators.items():
                 self.add_validation_operator(
                     validation_operator_name,
                     validation_operator_config,
@@ -332,6 +332,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # NOTE: <DataContextRefactor>  This will be migrated to AbstractDataContext, along with associated methods
         # and properties.
         self._assistants = DataAssistantDispatcher(data_context=self)
+        self.variables.config = self._project_config
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -387,7 +388,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             store (Store)
         """
 
-        self.config["stores"][store_name] = store_config
+        self._variables.config.stores[store_name] = store_config
         return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
@@ -403,12 +404,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             validation_operator (ValidationOperator)
         """
 
-        self.config["validation_operators"][
+        self.variables.config.validation_operators[
             validation_operator_name
         ] = validation_operator_config
-        config = self.project_config_with_variables_substituted.validation_operators[
-            validation_operator_name
-        ]
+        config = self.variables.validation_operators[validation_operator_name]
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
             config=config,
@@ -1446,7 +1445,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 datasource_name=datasource_name, datasource_config=datasource_config
             )
         else:
-            self.config.datasources[datasource_name] = datasource_config
+            self.variables.config.datasources[datasource_name] = datasource_config
             self._cached_datasources[datasource_name] = datasource_config
 
     def add_batch_kwargs_generator(
@@ -2817,7 +2816,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ),
         )
         store_name = instantiated_class.store_name or store_name
-        self.config["stores"][store_name] = config
+        self.variables.config.stores[store_name] = config
 
         anonymizer = Anonymizer(self.data_context_id)
         usage_stats_event_payload = anonymizer.anonymize(

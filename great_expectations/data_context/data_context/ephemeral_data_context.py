@@ -48,7 +48,6 @@ class EphemeralDataContext(AbstractDataContext):
     def _init_variables(self) -> EphemeralDataContextVariables:
         variables: EphemeralDataContextVariables = EphemeralDataContextVariables(
             config=self._project_config,
-            substitutions={},
         )
         return variables
 

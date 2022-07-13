@@ -366,7 +366,8 @@ class DataContext(BaseDataContext):
         project_config_dict = dataContextConfigSchema.dump(project_config)
         if (
             project_config.anonymous_usage_statistics.explicit_id is False
-            or project_config_dict != dataContextConfigSchema.dump(self.config)
+            or project_config_dict
+            != dataContextConfigSchema.dump(self.variables.config)
         ):
             self._save_project_config()
 

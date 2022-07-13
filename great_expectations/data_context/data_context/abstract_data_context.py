@@ -158,10 +158,12 @@ class AbstractDataContext(ABC):
         self._data_context_id = self._construct_data_context_id()
 
         # Override the project_config data_context_id if an expectations_store was already set up
-        self._variables.config.anonymous_usage_statistics.data_context_id = (
+        self._project_config.anonymous_usage_statistics.data_context_id = (
             self._data_context_id
         )
-        self._initialize_usage_statistics(self.variables.anonymous_usage_statistics)
+        self._initialize_usage_statistics(
+            self.project_config_with_variables_substituted.anonymous_usage_statistics
+        )
 
         # Store cached datasources but don't init them
         self._cached_datasources = {}
@@ -171,6 +173,8 @@ class AbstractDataContext(ABC):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
+        self.variables.config = self._project_config
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
