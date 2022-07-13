@@ -23,7 +23,7 @@ class DataProfilerProfileReport(DataProfilerProfileMetricProvider):
         profile_path = metric_value_kwargs["profile_path"]
         try:
             profile = dp.Profiler.load(profile_path)
-            profile_report = profile.report(report_options={"output_format": "pretty"})
+            profile_report = profile.report(report_options={"output_format": "serializable"})
             profile_report["global_stats"]["profile_schema"] = dict(
                 profile_report["global_stats"]["profile_schema"]
             )

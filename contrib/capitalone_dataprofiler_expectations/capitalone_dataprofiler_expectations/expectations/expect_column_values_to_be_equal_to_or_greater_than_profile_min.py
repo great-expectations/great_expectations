@@ -102,7 +102,7 @@ class ExpectColumnValuesToBeEqualToOrGreaterThanProfileMin(ColumnMapExpectation)
     profiler_opts = dp.ProfilerOptions()
     profiler_opts.structured_options.multiprocess.is_enabled = False
     profileObj = dp.Profiler(df, options=profiler_opts)
-    profileReport = profileObj.report(report_options={"output_format": "compact"})
+    profileReport = profileObj.report(report_options={"output_format": "serializable"})
     profileReport["global_stats"]["profile_schema"] = dict(
         profileReport["global_stats"]["profile_schema"]
     )
