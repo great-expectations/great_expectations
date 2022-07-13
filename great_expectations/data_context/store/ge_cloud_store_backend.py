@@ -28,6 +28,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         "expectation_suite": "suite",
         "rendered_data_doc": "rendered_data_doc",
         "data_context_variables": "data_context_variables",
+        "profiler": "profiler_config",
     }
 
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {

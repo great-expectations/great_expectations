@@ -2445,7 +2445,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
         ge_cloud_id: Optional[str] = None,
-    ):
+    ) -> RuleBasedProfiler:
         config_data = {
             "name": name,
             "config_version": config_version,
