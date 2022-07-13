@@ -101,7 +101,6 @@ class FileDataContext(AbstractDataContext):
     def _init_variables(self) -> FileDataContextVariables:
         variables: FileDataContextVariables = FileDataContextVariables(
             config=self._project_config,
-            substitutions={},
             data_context=self,
         )
         return variables

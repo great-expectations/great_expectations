@@ -319,12 +319,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         if (
             "validation_operators" in self.get_config().commented_map
-            and self._project_config.validation_operators
+            and self.config.validation_operators
         ):
             for (
                 validation_operator_name,
                 validation_operator_config,
-            ) in self._project_config.validation_operators.items():
+            ) in self.config.validation_operators.items():
                 self.add_validation_operator(
                     validation_operator_name,
                     validation_operator_config,
@@ -374,7 +374,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
         with open(config_filepath, "w") as outfile:
-            self.variables.config.to_yaml(outfile)
+            self.config.to_yaml(outfile)
 
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -387,7 +387,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             store (Store)
         """
 
-        self.variables.config.stores[store_name] = store_config
+        self.config.stores[store_name] = store_config
         return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
@@ -403,7 +403,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             validation_operator (ValidationOperator)
         """
 
-        self.variables.config.validation_operators[
+        self.config.validation_operators[
             validation_operator_name
         ] = validation_operator_config
         config = self.variables.validation_operators[validation_operator_name]
@@ -621,9 +621,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             skip_if_substitution_variable=skip_if_substitution_variable,
         )
         config_variables[config_variable_name] = value
-        config_variables_filepath = cast(
-            DataContextConfig, self.get_config()
-        ).config_variables_file_path
+        config_variables_filepath = self.variables.config_variables_file_path
         if not config_variables_filepath:
             raise ge_exceptions.InvalidConfigError(
                 "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
@@ -1444,7 +1442,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 datasource_name=datasource_name, datasource_config=datasource_config
             )
         else:
-            self.variables.config.datasources[datasource_name] = datasource_config
+            self.config.datasources[datasource_name] = datasource_config
             self._cached_datasources[datasource_name] = datasource_config
 
     def add_batch_kwargs_generator(
@@ -2815,7 +2813,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ),
         )
         store_name = instantiated_class.store_name or store_name
-        self.variables.config.stores[store_name] = config
+        self.config.stores[store_name] = config
 
         anonymizer = Anonymizer(self.data_context_id)
         usage_stats_event_payload = anonymizer.anonymize(
