@@ -2,13 +2,13 @@ import copy
 from typing import Any, List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
-)
-from great_expectations.data_context.types.data_context_variables import (
-    DataContextVariableSchema,
 )
 from great_expectations.util import filter_properties_dict
 
@@ -48,7 +48,7 @@ class DatasourceStore(Store):
         """
         See parent 'Store.list_keys()' for more information
         """
-        from great_expectations.data_context.types.data_context_variables import (
+        from great_expectations.data_context.data_context_variables import (
             DataContextVariableSchema,
         )
 
@@ -136,13 +136,37 @@ class DatasourceStore(Store):
         """Persists a DatasourceConfig in the store by a given name.
 
         Args:
-            datasource_name: The name of the Datasource to retrieve.
+            datasource_name: The name of the Datasource to update.
             datasource_config: The config object to persist using the StoreBackend.
         """
         datasource_key: DataContextVariableKey = self._determine_datasource_key(
             datasource_name=datasource_name
         )
         self.set(datasource_key, datasource_config)
+
+    def update_by_name(
+        self, datasource_name: str, datasource_config: DatasourceConfig
+    ) -> None:
+        """Updates a DatasourceConfig that already exists in the store.
+
+        Args:
+            datasource_name: The name of the Datasource to retrieve.
+            datasource_config: The config object to persist using the StoreBackend.
+
+        Raises:
+            ValueError if a DatasourceConfig is not found.
+        """
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(
+            datasource_name=datasource_name
+        )
+        if not self.has_key(datasource_key):
+            raise ValueError(
+                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
+            )
+
+        self.set_by_name(
+            datasource_name=datasource_name, datasource_config=datasource_config
+        )
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
         datasource_key: DataContextVariableKey = DataContextVariableKey(

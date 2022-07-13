@@ -103,7 +103,7 @@ Note: Splitter methods can be specified with or without a preceding underscore.
 | `split_on_mod_integer`            | `table_name='table', column_name='col', mod=<int>`                       | Rows where value of column_name divided (using modular division) by the given mod are same                                                                                                                 |
 | `split_on_multi_column_values`    | `table_name='table', column_names='<list[col]>'`                         | Rows where values of column_names are same                                                                                                                                                                 |
 | `split_on_converted_datetime`     | `table_name='table', column_name='col', date_format_string=<'%Y-%m-%d'>` | Rows where value of column_name converted to datetime using the given date_format_string are same                                                                                                          |
-| `split_on_hashed_column`          | `column_name='col'`                                                      | Rows where value of column_name hashed (using "md5" hash function) are same (experimental)                                                                                                                 |
+| `split_on_hashed_column`          | `column_name='col', hash_digits=<int>`                                   | Rows where value of column_name hashed (using "md5" hash function) and retaining the stated number of hash_digits are same (experimental)     |
     
 
 
