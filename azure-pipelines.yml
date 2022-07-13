@@ -65,7 +65,6 @@ stages:
 
     jobs:
       - job: comprehensive
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
         timeoutInMinutes: 120
 
         services:
