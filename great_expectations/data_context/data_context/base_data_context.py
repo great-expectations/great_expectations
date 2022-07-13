@@ -387,7 +387,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             store (Store)
         """
 
-        self._variables.config.stores[store_name] = store_config
+        self.variables.config.stores[store_name] = store_config
         return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
@@ -1471,7 +1471,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
-        self._variables.config = project_config
+        self.variables.config = project_config
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
