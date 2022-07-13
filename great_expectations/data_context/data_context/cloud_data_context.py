@@ -109,7 +109,7 @@ class CloudDataContext(AbstractDataContext):
         be optional in GE Cloud mode).
         """
         if not config:
-            config = self._project_config
+            config = self.config
 
         substitutions: dict = self._determine_substitutions()
 
