@@ -39,7 +39,6 @@ from great_expectations.core.expectation_suite import (
     expectationSuiteSchema,
 )
 from great_expectations.exceptions import (
-    GreatExpectationsError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
