@@ -209,6 +209,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         ge_cloud_id: str = key[1]
 
         # if key has ge_cloud_id, perform _update instead
+        # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
+        # and always necessitate a PUT.
         if (
             ge_cloud_id
             or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES
