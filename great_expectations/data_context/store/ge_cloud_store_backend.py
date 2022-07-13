@@ -26,6 +26,7 @@ class GeCloudRESTResource(str, Enum):
     EXPECTATION = "expectation"
     EXPECTATION_SUITE = "expectation_suite"
     EXPECTATION_VALIDATION_RESULT = "expectation_validation_result"
+    PROFILER = "profiler"
     RENDERED_DATA_DOC = "rendered_data_doc"
     SUITE_VALIDATION_RESULT = "suite_validation_result"
 
@@ -37,6 +38,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GeCloudRESTResource.DATA_CONTEXT: "data_context_config",
         GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
         GeCloudRESTResource.EXPECTATION_SUITE: "suite",
+        GeCloudRESTResource.PROFILER: "profiler",
         GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
         GeCloudRESTResource.SUITE_VALIDATION_RESULT: "result",
     }
@@ -61,6 +63,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             GeCloudRESTResource.EXPECTATION: "expectations",
             GeCloudRESTResource.EXPECTATION_SUITE: "expectation_suites",
             GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "expectation_validation_results",
+            GeCloudRESTResource.PROFILER: "profilers",
             GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
             GeCloudRESTResource.SUITE_VALIDATION_RESULT: "suite_validation_results",
         }
