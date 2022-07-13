@@ -332,7 +332,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # NOTE: <DataContextRefactor>  This will be migrated to AbstractDataContext, along with associated methods
         # and properties.
         self._assistants = DataAssistantDispatcher(data_context=self)
-        self.variables.config = self._project_config
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
