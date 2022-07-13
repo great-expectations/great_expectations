@@ -156,10 +156,15 @@ def test_spark_kwargs_are_passed_through(
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
     dataset_name = "test_spark_dataset"
+
+    temp = dict(spark_session.sparkContext.getConf().getAll())
+    # temp['spark.sql.warehouse.dir'] = 'file:/home/vsts/work/1/s/spark-warehouse'
+    # temp['spark.sql.warehouse.dir'] = 'file:/Users/work/Development/great_expectations/tests/datasource/spark-warehouse'
+    print(f"before creating Datasource: {temp}")
     data_context_parameterized_expectation_suite.add_datasource(
         dataset_name,
         class_name="SparkDFDatasource",
-        spark_config=dict(spark_session.sparkContext.getConf().getAll()),
+        spark_config=temp,
         force_reuse_spark_context=False,
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
@@ -167,6 +172,9 @@ def test_spark_kwargs_are_passed_through(
     datasource_config = data_context_parameterized_expectation_suite.get_datasource(
         dataset_name
     ).config
+    updated_temp = dict(spark_session.sparkContext.getConf().getAll())
+    print(f"after creating Datasource: {updated_temp}")
+
     assert datasource_config["spark_config"] == dict(
         spark_session.sparkContext.getConf().getAll()
     )
