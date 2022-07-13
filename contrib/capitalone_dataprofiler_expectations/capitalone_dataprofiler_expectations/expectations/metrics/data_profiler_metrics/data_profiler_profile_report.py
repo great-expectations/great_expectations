@@ -24,6 +24,9 @@ class DataProfilerProfileReport(DataProfilerProfileMetricProvider):
         try:
             profile = dp.Profiler.load(profile_path)
             profile_report = profile.report(report_options={"output_format": "pretty"})
+            profile_report["global_stats"]["profile_schema"] = dict(
+                profile_report["global_stats"]["profile_schema"]
+            )
             return profile_report
         except FileNotFoundError:
             raise ValueError(
