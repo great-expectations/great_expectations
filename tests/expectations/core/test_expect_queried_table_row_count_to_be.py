@@ -128,7 +128,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     basic_spark_df_execution_engine,
     titanic_df,
 ):
-    df = titanic_df
+    df: pd.DataFrame = titanic_df
 
     validator: Validator = build_spark_validator_with_data(df, spark_session)
 
@@ -167,7 +167,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     basic_spark_df_execution_engine,
     titanic_df,
 ):
-    df = titanic_df
+    df: pd.DataFrame = titanic_df
 
     validator: Validator = build_spark_validator_with_data(df, spark_session)
 
