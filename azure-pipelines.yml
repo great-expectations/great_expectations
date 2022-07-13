@@ -111,6 +111,7 @@ stages:
               pip install  .
             displayName: 'Install dependencies'
           - script: |
-              java --version
+              java -version
               spark-shell --version
+              pip show pyspark
             displayName: 'pytest'
