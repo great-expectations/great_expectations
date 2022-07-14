@@ -52,7 +52,7 @@ variables:
 stages:
   - stage: required
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-latest'
 
     jobs:
       - job: comprehensive
