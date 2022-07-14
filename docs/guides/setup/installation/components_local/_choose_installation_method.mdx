@@ -2,8 +2,10 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import EnsureLatestPip from "./_ensure_latest_pip.mdx"
 import EnsureLatestAnaconda from "./_ensure_latest_anaconda.mdx"
+import CreateVenvPip from "./_create_an_venv_with_pip.mdx"
+import CreateVenvConda from "./_create_an_venv_with_anaconda.mdx"
 
-The simplest way to install Great Expectations is through a package management tool.  Pip and Anaconda are the recommended tools for this purpose; you can use either of the two to install Great Expectations.
+Our recommended best practice is to use a virtual environment for your Great Expectations installation.  Both standard Python 3 and Anaconda support the creation of virtual environments.  Once the virtual environment is created, you can then use either `pip` or `conda` to install project requirements, depending on how the virtual environment was created.
 
 <Tabs
   groupId="pip-or-conda"
@@ -14,12 +16,16 @@ The simplest way to install Great Expectations is through a package management t
   ]}>
 <TabItem value="pip">
 
+<CreateVenvPip />
+
 <EnsureLatestPip />
 
 </TabItem>
 <TabItem value="conda">
 
 <EnsureLatestAnaconda />
+
+<CreateVenvConda />
 
 </TabItem>
 </Tabs>
