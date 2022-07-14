@@ -8,6 +8,7 @@ from freezegun import freeze_time
 from great_expectations import DataContext
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
+from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -677,10 +678,10 @@ def test_site_builder_usage_statistics_disabled(
     site_builder_data_context_with_html_store_titanic_random,
 ):
     context = site_builder_data_context_with_html_store_titanic_random
-    context._project_config.anonymous_usage_statistics = {
-        "enabled": False,
-        "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c",
-    }
+    context.variables.anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
+        enabled=False,
+        data_context_id="f43d4897-385f-4366-82b0-1a8eda2bf79c",
+    )
     data_context_id = context.anonymous_usage_statistics["data_context_id"]
 
     sites = (
