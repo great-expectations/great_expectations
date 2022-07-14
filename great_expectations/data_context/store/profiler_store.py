@@ -1,8 +1,12 @@
 import random
 import uuid
-from typing import Union
+from typing import Optional, Union
 
+from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -32,7 +36,8 @@ class ProfilerStore(ConfigurationStore):
         test_key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
             test_key = self.key_class(
-                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+                resource_type=GeCloudRESTResource.PROFILER,
+                ge_cloud_id=str(uuid.uuid4()),
             )
         else:
             test_key = self.key_class(configuration_key=test_profiler_name)
@@ -70,3 +75,25 @@ class ProfilerStore(ConfigurationStore):
         profiler_config_dict["ge_cloud_id"] = ge_cloud_profiler_id
 
         return profiler_config_dict
+
+    @staticmethod
+    def determine_key(
+        name: Optional[str], ge_cloud_id: Optional[str]
+    ) -> DataContextKey:
+        assert bool(name) ^ bool(
+            ge_cloud_id
+        ), "Must provide either name or ge_cloud_id."
+
+        from great_expectations.data_context.store.ge_cloud_store_backend import (
+            GeCloudRESTResource,
+        )
+
+        key: DataContextKey
+        if ge_cloud_id:
+            key = GeCloudIdentifier(
+                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+            )
+        else:
+            key = ConfigurationIdentifier(configuration_key=name)
+
+        return key
