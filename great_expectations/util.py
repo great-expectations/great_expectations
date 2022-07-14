@@ -26,7 +26,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -39,7 +39,6 @@ from great_expectations.core.expectation_suite import (
     expectationSuiteSchema,
 )
 from great_expectations.exceptions import (
-    GreatExpectationsError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -73,62 +72,33 @@ except ImportError:
     Table = None
     Select = None
 
-SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
-    "batch": "batches",
-    "checkpoint": "checkpoints",
-    "data_asset": "data_assets",
-    "datasource": "datasources",
-    "expectation": "expectations",
-    "expectation_suite": "expectation_suites",
-    "suite_validation_result": "suite_validation_results",
-    "expectation_validation_result": "expectation_validation_results",
-    "contract": "contracts",
-    "rendered_data_doc": "rendered_data_docs",
-    "data_context_variables": "data_context_variables",
-}
-
-PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
-    "batches": "batch",
-    "checkpoints": "checkpoint",
-    "data_assets": "data_asset",
-    "datasources": "datasource",
-    "expectations": "expectation",
-    "expectation_suites": "expectation_suite",
-    "suite_validation_results": "suite_validation_result",
-    "expectation_validation_results": "expectation_validation_result",
-    "contracts": "contract",
-    "rendered_data_docs": "rendered_data_doc",
-    "data_context_variables": "data_context_variables",
-}
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
-def pluralize(singular_ge_noun: str) -> str:
+class bidict(dict):
     """
-    Pluralizes a Great Expectations singular noun
+    Bi-directional hashmap: https://stackoverflow.com/a/21894086
     """
-    try:
-        return SINGULAR_TO_PLURAL_LOOKUP_DICT[singular_ge_noun.lower()]
-    except KeyError:
-        raise GreatExpectationsError(
-            f"Unable to pluralize '{singular_ge_noun}'. Please update "
-            f"great_expectations.util.SINGULAR_TO_PLURAL_LOOKUP_DICT"
-        )
 
+    def __init__(self, *args: List[Any], **kwargs: Dict[str, Any]) -> None:
+        super().__init__(*args, **kwargs)
+        self.inverse = {}
+        for key, value in self.items():
+            self.inverse.setdefault(value, []).append(key)
 
-def singularize(plural_ge_noun: str) -> str:
-    """
-    Singularizes a Great Expectations plural noun
-    """
-    try:
-        return PLURAL_TO_SINGULAR_LOOKUP_DICT[plural_ge_noun.lower()]
-    except KeyError:
-        raise GreatExpectationsError(
-            f"Unable to singularize '{plural_ge_noun}'. Please update "
-            f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
-        )
+    def __setitem__(self, key: str, value: Any) -> None:
+        if key in self:
+            self.inverse[self[key]].remove(key)
+        super().__setitem__(key, value)
+        self.inverse.setdefault(value, []).append(key)
+
+    def __delitem__(self, key: str):
+        self.inverse.setdefault(self[key], []).remove(key)
+        if self[key] in self.inverse and not self.inverse[self[key]]:
+            del self.inverse[self[key]]
+        super().__delitem__(key)
 
 
 def camel_to_snake(name: str) -> str:
