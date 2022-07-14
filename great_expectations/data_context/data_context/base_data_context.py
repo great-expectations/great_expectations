@@ -1422,7 +1422,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             Datasource that was added
 
         """
-        new_datasource = super().add_datasource(name, initialize, **kwargs)
+        new_datasource = super().add_datasource(
+            name=name, initialize=initialize, save_changes=save_changes, **kwargs
+        )
         self._synchronize_self_with_underlying_data_context()
         return new_datasource
 
@@ -2842,6 +2844,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 name=datasource_name,
                 config=config,
                 initialize=True,
+                save_changes=False,
             ),
         )
 

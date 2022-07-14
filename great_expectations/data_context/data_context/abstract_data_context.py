@@ -421,13 +421,18 @@ class AbstractDataContext(ABC):
         return self.project_config_with_variables_substituted.concurrency
 
     def add_datasource(
-        self, name: str, initialize: bool = True, **kwargs: dict
+        self,
+        name: str,
+        initialize: bool = True,
+        save_changes: bool = False,
+        **kwargs: dict,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name: the name for the new datasource to add
             initialize: if False, add the datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
+            save_changes (bool): should GE save the Datasource config?
             kwargs (keyword arguments): the configuration for the new datasource
 
         Returns:
@@ -454,6 +459,7 @@ class AbstractDataContext(ABC):
             name=name,
             config=config,
             initialize=initialize,
+            save_changes=save_changes,
         )
         return datasource
 
@@ -1156,16 +1162,22 @@ class AbstractDataContext(ABC):
         return datasource
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: dict, initialize: bool = True
+        self,
+        name: str,
+        config: dict,
+        initialize: bool = True,
+        save_changes: bool = False,
     ) -> Optional[Datasource]:
         """ """
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
 
-        self._datasource_store.set_by_name(
-            datasource_name=name, datasource_config=datasource_config
-        )
+        if save_changes:
+            self._datasource_store.set_by_name(
+                datasource_name=name, datasource_config=datasource_config
+            )
+        self.config.datasources[name] = datasource_config
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
@@ -1183,7 +1195,10 @@ class AbstractDataContext(ABC):
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
-                self._datasource_store.delete_by_name(datasource_name=name)
+                if save_changes:
+                    self._datasource_store.delete_by_name(datasource_name=name)
+                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
+                self.config.datasources.pop(name, None)
                 raise e
 
         return datasource
