@@ -142,7 +142,6 @@ def test_force_reuse_spark_context(
     spark.stop()
 
 
-# WILL MARKER
 def test_spark_kwargs_are_passed_through(
     data_context_parameterized_expectation_suite,
     tmp_path_factory,
@@ -156,7 +155,6 @@ def test_spark_kwargs_are_passed_through(
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
     dataset_name = "test_spark_dataset"
-
     data_context_parameterized_expectation_suite.add_datasource(
         dataset_name,
         class_name="SparkDFDatasource",
