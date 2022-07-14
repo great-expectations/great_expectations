@@ -156,7 +156,7 @@ def test_spark_kwargs_are_passed_through(
         pytest.skip("No spark backend selected.")
     dataset_name = "test_spark_dataset"
 
-    spark_config = (dict(spark_session.sparkContext.getConf().getAll()),)
+    spark_config = dict(spark_session.sparkContext.getConf().getAll())
     data_context_parameterized_expectation_suite.add_datasource(
         dataset_name,
         class_name="SparkDFDatasource",
