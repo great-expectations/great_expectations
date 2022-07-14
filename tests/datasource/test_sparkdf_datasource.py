@@ -156,7 +156,10 @@ def test_spark_kwargs_are_passed_through(
         pytest.skip("No spark backend selected.")
     dataset_name = "test_spark_dataset"
 
-    spark_config = (dict(spark_session.sparkContext.getConf().getAll()),)
+    spark_config = dict(spark_session.sparkContext.getConf().getAll())
+    print("SPARK CONFIG #1:")
+    __import__("pprint").pprint(spark_config)
+
     data_context_parameterized_expectation_suite.add_datasource(
         dataset_name,
         class_name="SparkDFDatasource",
@@ -170,6 +173,9 @@ def test_spark_kwargs_are_passed_through(
     ).config
 
     expected_spark_config = dict(spark_session.sparkContext.getConf().getAll())
+    print("SPARK CONFIG #2:")
+    __import__("pprint").pprint(expected_spark_config)
+
     expected_spark_config.pop("spark.sql.warehouse.dir")
     assert datasource_config["spark_config"] == expected_spark_config
     assert datasource_config["force_reuse_spark_context"] is False
