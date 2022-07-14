@@ -168,7 +168,7 @@ def test_spark_kwargs_are_passed_through(
         dataset_name,
         class_name="SparkDFDatasource",
         spark_config=spark_config,
-        force_reuse_spark_context=False,
+        force_reuse_spark_context=True,
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
