@@ -15,8 +15,9 @@ class DataContextStore(ConfigurationStore):
     _configuration_class = DataContextConfig
 
     ge_cloud_exclude_field_names: Set[str] = {
-        DataContextVariableSchema.DATASOURCES,
         DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+        DataContextVariableSchema.DATASOURCES,
+        DataContextVariableSchema.VALIDATION_OPERATORS,
     }
 
     def serialize(
@@ -29,7 +30,7 @@ class DataContextStore(ConfigurationStore):
         step to remove unnecessary keys is a required part of the serialization process.
 
         Args:
-            key:
+            key: Unused but required to adhere to signature set by parent.
             value: DataContextConfig to serialize utilizing the configured StoreBackend.
 
         Returns:
@@ -41,6 +42,6 @@ class DataContextStore(ConfigurationStore):
         if self.ge_cloud_mode:
             assert isinstance(payload, dict)
             for attr in self.ge_cloud_exclude_field_names:
-                payload.pop(attr)
+                payload.pop(attr, None)
 
         return payload
