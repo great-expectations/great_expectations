@@ -45,8 +45,9 @@ title: Changelog
 * [MAINTENANCE] Misc updates to `GeCloudStoreBackend` to better integrate with GE Cloud (#5497)
 * [MAINTENANCE] Update automated release schedule (#5488)
 * [MAINTENANCE] Update core-team in `teams.yml` (#5489)
-* [MAINTENANCE] Update how_to_create_a_new_expectation_suite_using_rule_based_profile… (#5495) (thanks @jcampbell)
+* [MAINTENANCE] Update how_to_create_a_new_expectation_suite_using_rule_based_profile… (#5495)
 * [MAINTENANCE] Remove pypandoc pin in constraints-dev.txt. (#5501)
+* [MAINTENANCE] Ensure that `add_datasource` method on `AbstractDataContext` does not persist by default (#5482)
 
 ### 0.15.13
 * [FEATURE] Add atomic `rendered_content` to `ExpectationValidationResult` and `ExpectationConfiguration` (#5369)
