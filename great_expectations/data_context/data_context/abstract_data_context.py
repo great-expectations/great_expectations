@@ -134,6 +134,7 @@ class AbstractDataContext(ABC):
         if runtime_environment is None:
             runtime_environment = {}
         self.runtime_environment = runtime_environment
+
         # These attributes that are set downstream.
         self._variables = None
         self._config_variables = None
@@ -227,7 +228,7 @@ class AbstractDataContext(ABC):
         """
         # NOTE: <DataContextRefactor> _project_config is currently only defined in child classes.
         # See if this can this be also defined in AbstractDataContext as abstract property
-        return self._project_config
+        return self.variables.config
 
     @property
     def root_directory(self) -> Optional[str]:
@@ -250,7 +251,7 @@ class AbstractDataContext(ABC):
         # NOTE: <DataContextRefactor>  Why does this exist in AbstractDataContext? CloudDataContext and
         # FileDataContext both use it. Determine whether this should stay here or in child classes
         return self._normalize_absolute_or_relative_path(
-            self.project_config_with_variables_substituted.plugins_directory
+            self.variables.plugins_directory
         )
 
     @property
@@ -260,7 +261,7 @@ class AbstractDataContext(ABC):
 
     @property
     def expectations_store_name(self) -> Optional[str]:
-        return self.project_config_with_variables_substituted.expectations_store_name
+        return self.variables.expectations_store_name
 
     @property
     def expectations_store(self) -> ExpectationsStore:
@@ -268,9 +269,7 @@ class AbstractDataContext(ABC):
 
     @property
     def evaluation_parameter_store_name(self) -> Optional[str]:
-        return (
-            self.project_config_with_variables_substituted.evaluation_parameter_store_name
-        )
+        return self.variables.evaluation_parameter_store_name
 
     @property
     def evaluation_parameter_store(self) -> "EvaluationParameterStore":
@@ -278,7 +277,7 @@ class AbstractDataContext(ABC):
 
     @property
     def validations_store_name(self) -> Optional[str]:
-        return self.project_config_with_variables_substituted.validations_store_name
+        return self.variables.validations_store_name
 
     @property
     def validations_store(self) -> ValidationsStore:
@@ -287,7 +286,7 @@ class AbstractDataContext(ABC):
     @property
     def checkpoint_store_name(self) -> Optional[str]:
         try:
-            return self.project_config_with_variables_substituted.checkpoint_store_name
+            return self.variables.checkpoint_store_name
         except AttributeError:
             from great_expectations.data_context.store.checkpoint_store import (
                 CheckpointStore,
@@ -357,7 +356,7 @@ class AbstractDataContext(ABC):
     @property
     def profiler_store_name(self) -> Optional[str]:
         try:
-            return self.project_config_with_variables_substituted.profiler_store_name
+            return self.variables.profiler_store_name
         except AttributeError:
             if AbstractDataContext._default_profilers_exist(
                 directory_path=self.root_directory
@@ -393,7 +392,7 @@ class AbstractDataContext(ABC):
 
     @property
     def profiler_store(self) -> ProfilerStore:
-        profiler_store_name: str = self.profiler_store_name
+        profiler_store_name: Optional[str] = self.profiler_store_name
         try:
             return self.stores[profiler_store_name]
         except KeyError:
@@ -418,7 +417,7 @@ class AbstractDataContext(ABC):
 
     @property
     def concurrency(self) -> Optional[ConcurrencyConfig]:
-        return self.project_config_with_variables_substituted.concurrency
+        return self.variables.concurrency
 
     def add_datasource(
         self,
@@ -490,7 +489,7 @@ class AbstractDataContext(ABC):
         for (
             name,
             value,
-        ) in self.project_config_with_variables_substituted.stores.items():
+        ) in self.variables.stores.items():
             store_config = copy.deepcopy(value)
             store_config["name"] = name
             masked_config = PasswordMasker.sanitize_config(store_config)
@@ -947,7 +946,7 @@ class AbstractDataContext(ABC):
         ):
             store_config["store_backend"].update(
                 {
-                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                    "manually_initialize_store_backend_id": self.variables.anonymous_usage_statistics.data_context_id
                 }
             )
         # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
@@ -987,15 +986,15 @@ class AbstractDataContext(ABC):
 
     @property
     def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
-        return self.project_config_with_variables_substituted.anonymous_usage_statistics
+        return self.variables.anonymous_usage_statistics
 
     @property
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
-        return self.project_config_with_variables_substituted.progress_bars
+        return self.variables.progress_bars
 
     @property
     def notebooks(self) -> NotebookConfig:
-        return self.project_config_with_variables_substituted.notebooks
+        return self.variables.notebooks
 
     @property
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
@@ -1004,9 +1003,7 @@ class AbstractDataContext(ABC):
 
     @property
     def data_context_id(self) -> str:
-        return (
-            self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-        )
+        return self.variables.anonymous_usage_statistics.data_context_id
 
     def _init_stores(self, store_configs: Dict[str, dict]) -> None:
         """Initialize all Stores for this DataContext.
@@ -1205,9 +1202,7 @@ class AbstractDataContext(ABC):
 
     def _construct_data_context_id(self) -> str:
         # Choose the id of the currently-configured expectations store, if it is a persistent store
-        expectations_store = self._stores[
-            self.project_config_with_variables_substituted.expectations_store_name
-        ]
+        expectations_store = self._stores[self.variables.expectations_store_name]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation
             # if there was an invalid store config
@@ -1215,9 +1210,7 @@ class AbstractDataContext(ABC):
 
         # Otherwise choose the id stored in the project_config
         else:
-            return (
-                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-            )
+            return self.variables.anonymous_usage_statistics.data_context_id
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
