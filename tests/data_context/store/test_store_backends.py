@@ -1581,7 +1581,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     ) as mock_save:
         inline_store_backend.set(tuple_, new_config_version)
 
-    assert empty_data_context.config.config_version == new_config_version
+    assert empty_data_context.variables.config.config_version == new_config_version
     assert mock_save.call_count == 1
 
     # test .get
