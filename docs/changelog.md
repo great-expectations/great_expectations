@@ -13,6 +13,7 @@ title: Changelog
 * [BUGFIX] Make sure the profileReport obj does not have defaultdicts (breaks gallery JSON) (#5491)
 * [BUGFIX] Use Pandas.isnull() instead of NumPy.isnan() to check for empty values in TableExpectation._validate_metric_value_between(), due to wider types applicability. (#5502)
 * [BUGFIX] Spark Schema has unexpected field for `spark.sql.warehouse.dir` (#5490)
+* [BUGFIX] Conditionally pop values from Spark config in tests (#5508)
 * [DOCS] DOC-349 re-write and partition interactive mode expectations guide (#5448)
 * [DOCS] DOC-344 partition data docs on s3 guide (#5437)
 * [DOCS] DOC-342 partition how to configure a validation result store in amazon s3 guide (#5428)
