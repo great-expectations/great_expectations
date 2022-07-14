@@ -68,7 +68,7 @@ def context_with_multiple_built_sites(empty_data_context):
         },
     }
     config.data_docs_sites = multi_sites
-    context._project_config = config
+    context.variables.config = config
     context.build_data_docs()
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 2
