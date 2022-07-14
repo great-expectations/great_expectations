@@ -28,6 +28,9 @@ from great_expectations.data_context.store import (
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
@@ -1333,7 +1336,7 @@ def test_GeCloudStoreBackend():
         "access_token": "1234",
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
-    ge_cloud_resource_type = "contract"
+    ge_cloud_resource_type = GeCloudRESTResource.CONTRACT
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
@@ -1464,7 +1467,7 @@ def test_GeCloudStoreBackend():
         my_store_backend = GeCloudStoreBackend(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type="rendered_data_doc",
+            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
         )
         my_store_backend.set(("rendered_data_doc", ""), OrderedDict())
         mock_post.assert_called_with(
@@ -1489,7 +1492,7 @@ def test_GeCloudStoreBackend():
             my_store_backend = GeCloudStoreBackend(
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type="rendered_data_doc",
+                ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
             )
             my_store_backend.get(
                 (
@@ -1511,7 +1514,7 @@ def test_GeCloudStoreBackend():
             my_store_backend = GeCloudStoreBackend(
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type="rendered_data_doc",
+                ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
             )
             my_store_backend.list_keys()
             mock_get.assert_called_with(
@@ -1530,7 +1533,7 @@ def test_GeCloudStoreBackend():
             my_store_backend = GeCloudStoreBackend(
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type="rendered_data_doc",
+                ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
             )
             my_store_backend.remove_key(
                 (

@@ -10,6 +10,9 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store.datasource_store import DatasourceStore
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
@@ -110,7 +113,7 @@ def test_datasource_store_retrieval_cloud_mode(
     ge_cloud_store_backend_config: dict = {
         "class_name": "GeCloudStoreBackend",
         "ge_cloud_base_url": ge_cloud_base_url,
-        "ge_cloud_resource_type": "datasource",
+        "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
         "ge_cloud_credentials": {
             "access_token": ge_cloud_access_token,
             "organization_id": ge_cloud_organization_id,
@@ -124,7 +127,7 @@ def test_datasource_store_retrieval_cloud_mode(
     )
 
     key: GeCloudIdentifier = GeCloudIdentifier(
-        resource_type="datasource", ge_cloud_id="foobarbaz"
+        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id="foobarbaz"
     )
 
     with patch("requests.patch", autospec=True) as mock_patch:
