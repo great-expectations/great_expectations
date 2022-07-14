@@ -44,9 +44,17 @@ def lint(ctx, path="great_expectations/core"):
 
 
 @invoke.task
-def hooks(ctx):
+def hooks(ctx, changes_only=False, diff=False):
     """Run pre-commit hooks"""
-    raise NotImplementedError
+    cmds = ["pre-commit", "run"]
+    if diff:
+        cmds.append("--show-diff-on-failure")
+    # used in CI - runs faster and only checks files that have changed
+    if changes_only:
+        cmds.extend(["--from-ref", "origin/HEAD", "--to-ref", "HEAD"])
+    else:
+        cmds.extend(["--all-files"])
+    ctx.run(" ".join(cmds))
 
 
 @invoke.task(iterable=["modules"])
