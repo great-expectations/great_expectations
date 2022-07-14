@@ -1,10 +1,13 @@
-from typing import Set, Tuple, Union
+import logging
+from typing import Any, Optional, Set, Tuple, Union
 
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
 from great_expectations.data_context.types.base import DataContextConfig
+
+logger = logging.getLogger(__name__)
 
 
 class DataContextStore(ConfigurationStore):
@@ -42,6 +45,10 @@ class DataContextStore(ConfigurationStore):
         if self.ge_cloud_mode:
             assert isinstance(payload, dict)
             for attr in self.ge_cloud_exclude_field_names:
-                payload.pop(attr, None)
+                removed: Optional[Any] = payload.pop(attr, None)
+                if removed:
+                    logger.info(
+                        f"Removed {attr} from DataContextConfig while serializing to JSON"
+                    )
 
         return payload
