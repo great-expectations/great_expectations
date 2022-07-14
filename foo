@@ -1,0 +1,996 @@
+[DEPENDENCY GRAPH]
+tzlocal (>=1.2)
+  pytest (>=4.3)
+    xmlschema 
+      jinja2 
+        Babel (>=2.7)
+          pytz (>=2015.7)
+        MarkupSafe (>=2.0)
+      sphinx-rtd-theme 
+        bump2version 
+        sphinxcontrib-httpdomain 
+          six 
+          Sphinx (>=1.6)
+            typed-ast 
+            cython 
+            html5lib 
+              lxml 
+              genshi 
+              chardet (>=2.2)
+              lxml 
+              chardet (>=2.2)
+              genshi 
+              webencodings 
+              six (>=1.9)
+            pytest (>=4.6)
+              requests 
+                certifi (>=2017.4.17)
+              pygments (>=2.7.2)
+              nose 
+              mock 
+                pytest-cov 
+                  virtualenv 
+                    packaging (>=20.0)
+                    pytest-timeout (>=1)
+                      pytest (>=5.0.0)
+                        hypothesis (>=3.56)
+                          tzdata (>=2022.1)
+                          backports.zoneinfo (>=0.2.1)
+                            tzdata 
+                            importlib-resources 
+                              pytest-mypy (>=0.9.1)
+                                mypy (>=0.780)
+                                mypy (>=0.700)
+                                pytest (>=4.6)
+                                pytest (>=6.2)
+                                mypy (>=0.500)
+                                filelock (>=3.0)
+                                  pytest-timeout (>=1.4.2)
+                                  pytest-cov 
+                                    pytest-xdist 
+                                      filelock 
+                                      setproctitle 
+                                      psutil (>=3.0)
+                                      pytest-forked 
+                                      pytest (>=6.2.0)
+                                      execnet (>=1.1)
+                                    six 
+                                    process-tests 
+                                    hunter 
+                                      manhole (>=1.5)
+                                    fields 
+                                    coverage (>=5.2.1)
+                                      tomli 
+                                    pytest (>=4.6)
+                                      argcomplete 
+                                        wheel 
+                                          pytest (>=3.0.0)
+                                            colorama 
+                                            atomicwrites (>=1.0)
+                                            importlib-metadata (>=0.12)
+                                              importlib-resources (>=1.3)
+                                                pytest-black (>=0.3.7)
+                                                pytest-enabler (>=1.0.1)
+                                                  types-toml 
+                                                  pytest-flake8 
+                                                    pytest (>=7.0)
+                                                    flake8 (>=4.0)
+                                                  pytest-checkdocs (>=2.4)
+                                                    pytest-mypy 
+                                                      attrs (>=19.0)
+                                                    types-docutils 
+                                                    pytest (>=4.6)
+                                                    rst.linker (>=1.9)
+                                                      types-python-dateutil 
+                                                      path 
+                                                      pytest (>=6)
+                                                        tomli (>=1.0.0)
+                                                        py (>=1.8.2)
+                                                        packaging 
+                                                        iniconfig 
+                                                        attrs (>=19.2.0)
+                                                          cloudpickle 
+                                                          pytest-mypy-plugins 
+                                                            dataclasses 
+                                                            regex 
+                                                            chevron 
+                                                            pyyaml 
+                                                            decorator 
+                                                            mypy (>=0.900)
+                                                              lxml 
+                                                                Cython (>=0.29.7)
+                                                                BeautifulSoup4 
+                                                                  lxml 
+                                                                  html5lib 
+                                                                  soupsieve (>1.2)
+                                                                html5lib 
+                                                                cssselect (>=0.7)
+                                                              psutil (>=4.0)
+                                                                wmi 
+                                                                pywin32 
+                                                                enum34 
+                                                                mock 
+                                                                ipaddress 
+                                                              tomli (>=1.1.0)
+                                                              mypy-extensions (>=0.4.3)
+                                                                typing (>=3.5.3)
+                                                              typing-extensions (>=3.10)
+                                                            pytest (>=6.0.0)
+                                                          mypy 
+                                                          six 
+                                                          pytest (>=4.3.0)
+                                                          pympler 
+                                                          hypothesis 
+                                                            redis (>=3.0.0)
+                                                              requests (>=2.26.0)
+                                                              cryptography (>=36.0.1)
+                                                              hiredis (>=1.0.0)
+                                                              typing-extensions 
+                                                              importlib-metadata (>=1.0)
+                                                                pytest-perf (>=0.9.2)
+                                                                  pytest-enabler (>=1.3)
+                                                                    jaraco.packaging (>=9)
+                                                                      jaraco.packaging (>=8.2)
+                                                                        sphinx 
+                                                                          types-requests 
+                                                                          types-typed-ast 
+                                                                          docutils-stubs 
+                                                                            docutils (>=0.14)
+                                                                          mypy (>=0.950)
+                                                                          isort 
+                                                                            setuptools 
+                                                                            pip-api 
+                                                                            requirementslib 
+                                                                            pipreqs 
+                                                                          flake8 (>=3.5.0)
+                                                                          sphinxcontrib-websupport 
+                                                                            Sphinx 
+                                                                            whoosh 
+                                                                            sqlalchemy 
+                                                                            pytest 
+                                                                            flake8 
+                                                                            sphinxcontrib-serializinghtml 
+                                                                          colorama (>=0.3.5)
+                                                                          importlib-metadata (>=4.4)
+                                                                            flufl.flake8 
+                                                                            pyfakefs 
+                                                                            packaging 
+                                                                            ipython 
+                                                                              trio 
+                                                                                cffi (>=1.14)
+                                                                                  pycparser 
+                                                                                sniffio 
+                                                                                  contextvars (>=2.1)
+                                                                                outcome 
+                                                                                idna 
+                                                                                async-generator (>=1.9)
+                                                                                sortedcontainers 
+                                                                              pandas 
+                                                                                pytest-xdist (>=1.31)
+                                                                                pytest (>=6.0)
+                                                                                hypothesis (>=5.5.3)
+                                                                                  pytz (>=2014.1)
+                                                                                  pytest (>=4.6)
+                                                                                  pandas (>=0.25)
+                                                                                    numpy (>=1.21.0)
+                                                                                    numpy (>=1.20.0)
+                                                                                    numpy (>=1.19.2)
+                                                                                    numpy (>=1.18.5)
+                                                                                    pytz (>=2020.1)
+                                                                                    python-dateutil (>=2.8.1)
+                                                                                      six (>=1.5)
+                                                                                  numpy (>=1.9.0)
+                                                                                  lark-parser (>=0.6.5)
+                                                                                  black (>=19.10b0)
+                                                                                    uvloop (>=0.15.2)
+                                                                                      mypy (>=0.800)
+                                                                                      psutil 
+                                                                                      aiohttp 
+                                                                                      mypy (>=0.800)
+                                                                                      psutil 
+                                                                                      aiohttp 
+                                                                                      pytest (>=3.6.0)
+                                                                                    tokenize-rt (>=3.2.0)
+                                                                                    ipython (>=7.8.0)
+                                                                                      numpy (>=1.19)
+                                                                                      nbformat 
+                                                                                        pre-commit 
+                                                                                          importlib-metadata 
+                                                                                            typing-extensions (>=3.6.4)
+                                                                                            zipp (>=0.5)
+                                                                                              func-timeout 
+                                                                                              jaraco.itertools 
+                                                                                                inflect 
+                                                                                                  pygments 
+                                                                                                  jaraco.tidelift (>=1.4)
+                                                                                                    importlib-resources (>=1.6)
+                                                                                                    keyring 
+                                                                                                    requests-toolbelt 
+                                                                                                    autocommand 
+                                                                                                more-itertools (>=4.0.0)
+                                                                                          virtualenv (>=20.0.8)
+                                                                                            pytest-randomly (>=1)
+                                                                                              importlib-metadata (>=3.6.0)
+                                                                                              pytest 
+                                                                                            pytest-mock (>=2)
+                                                                                              pytest-asyncio 
+                                                                                                pytest-trio (>=0.7.0)
+                                                                                                flaky (>=3.5.0)
+                                                                                                hypothesis (>=5.7.1)
+                                                                                                  dpcontracts (>=0.4)
+                                                                                                  django (>=2.2)
+                                                                                                    bcrypt 
+                                                                                                    argon2-cffi (>=19.1.0)
+                                                                                                      pytest 
+                                                                                                      hypothesis 
+                                                                                                        python-dateutil (>=1.4)
+                                                                                                        libcst (>=0.3.16)
+                                                                                                          slotscheck (>=0.7.1)
+                                                                                                            dataclasses (>=0.6)
+                                                                                                          setuptools-rust (>=0.12.1)
+                                                                                                            typing-extensions (>=3.7.4.3)
+                                                                                                            setuptools (>=62.4)
+                                                                                                          sphinx-rtd-theme (>=0.4.3)
+                                                                                                            transifex-client 
+                                                                                                          setuptools-scm (>=6.0.1)
+                                                                                                            setuptools (>=42)
+                                                                                                            virtualenv (>20)
+                                                                                                            pytest (>=6.2)
+                                                                                                            typing-extensions 
+                                                                                                            setuptools 
+                                                                                                              pytest-cov 
+                                                                                                              filelock (>=3.4.0)
+                                                                                                                pytest (>=4)
+                                                                                                                coverage (>=4)
+                                                                                                                covdefaults (>=1.2.0)
+                                                                                                                sphinx-autodoc-typehints (>=1.12)
+                                                                                                                sphinx (>=4.1)
+                                                                                                                furo (>=2021.8.17b43)
+                                                                                                              build 
+                                                                                                                virtualenv (>=20.0.35)
+                                                                                                                  pytest-freezegun (>=0.4.1)
+                                                                                                                    pytest (>=3.0.0)
+                                                                                                                    freezegun (>0.3)
+                                                                                                                  pytest-env (>=0.6.2)
+                                                                                                                  flaky (>=3)
+                                                                                                                  coverage-enable-subprocess (>=1)
+                                                                                                                    coverage 
+                                                                                                                  towncrier (>=21.3)
+                                                                                                                    packaging 
+                                                                                                                    tomli 
+                                                                                                                    toml 
+                                                                                                                    jinja2 
+                                                                                                                    incremental 
+                                                                                                                    click-default-group 
+                                                                                                                    click 
+                                                                                                                  sphinx-rtd-theme (>=0.4.3)
+                                                                                                                  sphinx-argparse (>=0.2.5)
+                                                                                                                    CommonMark (>=0.5.6)
+                                                                                                                    sphinx (>=1.2.0)
+                                                                                                                  sphinx (>=3)
+                                                                                                                    requests (>=2.5.0)
+                                                                                                                    imagesize 
+                                                                                                                    babel (>=1.3)
+                                                                                                                    snowballstemmer (>=1.1)
+                                                                                                                    Pygments (>=2.0)
+                                                                                                                    Jinja2 (>=2.3)
+                                                                                                                    sphinxcontrib-qthelp 
+                                                                                                                      mypy 
+                                                                                                                    sphinxcontrib-serializinghtml (>=1.1.5)
+                                                                                                                    sphinxcontrib-htmlhelp (>=2.0.0)
+                                                                                                                    sphinxcontrib-jsmath 
+                                                                                                                      mypy 
+                                                                                                                      flake8 
+                                                                                                                    sphinxcontrib-devhelp 
+                                                                                                                    sphinxcontrib-applehelp 
+                                                                                                                  proselint (>=0.10.2)
+                                                                                                                  importlib-resources (>=1.0)
+                                                                                                                    zipp (>=3.1.0)
+                                                                                                                typing-extensions (>=3.7.4.3)
+                                                                                                                importlib-metadata (>=4.6.4)
+                                                                                                                setuptools (>=56.0.0)
+                                                                                                                  jaraco.envs (>=2.2)
+                                                                                                                    tox 
+                                                                                                                    virtualenv 
+                                                                                                                    path 
+                                                                                                                  jaraco.path (>=3.2.0)
+                                                                                                                    jaraco.windows 
+                                                                                                                    pyobjc 
+                                                                                                                  wheel 
+                                                                                                                  tomli 
+                                                                                                                  virtualenv (>=13.0.0)
+                                                                                                                  pytest-enabler 
+                                                                                                                    jaraco.context 
+                                                                                                                    jaraco.functools 
+                                                                                                                      jaraco.classes 
+                                                                                                                        more-itertools 
+                                                                                                                    toml 
+                                                                                                                  pytest-xdist 
+                                                                                                                  pytest 
+                                                                                                                  tomli-w (>=1.0.0)
+                                                                                                                  ini2toml (>=0.9)
+                                                                                                                    typing-extensions 
+                                                                                                                    pytest 
+                                                                                                                    tomli 
+                                                                                                                    setuptools 
+                                                                                                                    importlib-metadata 
+                                                                                                                    importlib-metadata 
+                                                                                                                    pyproject-fmt (>=0.3.2)
+                                                                                                                    packaging (>=20.7)
+                                                                                                                  pip-run (>=8.8)
+                                                                                                                    nbformat 
+                                                                                                                    path (>=15.1)
+                                                                                                                    pip (>=19.3)
+                                                                                                                  filelock (>=3.4.0)
+                                                                                                                  build 
+                                                                                                                    setuptools (>=42.0.0)
+                                                                                                                      jaraco.path (>=3.2.0)
+                                                                                                                      jaraco.envs (>=2.2)
+                                                                                                                      pip (>=19.1)
+                                                                                                                      wheel 
+                                                                                                                      virtualenv (>=13.0.0)
+                                                                                                                      flake8-2020 
+                                                                                                                        importlib-metadata (>=0.9)
+                                                                                                                        flake8 (>=3.7)
+                                                                                                                      pytest-perf 
+                                                                                                                        tempora (>=4.1)
+                                                                                                                        pip-run (>=8.5)
+                                                                                                                      furo 
+                                                                                                                        pygments 
+                                                                                                                        sphinx-basic-ng 
+                                                                                                                          ipython 
+                                                                                                                            curio 
+                                                                                                                            testpath 
+                                                                                                                            pytest-asyncio 
+                                                                                                                              typing-extensions (>=3.7.2)
+                                                                                                                              pytest (>=6.1.0)
+                                                                                                                            testpath 
+                                                                                                                            pytest-asyncio 
+                                                                                                                            qtconsole 
+                                                                                                                              pytest-qt 
+                                                                                                                                sphinx-rtd-theme 
+                                                                                                                                sphinx 
+                                                                                                                                tox 
+                                                                                                                                  pathlib2 (>=2.3.3)
+                                                                                                                                    typing 
+                                                                                                                                    scandir 
+                                                                                                                                  psutil (>=5.6.1)
+                                                                                                                                  pytest-mock (>=1.10.0)
+                                                                                                                                    pre-commit 
+                                                                                                                                      pyyaml (>=5.1)
+                                                                                                                                      nodeenv (>=0.11.1)
+                                                                                                                                      identify (>=1.0.0)
+                                                                                                                                        ukkonen 
+                                                                                                                                          cffi (>=1)
+                                                                                                                                      cfgv (>=2.0.0)
+                                                                                                                                  pytest-cov (>=2.5.1)
+                                                                                                                                  freezegun (>=0.3.11)
+                                                                                                                                    python-dateutil (>=2.7)
+                                                                                                                                  flaky (>=3.4.0)
+                                                                                                                                  towncrier (>=18.5.0)
+                                                                                                                                  sphinxcontrib-autoprogram (>=0.1.5)
+                                                                                                                                  sphinx (>=2.0.0)
+                                                                                                                                  pygments-github-lexers (>=0.0.5)
+                                                                                                                                  colorama (>=0.4.1)
+                                                                                                                                  toml (>=0.9.4)
+                                                                                                                                  six (>=1.14.0)
+                                                                                                                                  py (>=1.4.17)
+                                                                                                                                  pluggy (>=0.12.0)
+                                                                                                                                    pytest-benchmark 
+                                                                                                                                  packaging (>=14)
+                                                                                                                              flaky 
+                                                                                                                              Sphinx (>=1.3)
+                                                                                                                              pyzmq (>=17.1)
+                                                                                                                              qtpy (>=2.0.1)
+                                                                                                                                pytest-cov (>=3.0.0)
+                                                                                                                              ipykernel (>=4.1)
+                                                                                                                                pytest-timeout 
+                                                                                                                                ipyparallel 
+                                                                                                                                  ipython 
+                                                                                                                                    ipyparallel 
+                                                                                                                                      jupyter-server 
+                                                                                                                                        requests 
+                                                                                                                                        pytest-tornasync 
+                                                                                                                                        pytest-mock 
+                                                                                                                                        pytest-console-scripts 
+                                                                                                                                        ipykernel 
+                                                                                                                                          traitlets (>=5.1.0)
+                                                                                                                                          tornado (>=6.1)
+                                                                                                                                          pyzmq (>=17)
+                                                                                                                                          psutil 
+                                                                                                                                          nest-asyncio 
+                                                                                                                                          matplotlib-inline (>=0.1)
+                                                                                                                                            traitlets 
+                                                                                                                                          jupyter-client (>=6.1.12)
+                                                                                                                                            pytest-asyncio (>=0.18)
+                                                                                                                                            ipython 
+                                                                                                                                            ipykernel (>=6.5)
+                                                                                                                                            coverage 
+                                                                                                                                            codecov 
+                                                                                                                                            sphinxcontrib-github-alt 
+                                                                                                                                            sphinx (>=1.3.6)
+                                                                                                                                            myst-parser 
+                                                                                                                                            ipykernel 
+                                                                                                                                            tornado (>=6.0)
+                                                                                                                                            pyzmq (>=23.0)
+                                                                                                                                            python-dateutil (>=2.8.2)
+                                                                                                                                            nest-asyncio (>=1.5.4)
+                                                                                                                                            jupyter-core (>=4.9.2)
+                                                                                                                                            entrypoints 
+                                                                                                                                          ipython (>=7.23.1)
+                                                                                                                                            notebook 
+                                                                                                                                              requests-unixsocket 
+                                                                                                                                                requests (>=1.1)
+                                                                                                                                              selenium 
+                                                                                                                                              nbval 
+                                                                                                                                                ipykernel 
+                                                                                                                                                  debugpy (>=1.0)
+                                                                                                                                                  appnope 
+                                                                                                                                                nbformat 
+                                                                                                                                                  check-manifest 
+                                                                                                                                                    mock (>=3.0.0)
+                                                                                                                                                      blurb 
+                                                                                                                                                      wheel 
+                                                                                                                                                      twine 
+                                                                                                                                                        rich (>=12.0.0)
+                                                                                                                                                        rfc3986 (>=1.4.0)
+                                                                                                                                                          idna 
+                                                                                                                                                        keyring (>=15.1)
+                                                                                                                                                          jeepney (>=0.4.2)
+                                                                                                                                                          SecretStorage (>=3.2)
+                                                                                                                                                        importlib-metadata (>=3.6)
+                                                                                                                                                        urllib3 (>=1.26.0)
+                                                                                                                                                          ipaddress 
+                                                                                                                                                          certifi 
+                                                                                                                                                          idna (>=2.0.0)
+                                                                                                                                                          cryptography (>=1.3.4)
+                                                                                                                                                          pyOpenSSL (>=0.14)
+                                                                                                                                                          brotlipy (>=0.6.0)
+                                                                                                                                                          brotli (>=1.0.9)
+                                                                                                                                                          brotlicffi (>=0.8.0)
+                                                                                                                                                        requests (>=2.20)
+                                                                                                                                                        readme-renderer (>=35.0)
+                                                                                                                                                          cmarkgfm (>=0.8.0)
+                                                                                                                                                            cffi (>=1.15.0)
+                                                                                                                                                          Pygments (>=2.5.1)
+                                                                                                                                                          docutils (>=0.13.1)
+                                                                                                                                                          bleach (>=2.1.0)
+                                                                                                                                                        pkginfo (>=1.8.1)
+                                                                                                                                                          coverage 
+                                                                                                                                                    tomli 
+                                                                                                                                                    build (>=0.1)
+                                                                                                                                                      wheel (>=0.36.0)
+                                                                                                                                                      toml (>=0.10.0)
+                                                                                                                                                      pytest-xdist (>=1.34)
+                                                                                                                                                      pytest-rerunfailures (>=9.1)
+                                                                                                                                                        pytest (>=5.3)
+                                                                                                                                                        setuptools (>=40.0)
+                                                                                                                                                          sphinxcontrib-towncrier 
+                                                                                                                                                            towncrier (>=19.2)
+                                                                                                                                                            sphinx 
+                                                                                                                                                          sphinx-reredirects 
+                                                                                                                                                          sphinx-inline-tabs 
+                                                                                                                                                            pytest-xdist 
+                                                                                                                                                            furo 
+                                                                                                                                                            sphinx (>=3)
+                                                                                                                                                          sphinx-favicon 
+                                                                                                                                                            sphinx (>=3.4)
+                                                                                                                                                      pytest-mock (>=2)
+                                                                                                                                                      pytest-cov (>=2.12)
+                                                                                                                                                      pytest (>=6.2.4)
+                                                                                                                                                      filelock (>=3)
+                                                                                                                                                      sphinx-autodoc-typehints (>=1.10)
+                                                                                                                                                        typed-ast (>=1.5.2)
+                                                                                                                                                        typing-extensions (>=4.1)
+                                                                                                                                                        sphobjinv (>=2)
+                                                                                                                                                        pytest-cov (>=3)
+                                                                                                                                                        pytest (>=7.1)
+                                                                                                                                                        nptyping (>=2.1.2)
+                                                                                                                                                        diff-cover (>=6.4)
+                                                                                                                                                        coverage (>=6.3)
+                                                                                                                                                        covdefaults (>=2.2)
+                                                                                                                                                        Sphinx (>=4.5)
+                                                                                                                                                      sphinx-argparse-cli (>=1.5)
+                                                                                                                                                      furo (>=2021.08.31)
+                                                                                                                                                        beautifulsoup4 
+                                                                                                                                                      importlib-metadata (>=0.22)
+                                                                                                                                                      tomli (>=1.0.0)
+                                                                                                                                                      colorama 
+                                                                                                                                                      pep517 (>=0.9.1)
+                                                                                                                                                        zipp 
+                                                                                                                                                        tomli (>=1.1.0)
+                                                                                                                                                      packaging (>=19.0)
+                                                                                                                                                  fastjsonschema 
+                                                                                                                                                  jupyter-core 
+                                                                                                                                                    pywin32 (>=1.0)
+                                                                                                                                                  jsonschema (>=2.6)
+                                                                                                                                                    webcolors (>=1.11)
+                                                                                                                                                    uri-template 
+                                                                                                                                                      pep8-naming 
+                                                                                                                                                        flake8 (>=3.9.1)
+                                                                                                                                                      flake8-use-fstring 
+                                                                                                                                                      flake8-type-annotations 
+                                                                                                                                                      flake8-requirements 
+                                                                                                                                                        toml (>=0.7.0)
+                                                                                                                                                        setuptools (>=10.0.0)
+                                                                                                                                                        flake8 (>=2.0.0)
+                                                                                                                                                      flake8-noqa 
+                                                                                                                                                        flake8-docstrings 
+                                                                                                                                                          pydocstyle (>=2.1)
+                                                                                                                                                            toml 
+                                                                                                                                                            snowballstemmer 
+                                                                                                                                                          flake8 (>=3)
+                                                                                                                                                        types-setuptools 
+                                                                                                                                                        flake8-typechecking-import 
+                                                                                                                                                          types-dataclasses 
+                                                                                                                                                          coverage 
+                                                                                                                                                          pytest-coverage 
+                                                                                                                                                          pytest-sugar 
+                                                                                                                                                            packaging (>=14.1)
+                                                                                                                                                            termcolor (>=1.1.0)
+                                                                                                                                                            pytest (>=2.9)
+                                                                                                                                                          mypy 
+                                                                                                                                                          black 
+                                                                                                                                                            aiohttp (>=3.7.4)
+                                                                                                                                                              cchardet 
+                                                                                                                                                              Brotli 
+                                                                                                                                                              aiodns 
+                                                                                                                                                              typing-extensions (>=3.7.4)
+                                                                                                                                                              idna-ssl (>=1.0)
+                                                                                                                                                              aiosignal (>=1.1.2)
+                                                                                                                                                              frozenlist (>=1.1.1)
+                                                                                                                                                              attrs (>=17.3.0)
+                                                                                                                                                            colorama (>=0.4.3)
+                                                                                                                                                            typed-ast (>=1.4.2)
+                                                                                                                                                            typing-extensions (>=3.10.0.0)
+                                                                                                                                                            tomli (>=1.1.0)
+                                                                                                                                                            pathspec (>=0.9.0)
+                                                                                                                                                            platformdirs (>=2)
+                                                                                                                                                              pytest-mock (>=3.6)
+                                                                                                                                                              pytest-cov (>=2.7)
+                                                                                                                                                              sphinx (>=4)
+                                                                                                                                                              furo (>=2021.7.5b38)
+                                                                                                                                                            click (>=8.0.0)
+                                                                                                                                                              colorama 
+                                                                                                                                                          dataclasses 
+                                                                                                                                                          flake8 
+                                                                                                                                                        flake8-tabs 
+                                                                                                                                                        flake8-postponed-annotations 
+                                                                                                                                                          flake8-polyfill 
+                                                                                                                                                          flake8-import-order 
+                                                                                                                                                            enum34 
+                                                                                                                                                            pycodestyle 
+                                                                                                                                                          flake8-docstrings 
+                                                                                                                                                          flake8-datetimez 
+                                                                                                                                                          flake8-continuation 
+                                                                                                                                                          flake8-commas 
+                                                                                                                                                          flake8-bugbear 
+                                                                                                                                                            hypothesmith (>=0.2)
+                                                                                                                                                            hypothesis 
+                                                                                                                                                              rich (>=9.0.0)
+                                                                                                                                                              black (>=19.10b0)
+                                                                                                                                                              click (>=7.0)
+                                                                                                                                                              tzdata (>=2022.1)
+                                                                                                                                                              backports.zoneinfo (>=0.2.1)
+                                                                                                                                                              importlib-metadata (>=3.6)
+                                                                                                                                                              rich (>=9.0.0)
+                                                                                                                                                              redis (>=3.0.0)
+                                                                                                                                                                async-timeout (>=4.0.2)
+                                                                                                                                                                  typing-extensions (>=3.6.5)
+                                                                                                                                                                packaging (>=20.4)
+                                                                                                                                                                deprecated (>=1.2.3)
+                                                                                                                                                                  PyTest-Cov 
+                                                                                                                                                                  PyTest 
+                                                                                                                                                              pytz (>=2014.1)
+                                                                                                                                                              python-dateutil (>=1.4)
+                                                                                                                                                              pytest (>=4.6)
+                                                                                                                                                              pandas (>=0.25)
+                                                                                                                                                              numpy (>=1.9.0)
+                                                                                                                                                              libcst (>=0.3.16)
+                                                                                                                                                                prompt-toolkit (>=2.0.9)
+                                                                                                                                                                  wcwidth 
+                                                                                                                                                                nbsphinx (>=0.4.2)
+                                                                                                                                                                  sphinx (>=1.8)
+                                                                                                                                                                  traitlets (>=5)
+                                                                                                                                                                  docutils 
+                                                                                                                                                                jupyter (>=1.0.0)
+                                                                                                                                                                hypothesmith (>=0.0.4)
+                                                                                                                                                                  libcst (>=0.3.8)
+                                                                                                                                                                  lark-parser (>=0.7.2)
+                                                                                                                                                                  hypothesis (>=5.41.0)
+                                                                                                                                                                hypothesis (>=4.36.0)
+                                                                                                                                                                  lark-parser (>=0.6.5)
+                                                                                                                                                                  dpcontracts (>=0.4)
+                                                                                                                                                                  django (>=2.2)
+                                                                                                                                                                    tzdata 
+                                                                                                                                                                    backports.zoneinfo 
+                                                                                                                                                                    sqlparse (>=0.2.2)
+                                                                                                                                                                  click (>=7.0)
+                                                                                                                                                                  black (>=19.10b0)
+                                                                                                                                                                  exceptiongroup (>=1.0.0rc8)
+                                                                                                                                                                flake8 (>=3.7.8)
+                                                                                                                                                                coverage (>=4.5.4)
+                                                                                                                                                                pyyaml (>=5.2)
+                                                                                                                                                                typing-inspect (>=0.4.0)
+                                                                                                                                                                  typing (>=3.7.4)
+                                                                                                                                                                  typing-extensions (>=3.7.4)
+                                                                                                                                                                  mypy-extensions (>=0.3.0)
+                                                                                                                                                                typing-extensions (>=3.7.4.2)
+                                                                                                                                                            coverage 
+                                                                                                                                                          flake8-annotations 
+                                                                                                                                                        flake8-literal 
+                                                                                                                                                          flake8-comprehensions 
+                                                                                                                                                          flake8-bandit 
+                                                                                                                                                            flake8-polyfill 
+                                                                                                                                                            bandit (>=1.7.3)
+                                                                                                                                                          flake8 
+                                                                                                                                                    rfc3986-validator (>0.1.0)
+                                                                                                                                                    rfc3339-validator 
+                                                                                                                                                    jsonpointer (>1.13)
+                                                                                                                                                    isoduration 
+                                                                                                                                                      arrow (>=0.15.0)
+                                                                                                                                                    idna 
+                                                                                                                                                    fqdn 
+                                                                                                                                                      cached-property (>=1.3.0)
+                                                                                                                                                    webcolors (>=1.11)
+                                                                                                                                                    uri-template 
+                                                                                                                                                    rfc3987 
+                                                                                                                                                    rfc3339-validator 
+                                                                                                                                                    jsonpointer (>1.13)
+                                                                                                                                                    isoduration 
+                                                                                                                                                    idna 
+                                                                                                                                                    fqdn 
+                                                                                                                                                    importlib-resources (>=1.4.0)
+                                                                                                                                                    attrs (>=17.4.0)
+                                                                                                                                                      coverage (>=5.0.2)
+                                                                                                                                                      cloudpickle 
+                                                                                                                                                      zope.interface 
+                                                                                                                                                      pytest-mypy-plugins 
+                                                                                                                                                      mypy 
+                                                                                                                                                      six 
+                                                                                                                                                      pytest (>=4.3.0)
+                                                                                                                                                      pympler 
+                                                                                                                                                      coverage (>=5.0.2)
+                                                                                                                                                      sphinx-notfound-page 
+                                                                                                                                                        tox 
+                                                                                                                                                        sphinx-notfound-page 
+                                                                                                                                                          sphinx-autoapi 
+                                                                                                                                                            sphinxcontrib-golangdomain 
+                                                                                                                                                            sphinxcontrib-dotnetdomain 
+                                                                                                                                                            unidecode 
+                                                                                                                                                            astroid (>=2.7)
+                                                                                                                                                          sphinxemoji 
+                                                                                                                                                          sphinx-tabs 
+                                                                                                                                                            rinohtype 
+                                                                                                                                                            bs4 
+                                                                                                                                                            sphinx-testing 
+                                                                                                                                                            pytest-regressions 
+                                                                                                                                                          sphinx-prompt 
+                                                                                                                                                      zope.interface 
+                                                                                                                                                      cloudpickle 
+                                                                                                                                                      sphinx-notfound-page 
+                                                                                                                                                      sphinx 
+                                                                                                                                                      furo 
+                                                                                                                                                      zope.interface 
+                                                                                                                                                      pytest-mypy-plugins 
+                                                                                                                                                      six 
+                                                                                                                                                      pytest (>=4.3.0)
+                                                                                                                                                      pympler 
+                                                                                                                                                      coverage (>=5.0.2)
+                                                                                                                                                jupyter-client 
+                                                                                                                                                pytest (>=2.8)
+                                                                                                                                              json-logging 
+                                                                                                                                              myst-parser 
+                                                                                                                                                sphinx-pytest 
+                                                                                                                                                coverage 
+                                                                                                                                                beautifulsoup4 
+                                                                                                                                                sphinx-design 
+                                                                                                                                                sphinx-book-theme 
+                                                                                                                                                ipython 
+                                                                                                                                              sphinxcontrib-github-alt 
+                                                                                                                                              nbsphinx 
+                                                                                                                                              prometheus-client 
+                                                                                                                                                twisted 
+                                                                                                                                              terminado (>=0.8.3)
+                                                                                                                                                pywinpty (>=1.1.0)
+                                                                                                                                                ptyprocess 
+                                                                                                                                              Send2Trash (>=1.8.0)
+                                                                                                                                                pywin32 
+                                                                                                                                                pyobjc-framework-Cocoa 
+                                                                                                                                                pywin32 
+                                                                                                                                                pyobjc-framework-Cocoa 
+                                                                                                                                              nest-asyncio (>=1.5)
+                                                                                                                                              nbconvert (>=5)
+                                                                                                                                                ipywidgets (>=7)
+                                                                                                                                                  mock 
+                                                                                                                                                  pytest (>=3.6.0)
+                                                                                                                                                  jupyterlab-widgets (>=1.0.0)
+                                                                                                                                                  ipython (>=4.0.0)
+                                                                                                                                                    ipywidgets 
+                                                                                                                                                      traitlets (>=4.3.1)
+                                                                                                                                                      ipykernel (>=4.5.1)
+                                                                                                                                                    nbformat 
+                                                                                                                                                    nbconvert 
+                                                                                                                                                      pytest-dependency 
+                                                                                                                                                      tornado (>=6.1)
+                                                                                                                                                      nbsphinx (>=0.2.12)
+                                                                                                                                                      sphinx (>=1.5.1)
+                                                                                                                                                      ipython 
+                                                                                                                                                        ipykernel 
+                                                                                                                                                        black 
+                                                                                                                                                        trio 
+                                                                                                                                                        pandas 
+                                                                                                                                                        numpy (>=1.19)
+                                                                                                                                                        curio 
+                                                                                                                                                        testpath 
+                                                                                                                                                        pytest-asyncio 
+                                                                                                                                                        qtconsole 
+                                                                                                                                                          jupyter-client (>=4.1)
+                                                                                                                                                          ipython-genutils 
+                                                                                                                                                        ipyparallel 
+                                                                                                                                                          retrolab 
+                                                                                                                                                          jupyter-server 
+                                                                                                                                                            pywinpty 
+                                                                                                                                                            websocket-client 
+                                                                                                                                                            Send2Trash 
+                                                                                                                                                            nbformat (>=5.2.0)
+                                                                                                                                                            nbconvert (>=6.4.4)
+                                                                                                                                                            jupyter-core (>=4.7.0)
+                                                                                                                                                            argon2-cffi 
+                                                                                                                                                              pytest 
+                                                                                                                                                              tomli 
+                                                                                                                                                              cogapp 
+                                                                                                                                                              argon2-cffi-bindings 
+                                                                                                                                                          notebook 
+                                                                                                                                                            jupyter-client (>=5.3.4)
+                                                                                                                                                            jupyter-core (>=4.6.1)
+                                                                                                                                                            traitlets (>=4.2.1)
+                                                                                                                                                          jupyter-server 
+                                                                                                                                                          jupyterlab (>=3)
+                                                                                                                                                            build 
+                                                                                                                                                            virtualenv 
+                                                                                                                                                            requests-cache 
+                                                                                                                                                            pytest-check-links (>=0.5)
+                                                                                                                                                            jupyterlab-server 
+                                                                                                                                                            jinja2 (>=2.1)
+                                                                                                                                                            ipython 
+                                                                                                                                                          jupyter-server 
+                                                                                                                                                          asv 
+                                                                                                                                                          traitlets (>=4.3)
+                                                                                                                                                          tqdm 
+                                                                                                                                                            requests 
+                                                                                                                                                            slack-sdk 
+                                                                                                                                                              databases (>=0.5)
+                                                                                                                                                                aiosqlite 
+                                                                                                                                                                  typing-extensions (>=3.7.2)
+                                                                                                                                                                asyncpg 
+                                                                                                                                                                  uvloop (>=0.15.3)
+                                                                                                                                                                  uvloop (>=0.15.3)
+                                                                                                                                                                  pytest (>=6.0)
+                                                                                                                                                                  typing-extensions (>=3.7.4.3)
+                                                                                                                                                                aiomysql 
+                                                                                                                                                                  PyMySQL (>=1.0)
+                                                                                                                                                                    cryptography 
+                                                                                                                                                                    PyNaCl (>=1.4.0)
+                                                                                                                                                                  PyMySQL (>=1.0)
+                                                                                                                                                                asyncpg 
+                                                                                                                                                                asyncmy 
+                                                                                                                                                                aiosqlite 
+                                                                                                                                                                aiopg 
+                                                                                                                                                                  psycopg2-binary (>=2.8.4)
+                                                                                                                                                                aiomysql 
+                                                                                                                                                              aiodns (>1.0)
+                                                                                                                                                                pycares (>=4.0.0)
+                                                                                                                                                                  idna (>=2.1)
+                                                                                                                                                                  cffi (>=1.5.0)
+                                                                                                                                                            ipywidgets (>=6)
+                                                                                                                                                            wheel 
+                                                                                                                                                            twine 
+                                                                                                                                                            py-make (>=0.1.0)
+                                                                                                                                                              docopt (>=0.6.0)
+                                                                                                                                                          tornado (>=5.1)
+                                                                                                                                                          pyzmq (>=18)
+                                                                                                                                                          python-dateutil (>=2.1)
+                                                                                                                                                          ipython (>=4)
+                                                                                                                                                            notebook 
+                                                                                                                                                            ipywidgets 
+                                                                                                                                                            nbformat 
+                                                                                                                                                            nbconvert 
+                                                                                                                                                              nbsphinx (>=0.2.12)
+                                                                                                                                                              sphinx-rtd-theme 
+                                                                                                                                                              sphinx (>=1.5.1)
+                                                                                                                                                              tornado (>=6.1)
+                                                                                                                                                              pre-commit 
+                                                                                                                                                              ipywidgets (>=7)
+                                                                                                                                                              ipykernel 
+                                                                                                                                                              pytest-dependency 
+                                                                                                                                                              pytest-cov 
+                                                                                                                                                              pytest 
+                                                                                                                                                              tinycss2 
+                                                                                                                                                                pytest-isort 
+                                                                                                                                                                pytest-flake8 
+                                                                                                                                                                webencodings (>=0.4)
+                                                                                                                                                              pygments (>=2.4.1)
+                                                                                                                                                              pandocfilters (>=1.4.1)
+                                                                                                                                                              nbformat (>=5.1)
+                                                                                                                                                              nbclient (>=0.5.0)
+                                                                                                                                                                xmltodict 
+                                                                                                                                                                twine (>=1.11.0)
+                                                                                                                                                                setuptools (>=60.0)
+                                                                                                                                                                pytest-cov (>=2.6.1)
+                                                                                                                                                                pytest (>=4.1)
+                                                                                                                                                                pip (>=18.1)
+                                                                                                                                                                black 
+                                                                                                                                                                sphinx-book-theme 
+                                                                                                                                                                Sphinx (>=1.7)
+                                                                                                                                                                myst-parser 
+                                                                                                                                                                moto 
+                                                                                                                                                                mock 
+                                                                                                                                                                autodoc-traits 
+                                                                                                                                                                traitlets (>=5.2.2)
+                                                                                                                                                                nbformat (>=5.0)
+                                                                                                                                                                jupyter-client (>=6.1.5)
+                                                                                                                                                              jupyterlab-pygments 
+                                                                                                                                                              jinja2 (>=3.0)
+                                                                                                                                                              entrypoints (>=0.2.2)
+                                                                                                                                                              defusedxml 
+                                                                                                                                                              bleach 
+                                                                                                                                                            Sphinx (>=1.3)
+                                                                                                                                                            black 
+                                                                                                                                                            appnope 
+                                                                                                                                                            pexpect (>4.3)
+                                                                                                                                                              ptyprocess (>=0.5)
+                                                                                                                                                            stack-data 
+                                                                                                                                                              cython 
+                                                                                                                                                              littleutils 
+                                                                                                                                                              pygments 
+                                                                                                                                                              typeguard 
+                                                                                                                                                                mypy 
+                                                                                                                                                                typing-extensions 
+                                                                                                                                                                sphinx-autodoc-typehints (>=1.2.0)
+                                                                                                                                                              pure-eval 
+                                                                                                                                                              asttokens 
+                                                                                                                                                                astroid 
+                                                                                                                                                              executing 
+                                                                                                                                                            setuptools (>=18.5)
+                                                                                                                                                            pygments (>=2.4.0)
+                                                                                                                                                            pickleshare 
+                                                                                                                                                              pathlib2 
+                                                                                                                                                            matplotlib-inline 
+                                                                                                                                                            jedi (>=0.16)
+                                                                                                                                                              docopt 
+                                                                                                                                                              colorama 
+                                                                                                                                                            backcall 
+                                                                                                                                                          ipykernel (>=4.4)
+                                                                                                                          sphinx-copybutton 
+                                                                                                                            myst-nb 
+                                                                                                                            sphinx 
+                                                                                                            packaging (>=20.0)
+                                                                        pep517 
+                                                      python-dateutil 
+                                                    importlib-metadata (>=4)
+                                                    docutils (>=0.15)
+                                        pexpect 
+      lxml-stubs 
+      jinja2 
+      sphinx-rtd-theme 
+      memory-profiler 
+      lxml 
+      jinja2 
+  pytest-mock (>=3.3)
+  zest.releaser 
+    zope.testrunner 
+      zope.testing 
+        mock 
+        zope.exceptions 
+          repoze.sphinx.autointerface 
+            Sphinx (>=4.0)
+            zope.interface 
+      testtools (>=0.9.30)
+        testresources 
+        testscenarios 
+        fixtures (>=1.3.0)
+        extras (>=1.0.0)
+        pbr (>=0.11)
+      python-subunit (>=0.0.11)
+      sphinxcontrib-programoutput 
+        Sphinx (>=1.7.0)
+      zope.exceptions 
+    z3c.testsetup (>=0.8.4)
+    wheel 
+    readme-renderer 
+    pyroma 
+      wheel 
+      requests 
+      build 
+    check-manifest 
+    chardet 
+    twine (>=1.6.0)
+    colorama 
+  pytest-cov 
+  pyroma 
+  black 
+  tzdata 
+  pytz-deprecation-shim 
+    backports.zoneinfo 
+    tzdata 
+    python-dateutil 
+tqdm (>=4.59.0)
+scipy (>=0.19.0)
+pytz (>=2021.3)
+pandas (>=0.23.0)
+numpy (>=1.14.1)
+notebook (>=6.4.10)
+mistune (>=0.8.4)
+jsonschema (>=2.5.1)
+jsonpatch (>=1.22)
+  jsonpointer (>=1.9)
+jinja2 (>=2.10)
+Ipython (>=7.16.3)
+importlib-metadata (>=1.7.0)
+cryptography (>=3.2)
+colorama (>=0.4.3)
+Click (>=7.1.2)
+
+
+[SUMMARY]
+setuptools (>=42.0.0)
+  Version: 63.2.0
+  Time:    2022-07-14 00:37:44
+  URL:     https://github.com/pypa/setuptools
+
+setuptools (>=40.0)
+  Version: 63.2.0
+  Time:    2022-07-14 00:37:44
+  URL:     https://github.com/pypa/setuptools
+
+setuptools (>=56.0.0)
+  Version: 63.2.0
+  Time:    2022-07-14 00:37:44
+  URL:     https://github.com/pypa/setuptools
+
+setuptools (>=10.0.0)
+  Version: 63.2.0
+  Time:    2022-07-14 00:37:44
+  URL:     https://github.com/pypa/setuptools
+
+setuptools (>=60.0)
+  Version: 63.2.0
+  Time:    2022-07-14 00:37:44
+  URL:     https://github.com/pypa/setuptools
+
+pyfakefs 
+  Version: 4.6.1
+  Time:    2022-07-13 19:33:08
+  URL:     http://pyfakefs.org
+
+setuptools 
+  Version: 63.2.0
+  Time:    2022-07-14 00:37:44
+  URL:     https://github.com/pypa/setuptools
+
+jaraco.classes 
+  Version: 3.2.2
+  Time:    2022-07-13 02:22:49
+  URL:     https://github.com/jaraco/jaraco.classes
+
+sphinx-notfound-page 
+  Version: 0.8.3
+  Time:    2022-07-13 10:44:59
+  URL:     None
+
+setuptools (>=18.5)
+  Version: 63.2.0
+  Time:    2022-07-14 00:37:44
+  URL:     https://github.com/pypa/setuptools
+
+sphinx-notfound-page 
+  Version: 0.8.3
+  Time:    2022-07-13 10:44:59
+  URL:     None
+
+sphinx-notfound-page 
+  Version: 0.8.3
+  Time:    2022-07-13 10:44:59
+  URL:     None
+
