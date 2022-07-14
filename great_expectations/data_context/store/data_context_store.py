@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional, Set, Tuple, Union
+from typing import Set, Tuple, Union
 
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
@@ -45,8 +45,8 @@ class DataContextStore(ConfigurationStore):
         if self.ge_cloud_mode:
             assert isinstance(payload, dict)
             for attr in self.ge_cloud_exclude_field_names:
-                removed: Optional[Any] = payload.pop(attr, None)
-                if removed:
+                if attr in payload:
+                    payload.pop(attr)
                     logger.info(
                         f"Removed {attr} from DataContextConfig while serializing to JSON"
                     )
