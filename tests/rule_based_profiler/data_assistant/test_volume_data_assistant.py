@@ -2109,7 +2109,7 @@ def quentin_expected_expectation_suite(
                     "profiler_config": quentin_expected_rule_based_profiler_configuration(
                         name=name
                     ).to_json_dict(),
-                    "comment": "Suite created by Rule-Based Profiler with the configuration included.",
+                    "comment": "Created by effective Rule-Based Profiler of VolumeDataAssistant with the configuration included.\n",
                 }
             ]
         }
