@@ -7,6 +7,9 @@ from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
@@ -215,7 +218,8 @@ class ExpectationsStore(Store):
         )
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
-                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+                resource_type=GeCloudRESTResource.CONTRACT,
+                ge_cloud_id=str(uuid.uuid4()),
             )
         else:
             test_key: ExpectationSuiteIdentifier = self.key_class(test_key_name)
