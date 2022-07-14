@@ -9,6 +9,9 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
 )
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     DataContextConfig,
@@ -144,7 +147,7 @@ class CloudDataContext(AbstractDataContext):
             None
         """
         key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type="expectation_suite",
+            resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id
             if ge_cloud_id is not None
             else str(expectation_suite.ge_cloud_id),

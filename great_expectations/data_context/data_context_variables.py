@@ -354,7 +354,11 @@ class CloudDataContextVariables(DataContextVariables):
         """
         Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
         """
+        from great_expectations.data_context.store.ge_cloud_store_backend import (
+            GeCloudRESTResource,
+        )
+
         key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type=DataContextVariableSchema.ALL_VARIABLES
+            resource_type=GeCloudRESTResource.DATA_CONTEXT_VARIABLES
         )
         return key
