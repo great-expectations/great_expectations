@@ -14,6 +14,7 @@ from numbers import Number
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
+import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
@@ -1738,7 +1739,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 except TypeError:
                     pass
 
-        if not isinstance(metric_value, datetime.datetime) and np.isnan(metric_value):
+        if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
 
         # Checking if mean lies between thresholds
