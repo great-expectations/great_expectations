@@ -56,7 +56,6 @@ stages:
 
     jobs:
       - job: comprehensive
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
         timeoutInMinutes: 120
 
         services:
