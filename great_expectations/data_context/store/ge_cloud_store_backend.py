@@ -1,5 +1,6 @@
 import logging
 from abc import ABCMeta
+from enum import Enum
 from json import JSONDecodeError
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
@@ -9,32 +10,64 @@ import requests
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.exceptions import StoreBackendError
-from great_expectations.util import (
-    filter_properties_dict,
-    hyphen,
-    pluralize,
-    singularize,
-)
+from great_expectations.util import bidict, filter_properties_dict, hyphen
 
 logger = logging.getLogger(__name__)
 
 
+class GeCloudRESTResource(str, Enum):
+    BATCH = "batch"
+    CHECKPOINT = "checkpoint"
+    CONTRACT = "contract"
+    DATASOURCE = "datasource"
+    DATA_ASSET = "data_asset"
+    DATA_CONTEXT = "data_context"
+    DATA_CONTEXT_VARIABLES = "data_context_variables"
+    EXPECTATION = "expectation"
+    EXPECTATION_SUITE = "expectation_suite"
+    EXPECTATION_VALIDATION_RESULT = "expectation_validation_result"
+    PROFILER = "profiler"
+    RENDERED_DATA_DOC = "rendered_data_doc"
+    SUITE_VALIDATION_RESULT = "suite_validation_result"
+
+
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
-    PAYLOAD_ATTRIBUTES_KEYS = {
-        "suite_validation_result": "result",
-        "contract": "checkpoint_config",
-        "datasource": "datasource_config",
-        "data_context": "data_context_config",
-        "expectation_suite": "suite",
-        "rendered_data_doc": "rendered_data_doc",
-        "data_context_variables": "data_context_variables",
+    PAYLOAD_ATTRIBUTES_KEYS: Dict[GeCloudRESTResource, str] = {
+        GeCloudRESTResource.CONTRACT: "checkpoint_config",
+        GeCloudRESTResource.DATASOURCE: "datasource_config",
+        GeCloudRESTResource.DATA_CONTEXT: "data_context_config",
+        GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
+        GeCloudRESTResource.EXPECTATION_SUITE: "suite",
+        GeCloudRESTResource.PROFILER: "profiler",
+        GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
+        GeCloudRESTResource.SUITE_VALIDATION_RESULT: "result",
     }
 
-    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {
-        "expectation_suite": {"clause_id"},
-        "rendered_data_doc": {"source_type", "source_id"},
-        "suite_validation_result": {"contract_id", "expectation_suite_id"},
+    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GeCloudRESTResource, Set[str]] = {
+        GeCloudRESTResource.EXPECTATION_SUITE: {"clause_id"},
+        GeCloudRESTResource.RENDERED_DATA_DOC: {"source_type", "source_id"},
+        GeCloudRESTResource.SUITE_VALIDATION_RESULT: {
+            "contract_id",
+            "expectation_suite_id",
+        },
     }
+
+    RESOURCE_PLURALITY_LOOKUP_DICT: bidict = bidict(
+        **{
+            GeCloudRESTResource.BATCH: "batches",
+            GeCloudRESTResource.CHECKPOINT: "checkpoints",
+            GeCloudRESTResource.CONTRACT: "contracts",
+            GeCloudRESTResource.DATA_ASSET: "data_assets",
+            GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
+            GeCloudRESTResource.DATASOURCE: "datasources",
+            GeCloudRESTResource.EXPECTATION: "expectations",
+            GeCloudRESTResource.EXPECTATION_SUITE: "expectation_suites",
+            GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "expectation_validation_results",
+            GeCloudRESTResource.PROFILER: "profilers",
+            GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
+            GeCloudRESTResource.SUITE_VALIDATION_RESULT: "suite_validation_results",
+        }
+    )
 
     def __init__(
         self,
@@ -56,11 +89,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             "Must provide either ge_cloud_resource_type or " "ge_cloud_resource_name"
         )
         self._ge_cloud_base_url = ge_cloud_base_url
-        self._ge_cloud_resource_name = ge_cloud_resource_name or pluralize(
-            ge_cloud_resource_type
-        )
-        self._ge_cloud_resource_type = ge_cloud_resource_type or singularize(
+        self._ge_cloud_resource_name = (
             ge_cloud_resource_name
+            or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_type]
+        )
+        self._ge_cloud_resource_type = (
+            ge_cloud_resource_type
+            or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_name]
         )
 
         # TOTO: remove when account_id is deprecated
@@ -173,10 +208,16 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self, key: Tuple[str, ...], value: Any, **kwargs: dict
     ) -> Union[bool, GeCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
-        ge_cloud_id = key[1]
+        ge_cloud_resource: GeCloudRESTResource = key[0]
+        ge_cloud_id: str = key[1]
 
         # if key has ge_cloud_id, perform _update instead
-        if ge_cloud_id:
+        # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
+        # and always necessitate a PUT.
+        if (
+            ge_cloud_id
+            or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES
+        ):
             return self._update(ge_cloud_id=ge_cloud_id, value=value, **kwargs)
 
         resource_type = self.ge_cloud_resource_type
