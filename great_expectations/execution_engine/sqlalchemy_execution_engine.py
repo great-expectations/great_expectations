@@ -960,8 +960,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             assert len(query["ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
-            for idx, id in enumerate(query["ids"]):
-                resolved_metrics[id] = convert_to_json_serializable(res[0][idx])
+            for idx, count in enumerate(query["ids"]):
+                resolved_metrics[count] = convert_to_json_serializable(res[0][idx])
 
         return resolved_metrics
 
