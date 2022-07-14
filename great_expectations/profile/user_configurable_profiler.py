@@ -673,6 +673,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             for semantic_type, column_list in self.semantic_types_dict.items():
                 if column_name in column_list:
                     semantic_types.append(semantic_type.upper())
+
             column_info_entry["semantic_types"] = semantic_types
             if all(
                 i in column_info_entry.get("semantic_types")
