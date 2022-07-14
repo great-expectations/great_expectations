@@ -169,8 +169,15 @@ def test_spark_kwargs_are_passed_through(
         dataset_name
     ).config
 
+    actual_spark_config = datasource_config["spark_config"]
     expected_spark_config = dict(spark_session.sparkContext.getConf().getAll())
-    expected_spark_config.pop("spark.sql.warehouse.dir")
+
+    # 20220714 - Chetan `spark.sql.warehouse.dir` intermittently shows up in Spark config
+    # As the rest of the config adheres to expectations, we conditionally pop and assert
+    # against known values in the payload.
+    for config in (actual_spark_config, expected_spark_config):
+        config.pop("spark.sql.warehouse.dir", None)
+
     assert datasource_config["spark_config"] == expected_spark_config
     assert datasource_config["force_reuse_spark_context"] is False
 
