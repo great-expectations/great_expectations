@@ -4,10 +4,10 @@ from typing import Any, Dict, Optional
 
 import dataprofiler as dp
 import pandas as pd
-from metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
+from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
     DataProfilerProfileMetricProvider,
 )
-from util import (
+from capitalone_dataprofiler_expectations.expectations.util import (
     is_value_greater_than_threshold,
     replace_generic_operator_in_report_keys,
 )
