@@ -4,13 +4,10 @@ from typing import Any, Dict, Optional
 
 import dataprofiler as dp
 import pandas as pd
-from capitalone_dataprofiler_expectations.expectations.util import (
-    is_value_less_than_threshold,
-    replace_generic_operator_in_report_keys,
-)
-from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
+from metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
     DataProfilerProfileMetricProvider,
 )
+from util import is_value_between_bounds, replace_generic_operator_in_report_keys
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
@@ -19,10 +16,12 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class DataProfilerProfileNumericColumnsDiffLessThanThreshold(
+class DataProfilerProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
     DataProfilerProfileMetricProvider
 ):
-    metric_name = "data_profiler.profile_numeric_columns_diff_less_than_threshold"
+    metric_name = (
+        "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range"
+    )
 
     value_keys = (
         "profile_path",
@@ -77,17 +76,20 @@ class DataProfilerProfileNumericColumnsDiffLessThanThreshold(
                     break
 
             requested_columns[col] = {}
-            for stat, threshold in stats.items():
+            for stat, bounds in stats.items():
                 if stat not in col_data_stats:
                     requested_columns[col][stat] = "Statistic requested was not found."
                     continue
                 diff_val = col_data_stats[stat]
                 if diff_val == "unchanged":  # In the case there is no delta
                     diff_val = 0
-                is_less = is_value_less_than_threshold(diff_val, threshold)
-                if not is_less:
+                between_bounds = is_value_between_bounds(
+                    diff_val, bounds["lower"], bounds["upper"], inclusive=True
+                )
+                if not between_bounds:
                     requested_columns[col][stat] = {
-                        "threshold": threshold,
+                        "lower_bound": bounds["lower"],
+                        "upper_bound": bounds["upper"],
                         "value_found": diff_val,
                     }
                 else:
@@ -116,7 +118,7 @@ class DataProfilerProfileNumericColumnsDiffLessThanThreshold(
 
         if (
             metric.metric_name
-            == "data_profiler.profile_numeric_columns_diff_less_than_threshold"
+            == "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range"
         ):
             dependencies["data_profiler.profile_diff"] = MetricConfiguration(
                 metric_name="data_profiler.profile_diff",
@@ -132,26 +134,26 @@ class DataProfilerProfileNumericColumnsDiffLessThanThreshold(
         return dependencies
 
 
-class ExpectProfileNumericColumnsDiffLessThanThreshold(TableExpectation):
+class ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange(TableExpectation):
     """
     This expectation takes the difference report between the data it is called on and a DataProfiler profile of the same schema loaded from a provided path.
     This function builds upon the custom table expectations of Great Expectations.
-    Each numerical column will be checked against a user provided dictionary of columns paired with dictionaries of statistics containing a threshold value.
-    It is expected that a statistics value for a given column is less than the specified threshold.
+    Each numerical column will be checked against a user provided dictionary of columns paired with dictionaries of statistics containing lower and upper bounds.
+    It is expected that a statistics value for a given column is within the specified threshold, inclusive.
 
     Args:
         profile_path (str): A path to a saved DataProfiler profile object on the local filesystem.
-        limit_check_report_keys (dict): A dict, containing column names as keys and dicts as values that contain statistics as keys and ints or floats as values
-                                        denoting the threshold that the statistic delta is expectated to exceed.
+        limit_check_report_keys (dict): A dict, containing column names as keys and dicts as values that contain statistics as keys and dicts as values containing two keys:
+                                        "lower" denoting the lower bound for the threshold range, and "upper" denoting the upper bound for the threshold range.
         mostly (float - optional): a value indicating the lower bound percentage of successful values that must be present to evaluate to success=True.
-    validator.expect_profile_numerical_columns_diff_less_than_threshold(
+    validator.expect_profile_numerical_columns_diff_between_threshold_range(
         profile_path = "C:/path_to/my_profile.pkl",
         limit_check_report_keys = {
             "column_one": {
-                "min": 0
+                "min": {"lower": 2.0, "upper": 10.0},
             },
             "*": {
-                "*": 1
+                "*": {"lower": 0, "upper": 100},
             },
         }
     )
@@ -200,29 +202,29 @@ class ExpectProfileNumericColumnsDiffLessThanThreshold(TableExpectation):
             },
             "tests": [
                 {
-                    "title": "profile_min_delta_below_threshold",
+                    "title": "profile_min_delta_witin_threshold",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "profile_path": profile_path,
                         "limit_check_report_keys": {
                             "*": {
-                                "min": 1000,
+                                "min": {"lower": 0, "upper": 50},
                             },
                         },
                     },
                     "out": {"success": True},
                 },
                 {
-                    "title": "profile_all_stats_above_delta_threshold",
+                    "title": "profile_all_stats_beyond_delta_threshold",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "profile_path": profile_path,
                         "limit_check_report_keys": {
-                            "*": {"*": -1000},
+                            "*": {"*": {"lower": 0, "upper": 0}},
                             "by_2": {
-                                "min": 2,
+                                "min": {"lower": -1, "upper": 1},
                             },
                         },
                     },
@@ -235,8 +237,8 @@ class ExpectProfileNumericColumnsDiffLessThanThreshold(TableExpectation):
                     "in": {
                         "profile_path": profile_path,
                         "limit_check_report_keys": {
-                            "*": {"*": 1000},
-                            "by_2": {"min": 2},
+                            "*": {"*": {"lower": -25, "upper": 50}},
+                            "by_2": {"min": {"lower": 0, "upper": 0}},
                         },
                     },
                     "out": {"success": False},
@@ -248,8 +250,8 @@ class ExpectProfileNumericColumnsDiffLessThanThreshold(TableExpectation):
                     "in": {
                         "profile_path": profile_path,
                         "limit_check_report_keys": {
-                            "*": {"*": 1000},
-                            "by_2": {"min": 2},
+                            "*": {"*": {"lower": -25, "upper": 50}},
+                            "by_2": {"min": {"lower": 0, "upper": 0}},
                         },
                         "mostly": 0.75,
                     },
@@ -260,7 +262,7 @@ class ExpectProfileNumericColumnsDiffLessThanThreshold(TableExpectation):
     ]
 
     metric_dependencies = (
-        "data_profiler.profile_numeric_columns_diff_less_than_threshold",
+        "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range",
     )
 
     success_keys = (
@@ -272,20 +274,20 @@ class ExpectProfileNumericColumnsDiffLessThanThreshold(TableExpectation):
 
     default_limit_check_report_keys = {
         "*": {
-            "min": 0,
-            "max": 0,
-            "sum": 0,
-            "mean": 0,
-            "median": 0,
-            "median_absolute_deviation": 0,
-            "variance": 0,
-            "stddev": 0,
-            "unique_count": 0,
-            "unique_ratio": 0,
-            "gini_impurity": 0,
-            "unalikeability": 0,
-            "sample_size": 0,
-            "null_count": 0,
+            "min": {"lower": 0, "upper": 0},
+            "max": {"lower": 0, "upper": 0},
+            "sum": {"lower": 0, "upper": 0},
+            "mean": {"lower": 0, "upper": 0},
+            "median": {"lower": 0, "upper": 0},
+            "median_absolute_deviation": {"lower": 0, "upper": 0},
+            "variance": {"lower": 0, "upper": 0},
+            "stddev": {"lower": 0, "upper": 0},
+            "unique_count": {"lower": 0, "upper": 0},
+            "unique_ratio": {"lower": 0, "upper": 0},
+            "gini_impurity": {"lower": 0, "upper": 0},
+            "unalikeability": {"lower": 0, "upper": 0},
+            "sample_size": {"lower": 0, "upper": 0},
+            "null_count": {"lower": 0, "upper": 0},
         }
     }
 
@@ -305,7 +307,7 @@ class ExpectProfileNumericColumnsDiffLessThanThreshold(TableExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         delta_between_thresholds = metrics.get(
-            "data_profiler.profile_numeric_columns_diff_less_than_threshold"
+            "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range"
         )
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
@@ -353,6 +355,6 @@ class ExpectProfileNumericColumnsDiffLessThanThreshold(TableExpectation):
 
 if __name__ == "__main__":
     diagnostics_report = (
-        ExpectProfileNumericColumnsDiffLessThanThreshold().run_diagnostics()
+        ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange().run_diagnostics()
     )
     print(diagnostics_report.generate_checklist())
