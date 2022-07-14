@@ -53,15 +53,26 @@ def hooks(ctx):
 def types(ctx, modules, coverage=False, install_types=False):
     """Static Type checking"""
     modules = modules or [
-        "checkpoint",
-        "cli",
-        "core",
-        "data_asset",
-        "data_context",
-        "datasource",
-        "exceptions",
-        # TODO indentify modules that are close to being 100% type correct
+        # "checkpoint",  # 78
+        # "cli",  # 237
+        # "core",  # 237
+        "data_asset",  # 1
+        # "data_context",  # 228
+        # "datasource",  # 98
+        "exceptions",  # 2
+        # "execution_engine",  # 111
+        # "expectations",  # 453
+        "jupyter_ux",  # 4
+        # "marshmallow__shade",  # 19
+        "profile",  # 9
+        # "render",  # 87
+        # "rule_based_profiler",  # 469
+        "self_check",  # 10
+        "types",  # 3
+        # "validation_operators", # 47
+        # "validator",  # 46
     ]
+    # TODO: fix modules with low error count
     ge_modules = [f"great_expectations/{m}" for m in modules]
     args = [
         "mypy",
@@ -74,5 +85,4 @@ def types(ctx, modules, coverage=False, install_types=False):
     if coverage:
         check_type_hint_coverage.main()
     else:
-        print(args)
-        ctx.run(" ".join(args))
+        ctx.run(" ".join(args), echo=True)
