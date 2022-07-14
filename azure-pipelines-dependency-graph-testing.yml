@@ -109,6 +109,6 @@ stages:
               pip install pytest pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest tests/datasource/test_sparkdf_datasource.py::test_spark_kwargs_are_passed_through -vvs
+              pytest --postgresql --spark tests/datasource/test_sparkdf_datasource.py::test_spark_kwargs_are_passed_through -vvs
 
             displayName: 'pytest'
