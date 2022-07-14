@@ -11,7 +11,7 @@ from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
 from numbers import Number
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -89,7 +89,6 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
 
 _TEST_DEFS_DIR = os.path.join(
     os.path.dirname(__file__),
@@ -804,7 +803,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def get_success_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
-    ):
+    ) -> Dict[str, Any]:
         if not configuration:
             configuration = self.configuration
 
@@ -1928,12 +1927,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             assert (
                 "column" in configuration.kwargs
             ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+            _validate_mostly_config(configuration)
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -2072,9 +2066,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         )
         include_unexpected_rows = result_format.get("include_unexpected_rows")
 
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
         total_count = metrics.get("table.row_count")
         null_count = metrics.get("column_values.nonnull.unexpected_count")
         unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
@@ -2094,8 +2085,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
             # Vacuously true
             success = True
         elif nonnull_count > 0:
-            success_ratio = float(nonnull_count - unexpected_count) / nonnull_count
-            success = success_ratio >= mostly
+            success = _mostly_success(
+                nonnull_count, unexpected_count, self.get_success_kwargs().get("mostly")
+            )
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
@@ -2134,9 +2126,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -2145,12 +2135,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             assert (
                 "column_B" in configuration.kwargs
             ), "'column_B' parameter is required for column pair map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+            _validate_mostly_config(configuration)
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -2274,9 +2259,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
         unexpected_values = metrics.get(f"{self.map_metric}.unexpected_values")
@@ -2292,10 +2274,11 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             # Vacuously true
             success = True
         else:
-            success_ratio = (
-                float(filtered_row_count - unexpected_count) / filtered_row_count
+            success = _mostly_success(
+                filtered_row_count,
+                unexpected_count,
+                self.get_success_kwargs().get("mostly"),
             )
-            success = success_ratio >= mostly
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
@@ -2319,10 +2302,11 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "ignore_row_if",
     )
     domain_type = MetricDomainTypes.MULTICOLUMN
-    success_keys = tuple()
+    success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "mostly": 1,
         "ignore_row_if": "all_value_are_missing",
         "result_format": "BASIC",
         "include_config": True,
@@ -2333,14 +2317,13 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
                 "column_list" in configuration.kwargs
             ), "'column_list' parameter is required for multicolumn map expectations"
+            _validate_mostly_config(configuration)
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -2479,7 +2462,11 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             # Vacuously true
             success = True
         else:
-            success = unexpected_count == 0
+            success = _mostly_success(
+                filtered_row_count,
+                unexpected_count,
+                self.get_success_kwargs().get("mostly"),
+            )
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
@@ -2623,3 +2610,27 @@ def _format_map_output(
         return return_obj
 
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")
+
+
+def _validate_mostly_config(configuration: Optional[ExpectationConfiguration]) -> None:
+    """
+    Validates "mostly" in ExpectationConfiguration is a number if it exists.
+
+    Args:
+        configuration: The ExpectationConfiguration to be validated
+
+    Raises:
+        AssertionError: An error is mostly exists in the configuration but is not between 0 and 1.
+    """
+    if "mostly" in configuration.kwargs:
+        mostly = configuration.kwargs["mostly"]
+        assert isinstance(
+            mostly, (int, float)
+        ), "'mostly' parameter must be an integer or float"
+        assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+
+
+def _mostly_success(
+    rows_considered_cnt: int, unexpected_cnt: int, mostly: float
+) -> bool:
+    return float((rows_considered_cnt - unexpected_cnt) / rows_considered_cnt) >= mostly
