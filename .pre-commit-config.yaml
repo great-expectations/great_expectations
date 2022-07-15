@@ -31,3 +31,15 @@ repos:
     hooks:
       - id: pyupgrade
         args: ["--py3-plus"]
+# https://pre-commit.ci/
+ci:
+    autofix_commit_msg: |
+        [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+        for more information, see https://pre-commit.ci
+    autofix_prs: false
+    autoupdate_branch: 'develop'
+    autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+    autoupdate_schedule: monthly
+    skip: [flake8]
+    submodules: false
