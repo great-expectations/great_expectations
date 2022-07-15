@@ -58,10 +58,12 @@ def hooks(ctx, changes_only=False, diff=False):
     ctx.run(" ".join(cmds))
 
 
-@invoke.task(iterable=["modules"])
-def types(ctx, modules, coverage=False, install_types=False):
+@invoke.task(iterable=["packages"])
+def types(ctx, packages, coverage=False, install_types=False):
     """Static Type checking"""
-    modules = modules or [
+    # numbers next to each package represent the last known number of typing errors.
+    # when errors reach 0 please uncomment the module so it becomes type-checked by default.
+    packages = packages or [
         # "checkpoint",  # 78
         # "cli",  # 237
         # "core",  # 237
@@ -81,11 +83,11 @@ def types(ctx, modules, coverage=False, install_types=False):
         # "validation_operators", # 47
         # "validator",  # 46
     ]
-    # TODO: fix modules with low error count
-    ge_modules = [f"great_expectations/{m}" for m in modules]
+    # TODO: fix packages with low error count
+    ge_pkgs = [f"great_expectations/{p}" for p in packages]
     cmds = [
         "mypy",
-        *ge_modules,
+        *ge_pkgs,
         "--ignore-missing-imports",
         "--follow-imports=silent",
     ]
