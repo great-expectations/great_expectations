@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import Dict, List, Optional
 
 TYPE_HINT_ERROR_THRESHOLD: int = (
-    2501  # This number is to be reduced as we annotate more functions!
+    2488  # This number is to be reduced as we annotate more functions!
 )
 
 logger = logging.getLogger(__name__)

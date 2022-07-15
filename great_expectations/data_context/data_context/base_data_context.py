@@ -14,6 +14,9 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -308,6 +311,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
         # necessary properties / overrides
         self._synchronize_self_with_underlying_data_context()
+
+        self._variables = self._init_variables()
+
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
@@ -384,7 +390,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             store (Store)
         """
 
-        self.config["stores"][store_name] = store_config
+        self.config.stores[store_name] = store_config
         return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
@@ -400,12 +406,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             validation_operator (ValidationOperator)
         """
 
-        self.config["validation_operators"][
+        self.config.validation_operators[
             validation_operator_name
         ] = validation_operator_config
-        config = self.project_config_with_variables_substituted.validation_operators[
-            validation_operator_name
-        ]
+        config = self.variables.validation_operators[validation_operator_name]
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
             config=config,
@@ -434,9 +438,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
-        return list(
-            self.project_config_with_variables_substituted.data_docs_sites.keys()
-        )
+        return list(self.variables.data_docs_sites.keys())
 
     def get_docs_sites_urls(
         self,
@@ -465,9 +467,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        unfiltered_sites = (
-            self.project_config_with_variables_substituted.data_docs_sites
-        )
+        unfiltered_sites = self.variables.data_docs_sites
 
         # Filter out sites that are not in site_names
         sites = (
@@ -624,9 +624,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             skip_if_substitution_variable=skip_if_substitution_variable,
         )
         config_variables[config_variable_name] = value
-        config_variables_filepath = cast(
-            DataContextConfig, self.get_config()
-        ).config_variables_file_path
+        # Required to call _variables instead of variables property because we don't want to trigger substitutions
+        config = self._variables.config
+        config_variables_filepath = config.config_variables_file_path
         if not config_variables_filepath:
             raise ge_exceptions.InvalidConfigError(
                 "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
@@ -1422,7 +1422,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             Datasource that was added
 
         """
-        new_datasource = super().add_datasource(name, initialize, **kwargs)
+        new_datasource = super().add_datasource(
+            name=name, initialize=initialize, save_changes=save_changes, **kwargs
+        )
         self._synchronize_self_with_underlying_data_context()
         return new_datasource
 
@@ -1474,6 +1476,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
+        self.variables.config = project_config
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
@@ -1482,9 +1485,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         for (
             name,
             value,
-        ) in (
-            self.project_config_with_variables_substituted.validation_operators.items()
-        ):
+        ) in self.variables.validation_operators.items():
             value["name"] = name
             validation_operators.append(value)
         return validation_operators
@@ -1527,9 +1528,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite: ExpectationSuite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
+
+        key: Union[GeCloudIdentifier, ExpectationSuiteIdentifier]
         if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+            key = GeCloudIdentifier(
+                resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+                ge_cloud_id=ge_cloud_id,
             )
             if self.expectations_store.has_key(key) and not overwrite_existing:
                 raise ge_exceptions.DataContextError(
@@ -1539,7 +1543,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     )
                 )
         else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
             if self.expectations_store.has_key(key) and not overwrite_existing:
@@ -1566,14 +1570,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             True for Success and False for Failure.
         """
+        key: Union[GeCloudIdentifier, ExpectationSuiteIdentifier]
         if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+            key = GeCloudIdentifier(
+                resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+                ge_cloud_id=ge_cloud_id,
             )
         else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                expectation_suite_name
-            )
+            key = ExpectationSuiteIdentifier(expectation_suite_name)
         if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
@@ -1595,12 +1599,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             expectation_suite
         """
+        key: Union[GeCloudIdentifier, ExpectationSuiteIdentifier]
         if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+            key = GeCloudIdentifier(
+                resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+                ge_cloud_id=ge_cloud_id,
             )
         else:
-            key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
 
@@ -1779,7 +1785,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         index_page_locator_infos = {}
 
-        sites = self.project_config_with_variables_substituted.data_docs_sites
+        sites = self.variables.data_docs_sites
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -1836,7 +1842,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             site_name (str): Optional, the name of the site to clean. If not
             specified, all sites will be cleaned.
         """
-        data_docs_sites = self.project_config_with_variables_substituted.data_docs_sites
+        data_docs_sites = self.variables.data_docs_sites
         if not data_docs_sites:
             raise ge_exceptions.DataContextError(
                 "No data docs sites were found on this DataContext, therefore no sites will be cleaned.",
@@ -1856,7 +1862,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return all(cleaned)
 
     def _clean_data_docs_site(self, site_name: str) -> bool:
-        sites = self.project_config_with_variables_substituted.data_docs_sites
+        sites = self.variables.data_docs_sites
         if not sites:
             return False
         site_config = sites.get(site_name)
@@ -2445,7 +2451,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
         ge_cloud_id: Optional[str] = None,
-    ):
+    ) -> RuleBasedProfiler:
         config_data = {
             "name": name,
             "config_version": config_version,
@@ -2819,7 +2825,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ),
         )
         store_name = instantiated_class.store_name or store_name
-        self.config["stores"][store_name] = config
+        self.config.stores[store_name] = config
 
         anonymizer = Anonymizer(self.data_context_id)
         usage_stats_event_payload = anonymizer.anonymize(
@@ -2842,6 +2848,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 name=datasource_name,
                 config=config,
                 initialize=True,
+                save_changes=False,
             ),
         )
 
