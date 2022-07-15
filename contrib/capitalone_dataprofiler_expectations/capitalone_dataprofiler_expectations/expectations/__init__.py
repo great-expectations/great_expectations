@@ -24,3 +24,6 @@ from .expect_profile_numeric_columns_diff_less_than_threshold import (
 from .expect_profile_numeric_columns_diff_greater_than_threshold import (
     ExpectProfileNumericColumnsDiffGreaterThanThreshold
 ) 
+from .expect_profile_numeric_columns_diff_between_inclusive_threshold_range import (
+    ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange,
+)
