@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Optional
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.ge_cloud_store_backend import (
@@ -29,7 +29,10 @@ class Store:
     _key_class = DataContextKey
 
     def __init__(
-        self, store_backend=None, runtime_environment=None, store_name="no_store_name"
+        self,
+        store_backend: Optional[dict] = None,
+        runtime_environment: Optional[dict] = None,
+        store_name: str = "no_store_name",
     ) -> None:
         """
         Runtime environment may be necessary to instantiate store backend elements.
@@ -78,15 +81,15 @@ class Store:
             )
 
     @property
-    def ge_cloud_mode(self):
+    def ge_cloud_mode(self) -> bool:
         return isinstance(self._store_backend, GeCloudStoreBackend)
 
     @property
-    def store_backend(self):
+    def store_backend(self) -> dict:
         return self._store_backend
 
     @property
-    def store_name(self):
+    def store_name(self) -> str:
         return self._store_name
 
     @property
@@ -114,7 +117,7 @@ class Store:
         return self._store_backend.store_backend_id_warnings_suppressed
 
     # noinspection PyMethodMayBeStatic
-    def serialize(self, key, value):
+    def serialize(self, value):
         return value
 
     # noinspection PyMethodMayBeStatic
@@ -131,7 +134,7 @@ class Store:
         return self.key_class.from_tuple(tuple_)
 
     # noinspection PyMethodMayBeStatic
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         return value
 
     def get(self, key):
@@ -148,7 +151,7 @@ class Store:
             value = self._store_backend.get(self.key_to_tuple(key))
 
         if value:
-            return self.deserialize(key, value)
+            return self.deserialize(value)
         else:
             return None
 
@@ -158,7 +161,7 @@ class Store:
         else:
             self._validate_key(key)
             return self._store_backend.set(
-                self.key_to_tuple(key), self.serialize(key, value), **kwargs
+                self.key_to_tuple(key), self.serialize(value), **kwargs
             )
 
     def list_keys(self):

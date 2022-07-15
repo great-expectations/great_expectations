@@ -50,8 +50,11 @@ class SqlAlchemyDataSampler(DataSampler):
         """
 
         # Split clause should be permissive of all values if not supplied.
-        if not where_clause:
-            where_clause = True
+        if where_clause is None:
+            if execution_engine.dialect_name == "sqlite":
+                where_clause = sa.text("1 = 1")
+            else:
+                where_clause = sa.true()
 
         table_name: str = batch_spec["table_name"]
 
@@ -77,7 +80,6 @@ class SqlAlchemyDataSampler(DataSampler):
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
         elif dialect_name == GESqlDialect.MSSQL.value:
-            # TODO: AJB 20220429 WARNING THIS mssql dialect METHOD IS NOT COVERED BY TESTS
             # Note that this code path exists because the limit parameter is not getting rendered
             # successfully in the resulting mssql query.
             selectable_query: Selectable = (
@@ -109,7 +111,8 @@ class SqlAlchemyDataSampler(DataSampler):
                 .limit(batch_spec["sampling_kwargs"]["n"])
             )
 
-    def _validate_mssql_limit_param(self, n: Union[str, int]) -> None:
+    @staticmethod
+    def _validate_mssql_limit_param(n: Union[str, int]) -> None:
         """Validate that the mssql limit param is passed as an int or a string representation of an int.
 
         Args:
@@ -128,8 +131,8 @@ class SqlAlchemyDataSampler(DataSampler):
                 "parseable as an integer."
             )
 
+    @staticmethod
     def sample_using_random(
-        self,
         execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
         batch_spec: BatchSpec,
         where_clause: Optional[Selectable] = None,
@@ -174,28 +177,85 @@ class SqlAlchemyDataSampler(DataSampler):
 
     def sample_using_mod(
         self,
-        column_name: str,
-        mod: int,
-        value: int,
-    ) -> bool:
-        """Take the mod of named column, and only keep rows that match the given value"""
+        batch_spec: BatchSpec,
+    ) -> Selectable:
+        """Take the mod of named column, and only keep rows that match the given value.
+
+        Args:
+            batch_spec: should contain keys `column_name`, `mod` and `value`
+
+        Returns:
+            Sampled selectable
+
+        Raises:
+            SamplerError
+        """
+        self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("mod", batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("value", batch_spec)
+        column_name: str = self.get_sampling_kwargs_value_or_default(
+            batch_spec, "column_name"
+        )
+        mod: int = self.get_sampling_kwargs_value_or_default(batch_spec, "mod")
+        value: int = self.get_sampling_kwargs_value_or_default(batch_spec, "value")
+
         return sa.column(column_name) % mod == value
 
     def sample_using_a_list(
         self,
-        column_name: str,
-        value_list: list,
-    ) -> bool:
-        """Match the values in the named column against value_list, and only keep the matches"""
+        batch_spec: BatchSpec,
+    ) -> Selectable:
+        """Match the values in the named column against value_list, and only keep the matches.
+
+        Args:
+            batch_spec: should contain keys `column_name` and `value_list`
+
+        Returns:
+            Sampled selectable
+
+        Raises:
+            SamplerError
+        """
+        self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("value_list", batch_spec)
+        column_name: str = self.get_sampling_kwargs_value_or_default(
+            batch_spec, "column_name"
+        )
+        value_list: list = self.get_sampling_kwargs_value_or_default(
+            batch_spec, "value_list"
+        )
         return sa.column(column_name).in_(value_list)
 
     def sample_using_md5(
         self,
-        column_name: str,
-        hash_digits: int = 1,
-        hash_value: str = "f",
-    ) -> bool:
-        """Hash the values in the named column, and split on that"""
+        batch_spec: BatchSpec,
+    ) -> Selectable:
+        """Hash the values in the named column using md5, and only keep rows that match the given hash_value.
+
+        Args:
+            batch_spec: should contain keys `column_name` and optionally `hash_digits`
+                (default is 1 if not provided), `hash_value` (default is "f" if not provided)
+
+        Returns:
+            Sampled selectable
+
+        Raises:
+            SamplerError
+        """
+        self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
+        self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
+        column_name: str = self.get_sampling_kwargs_value_or_default(
+            batch_spec, "column_name"
+        )
+        hash_digits: int = self.get_sampling_kwargs_value_or_default(
+            batch_spec=batch_spec, sampling_kwargs_key="hash_digits", default_value=1
+        )
+        hash_value: str = self.get_sampling_kwargs_value_or_default(
+            batch_spec=batch_spec, sampling_kwargs_key="hash_value", default_value="f"
+        )
+
         return (
             sa.func.right(
                 sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits

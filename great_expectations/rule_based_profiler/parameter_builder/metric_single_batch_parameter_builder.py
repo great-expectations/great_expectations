@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -36,7 +35,6 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> None:
         """
@@ -54,7 +52,6 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
@@ -66,7 +63,6 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -83,33 +79,19 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        num_batch_ids: int = len(batch_ids)
-        if num_batch_ids != 1:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Utilizing a {self.__class__.__name__} requires exactly one Batch of data to be available
-({num_batch_ids} Batch identifiers found).
-"""
-            )
-
         # Compute metric value for one Batch object (expressed as list of Batch objects).
         super().build_parameters(
             domain=domain,
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            json_serialize=False,
             recompute_existing_parameter_values=recompute_existing_parameter_values,
         )
 
         # Retrieve metric values for one Batch object (expressed as list of Batch objects).
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self.fully_qualified_parameter_name,
+            parameter_reference=self.raw_fully_qualified_parameter_name,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,

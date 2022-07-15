@@ -77,7 +77,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if class_name is None:
         logger.warning(
             "Instantiating class from config without an explicit class_name is dangerous. Consider adding "
-            "an explicit class_name for %s" % config.get("name")
+            f"an explicit class_name for {config.get('name')}"
         )
         try:
             class_name = config_defaults.pop("class_name")
@@ -127,11 +127,11 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
 
 
 def build_store_from_config(
-    store_name: str = None,
-    store_config: dict = None,
+    store_name: Optional[str] = None,
+    store_config: Optional[dict] = None,
     module_name: str = "great_expectations.data_context.store",
-    runtime_environment: dict = None,
-):
+    runtime_environment: Optional[dict] = None,
+) -> Optional["Store"]:  # noqa: F821
     if store_config is None or module_name is None:
         return None
 
@@ -167,7 +167,7 @@ def format_dict_for_error_message(dict_):
 
 def substitute_config_variable(
     template_str, config_variables_dict, dollar_sign_escape_string: str = r"\$"
-):
+) -> Optional[str]:
     """
     This method takes a string, and if it contains a pattern ${SOME_VARIABLE} or $SOME_VARIABLE,
     returns a string where the pattern is replaced with the value of SOME_VARIABLE,
@@ -220,7 +220,7 @@ def substitute_config_variable(
             raise ge_exceptions.MissingConfigVariableError(
                 f"""\n\nUnable to find a match for config substitution variable: `{config_variable_name}`.
 Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
-See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets""",
+See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials""",
                 missing_config_variable=config_variable_name,
             )
 

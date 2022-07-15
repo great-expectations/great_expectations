@@ -14,6 +14,7 @@ import great_expectations as ge
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.util import get_or_create_spark_application
@@ -21,6 +22,7 @@ from great_expectations.data_context.data_context.data_context import DataContex
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -1380,6 +1382,61 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_checkpoint_name_in_meta_when_run(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    checkpoint_name: str = "test_checkpoint_name"
+    # add checkpoint config
+    checkpoint_config: CheckpointConfig = CheckpointConfig(
+        name=checkpoint_name,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+        ],
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_basic_data_connector",
+                    "data_asset_name": "Titanic_1911",
+                }
+            }
+        ],
+    )
+    checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=checkpoint_config.name
+    )
+    context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
+    checkpoint: Checkpoint = context.get_checkpoint(checkpoint_config.name)
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    result: CheckpointResult = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+    validation_result_identifier: ValidationResultIdentifier = (
+        context.validations_store.list_keys()[0]
+    )
+    validation_result: ExpectationSuiteValidationResult = context.validations_store.get(
+        validation_result_identifier
+    )
+
+    assert "checkpoint_name" in validation_result.meta
+    assert validation_result.meta["checkpoint_name"] == checkpoint_name
+
+
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1616,6 +1673,94 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                 {"batch_request": batch_request},
             ]
         )
+
+    assert mock_emit.call_count == 1
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
+                    "config_version": 1,
+                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_action_list": [
+                        {
+                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                            "parent_class": "StoreValidationResultAction",
+                        },
+                        {
+                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                            "parent_class": "StoreEvaluationParametersAction",
+                        },
+                        {
+                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                            "parent_class": "UpdateDataDocsAction",
+                        },
+                    ],
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                                    "anonymized_data_asset_name": "7e60092b1b9b96327196fdba39029b9e",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_identifiers",
+                                    "runtime_parameters",
+                                ],
+                                "runtime_parameters_keys": ["batch_data"],
+                            },
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                                }
+                            },
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                    ],
+                },
+                "event": "checkpoint.run",
+                "success": False,
+            }
+        )
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     assert len(context.validations_store.list_keys()) == 0
 
@@ -1868,6 +2013,13 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert actual_events == expected_events
+
+    # Since there are two validations, confirming there should be two "data_asset.validate" events
+    num_data_asset_validate_events = 0
+    for event in actual_events:
+        if event[0][0]["event"] == "data_asset.validate":
+            num_data_asset_validate_events += 1
+    assert num_data_asset_validate_events == 2
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
@@ -4918,3 +5070,67 @@ def test_newstyle_checkpoint_result_can_be_pickled(
 
     result: CheckpointResult = checkpoint.run()
     assert isinstance(pickle.dumps(result), bytes)
+
+
+def test_newstyle_checkpoint_result_validations_include_rendered_content(
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
+    sa,
+):
+    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    include_rendered_content: bool = True
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        "validations": [
+            {
+                "batch_request": batch_request,
+                "include_rendered_content": include_rendered_content,
+            }
+        ],
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+
+    result: CheckpointResult = checkpoint.run()
+    validation_result_identifier: ValidationResultIdentifier = (
+        result.list_validation_result_identifiers()[0]
+    )
+    assert (
+        result.run_results[validation_result_identifier]["validation_result"]
+        .results[0]
+        .rendered_content
+        is not None
+    )

@@ -1,9 +1,12 @@
 import copy
 import json
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    determine_progress_bar_method_by_environment,
+)
 from great_expectations.rule_based_profiler.config.base import (
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
@@ -29,7 +32,10 @@ from great_expectations.rule_based_profiler.types import (
     build_parameter_container_for_variables,
 )
 from great_expectations.types import SerializableDictDot
-from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    measure_execution_time,
+)
 
 
 class Rule(SerializableDictDot):
@@ -73,6 +79,13 @@ class Rule(SerializableDictDot):
         self._parameter_builders = parameter_builders
         self._expectation_configuration_builders = expectation_configuration_builders
 
+        self._execution_time = None
+
+    @measure_execution_time(
+        execution_time_holder_object_reference_name="rule_state",
+        execution_time_property_name="execution_time",
+        pretty_print=False,
+    )
     def run(
         self,
         variables: Optional[ParameterContainer] = None,
@@ -80,6 +93,7 @@ class Rule(SerializableDictDot):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
+        rule_state: Optional[RuleState] = None,
     ) -> RuleState:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
@@ -91,6 +105,7 @@ class Rule(SerializableDictDot):
             batch_request: Explicit batch_request used to supply data at runtime
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
+            rule_state: holds "Rule" execution state and responds to "execution_time_property_name" ("execution_time")
 
         Returns:
             RuleState representing effect of executing Rule
@@ -112,15 +127,26 @@ class Rule(SerializableDictDot):
                 batch_request=batch_request,
             )
         )
-        rule_state: RuleState = RuleState(
-            rule=self,
-            variables=variables,
-            domains=domains,
-        )
+
+        if rule_state is None:
+            rule_state = RuleState()
+
+        rule_state.rule = self
+        rule_state.variables = variables
+        rule_state.domains = domains
+
         rule_state.reset_parameter_containers()
 
+        pbar_method: Callable = determine_progress_bar_method_by_environment()
+
         domain: Domain
-        for domain in domains:
+        for domain in pbar_method(
+            domains,
+            desc="Profiling Dataset:",
+            position=1,
+            leave=False,
+            bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
+        ):
             rule_state.initialize_parameter_container_for_domain(domain=domain)
 
             parameter_builders: List[ParameterBuilder] = self.parameter_builders or []
@@ -131,7 +157,6 @@ class Rule(SerializableDictDot):
                     variables=variables,
                     parameters=rule_state.parameters,
                     parameter_computation_impl=None,
-                    json_serialize=None,
                     batch_list=batch_list,
                     batch_request=batch_request,
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
@@ -185,6 +210,13 @@ class Rule(SerializableDictDot):
         self,
     ) -> Optional[List[ExpectationConfigurationBuilder]]:
         return self._expectation_configuration_builders
+
+    @property
+    def execution_time(self) -> Optional[float]:  # Execution time (in seconds).
+        """
+        Property that holds "execution_time" of this "Rule" (in seconds).
+        """
+        return self._execution_time
 
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None

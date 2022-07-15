@@ -1,11 +1,29 @@
-import pytest
+import datetime
+import os
+from typing import List
 
+import pandas as pd
+import pytest
+from dateutil.parser import parse
+
+from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
+)
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import import_library_module
+
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
 
 
 @pytest.mark.parametrize(
@@ -59,7 +77,7 @@ def clean_query_for_comparison(query_string: str) -> str:
 @pytest.fixture
 def dialect_name_to_sql_statement():
     def _dialect_name_to_sql_statement(dialect_name: GESqlDialect) -> str:
-        DIALECT_NAME_TO_SQL_STATEMENT: dict = {
+        dialect_name_to_sql_statement: dict = {
             GESqlDialect.POSTGRESQL: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
             GESqlDialect.MYSQL: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE = 1 LIMIT 10",
             GESqlDialect.ORACLE: "SELECT * FROM test_schema_name.test_table WHERE 1 = 1 AND ROWNUM <= 10",
@@ -72,8 +90,9 @@ def dialect_name_to_sql_statement():
             GESqlDialect.DREMIO: 'SELECT * FROM "TEST_SCHEMA_NAME"."TEST_TABLE" WHERE 1 = 1 LIMIT 10',
             GESqlDialect.TERADATASQL: "SELECT TOP 10 * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1",
             GESqlDialect.TRINO: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
+            GESqlDialect.HIVE: "SELECT * FROM `TEST_SCHEMA_NAME`.`TEST_TABLE` WHERE TRUE LIMIT 10",
         }
-        return DIALECT_NAME_TO_SQL_STATEMENT[dialect_name]
+        return dialect_name_to_sql_statement[dialect_name]
 
     return _dialect_name_to_sql_statement
 
@@ -81,7 +100,9 @@ def dialect_name_to_sql_statement():
 @pytest.mark.parametrize(
     "dialect_name",
     [
-        pytest.param(dialect_name, id=dialect_name.value)
+        pytest.param(
+            dialect_name, id=dialect_name.value, marks=pytest.mark.external_sqldialect
+        )
         for dialect_name in GESqlDialect.get_all_dialects()
     ],
 )
@@ -115,6 +136,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             GESqlDialect.DREMIO: "dremio://",
             GESqlDialect.TERADATASQL: "teradatasql://",
             GESqlDialect.TRINO: "trino://",
+            GESqlDialect.HIVE: "hive://",
         }
 
         @property
@@ -132,15 +154,18 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             #  and then use it here.
             dialect_name: GESqlDialect = self._dialect_name
             if dialect_name == GESqlDialect.ORACLE:
+                # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name="sqlalchemy.dialects.oracle"
                 ).dialect()
             elif dialect_name == GESqlDialect.SNOWFLAKE:
+                # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name="snowflake.sqlalchemy.snowdialect"
                 ).dialect()
             elif dialect_name == GESqlDialect.DREMIO:
                 # WARNING: Dremio Support is experimental, functionality is not fully under test
+                # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name="sqlalchemy_dremio.pyodbc"
                 ).dialect()
@@ -151,11 +176,13 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             #         module_name="sqlalchemy_redshift.dialect"
             #     ).RedshiftDialect
             elif dialect_name == GESqlDialect.BIGQUERY:
+                # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name=self._BIGQUERY_MODULE_NAME
                 ).dialect()
             elif dialect_name == GESqlDialect.TERADATASQL:
                 # WARNING: Teradata Support is experimental, functionality is not fully under test
+                # noinspection PyUnresolvedReferences
                 return import_library_module(
                     module_name="teradatasqlalchemy.dialect"
                 ).dialect()
@@ -197,3 +224,131 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
     )
 
     assert query_str == expected
+
+
+@pytest.mark.integration
+def test_sqlite_sample_using_limit(sa):
+
+    csv_path: str = file_relative_path(
+        os.path.dirname(os.path.dirname(__file__)),
+        os.path.join(
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "ten_trips_from_each_month",
+            "yellow_tripdata_sample_10_trips_from_each_month.csv",
+        ),
+    )
+    df: pd.DataFrame = pd.read_csv(csv_path)
+    engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
+
+    n: int = 10
+    batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
+        table_name="test",
+        schema_name="main",
+        sampling_method="sample_using_limit",
+        sampling_kwargs={"n": n},
+    )
+    batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
+
+    # Right number of rows?
+    num_rows: int = batch_data.execution_engine.engine.execute(
+        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == n
+
+    # Right rows?
+    rows: sa.Row = batch_data.execution_engine.engine.execute(
+        sa.select([sa.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
+    for row_date in row_dates:
+        assert row_date.month == 1
+        assert row_date.year == 2018
+
+
+def test_sample_using_random(sqlite_view_engine, test_df):
+    my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
+
+    p: float
+    batch_spec: SqlAlchemyDatasourceBatchSpec
+    batch_data: SqlAlchemyBatchData
+    num_rows: int
+    rows_0: List[tuple]
+    rows_1: List[tuple]
+
+    # First, make sure that degenerative case never passes.
+
+    test_df_0: pd.DataFrame = test_df.iloc[:1]
+    test_df_0.to_sql("test_table_0", con=my_execution_engine.engine)
+
+    p = 1.0
+    batch_spec = SqlAlchemyDatasourceBatchSpec(
+        table_name="test_table_0",
+        schema_name="main",
+        sampling_method="_sample_using_random",
+        sampling_kwargs={"p": p},
+    )
+
+    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
+    num_rows = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == round(p * test_df_0.shape[0])
+
+    rows_0: List[tuple] = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
+    num_rows = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == round(p * test_df_0.shape[0])
+
+    rows_1: List[tuple] = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    assert len(rows_0) == len(rows_1) == 1
+
+    assert rows_0 == rows_1
+
+    # Second, verify that realistic case always returns different random sample of rows.
+
+    test_df_1: pd.DataFrame = test_df
+    test_df_1.to_sql("test_table_1", con=my_execution_engine.engine)
+
+    p = 2.0e-1
+    batch_spec = SqlAlchemyDatasourceBatchSpec(
+        table_name="test_table_1",
+        schema_name="main",
+        sampling_method="_sample_using_random",
+        sampling_kwargs={"p": p},
+    )
+
+    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
+    num_rows = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == round(p * test_df_1.shape[0])
+
+    rows_0 = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
+    num_rows = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == round(p * test_df_1.shape[0])
+
+    rows_1 = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    assert len(rows_0) == len(rows_1)
+
+    assert not (rows_0 == rows_1)

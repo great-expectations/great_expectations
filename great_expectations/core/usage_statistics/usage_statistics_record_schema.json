@@ -1481,9 +1481,9 @@
         }
       ]
     },
-    "anonymized_save_or_edit_expectation_suite_payload": {
+    "anonymized_get_or_edit_or_save_expectation_suite_payload": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "title": "anonymized-save-or-edit-expectation-suite-payload",
+      "title": "anonymized-get-or-edit-or-save-expectation-suite-payload",
       "definitions": {
         "anonymized_string": {
           "$schema": "http://json-schema.org/draft-04/schema#",
@@ -5229,19 +5229,6 @@
       "properties": {
         "event": {
           "enum": [
-            "data_context.save_expectation_suite"
-          ]
-        },
-        "event_payload": {
-          "$ref": "#/definitions/anonymized_save_or_edit_expectation_suite_payload"
-        }
-      }
-    },
-    {
-      "type": "object",
-      "properties": {
-        "event": {
-          "enum": [
             "data_context.run_validation_operator"
           ]
         },
@@ -5331,6 +5318,21 @@
         },
         "event_payload": {
           "$ref": "#/definitions/empty_payload"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event": {
+          "enum": [
+            "data_context.save_expectation_suite",
+            "profiler.result.get_expectation_suite",
+            "data_assistant.result.get_expectation_suite"
+          ]
+        },
+        "event_payload": {
+          "$ref": "#/definitions/anonymized_get_or_edit_or_save_expectation_suite_payload"
         }
       }
     },

@@ -26,7 +26,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -39,7 +39,6 @@ from great_expectations.core.expectation_suite import (
     expectationSuiteSchema,
 )
 from great_expectations.exceptions import (
-    GreatExpectationsError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -73,61 +72,36 @@ except ImportError:
     Table = None
     Select = None
 
-SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
-    "batch": "batches",
-    "checkpoint": "checkpoints",
-    "data_asset": "data_assets",
-    "expectation": "expectations",
-    "expectation_suite": "expectation_suites",
-    "suite_validation_result": "suite_validation_results",
-    "expectation_validation_result": "expectation_validation_results",
-    "contract": "contracts",
-    "rendered_data_doc": "rendered_data_docs",
-}
-
-PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
-    "batches": "batch",
-    "checkpoints": "checkpoint",
-    "data_assets": "data_asset",
-    "expectations": "expectation",
-    "expectation_suites": "expectation_suite",
-    "suite_validation_results": "suite_validation_result",
-    "expectation_validation_results": "expectation_validation_result",
-    "contracts": "contract",
-    "rendered_data_docs": "rendered_data_doc",
-}
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
-def pluralize(singular_ge_noun):
+class bidict(dict):
     """
-    Pluralizes a Great Expectations singular noun
+    Bi-directional hashmap: https://stackoverflow.com/a/21894086
     """
-    try:
-        return SINGULAR_TO_PLURAL_LOOKUP_DICT[singular_ge_noun.lower()]
-    except KeyError:
-        raise GreatExpectationsError(
-            f"Unable to pluralize '{singular_ge_noun}'. Please update "
-            f"great_expectations.util.SINGULAR_TO_PLURAL_LOOKUP_DICT"
-        )
+
+    def __init__(self, *args: List[Any], **kwargs: Dict[str, Any]) -> None:
+        super().__init__(*args, **kwargs)
+        self.inverse = {}
+        for key, value in self.items():
+            self.inverse.setdefault(value, []).append(key)
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        if key in self:
+            self.inverse[self[key]].remove(key)
+        super().__setitem__(key, value)
+        self.inverse.setdefault(value, []).append(key)
+
+    def __delitem__(self, key: str):
+        self.inverse.setdefault(self[key], []).remove(key)
+        if self[key] in self.inverse and not self.inverse[self[key]]:
+            del self.inverse[self[key]]
+        super().__delitem__(key)
 
 
-def singularize(plural_ge_noun):
-    """
-    Singularizes a Great Expectations plural noun
-    """
-    try:
-        return PLURAL_TO_SINGULAR_LOOKUP_DICT[plural_ge_noun.lower()]
-    except KeyError:
-        raise GreatExpectationsError(
-            f"Unable to singularize '{plural_ge_noun}'. Please update "
-            f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
-        )
-
-
-def camel_to_snake(name):
+def camel_to_snake(name: str) -> str:
     name = p1.sub(r"\1_\2", name)
     return p2.sub(r"\1_\2", name).lower()
 
@@ -180,6 +154,7 @@ def measure_execution_time(
     execution_time_holder_object_reference_name: str = "execution_time_holder",
     execution_time_property_name: str = "execution_time",
     pretty_print: bool = True,
+    include_arguments: bool = True,
 ) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
         @wraps(func)
@@ -216,11 +191,19 @@ def measure_execution_time(
                     )
 
                 if pretty_print:
-                    bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-                    call_args: OrderedDict = bound_args.arguments
-                    print(
-                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} seconds."
-                    )
+                    if include_arguments:
+                        bound_args: BoundArguments = signature(func).bind(
+                            *args, **kwargs
+                        )
+                        call_args: OrderedDict = bound_args.arguments
+                        print(
+                            f"""Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} \
+seconds."""
+                        )
+                    else:
+                        print(
+                            f"Total execution time of function {func.__name__}(): {delta_t} seconds."
+                        )
 
         return compute_delta_t
 
@@ -918,8 +901,7 @@ def validate(
                 "When providing an expectation suite, expectation_suite_name cannot also be provided."
             )
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s"
-            % (data_asset_name, expectation_suite.expectation_suite_name)
+            f"Validating data_asset_name {data_asset_name} with expectation_suite_name {expectation_suite.expectation_suite_name}"
         )
 
     # If the object is already a DataAsset type, then this is purely a convenience method
@@ -1474,6 +1456,14 @@ def get_pyathena_potential_type(type_module, type_):
         # < 2.5 column type mapping
         potential_type = type_module._TYPE_MAPPINGS.get(type_)
 
+    return potential_type
+
+
+def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
+    """
+    Leverage on Trino Package to return sqlalchemy sql type
+    """
+    potential_type = type_module.parse_sqltype(type_)
     return potential_type
 
 

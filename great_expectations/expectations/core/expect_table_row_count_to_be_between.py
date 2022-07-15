@@ -8,7 +8,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
-    parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 from great_expectations.rule_based_profiler.config import (
@@ -16,6 +15,7 @@ from great_expectations.rule_based_profiler.config import (
     RuleBasedProfilerConfig,
 )
 from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
@@ -92,7 +92,8 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="table_row_count_range_estimator",
         metric_name="table.row_count",
-        metric_domain_kwargs=None,
+        metric_multi_batch_parameter_builder_name=None,
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,
         replace_nan_with_zero=True,
@@ -106,7 +107,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         table_row_count_range_estimator_parameter_builder_config,
@@ -204,8 +204,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             [
                 "min_value",
                 "max_value",
-                "row_condition",
-                "condition_parser",
                 "strict_min",
                 "strict_max",
             ],
@@ -219,10 +217,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "max_value": {
                 "schema": {"type": "number"},
                 "value": params.get("max_value"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
             },
             "strict_min": {
                 "schema": {"type": "boolean"},
@@ -245,21 +239,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
 
@@ -285,8 +264,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             [
                 "min_value",
                 "max_value",
-                "row_condition",
-                "condition_parser",
                 "strict_min",
                 "strict_max",
             ],
@@ -303,19 +280,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(

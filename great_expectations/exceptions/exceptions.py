@@ -120,18 +120,28 @@ class ProfilerError(GreatExpectationsError):
 
 
 class ProfilerConfigurationError(ProfilerError):
-    """A configuration error for a profiler."""
+    """A configuration error for a "RuleBasedProfiler" class."""
 
     pass
 
 
 class ProfilerExecutionError(ProfilerError):
-    """A runtime error for a profiler."""
+    """A runtime error for a "RuleBasedProfiler" class."""
 
     pass
 
 
 class ProfilerNotFoundError(ProfilerError):
+    pass
+
+
+class DataAssistantError(ProfilerError):
+    pass
+
+
+class DataAssistantExecutionError(DataAssistantError):
+    """A runtime error for a "DataAssistant" class."""
+
     pass
 
 
@@ -166,6 +176,10 @@ class InvalidExpectationKwargsError(GreatExpectationsError):
 
 
 class InvalidExpectationConfigurationError(GreatExpectationsError):
+    pass
+
+
+class ExpectationNotFoundError(GreatExpectationsError):
     pass
 
 
@@ -374,6 +388,10 @@ class SorterError(DataContextError):
     def __init__(self, message) -> None:
         self.message = message
         super().__init__(self.message)
+
+
+class SamplerError(DataContextError):
+    pass
 
 
 class MetricError(GreatExpectationsError):

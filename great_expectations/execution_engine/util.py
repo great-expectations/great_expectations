@@ -35,6 +35,7 @@ def is_valid_categorical_partition_object(partition_object):
         or ("values" not in partition_object)
     ):
         return False
+
     # Expect the same number of values as weights; weights should sum to one
     return len(partition_object["values"]) == len(
         partition_object["weights"]
@@ -116,19 +117,20 @@ def build_continuous_partition_object(
         bins = bins.tolist()
     else:
         bins = list(bins)
+
     hist_metric_configuration = MetricConfiguration(
         "column.histogram",
         metric_domain_kwargs=domain_kwargs,
         metric_value_kwargs={
             "bins": tuple(bins),
         },
+        metric_dependencies=None,
     )
     nonnull_configuration = MetricConfiguration(
         "column_values.nonnull.count",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={
-            "bins": tuple(bins),
-        },
+        metric_value_kwargs=None,
+        metric_dependencies=None,
     )
     metrics = execution_engine.resolve_metrics(
         (hist_metric_configuration, nonnull_configuration)
@@ -172,10 +174,13 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
         metric_value_kwargs={
             "sort": sort,
         },
+        metric_dependencies=None,
     )
     nonnull_configuration = MetricConfiguration(
         "column_values.nonnull.count",
         metric_domain_kwargs=domain_kwargs,
+        metric_value_kwargs=None,
+        metric_dependencies=None,
     )
     metrics = execution_engine.resolve_metrics(
         (counts_configuration, nonnull_configuration)

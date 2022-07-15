@@ -108,6 +108,7 @@ class SqlAlchemyBatchData(BatchData):
             raise ValueError(
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
             )
+
         dialect: GESqlDialect = GESqlDialect(engine.dialect.name.lower())
         if table_name:
             # Suggestion: pull this block out as its own _function
@@ -135,6 +136,7 @@ class SqlAlchemyBatchData(BatchData):
             # mssql expects all temporary table names to have a prefix '#'
             if dialect == GESqlDialect.MSSQL:
                 generated_table_name = f"#{generated_table_name}"
+
             if selectable is not None:
                 if dialect in [GESqlDialect.ORACLE, GESqlDialect.MSSQL] and isinstance(
                     selectable, str
@@ -147,6 +149,7 @@ class SqlAlchemyBatchData(BatchData):
                         dialect=self.sql_engine_dialect,
                         compile_kwargs={"literal_binds": True},
                     )
+
             self._create_temporary_table(
                 temp_table_name=generated_table_name,
                 query=query,
@@ -196,9 +199,10 @@ class SqlAlchemyBatchData(BatchData):
         :param query:
         """
         dialect_name: str = self.sql_engine_dialect.name.lower()
-        if dialect_name in GESqlDialect.get_all_dialect_names():
+
+        try:
             dialect: Union[GESqlDialect, str] = GESqlDialect(dialect_name)
-        else:
+        except ValueError:
             dialect: Union[GESqlDialect, str] = dialect_name
 
         if dialect == GESqlDialect.BIGQUERY:
@@ -218,9 +222,9 @@ class SqlAlchemyBatchData(BatchData):
 
             stmt = f"CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}"
         elif dialect == GESqlDialect.MYSQL:
-            # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the
-            # generic case.
             stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS {query}"
+        elif dialect == GESqlDialect.HIVE:
+            stmt = f"CREATE TEMPORARY TABLE `{temp_table_name}` AS {query}"
         elif dialect == GESqlDialect.MSSQL:
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
@@ -240,6 +244,11 @@ class SqlAlchemyBatchData(BatchData):
             )
         # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
         # Similar message may be needed in the future for Trino backend.
+        elif dialect == GESqlDialect.TRINO:
+            logger.warning(
+                f"GE has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
+            )
+            stmt = f"CREATE TABLE {temp_table_name} AS {query}"
         elif dialect == GESqlDialect.AWSATHENA:
             logger.warning(
                 f"GE has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
