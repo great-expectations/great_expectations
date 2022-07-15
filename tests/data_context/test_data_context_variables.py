@@ -1,4 +1,5 @@
-from typing import Any, Callable, cast
+import os
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -18,7 +19,6 @@ from great_expectations.data_context.types.base import (
     NotebookConfig,
     NotebookTemplateConfig,
     ProgressBarsConfig,
-    dataContextConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -77,10 +77,12 @@ def ephemeral_data_context_variables(
 
 @pytest.fixture
 def file_data_context_variables(
-    data_context_config: DataContextConfig, empty_data_context: DataContext
+    tmp_path, data_context_config: DataContextConfig
 ) -> FileDataContextVariables:
+    tmp_path = str(tmp_path)
+    config_filepath = os.path.join(tmp_path, "great_expectations.yml")
     return FileDataContextVariables(
-        data_context=empty_data_context, config=data_context_config
+        config=data_context_config, config_filepath=config_filepath
     )
 
 
@@ -375,7 +377,7 @@ def test_data_context_variables_save_config(
 
     # FileDataContextVariables
     with mock.patch(
-        "great_expectations.data_context.DataContext._save_project_config",
+        "great_expectations.data_context.store.inline_store_backend.InlineStoreBackend._save_changes",
         autospec=True,
     ) as mock_save:
         file_data_context_variables.save_config()

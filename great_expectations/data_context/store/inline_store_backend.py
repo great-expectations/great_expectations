@@ -193,7 +193,7 @@ class InlineStoreBackend(StoreBackend):
             )
 
     def _save_changes(self) -> None:
-        with open(self._project_config_filepath) as outfile:
+        with open(self._project_config_filepath, "w") as outfile:
             self._project_config.to_yaml(outfile)
 
     @staticmethod

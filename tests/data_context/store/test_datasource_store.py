@@ -1,11 +1,11 @@
 import copy
+import os
 from typing import cast
 from unittest.mock import PropertyMock, patch
 
 import pytest
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -154,12 +154,18 @@ def test_datasource_store_retrieval_cloud_mode(
         )
 
 
+@pytest.mark.integration
 def test_datasource_store_with_inline_store_backend(
-    datasource_config: DatasourceConfig, empty_data_context: DataContext
+    tmp_path,
+    datasource_config: DatasourceConfig,
 ) -> None:
+    tmp_path = str(tmp_path)
+    config_filepath = os.path.join(tmp_path, "great_expectations.yml")
+
     inline_store_backend_config: dict = {
         "class_name": "InlineStoreBackend",
-        "data_context": empty_data_context,
+        "project_config": datasource_config,
+        "project_config_filepath": config_filepath,
         "suppress_store_backend_id": True,
     }
 

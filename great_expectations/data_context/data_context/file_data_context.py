@@ -121,7 +121,7 @@ class FileDataContext(AbstractDataContext):
     def _init_variables(self) -> FileDataContextVariables:
         variables: FileDataContextVariables = FileDataContextVariables(
             config=self._project_config,
-            data_context=self,
+            config_filepath=os.path.join(self._context_root_directory, self.GE_YML),
         )
         return variables
 

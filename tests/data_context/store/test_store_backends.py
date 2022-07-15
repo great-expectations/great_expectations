@@ -1559,10 +1559,18 @@ def test_GeCloudStoreBackend():
             )
 
 
-def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
-    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
-        data_context=empty_data_context,
+@pytest.fixture
+def inline_store_backend(empty_data_context: DataContext) -> InlineStoreBackend:
+    store_backend: InlineStoreBackend = InlineStoreBackend(
+        project_config=empty_data_context.config,
+        project_config_filepath=os.path.join(
+            empty_data_context._context_root_directory, empty_data_context.GE_YML
+        ),
     )
+    return store_backend
+
+
+def test_InlineStoreBackend(inline_store_backend: InlineStoreBackend) -> None:
     new_config_version: float = 5.0
 
     # test invalid .set
@@ -1577,11 +1585,11 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
     tuple_ = key.to_tuple()
     with patch(
-        "great_expectations.data_context.DataContext._save_project_config"
+        "great_expectations.data_context.store.inline_store_backend.InlineStoreBackend.save_config"
     ) as mock_save:
         inline_store_backend.set(tuple_, new_config_version)
 
-    assert empty_data_context.variables.config.config_version == new_config_version
+    assert inline_store_backend._project_config.config_version == new_config_version
     assert mock_save.call_count == 1
 
     # test .get
@@ -1659,16 +1667,11 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
 
 
 @pytest.mark.integration
-def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
-    path_to_great_expectations_yml: str = os.path.join(
-        empty_data_context.root_directory, empty_data_context.GE_YML
-    )
-
-    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
-        data_context=empty_data_context,
-    )
-
+def test_InlineStoreBackend_with_mocked_fs(
+    inline_store_backend: InlineStoreBackend,
+) -> None:
     # 1. Set simple string config value and confirm it persists in the GE.yml
+    path_to_great_expectations_yml: str = inline_store_backend._project_config_filepath
 
     with open(path_to_great_expectations_yml) as data:
         config_commented_map_from_yaml = yaml.load(data)

@@ -279,7 +279,7 @@ class EphemeralDataContextVariables(DataContextVariables):
 
 @dataclass
 class FileDataContextVariables(DataContextVariables):
-    data_context: Optional["DataContext"] = None  # noqa: F821
+    config_filepath: Optional[str] = None
 
     def __post_init__(self) -> None:
         # Chetan - 20220607 - Although the above argument is not truly optional, we are
@@ -289,7 +289,7 @@ class FileDataContextVariables(DataContextVariables):
         # Python 3.10 resolves this issue around dataclass inheritance using `kw_only=True` (https://docs.python.org/3/library/dataclasses.html)
         # This should be modified once our lowest supported version is 3.10.
 
-        if self.data_context is None:
+        if self.config_filepath is None:
             raise ValueError(
                 f"A reference to a data context is required for {self.__class__.__name__}"
             )
@@ -301,7 +301,8 @@ class FileDataContextVariables(DataContextVariables):
 
         store_backend: dict = {
             "class_name": "InlineStoreBackend",
-            "data_context": self.data_context,
+            "project_config": self.config,
+            "project_config_filepath": self.config_filepath,
         }
         store: DataContextStore = DataContextStore(
             store_name="file_data_context_store",
