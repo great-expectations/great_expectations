@@ -144,7 +144,7 @@ class ExpectProfileNumericColumnsDiffLessThanOrEqualToThreshold(TableExpectation
     Args:
         profile_path (str): A path to a saved DataProfiler profile object on the local filesystem.
         limit_check_report_keys (dict): A dict, containing column names as keys and dicts as values that contain statistics as keys and ints or floats as values
-                                        denoting the threshold that the statistic delta is expectated to exceed.
+                                        denoting the threshold that the statistic delta is expectated to be below.
         mostly (float - optional): a value indicating the lower bound percentage of successful values that must be present to evaluate to success=True.
     validator.expect_profile_numerical_columns_diff_less_than_threshold(
         profile_path = "C:/path_to/my_profile.pkl",
