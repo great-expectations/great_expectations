@@ -1559,10 +1559,14 @@ def test_GeCloudStoreBackend():
             )
 
 
-def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
+def test_InlineStoreBackend(tmp_path, basic_data_context_config) -> None:
+    project_config = basic_data_context_config
+    project_config_filepath = os.path.join(str(tmp_path), "great_expectations.yml")
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
-        data_context=empty_data_context,
+        project_config=project_config,
+        project_config_filepath=project_config_filepath,
     )
+
     new_config_version: float = 5.0
 
     # test invalid .set
@@ -1577,11 +1581,11 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
     tuple_ = key.to_tuple()
     with patch(
-        "great_expectations.data_context.DataContext._save_project_config"
+        "great_expectations.data_context.types.base.DataContextConfig.to_yaml",
     ) as mock_save:
         inline_store_backend.set(tuple_, new_config_version)
 
-    assert empty_data_context.variables.config.config_version == new_config_version
+    assert inline_store_backend._project_config.config_version == new_config_version
     assert mock_save.call_count == 1
 
     # test .get
@@ -1593,7 +1597,6 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     # test .list_keys
     assert sorted(inline_store_backend.list_keys()) == [
         "anonymous_usage_statistics",
-        "checkpoint_store_name",
         "concurrency",
         "config_variables_file_path",
         "config_version",
@@ -1605,6 +1608,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
         "plugins_directory",
         "progress_bars",
         "stores",
+        "validation_operators",
         "validations_store_name",
     ]
 
@@ -1659,13 +1663,17 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
 
 
 @pytest.mark.integration
-def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
-    path_to_great_expectations_yml: str = os.path.join(
+def test_InlineStoreBackend_with_mocked_fs(
+    empty_data_context: DataContext, basic_data_context_config: DataContextConfig
+) -> None:
+    project_config = basic_data_context_config
+    path_to_great_expectations_yml = os.path.join(
         empty_data_context.root_directory, empty_data_context.GE_YML
     )
 
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
-        data_context=empty_data_context,
+        project_config=project_config,
+        project_config_filepath=path_to_great_expectations_yml,
     )
 
     # 1. Set simple string config value and confirm it persists in the GE.yml
