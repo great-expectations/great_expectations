@@ -100,7 +100,7 @@ class ConfigurationStore(Store):
             return config_schema.dump(value)
         return value.to_yaml_str()
 
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         config = value
         if isinstance(value, str):
             config: CommentedMap = yaml.load(value)

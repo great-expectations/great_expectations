@@ -134,7 +134,7 @@ class Store:
         return self.key_class.from_tuple(tuple_)
 
     # noinspection PyMethodMayBeStatic
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         return value
 
     def get(self, key):
@@ -151,7 +151,7 @@ class Store:
             value = self._store_backend.get(self.key_to_tuple(key))
 
         if value:
-            return self.deserialize(key, value)
+            return self.deserialize(value)
         else:
             return None
 

@@ -173,7 +173,7 @@ class ValidationsStore(Store):
             value, indent=2, sort_keys=True
         )
 
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         if isinstance(value, dict):
             return self._expectationSuiteValidationResultSchema.load(value)
         else:

@@ -63,7 +63,7 @@ class JsonSiteStore(Store):
     def serialize(self, value):
         return value.to_json_dict()
 
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         return RenderedDocumentContent(**loads(value))
 
     def self_check(self, pretty_print) -> None:

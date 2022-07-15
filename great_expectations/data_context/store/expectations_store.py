@@ -186,7 +186,7 @@ class ExpectationsStore(Store):
             return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         if isinstance(value, dict):
             return self._expectationSuiteSchema.load(value)
         else:

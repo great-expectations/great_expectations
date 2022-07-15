@@ -63,7 +63,7 @@ class MetricStore(Store):
     def serialize(self, value):
         return json.dumps({"value": value})
 
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         if value:
             return json.loads(value)["value"]
 

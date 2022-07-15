@@ -76,14 +76,10 @@ class DatasourceStore(Store):
             return self._schema.dump(value)
         return value
 
-    def deserialize(
-        self, key: Optional[Any], value: Union[dict, DatasourceConfig]
-    ) -> DatasourceConfig:
+    def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
         """
         See parent 'Store.deserialize()' for more information
         """
-        del key  # Unused arg but necessary as part of signature
-
         # When using the InlineStoreBackend, objects are already converted to their respective config types.
         if isinstance(value, DatasourceConfig):
             return value
