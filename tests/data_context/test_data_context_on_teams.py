@@ -20,6 +20,6 @@ def test_incomplete_uncommitted():
         )
         assert (
             "Unable to find match for config variable my_postgres_db. See "
-            "https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets"
+            "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials"
             in exc.value.message
         )
