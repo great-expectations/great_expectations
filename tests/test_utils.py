@@ -449,20 +449,38 @@ def delete_config_from_filesystem(
     )
 
 
+# noinspection PyPep8Naming
 def get_snowflake_connection_url() -> str:
     """Get snowflake connection url from environment variables.
 
     Returns:
-        String of the snowflake connection url.
+        String of the snowflake connection URL.
     """
-    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
     sfUser = os.environ.get("SNOWFLAKE_USER")
     sfPswd = os.environ.get("SNOWFLAKE_PW")
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
     sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
     sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
     sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"
 
-    return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+    return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
+
+
+def get_redshift_connection_url() -> str:
+    """Get Amazon Redshift connection url from environment variables.
+
+    Returns:
+        String of the Amazon Redshift connection URL.
+    """
+    host = os.environ.get("REDSHIFT_HOST")
+    port = os.environ.get("REDSHIFT_PORT")
+    user = os.environ.get("REDSHIFT_USERNAME")
+    pswd = os.environ.get("REDSHIFT_PASSWORD")
+    db = os.environ.get("REDSHIFT_DATABASE")
+    ssl = os.environ.get("REDSHIFT_SSLMODE")
+
+    return f"redshift+psycopg2://{user}:{pswd}@{host}:{port}/{db}?sslmode={ssl}"
 
 
 def get_bigquery_table_prefix() -> str:
@@ -535,8 +553,9 @@ def load_and_concatenate_csvs(
     dfs: List[pd.DataFrame] = []
     for csv_path in csv_paths:
         df = pd.read_csv(csv_path)
-        for column_name_to_convert in convert_column_names_to_datetime:
-            df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+        convert_string_columns_to_datetime(
+            df=df, column_names_to_convert=convert_column_names_to_datetime
+        )
         if not load_full_dataset:
             # Improving test performance by only loading the first 10 rows of our test data into the db
             df = df.head(10)
@@ -546,6 +565,21 @@ def load_and_concatenate_csvs(
     all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
 
     return all_dfs_concatenated
+
+
+def convert_string_columns_to_datetime(
+    df: pd.DataFrame, column_names_to_convert: Optional[List[str]] = None
+) -> None:
+    """
+    Converts specified columns (e.g., "pickup_datetime" and "dropoff_datetime") to datetime column type.
+    Side-effect: Passed DataFrame is modified (in-place).
+    """
+    if column_names_to_convert is None:
+        column_names_to_convert = []
+
+    column_name_to_convert: str
+    for column_name_to_convert in column_names_to_convert:
+        df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
 
 
 def load_data_into_test_database(
@@ -877,6 +911,8 @@ def get_connection_string_and_dialect(
     dialect: str = db_config["dialect"]
     if dialect == "snowflake":
         connection_string: str = get_snowflake_connection_url()
+    elif dialect == "redshift":
+        connection_string: str = get_redshift_connection_url()
     elif dialect == "bigquery":
         connection_string: str = get_bigquery_connection_url()
     elif dialect == "awsathena":

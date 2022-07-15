@@ -129,7 +129,8 @@ module.exports = {
             'guides/connecting_to_your_data/database/postgres',
             'guides/connecting_to_your_data/database/redshift',
             'guides/connecting_to_your_data/database/snowflake',
-            'guides/connecting_to_your_data/database/sqlite'
+            'guides/connecting_to_your_data/database/sqlite',
+            'guides/connecting_to_your_data/database/trino'
           ]
         },
         {
@@ -173,7 +174,6 @@ module.exports = {
           label: 'Core skills',
           items: [
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
-            'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
             'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
             { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
@@ -290,6 +290,7 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_with_prefect',
         'deployment_patterns/how_to_use_great_expectations_with_meltano',
+        'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
         { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
       ]
     },

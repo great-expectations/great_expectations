@@ -148,6 +148,7 @@ class Validator:
             Any
         ] = None,  # Cannot type DataContext due to circular import
         batches: Optional[List[Batch]] = None,
+        include_rendered_content: bool = False,
         **kwargs,
     ) -> None:
         """
@@ -156,13 +157,14 @@ class Validator:
 
         Additionally, note that Validators are used by Checkpoints under-the-hood.
 
-        :param execution_engine (ExecutionEngine):
-        :param interactive_evaluation (bool):
-        :param expectation_suite (Optional[ExpectationSuite]):
-        :param expectation_suite_name (Optional[str]):
-        :param data_context (Optional[DataContext]):
-        :param batches (Optional[List[Batch]]):
-
+        Args:
+            execution_engine: The ExecutionEngine to be used to perform validation.
+            interactive_evaluation: Whether the Validator should perform evaluation when Expectations are added.
+            expectation_suite: The ExpectationSuite to validate.
+            expectation_suite_name: The name of the ExpectationSuite to validate.
+            data_context: The DataContext associated with this Validator.
+            batches: The batches for which to validate.
+            include_rendered_content: Whether or not to include rendered_content in the ExpectationValidationResult.
         """
 
         self._data_context = data_context
@@ -201,6 +203,8 @@ class Validator:
         ):
             # TODO: verify flow of default expectation arguments
             self.set_default_expectation_argument("include_config", True)
+
+        self._include_rendered_content = include_rendered_content
 
     def __dir__(self):
         """
@@ -386,7 +390,10 @@ class Validator:
                     # Add a "success" object to the config
                     stored_config.success_on_last_run = validation_result.success
 
-                if self._data_context is not None:
+                # NOTE: <DataContextRefactor> Indirect way to checking whether _data_context is a ExplorerDataContext
+                if self._data_context is not None and hasattr(
+                    self._data_context, "update_return_obj"
+                ):
                     validation_result = self._data_context.update_return_obj(
                         self, validation_result
                     )
@@ -1626,9 +1633,8 @@ set as active.
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (
-                " Omitting %d expectation(s) that failed when last run; set "
+                f" Omitting {discards['failed_expectations']} expectation(s) that failed when last run; set "
                 "discard_failed_expectations=False to include them."
-                % discards["failed_expectations"]
             )
 
         for expectation in expectations:
@@ -1749,6 +1755,7 @@ set as active.
         only_return_failures: bool = False,
         run_name: Optional[str] = None,
         run_time: Optional[str] = None,
+        checkpoint_name: Optional[str] = None,
     ) -> Union[ExpectationValidationResult, ExpectationSuiteValidationResult]:
         # noinspection SpellCheckingInspection
         """Generates a JSON-formatted report describing the outcome of all expectations.
@@ -1783,6 +1790,9 @@ set as active.
                 etc.).
             only_return_failures (boolean): \
                 If True, expectation results are only returned when ``success = False`` \
+            checkpoint_name (string or None): \
+                Name of the Checkpoint which invoked this Validator.validate() call against an Expectation Suite. \
+                It will be added to `meta` field of the returned ExpectationSuiteValidationResult.
 
         Returns:
             A JSON-formatted dictionary containing a list of the validation results. \
@@ -1874,8 +1884,7 @@ set as active.
                     raise
                 except OSError:
                     raise GreatExpectationsError(
-                        "Unable to load expectation suite: IO error while reading %s"
-                        % expectation_suite
+                        f"Unable to load expectation suite: IO error while reading {expectation_suite}"
                     )
             elif not isinstance(expectation_suite, ExpectationSuite):
                 logger.error(
@@ -1958,6 +1967,9 @@ set as active.
                 configurations=expectations_to_evaluate,
                 runtime_configuration=runtime_configuration,
             )
+            if self._include_rendered_content:
+                for validation_result in results:
+                    validation_result.render()
             statistics = _calc_validation_statistics(results)
 
             if only_return_failures:
@@ -1987,6 +1999,7 @@ set as active.
                     "batch_markers": self.active_batch_markers,
                     "active_batch_definition": self.active_batch_definition,
                     "validation_time": validation_time,
+                    "checkpoint_name": checkpoint_name,
                 },
             )
 

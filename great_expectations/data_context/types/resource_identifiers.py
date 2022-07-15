@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 from uuid import UUID
 
 from dateutil.parser import parse
@@ -10,6 +10,11 @@ from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
 from great_expectations.marshmallow__shade import Schema, fields, post_load
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.store.ge_cloud_store_backend import (
+        GeCloudRESTResource,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +201,9 @@ class ValidationResultIdentifier(DataContextKey):
 
 
 class GeCloudIdentifier(DataContextKey):
-    def __init__(self, resource_type: str, ge_cloud_id: Optional[str] = None) -> None:
+    def __init__(
+        self, resource_type: "GeCloudRESTResource", ge_cloud_id: Optional[str] = None
+    ) -> None:
         super().__init__()
 
         self._resource_type = resource_type

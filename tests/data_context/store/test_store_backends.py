@@ -16,6 +16,9 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.data_context import BaseDataContext
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.data_context.store import (
     GeCloudStoreBackend,
     InMemoryStoreBackend,
@@ -25,15 +28,15 @@ from great_expectations.data_context.store import (
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
-)
-from great_expectations.data_context.types.data_context_variables import (
-    DataContextVariableSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -1333,7 +1336,7 @@ def test_GeCloudStoreBackend():
         "access_token": "1234",
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
-    ge_cloud_resource_type = "contract"
+    ge_cloud_resource_type = GeCloudRESTResource.CONTRACT
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
@@ -1464,7 +1467,7 @@ def test_GeCloudStoreBackend():
         my_store_backend = GeCloudStoreBackend(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type="rendered_data_doc",
+            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
         )
         my_store_backend.set(("rendered_data_doc", ""), OrderedDict())
         mock_post.assert_called_with(
@@ -1489,7 +1492,7 @@ def test_GeCloudStoreBackend():
             my_store_backend = GeCloudStoreBackend(
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type="rendered_data_doc",
+                ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
             )
             my_store_backend.get(
                 (
@@ -1511,7 +1514,7 @@ def test_GeCloudStoreBackend():
             my_store_backend = GeCloudStoreBackend(
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type="rendered_data_doc",
+                ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
             )
             my_store_backend.list_keys()
             mock_get.assert_called_with(
@@ -1530,7 +1533,7 @@ def test_GeCloudStoreBackend():
             my_store_backend = GeCloudStoreBackend(
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type="rendered_data_doc",
+                ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
             )
             my_store_backend.remove_key(
                 (
@@ -1565,13 +1568,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     # test invalid .set
     key = DataContextVariableKey(resource_type="my_fake_variable")
     tuple_ = key.to_tuple()
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(ValueError) as e:
         inline_store_backend.set(tuple_, "a_random_string_value")
 
-    assert (
-        "Keys in InlineStoreBackend must adhere to the schema defined by DataContextVariableSchema"
-        in str(e.value)
-    )
+    assert "'my_fake_variable' is not a valid DataContextVariableSchema" in str(e.value)
 
     # test valid .set
     key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
@@ -1581,7 +1581,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     ) as mock_save:
         inline_store_backend.set(tuple_, new_config_version)
 
-    assert empty_data_context.config.config_version == new_config_version
+    assert empty_data_context.variables.config.config_version == new_config_version
     assert mock_save.call_count == 1
 
     # test .get

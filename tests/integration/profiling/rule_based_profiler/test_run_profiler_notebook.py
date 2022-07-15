@@ -58,8 +58,8 @@ def test_run_rbp_notebook(tmp_path):
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
-        msg = 'Error executing the notebook "%s".\n\n' % notebook_path
-        msg += 'See notebook "%s" for the traceback.' % output_notebook_path
+        msg = f'Error executing the notebook "{notebook_path}".\n\n'
+        msg += f'See notebook "{output_notebook_path}" for the traceback.'
         print(msg)
         raise
     finally:
@@ -101,8 +101,8 @@ def test_run_data_assistants_notebook(tmp_path):
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
-        msg = 'Error executing the notebook "%s".\n\n' % notebook_path
-        msg += 'See notebook "%s" for the traceback.' % output_notebook_path
+        msg = f'Error executing the notebook "{notebook_path}".\n\n'
+        msg += f'See notebook "{output_notebook_path}" for the traceback.'
         print(msg)
         raise
     finally:
@@ -141,8 +141,8 @@ def test_run_self_initializing_expectations_notebook(tmp_path):
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
-        msg = 'Error executing the notebook "%s".\n\n' % notebook_path
-        msg += 'See notebook "%s" for the traceback.' % output_notebook_path
+        msg = f'Error executing the notebook "{notebook_path}".\n\n'
+        msg += f'See notebook "{output_notebook_path}" for the traceback.'
         print(msg)
         raise
     finally:

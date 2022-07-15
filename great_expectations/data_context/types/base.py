@@ -110,10 +110,11 @@ class BaseYamlConfig(SerializableDictDot):
 
     def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
         commented_map: CommentedMap = copy.deepcopy(self._commented_map)
-        commented_map.update(self._get_schema_instance().dump(self))
+        schema_validated_map: dict = self._get_schema_instance().dump(self)
+        commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile) -> None:
+    def to_yaml(self, outfile: str) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
@@ -935,9 +936,7 @@ class DatasourceConfigSchema(Schema):
         missing="great_expectations.datasource",
     )
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
-    spark_config = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
+    spark_config = fields.Raw(required=False, allow_none=True)
     execution_engine = fields.Nested(
         ExecutionEngineConfigSchema, required=False, allow_none=True
     )

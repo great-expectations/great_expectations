@@ -10,7 +10,6 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
     NotebookConfig,
     NotebookTemplateConfig,
-    notebookConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
@@ -90,9 +89,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def from_data_context(data_context):
         suite_edit_notebook_config: Optional[NotebookConfig] = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
-            suite_edit_notebook_config = notebookConfigSchema.load(
-                data_context.notebooks.get("suite_edit")
-            )
+            suite_edit_notebook_config = data_context.notebooks.get("suite_edit")
 
         return instantiate_class_from_config(
             config=suite_edit_notebook_config.__dict__

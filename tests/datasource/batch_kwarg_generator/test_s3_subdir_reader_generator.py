@@ -12,7 +12,7 @@ from great_expectations.datasource.batch_kwargs_generator import (
 
 port = 5555
 url_host = os.getenv("GE_TEST_LOCALHOST_URL", "127.0.0.1")
-endpoint_uri = f"http://{url_host}:%s/" % port
+endpoint_uri = f"http://{url_host}:{port}/"
 os.environ["AWS_ACCESS_KEY_ID"] = "dummy_key"
 os.environ["AWS_SECRET_ACCESS_KEY"] = "dummy_secret"
 
@@ -23,7 +23,7 @@ def s3_base():
     import shlex
     import subprocess
 
-    proc = subprocess.Popen(shlex.split("moto_server s3 -p %s" % port))
+    proc = subprocess.Popen(shlex.split(f"moto_server s3 -p {port}"))
 
     timeout = 5
     while timeout > 0:

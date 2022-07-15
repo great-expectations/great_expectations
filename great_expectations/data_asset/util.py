@@ -188,8 +188,7 @@ def recursively_convert_to_json_serializable(test_obj):
 
     else:
         raise TypeError(
-            "%s is of type %s which cannot be serialized."
-            % (str(test_obj), type(test_obj).__name__)
+            f"{str(test_obj)} is of type {type(test_obj).__name__} which cannot be serialized."
         )
 
 
