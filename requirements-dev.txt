@@ -1,4 +1,5 @@
 --requirement requirements.txt
+--requirement requirements-dev-lite.txt
 --requirement requirements-dev-contrib.txt
 --requirement requirements-dev-sqlalchemy.txt
 
