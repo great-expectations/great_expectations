@@ -97,7 +97,7 @@ class InlineStoreBackend(StoreBackend):
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
-            project_config = value
+            self._data_context.set_config(value)
         elif resource_name is not None:
             project_config[resource_type][resource_name] = value
         else:
