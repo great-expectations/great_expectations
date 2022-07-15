@@ -47,7 +47,7 @@ class DataContextStore(ConfigurationStore):
             for attr in self.ge_cloud_exclude_field_names:
                 if attr in payload:
                     payload.pop(attr)
-                    logger.info(
+                    logger.debug(
                         f"Removed {attr} from DataContextConfig while serializing to JSON"
                     )
 
