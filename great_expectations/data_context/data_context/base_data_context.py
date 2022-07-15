@@ -14,6 +14,10 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
@@ -2156,7 +2160,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
         ge_cloud_id: Optional[str] = None,
-    ):
+    ) -> RuleBasedProfiler:
         config_data = {
             "name": name,
             "config_version": config_version,
