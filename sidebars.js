@@ -281,6 +281,7 @@ module.exports = {
       label: 'Reference Architectures',
       link: { type: 'doc', id: 'deployment_patterns/reference_architecture_overview' },
       items: [
+        { type: 'doc', id: 'integrations/integration_datahub' },
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
         'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
@@ -297,8 +298,9 @@ module.exports = {
     {
       type: 'category',
       label: 'Integrations',
-      items:[
-        { type: 'doc', id: 'integrations/index', label: 'Index' }
+      items: [
+        { type: 'doc', id: 'integrations/contributing_integration' },
+        { type: 'doc', id: 'integrations/integration_template' }
       ]
     },
     {
