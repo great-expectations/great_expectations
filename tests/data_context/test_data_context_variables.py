@@ -4,7 +4,6 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariables,
@@ -79,10 +78,10 @@ def ephemeral_data_context_variables(
 def file_data_context_variables(
     tmp_path, data_context_config: DataContextConfig
 ) -> FileDataContextVariables:
-    tmp_path = str(tmp_path)
-    config_filepath = os.path.join(tmp_path, "great_expectations.yml")
+    config_filepath: str = os.path.join(str(tmp_path), "great_expectations.yml")
     return FileDataContextVariables(
-        config=data_context_config, config_filepath=config_filepath
+        config=data_context_config,
+        config_filepath=config_filepath,
     )
 
 
@@ -377,7 +376,7 @@ def test_data_context_variables_save_config(
 
     # FileDataContextVariables
     with mock.patch(
-        "great_expectations.data_context.store.inline_store_backend.InlineStoreBackend._save_changes",
+        "great_expectations.data_context.types.base.DataContextConfig.to_yaml",
         autospec=True,
     ) as mock_save:
         file_data_context_variables.save_config()
