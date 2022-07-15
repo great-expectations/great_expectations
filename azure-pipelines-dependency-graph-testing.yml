@@ -88,7 +88,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: and(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), ne(variables['Build.Reason'], 'IndividualCI')))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -171,7 +171,7 @@ stages:
 
     jobs:
       - job: compatibility_matrix
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: and(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), ne(variables['Build.Reason'], 'IndividualCI')))
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
@@ -261,7 +261,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: and(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), ne(variables['Build.Reason'], 'IndividualCI')))
         timeoutInMinutes: 120
 
         services:
@@ -367,7 +367,7 @@ stages:
 
     jobs:
       - job: test_usage_stats_messages
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: and(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), ne(variables['Build.Reason'], 'IndividualCI')))
         variables:
           python.version: '3.8'
 
