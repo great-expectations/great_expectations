@@ -117,7 +117,7 @@ class Store:
         return self._store_backend.store_backend_id_warnings_suppressed
 
     # noinspection PyMethodMayBeStatic
-    def serialize(self, key, value):
+    def serialize(self, value):
         return value
 
     # noinspection PyMethodMayBeStatic
@@ -134,7 +134,7 @@ class Store:
         return self.key_class.from_tuple(tuple_)
 
     # noinspection PyMethodMayBeStatic
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         return value
 
     def get(self, key):
@@ -151,7 +151,7 @@ class Store:
             value = self._store_backend.get(self.key_to_tuple(key))
 
         if value:
-            return self.deserialize(key, value)
+            return self.deserialize(value)
         else:
             return None
 
@@ -161,7 +161,7 @@ class Store:
         else:
             self._validate_key(key)
             return self._store_backend.set(
-                self.key_to_tuple(key), self.serialize(key, value), **kwargs
+                self.key_to_tuple(key), self.serialize(value), **kwargs
             )
 
     def list_keys(self):

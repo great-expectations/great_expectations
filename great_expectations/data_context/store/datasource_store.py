@@ -1,5 +1,5 @@
 import copy
-from typing import Any, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.data_context_variables import (
@@ -67,26 +67,19 @@ class DatasourceStore(Store):
         """
         return self._store_backend.remove_key(key.to_tuple())
 
-    def serialize(
-        self, key: Optional[Any], value: DatasourceConfig
-    ) -> Union[str, DatasourceConfig]:
+    def serialize(self, value: DatasourceConfig) -> Union[str, DatasourceConfig]:
         """
         See parent 'Store.serialize()' for more information
         """
-        del key  # Unused arg but necessary as part of signature
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._schema.dump(value)
         return value
 
-    def deserialize(
-        self, key: Optional[Any], value: Union[dict, DatasourceConfig]
-    ) -> DatasourceConfig:
+    def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
         """
         See parent 'Store.deserialize()' for more information
         """
-        del key  # Unused arg but necessary as part of signature
-
         # When using the InlineStoreBackend, objects are already converted to their respective config types.
         if isinstance(value, DatasourceConfig):
             return value
