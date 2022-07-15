@@ -1,4 +1,5 @@
 import copy
+import os
 from typing import cast
 from unittest.mock import PropertyMock, patch
 
@@ -13,7 +14,10 @@ from great_expectations.data_context.store.datasource_store import DatasourceSto
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
-from great_expectations.data_context.types.base import DatasourceConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    DatasourceConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
@@ -155,11 +159,17 @@ def test_datasource_store_retrieval_cloud_mode(
 
 
 def test_datasource_store_with_inline_store_backend(
-    datasource_config: DatasourceConfig, empty_data_context: DataContext
+    tmp_path,
+    datasource_config: DatasourceConfig,
+    basic_data_context_config: DataContextConfig,
 ) -> None:
+    path_to_great_expectations_yml = os.path.join(
+        str(tmp_path), "great_expectations.yml"
+    )
     inline_store_backend_config: dict = {
         "class_name": "InlineStoreBackend",
-        "data_context": empty_data_context,
+        "project_config": basic_data_context_config,
+        "project_config_filepath": path_to_great_expectations_yml,
         "suppress_store_backend_id": True,
     }
 
