@@ -1,6 +1,5 @@
 import copy
 import datetime
-import hashlib
 import logging
 import uuid
 import warnings
@@ -28,6 +27,12 @@ from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
+    SparkDataSampler,
+)
+from great_expectations.execution_engine.split_and_sample.sparkdf_data_splitter import (
+    SparkDataSplitter,
+)
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
@@ -156,7 +161,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         spark_config=None,
         force_reuse_spark_context=False,
         **kwargs,
-    ):
+    ) -> None:
         # Creation of the Spark DataFrame is done outside this class
         self._persist = persist
 
@@ -186,6 +191,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 "azure_options": azure_options,
             }
         )
+
+        self._data_splitter = SparkDataSplitter()
+        self._data_sampler = SparkDataSampler()
 
     @property
     def dataframe(self):
@@ -306,15 +314,22 @@ Please check your config."""
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
-        if batch_spec.get("splitter_method"):
-            splitter_fn = getattr(self, batch_spec.get("splitter_method"))
+
+        splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
+        if splitter_method_name:
+            splitter_fn: Callable = self._data_splitter.get_splitter_method(
+                splitter_method_name
+            )
             splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
-        if batch_spec.get("sampling_method"):
-            sampling_fn = getattr(self, batch_spec.get("sampling_method"))
-            sampling_kwargs: dict = batch_spec.get("sampling_kwargs") or {}
-            batch_data = sampling_fn(batch_data, **sampling_kwargs)
+        sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
+        if sampler_method_name:
+            sampling_fn: Callable = self._data_sampler.get_sampler_method(
+                sampler_method_name
+            )
+            batch_data = sampling_fn(batch_data, batch_spec)
+
         return batch_data
 
     # TODO: <Alex>Similar to Abe's note in PandasExecutionEngine: Any reason this shouldn't be a private method?</Alex>
@@ -599,7 +614,7 @@ Please check your config."""
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
-    ) -> dict:
+    ) -> Dict[Tuple[str, str, str], Any]:
         """For each metric name in the given metric_fn_bundle, finds the domain of the metric and calculates it using a
         metric function from the given provider class.
 
@@ -660,176 +675,3 @@ Please check your config."""
     def head(self, n=5):
         """Returns dataframe head. Default is 5"""
         return self.dataframe.limit(n).toPandas()
-
-    @staticmethod
-    def _split_on_whole_table(
-        df,
-    ):
-        return df
-
-    @staticmethod
-    def _split_on_column_value(df, column_name: str, batch_identifiers: dict):
-        return df.filter(F.col(column_name) == batch_identifiers[column_name])
-
-    @staticmethod
-    def _split_on_converted_datetime(
-        df,
-        column_name: str,
-        batch_identifiers: dict,
-        date_format_string: str = "yyyy-MM-dd",
-    ):
-        matching_string = batch_identifiers[column_name]
-        res = (
-            df.withColumn(
-                "date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)
-            )
-            .filter(F.col("date_time_tmp") == matching_string)
-            .drop("date_time_tmp")
-        )
-        return res
-
-    @staticmethod
-    def _split_on_divided_integer(
-        df, column_name: str, divisor: int, batch_identifiers: dict
-    ):
-        """Divide the values in the named column by `divisor`, and split on that"""
-        matching_divisor = batch_identifiers[column_name]
-        res = (
-            df.withColumn(
-                "div_temp",
-                (F.col(column_name) / divisor).cast(sparktypes.IntegerType()),
-            )
-            .filter(F.col("div_temp") == matching_divisor)
-            .drop("div_temp")
-        )
-        return res
-
-    @staticmethod
-    def _split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
-        """Divide the values in the named column by `divisor`, and split on that"""
-        matching_mod_value = batch_identifiers[column_name]
-        res = (
-            df.withColumn(
-                "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
-            )
-            .filter(F.col("mod_temp") == matching_mod_value)
-            .drop("mod_temp")
-        )
-        return res
-
-    @staticmethod
-    def _split_on_multi_column_values(df, column_names: list, batch_identifiers: dict):
-        """Split on the joint values in the named columns"""
-        for column_name in column_names:
-            value = batch_identifiers.get(column_name)
-            if not value:
-                raise ValueError(
-                    f"In order for SparkDFExecutionEngine to `_split_on_multi_column_values`, "
-                    f"all values in  column_names must also exist in batch_identifiers. "
-                    f"{column_name} was not found in batch_identifiers."
-                )
-            df = df.filter(F.col(column_name) == value)
-        return df
-
-    @staticmethod
-    def _split_on_hashed_column(
-        df,
-        column_name: str,
-        hash_digits: int,
-        batch_identifiers: dict,
-        hash_function_name: str = "sha256",
-    ):
-        """Split on the hashed value of the named column"""
-        try:
-            getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError):
-            raise (
-                ge_exceptions.ExecutionEngineError(
-                    f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""
-                )
-            )
-
-        def _encrypt_value(to_encode):
-            hash_func = getattr(hashlib, hash_function_name)
-            hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits :]
-            return hashed_value
-
-        encrypt_udf = F.udf(_encrypt_value, sparktypes.StringType())
-        res = (
-            df.withColumn("encrypted_value", encrypt_udf(column_name))
-            .filter(F.col("encrypted_value") == batch_identifiers["hash_value"])
-            .drop("encrypted_value")
-        )
-        return res
-
-    ### Sampling methods ###
-    @staticmethod
-    def _sample_using_random(df, p: float = 0.1, seed: int = 1):
-        """Take a random sample of rows, retaining proportion p"""
-        res = (
-            df.withColumn("rand", F.rand(seed=seed))
-            .filter(F.col("rand") < p)
-            .drop("rand")
-        )
-        return res
-
-    @staticmethod
-    def _sample_using_mod(
-        df,
-        column_name: str,
-        mod: int,
-        value: int,
-    ):
-        """Take the mod of named column, and only keep rows that match the given value"""
-        res = (
-            df.withColumn(
-                "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
-            )
-            .filter(F.col("mod_temp") == value)
-            .drop("mod_temp")
-        )
-        return res
-
-    @staticmethod
-    def _sample_using_a_list(
-        df,
-        column_name: str,
-        value_list: list,
-    ):
-        """Match the values in the named column against value_list, and only keep the matches"""
-        return df.where(F.col(column_name).isin(value_list))
-
-    @staticmethod
-    def _sample_using_hash(
-        df,
-        column_name: str,
-        hash_digits: int = 1,
-        hash_value: str = "f",
-        hash_function_name: str = "md5",
-    ):
-        try:
-            getattr(hashlib, str(hash_function_name))
-        except (TypeError, AttributeError):
-            raise (
-                ge_exceptions.ExecutionEngineError(
-                    f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""
-                )
-            )
-
-        def _encrypt_value(to_encode):
-            to_encode_str = str(to_encode)
-            hash_func = getattr(hashlib, hash_function_name)
-            hashed_value = hash_func(to_encode_str.encode()).hexdigest()[
-                -1 * hash_digits :
-            ]
-            return hashed_value
-
-        encrypt_udf = F.udf(_encrypt_value, sparktypes.StringType())
-        res = (
-            df.withColumn("encrypted_value", encrypt_udf(column_name))
-            .filter(F.col("encrypted_value") == hash_value)
-            .drop("encrypted_value")
-        )
-        return res

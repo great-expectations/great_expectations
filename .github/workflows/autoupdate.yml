@@ -1,14 +1,13 @@
 # https://github.com/marketplace/actions/auto-update
 name: autoupdate
 on:
-  pull_request:
-    types:
-      - auto_merge_enabled
+ push:
+   branches:
+     - develop # Whenever the base changes, this action should run
 
 jobs:
   autoupdate:
     name: autoupdate
-    if: contains(github.event.pull_request.labels.*.name, 'core-team') || contains(github.event.pull_request.labels.*.name, 'devrel')
     runs-on: ubuntu-20.04
     steps:
       - uses: docker://chinthakagodawita/autoupdate-action:v1

@@ -35,7 +35,7 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass
 
     @classmethod
@@ -47,5 +47,5 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass

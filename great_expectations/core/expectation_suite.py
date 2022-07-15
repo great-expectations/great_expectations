@@ -57,7 +57,7 @@ class ExpectationSuite(SerializableDictDot):
         execution_engine_type=None,
         meta=None,
         ge_cloud_id=None,
-    ):
+    ) -> None:
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
         self._data_context = data_context
@@ -99,7 +99,7 @@ class ExpectationSuite(SerializableDictDot):
         batch_parameters: Optional[dict] = None,
         profiler_config: Optional[dict] = None,
         citation_date: Optional[Union[str, datetime.datetime]] = None,
-    ):
+    ) -> None:
         if "citations" not in self.meta:
             self.meta["citations"] = []
 
@@ -210,7 +210,7 @@ class ExpectationSuite(SerializableDictDot):
         myself["meta"] = convert_to_json_serializable(myself["meta"])
         return myself
 
-    def get_evaluation_parameter_dependencies(self):
+    def get_evaluation_parameter_dependencies(self) -> dict:
         dependencies = {}
         for expectation in self.expectations:
             t = expectation.get_evaluation_parameter_dependencies()
@@ -271,7 +271,7 @@ class ExpectationSuite(SerializableDictDot):
 
     # CRUD methods #
 
-    def append_expectation(self, expectation_config):
+    def append_expectation(self, expectation_config) -> None:
         """Appends an expectation.
 
            Args:
@@ -440,7 +440,7 @@ class ExpectationSuite(SerializableDictDot):
         existing_expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
         ge_cloud_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Find Expectations matching the given ExpectationConfiguration on the given match_type.
         If a ge_cloud_id is provided, match_type is ignored and only Expectations with matching
@@ -590,7 +590,7 @@ class ExpectationSuite(SerializableDictDot):
             self.send_usage_event(success=True)
         return expectation_configuration
 
-    def send_usage_event(self, success: bool):
+    def send_usage_event(self, success: bool) -> None:
         usage_stats_event_payload: dict = {}
         if self._data_context is not None:
             self._data_context.send_usage_message(

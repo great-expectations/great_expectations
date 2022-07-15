@@ -617,6 +617,7 @@ def test_EmailAction(
 #
 
 
+@pytest.mark.cloud
 @mock.patch.object(Session, "post", return_value=MockCloudResponse(200))
 def test_cloud_notification_action(
     mock_post_method,
@@ -650,6 +651,7 @@ def test_cloud_notification_action(
     )
 
 
+@pytest.mark.cloud
 @mock.patch.object(Session, "post", return_value=MockCloudResponse(418))
 def test_cloud_notification_action_bad_response(
     mock_post_method,
@@ -689,6 +691,7 @@ def test_cloud_notification_action_bad_response(
     )
 
 
+@pytest.mark.cloud
 def test_cloud_sns_notification_action(
     sns,
     validation_result_suite,

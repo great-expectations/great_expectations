@@ -12,7 +12,7 @@ def build_docs(
     site_names: Optional[List[str]] = None,
     view: bool = True,
     assume_yes: bool = False,
-):
+) -> None:
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 

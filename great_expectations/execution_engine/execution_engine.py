@@ -33,7 +33,7 @@ class NoOpDict:
 
 
 class BatchData:
-    def __init__(self, execution_engine):
+    def __init__(self, execution_engine) -> None:
         self._execution_engine = execution_engine
 
     @property
@@ -161,7 +161,7 @@ class ExecutionEngine(ABC):
         batch_spec_defaults=None,
         batch_data_dict=None,
         validator=None,
-    ):
+    ) -> None:
         self.name = name
         self._validator = validator
 
@@ -179,8 +179,7 @@ class ExecutionEngine(ABC):
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
-                "Unrecognized batch_spec_default(s): %s"
-                % str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)
+                f"Unrecognized batch_spec_default(s): {str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}"
             )
 
         self._batch_spec_defaults = {
@@ -208,7 +207,7 @@ class ExecutionEngine(ABC):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def configure_validator(self, validator):
+    def configure_validator(self, validator) -> None:
         """Optionally configure the validator as appropriate for the execution engine."""
         pass
 
@@ -228,7 +227,7 @@ class ExecutionEngine(ABC):
             return None
 
     @active_batch_data_id.setter
-    def active_batch_data_id(self, batch_id):
+    def active_batch_data_id(self, batch_id) -> None:
         if batch_id in self.loaded_batch_data_dict.keys():
             self._active_batch_data_id = batch_id
         else:
@@ -241,8 +240,8 @@ class ExecutionEngine(ABC):
         """The data from the currently-active batch."""
         if self.active_batch_data_id is None:
             return None
-        else:
-            return self.loaded_batch_data_dict.get(self.active_batch_data_id)
+
+        return self.loaded_batch_data_dict.get(self.active_batch_data_id)
 
     @property
     def loaded_batch_data_dict(self):
@@ -288,7 +287,7 @@ class ExecutionEngine(ABC):
         self._batch_data_dict[batch_id] = batch_data
         self._active_batch_data_id = batch_id
 
-    def _load_batch_data_from_dict(self, batch_data_dict):
+    def _load_batch_data_from_dict(self, batch_data_dict) -> None:
         """
         Loads all data in batch_data_dict into load_batch_data
         """
@@ -406,7 +405,9 @@ class ExecutionEngine(ABC):
 
         return resolved_metrics
 
-    def resolve_metric_bundle(self, metric_fn_bundle):
+    def resolve_metric_bundle(
+        self, metric_fn_bundle
+    ) -> Dict[Tuple[str, str, str], Any]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
@@ -607,6 +608,7 @@ class ExecutionEngine(ABC):
                 logger.warning(
                     f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
                 )
+
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod

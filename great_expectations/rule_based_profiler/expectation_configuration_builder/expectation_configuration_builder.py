@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class ExpectationConfigurationBuilder(Builder, ABC):
+class ExpectationConfigurationBuilder(ABC, Builder):
     exclude_field_names: Set[str] = Builder.exclude_field_names | {
         "validation_parameter_builders",
     }
@@ -32,8 +32,8 @@ class ExpectationConfigurationBuilder(Builder, ABC):
             List[ParameterBuilderConfig]
         ] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-        **kwargs
-    ):
+        **kwargs,
+    ) -> None:
         """
         The ExpectationConfigurationBuilder will build ExpectationConfiguration objects for a Domain from the Rule.
 
@@ -63,10 +63,7 @@ class ExpectationConfigurationBuilder(Builder, ABC):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 
     def build_expectation_configuration(
@@ -120,7 +117,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
                 variables=variables,
                 parameters=parameters,
                 parameter_computation_impl=None,
-                json_serialize=None,
                 batch_list=batch_list,
                 batch_request=batch_request,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,

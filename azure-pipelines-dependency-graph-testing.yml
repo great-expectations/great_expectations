@@ -41,6 +41,10 @@ resources:
       MSSQL_PID: Developer
     ports:
       - 1433:1433
+  - container: trino
+    image: trinodb/trino:379
+    ports:
+      - 8088:8080
 
 variables:
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -117,6 +121,14 @@ stages:
       steps:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
+
+    - job: unused_import_checker
+      steps:
+      - script: |
+          pip install flake8
+          # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
+          flake8 --select F401 great_expectations tests
+        name: UnusedImportChecker
 
   - stage: import_ge
     dependsOn: [lint]
@@ -250,19 +262,20 @@ stages:
 
       - job: comprehensive
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        timeoutInMinutes: 120
 
         services:
           postgres: postgres
 
         variables:
-          GE_pytest_opts: ''
+          GE_pytest_opts: '--postgresql --spark'
 
         strategy:
           matrix:
             Python37:
               python.version: '3.7'
               pandas.version: 'latest'
-              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python38:
               python.version: '3.8'
               pandas.version: 'latest'
@@ -281,11 +294,6 @@ stages:
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
-
-          - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
 
           - script: |
               if [[ $(pandas.version) == 'latest' ]]; then
@@ -318,17 +326,27 @@ stages:
               # These are tests that are missed by the dgtest dependency graph.
               # In order to ensure coverage, we run them during each CI/CD cycle.
               pytest \
-                tests/test_deprecation.py \
+                tests/core/test_urn.py \
+                tests/core/usage_statistics/test_package_dependencies.py \
                 tests/data_asset/test_data_asset_util.py \
+                tests/data_context/test_data_context_store_configs.py \
+                tests/data_context/test_templates.py \
+                tests/dataset/test_pandas_dataset_conditionals.py \
                 tests/datasource/test_batch_kwargs.py \
                 tests/datasource/test_sqlalchemy_datasource_workarounds.py \
-                tests/data_context/test_templates.py \
-                tests/data_context/test_data_context_store_configs.py \
-                tests/core/test_urn.py \
-                tests/dataset/test_pandas_dataset_conditionals.py \
-                tests/expectations/test_generate_diagnostic_checklist.py
+                tests/expectations/test_generate_diagnostic_checklist.py \
+                tests/test_deprecation.py \
+                tests/test_packaging.py \
+                tests/test_release.py
 
-            displayName: 'dgtest-overrides'
+            displayName: 'dgtest-general-overrides'
+
+          - script: |
+              # These are tests that are specific to Great Expectations Cloud.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              pytest -m cloud
+
+            displayName: 'dgtest-cloud-overrides'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -384,6 +402,7 @@ stages:
     jobs:
       - job: mysql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        timeoutInMinutes: 120
 
         services:
           mysql: mysql
@@ -434,6 +453,7 @@ stages:
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        timeoutInMinutes: 120
 
         services:
           mssql: mssql
@@ -471,6 +491,53 @@ stages:
 
             displayName: 'dgtest'
 
+      - job: trino
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        timeoutInMinutes: 120
+
+        services:
+          trino: trino
+
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              printf 'Waiting for Trino database to accept connections'
+              sleep 30
+#             until trino --execute "SHOW CATALOGS"; do
+#               printf '.'
+#               sleep 1;
+#             done;
+            displayName: Wait for database to initialise
+
+          - script: |
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              # Install dependencies
+              pip install --requirement requirements.txt
+              pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
+
+              # Run dgtest
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+            displayName: 'dgtest'
+
   - stage: cli_integration
     dependsOn: [scope_check, lint, import_ge, custom_checks]
     pool:
@@ -494,11 +561,6 @@ stages:
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
-
-          - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
 
           - script: |
               pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt

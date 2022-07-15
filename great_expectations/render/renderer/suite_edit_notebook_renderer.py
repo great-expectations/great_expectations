@@ -10,7 +10,6 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
     NotebookConfig,
     NotebookTemplateConfig,
-    notebookConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
@@ -44,7 +43,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
         context: Optional[DataContext] = None,
-    ):
+    ) -> None:
         super().__init__()
         custom_loader = []
 
@@ -90,9 +89,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def from_data_context(data_context):
         suite_edit_notebook_config: Optional[NotebookConfig] = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
-            suite_edit_notebook_config = notebookConfigSchema.load(
-                data_context.notebooks.get("suite_edit")
-            )
+            suite_edit_notebook_config = data_context.notebooks.get("suite_edit")
 
         return instantiate_class_from_config(
             config=suite_edit_notebook_config.__dict__
@@ -193,7 +190,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         )
         self.add_code_cell(code)
 
-    def add_expectation_cells_from_suite(self, expectations):
+    def add_expectation_cells_from_suite(self, expectations) -> None:
         expectations_by_column = self._get_expectations_by_column(expectations)
         markdown = self.render_with_overwrite(
             self.table_expectations_header_markdown, "TABLE_EXPECTATIONS_HEADER.md"
@@ -306,7 +303,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self.render(suite, batch_kwargs)
         self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
-    def add_authoring_intro(self):
+    def add_authoring_intro(self) -> None:
         markdown = self.render_with_overwrite(
             self.authoring_intro_markdown, "AUTHORING_INTRO.md"
         )

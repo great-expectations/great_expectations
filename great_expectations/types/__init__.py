@@ -72,10 +72,10 @@ class DictDot:
             return list(self.__dict__.keys())[item]
         return getattr(self, item)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value) -> None:
         setattr(self, key, value)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key) -> None:
         delattr(self, key)
 
     def __contains__(self, key):
@@ -202,15 +202,18 @@ class DictDot:
 
         keys_for_exclusion: list = []
 
-        def assert_valid_keys(keys: Set[str], purpose: str):
+        def assert_valid_keys(keys: Set[str], purpose: str) -> None:
             name: str
             for name in keys:
                 try:
                     _ = self[name]
                 except AttributeError:
-                    raise ValueError(
-                        f'Property "{name}", marked for {purpose} on object "{str(type(self))}", does not exist.'
-                    )
+                    try:
+                        _ = self[f"_{name}"]
+                    except AttributeError:
+                        raise ValueError(
+                            f'Property "{name}", marked for {purpose} on object "{str(type(self))}", does not exist.'
+                        )
 
         if include_keys:
             # Make sure that all properties, marked for inclusion, actually exist on the object.

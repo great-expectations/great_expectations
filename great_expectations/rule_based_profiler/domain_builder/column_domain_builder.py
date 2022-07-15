@@ -1,20 +1,17 @@
-from typing import Iterable, List, Optional, Set, Union
+from typing import Iterable, List, Optional, Set, Tuple, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
-    build_simple_domains_from_column_names,
+    build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.types import (
-    INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     ParameterContainer,
     SemanticDomainTypes,
-)
-from great_expectations.rule_based_profiler.types.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -40,7 +37,7 @@ class ColumnDomainBuilder(DomainBuilder):
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         A semantic type is distinguished from the structured column type;
         An example structured column type would be "integer".  The inferred semantic type would be "id".
@@ -115,7 +112,7 @@ class ColumnDomainBuilder(DomainBuilder):
     @include_column_name_suffixes.setter
     def include_column_name_suffixes(
         self, value: Optional[Union[str, Iterable, List[str]]]
-    ):
+    ) -> None:
         self._include_column_name_suffixes = value
 
     @property
@@ -127,7 +124,7 @@ class ColumnDomainBuilder(DomainBuilder):
     @exclude_column_name_suffixes.setter
     def exclude_column_name_suffixes(
         self, value: Optional[Union[str, Iterable, List[str]]]
-    ):
+    ) -> None:
         self._exclude_column_name_suffixes = value
 
     @property
@@ -152,7 +149,7 @@ class ColumnDomainBuilder(DomainBuilder):
         value: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ],
-    ):
+    ) -> None:
         self._include_semantic_types = value
 
     @property
@@ -169,7 +166,7 @@ class ColumnDomainBuilder(DomainBuilder):
         value: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ],
-    ):
+    ) -> None:
         self._exclude_semantic_types = value
 
     @property
@@ -182,26 +179,16 @@ class ColumnDomainBuilder(DomainBuilder):
         validator: Optional["Validator"] = None,  # noqa: F821
         variables: Optional[ParameterContainer] = None,
     ) -> List[str]:
-        # Obtain include_column_names from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        include_column_names: Optional[
-            List[str]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.include_column_names,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
-        )
-
-        # Obtain exclude_column_names from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        exclude_column_names: Optional[
-            List[str]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.exclude_column_names,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
+        """
+        This method applies multiple directives to obtain columns to be included as part of returned "Domain" objects.
+        """
+        include_column_names: List[str] = cast(
+            List[str],
+            self._resolve_list_type_property(
+                property_name="include_column_names",
+                property_value_type=list,
+                variables=variables,
+            ),
         )
 
         if batch_ids is None:
@@ -223,8 +210,14 @@ class ColumnDomainBuilder(DomainBuilder):
 
         effective_column_names: List[str] = include_column_names or table_columns
 
-        if exclude_column_names is None:
-            exclude_column_names = []
+        exclude_column_names: List[str] = cast(
+            List[str],
+            self._resolve_list_type_property(
+                property_name="exclude_column_names",
+                property_value_type=list,
+                variables=variables,
+            ),
+        )
 
         column_name: str
 
@@ -240,38 +233,16 @@ class ColumnDomainBuilder(DomainBuilder):
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 
-        # include_column_name_suffixes column_name_suffixes from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        include_column_name_suffixes: Optional[
-            Union[str, Iterable, List[str]]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.include_column_name_suffixes,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
+        include_column_name_suffixes: List[str] = cast(
+            List[str],
+            self._resolve_list_type_property(
+                property_name="include_column_name_suffixes",
+                property_value_type=(str, Iterable, list),
+                variables=variables,
+            ),
         )
-
-        # exclude_column_name_suffixes column_name_suffixes from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        exclude_column_name_suffixes: Optional[
-            Union[str, Iterable, List[str]]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.exclude_column_name_suffixes,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
-        )
-
         if include_column_name_suffixes:
-            if isinstance(include_column_name_suffixes, str):
-                include_column_name_suffixes = [include_column_name_suffixes]
-            else:
-                if not isinstance(include_column_name_suffixes, (Iterable, list)):
-                    raise ValueError(
-                        "Unrecognized include_column_name_suffixes directive -- must be a list or a string."
-                    )
-
-            effective_column_names: List[str] = list(
+            effective_column_names = list(
                 filter(
                     lambda candidate_column_name: candidate_column_name.endswith(
                         tuple(include_column_name_suffixes)
@@ -280,16 +251,16 @@ class ColumnDomainBuilder(DomainBuilder):
                 )
             )
 
+        exclude_column_name_suffixes: List[str] = cast(
+            List[str],
+            self._resolve_list_type_property(
+                property_name="exclude_column_name_suffixes",
+                property_value_type=(str, Iterable, list),
+                variables=variables,
+            ),
+        )
         if exclude_column_name_suffixes:
-            if isinstance(exclude_column_name_suffixes, str):
-                exclude_column_name_suffixes = [exclude_column_name_suffixes]
-            else:
-                if not isinstance(exclude_column_name_suffixes, (Iterable, list)):
-                    raise ValueError(
-                        "Unrecognized exclude_column_name_suffixes directive -- must be a list or a string."
-                    )
-
-            effective_column_names: List[str] = list(
+            effective_column_names = list(
                 filter(
                     lambda candidate_column_name: not candidate_column_name.endswith(
                         tuple(exclude_column_name_suffixes)
@@ -338,15 +309,13 @@ class ColumnDomainBuilder(DomainBuilder):
         )
         self._semantic_type_filter = semantic_type_filter
 
-        # Obtain include_semantic_types from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        include_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.include_semantic_types,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
+        include_semantic_types: Union[List[Union[str, SemanticDomainTypes]]] = cast(
+            List[Union[str, SemanticDomainTypes]],
+            self._resolve_list_type_property(
+                property_name="include_semantic_types",
+                property_value_type=(str, SemanticDomainTypes, list),
+                variables=variables,
+            ),
         )
         include_semantic_types = (
             self.semantic_type_filter.parse_semantic_domain_type_argument(
@@ -354,26 +323,10 @@ class ColumnDomainBuilder(DomainBuilder):
             )
         )
 
-        # Obtain exclude_semantic_types from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        exclude_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.exclude_semantic_types,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
-        )
-        exclude_semantic_types = (
-            self.semantic_type_filter.parse_semantic_domain_type_argument(
-                semantic_types=exclude_semantic_types
-            )
-        )
-
         if include_semantic_types:
             effective_column_names = list(
                 filter(
-                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
+                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
                         candidate_column_name
                     ]
                     in include_semantic_types,
@@ -381,10 +334,24 @@ class ColumnDomainBuilder(DomainBuilder):
                 )
             )
 
+        exclude_semantic_types: Union[List[Union[str, SemanticDomainTypes]]] = cast(
+            List[Union[str, SemanticDomainTypes]],
+            self._resolve_list_type_property(
+                property_name="exclude_semantic_types",
+                property_value_type=(str, SemanticDomainTypes, list),
+                variables=variables,
+            ),
+        )
+        exclude_semantic_types = (
+            self.semantic_type_filter.parse_semantic_domain_type_argument(
+                semantic_types=exclude_semantic_types
+            )
+        )
+
         if exclude_semantic_types:
             effective_column_names = list(
                 filter(
-                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
+                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
                         candidate_column_name
                     ]
                     not in exclude_semantic_types,
@@ -396,6 +363,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """
@@ -411,26 +379,44 @@ class ColumnDomainBuilder(DomainBuilder):
             variables=variables,
         )
 
-        domains: List[Domain]
-        if self.include_semantic_types or self.exclude_semantic_types:
-            domains = [
-                Domain(
-                    domain_type=self.domain_type,
-                    domain_kwargs={
-                        "column": column_name,
-                    },
-                    details={
-                        INFERRED_SEMANTIC_TYPE_KEY: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
-                            column_name
-                        ],
-                    },
-                )
-                for column_name in effective_column_names
-            ]
-        else:
-            domains = build_simple_domains_from_column_names(
-                column_names=effective_column_names,
-                domain_type=self.domain_type,
-            )
+        column_name: str
+        domains: List[Domain] = build_domains_from_column_names(
+            rule_name=rule_name,
+            column_names=effective_column_names,
+            domain_type=self.domain_type,
+            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,
+        )
 
         return domains
+
+    def _resolve_list_type_property(
+        self,
+        property_name: str,
+        property_value_type: Union[type, Tuple[type, ...]],
+        variables: Optional[ParameterContainer] = None,
+    ) -> List[type]:
+        property_value: Optional[property_value_type] = getattr(self, property_name, [])
+        if property_value is None:
+            property_value = []
+        elif isinstance(property_value, str):
+            property_value = [property_value]
+        else:
+            if not isinstance(property_value, property_value_type):
+                raise ValueError(
+                    f'Unrecognized "{property_name}" directive -- must be "{property_value_type}" (or string).'
+                )
+
+        property_cursor: type
+        property_value = [
+            # Obtain property from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            get_parameter_value_and_validate_return_type(
+                domain=None,
+                parameter_reference=property_cursor,
+                expected_return_type=None,
+                variables=variables,
+                parameters=None,
+            )
+            for property_cursor in property_value
+        ]
+
+        return property_value

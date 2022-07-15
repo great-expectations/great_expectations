@@ -6,20 +6,17 @@ from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
-    AttributedResolvedMetrics,
-    MetricComputationResult,
-    MetricValues,
-    ParameterBuilder,
-)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    Attributes,
+    AttributedResolvedMetrics,
     Domain,
+    MetricComputationResult,
+    MetricValues,
     ParameterContainer,
 )
+from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)
 
@@ -103,9 +100,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Configure this SimpleDateFormatStringParameterBuilder
         Args:
@@ -119,13 +115,11 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -138,14 +132,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             self._candidate_strings = set(candidate_strings)
         else:
             self._candidate_strings = DEFAULT_CANDIDATE_STRINGS
-
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"{PARAMETER_KEY}{self.name}"
-
-    """
-    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
-    """
 
     @property
     def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
@@ -210,7 +196,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         metric_values: MetricValues
 
-        metric_values = attributed_resolved_metrics.metric_values
+        metric_values = attributed_resolved_metrics.conditioned_metric_values
+
+        if metric_values is None:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"Result of metric computations for {self.__class__.__name__} is empty."
+            )
 
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
@@ -264,7 +255,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             attributed_resolved_metrics
         ) in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
-            metric_values = attributed_resolved_metrics.metric_values[:, 0]
+            metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
             match_strftime_unexpected_count: int = sum(metric_values)
             success_ratio: float = (

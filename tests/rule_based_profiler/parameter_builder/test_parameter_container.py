@@ -37,6 +37,7 @@ def test_get_fully_qualified_parameter_names(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=None,
         details=None,
+        rule_name="my_rule",
     )
     # Convert variables argument to ParameterContainer
     variables: ParameterContainer = build_parameter_container_for_variables(
@@ -92,6 +93,7 @@ def test_get_parameter_values_for_fully_qualified_parameter_names(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=None,
         details=None,
+        rule_name="my_rule",
     )
     # Convert variables argument to ParameterContainer
     variables: ParameterContainer = build_parameter_container_for_variables(

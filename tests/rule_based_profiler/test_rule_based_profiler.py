@@ -7,20 +7,34 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
 from great_expectations.exceptions.exceptions import InvalidConfigError
-from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.rule_based_profiler import (
+from great_expectations.rule_based_profiler import (
+    BaseRuleBasedProfiler,
+    RuleBasedProfiler,
+    RuleBasedProfilerResult,
+)
+from great_expectations.rule_based_profiler.config import (
+    DomainBuilderConfig,
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations.rule_based_profiler.domain_builder import TableDomainBuilder
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    DefaultExpectationConfigurationBuilder,
+)
+from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     ReconciliationDirectives,
     ReconciliationStrategy,
 )
+from great_expectations.rule_based_profiler.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -106,14 +120,14 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
-                    "json_serialize": True,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "include_estimator_samples_histogram_in_details": False,
                 },
             ],
             "expectation_configuration_builders": [
@@ -125,7 +139,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -138,7 +152,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -164,7 +178,6 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -176,8 +189,9 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -189,7 +203,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -202,7 +216,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -225,7 +239,6 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -238,7 +251,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "my_arg": "$parameter.my_parameter.value[0]",
                     "my_other_arg": "$parameter.my_parameter.value[1]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -296,7 +309,6 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -309,7 +321,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
                     "my_arg": "$parameter.my_parameter.value[0]",
                     "my_other_arg": "$parameter.my_parameter.value[1]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -346,7 +358,6 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -357,7 +368,8 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
-                    "json_serialize": True,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "include_estimator_samples_histogram_in_details": False,
                 },
             ],
         },
@@ -379,7 +391,6 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -391,8 +402,9 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -405,7 +417,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "my_arg": "$parameter.my_parameter.value[0]",
                     "my_other_arg": "$parameter.my_parameter.value[1]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -442,7 +454,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -455,7 +467,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -481,7 +493,6 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -493,7 +504,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -506,7 +517,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -545,14 +556,14 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
-                    "json_serialize": True,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "include_estimator_samples_histogram_in_details": False,
                 },
             ],
             "expectation_configuration_builders": [
@@ -564,7 +575,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -577,7 +588,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -603,7 +614,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -615,8 +625,9 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -630,7 +641,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "my_other_arg": "$parameter.my_parameter.value[1]",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -643,7 +654,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -689,7 +700,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
-                    "json_serialize": True,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "include_estimator_samples_histogram_in_details": False,
                 },
             ],
             "expectation_configuration_builders": [
@@ -700,7 +712,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -728,8 +740,9 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -740,7 +753,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -786,14 +799,14 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
-                    "json_serialize": True,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "include_estimator_samples_histogram_in_details": False,
                 },
             ],
             "expectation_configuration_builders": [
@@ -805,7 +818,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -818,7 +831,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -844,7 +857,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -856,8 +868,9 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -869,7 +882,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -882,7 +895,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -932,6 +945,9 @@ def test_run_profiler_without_dynamic_args(
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
+        variables_directives_list=None,
+        domain_type_directives_list=None,
+        comment=None,
     )
 
 
@@ -946,17 +962,16 @@ def test_run_profiler_with_dynamic_args(
     # Dynamic arguments used to override the profiler's attributes
     variables = {"foo": "bar"}
     rules = {"baz": "qux"}
-    expectation_suite_name = "my_expectation_suite_name"
-    include_citation = False
 
-    RuleBasedProfiler.run_profiler(
-        data_context=mock_data_context,
-        profiler_store=populated_profiler_store,
-        name=profiler_name,
-        variables=variables,
-        rules=rules,
-        expectation_suite_name=expectation_suite_name,
-        include_citation=include_citation,
+    # noinspection PyUnusedLocal
+    rule_based_profiler_result: RuleBasedProfilerResult = (
+        RuleBasedProfiler.run_profiler(
+            data_context=mock_data_context,
+            profiler_store=populated_profiler_store,
+            name=profiler_name,
+            variables=variables,
+            rules=rules,
+        )
     )
 
     assert mock_profiler_run.called
@@ -972,6 +987,9 @@ def test_run_profiler_with_dynamic_args(
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
+        variables_directives_list=None,
+        domain_type_directives_list=None,
+        comment=None,
     )
 
 
@@ -1051,13 +1069,73 @@ def test_get_profiler_with_too_many_args_raises_error(
 
 
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+def test_serialize_profiler_config(
+    mock_data_context: mock.MagicMock,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+):
+    profiler: BaseRuleBasedProfiler = BaseRuleBasedProfiler(
+        profiler_config=profiler_config_with_placeholder_args,
+        data_context=mock_data_context,
+    )
+    assert profiler.config == profiler_config_with_placeholder_args
+    assert len(profiler.rules) == 1
+    assert isinstance(profiler.rules[0].domain_builder, TableDomainBuilder)
+    assert DomainBuilderConfig(
+        **profiler.rules[0].domain_builder.to_json_dict()
+    ).to_json_dict() == {
+        "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+        "class_name": "TableDomainBuilder",
+    }
+    assert isinstance(
+        profiler.rules[0].parameter_builders[0], MetricMultiBatchParameterBuilder
+    )
+    assert ParameterBuilderConfig(
+        **profiler.rules[0].parameter_builders[0].to_json_dict()
+    ).to_json_dict() == {
+        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+        "class_name": "MetricMultiBatchParameterBuilder",
+        "name": "my_parameter",
+        "metric_name": "my_metric",
+        "metric_domain_kwargs": None,
+        "metric_value_kwargs": None,
+        "enforce_numeric_metric": False,
+        "replace_nan_with_zero": False,
+        "reduce_scalar_metric": True,
+        "evaluation_parameter_builder_configs": None,
+    }
+    assert isinstance(
+        profiler.rules[0].expectation_configuration_builders[0],
+        DefaultExpectationConfigurationBuilder,
+    )
+    assert DefaultExpectationConfigurationBuilder(
+        **profiler.rules[0].expectation_configuration_builders[0].to_json_dict()
+    ).to_json_dict() == {
+        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+        "class_name": "DefaultExpectationConfigurationBuilder",
+        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+        "validation_parameter_builder_configs": None,
+        "column_A": "$domain.domain_kwargs.column_A",
+        "column_B": "$domain.domain_kwargs.column_B",
+        "condition": None,
+        "my_arg": "$parameter.my_parameter.value[0]",
+        "my_other_arg": "$parameter.my_parameter.value[1]",
+        "meta": {
+            "profiler_details": {
+                "my_parameter_estimator": "$parameter.my_parameter.details",
+                "note": "Important remarks about estimation algorithm.",
+            },
+        },
+    }
+
+
+@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
 def test_add_profiler(
     mock_data_context: mock.MagicMock,
     profiler_key: ConfigurationIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     mock_data_context.ge_cloud_mode.return_value = False
-    profiler = RuleBasedProfiler.add_profiler(
+    profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
         profiler_config_with_placeholder_args,
         data_context=mock_data_context,
         profiler_store=mock_data_context.profiler_store,
@@ -1070,6 +1148,7 @@ def test_add_profiler(
     )
 
 
+@pytest.mark.cloud
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
 def test_add_profiler_ge_cloud_mode(
     mock_data_context: mock.MagicMock,
@@ -1078,7 +1157,7 @@ def test_add_profiler_ge_cloud_mode(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     mock_data_context.ge_cloud_mode.return_value = True
-    profiler = RuleBasedProfiler.add_profiler(
+    profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
         profiler_config_with_placeholder_args,
         data_context=mock_data_context,
         profiler_store=mock_data_context.profiler_store,
@@ -1114,7 +1193,6 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
                         "class_name": "MetricMultiBatchParameterBuilder",
                         "name": "my_parameter",
                         "metric_name": "my_metric",
-                        "json_serialize": True,
                     },
                 ],
                 "expectation_configuration_builders": [
@@ -1147,7 +1225,7 @@ def test_get_profiler(
         "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
         return_value=profiler_config_with_placeholder_args,
     ):
-        profiler = RuleBasedProfiler.get_profiler(
+        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
             name="my_profiler",
@@ -1227,6 +1305,7 @@ def test_list_profilers(mock_profiler_store: mock.MagicMock):
     assert store.list_keys.called
 
 
+@pytest.mark.cloud
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
 def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
     store = mock_profiler_store()
@@ -1343,7 +1422,6 @@ def test_add_rule_add_second_rule(
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
 def test_add_rule_bad_rule(
     mock_data_context: mock.MagicMock,
-    sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
         name="my_rbp",
@@ -1359,39 +1437,3 @@ def test_add_rule_bad_rule(
         # noinspection PyTypeChecker
         profiler.add_rule(rule=not_a_rule)
     assert "'dict' object has no attribute 'name'" in str(e.value)
-
-
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
-def test_run_with_expectation_suite_arg(mock_data_context: mock.MagicMock):
-    profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rbp", data_context=mock_data_context, config_version=1.0
-    )
-    suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="my_expectation_suite"
-    )
-    profiler.run()
-    result_suite: ExpectationSuite = profiler.get_expectation_suite(
-        expectation_suite=suite
-    )
-
-    assert id(suite) == id(result_suite)
-
-
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
-def test_run_with_conflicting_expectation_suite_args_raises_error(
-    mock_data_context: mock.MagicMock,
-):
-    profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rbp", data_context=mock_data_context, config_version=1.0
-    )
-    suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="my_expectation_suite"
-    )
-
-    with pytest.raises(AssertionError) as e:
-        profiler.run()
-        suite = profiler.get_expectation_suite(
-            expectation_suite=suite, expectation_suite_name="my_expectation_suite"
-        )
-
-    assert "Ambiguous arguments provided" in str(e.value)

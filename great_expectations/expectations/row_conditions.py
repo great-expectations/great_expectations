@@ -26,7 +26,7 @@ except ImportError:
     sa = None
 
 
-def _set_notnull(s, l, t):
+def _set_notnull(s, l, t) -> None:
     t["notnull"] = True
 
 
@@ -42,9 +42,9 @@ le = Literal("<=")
 eq = Literal("==")
 ops = (gt ^ lt ^ ge ^ le ^ eq).setResultsName("op")
 fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?").setResultsName("fnumber")
-condition_value = Suppress('"') + Word(f"{alphanums}.").setResultsName(
+condition_value = Suppress('"') + Word(f"{alphanums}._").setResultsName(
     "condition_value"
-) + Suppress('"') ^ Suppress("'") + Word(f"{alphanums}.").setResultsName(
+) + Suppress('"') ^ Suppress("'") + Word(f"{alphanums}._").setResultsName(
     "condition_value"
 ) + Suppress(
     "'"

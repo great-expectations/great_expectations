@@ -8,7 +8,7 @@ import sys
 import uuid
 from collections import OrderedDict
 from collections.abc import Mapping
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
 import dateutil.parser
@@ -25,9 +25,14 @@ from great_expectations.types.base import SerializableDotDict
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 
-
 logger = logging.getLogger(__name__)
 
+
+try:
+    from shapely.geometry import Point, Polygon
+except ImportError:
+    Point = None
+    Polygon = None
 
 try:
     import sqlalchemy
@@ -68,12 +73,6 @@ except ImportError:
 
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
-
-TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX: str = "tmp"
-TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
-TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN: re.Pattern = re.compile(
-    rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\w{8}"
-)
 
 
 def nested_update(
@@ -136,6 +135,25 @@ def in_databricks() -> bool:
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
+def determine_progress_bar_method_by_environment() -> Callable:
+    """
+    As tqdm has specific methods for progress bar creation and iteration,
+    we require a utility to determine which method to use.
+
+    If in a Jupyter notebook, we want to use `tqdm.notebook.tqdm`. Otherwise,
+    we default to the standard `tqdm.tqdm`. Please see the docs for more information: https://tqdm.github.io/
+
+    Returns:
+        The appropriate tqdm method for the environment in question.
+    """
+    from tqdm import tqdm
+    from tqdm.notebook import tqdm as tqdm_notebook
+
+    if in_jupyter_notebook():
+        return tqdm_notebook
+    return tqdm
+
+
 def convert_to_json_serializable(data):
     """
     Helper function to convert an object to one that is json serializable
@@ -191,6 +209,9 @@ def convert_to_json_serializable(data):
         return data.isoformat()
 
     if isinstance(data, (uuid.UUID, bytes)):
+        return str(data)
+
+    if Polygon and isinstance(data, (Point, Polygon)):
         return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
@@ -364,8 +385,7 @@ def ensure_json_serializable(data):
 
     else:
         raise InvalidExpectationConfigurationError(
-            "%s is of type %s which cannot be serialized to json"
-            % (str(data), type(data).__name__)
+            f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
         )
 
 
@@ -464,7 +484,7 @@ class AzureUrl:
         "wasbs://{container}@{account_name}.blob.core.windows.net/{path}"
     )
 
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         search = re.search(
             AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url
         )
@@ -518,7 +538,7 @@ class GCSUrl:
 
     OBJECT_URL_TEMPLATE: str = "gs://{bucket_or_name}/{path}"
 
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         search = re.search(GCSUrl.URL_REGEX_PATTERN, url)
         assert (
             search is not None
@@ -563,7 +583,7 @@ class S3Url:
     's3://bucket/hello/world#foo?bar=2'
     """
 
-    def __init__(self, url):
+    def __init__(self, url) -> None:
         self._parsed = urlparse(url, allow_fragments=False)
 
     @property
@@ -774,58 +794,3 @@ def get_sql_dialect_floating_point_infinity_value(
             return res["NegativeInfinity"]
         else:
             return res["PositiveInfinity"]
-
-
-def get_or_create_expectation_suite(
-    data_context: "BaseDataContext",  # noqa: F821
-    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
-    expectation_suite_name: Optional[str] = None,
-    component_name: Optional[str] = None,
-) -> "ExpectationSuite":  # noqa: F821
-    """
-    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
-    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
-    """
-    suite: "ExpectationSuite"  # noqa: F821
-
-    generate_temp_expectation_suite_name: bool
-    create_expectation_suite: bool
-
-    if expectation_suite is not None and expectation_suite_name is not None:
-        if expectation_suite.expectation_suite_name != expectation_suite_name:
-            raise ValueError(
-                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
-            )
-
-        return expectation_suite
-    elif expectation_suite is None and expectation_suite_name is not None:
-        generate_temp_expectation_suite_name = False
-        create_expectation_suite = True
-    elif expectation_suite is not None and expectation_suite_name is None:
-        generate_temp_expectation_suite_name = False
-        create_expectation_suite = False
-    else:
-        generate_temp_expectation_suite_name = True
-        create_expectation_suite = True
-
-    if generate_temp_expectation_suite_name:
-        if not component_name:
-            component_name = "test"
-
-        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}{str(uuid.uuid4())[:8]}"
-
-    if create_expectation_suite:
-        try:
-            # noinspection PyUnusedLocal
-            expectation_suite = data_context.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-        except ge_exceptions.DataContextError:
-            expectation_suite = data_context.create_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-            print(
-                f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
-            )
-
-    return expectation_suite

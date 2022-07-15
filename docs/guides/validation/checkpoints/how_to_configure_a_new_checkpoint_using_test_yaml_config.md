@@ -3,6 +3,7 @@ title: How to configure a new Checkpoint using test_yaml_config
 ---
 import Prerequsities from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import RelevantApiLinks from './how_to_configure_a_new_checkpoint_using_test_yaml_config__api_links.mdx'
 
 This how-to guide demonstrates advanced examples for configuring a <TechnicalTag tag="checkpoint" text="Checkpoint" /> using ``test_yaml_config``. **Note:** For a basic guide on creating a new Checkpoint, please see [How to create a new Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
@@ -39,7 +40,7 @@ In the [Additional Information](#additional-information) section at the end of t
 After you make edits to the `yaml_config` variable, don't forget to re-run the cell that contains it!
 :::
 
-### 3. Use `test_yamal_config()` to validate your Checkpoint configuration
+### 3. Use `test_yaml_config()` to validate your Checkpoint configuration
 
 Once you have made changes to the `yaml_config` in your Jupyter Notebook, you can verify that the updated configuration is valid by running the following code:
 
@@ -321,3 +322,6 @@ checkpoint_run_result: CheckpointResult = data_context.run_checkpoint(
 )
  ```
 
+### Relevant API documentation (links)
+
+<RelevantApiLinks/>

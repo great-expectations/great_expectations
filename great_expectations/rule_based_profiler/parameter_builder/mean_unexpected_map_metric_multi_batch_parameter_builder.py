@@ -8,24 +8,24 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
-    MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    Attributes,
+    RAW_PARAMETER_KEY,
     Domain,
+    MetricValues,
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.types.attributes import Attributes
 
 
 class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
     MetricMultiBatchParameterBuilder
 ):
     """
-    Compute mean unexpected count ratio (as a fraction) of a specified map-style metric across all specified batches.
+    Compute mean unexpected count ratio (as a fraction) of specified map-style metric across every Batch of data given.
     """
 
     exclude_field_names: Set[
@@ -48,9 +48,8 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Args:
             name: the name of this parameter -- this is user-specified parameter name (from configuration);
@@ -65,7 +64,6 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
@@ -77,7 +75,6 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             replace_nan_with_zero=True,
             reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -122,7 +119,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         )
 
         fully_qualified_total_count_parameter_builder_name: str = (
-            f"{PARAMETER_KEY}{total_count_parameter_builder_name}"
+            f"{RAW_PARAMETER_KEY}{total_count_parameter_builder_name}"
         )
         # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         total_count_parameter_node: ParameterNode = (
@@ -161,7 +158,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             null_count_values = np.zeros(shape=(num_batch_ids,))
         else:
             fully_qualified_null_count_parameter_builder_name: str = (
-                f"{PARAMETER_KEY}{null_count_parameter_builder_name}"
+                f"{RAW_PARAMETER_KEY}{null_count_parameter_builder_name}"
             )
             # Obtain null_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
             null_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
@@ -189,7 +186,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         # Retrieve "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self.fully_qualified_parameter_name,
+            parameter_reference=self.raw_fully_qualified_parameter_name,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,

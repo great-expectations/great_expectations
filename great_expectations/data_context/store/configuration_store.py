@@ -5,6 +5,9 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -42,7 +45,7 @@ class ConfigurationStore(Store):
         store_backend: Optional[dict] = None,
         overwrite_existing: bool = False,
         runtime_environment: Optional[dict] = None,
-    ):
+    ) -> None:
         if not issubclass(self._configuration_class, BaseYamlConfig):
             raise ge_exceptions.DataContextError(
                 "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
@@ -112,7 +115,7 @@ class ConfigurationStore(Store):
         return self._overwrite_existing
 
     @overwrite_existing.setter
-    def overwrite_existing(self, overwrite_existing: bool):
+    def overwrite_existing(self, overwrite_existing: bool) -> None:
         self._overwrite_existing = overwrite_existing
 
     @property
@@ -148,7 +151,7 @@ class ConfigurationStore(Store):
 
         return report_object
 
-    def serialization_self_check(self, pretty_print: bool):
+    def serialization_self_check(self, pretty_print: bool) -> None:
         raise NotImplementedError
 
     @staticmethod
@@ -161,7 +164,9 @@ class ConfigurationStore(Store):
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+            key = GeCloudIdentifier(
+                resource_type=GeCloudRESTResource.CONTRACT, ge_cloud_id=ge_cloud_id
+            )
         else:
             key = ConfigurationIdentifier(configuration_key=name)
 

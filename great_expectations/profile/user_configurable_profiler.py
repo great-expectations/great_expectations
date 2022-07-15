@@ -69,7 +69,7 @@ class UserConfigurableProfiler:
         semantic_types_dict: Optional[Dict[str, List[str]]] = None,
         table_expectations_only: bool = False,
         value_set_threshold: str = "MANY",
-    ):
+    ) -> None:
         """
         The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
         instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
@@ -238,7 +238,7 @@ class UserConfigurableProfiler:
 
         return expectation_suite
 
-    def _send_usage_stats_message(self):
+    def _send_usage_stats_message(self) -> None:
         profile_dataset_type: str = str(type(self.profile_dataset))
         if "Dataset" in profile_dataset_type:
             profile_dataset_type = "Dataset"
@@ -673,6 +673,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             for semantic_type, column_list in self.semantic_types_dict.items():
                 if column_name in column_list:
                     semantic_types.append(semantic_type.upper())
+
             column_info_entry["semantic_types"] = semantic_types
             if all(
                 i in column_info_entry.get("semantic_types")
@@ -1111,7 +1112,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
 
         return profile_dataset
 
-    def _build_expectations_for_all_column_types(self, profile_dataset, column):
+    def _build_expectations_for_all_column_types(self, profile_dataset, column) -> None:
         """
         Adds these expectations for all included columns irrespective of type. Includes:
             - `expect_column_values_to_not_be_null` (or `expect_column_values_to_be_null`)
@@ -1203,7 +1204,7 @@ nan: {pct_unique}
                     f"Skipping expect_column_values_to_be_in_type_list for this column."
                 )
 
-    def _build_expectations_table(self, profile_dataset):
+    def _build_expectations_table(self, profile_dataset) -> None:
         """
         Adds two table level expectations to the dataset
         Args:

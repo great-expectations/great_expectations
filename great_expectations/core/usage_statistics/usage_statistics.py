@@ -53,7 +53,7 @@ class UsageStatisticsHandler:
         data_context: "DataContext",  # noqa: F821
         data_context_id: str,
         usage_statistics_url: str,
-    ):
+    ) -> None:
         self._url = usage_statistics_url
 
         self._data_context_id = data_context_id
@@ -126,13 +126,18 @@ class UsageStatisticsHandler:
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
 
+        # <WILL> 20220701 - ValidationOperators have been deprecated, so some init_payloads will not have them included
+        validation_operators = None
+        if hasattr(self._data_context, "validation_operators"):
+            validation_operators = self._data_context.validation_operators
+
         init_payload = {
             "platform.system": platform.system(),
             "platform.release": platform.release(),
             "version_info": str(sys.version_info),
             "datasources": self._data_context.project_config_with_variables_substituted.datasources,
             "stores": self._data_context.stores,
-            "validation_operators": self._data_context.validation_operators,
+            "validation_operators": validation_operators,
             "data_docs_sites": self._data_context.project_config_with_variables_substituted.data_docs_sites,
             "expectation_suites": expectation_suites,
             "dependencies": self._get_serialized_dependencies(),
@@ -143,7 +148,8 @@ class UsageStatisticsHandler:
         )
         return anonymized_init_payload
 
-    def _get_serialized_dependencies(self) -> List[dict]:
+    @staticmethod
+    def _get_serialized_dependencies() -> List[dict]:
         """Get the serialized dependencies from the GEExecutionEnvironment."""
         ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
@@ -253,6 +259,7 @@ def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHa
             "Unrecognized error when trying to find usage_statistics_handler: " + str(e)
         )
         handler = None
+
     return handler
 
 
@@ -367,67 +374,56 @@ def save_expectation_suite_usage_statistics(
     data_context: "DataContext",  # noqa: F821
     expectation_suite: ExpectationSuite,
     expectation_suite_name: Optional[str] = None,
-    **kwargs,
+    **kwargs: dict,
 ) -> dict:
-    try:
-        data_context_id = data_context.data_context_id
-    except AttributeError:
-        data_context_id = None
-    anonymizer = _anonymizers.get(data_context_id, None)
-    if anonymizer is None:
-        anonymizer = Anonymizer(data_context_id)
-        _anonymizers[data_context_id] = anonymizer
-    payload = {}
+    """
+    Event handler for saving expectation suite with either "ExpectationSuite" object or "expectation_suite_name" string.
+    """
+    return _handle_expectation_suite_usage_statistics(
+        data_context=data_context,
+        event_arguments_payload_handler_name="save_expectation_suite_usage_statistics",
+        expectation_suite=expectation_suite,
+        expectation_suite_name=expectation_suite_name,
+        interactive_mode=None,
+        **kwargs,
+    )
 
-    if expectation_suite_name is None:
-        if isinstance(expectation_suite, ExpectationSuite):
-            expectation_suite_name = expectation_suite.expectation_suite_name
-        elif isinstance(expectation_suite, dict):
-            expectation_suite_name = expectation_suite.get("expectation_suite_name")
 
-    # noinspection PyBroadException
-    try:
-        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
-            obj=expectation_suite_name
-        )
-    except Exception as e:
-        logger.debug(
-            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
-        )
-
-    return payload
+def get_expectation_suite_usage_statistics(
+    data_context: "DataContext",  # noqa: F821
+    expectation_suite_name: str,
+    **kwargs: dict,
+) -> dict:
+    """
+    Event handler for obtaining expectation suite with "expectation_suite_name" string.
+    """
+    return _handle_expectation_suite_usage_statistics(
+        data_context=data_context,
+        event_arguments_payload_handler_name="get_expectation_suite_usage_statistics",
+        expectation_suite=None,
+        expectation_suite_name=expectation_suite_name,
+        interactive_mode=None,
+        **kwargs,
+    )
 
 
 def edit_expectation_suite_usage_statistics(
     data_context: "DataContext",  # noqa: F821
     expectation_suite_name: str,
     interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
+    **kwargs: dict,
 ) -> dict:
-    try:
-        data_context_id = data_context.data_context_id
-    except AttributeError:
-        data_context_id = None
-    anonymizer = _anonymizers.get(data_context_id, None)
-    if anonymizer is None:
-        anonymizer = Anonymizer(data_context_id)
-        _anonymizers[data_context_id] = anonymizer
-
-    if interactive_mode is None:
-        payload = {}
-    else:
-        payload = copy.deepcopy(interactive_mode.value)
-
-    # noinspection PyBroadException
-    try:
-        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
-            obj=expectation_suite_name
-        )
-    except Exception as e:
-        logger.debug(
-            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
-        )
-
-    return payload
+    """
+    Event handler for editing expectation suite with "expectation_suite_name" string.
+    """
+    return _handle_expectation_suite_usage_statistics(
+        data_context=data_context,
+        event_arguments_payload_handler_name="edit_expectation_suite_usage_statistics",
+        expectation_suite=None,
+        expectation_suite_name=expectation_suite_name,
+        interactive_mode=interactive_mode,
+        **kwargs,
+    )
 
 
 def add_datasource_usage_statistics(
@@ -535,12 +531,13 @@ def get_checkpoint_run_usage_statistics(
     return payload
 
 
+# noinspection PyUnusedLocal
 def get_profiler_run_usage_statistics(
     profiler: "RuleBasedProfiler",  # noqa: F821
     variables: Optional[dict] = None,
     rules: Optional[dict] = None,
-    *args,
-    **kwargs,
+    *args: tuple,
+    **kwargs: dict,
 ) -> dict:
     usage_statistics_handler: Optional[
         UsageStatisticsHandler
@@ -600,3 +597,53 @@ def send_usage_message(
             handler.emit(message)
     except Exception:
         pass
+
+
+# noinspection SpellCheckingInspection
+# noinspection PyUnusedLocal
+def _handle_expectation_suite_usage_statistics(
+    data_context: "DataContext",  # noqa: F821
+    event_arguments_payload_handler_name: str,
+    expectation_suite: Optional[ExpectationSuite] = None,
+    expectation_suite_name: Optional[str] = None,
+    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
+    **kwargs,
+) -> dict:
+    """
+    This method anonymizes "expectation_suite_name" for events that utilize this property.
+    """
+    data_context_id: Optional[str]
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+
+    anonymizer: Anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+
+    payload: dict
+
+    if interactive_mode is None:
+        payload = {}
+    else:
+        payload = copy.deepcopy(interactive_mode.value)
+
+    if expectation_suite_name is None:
+        if isinstance(expectation_suite, ExpectationSuite):
+            expectation_suite_name = expectation_suite.expectation_suite_name
+        elif isinstance(expectation_suite, dict):
+            expectation_suite_name = expectation_suite.get("expectation_suite_name")
+
+    # noinspection PyBroadException
+    try:
+        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
+            obj=expectation_suite_name
+        )
+    except Exception as e:
+        logger.debug(
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, {event_arguments_payload_handler_name}: Unable to create anonymized_expectation_suite_name payload field."
+        )
+
+    return payload
