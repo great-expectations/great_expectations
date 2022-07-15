@@ -1,3 +1,4 @@
+import logging
 from typing import Set, Union
 
 from great_expectations.data_context.data_context_variables import (
@@ -5,6 +6,8 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
 from great_expectations.data_context.types.base import DataContextConfig
+
+logger = logging.getLogger(__name__)
 
 
 class DataContextStore(ConfigurationStore):
@@ -14,9 +17,10 @@ class DataContextStore(ConfigurationStore):
 
     _configuration_class = DataContextConfig
 
-    ge_cloud_exclude_field_names: Set[str] = {
-        DataContextVariableSchema.DATASOURCES,
+    ge_cloud_exclude_field_names: Set[DataContextVariableSchema] = {
         DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
+        DataContextVariableSchema.DATASOURCES,
+        DataContextVariableSchema.VALIDATION_OPERATORS,
     }
 
     def serialize(self, value: DataContextConfig) -> Union[dict, str]:
@@ -38,6 +42,10 @@ class DataContextStore(ConfigurationStore):
         if self.ge_cloud_mode:
             assert isinstance(payload, dict)
             for attr in self.ge_cloud_exclude_field_names:
-                payload.pop(attr)
+                if attr in payload:
+                    payload.pop(attr)
+                    logger.debug(
+                        f"Removed {attr} from DataContextConfig while serializing to JSON"
+                    )
 
         return payload
