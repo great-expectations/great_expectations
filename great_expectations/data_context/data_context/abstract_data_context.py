@@ -218,7 +218,7 @@ class AbstractDataContext(ABC):
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
         ge_cloud_id: Optional[str] = None,
-        **kwargs,
+        **kwargs: Optional[dict],
     ) -> None:
         """
         Each DataContext will define how ExpectationSuite will be saved.
@@ -453,7 +453,7 @@ class AbstractDataContext(ABC):
         name: str,
         initialize: bool = True,
         save_changes: bool = False,
-        **kwargs: dict,
+        **kwargs: Optional[dict],
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
@@ -701,7 +701,7 @@ class AbstractDataContext(ABC):
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
         include_rendered_content: bool = False,
-        **kwargs: dict,
+        **kwargs: Optional[dict],
     ) -> Validator:
         """
         This method applies only to the new (V3) Datasource schema.
@@ -798,7 +798,7 @@ class AbstractDataContext(ABC):
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
         include_rendered_content: bool = False,
-        **kwargs: dict,
+        **kwargs: Optional[dict],
     ) -> Validator:
         """
 
@@ -854,7 +854,7 @@ class AbstractDataContext(ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        **kwargs,
+        **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
         This method applies only to the new (V3) Datasource schema.
@@ -937,7 +937,7 @@ class AbstractDataContext(ABC):
         expectation_suite_name: str,
         overwrite_existing: bool = False,
         ge_cloud_id: Optional[str] = None,
-        **kwargs,
+        **kwargs: Optional[dict],
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -1085,7 +1085,7 @@ class AbstractDataContext(ABC):
 
     @staticmethod
     def _get_metric_configuration_tuples(
-        metric_configuration, base_kwargs=None
+        metric_configuration: Union[str, dict], base_kwargs: Optional[dict] = None
     ) -> List[Tuple[str, Union[dict, Any]]]:
         if base_kwargs is None:
             base_kwargs = {}

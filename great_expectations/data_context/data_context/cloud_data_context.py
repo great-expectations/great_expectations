@@ -142,7 +142,7 @@ class CloudDataContext(AbstractDataContext):
         expectation_suite_name: str,
         overwrite_existing: bool = False,
         ge_cloud_id: Optional[str] = None,
-        **kwargs,
+        **kwargs: Optional[dict],
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -229,7 +229,7 @@ class CloudDataContext(AbstractDataContext):
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
         ge_cloud_id: Optional[str] = None,
-        **kwargs,
+        **kwargs: Optional[dict],
     ) -> None:
         """Save the provided expectation suite into the DataContext.
 
