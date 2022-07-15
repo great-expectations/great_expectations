@@ -93,7 +93,7 @@ class ConfigurationStore(Store):
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
 
-    def serialize(self, key, value):
+    def serialize(self, value):
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()

@@ -60,7 +60,7 @@ class MetricStore(Store):
         # Values must be json serializable since they must be inputs to expectation configurations
         ensure_json_serializable(value)
 
-    def serialize(self, key, value):
+    def serialize(self, value):
         return json.dumps({"value": value})
 
     def deserialize(self, key, value):

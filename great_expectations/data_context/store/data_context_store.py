@@ -1,4 +1,4 @@
-from typing import Set, Tuple, Union
+from typing import Set, Union
 
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
@@ -19,9 +19,7 @@ class DataContextStore(ConfigurationStore):
         DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
     }
 
-    def serialize(
-        self, key: Tuple[str, ...], value: DataContextConfig
-    ) -> Union[dict, str]:
+    def serialize(self, value: DataContextConfig) -> Union[dict, str]:
         """
         Please see `ConfigurationStore.serialize` for more information.
 
@@ -29,13 +27,12 @@ class DataContextStore(ConfigurationStore):
         step to remove unnecessary keys is a required part of the serialization process.
 
         Args:
-            key:
             value: DataContextConfig to serialize utilizing the configured StoreBackend.
 
         Returns:
             Either a string or dictionary representation of the serialized config.
         """
-        payload: Union[str, dict] = super().serialize(key=key, value=value)
+        payload: Union[str, dict] = super().serialize(value=value)
 
         # Cloud requires a subset of the DataContextConfig
         if self.ge_cloud_mode:
