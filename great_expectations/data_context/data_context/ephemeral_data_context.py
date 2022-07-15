@@ -52,6 +52,7 @@ class EphemeralDataContext(AbstractDataContext):
 
         store_name: str = "datasource_store"
         store_backend: dict = {"class_name": "InMemoryStoreBackend"}
+
         datasource_store: DatasourceStore = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,

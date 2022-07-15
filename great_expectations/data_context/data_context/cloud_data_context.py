@@ -63,7 +63,10 @@ class CloudDataContext(AbstractDataContext):
 
         store_name: str = "datasource_store"
         store_backend: dict = {"class_name": "GeCloudStoreBackend"}
-        runtime_environment: dict = {}
+        runtime_environment: dict = {
+            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),
+            "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
+        }
 
         datasource_store: DatasourceStore = DatasourceStore(
             store_name=store_name,
