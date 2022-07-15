@@ -2211,11 +2211,12 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                             rtol=RTOL,
                             atol=ATOL,
                         ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['success']} not np.allclose to {value}"
-
                     except TypeError:
                         assert (
                             result["success"] == value
                         ), f"{result['success']} != {value}"
+                else:
+                    assert result["success"] == value, f"{result['success']} != {value}"
 
             elif key == "observed_value":
                 if "tolerance" in test:
