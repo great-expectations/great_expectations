@@ -18,12 +18,12 @@ from .expect_column_values_to_be_probabilistically_greater_than_or_equal_to_thre
 from .expect_profile_numeric_columns_diff_between_exclusive_threshold_range import (
     ExpectProfileNumericColumnsDiffBetweenExclusiveThresholdRange,
 )
-from .expect_profile_numeric_columns_diff_less_than_threshold import (
-    ExpectProfileNumericColumnsDiffLessThanThreshold
-)
-from .expect_profile_numeric_columns_diff_greater_than_threshold import (
-    ExpectProfileNumericColumnsDiffGreaterThanThreshold
-) 
 from .expect_profile_numeric_columns_diff_between_inclusive_threshold_range import (
     ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange,
+)
+from .expect_profile_numeric_columns_diff_greater_than_threshold import (
+    ExpectProfileNumericColumnsDiffGreaterThanThreshold,
+)
+from .expect_profile_numeric_columns_diff_less_than_threshold import (
+    ExpectProfileNumericColumnsDiffLessThanThreshold,
 )
