@@ -1,5 +1,6 @@
 """
 PyInvoke developer task file
+https://www.pyinvoke.org/
 
 These tasks can be run using `invoke <NAME>` or `inv <NAME>` from the project root.
 
@@ -15,12 +16,12 @@ from scripts import check_type_hint_coverage
 @invoke.task
 def sort(ctx, path=".", check=False, exclude=None):
     """Sort module imports"""
-    args = ["isort", path, "--profile", "black"]
+    cmds = ["isort", path, "--profile", "black"]
     if check:
-        args.append("--check-only")
+        cmds.append("--check-only")
     if exclude:
-        args.extend(["--skip", exclude])
-    ctx.run(" ".join(args))
+        cmds.extend(["--skip", exclude])
+    ctx.run(" ".join(cmds))
 
 
 @invoke.task
@@ -29,12 +30,12 @@ def fmt(ctx, path=".", sort_=True, check=False, exclude=None):
     if sort_:
         sort(ctx, path, check=check, exclude=exclude)
 
-    args = ["black", path]
+    cmds = ["black", path]
     if check:
-        args.append("--check")
+        cmds.append("--check")
     if exclude:
-        args.extend(["--exclude", exclude])
-    ctx.run(" ".join(args))
+        cmds.extend(["--exclude", exclude])
+    ctx.run(" ".join(cmds))
 
 
 @invoke.task
@@ -82,15 +83,15 @@ def types(ctx, modules, coverage=False, install_types=False):
     ]
     # TODO: fix modules with low error count
     ge_modules = [f"great_expectations/{m}" for m in modules]
-    args = [
+    cmds = [
         "mypy",
         *ge_modules,
         "--ignore-missing-imports",
         "--follow-imports=silent",
     ]
     if install_types:
-        args.extend(["--install-types", "--non-interactive"])
+        cmds.extend(["--install-types", "--non-interactive"])
     if coverage:
         check_type_hint_coverage.main()
     else:
-        ctx.run(" ".join(args), echo=True)
+        ctx.run(" ".join(cmds), echo=True)
