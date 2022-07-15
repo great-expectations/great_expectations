@@ -1414,32 +1414,14 @@ class AbstractDataContext(ABC):
         # As such, it must be instantiated separately.
         self._init_datasource_store()
 
+    @abstractmethod
     def _init_datasource_store(self) -> None:
         """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
 
         Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default
         implementation is provided based on the user's environment but is not customizable.
         """
-        from great_expectations.data_context.store.datasource_store import (
-            DatasourceStore,
-        )
-
-        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
-        # to the convention set by other internal Stores
-        store_backend: dict = {"class_name": "InlineStoreBackend"}
-        runtime_environment: dict = {
-            "root_directory": self.root_directory,
-            "data_context": self,
-            # By passing this value in our runtime_environment,
-            # we ensure that the same exact context (memory address and all) is supplied to the Store backend
-        }
-
-        datasource_store: DatasourceStore = DatasourceStore(
-            store_name=store_name,
-            store_backend=store_backend,
-            runtime_environment=runtime_environment,
-        )
-        self._datasource_store = datasource_store
+        raise NotImplementedError
 
     def _update_config_variables(self) -> None:
         """Updates config_variables cache by re-calling _load_config_variables().

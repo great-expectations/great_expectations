@@ -33,7 +33,8 @@ class InlineStoreBackend(StoreBackend):
 
     def __init__(
         self,
-        data_context: "DataContext",  # noqa: F821
+        project_config: DataContextConfig,
+        project_config_filepath: str,
         runtime_environment: Optional[dict] = None,
         fixed_length_key: bool = False,
         suppress_store_backend_id: bool = False,
@@ -47,7 +48,8 @@ class InlineStoreBackend(StoreBackend):
             store_name=store_name,
         )
 
-        self._data_context = data_context
+        self._project_config = project_config
+        self._project_config_filepath = project_config_filepath
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
@@ -72,12 +74,10 @@ class InlineStoreBackend(StoreBackend):
             resource_name,
         ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
 
-        project_config: DataContextConfig = self._data_context.config
-
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
-            return project_config
+            return self._project_config
 
-        variable_config: Any = project_config[resource_type]
+        variable_config: Any = self._project_config[resource_type]
 
         if resource_name is not None:
             return variable_config[resource_name]
@@ -90,18 +90,16 @@ class InlineStoreBackend(StoreBackend):
             resource_name,
         ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
 
-        project_config: DataContextConfig = self._data_context.config
-
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             config_commented_map_from_yaml = yaml.load(value)
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
-            project_config = value
+            self._project_config = value
         elif resource_name is not None:
-            project_config[resource_type][resource_name] = value
+            self._project_config[resource_type][resource_name] = value
         else:
-            project_config[resource_type] = value
+            self._project_config[resource_type] = value
 
         self._save_changes()
 
@@ -128,7 +126,7 @@ class InlineStoreBackend(StoreBackend):
             config_section = prefix[0]
 
         keys: List[str]
-        config_dict: dict = self._data_context.config.to_dict()
+        config_dict: dict = self._project_config.to_dict()
         if config_section is None:
             keys = list(key for key in config_dict.keys())
         else:
@@ -163,7 +161,7 @@ class InlineStoreBackend(StoreBackend):
                 f"Could not find a value associated with key `{key}`"
             )
 
-        del self._data_context.config[resource_type][resource_name]
+        del self._project_config[resource_type][resource_name]
 
         self._save_changes()
 
@@ -174,9 +172,9 @@ class InlineStoreBackend(StoreBackend):
         ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
 
         if len(key) == 1:
-            return resource_type in self._data_context.config
+            return resource_type in self._project_config
         elif len(key) == 2:
-            res: dict = self._data_context.config.get(resource_type) or {}
+            res: dict = self._project_config.get(resource_type) or {}
             return resource_name in res
 
         return False
@@ -195,8 +193,8 @@ class InlineStoreBackend(StoreBackend):
             )
 
     def _save_changes(self) -> None:
-        # NOTE: <DataContextRefactor> This responsibility will be moved into DataContext Variables object
-        self._data_context._save_project_config()
+        with open(self._project_config_filepath) as outfile:
+            self._project_config.to_yaml(outfile)
 
     @staticmethod
     def _determine_resource_type_and_name_from_key(

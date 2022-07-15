@@ -50,6 +50,26 @@ class FileDataContext(AbstractDataContext):
         self._variables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 
+    def _init_datasource_store(self) -> None:
+        from great_expectations.data_context.store.datasource_store import (
+            DatasourceStore,
+        )
+
+        store_name: str = "datasource_store"
+        store_backend: dict = {"class_name": "InlineStoreBackend"}
+        runtime_environment: dict = {
+            "root_directory": self.root_directory,
+            "project_config": self._project_config,
+            "project_config_filepath": os.path.join(self.root_directory, self.GE_YML),
+        }
+
+        datasource_store: DatasourceStore = DatasourceStore(
+            store_name=store_name,
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+        )
+        self._datasource_store = datasource_store
+
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,

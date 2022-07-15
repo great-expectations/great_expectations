@@ -56,6 +56,22 @@ class CloudDataContext(AbstractDataContext):
             runtime_environment=runtime_environment,
         )
 
+    def _init_datasource_store(self) -> None:
+        from great_expectations.data_context.store.datasource_store import (
+            DatasourceStore,
+        )
+
+        store_name: str = "datasource_store"
+        store_backend: dict = {"class_name": "GeCloudStoreBackend"}
+        runtime_environment: dict = {}
+
+        datasource_store: DatasourceStore = DatasourceStore(
+            store_name=store_name,
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+        )
+        self._datasource_store = datasource_store
+
     def list_expectation_suite_names(self) -> List[str]:
         """
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
