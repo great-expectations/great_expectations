@@ -73,7 +73,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self,
         ge_cloud_credentials: Dict,
         ge_cloud_base_url: str = "https://app.greatexpectations.io/",
-        ge_cloud_resource_type: Optional[str] = None,
+        ge_cloud_resource_type: Optional[GeCloudRESTResource] = None,
         ge_cloud_resource_name: Optional[str] = None,
         suppress_store_backend_id: bool = True,
         manually_initialize_store_backend_id: str = "",
@@ -159,14 +159,16 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         data = {
             "data": {
-                "type": resource_type,
-                "id": ge_cloud_id,
+                "type": resource_type.value,
                 "attributes": {
                     attributes_key: value,
                     "organization_id": organization_id,
                 },
             }
         }
+
+        if ge_cloud_id:
+            data["data"]["id"] = ge_cloud_id
 
         url = urljoin(
             self.ge_cloud_base_url,
@@ -268,7 +270,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._ge_cloud_resource_name
 
     @property
-    def ge_cloud_resource_type(self) -> str:
+    def ge_cloud_resource_type(self) -> GeCloudRESTResource:
         return self._ge_cloud_resource_type
 
     @property
