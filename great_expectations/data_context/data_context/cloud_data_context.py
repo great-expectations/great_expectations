@@ -163,8 +163,9 @@ class CloudDataContext(AbstractDataContext):
         expectation_suite: ExpectationSuite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
-        key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+        key = GeCloudIdentifier(
+            resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+            ge_cloud_id=ge_cloud_id,
         )
         if self.expectations_store.has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
@@ -187,8 +188,9 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             True for Success and False for Failure.
         """
-        key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+        key = GeCloudIdentifier(
+            resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+            ge_cloud_id=ge_cloud_id,
         )
         if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
@@ -211,8 +213,9 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             expectation_suite
         """
-        key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+        key = GeCloudIdentifier(
+            resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+            ge_cloud_id=ge_cloud_id,
         )
         if self.expectations_store.has_key(key):
             expectations_schema_dict: dict = cast(
