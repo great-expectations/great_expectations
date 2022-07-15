@@ -7,7 +7,18 @@ import os
 import sys
 import uuid
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store import EvaluationParameterStore
@@ -16,6 +27,13 @@ from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import (
+    Batch,
+    BatchDefinition,
+    BatchRequestBase,
+    IDDict,
+    get_batch_request_from_acceptable_arguments,
+)
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.util import nested_update
@@ -49,7 +67,12 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+    DataAssistantDispatcher,
+)
 from great_expectations.util import load_class, verify_dynamic_loading_support
+from great_expectations.validator.validator import Validator
 
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
     UsageStatisticsHandler,
@@ -172,6 +195,8 @@ class AbstractDataContext(ABC):
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
+        self._assistants = DataAssistantDispatcher(data_context=self)
+
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
@@ -193,7 +218,7 @@ class AbstractDataContext(ABC):
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
         ge_cloud_id: Optional[str] = None,
-        **kwargs,
+        **kwargs: Optional[dict],
     ) -> None:
         """
         Each DataContext will define how ExpectationSuite will be saved.
@@ -419,12 +444,16 @@ class AbstractDataContext(ABC):
     def concurrency(self) -> Optional[ConcurrencyConfig]:
         return self.variables.concurrency
 
+    @property
+    def assistants(self) -> DataAssistantDispatcher:
+        return self._assistants
+
     def add_datasource(
         self,
         name: str,
         initialize: bool = True,
         save_changes: bool = False,
-        **kwargs: dict,
+        **kwargs: Optional[dict],
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
@@ -484,7 +513,6 @@ class AbstractDataContext(ABC):
 
     def list_stores(self) -> List[Store]:
         """List currently-configured Stores on this context"""
-
         stores = []
         for (
             name,
@@ -606,6 +634,24 @@ class AbstractDataContext(ABC):
             else:
                 raise ValueError(f"Datasource {datasource_name} not found")
 
+    def store_evaluation_parameters(
+        self, validation_results, target_store_name=None
+    ) -> None:
+        """
+        Stores ValidationResult EvaluationParameters to defined store
+        """
+        if not self._evaluation_parameter_dependencies_compiled:
+            self._compile_evaluation_parameter_dependencies()
+
+        if target_store_name is None:
+            target_store_name = self.evaluation_parameter_store_name
+
+        self._store_metrics(
+            self._evaluation_parameter_dependencies,
+            validation_results,
+            target_store_name,
+        )
+
     def list_expectation_suite_names(self) -> List[str]:
         """
         Lists the available expectation suite names.
@@ -626,20 +672,368 @@ class AbstractDataContext(ABC):
             )
         return keys
 
-    def store_evaluation_parameters(
-        self, validation_results, target_store_name=None
-    ) -> None:
-        if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
+    def get_validator(
+        self,
+        datasource_name: Optional[str] = None,
+        data_connector_name: Optional[str] = None,
+        data_asset_name: Optional[str] = None,
+        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        batch_request_list: Optional[List[BatchRequestBase]] = None,
+        batch_data: Optional[Any] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
+        batch_identifiers: Optional[dict] = None,
+        limit: Optional[int] = None,
+        index: Optional[Union[int, list, tuple, slice, str]] = None,
+        custom_filter_function: Optional[Callable] = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[dict] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        expectation_suite_name: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        create_expectation_suite_with_name: Optional[str] = None,
+        include_rendered_content: bool = False,
+        **kwargs: Optional[dict],
+    ) -> Validator:
+        """
+        This method applies only to the new (V3) Datasource schema.
+        """
 
-        if target_store_name is None:
-            target_store_name = self.evaluation_parameter_store_name
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    expectation_suite is not None,
+                    expectation_suite_name is not None,
+                    create_expectation_suite_with_name is not None,
+                    expectation_suite_ge_cloud_id is not None,
+                ]
+            )
+            > 1
+        ):
+            raise ValueError(
+                f"No more than one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name can be specified"
+            )
 
-        self._store_metrics(
-            self._evaluation_parameter_dependencies,
-            validation_results,
-            target_store_name,
+        if expectation_suite_ge_cloud_id is not None:
+            expectation_suite = self.get_expectation_suite(
+                ge_cloud_id=expectation_suite_ge_cloud_id
+            )
+        if expectation_suite_name is not None:
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)
+        if create_expectation_suite_with_name is not None:
+            expectation_suite = self.create_expectation_suite(
+                expectation_suite_name=create_expectation_suite_with_name
+            )
+
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    batch is not None,
+                    batch_list is not None,
+                    batch_request is not None,
+                    batch_request_list is not None,
+                ]
+            )
+            > 1
+        ):
+            raise ValueError(
+                "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"
+            )
+
+        if batch_list:
+            pass
+
+        elif batch:
+            batch_list: List = [batch]
+
+        else:
+            batch_list: List = []
+            if not batch_request_list:
+                batch_request_list = [batch_request]
+
+            for batch_request in batch_request_list:
+                batch_list.extend(
+                    self.get_batch_list(
+                        datasource_name=datasource_name,
+                        data_connector_name=data_connector_name,
+                        data_asset_name=data_asset_name,
+                        batch_request=batch_request,
+                        batch_data=batch_data,
+                        data_connector_query=data_connector_query,
+                        batch_identifiers=batch_identifiers,
+                        limit=limit,
+                        index=index,
+                        custom_filter_function=custom_filter_function,
+                        sampling_method=sampling_method,
+                        sampling_kwargs=sampling_kwargs,
+                        splitter_method=splitter_method,
+                        splitter_kwargs=splitter_kwargs,
+                        runtime_parameters=runtime_parameters,
+                        query=query,
+                        path=path,
+                        batch_filter_parameters=batch_filter_parameters,
+                        batch_spec_passthrough=batch_spec_passthrough,
+                        **kwargs,
+                    )
+                )
+
+        return self.get_validator_using_batch_list(
+            expectation_suite=expectation_suite,
+            batch_list=batch_list,
+            include_rendered_content=include_rendered_content,
         )
+
+    def get_validator_using_batch_list(
+        self,
+        expectation_suite: ExpectationSuite,
+        batch_list: List[Batch],
+        include_rendered_content: bool = False,
+        **kwargs: Optional[dict],
+    ) -> Validator:
+        """
+
+        Args:
+            expectation_suite ():
+            batch_list ():
+            include_rendered_content ():
+            **kwargs ():
+
+        Returns:
+
+        """
+        if len(batch_list) == 0:
+            raise ge_exceptions.InvalidBatchRequestError(
+                """Validator could not be created because BatchRequest returned an empty batch_list.
+                Please check your parameters and try again."""
+            )
+        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
+        # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
+        batch_definition: BatchDefinition = batch_list[-1].batch_definition
+        execution_engine: ExecutionEngine = self.datasources[
+            batch_definition.datasource_name
+        ].execution_engine
+        validator: Validator = Validator(
+            execution_engine=execution_engine,
+            interactive_evaluation=True,
+            expectation_suite=expectation_suite,
+            data_context=self,
+            batches=batch_list,
+            include_rendered_content=include_rendered_content,
+        )
+        return validator
+
+    def get_batch_list(
+        self,
+        datasource_name: Optional[str] = None,
+        data_connector_name: Optional[str] = None,
+        data_asset_name: Optional[str] = None,
+        *,
+        batch_request: Optional[BatchRequestBase] = None,
+        batch_data: Optional[Any] = None,
+        data_connector_query: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
+        limit: Optional[int] = None,
+        index: Optional[Union[int, list, tuple, slice, str]] = None,
+        custom_filter_function: Optional[Callable] = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[dict] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        **kwargs: Optional[dict],
+    ) -> List[Batch]:
+        """Get the list of zero or more batches, based on a variety of flexible input types.
+        This method applies only to the new (V3) Datasource schema.
+
+        Args:
+            batch_request
+
+            datasource_name
+            data_connector_name
+            data_asset_name
+
+            batch_request
+            batch_data
+            query
+            path
+            runtime_parameters
+            data_connector_query
+            batch_identifiers
+            batch_filter_parameters
+
+            limit
+            index
+            custom_filter_function
+
+            sampling_method
+            sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
+
+            batch_spec_passthrough
+
+            **kwargs
+
+        Returns:
+            (Batch) The requested batch
+
+        `get_batch` is the main user-facing API for getting batches.
+        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
+        Instead, this method is intended to help the user pick the right parameters
+
+        This method attempts to return any number of batches, including an empty list.
+        """
+
+        batch_request = get_batch_request_from_acceptable_arguments(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            data_connector_query=data_connector_query,
+            batch_identifiers=batch_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
+            batch_filter_parameters=batch_filter_parameters,
+            batch_spec_passthrough=batch_spec_passthrough,
+            **kwargs,
+        )
+        datasource_name = batch_request.datasource_name
+        if datasource_name in self.datasources:
+            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        else:
+            raise ge_exceptions.DatasourceError(
+                datasource_name,
+                "The given datasource could not be retrieved from the DataContext; "
+                "please confirm that your configuration is accurate.",
+            )
+        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+
+    def create_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        overwrite_existing: bool = False,
+        ge_cloud_id: Optional[str] = None,
+        **kwargs: Optional[dict],
+    ) -> ExpectationSuite:
+        """Build a new expectation suite and save it into the data_context expectation store.
+
+        Args:
+            expectation_suite_name: The name of the expectation_suite to create
+            overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
+                already exists.
+
+        Returns:
+            A new (empty) expectation suite.
+        """
+        if not isinstance(overwrite_existing, bool):
+            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+
+        expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite_name=expectation_suite_name, data_context=self
+        )
+        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite_name
+        )
+        if self.expectations_store.has_key(key) and not overwrite_existing:
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True.".format(
+                    expectation_suite_name
+                )
+            )
+        self.expectations_store.set(key, expectation_suite, **kwargs)
+        return expectation_suite
+
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: Optional[str] = None,
+    ) -> bool:
+        """Delete specified expectation suite from data_context expectation store.
+
+        Args:
+            expectation_suite_name: The name of the expectation_suite to create
+
+        Returns:
+            True for Success and False for Failure.
+        """
+        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            expectation_suite_name
+        )
+        if not self.expectations_store.has_key(key):
+            raise ge_exceptions.DataContextError(
+                "expectation_suite with name {} does not exist."
+            )
+        else:
+            self.expectations_store.remove_key(key)
+            return True
+
+    def get_expectation_suite(
+        self,
+        expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> ExpectationSuite:
+        """Get an Expectation Suite by name or GE Cloud ID
+        Args:
+            expectation_suite_name (str): the name for the Expectation Suite
+            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
+
+        Returns:
+            expectation_suite
+        """
+        key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite_name
+        )
+
+        if self.expectations_store.has_key(key):
+            expectations_schema_dict: dict = cast(
+                dict, self.expectations_store.get(key)
+            )
+            # create the ExpectationSuite from constructor
+            return ExpectationSuite(**expectations_schema_dict, data_context=self)
+
+        else:
+            raise ge_exceptions.DataContextError(
+                f"expectation_suite {expectation_suite_name} not found"
+            )
+
+    def store_validation_result_metrics(
+        self, requested_metrics, validation_results, target_store_name
+    ) -> None:
+        """
+
+        Args:
+            requested_metrics ():
+            validation_results ():
+            target_store_name ():
+
+        Returns:
+
+        """
+        self._store_metrics(requested_metrics, validation_results, target_store_name)
 
     @staticmethod
     def _default_profilers_exist(directory_path: Optional[str]) -> bool:
@@ -691,7 +1085,7 @@ class AbstractDataContext(ABC):
 
     @staticmethod
     def _get_metric_configuration_tuples(
-        metric_configuration, base_kwargs=None
+        metric_configuration: Union[str, dict], base_kwargs: Optional[dict] = None
     ) -> List[Tuple[str, Union[dict, Any]]]:
         if base_kwargs is None:
             base_kwargs = {}
@@ -863,7 +1257,6 @@ class AbstractDataContext(ABC):
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
-                logger.debug("Generating empty config variables file.")
                 return {}
         else:
             return {}

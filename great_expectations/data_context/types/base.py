@@ -937,7 +937,6 @@ class DatasourceConfigSchema(Schema):
     )
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
-
     execution_engine = fields.Nested(
         ExecutionEngineConfigSchema, required=False, allow_none=True
     )
