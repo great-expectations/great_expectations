@@ -7,6 +7,9 @@ import pytest
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariables,
@@ -101,6 +104,20 @@ def cloud_data_context_variables(
         ge_cloud_access_token=ge_cloud_access_token,
         config=data_context_config,
     )
+
+
+@pytest.fixture
+def file_data_context(
+    tmp_path, data_context_config: DataContextConfig
+) -> FileDataContext:
+    project_path = tmp_path / "file_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    context = FileDataContext(
+        project_config=data_context_config, context_root_dir=context_root_dir
+    )
+    return context
 
 
 def stores() -> dict:
@@ -475,3 +492,25 @@ def test_file_data_context_variables_e2e(
         file_data_context_variables.plugins_directory == value_associated_with_env_var
     )
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
+
+
+@pytest.mark.integration
+def test_file_data_context_e2e(
+    file_data_context: FileDataContext, progress_bars: ProgressBarsConfig
+):
+    updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
+    updated_progress_bars.globally = False
+    updated_progress_bars.profilers = True
+
+    file_data_context.variables.progress_bars = updated_progress_bars
+    # Does not currently work because of the weird relationship between InlineStoreBackend and DataContext
+    file_data_context.variables.save_config()
+
+    config_filepath: str = os.path.join(
+        file_data_context.root_directory, file_data_context.GE_YML
+    )
+    with open(config_filepath) as f:
+        contents: dict = yaml.load(f)
+        config_saved_to_disk: DataContextConfig = DataContextConfig(**contents)
+
+    assert config_saved_to_disk.progress_bars == updated_progress_bars.to_dict()
