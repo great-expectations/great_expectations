@@ -58,9 +58,20 @@ def hooks(ctx, changes_only=False, diff=False):
     ctx.run(" ".join(cmds))
 
 
+@invoke.task
+def type_coverage(ctx):
+    """
+    Check total type-hint coverage compared to `develop`.
+    """
+    try:
+        check_type_hint_coverage.main()
+    except AssertionError as err:
+        raise invoke.Exit(message=str(err), code=1)
+
+
 @invoke.task(iterable=["packages"])
-def types(ctx, packages, coverage=False, install_types=False):
-    """Static Type checking"""
+def type_check(ctx, packages, install_types=False):
+    """Run mypy static type-checking on select packages."""
     # numbers next to each package represent the last known number of typing errors.
     # when errors reach 0 please uncomment the module so it becomes type-checked by default.
     packages = packages or [
@@ -83,7 +94,6 @@ def types(ctx, packages, coverage=False, install_types=False):
         # "validation_operators", # 47
         # "validator",  # 46
     ]
-    # TODO: fix packages with low error count
     ge_pkgs = [f"great_expectations/{p}" for p in packages]
     cmds = [
         "mypy",
@@ -93,7 +103,4 @@ def types(ctx, packages, coverage=False, install_types=False):
     ]
     if install_types:
         cmds.extend(["--install-types", "--non-interactive"])
-    if coverage:
-        check_type_hint_coverage.main()
-    else:
-        ctx.run(" ".join(cmds), echo=True)
+    ctx.run(" ".join(cmds), echo=True)
