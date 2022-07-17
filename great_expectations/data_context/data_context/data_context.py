@@ -487,6 +487,10 @@ class DataContext(BaseDataContext):
         variables: Optional[dict] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
+        """
+        Constructs a RuleBasedProfiler instance just like the parent `BaseDataContext.add_profiler`
+        but also persists the result object utilizing the context's ProfilerStore instance.
+        """
         profiler: RuleBasedProfiler = super().add_profiler(
             name=name,
             config_version=config_version,
