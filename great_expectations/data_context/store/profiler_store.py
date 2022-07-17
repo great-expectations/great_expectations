@@ -1,8 +1,7 @@
 import random
 import uuid
-from typing import Optional, Union
+from typing import Union
 
-from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
