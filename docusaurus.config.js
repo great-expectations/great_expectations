@@ -78,8 +78,8 @@ module.exports = {
               href: 'https://github.com/great-expectations/great_expectations'
             },
             {
-              label: 'Discuss',
-              href: 'https://discuss.greatexpectations.io/'
+              label: 'Discussions',
+              href: 'https://github.com/great-expectations/great_expectations/discussions/'
             },
             {
               label: 'Newsletter',
@@ -135,8 +135,8 @@ module.exports = {
               href: 'https://greatexpectations.io/slack'
             },
             {
-              label: 'Discuss',
-              href: 'https://discuss.greatexpectations.io/'
+              label: 'Discussions',
+              href: 'https://github.com/great-expectations/great_expectations/discussions/'
             },
             {
               label: 'Twitter',
