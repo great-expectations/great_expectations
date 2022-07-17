@@ -444,11 +444,8 @@ def test_data_context_variables_save_config(
         )
 
 
-@pytest.mark.integration
 def test_file_data_context_variables_e2e(
-    empty_data_context: DataContext,
-    file_data_context_variables: FileDataContextVariables,
-    progress_bars: ProgressBarsConfig,
+    monkeypatch, file_data_context: FileDataContext, progress_bars: ProgressBarsConfig
 ) -> None:
     """
     What does this test do and why?
@@ -469,43 +466,14 @@ def test_file_data_context_variables_e2e(
     # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
     value_associated_with_env_var: str = "foo/bar/baz"
-    substitutions: dict = {
-        env_var_name: value_associated_with_env_var,
-    }
-    file_data_context_variables.substitutions = substitutions
+    monkeypatch.setenv(env_var_name, value_associated_with_env_var)
 
     # Set attributes defined above
-    file_data_context_variables.progress_bars = updated_progress_bars
-    file_data_context_variables.plugins_directory = f"${env_var_name}"
-    file_data_context_variables.save_config()
-
-    # Review great_expectations.yml where values were written and confirm changes
-    config_filepath: str = os.path.join(
-        empty_data_context.root_directory, empty_data_context.GE_YML
-    )
-    with open(config_filepath) as f:
-        contents: dict = yaml.load(f)
-        config_saved_to_disk: DataContextConfig = DataContextConfig(**contents)
-
-    assert config_saved_to_disk.progress_bars == updated_progress_bars.to_dict()
-    assert (
-        file_data_context_variables.plugins_directory == value_associated_with_env_var
-    )
-    assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
-
-
-@pytest.mark.integration
-def test_file_data_context_e2e(
-    file_data_context: FileDataContext, progress_bars: ProgressBarsConfig
-):
-    updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
-    updated_progress_bars.globally = False
-    updated_progress_bars.profilers = True
-
     file_data_context.variables.progress_bars = updated_progress_bars
-    # Does not currently work because of the weird relationship between InlineStoreBackend and DataContext
+    file_data_context.variables.plugins_directory = f"${env_var_name}"
     file_data_context.variables.save_config()
 
+    # Review great_expectations.yml where values were written and confirm changes
     config_filepath: str = os.path.join(
         file_data_context.root_directory, file_data_context.GE_YML
     )
@@ -514,3 +482,7 @@ def test_file_data_context_e2e(
         config_saved_to_disk: DataContextConfig = DataContextConfig(**contents)
 
     assert config_saved_to_disk.progress_bars == updated_progress_bars.to_dict()
+    assert (
+        file_data_context.variables.plugins_directory == value_associated_with_env_var
+    )
+    assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
