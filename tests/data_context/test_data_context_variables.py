@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable, cast
 from unittest import mock
 
 import pytest
@@ -18,6 +18,7 @@ from great_expectations.data_context.types.base import (
     NotebookConfig,
     NotebookTemplateConfig,
     ProgressBarsConfig,
+    dataContextConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
