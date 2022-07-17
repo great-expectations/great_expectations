@@ -75,25 +75,3 @@ class ProfilerStore(ConfigurationStore):
         profiler_config_dict["ge_cloud_id"] = ge_cloud_profiler_id
 
         return profiler_config_dict
-
-    @staticmethod
-    def determine_key(
-        name: Optional[str], ge_cloud_id: Optional[str]
-    ) -> DataContextKey:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id."
-
-        from great_expectations.data_context.store.ge_cloud_store_backend import (
-            GeCloudRESTResource,
-        )
-
-        key: DataContextKey
-        if ge_cloud_id:
-            key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key = ConfigurationIdentifier(configuration_key=name)
-
-        return key

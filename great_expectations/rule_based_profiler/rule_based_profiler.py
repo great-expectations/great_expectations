@@ -1121,7 +1121,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
+        if data_context.ge_cloud_mode:
             key = GeCloudIdentifier(
                 resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
             )
