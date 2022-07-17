@@ -1,4 +1,4 @@
-from typing import Any, Callable, cast
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -18,7 +18,6 @@ from great_expectations.data_context.types.base import (
     NotebookConfig,
     NotebookTemplateConfig,
     ProgressBarsConfig,
-    dataContextConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -352,6 +351,7 @@ def test_data_context_variables_set(
 
 
 def test_data_context_variables_save_config(
+    data_context_config_dict: dict,
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
@@ -387,13 +387,20 @@ def test_data_context_variables_save_config(
 
         cloud_data_context_variables.save_config()
 
-        expected_config_dict: dict = cast(
-            dict, dataContextConfigSchema.dump(cloud_data_context_variables.config)
-        )
+        expected_config_dict: dict = {}
+        for attr in (
+            "config_variables_file_path",
+            "config_version",
+            "data_docs_sites",
+            "notebooks",
+            "plugins_directory",
+            "stores",
+        ):
+            expected_config_dict[attr] = data_context_config_dict[attr]
 
         assert mock_patch.call_count == 1
         mock_patch.assert_called_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables/",
             json={
                 "data": {
                     "type": "data_context_variables",
