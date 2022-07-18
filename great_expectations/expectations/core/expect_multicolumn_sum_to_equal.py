@@ -47,7 +47,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     }
 
     map_metric = "multicolumn_sum.equal"
-    success_keys = ("sum_total",)
+    success_keys = ("mostly", "sum_total")
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed

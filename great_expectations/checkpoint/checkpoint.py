@@ -33,6 +33,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import (
@@ -351,7 +354,8 @@ class BaseCheckpoint(ConfigPeer):
             checkpoint_identifier = None
             if self.data_context.ge_cloud_mode:
                 checkpoint_identifier = GeCloudIdentifier(
-                    resource_type="contract", ge_cloud_id=str(self.ge_cloud_id)
+                    resource_type=GeCloudRESTResource.CONTRACT,
+                    ge_cloud_id=str(self.ge_cloud_id),
                 )
 
             operator_run_kwargs = {}

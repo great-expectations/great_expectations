@@ -386,20 +386,6 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
-        name="split_data_on_whole_table_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
-    ),
-    IntegrationTestFixture(
         name="split_data_on_whole_table_mssql",
         user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -428,48 +414,6 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
-        name="split_data_on_whole_table_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_whole_table_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_whole_table_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.AWS,
-    ),
-    IntegrationTestFixture(
         name="split_data_on_column_value_postgres",
         user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -482,20 +426,6 @@ dockerized_db_tests = [
             ),
         ),
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_column_value_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     IntegrationTestFixture(
         name="split_data_on_column_value_mssql",
@@ -526,48 +456,6 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
-        name="split_data_on_column_value_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_column_value_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_column_value_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.AWS,
-    ),
-    IntegrationTestFixture(
         name="split_data_on_divided_integer_postgres",
         user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -580,20 +468,6 @@ dockerized_db_tests = [
             ),
         ),
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_divided_integer_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     IntegrationTestFixture(
         name="split_data_on_divided_integer_mssql",
@@ -624,48 +498,6 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
-        name="split_data_on_divided_integer_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_divided_integer_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_divided_integer_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.AWS,
-    ),
-    IntegrationTestFixture(
         name="split_data_on_mod_integer_postgres",
         user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -678,20 +510,6 @@ dockerized_db_tests = [
             ),
         ),
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_mod_integer_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     IntegrationTestFixture(
         name="split_data_on_mod_integer_mssql",
@@ -721,48 +539,6 @@ dockerized_db_tests = [
         ),
         extra_backend_dependencies=BackendDependencies.MYSQL,
     ),
-    IntegrationTestFixture(
-        name="split_data_on_mod_integer_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_mod_integer_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_mod_integer_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.AWS,
-    ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for POSTGRESQL is implemented.</Alex>
     # IntegrationTestFixture(
     #     name="split_data_on_hashed_column_postgres",
@@ -777,21 +553,6 @@ dockerized_db_tests = [
     #         ),
     #     ),
     #     extra_backend_dependencies=BackendDependencies.POSTGRESQL,
-    # ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for REDSHIFT is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_hashed_column_redshift",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     extra_backend_dependencies=BackendDependencies.REDSHIFT,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for MSSQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -823,51 +584,6 @@ dockerized_db_tests = [
     #     ),
     #     extra_backend_dependencies=BackendDependencies.MYSQL,
     # ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for SNOWFLAKE is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_hashed_column_snowflake",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
-    # ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for BIGQUERY is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_hashed_column_bigquery",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    # ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for AWS ATHENA is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_hashed_column_awsathena",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     extra_backend_dependencies=BackendDependencies.AWS,
-    # ),
     IntegrationTestFixture(
         name="split_data_on_multi_column_values_postgres",
         user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
@@ -881,20 +597,6 @@ dockerized_db_tests = [
             ),
         ),
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_multi_column_values_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     IntegrationTestFixture(
         name="split_data_on_multi_column_values_mssql",
@@ -925,48 +627,6 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
-        name="split_data_on_multi_column_values_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_multi_column_values_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_multi_column_values_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.AWS,
-    ),
-    IntegrationTestFixture(
         name="split_data_on_datetime_postgres",
         user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -979,20 +639,6 @@ dockerized_db_tests = [
             ),
         ),
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_datetime_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_mssql",
@@ -1022,48 +668,51 @@ dockerized_db_tests = [
         ),
         extra_backend_dependencies=BackendDependencies.MYSQL,
     ),
-    IntegrationTestFixture(
-        name="split_data_on_datetime_snowflake",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_datetime_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_datetime_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.AWS,
-    ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for POSTGRESQL is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_postgres",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/postgres_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MSSQL is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_mssql",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/mssql_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.MSSQL,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MYSQL is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_mysql",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/mysql_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.MYSQL,
+    # ),
     IntegrationTestFixture(
         name="sample_data_using_limit_postgres",
         user_flow_script="tests/integration/db/test_sql_data_sampling.py",
@@ -1181,6 +830,225 @@ cloud_snowflake_tests = [
         extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
         util_script="tests/test_utils.py",
     ),
+    IntegrationTestFixture(
+        name="split_data_on_whole_table_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_column_value_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_divided_integer_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_mod_integer_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for SNOWFLAKE is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_hashed_column_snowflake",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    # ),
+    IntegrationTestFixture(
+        name="split_data_on_multi_column_values_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for POSTGRESQL is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_postgres",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/postgres_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for REDSHIFT is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_redshift",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MSSQL is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_mssql",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/mssql_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.MSSQL,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MYSQL is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_mysql",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/mysql_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.MYSQL,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for SNOWFLAKE is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_snowflake",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for BIGQUERY is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_bigquery",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    # ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for AWS ATHENA is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_awsathena",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.AWS,
+    # ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for SNOWFLAKE is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_snowflake",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/snowflake_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    # ),
     IntegrationTestFixture(
         name="sample_data_using_limit_snowflake",
         user_flow_script="tests/integration/db/test_sql_data_sampling.py",
@@ -1322,6 +1190,120 @@ cloud_bigquery_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
+    IntegrationTestFixture(
+        name="split_data_on_whole_table_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_column_value_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_divided_integer_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_mod_integer_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for BIGQUERY is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_hashed_column_bigquery",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    # ),
+    IntegrationTestFixture(
+        name="split_data_on_multi_column_values_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for BIGQUERY is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_bigquery",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    # ),
 ]
 
 cloud_azure_tests = [
@@ -1439,6 +1421,120 @@ cloud_s3_tests = [
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     extra_backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
     # ),
+    IntegrationTestFixture(
+        name="split_data_on_whole_table_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_column_value_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_divided_integer_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_mod_integer_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for AWS ATHENA is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_hashed_column_awsathena",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.AWS,
+    # ),
+    IntegrationTestFixture(
+        name="split_data_on_multi_column_values_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_awsathena",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for AWS ATHENA is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_awsathena",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.AWS,
+    # ),
 ]
 
 cloud_redshift_tests = [
@@ -1458,6 +1554,120 @@ cloud_redshift_tests = [
     #     data_dir= "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     extra_backend_dependencies= [BackendDependencies.AWS, BackendDependencies.REDSHIFT],
     #     util_script= "tests/test_utils.py",
+    # ),
+    IntegrationTestFixture(
+        name="split_data_on_whole_table_redshift",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_column_value_redshift",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_divided_integer_redshift",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_mod_integer_redshift",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for REDSHIFT is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_hashed_column_redshift",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    # ),
+    IntegrationTestFixture(
+        name="split_data_on_multi_column_values_redshift",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_redshift",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    ),
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for REDSHIFT is implemented.</Alex>
+    # IntegrationTestFixture(
+    #     name="split_data_on_converted_datetime_redshift",
+    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.REDSHIFT,
     # ),
 ]
 

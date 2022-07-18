@@ -21,7 +21,7 @@ Great Expectations helps data teams eliminate pipeline debt, through data testin
 
 Software developers have long known that testing and documentation are essential for managing complex codebases. Great Expectations brings the same confidence, integrity, and acceleration to data science and data engineering teams.
 
-See [Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pipeline-debt-introducing-great-expectations-862ddc46782a) for an introduction to the philosophy of pipeline testing.
+See [Down with Pipeline Debt!](https://greatexpectations.io/blog/down-with-pipeline-debt-introducing-great-expectations/) for an introduction to the philosophy of pipeline testing.
 
 
 <!--
@@ -140,9 +140,9 @@ great_expectations init
 
 (We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](https://docs.greatexpectations.io/docs/reference/supporting_resources), which will teach you how to get up and running in minutes.)
 
-For full documentation, visit [Great Expectations on readthedocs.io](https://docs.greatexpectations.io/docs/).
+For full documentation, visit [https://docs.greatexpectations.io/](https://docs.greatexpectations.io/).
 
-If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there.
+If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there. You can also use our [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions)
 
 <!--
 -------------------------------------------------------------
@@ -225,11 +225,9 @@ Great Expectations is under active development by James Campbell, Abe Gong, Euge
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------
 
-If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public [Slack channel](https://greatexpectations.io/slack)
-
-If you'd like hands-on assistance setting up Great Expectations, establishing a healthy practice of data testing, or adding functionality to Great Expectations, please see options for consulting help [here](https://superconductive.com/).
+If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public [Slack channel](https://greatexpectations.io/slack) or post in our [GitHub Discussions](https://docs.greatexpectations.io/docs/contributing/index)
 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/docs/contributing/contributing/) and please don't be shy with questions.
+Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/docs/contributing/index) and please don't be shy with questions.

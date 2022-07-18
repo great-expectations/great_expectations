@@ -945,6 +945,9 @@ def test_run_profiler_without_dynamic_args(
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
+        variables_directives_list=None,
+        domain_type_directives_list=None,
+        comment=None,
     )
 
 
@@ -984,6 +987,9 @@ def test_run_profiler_with_dynamic_args(
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
+        variables_directives_list=None,
+        domain_type_directives_list=None,
+        comment=None,
     )
 
 
