@@ -7,6 +7,9 @@ from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
@@ -177,13 +180,13 @@ class ExpectationsStore(Store):
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
 
-    def serialize(self, key, value):
+    def serialize(self, value):
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         if isinstance(value, dict):
             return self._expectationSuiteSchema.load(value)
         else:
@@ -215,7 +218,8 @@ class ExpectationsStore(Store):
         )
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
-                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+                resource_type=GeCloudRESTResource.CONTRACT,
+                ge_cloud_id=str(uuid.uuid4()),
             )
         else:
             test_key: ExpectationSuiteIdentifier = self.key_class(test_key_name)
