@@ -735,6 +735,35 @@ class ExpectationSuite(SerializableDictDot):
 
         return expectations_by_column, sorted_columns
 
+    def get_grouped_and_ordered_expectations_by_expectation_type(
+        self,
+    ) -> List[ExpectationConfiguration]:
+        """
+        Returns "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
+        """
+        table_expectation_configurations: List[ExpectationConfiguration] = sorted(
+            self.get_table_expectations(),
+            key=lambda element: element["expectation_type"],
+        )
+        column_expectation_configurations: List[ExpectationConfiguration] = sorted(
+            self.get_column_expectations(),
+            key=lambda element: element["expectation_type"],
+        )
+        column_pair_expectation_configurations: List[ExpectationConfiguration] = sorted(
+            self.get_column_pair_expectations(),
+            key=lambda element: element["expectation_type"],
+        )
+        multicolumn_expectation_configurations: List[ExpectationConfiguration] = sorted(
+            self.get_multicolumn_expectations(),
+            key=lambda element: element["expectation_type"],
+        )
+        return (
+            table_expectation_configurations
+            + column_expectation_configurations
+            + column_pair_expectation_configurations
+            + multicolumn_expectation_configurations
+        )
+
     def get_grouped_and_ordered_expectations_by_domain_type(
         self,
     ) -> Dict[str, List[ExpectationConfiguration]]:
@@ -777,9 +806,7 @@ class ExpectationSuite(SerializableDictDot):
         ] = {}
 
         expectation_configurations: List[ExpectationConfiguration]
-        domain_kwargs: dict
         expectation_configuration: ExpectationConfiguration
-
         for expectation_configuration in accessor_method():
             expectation_configurations = expectation_configurations_by_domain.get(
                 domain_type

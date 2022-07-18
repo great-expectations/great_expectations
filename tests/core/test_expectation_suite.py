@@ -553,6 +553,32 @@ def test_get_column_expectations(
     assert obs == [exp1, exp2, exp3, exp4]
 
 
+def test_get_expectations_by_expectation_type(
+    suite_with_table_and_column_expectations,
+    exp1,
+    exp2,
+    exp3,
+    exp4,
+    column_pair_expectation,
+    table_exp1,
+    table_exp2,
+    table_exp3,
+):
+    obs = (
+        suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_expectation_type()
+    )
+    assert obs == [
+        table_exp1,
+        table_exp2,
+        table_exp3,
+        exp1,
+        exp2,
+        exp3,
+        exp4,
+        column_pair_expectation,
+    ]
+
+
 def test_get_expectations_by_domain_type(
     suite_with_table_and_column_expectations,
     exp1,
