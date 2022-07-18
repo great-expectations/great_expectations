@@ -116,7 +116,7 @@ class ExpectationValidationResult(SerializableDictDot):
                     or (
                         self.expectation_config is not None
                         and self.expectation_config.isEquivalentTo(
-                            other.expectation_config
+                            other=other.expectation_config, match_type="success"
                         )
                     ),
                     # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.

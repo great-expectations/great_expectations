@@ -448,6 +448,10 @@ class AbstractDataContext(ABC):
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
 
+    def set_config(self, project_config: DataContextConfig) -> None:
+        self._project_config = project_config
+        self.variables.config = project_config
+
     def add_datasource(
         self,
         name: str,

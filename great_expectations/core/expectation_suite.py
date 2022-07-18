@@ -125,6 +125,7 @@ class ExpectationSuite(SerializableDictDot):
         )
         self.meta["citations"].append(citation)
 
+    # noinspection PyPep8Naming
     def isEquivalentTo(self, other):
         """
         ExpectationSuite equivalence relies only on expectations and evaluation parameters. It does not include:
@@ -136,6 +137,7 @@ class ExpectationSuite(SerializableDictDot):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
+                    # noinspection PyNoneFunctionAssignment,PyTypeChecker
                     other_dict: dict = expectationSuiteSchema.load(other)
                     other: ExpectationSuite = ExpectationSuite(
                         **other_dict, data_context=self._data_context
@@ -242,18 +244,6 @@ class ExpectationSuite(SerializableDictDot):
         if not sort:
             return citations
         return self._sort_citations(citations=citations)
-
-    def get_table_expectations(self):
-        """Return a list of table expectations."""
-        return [
-            e
-            for e in self.expectations
-            if e.expectation_type.startswith("expect_table_")
-        ]
-
-    def get_column_expectations(self):
-        """Return a list of column map expectations."""
-        return [e for e in self.expectations if "column" in e.kwargs]
 
     @staticmethod
     def _filter_citations(
@@ -382,19 +372,23 @@ class ExpectationSuite(SerializableDictDot):
             raise TypeError(
                 "Must provide either expectation_configuration or ge_cloud_id"
             )
+
         if expectation_configuration and not isinstance(
             expectation_configuration, ExpectationConfiguration
         ):
             raise InvalidExpectationConfigurationError(
                 "Ensure that expectation configuration is valid."
             )
+
         match_indexes = []
         for idx, expectation in enumerate(self.expectations):
             if ge_cloud_id is not None:
                 if str(expectation.ge_cloud_id) == str(ge_cloud_id):
                     match_indexes.append(idx)
             else:
-                if expectation.isEquivalentTo(expectation_configuration, match_type):
+                if expectation.isEquivalentTo(
+                    other=expectation_configuration, match_type=match_type
+                ):
                     match_indexes.append(idx)
 
         return match_indexes
@@ -426,13 +420,15 @@ class ExpectationSuite(SerializableDictDot):
             raise TypeError(
                 "Must provide either expectation_configuration or ge_cloud_id"
             )
-        found_expectation_indexes = self.find_expectation_indexes(
+
+        found_expectation_indexes: List[int] = self.find_expectation_indexes(
             expectation_configuration, match_type, ge_cloud_id
         )
+
         if len(found_expectation_indexes) > 0:
             return [self.expectations[idx] for idx in found_expectation_indexes]
-        else:
-            return []
+
+        return []
 
     def replace_expectation(
         self,
@@ -574,20 +570,24 @@ class ExpectationSuite(SerializableDictDot):
                     expectation_configuration.ge_cloud_id = (
                         existing_expectation_ge_cloud_id
                     )
+
                 self.expectations[
                     found_expectation_indexes[0]
                 ] = expectation_configuration
             else:
                 if send_usage_event:
                     self.send_usage_event(success=False)
+
                 raise DataContextError(
                     "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
                     "ExpectationConfiguration, set overwrite_existing=True"
                 )
         else:
             self.append_expectation(expectation_configuration)
+
         if send_usage_event:
             self.send_usage_event(success=True)
+
         return expectation_configuration
 
     def send_usage_event(self, success: bool) -> None:
@@ -667,17 +667,44 @@ class ExpectationSuite(SerializableDictDot):
             overwrite_existing=overwrite_existing,
         )
 
+    def get_table_expectations(self) -> List[ExpectationConfiguration]:
+        """Return a list of table expectations."""
+        return [
+            e
+            for e in self.expectations
+            if e.expectation_type.startswith("expect_table_")
+        ]
+
+    def get_column_expectations(self) -> List[ExpectationConfiguration]:
+        """Return a list of column map expectations."""
+        return [e for e in self.expectations if "column" in e.kwargs]
+
+    def get_column_pair_expectations(self) -> List[ExpectationConfiguration]:
+        """Return a list of column_pair map expectations."""
+        return [
+            e
+            for e in self.expectations
+            if "column_A" in e.kwargs and "column_B" in e.kwargs
+        ]
+
+    def get_multicolumn_expectations(self) -> List[ExpectationConfiguration]:
+        """Return a list of multicolumn map expectations."""
+        return [e for e in self.expectations if "column_list" in e.kwargs]
+
     def get_grouped_and_ordered_expectations_by_column(
         self, expectation_type_filter: Optional[str] = None
     ) -> Tuple[Dict[str, List[ExpectationConfiguration]], List[str]]:
-        expectations_by_column = {}
-        ordered_columns = []
+        expectations_by_column: Dict[str, List[ExpectationConfiguration]] = {}
+        ordered_columns: List[str] = []
 
+        column: str
+        expectation: ExpectationConfiguration
         for expectation in self.expectations:
             if "column" in expectation.kwargs:
                 column = expectation.kwargs["column"]
             else:
                 column = "_nocolumn"
+
             if column not in expectations_by_column:
                 expectations_by_column[column] = []
 
@@ -692,7 +719,7 @@ class ExpectationSuite(SerializableDictDot):
                 expectation.expectation_type
                 == "expect_table_columns_to_match_ordered_list"
             ):
-                exp_column_list = expectation.kwargs["column_list"]
+                exp_column_list: List[str] = expectation.kwargs["column_list"]
                 if exp_column_list and len(exp_column_list) > 0:
                     ordered_columns = exp_column_list
 
@@ -703,8 +730,8 @@ class ExpectationSuite(SerializableDictDot):
         # names from entire evr, else use alphabetic sort
         if set(sorted_columns) == set(ordered_columns):
             return expectations_by_column, ordered_columns
-        else:
-            return expectations_by_column, sorted_columns
+
+        return expectations_by_column, sorted_columns
 
 
 class ExpectationSuiteSchema(Schema):
