@@ -20,7 +20,7 @@ This style guide will be enforced for all incoming PRs. However, certain legacy 
 
 ### Tasks
 
-Common developer tasks such as linting, formatting, type-checking are defined in `tasks.py` and runnable via the `invoke` task runner library.
+Common developer tasks such as linting, formatting, type-checking are defined in [`tasks.py`](https://github.com/great-expectations/great_expectations/blob/develop/tasks.py) and runnable via the [`invoke` task runner library](https://www.pyinvoke.org/).
 
 To see the available task run `invoke --list` from the project root.
 
