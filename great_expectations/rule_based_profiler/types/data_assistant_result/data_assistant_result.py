@@ -12,6 +12,7 @@ import pandas as pd
 from IPython.display import HTML, display
 
 from great_expectations import __version__ as ge_version
+from great_expectations import exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -574,11 +575,25 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_chart_titles(charts: List[alt.Chart]) -> List[str]:
         chart_titles: List[str] = []
+        chart_title: Optional[str]
         for chart in charts:
-            if isinstance(chart, alt.LayerChart):
-                chart_titles.append(chart.layer[0].title.text)
+            chart_title = None
+            try:
+                chart_title = chart.title.text
+            except AttributeError:
+                for layer in chart.layer:
+                    try:
+                        chart_title = layer.title.text
+                        break
+                    except AttributeError:
+                        continue
+
+            if chart_title is not None:
+                chart_titles.append(chart_title)
             else:
-                chart_titles.append(chart.title.text)
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    "All DataAssistantResult charts must have a title."
+                )
 
         return chart_titles
 
