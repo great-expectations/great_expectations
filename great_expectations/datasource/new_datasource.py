@@ -1,6 +1,7 @@
 import copy
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
+from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -32,6 +33,7 @@ class BaseDatasource:
         execution_engine=None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
+        id_: Optional[UUID] = None,
     ) -> None:
         """
         Build a new Datasource.
@@ -41,6 +43,7 @@ class BaseDatasource:
             execution_engine (ClassConfig): the type of compute engine to produce
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
+            id_: Identifier specific to this datasource. Serialized as id.
         """
         self._name = name
 
@@ -58,6 +61,7 @@ class BaseDatasource:
             )
             self._datasource_config = {
                 "execution_engine": execution_engine,
+                "id": id_,
             }
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
@@ -388,6 +392,13 @@ class BaseDatasource:
     def config(self) -> dict:
         return copy.deepcopy(self._datasource_config)
 
+    @property
+    def id(self) -> Optional[UUID]:
+        try:
+            return self.config.id
+        except AttributeError:
+            return None
+
 
 class Datasource(BaseDatasource):
     """
@@ -403,6 +414,7 @@ class Datasource(BaseDatasource):
         data_connectors=None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
+        id_: Optional[UUID] = None,
     ) -> None:
         """
         Build a new Datasource with data connectors.
@@ -413,6 +425,7 @@ class Datasource(BaseDatasource):
             data_connectors: DataConnectors to add to the datasource
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
+            id_: Identifier specific to this datasource. Serialized as id.
         """
         self._name = name
 
@@ -421,6 +434,7 @@ class Datasource(BaseDatasource):
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory,
             concurrency=concurrency,
+            id_=id_,
         )
 
         if data_connectors is None:
