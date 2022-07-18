@@ -18,6 +18,41 @@ This style guide will be enforced for all incoming PRs. However, certain legacy 
 
 * **Docstrings are highly recommended.** We use the Sphinx’s [Napoleon extension](http://www.sphinx-doc.org/en/master/ext/napoleon.html) to build documentation from Google-style docstrings.
 
+### Tasks
+
+Common developer tasks such as linting, formatting, type-checking are defined in `tasks.py` and runnable via the `invoke` task runner library.
+
+To see the available task run `invoke --list` from the project root.
+
+```console
+$ invoke --list                                                                                                                                                                                                                                                                                                                                               in zsh at 14:47:20
+Available tasks:
+
+  fmt             Run code formatter.
+  hooks           Run all pre-commit hooks.
+  lint            Run code linter
+  sort            Sort module imports.
+  type-check      Run mypy static type-checking on select packages.
+  type-coverage   Check total type-hint coverage compared to `develop`.
+  upgrade         Run code styntax upgrades.
+```
+
+For detailed usage guide, `invoke <TASK-NAME> --help`
+
+```console
+$ invoke fmt --help                                                                                                                                                                                                                                                                                                                                           in zsh at 14:58:01
+Usage: inv[oke] [--core-opts] fmt [--options] [other tasks here ...]
+
+Docstring:
+  Run code formatter.
+
+Options:
+  -c, --check                   Only checks for needed changes without writing back. Exit with error code if changes needed.
+  -e STRING, --exclude=STRING   Exclude files or directories
+  -p STRING, --path=STRING
+  -s, --[no-]sort               Disable import sorting. Runs by default.
+```
+
 ### Linting
 
 Our CI system will check using `black`, `isort`, `flake8` and `pyupgrade`. 
