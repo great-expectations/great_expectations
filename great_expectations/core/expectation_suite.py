@@ -738,6 +738,10 @@ class ExpectationSuite(SerializableDictDot):
     def get_grouped_and_ordered_expectations_by_domain_type(
         self,
     ) -> Dict[str, List[ExpectationConfiguration]]:
+        """
+        Returns "ExpectationConfiguration" list in predetermined order by passing appropriate methods for retrieving
+        "ExpectationConfiguration" lists by corresponding "domain_type" (with "table" first; then "column", and so on).
+        """
         expectation_configurations_by_domain: Dict[
             str, List[ExpectationConfiguration]
         ] = self._get_expectations_by_domain_using_accessor_method(
