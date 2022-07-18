@@ -12,7 +12,6 @@ import invoke
 
 from scripts import check_type_hint_coverage
 
-
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
 
