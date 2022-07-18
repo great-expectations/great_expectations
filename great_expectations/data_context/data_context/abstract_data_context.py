@@ -583,6 +583,7 @@ class AbstractDataContext(ABC):
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
+        # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = self._instantiate_datasource_from_config(
