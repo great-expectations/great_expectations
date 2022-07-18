@@ -58,7 +58,15 @@ def fmt(ctx, path=".", sort_=True, check=False, exclude=None):
 @invoke.task
 def lint(ctx, path="great_expectations/core"):
     """Run code linter"""
-    ctx.run(" ".join(["flake8", path]))
+    cmds = ["flake8", path]
+    ctx.run(" ".join(cmds))
+
+
+@invoke.task
+def upgrade(ctx, path="."):
+    """Run code styntax upgrades."""
+    cmds = ["pyupgrade", path, "--py3-plus"]
+    ctx.run(" ".join(cmds))
 
 
 @invoke.task(
