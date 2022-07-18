@@ -53,10 +53,10 @@ class MetricFunctionTypes(Enum):
 
 
 class MetricDomainTypes(Enum):
+    TABLE = "table"
     COLUMN = "column"
     COLUMN_PAIR = "column_pair"
     MULTICOLUMN = "multicolumn"
-    TABLE = "table"
 
 
 class DataConnectorStorageDataReferenceResolver:
