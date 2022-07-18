@@ -1,5 +1,6 @@
 import copy
 import os
+import pathlib
 from typing import Any
 from unittest import mock
 
@@ -108,14 +109,13 @@ def cloud_data_context_variables(
 
 @pytest.fixture
 def file_data_context(
-    tmp_path, data_context_config: DataContextConfig
+    tmp_path: pathlib.Path, data_context_config: DataContextConfig
 ) -> FileDataContext:
     project_path = tmp_path / "file_data_context"
     project_path.mkdir()
-    project_path = str(project_path)
-    context_root_dir = os.path.join(project_path, "great_expectations")
+    context_root_dir = project_path / "great_expectations"
     context = FileDataContext(
-        project_config=data_context_config, context_root_dir=context_root_dir
+        project_config=data_context_config, context_root_dir=str(context_root_dir)
     )
     return context
 
@@ -469,9 +469,10 @@ def test_file_data_context_variables_e2e(
     file_data_context.variables.save_config()
 
     # Review great_expectations.yml where values were written and confirm changes
-    config_filepath: str = os.path.join(
-        file_data_context.root_directory, file_data_context.GE_YML
+    config_filepath = pathlib.Path(file_data_context.root_directory).joinpath(
+        file_data_context.GE_YML
     )
+
     with open(config_filepath) as f:
         contents: dict = yaml.load(f)
         config_saved_to_disk: DataContextConfig = DataContextConfig(**contents)
