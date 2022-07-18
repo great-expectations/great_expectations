@@ -600,21 +600,17 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _combine_themed_charts_into_single_display_chart(
         themed_charts: List[alt.Chart],
-    ) -> alt.Chart:
+    ) -> alt.LayerChart:
+        domain_name: str = "chart"
+
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
+            name=domain_name,
+            alt_type=AltairDataTypes.NOMINAL.value,
+        )
 
         chart_titles: List[str] = DataAssistantResult._get_chart_titles(
             charts=themed_charts
         )
-        df: pd.DataFrame = pd.DataFrame(
-            data=list(zip(chart_titles, themed_charts)),
-            columns=["chart_title", "chart"],
-        )
-
-        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
-            name="plot",
-            alt_type=AltairDataTypes.NOMINAL.value,
-        )
-
         dropdown_options: List[str] = [" "] + sorted(chart_titles)
         input_dropdown: alt.binding_select = alt.binding_select(
             options=dropdown_options, name="Select Chart: "
@@ -622,7 +618,12 @@ class DataAssistantResult(SerializableDictDot):
         selection: alt.selection_single = alt.selection_single(
             empty="none",
             bind=input_dropdown,
-            fields=[domain_plot_component.name],
+            fields=[domain_name],
+        )
+
+        df: pd.DataFrame = pd.DataFrame(
+            data=list(zip(chart_titles, themed_charts)),
+            columns=["chart_title", domain_name],
         )
 
         display_chart: alt.Chart = alt.Chart(data=df, title=None).add_selection(
