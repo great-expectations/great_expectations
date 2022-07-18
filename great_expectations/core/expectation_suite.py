@@ -330,6 +330,7 @@ class ExpectationSuite(SerializableDictDot):
     ) -> List[ExpectationConfiguration]:
         if isinstance(expectation_types, str):
             expectation_types = [expectation_types]
+
         removed_expectations = [
             expectation
             for expectation in self.expectations
