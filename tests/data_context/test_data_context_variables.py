@@ -411,17 +411,12 @@ def test_data_context_variables_save_config(
 
         expected_config_dict: dict = {}
         for attr in (
-            "checkpoint_store_name",
             "config_variables_file_path",
             "config_version",
             "data_docs_sites",
-            "evaluation_parameter_store_name",
-            "expectations_store_name",
             "notebooks",
             "plugins_directory",
-            "profiler_store_name",
             "stores",
-            "validations_store_name",
         ):
             expected_config_dict[attr] = data_context_config_dict[attr]
 
