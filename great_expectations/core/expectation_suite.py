@@ -3,7 +3,7 @@ import json
 import logging
 import uuid
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import great_expectations as ge
 from great_expectations import __version__ as ge_version
@@ -15,6 +15,7 @@ from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
     expectationConfigurationSchema,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -733,6 +734,61 @@ class ExpectationSuite(SerializableDictDot):
 
         return expectations_by_column, sorted_columns
 
+    def get_grouped_and_ordered_expectations_by_domain_type(
+        self,
+    ) -> Dict[str, List[ExpectationConfiguration]]:
+        expectation_configurations_by_domain: Dict[
+            str, List[ExpectationConfiguration]
+        ] = self._get_expectations_by_domain_using_accessor_method(
+            domain_type=MetricDomainTypes.TABLE.value,
+            accessor_method=self.get_table_expectations,
+        )
+        expectation_configurations_by_domain.update(
+            self._get_expectations_by_domain_using_accessor_method(
+                domain_type=MetricDomainTypes.COLUMN.value,
+                accessor_method=self.get_column_expectations,
+            )
+        )
+        expectation_configurations_by_domain.update(
+            self._get_expectations_by_domain_using_accessor_method(
+                domain_type=MetricDomainTypes.COLUMN_PAIR.value,
+                accessor_method=self.get_column_pair_expectations,
+            )
+        )
+        expectation_configurations_by_domain.update(
+            self._get_expectations_by_domain_using_accessor_method(
+                domain_type=MetricDomainTypes.MULTICOLUMN.value,
+                accessor_method=self.get_multicolumn_expectations,
+            )
+        )
+        return expectation_configurations_by_domain
+
+    @staticmethod
+    def _get_expectations_by_domain_using_accessor_method(
+        domain_type: str, accessor_method: Callable
+    ) -> Dict[str, List[ExpectationConfiguration]]:
+        expectation_configurations_by_domain: Dict[
+            str, List[ExpectationConfiguration]
+        ] = {}
+
+        expectation_configurations: List[ExpectationConfiguration]
+        domain_kwargs: dict
+        expectation_configuration: ExpectationConfiguration
+
+        for expectation_configuration in accessor_method():
+            expectation_configurations = expectation_configurations_by_domain.get(
+                domain_type
+            )
+            if expectation_configurations is None:
+                expectation_configurations = []
+                expectation_configurations_by_domain[
+                    domain_type
+                ] = expectation_configurations
+
+            expectation_configurations.append(expectation_configuration)
+
+        return expectation_configurations_by_domain
+
 
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
@@ -744,6 +800,7 @@ class ExpectationSuiteSchema(Schema):
 
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
+    # noinspection PyMethodMayBeStatic
     def clean_empty(self, data):
         if isinstance(data, ExpectationSuite):
             if not hasattr(data, "evaluation_parameters"):
