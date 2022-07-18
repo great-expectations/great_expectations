@@ -935,6 +935,7 @@ class DatasourceConfigSchema(Schema):
         allow_none=True,
         missing="great_expectations.datasource",
     )
+    id_ = fields.String(required=False, allow_none=True, data_key="id")
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
     execution_engine = fields.Nested(
