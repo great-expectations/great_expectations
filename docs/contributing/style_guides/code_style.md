@@ -22,17 +22,6 @@ This style guide will be enforced for all incoming PRs. However, certain legacy 
 
 Our CI system will check using `black`, `isort`, `flake8` and `pyupgrade`. 
 
-Linting with `isort` MUST occur from a virtual environment that has all required packages installed, and pre-commit uses the virtual environment from which it was installed, whether or not that environment is active when making the commit. 
-
-This means you must ensure you have activated a virtual environment that has all development requirements installed **before running `pre-commit install`**.
-
-```console
-pre-commit uninstall
-# ACTIVATE ENV, e.g.: conda activate pre_commit_env OR source pre_commit_env/bin/activate
-pip install -r requirements-dev.txt
-pre-commit install --install-hooks
-```
-
 If you have already committed files but are seeing errors during the continuous integration tests, you can run tests manually:
 
 ```console
