@@ -78,6 +78,7 @@ class GEDependencies:
             "google-cloud-secret-manager",
             "google-cloud-storage",
             "ipywidgets",
+            "invoke",
             "isort",
             "mistune",
             "mock-alchemy",
