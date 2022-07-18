@@ -1,8 +1,8 @@
 from typing import Iterable, List, Optional, Set, Tuple, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,

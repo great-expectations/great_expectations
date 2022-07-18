@@ -9,8 +9,8 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
