@@ -138,6 +138,6 @@ DO_NOT_COMMIT
 # Hive Metastore from Spark
 metastore_db
 
-# dependency managment
+# dependency management
 Pipfile
 Pipfile.lock
