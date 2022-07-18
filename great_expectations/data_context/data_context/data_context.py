@@ -31,6 +31,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.exceptions import DataContextError
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -477,6 +478,28 @@ class DataContext(BaseDataContext):
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
         super().delete_datasource(datasource_name=name)
         self._save_project_config()
+
+    def add_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: Dict[str, dict],
+        variables: Optional[dict] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> RuleBasedProfiler:
+        """
+        Constructs a RuleBasedProfiler instance just like the parent `BaseDataContext.add_profiler`
+        but also persists the result object utilizing the context's ProfilerStore instance.
+        """
+        profiler: RuleBasedProfiler = super().add_profiler(
+            name=name,
+            config_version=config_version,
+            rules=rules,
+            variables=variables,
+            ge_cloud_id=ge_cloud_id,
+        )
+        self.save_profiler(profiler=profiler, name=name, ge_cloud_id=ge_cloud_id)
+        return profiler
 
     @classmethod
     def find_context_root_dir(cls):
