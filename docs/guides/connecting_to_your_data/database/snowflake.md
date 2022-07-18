@@ -42,9 +42,14 @@ pip install snowflake-sqlalchemy
 For this guide we will use a `connection_string` like this:
 
 ```
-snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>
+snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>&application=great_expectations_oss
 ```   
 
+:::note
+
+Please note `application=great_expectations_oss` connection string parameter above is simply so that Snowflake can identify connection source. It has no bearing on anything else.
+
+:::
 ### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
