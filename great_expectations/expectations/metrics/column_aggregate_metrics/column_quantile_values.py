@@ -77,6 +77,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 f"If specified for pandas, allow_relative_error must be one an allowed value for the 'interpolation'"
                 f"parameter of .quantile() (one of {interpolation_options})"
             )
+
         return column.quantile(quantiles, interpolation=allow_relative_error).tolist()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -188,19 +189,22 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
-        allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
         quantiles = metric_value_kwargs["quantiles"]
         column = accessor_domain_kwargs["column"]
-        if allow_relative_error is False:
+
+        allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
+        if not allow_relative_error:
             allow_relative_error = 0.0
+
         if (
             not isinstance(allow_relative_error, float)
-            or allow_relative_error < 0
-            or allow_relative_error > 1
+            or allow_relative_error < 0.0
+            or allow_relative_error > 1.0
         ):
             raise ValueError(
-                "SparkDFDataset requires relative error to be False or to be a float between 0 and 1."
+                "SparkDFExecutionEngine requires relative error to be False or to be a float between 0 and 1."
             )
+
         return df.approxQuantile(column, list(quantiles), allow_relative_error)
 
 
