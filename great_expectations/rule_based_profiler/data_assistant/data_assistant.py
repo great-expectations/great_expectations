@@ -498,16 +498,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         return isabstract(cls)
 
-    @property
-    def metrics_parameter_builders_by_domain(
-        self,
-    ) -> Dict[Domain, List[ParameterBuilder]]:
-        """
-        Returns:
-            Dictionary of "ParameterBuilder" objects, keyed by ("domain_type", "rule_name")-specified "Domain" object.
-        """
-        return self._metrics_parameter_builders_by_domain
-
     @abstractmethod
     def get_variables(self) -> Optional[Dict[str, Any]]:
         """
@@ -544,9 +534,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
     def get_metrics_by_domain(self) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
         Obtain subset of all parameter values for fully-qualified parameter names by domain, available from entire
-        "RuleBasedProfiler" state, where "Domain" objects are among keys included in provisions as proscribed by return
-        value of "DataAssistant.metrics_parameter_builders_by_domain" interface property and fully-qualified parameter
-        names match interface properties of "ParameterBuilder" objects, corresponding to these partial "Domain" objects.
+        "RuleBasedProfiler" state, where "Domain" objects are among keys included in provisions as proscribed by value
+        of "DataAssistant._metrics_parameter_builders_by_domain" private attribute and fully-qualified parameter names
+        match interface properties of "ParameterBuilder" objects, corresponding to these partial "Domain" objects.
 
         Returns:
             Dictionaries of values for fully-qualified parameter names by Domain for metrics, from "RuleBasedpRofiler"
@@ -561,7 +551,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 lambda element: any(
                     element[0].is_superset(other=domain_key)
                     for domain_key in list(
-                        self.metrics_parameter_builders_by_domain.keys()
+                        self._metrics_parameter_builders_by_domain.keys()
                     )
                 ),
                 self.profiler.get_parameter_values_for_fully_qualified_parameter_names_by_domain().items(),
@@ -577,7 +567,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 parameter_builder.json_serialized_fully_qualified_parameter_name
                 for parameter_builder in parameter_builders
             ]
-            for domain, parameter_builders in self.metrics_parameter_builders_by_domain.items()
+            for domain, parameter_builders in self._metrics_parameter_builders_by_domain.items()
         }
 
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]

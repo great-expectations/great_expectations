@@ -58,7 +58,7 @@ class Domain(SerializableDotDict):
     ) -> None:
         if isinstance(domain_type, str):
             try:
-                domain_type = MetricDomainTypes(domain_type)
+                domain_type = MetricDomainTypes(domain_type.lower())
             except (TypeError, KeyError) as e:
                 raise ValueError(
                     f""" {e}: Cannot instantiate Domain (domain_type "{str(domain_type)}" of type \
@@ -205,7 +205,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 
     def _convert_dictionaries_to_domain_kwargs(
         self, source: Optional[Any] = None
-    ) -> Optional[Union[Any, "Domain"]]:
+    ) -> Optional[Union[Any, "Domain"]]:  # noqa: F821
         if source is None:
             return None
 
