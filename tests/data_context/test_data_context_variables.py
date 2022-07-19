@@ -1,9 +1,16 @@
-from typing import Any, Callable, cast
+import copy
+import os
+import pathlib
+from typing import Any
 from unittest import mock
 
 import pytest
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariables,
@@ -18,11 +25,12 @@ from great_expectations.data_context.types.base import (
     NotebookConfig,
     NotebookTemplateConfig,
     ProgressBarsConfig,
-    dataContextConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
+
+yaml = YAMLHandler()
 
 
 @pytest.fixture
@@ -97,6 +105,19 @@ def cloud_data_context_variables(
         ge_cloud_access_token=ge_cloud_access_token,
         config=data_context_config,
     )
+
+
+@pytest.fixture
+def file_data_context(
+    tmp_path: pathlib.Path, data_context_config: DataContextConfig
+) -> FileDataContext:
+    project_path = tmp_path / "file_data_context"
+    project_path.mkdir()
+    context_root_dir = project_path / "great_expectations"
+    context = FileDataContext(
+        project_config=data_context_config, context_root_dir=str(context_root_dir)
+    )
+    return context
 
 
 def stores() -> dict:
@@ -383,8 +404,8 @@ def test_data_context_variables_save_config(
         assert mock_save.call_count == 1
 
     # CloudDataContextVariables
-    with mock.patch("requests.patch", autospec=True) as mock_patch:
-        type(mock_patch.return_value).status_code = mock.PropertyMock(return_value=200)
+    with mock.patch("requests.put", autospec=True) as mock_put:
+        type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
 
         cloud_data_context_variables.save_config()
 
@@ -399,8 +420,8 @@ def test_data_context_variables_save_config(
         ):
             expected_config_dict[attr] = data_context_config_dict[attr]
 
-        assert mock_patch.call_count == 1
-        mock_patch.assert_called_with(
+        assert mock_put.call_count == 1
+        mock_put.assert_called_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables/",
             json={
                 "data": {
@@ -416,3 +437,48 @@ def test_data_context_variables_save_config(
                 "Authorization": f"Bearer {ge_cloud_access_token}",
             },
         )
+
+
+def test_file_data_context_variables_e2e(
+    monkeypatch, file_data_context: FileDataContext, progress_bars: ProgressBarsConfig
+) -> None:
+    """
+    What does this test do and why?
+
+    Tests the E2E workflow with a FileDataContextVariables instance.
+      1. User updates certain values and sets them as attributes.
+      2. User persists changes utilizing the save_config call defined by the Variables API.
+      3. Upon reading the result config from disk, we can confirm that changes were appropriately persisted.
+
+    It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
+    value in order to preserve sensitive information.
+    """
+    # Prepare updated progress bars to set and serialize to disk
+    updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
+    updated_progress_bars.globally = False
+    updated_progress_bars.profilers = True
+
+    # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)
+    env_var_name: str = "MY_PLUGINS_DIRECTORY"
+    value_associated_with_env_var: str = "foo/bar/baz"
+    monkeypatch.setenv(env_var_name, value_associated_with_env_var)
+
+    # Set attributes defined above
+    file_data_context.variables.progress_bars = updated_progress_bars
+    file_data_context.variables.plugins_directory = f"${env_var_name}"
+    file_data_context.variables.save_config()
+
+    # Review great_expectations.yml where values were written and confirm changes
+    config_filepath = pathlib.Path(file_data_context.root_directory).joinpath(
+        file_data_context.GE_YML
+    )
+
+    with open(config_filepath) as f:
+        contents: dict = yaml.load(f)
+        config_saved_to_disk: DataContextConfig = DataContextConfig(**contents)
+
+    assert config_saved_to_disk.progress_bars == updated_progress_bars.to_dict()
+    assert (
+        file_data_context.variables.plugins_directory == value_associated_with_env_var
+    )
+    assert config_saved_to_disk.plugins_directory == f"${env_var_name}"

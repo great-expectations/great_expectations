@@ -14,6 +14,9 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
@@ -1300,10 +1303,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         return generator
 
-    def set_config(self, project_config: DataContextConfig) -> None:
-        self._project_config = project_config
-        self.variables.config = project_config
-
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
 
@@ -2185,9 +2184,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
-        key: Union[
-            GeCloudIdentifier, ConfigurationIdentifier
-        ] = self.profiler_store.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if self.ge_cloud_mode:
+            key = GeCloudIdentifier(
+                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+            )
+        else:
+            key = ConfigurationIdentifier(configuration_key=name)
+
         self.profiler_store.set(key=key, value=profiler.config)
 
     def get_profiler(

@@ -4,8 +4,8 @@ from enum import Enum
 from typing import Any, Dict, Optional, Union
 
 from great_expectations.core import IDDict
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.types import SerializableDictDot, SerializableDotDict
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -58,7 +58,7 @@ class Domain(SerializableDotDict):
     ) -> None:
         if isinstance(domain_type, str):
             try:
-                domain_type = MetricDomainTypes(domain_type)
+                domain_type = MetricDomainTypes(domain_type.lower())
             except (TypeError, KeyError) as e:
                 raise ValueError(
                     f""" {e}: Cannot instantiate Domain (domain_type "{str(domain_type)}" of type \
@@ -205,7 +205,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 
     def _convert_dictionaries_to_domain_kwargs(
         self, source: Optional[Any] = None
-    ) -> Optional[Union[Any, "Domain"]]:
+    ) -> Optional[Union[Any, "Domain"]]:  # noqa: F821
         if source is None:
             return None
 

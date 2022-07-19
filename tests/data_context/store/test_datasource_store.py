@@ -130,12 +130,12 @@ def test_datasource_store_retrieval_cloud_mode(
         resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id="foobarbaz"
     )
 
-    with patch("requests.patch", autospec=True) as mock_patch:
-        type(mock_patch.return_value).status_code = PropertyMock(return_value=200)
+    with patch("requests.put", autospec=True) as mock_put:
+        type(mock_put.return_value).status_code = PropertyMock(return_value=200)
 
         store.set(key=key, value=datasource_config)
 
-        mock_patch.assert_called_with(
+        mock_put.assert_called_with(
             "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/datasources/foobarbaz",
             json={
                 "data": {
