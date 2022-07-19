@@ -2,3 +2,6 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.isort]
+profile = "black"
+skip_gitignore = true
