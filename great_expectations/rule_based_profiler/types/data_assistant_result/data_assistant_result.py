@@ -572,7 +572,7 @@ class DataAssistantResult(SerializableDictDot):
                 font-size: {dropdown_font_size}px;
                 position: absolute;
                 left: 75px;
-                top: 30px;
+                top: 28px;
             }}
             </style>
         """
