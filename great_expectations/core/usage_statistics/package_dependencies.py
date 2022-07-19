@@ -116,6 +116,7 @@ class GEDependencies:
         # requirements-dev-contrib.txt:
         "black",
         "flake8",
+        "invoke",
         "isort",
         "pre-commit",
         "pytest-cov",
