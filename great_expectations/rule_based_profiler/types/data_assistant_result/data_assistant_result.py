@@ -553,8 +553,8 @@ class DataAssistantResult(SerializableDictDot):
             display_chart_dict[chart_titles[idx]] = themed_charts[idx]
 
         dropdown_title_color: str = altair_theme["legend"]["titleColor"]
-        dropdown_title_font: str = altair_theme["font"]
-        dropdown_title_font_size: str = altair_theme["axis"]["titleFontSize"]
+        dropdown_font: str = altair_theme["font"]
+        dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
         dropdown_text_color: str = altair_theme["axis"]["labelColor"]
 
         # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
@@ -562,13 +562,14 @@ class DataAssistantResult(SerializableDictDot):
             <style>
             span.vega-bind-name {{
                 color: {dropdown_title_color};
-                font-family: {dropdown_title_font};
-                font-size: {dropdown_title_font_size}px;
+                font-family: {dropdown_font};
+                font-size: {dropdown_font_size}px;
                 font-weight: bold;
             }}
             form.vega-bindings {{
-                font-family: {dropdown_title_font};
-                font-size: {dropdown_title_font_size}px;
+                color: {dropdown_text_color};
+                font-family: {dropdown_font};
+                font-size: {dropdown_font_size}px;
                 position: absolute;
                 left: 75px;
                 top: 30px;
@@ -584,17 +585,17 @@ class DataAssistantResult(SerializableDictDot):
             <style>
             .widget-inline-hbox .widget-label {{
                 color: {dropdown_title_color};
-                font-family: {dropdown_title_font};
-                font-size: {dropdown_title_font_size}px;
+                font-family: {dropdown_font};
+                font-size: {dropdown_font_size}px;
                 font-weight: bold;
             }}
             .widget-dropdown > select {{
                 padding-right: 21px;
                 padding-left: 3px;
                 color: {dropdown_text_color};
-                font-family: {dropdown_title_font};
-                font-size: {dropdown_title_font_size}px;
-                line-height: {dropdown_title_font_size}px;
+                font-family: {dropdown_font};
+                font-size: {dropdown_font_size}px;
+                line-height: {dropdown_font_size}px;
                 background-size: 20px;
                 border-radius: 5px;
             }}
