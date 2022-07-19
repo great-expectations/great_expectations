@@ -8,6 +8,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 from .data_profiler_profile_metric_provider import DataProfilerProfileMetricProvider
 
+
 class DataProfilerProfilePercentDiff(DataProfilerProfileMetricProvider):
     metric_name = "data_profiler.profile_percent_diff"
 
@@ -36,7 +37,7 @@ class DataProfilerProfilePercentDiff(DataProfilerProfileMetricProvider):
             "gini_impurity",
             "unalikeability",
             "sample_size",
-            "null_count"
+            "null_count",
         ]
 
         profile_report = metrics["data_profiler.profile_report"]
@@ -54,7 +55,7 @@ class DataProfilerProfilePercentDiff(DataProfilerProfileMetricProvider):
             for (dr_stat, dr_val) in dr_stats.items():
                 if dr_stat not in numerical_diff_stats:
                     percent_delta_stats[dr_stat] = dr_val
-                    continue    
+                    continue
                 if dr_val == "unchanged":
                     dr_val = 0
                 if dr_stat not in pr_stats:
@@ -63,9 +64,9 @@ class DataProfilerProfilePercentDiff(DataProfilerProfileMetricProvider):
                 pr_val = pr_stats[dr_stat]
                 percent_change = 0
                 if pr_val == 0:
-                    percent_change = "ERR_divide_by_zero" #Div by 0 error
+                    percent_change = "ERR_divide_by_zero"  # Div by 0 error
                 else:
-                    percent_change = dr_val/pr_val
+                    percent_change = dr_val / pr_val
                 percent_delta_stats[dr_stat] = percent_change
             percent_delta_col["statistics"] = percent_delta_stats
             percent_delta_data_stats.append(percent_delta_col)
