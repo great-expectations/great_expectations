@@ -51,6 +51,7 @@ legend_title_font_size: int = 12
 
 # Scale
 scale_continuous_padding: int = 33
+scale_band_padding_outer: float = 1.0
 
 #
 # Color Palettes
@@ -137,6 +138,7 @@ class AltairThemes(Enum):
         },
         "scale": {
             "continuousPadding": scale_continuous_padding,
+            "bandPaddingOuter": scale_band_padding_outer,
         },
         "area": {
             "color": fill_color,
