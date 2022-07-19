@@ -881,6 +881,7 @@ def validate(
             from great_expectations.data_context import DataContext
 
             data_context = DataContext(data_context)
+
         expectation_suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
         )
@@ -892,14 +893,17 @@ def validate(
             expectation_suite: ExpectationSuite = ExpectationSuite(
                 **expectation_suite_dict, data_context=data_context
             )
+
         if data_asset_name is not None:
             raise ValueError(
                 "When providing an expectation suite, data_asset_name cannot also be provided."
             )
+
         if expectation_suite_name is not None:
             raise ValueError(
                 "When providing an expectation suite, expectation_suite_name cannot also be provided."
             )
+
         logger.info(
             f"Validating data_asset_name {data_asset_name} with expectation_suite_name {expectation_suite.expectation_suite_name}"
         )
@@ -950,6 +954,7 @@ def validate(
     data_asset_ = _convert_to_dataset_class(
         data_asset, dataset_class=data_asset_class, expectation_suite=expectation_suite
     )
+
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 

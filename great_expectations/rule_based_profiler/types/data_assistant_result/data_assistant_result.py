@@ -15,6 +15,7 @@ from IPython.display import HTML, display
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
@@ -26,7 +27,6 @@ from great_expectations.core.util import (
     in_jupyter_notebook,
     nested_update,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import RuleConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,

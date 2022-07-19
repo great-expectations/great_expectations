@@ -178,7 +178,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{ge_cloud_id}",
         )
         try:
-            response = requests.patch(url, json=data, headers=self.auth_headers)
+            response = requests.put(url, json=data, headers=self.auth_headers)
             response_status_code = response.status_code
 
             if response_status_code < 300:
@@ -335,7 +335,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{ge_cloud_id}",
         )
         try:
-            response = requests.patch(url, json=data, headers=self.auth_headers)
+            response = requests.delete(url, json=data, headers=self.auth_headers)
             response_status_code = response.status_code
 
             if response_status_code < 300:
