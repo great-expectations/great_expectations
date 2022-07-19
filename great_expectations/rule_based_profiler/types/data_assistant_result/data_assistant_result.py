@@ -611,12 +611,11 @@ class DataAssistantResult(SerializableDictDot):
             layout={"width": "max-content", "margin": "0px"},
         )
 
-        # As of 19 July, 2022 there is a DeprecationWarning due to the latest ipywidgets' interaction with
-        # ipykernel versions > 6.0.0. Rather than add a version constraint to ipykernel, we suppress
-        # DeprecationWarnings produced by module ipywidgets.widgets.widget_output
+        # As of 19 July, 2022 there is a Deprecation Warning due to the latest ipywidgets' interaction with
+        # ipykernel (Kernel._parent_header deprecated in v6.0.0). Rather than add a version constraint to ipykernel,
+        # we suppress Deprecation Warnings produced by module ipywidgets.widgets.widget_output.
         warnings.filterwarnings(
             action="ignore",
-            category=DeprecationWarning,
             module="ipywidgets.widgets.widget_output",
         )
         widgets.interact(
