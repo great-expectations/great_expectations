@@ -1,5 +1,7 @@
 from unittest.mock import PropertyMock, patch
 
+import pytest
+
 from great_expectations.data_context.store import DatasourceStore
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
@@ -8,6 +10,7 @@ from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
+@pytest.mark.unit
 def test_datasource_store_create(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -45,6 +48,7 @@ def test_datasource_store_create(
         )
 
 
+@pytest.mark.unit
 def test_datasource_store_get_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -75,6 +79,7 @@ def test_datasource_store_get_by_id(
         )
 
 
+@pytest.mark.unit
 def test_datasource_store_delete_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
