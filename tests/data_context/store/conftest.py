@@ -8,6 +8,14 @@ from great_expectations.data_context.types.base import DatasourceConfig
 
 
 @pytest.fixture
+def request_headers(ge_cloud_access_token) -> dict:
+    return {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+    }
+
+
+@pytest.fixture
 def datasource_name() -> str:
     return "my_first_datasource"
 
