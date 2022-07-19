@@ -167,16 +167,17 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             }
         }
 
-        if ge_cloud_id:
-            data["data"]["id"] = ge_cloud_id
-
         url = urljoin(
             self.ge_cloud_base_url,
             f"organizations/"
             f"{organization_id}/"
-            f"{hyphen(self.ge_cloud_resource_name)}/"
-            f"{ge_cloud_id}",
+            f"{hyphen(self.ge_cloud_resource_name)}",
         )
+
+        if ge_cloud_id:
+            data["data"]["id"] = ge_cloud_id
+            url = urljoin(url, ge_cloud_id)
+
         try:
             response = requests.put(url, json=data, headers=self.auth_headers)
             response_status_code = response.status_code
