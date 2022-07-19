@@ -32,7 +32,6 @@ Available tasks:
   hooks           Run all pre-commit hooks.
   lint            Run code linter
   sort            Sort module imports.
-  type-check      Run mypy static type-checking on select packages.
   type-coverage   Check total type-hint coverage compared to `develop`.
   upgrade         Run code syntax upgrades.
 ```
@@ -49,7 +48,7 @@ Docstring:
 Options:
   -c, --check                   Only checks for needed changes without writing back. Exit with error code if changes needed.
   -e STRING, --exclude=STRING   Exclude files or directories
-  -p STRING, --path=STRING
+  -p STRING, --path=STRING      Target path. (Default: .)
   -s, --[no-]sort               Disable import sorting. Runs by default.
 ```
 
