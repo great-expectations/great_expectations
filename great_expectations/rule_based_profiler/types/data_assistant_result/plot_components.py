@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import List, Optional, Union
 
 import altair as alt
-import pandas as pd
 
 
 @dataclass(frozen=True)
@@ -47,14 +46,18 @@ class PlotComponent:
             scale=alt.Scale(align=0.05),
         )
 
-    def plot_on_y_axis(self, df: pd.DataFrame) -> alt.Y:
+    def plot_on_y_axis(self) -> alt.Y:
         """
         Plots domain on Y axis.
 
         Returns:
             An instance of alt.Y.
         """
-        raise NotImplementedError
+        return alt.Y(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
+        )
 
     def plot_on_axis(self) -> Union[alt.X, alt.Y]:
         """Wrapper around alt.X/alt.Y plotting utility.
@@ -67,31 +70,15 @@ class PlotComponent:
 
 @dataclass(frozen=True)
 class MetricPlotComponent(PlotComponent):
-    def plot_on_y_axis(self, df: Optional[pd.DataFrame]) -> alt.Y:
+    def plot_on_axis(self) -> alt.Y:
         """
         Plots metric on Y axis - see parent `PlotComponent` for more details.
         """
-        range_min: float = df[self.name].min()
-        range_max: float = df[self.name].max()
-        scale_min: float
-        scale_max: float
-        scale_min, scale_max = get_axis_scale_from_range(
-            range_min=range_min, range_max=range_max
+        return alt.Y(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
         )
-
-        if df is not None:
-            return alt.Y(
-                self.name,
-                type=self.alt_type,
-                title=self.title,
-                scale=alt.Scale(domain=[scale_min, scale_max]),
-            )
-        else:
-            return alt.Y(
-                self.name,
-                type=self.alt_type,
-                title=self.title,
-            )
 
 
 @dataclass(frozen=True)
@@ -164,40 +151,15 @@ class BatchPlotComponent(PlotComponent):
 class ExpectationKwargPlotComponent(PlotComponent):
     metric_plot_component: Optional[MetricPlotComponent] = None
 
-    def plot_on_y_axis(self, df: pd.DataFrame) -> alt.Y:
+    def plot_on_y_axis(self) -> alt.Y:
         """
         Plots metric on Y axis - see parent `PlotComponent` for more details.
         """
-        range_min: float = df[self.metric_plot_component.name].min()
-        range_max: float = df[self.metric_plot_component.name].max()
-        scale_min: float
-        scale_max: float
-        scale_min, scale_max = get_axis_scale_from_range(
-            range_min=range_min, range_max=range_max
+        return alt.Y(
+            self.name,
+            type=self.alt_type,
+            title=self.metric_plot_component.title,
         )
-
-        if df is not None:
-            return alt.Y(
-                self.name,
-                type=self.alt_type,
-                title=self.metric_plot_component.title,
-                scale=alt.Scale(domain=[scale_min, scale_max]),
-            )
-        else:
-            return alt.Y(
-                self.name,
-                type=self.alt_type,
-                title=self.metric_plot_component.title,
-            )
-
-
-def get_axis_scale_from_range(
-    range_min: float, range_max: float, added_range_pct: float = 0.01
-):
-    scale_range: float = range_max - range_min
-    scale_min: float = range_min - (scale_range * added_range_pct)
-    scale_max: float = range_max + (scale_range * added_range_pct)
-    return scale_min, scale_max
 
 
 def determine_plot_title(
