@@ -34,10 +34,6 @@ from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
 
-from great_expectations.core.expectation_suite import (
-    ExpectationSuite,
-    expectationSuiteSchema,
-)
 from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
@@ -886,6 +882,11 @@ def validate(
             expectation_suite_name=expectation_suite_name
         )
     else:
+        from great_expectations.core.expectation_suite import (
+            ExpectationSuite,
+            expectationSuiteSchema,
+        )
+
         if isinstance(expectation_suite, dict):
             expectation_suite_dict: dict = expectationSuiteSchema.load(
                 expectation_suite
@@ -1070,7 +1071,7 @@ def filter_properties_dict(
         delete_fields: list of keys that must be deleted, with the understanding that all other entries will be retained
         clean_nulls: If True, then in addition to other filtering directives, delete entries, whose values are None
         clean_falsy: If True, then in addition to other filtering directives, delete entries, whose values are Falsy
-        (If the "clean_falsy" argument is specified at "True", then "clean_nulls" is assumed to be "True" as well.)
+        (If the "clean_falsy" argument is specified as "True", then "clean_nulls" is assumed to be "True" as well.)
         inplace: If True, then modify the source properties dictionary; otherwise, make a copy for filtering purposes
         keep_falsy_numerics: If True, then in addition to other filtering directives, do not delete zero-valued numerics
 
