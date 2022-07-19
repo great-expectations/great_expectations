@@ -50,7 +50,7 @@ legend_title_color: str = Colors.PURPLE.value
 legend_title_font_size: int = 12
 
 # Scale
-scale_padding: int = 33
+scale_continuous_padding: int = 33
 
 #
 # Color Palettes
@@ -136,7 +136,7 @@ class AltairThemes(Enum):
             "ordinal": ordinal_color_scheme,
         },
         "scale": {
-            "continuousPadding": scale_padding,
+            "continuousPadding": scale_continuous_padding,
         },
         "area": {
             "color": fill_color,
