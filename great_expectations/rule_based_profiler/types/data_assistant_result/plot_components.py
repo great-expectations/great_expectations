@@ -56,7 +56,7 @@ class PlotComponent:
         """
         raise NotImplementedError
 
-    def plot_on_axis(self, df: Optional[pd.DataFrame] = None) -> Union[alt.X, alt.Y]:
+    def plot_on_axis(self) -> Union[alt.X, alt.Y]:
         """Wrapper around alt.X/alt.Y plotting utility.
 
         Returns:
@@ -168,8 +168,8 @@ class ExpectationKwargPlotComponent(PlotComponent):
         """
         Plots metric on Y axis - see parent `PlotComponent` for more details.
         """
-        range_min: float = df[self.name].min()
-        range_max: float = df[self.name].max()
+        range_min: float = df[self.metric_plot_component.name].min()
+        range_max: float = df[self.metric_plot_component.name].max()
         scale_min: float
         scale_max: float
         scale_min, scale_max = get_axis_scale_from_range(
