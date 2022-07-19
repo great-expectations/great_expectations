@@ -151,7 +151,7 @@ class BatchPlotComponent(PlotComponent):
 class ExpectationKwargPlotComponent(PlotComponent):
     metric_plot_component: Optional[MetricPlotComponent] = None
 
-    def plot_on_y_axis(self) -> alt.Y:
+    def plot_on_axis(self) -> alt.Y:
         """
         Plots metric on Y axis - see parent `PlotComponent` for more details.
         """
