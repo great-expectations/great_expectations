@@ -63,7 +63,7 @@ def lint(ctx, path="great_expectations/core"):
 
 @invoke.task
 def upgrade(ctx, path="."):
-    """Run code styntax upgrades."""
+    """Run code syntax upgrades."""
     cmds = ["pyupgrade", path, "--py3-plus"]
     ctx.run(" ".join(cmds))
 

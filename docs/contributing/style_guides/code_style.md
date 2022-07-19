@@ -34,7 +34,7 @@ Available tasks:
   sort            Sort module imports.
   type-check      Run mypy static type-checking on select packages.
   type-coverage   Check total type-hint coverage compared to `develop`.
-  upgrade         Run code styntax upgrades.
+  upgrade         Run code syntax upgrades.
 ```
 
 For detailed usage guide, `invoke <TASK-NAME> --help`
