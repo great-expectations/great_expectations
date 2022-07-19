@@ -595,9 +595,10 @@ class DataAssistantResult(SerializableDictDot):
                 color: {dropdown_text_color};
                 font-family: {dropdown_font};
                 font-size: {dropdown_font_size}px;
+                height: 20px;
                 line-height: {dropdown_font_size}px;
                 background-size: 20px;
-                border-radius: 5px;
+                border-radius: 2px;
             }}
             </style>
         """
