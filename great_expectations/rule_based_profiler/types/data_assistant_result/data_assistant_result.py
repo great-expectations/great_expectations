@@ -740,7 +740,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_component: BatchPlotComponent = BatchPlotComponent(
+        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
@@ -750,7 +750,7 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
-        metric_component: MetricPlotComponent
+        metric_plot_component: MetricPlotComponent
         if metric_name == "table_columns":
             table_column: str = "table_column"
             unique_column_sets: np.ndarray = np.unique(df[metric_name])
@@ -776,22 +776,22 @@ class DataAssistantResult(SerializableDictDot):
                     df=df, metric_name=metric_name
                 )
 
-            metric_component = MetricPlotComponent(
+            metric_plot_component = MetricPlotComponent(
                 name=table_column,
                 alt_type=metric_type,
             )
         else:
-            metric_component = MetricPlotComponent(
+            metric_plot_component = MetricPlotComponent(
                 name=metric_name,
                 alt_type=metric_type,
             )
 
-        column_number_component: PlotComponent = PlotComponent(
+        column_number_plot_component: PlotComponent = PlotComponent(
             name=column_number,
             alt_type=AltairDataTypes.ORDINAL.value,
         )
 
-        domain_component: DomainPlotComponent = DomainPlotComponent(
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name=None,
             alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
@@ -800,19 +800,19 @@ class DataAssistantResult(SerializableDictDot):
         if sequential:
             return DataAssistantResult._get_sequential_isotype_chart(
                 df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-                column_number_component=column_number_component,
+                metric_plot_component=metric_plot_component,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+                column_number_plot_component=column_number_plot_component,
                 column_set=column_set,
             )
         else:
             return DataAssistantResult._get_nonsequential_isotype_chart(
                 df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-                column_number_component=column_number_component,
+                metric_plot_component=metric_plot_component,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+                column_number_plot_component=column_number_plot_component,
                 column_set=column_set,
             )
 
@@ -844,7 +844,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_component: BatchPlotComponent = BatchPlotComponent(
+        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
@@ -854,7 +854,7 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
-        metric_component: MetricPlotComponent
+        metric_plot_component: MetricPlotComponent
         if metric_name == "table_columns":
             table_column: str = "table_column"
             unique_column_sets: np.ndarray = np.unique(df[metric_name])
@@ -865,12 +865,12 @@ class DataAssistantResult(SerializableDictDot):
                 df=df, metric_name=metric_name
             )
 
-            metric_component = MetricPlotComponent(
+            metric_plot_component = MetricPlotComponent(
                 name=table_column,
                 alt_type=metric_type,
             )
         else:
-            metric_component = MetricPlotComponent(
+            metric_plot_component = MetricPlotComponent(
                 name=metric_name,
                 alt_type=metric_type,
             )
@@ -879,12 +879,12 @@ class DataAssistantResult(SerializableDictDot):
         if column_set is not None:
             df = df.iloc[:1]
 
-        column_number_component: PlotComponent = PlotComponent(
+        column_number_plot_component: PlotComponent = PlotComponent(
             name=column_number,
             alt_type=AltairDataTypes.ORDINAL.value,
         )
 
-        domain_component: DomainPlotComponent = DomainPlotComponent(
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name=None,
             alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
@@ -894,40 +894,40 @@ class DataAssistantResult(SerializableDictDot):
             return DataAssistantResult._get_sequential_expect_domain_values_to_match_set_isotype_chart(
                 expectation_type=expectation_type,
                 df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-                column_number_component=column_number_component,
+                metric_plot_component=metric_plot_component,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+                column_number_plot_component=column_number_plot_component,
                 column_set=column_set,
             )
         else:
             return DataAssistantResult._get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
                 expectation_type=expectation_type,
                 df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-                column_number_component=column_number_component,
+                metric_plot_component=metric_plot_component,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+                column_number_plot_component=column_number_plot_component,
                 column_set=column_set,
             )
 
     @staticmethod
     def _get_sequential_isotype_chart(
         df: pd.DataFrame,
-        metric_component: MetricPlotComponent,
-        batch_component: BatchPlotComponent,
-        domain_component: DomainPlotComponent,
-        column_number_component: PlotComponent,
+        metric_plot_component: MetricPlotComponent,
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_component,
-            batch_plot_component=batch_component,
-            domain_plot_component=domain_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            metric_component.generate_tooltip(),
+        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+            metric_plot_component.generate_tooltip(),
         ]
 
         chart: Union[alt.Chart, alt.LayerChart]
@@ -937,15 +937,15 @@ class DataAssistantResult(SerializableDictDot):
                 .mark_point(color=Colors.PURPLE.value)
                 .encode(
                     x=alt.X(
-                        batch_component.name,
-                        type=batch_component.alt_type,
-                        title=batch_component.title,
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
                         axis=alt.Axis(grid=False),
                     ),
                     y=alt.Y(
-                        column_number_component.name,
-                        type=column_number_component.alt_type,
-                        title=column_number_component.title,
+                        column_number_plot_component.name,
+                        type=column_number_plot_component.alt_type,
+                        title=column_number_plot_component.title,
                         axis=alt.Axis(grid=True),
                     ),
                     tooltip=tooltip,
@@ -960,14 +960,14 @@ class DataAssistantResult(SerializableDictDot):
                 .mark_point(opacity=0.0)
                 .encode(
                     x=alt.X(
-                        batch_component.name,
-                        type=batch_component.alt_type,
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
                         title=None,
                         axis=alt.Axis(labels=False, ticks=False, grid=False),
                     ),
                     y=alt.Y(
-                        column_number_component.name,
-                        type=column_number_component.alt_type,
+                        column_number_plot_component.name,
+                        type=column_number_plot_component.alt_type,
                         title=" ",
                         axis=alt.Axis(labels=False, ticks=False),
                     ),
@@ -984,20 +984,20 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_nonsequential_isotype_chart(
         df: pd.DataFrame,
-        metric_component: MetricPlotComponent,
-        batch_component: BatchPlotComponent,
-        domain_component: DomainPlotComponent,
-        column_number_component: PlotComponent,
+        metric_plot_component: MetricPlotComponent,
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_component,
-            batch_plot_component=batch_component,
-            domain_plot_component=domain_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            metric_component.generate_tooltip(),
+        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+            metric_plot_component.generate_tooltip(),
         ]
 
         chart: alt.Chart
@@ -1007,15 +1007,15 @@ class DataAssistantResult(SerializableDictDot):
                 .mark_point(color=Colors.PURPLE.value)
                 .encode(
                     x=alt.X(
-                        batch_component.name,
-                        type=batch_component.alt_type,
-                        title=batch_component.title,
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
                         axis=alt.Axis(labels=False, grid=False),
                     ),
                     y=alt.Y(
-                        column_number_component.name,
-                        type=column_number_component.alt_type,
-                        title=column_number_component.title,
+                        column_number_plot_component.name,
+                        type=column_number_plot_component.alt_type,
+                        title=column_number_plot_component.title,
                         axis=alt.Axis(grid=True),
                     ),
                     tooltip=tooltip,
@@ -1030,14 +1030,14 @@ class DataAssistantResult(SerializableDictDot):
                 .mark_point(opacity=0.0)
                 .encode(
                     x=alt.X(
-                        batch_component.name,
-                        type=batch_component.alt_type,
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
                         title=None,
                         axis=alt.Axis(labels=False, ticks=False, grid=False),
                     ),
                     y=alt.Y(
-                        column_number_component.name,
-                        type=column_number_component.alt_type,
+                        column_number_plot_component.name,
+                        type=column_number_plot_component.alt_type,
                         title=" ",
                         axis=alt.Axis(labels=False, ticks=False),
                     ),
@@ -1055,25 +1055,25 @@ class DataAssistantResult(SerializableDictDot):
     def _get_sequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_component: MetricPlotComponent,
-        batch_component: BatchPlotComponent,
-        domain_component: DomainPlotComponent,
-        column_number_component: PlotComponent,
+        metric_plot_component: MetricPlotComponent,
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
-            metric_plot_component=metric_component,
-            batch_plot_component=batch_component,
-            domain_plot_component=domain_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
         chart: alt.Chart = DataAssistantResult._get_sequential_isotype_chart(
             df=df,
-            metric_component=metric_component,
-            batch_component=batch_component,
-            domain_component=domain_component,
-            column_number_component=column_number_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+            column_number_plot_component=column_number_plot_component,
             column_set=column_set,
         ).properties(title=title)
 
@@ -1083,25 +1083,25 @@ class DataAssistantResult(SerializableDictDot):
     def _get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_component: MetricPlotComponent,
-        batch_component: BatchPlotComponent,
-        domain_component: DomainPlotComponent,
-        column_number_component: PlotComponent,
+        metric_plot_component: MetricPlotComponent,
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
-            metric_plot_component=metric_component,
-            batch_plot_component=batch_component,
-            domain_plot_component=domain_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
         chart: alt.Chart = DataAssistantResult._get_nonsequential_isotype_chart(
             df=df,
-            metric_component=metric_component,
-            batch_component=batch_component,
-            domain_component=domain_component,
-            column_number_component=column_number_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+            column_number_plot_component=column_number_plot_component,
             column_set=column_set,
         ).properties(title=title)
 
@@ -1793,7 +1793,7 @@ class DataAssistantResult(SerializableDictDot):
             .mark_line()
             .encode(
                 x=batch_plot_component.plot_on_axis(),
-                y=metric_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(df=df),
                 tooltip=tooltip,
             )
         )
@@ -1803,7 +1803,7 @@ class DataAssistantResult(SerializableDictDot):
             .mark_point()
             .encode(
                 x=batch_plot_component.plot_on_axis(),
-                y=metric_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(df=df),
                 tooltip=tooltip,
             )
         )
@@ -1837,7 +1837,7 @@ class DataAssistantResult(SerializableDictDot):
                     title=batch_plot_component.title,
                     axis=alt.Axis(labels=False, grid=False),
                 ),
-                y=metric_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(df=df),
                 tooltip=tooltip,
             )
         )
@@ -2341,7 +2341,7 @@ class DataAssistantResult(SerializableDictDot):
             .mark_line()
             .encode(
                 x=batch_plot_component.plot_on_axis(),
-                y=metric_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(df=df),
                 tooltip=tooltip,
             )
         )
@@ -2351,7 +2351,7 @@ class DataAssistantResult(SerializableDictDot):
             .mark_point()
             .encode(
                 x=batch_plot_component.plot_on_axis(),
-                y=metric_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(df=df),
                 tooltip=tooltip,
             )
         )
@@ -2411,7 +2411,7 @@ class DataAssistantResult(SerializableDictDot):
                     title=batch_plot_component.title,
                     axis=alt.Axis(labels=False, grid=False),
                 ),
-                y=metric_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(df=df),
                 tooltip=tooltip,
             )
             .add_selection(selection)
