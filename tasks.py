@@ -75,10 +75,11 @@ def upgrade(ctx, path="."):
     help={
         "all_files": "Run hooks against all files, not just the current changes.",
         "diff": "Show the diff of changes on hook failure.",
+        "sync": "Re-install the latest git hooks.",
     }
 )
-def hooks(ctx, all_files=False, diff=False):
-    """Run all pre-commit hooks."""
+def hooks(ctx, all_files=False, diff=False, sync=False):
+    """Run and manage pre-commit hooks."""
     cmds = ["pre-commit", "run"]
     if diff:
         cmds.append("--show-diff-on-failure")
@@ -89,6 +90,11 @@ def hooks(ctx, all_files=False, diff=False):
         cmds.extend(["--from-ref", "origin/HEAD", "--to-ref", "HEAD"])
 
     ctx.run(" ".join(cmds))
+
+    if sync:
+        print("  Re-installing hooks ...")
+        ctx.run(" ".join(["pre-commit", "uninstall"]), echo=True)
+        ctx.run(" ".join(["pre-commit", "install"]), echo=True)
 
 
 @invoke.task
