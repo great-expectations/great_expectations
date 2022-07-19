@@ -2,6 +2,7 @@ import importlib
 import itertools
 import json
 from collections.abc import Iterable
+from typing import Any, Dict, List, Union
 
 from great_expectations.marshmallow__shade import ValidationError
 
@@ -15,13 +16,13 @@ class GreatExpectationsError(Exception):
 class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
     def __init__(self, message, validation_error=None) -> None:
         self.message = message
-        self.messages = None
+        self.messages: Union[List[str], List[Any], Dict] = []
         if validation_error is not None:
             self.messages = validation_error.messages
 
     def __str__(self) -> str:
         if self.message is None:
-            return self.messages
+            return str(self.messages)
         return self.message
 
 
