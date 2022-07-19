@@ -3,31 +3,21 @@ This is a template for creating custom ColumnMapExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
-
-import json
-from ast import Str
+from typing import Any
 
 import dataprofiler as dp
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-
-from typing import Any
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
 # This class defines a Metric to support your Expectation.
@@ -78,7 +68,8 @@ class ColumnValuesLessThanOrEqualToProfileMax(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeEqualToOrLessThanProfileMax(ColumnMapExpectation):
     """
-    This function builds upon the custom column map expectations of Great Expectations. This function asks a yes/no question of each row in the user-specified column; namely, is the value less than or equal to the maximum value of the respective column within the provided profile report generated from the DataProfiler.
+    This function builds upon the custom column map expectations of Great Expectations. This function asks a yes/no question of each row in the user-specified column;
+    namely, is the value less than or equal to the maximum value of the respective column within the provided profile report generated from the DataProfiler.
 
     Args:
         column(str): The column that you want to check.
@@ -109,8 +100,10 @@ class ExpectColumnValuesToBeEqualToOrLessThanProfileMax(ColumnMapExpectation):
 
     df = pd.DataFrame(data, columns=cols)
 
-    profileObj = dp.Profiler(df)
-    profileReport = profileObj.report(report_options={"output_format": "compact"})
+    profiler_opts = dp.ProfilerOptions()
+    profiler_opts.structured_options.multiprocess.is_enabled = False
+    profileObj = dp.Profiler(df, options=profiler_opts)
+    profileReport = profileObj.report(report_options={"output_format": "serializable"})
     profileReport["global_stats"]["profile_schema"] = dict(
         profileReport["global_stats"]["profile_schema"]
     )
