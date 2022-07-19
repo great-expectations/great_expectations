@@ -1,2 +1,2 @@
-snowflake-connector-python
+snowflake-connector-python>=2.5.0
 snowflake-sqlalchemy>=1.2.3
