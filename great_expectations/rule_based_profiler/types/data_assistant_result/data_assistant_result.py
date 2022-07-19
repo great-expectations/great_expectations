@@ -7,6 +7,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
 
 import altair as alt
+import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 from IPython.display import HTML, display
@@ -542,35 +543,83 @@ class DataAssistantResult(SerializableDictDot):
             charts=charts, theme=altair_theme
         )
 
-        display_chart: alt.Chart = (
-            DataAssistantResult._combine_themed_charts_into_single_display_chart(
-                themed_charts=themed_charts
-            )
+        chart_titles: List[str] = DataAssistantResult._get_chart_titles(
+            charts=themed_charts
         )
 
-        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+        display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {" ": None}
+        for idx in range(len(chart_titles)):
+            display_chart_dict[chart_titles[idx]] = themed_charts[idx]
+
         dropdown_title_color: str = altair_theme["legend"]["titleColor"]
         dropdown_title_font: str = altair_theme["font"]
-        dropdown_css: str = f"""
+        dropdown_title_font_size: str = altair_theme["axis"]["titleFontSize"]
+        dropdown_text_color: str = altair_theme["axis"]["labelColor"]
+
+        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+        altair_dropdown_css: str = f"""
             <style>
             span.vega-bind-name {{
                 color: {dropdown_title_color};
-                font-family: "{dropdown_title_font}";
+                font-family: {dropdown_title_font};
+                font-size: {dropdown_title_font_size}px;
                 font-weight: bold;
             }}
             form.vega-bindings {{
-              position: absolute;
-              left: 75px;
-              top: 30px;
+                font-family: {dropdown_title_font};
+                font-size: {dropdown_title_font_size}px;
+                position: absolute;
+                left: 75px;
+                top: 30px;
             }}
             </style>
         """
-        display(HTML(dropdown_css))
+        display(HTML(altair_dropdown_css))
 
         # max rows for Altair charts is set to 5,000 without this
         alt.data_transformers.disable_max_rows()
 
-        display_chart.display()
+        ipywidgets_dropdown_css: str = f"""
+            <style>
+            .widget-inline-hbox .widget-label {{
+                color: {dropdown_title_color};
+                font-family: {dropdown_title_font};
+                font-size: {dropdown_title_font_size}px;
+                font-weight: bold;
+            }}
+            .widget-dropdown > select {{
+                padding-right: 21px;
+                padding-left: 3px;
+                color: {dropdown_text_color};
+                font-family: {dropdown_title_font};
+                font-size: {dropdown_title_font_size}px;
+                line-height: {dropdown_title_font_size}px;
+                background-size: 20px;
+                border-radius: 5px;
+            }}
+            </style>
+        """
+        display(HTML(ipywidgets_dropdown_css))
+
+        dropdown_selection: widgets.Dropdown = widgets.Dropdown(
+            options=chart_titles,
+            description="Select Plot: ",
+            style={"description_width": "initial"},
+            layout={"width": "max-content", "margin": "0px"},
+        )
+
+        widgets.interact(
+            DataAssistantResult._display_chart_from_dict,
+            display_chart_dict=widgets.fixed(display_chart_dict),
+            chart_title=dropdown_selection,
+        )
+
+    @staticmethod
+    def _display_chart_from_dict(
+        display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]],
+        chart_title: str,
+    ) -> None:
+        display_chart_dict[chart_title].display()
 
     @staticmethod
     def _get_chart_titles(charts: List[alt.Chart]) -> List[str]:
@@ -596,41 +645,6 @@ class DataAssistantResult(SerializableDictDot):
                 )
 
         return chart_titles
-
-    @staticmethod
-    def _combine_themed_charts_into_single_display_chart(
-        themed_charts: List[alt.Chart],
-    ) -> alt.LayerChart:
-        domain_name: str = "chart"
-
-        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
-            name=domain_name,
-            alt_type=AltairDataTypes.NOMINAL.value,
-        )
-
-        chart_titles: List[str] = DataAssistantResult._get_chart_titles(
-            charts=themed_charts
-        )
-        dropdown_options: List[str] = [" "] + sorted(chart_titles)
-        input_dropdown: alt.binding_select = alt.binding_select(
-            options=dropdown_options, name="Select Chart: "
-        )
-        selection: alt.selection_single = alt.selection_single(
-            empty="none",
-            bind=input_dropdown,
-            fields=[domain_name],
-        )
-
-        df: pd.DataFrame = pd.DataFrame(
-            data=list(zip(chart_titles, themed_charts)),
-            columns=["chart_title", domain_name],
-        )
-
-        display_chart: alt.Chart = alt.Chart(data=df, title=None).add_selection(
-            selection
-        )
-
-        return display_chart
 
     @staticmethod
     def _apply_theme(
