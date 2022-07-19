@@ -2,6 +2,7 @@ import copy
 import datetime
 import json
 import os
+import warnings
 from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass, field
 from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
@@ -514,6 +515,7 @@ class DataAssistantResult(SerializableDictDot):
         return_charts.extend(column_domain_return_charts)
 
         self._display(charts=display_charts, theme=theme)
+        warnings.resetwarnings()
 
         return_charts = self._apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
@@ -608,6 +610,14 @@ class DataAssistantResult(SerializableDictDot):
             layout={"width": "max-content", "margin": "0px"},
         )
 
+        # As of 19 July, 2022 there is a DeprecationWarning due to the latest ipywidgets' interaction with
+        # ipykernel versions > 6.0.0. Rather than add a version constraint to ipykernel, we suppress
+        # DeprecationWarnings produced by module ipywidgets.widgets.widget_output
+        warnings.filterwarnings(
+            action="ignore",
+            category=DeprecationWarning,
+            module="ipywidgets.widgets.widget_output",
+        )
         widgets.interact(
             DataAssistantResult._display_chart_from_dict,
             display_chart_dict=widgets.fixed(display_chart_dict),
