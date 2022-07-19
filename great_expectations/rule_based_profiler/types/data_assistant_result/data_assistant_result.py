@@ -515,7 +515,6 @@ class DataAssistantResult(SerializableDictDot):
         return_charts.extend(column_domain_return_charts)
 
         self._display(charts=display_charts, theme=theme)
-        warnings.resetwarnings()
 
         return_charts = self._apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
