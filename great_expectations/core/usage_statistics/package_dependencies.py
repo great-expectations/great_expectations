@@ -78,6 +78,7 @@ class GEDependencies:
             "google-cloud-secret-manager",
             "google-cloud-storage",
             "ipywidgets",
+            "invoke",
             "isort",
             "mistune",
             "mock-alchemy",
@@ -115,6 +116,7 @@ class GEDependencies:
         # requirements-dev-contrib.txt:
         "black",
         "flake8",
+        "invoke",
         "isort",
         "pre-commit",
         "pytest-cov",
