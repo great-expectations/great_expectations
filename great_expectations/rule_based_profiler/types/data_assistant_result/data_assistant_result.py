@@ -648,12 +648,12 @@ class DataAssistantResult(SerializableDictDot):
                     except AttributeError:
                         continue
 
-            if chart_title is not None:
-                chart_titles.append(chart_title)
-            else:
+            if chart_title is None:
                 raise ge_exceptions.DataAssistantResultExecutionError(
                     "All DataAssistantResult charts must have a title."
                 )
+
+            chart_titles.append(chart_title)
 
         return chart_titles
 
