@@ -1397,76 +1397,76 @@ def test_GeCloudStoreBackend():
             },
         )
 
-        # test .get
-        with patch("requests.get", autospec=True) as mock_get:
-            my_store_backend = GeCloudStoreBackend(
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type=ge_cloud_resource_type,
+    # test .get
+    with patch("requests.get", autospec=True) as mock_get:
+        my_store_backend = GeCloudStoreBackend(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_credentials=ge_cloud_credentials,
+            ge_cloud_resource_type=ge_cloud_resource_type,
+        )
+        my_store_backend.get(
+            (
+                "contract",
+                "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             )
-            my_store_backend.get(
-                (
-                    "contract",
-                    "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                )
-            )
-            mock_get.assert_called_with(
-                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
-                "-4bdd-8a42-3c35cce574c6",
-                headers={
-                    "Content-Type": "application/vnd.api+json",
-                    "Authorization": "Bearer 1234",
-                },
-            )
+        )
+        mock_get.assert_called_with(
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+            "-4bdd-8a42-3c35cce574c6",
+            headers={
+                "Content-Type": "application/vnd.api+json",
+                "Authorization": "Bearer 1234",
+            },
+        )
 
-        # test .list_keys
-        with patch("requests.get", autospec=True) as mock_get:
-            my_store_backend = GeCloudStoreBackend(
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type=ge_cloud_resource_type,
-            )
-            my_store_backend.list_keys()
-            mock_get.assert_called_with(
-                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
-                headers={
-                    "Content-Type": "application/vnd.api+json",
-                    "Authorization": "Bearer 1234",
-                },
-            )
+    # test .list_keys
+    with patch("requests.get", autospec=True) as mock_get:
+        my_store_backend = GeCloudStoreBackend(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_credentials=ge_cloud_credentials,
+            ge_cloud_resource_type=ge_cloud_resource_type,
+        )
+        my_store_backend.list_keys()
+        mock_get.assert_called_with(
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
+            headers={
+                "Content-Type": "application/vnd.api+json",
+                "Authorization": "Bearer 1234",
+            },
+        )
 
-        # test .remove_key
-        with patch("requests.delete", autospec=True) as mock_delete:
-            mock_response = mock_delete.return_value
-            mock_response.status_code = 200
+    # test .remove_key
+    with patch("requests.delete", autospec=True) as mock_delete:
+        mock_response = mock_delete.return_value
+        mock_response.status_code = 200
 
-            my_store_backend = GeCloudStoreBackend(
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type=ge_cloud_resource_type,
+        my_store_backend = GeCloudStoreBackend(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_credentials=ge_cloud_credentials,
+            ge_cloud_resource_type=ge_cloud_resource_type,
+        )
+        my_store_backend.remove_key(
+            (
+                "contract",
+                "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             )
-            my_store_backend.remove_key(
-                (
-                    "contract",
-                    "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                )
-            )
-            mock_delete.assert_called_with(
-                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
-                "-4bdd"
-                "-8a42-3c35cce574c6",
-                json={
-                    "data": {
-                        "type": "contract",
-                        "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                        "attributes": {"deleted": True},
-                    }
-                },
-                headers={
-                    "Content-Type": "application/vnd.api+json",
-                    "Authorization": "Bearer 1234",
-                },
-            )
+        )
+        mock_delete.assert_called_with(
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+            "-4bdd"
+            "-8a42-3c35cce574c6",
+            json={
+                "data": {
+                    "type": "contract",
+                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "attributes": {"deleted": True},
+                }
+            },
+            headers={
+                "Content-Type": "application/vnd.api+json",
+                "Authorization": "Bearer 1234",
+            },
+        )
 
     # test .set
     with patch("requests.post", autospec=True) as mock_post:
@@ -1493,76 +1493,76 @@ def test_GeCloudStoreBackend():
             },
         )
 
-        # test .get
-        with patch("requests.get", autospec=True) as mock_get:
-            my_store_backend = GeCloudStoreBackend(
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
+    # test .get
+    with patch("requests.get", autospec=True) as mock_get:
+        my_store_backend = GeCloudStoreBackend(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_credentials=ge_cloud_credentials,
+            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
+        )
+        my_store_backend.get(
+            (
+                "rendered_data_doc",
+                "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
             )
-            my_store_backend.get(
-                (
-                    "rendered_data_doc",
-                    "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                )
-            )
-            mock_get.assert_called_with(
-                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
-                "-4bdd-8a42-3c35cce574c6",
-                headers={
-                    "Content-Type": "application/vnd.api+json",
-                    "Authorization": "Bearer 1234",
-                },
-            )
+        )
+        mock_get.assert_called_with(
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
+            "-4bdd-8a42-3c35cce574c6",
+            headers={
+                "Content-Type": "application/vnd.api+json",
+                "Authorization": "Bearer 1234",
+            },
+        )
 
-        # test .list_keys
-        with patch("requests.get", autospec=True) as mock_get:
-            my_store_backend = GeCloudStoreBackend(
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
-            )
-            my_store_backend.list_keys()
-            mock_get.assert_called_with(
-                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
-                headers={
-                    "Content-Type": "application/vnd.api+json",
-                    "Authorization": "Bearer 1234",
-                },
-            )
+    # test .list_keys
+    with patch("requests.get", autospec=True) as mock_get:
+        my_store_backend = GeCloudStoreBackend(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_credentials=ge_cloud_credentials,
+            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
+        )
+        my_store_backend.list_keys()
+        mock_get.assert_called_with(
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
+            headers={
+                "Content-Type": "application/vnd.api+json",
+                "Authorization": "Bearer 1234",
+            },
+        )
 
-        # test .remove_key
-        with patch("requests.delete", autospec=True) as mock_delete:
-            mock_response = mock_delete.return_value
-            mock_response.status_code = 200
+    # test .remove_key
+    with patch("requests.delete", autospec=True) as mock_delete:
+        mock_response = mock_delete.return_value
+        mock_response.status_code = 200
 
-            my_store_backend = GeCloudStoreBackend(
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
+        my_store_backend = GeCloudStoreBackend(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_credentials=ge_cloud_credentials,
+            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
+        )
+        my_store_backend.remove_key(
+            (
+                "rendered_data_doc",
+                "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
             )
-            my_store_backend.remove_key(
-                (
-                    "rendered_data_doc",
-                    "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                )
-            )
-            mock_delete.assert_called_with(
-                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
-                "-4bdd"
-                "-8a42-3c35cce574c6",
-                json={
-                    "data": {
-                        "type": "rendered_data_doc",
-                        "id": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                        "attributes": {"deleted": True},
-                    }
-                },
-                headers={
-                    "Content-Type": "application/vnd.api+json",
-                    "Authorization": "Bearer 1234",
-                },
-            )
+        )
+        mock_delete.assert_called_with(
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
+            "-4bdd"
+            "-8a42-3c35cce574c6",
+            json={
+                "data": {
+                    "type": "rendered_data_doc",
+                    "id": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "attributes": {"deleted": True},
+                }
+            },
+            headers={
+                "Content-Type": "application/vnd.api+json",
+                "Authorization": "Bearer 1234",
+            },
+        )
 
 
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
