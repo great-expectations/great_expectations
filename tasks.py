@@ -14,12 +14,14 @@ from scripts import check_type_hint_coverage
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
+_PATH_HELP_DESC = "Target path. (Default: .)"
 
 
 @invoke.task(
     help={
         "check": _CHECK_HELP_DESC,
         "exclude": _EXCLUDE_HELP_DESC,
+        "path": _PATH_HELP_DESC,
     }
 )
 def sort(ctx, path=".", check=False, exclude=None):
@@ -36,6 +38,7 @@ def sort(ctx, path=".", check=False, exclude=None):
     help={
         "check": _CHECK_HELP_DESC,
         "exclude": _EXCLUDE_HELP_DESC,
+        "path": _PATH_HELP_DESC,
         "sort": "Disable import sorting. Runs by default.",
     }
 )
@@ -61,7 +64,7 @@ def lint(ctx, path="great_expectations/core"):
     ctx.run(" ".join(cmds))
 
 
-@invoke.task
+@invoke.task(help={"path": _PATH_HELP_DESC})
 def upgrade(ctx, path="."):
     """Run code syntax upgrades."""
     cmds = ["pyupgrade", path, "--py3-plus"]
