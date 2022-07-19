@@ -25,6 +25,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
@@ -41,7 +42,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.registry import (
     get_expectation_impl,

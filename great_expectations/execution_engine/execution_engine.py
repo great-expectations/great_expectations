@@ -9,6 +9,7 @@ import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
@@ -50,13 +51,6 @@ class MetricFunctionTypes(Enum):
     MAP_VALUES = "value"  # "map_values"
     WINDOW_VALUES = "value"  # "window_values"
     AGGREGATE_VALUE = "value"  # "aggregate_value"
-
-
-class MetricDomainTypes(Enum):
-    TABLE = "table"
-    COLUMN = "column"
-    COLUMN_PAIR = "column_pair"
-    MULTICOLUMN = "multicolumn"
 
 
 class DataConnectorStorageDataReferenceResolver:
