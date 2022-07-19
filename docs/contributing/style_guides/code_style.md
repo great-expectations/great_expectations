@@ -29,7 +29,7 @@ $ invoke --list                                                                 
 Available tasks:
 
   fmt             Run code formatter.
-  hooks           Run all pre-commit hooks.
+  hooks           Run and manage pre-commit hooks.
   lint            Run code linter
   sort            Sort module imports.
   type-coverage   Check total type-hint coverage compared to `develop`.
