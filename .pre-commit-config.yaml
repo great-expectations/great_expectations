@@ -42,5 +42,8 @@ ci:
     autoupdate_branch: 'develop'
     autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
     autoupdate_schedule: monthly
+    # skip flake8 enforcement with pre-commit CI as it is enforced elsewhere
+    # flake8 hook also doesn't have an options to auto-fix
+    # pre-commit hooks should either have mechanisms for auto-fixing or should be simple to do manually
     skip: [flake8]
     submodules: false
