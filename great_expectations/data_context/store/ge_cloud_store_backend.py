@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import requests
 
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.data_context.types.base import GeCloudConfig
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
@@ -71,7 +72,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def __init__(
         self,
-        ge_cloud_credentials: Dict,
+        ge_cloud_credentials: GeCloudConfig,
         ge_cloud_base_url: str = "https://app.greatexpectations.io/",
         ge_cloud_resource_type: Optional[GeCloudRESTResource] = None,
         ge_cloud_resource_name: Optional[str] = None,
