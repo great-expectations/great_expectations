@@ -1,7 +1,5 @@
-import enum
 import logging
 import os
-from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -13,9 +11,6 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_engine.sqlalchemy_batch_data import (
-    SqlAlchemyBatchData,
-)
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
@@ -32,9 +27,6 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
-
-# import great_expectations.execution_engine.sqlalchemy_batch_data as sqlsdf
-
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
