@@ -38,6 +38,7 @@ class GEDependencies:
             "cryptography",
             "importlib-metadata",
             "Ipython",
+            "ipywidgets",
             "jinja2",
             "jsonpatch",
             "jsonschema",
@@ -125,6 +126,7 @@ class GEDependencies:
         # requirements-dev-lite.txt:
         "flask",
         "freezegun",
+        "ipywidgets",
         "mistune",
         "mock-alchemy",
         "moto",
