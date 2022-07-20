@@ -220,12 +220,15 @@ class UserConfigurableProfiler:
 
         """
         expectation_suite: ExpectationSuite
-        if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
+        if (
+            len(self.profile_dataset.get_expectation_suite().expectations) > 0  # type: ignore
+        ):
+            # Only `Validator`` has `get_expectation_suite()`
             # noinspection PyProtectedMember
             suite_name: str = (
-                self.profile_dataset._expectation_suite.expectation_suite_name
+                self.profile_dataset._expectation_suite.expectation_suite_name  # type: ignore
             )
-            self.profile_dataset._expectation_suite = ExpectationSuite(
+            self.profile_dataset._expectation_suite = ExpectationSuite(  # type: ignore
                 expectation_suite_name=suite_name, data_context=None
             )
 
