@@ -147,4 +147,4 @@ def test_instantiation_with_unknown_dialect(sqlite_view_engine):
         table_name="test_table",
     )
 
-    assert batch_data.dialect == GESqlDialect.UNSUPPORTED
+    assert batch_data.dialect == GESqlDialect.OTHER

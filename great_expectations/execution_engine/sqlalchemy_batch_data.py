@@ -113,7 +113,7 @@ class SqlAlchemyBatchData(BatchData):
         try:
             dialect: GESqlDialect = GESqlDialect(dialect_name)
         except ValueError:
-            dialect: GESqlDialect = GESqlDialect.UNSUPPORTED
+            dialect: GESqlDialect = GESqlDialect.OTHER
 
         self._dialect = dialect
 
