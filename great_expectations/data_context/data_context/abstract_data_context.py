@@ -1569,6 +1569,14 @@ class AbstractDataContext(ABC):
         )
 
         if save_changes:
+            #
+            #
+            #
+            # TODO: AJB 20220719 Here is where we return the GeCloudResourceRef and pull out the ID to stick into the datasource config
+            #  Pull out id if exists then do update else post
+            #  How to handle case of saving with name - duplicates? Check in cache?
+            #  Desired behavior?
+
             self._datasource_store.set_by_name(
                 datasource_name=name, datasource_config=datasource_config
             )

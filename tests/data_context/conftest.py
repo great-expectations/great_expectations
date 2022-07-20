@@ -5,7 +5,10 @@ from unittest.mock import PropertyMock, patch
 import pytest
 
 import great_expectations as ge
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    DatasourceConfig,
+)
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -585,3 +588,74 @@ def data_context_with_incomplete_global_config_in_dot_dir_only(
             str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
         )
         yield
+
+
+@pytest.fixture
+def datasource_name() -> str:
+    return "my_first_datasource"
+
+
+@pytest.fixture
+def datasource_store_name() -> str:
+    return "datasource_store"
+
+
+@pytest.fixture
+def request_headers(ge_cloud_access_token) -> dict:
+    return {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+    }
+
+
+@pytest.fixture
+def datasource_config() -> DatasourceConfig:
+    return DatasourceConfig(
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        data_connectors={
+            "tripdata_monthly_configured": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "base_directory": "/path/to/trip_data",
+                "assets": {
+                    "yellow": {
+                        "class_name": "Asset",
+                        "module_name": "great_expectations.datasource.data_connector.asset",
+                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                        "group_names": ["year", "month"],
+                    }
+                },
+            }
+        },
+    )
+
+
+@pytest.fixture
+def datasource_config_with_id() -> DatasourceConfig:
+    return DatasourceConfig(
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        id="foobarbaz",
+        data_connectors={
+            "tripdata_monthly_configured": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "base_directory": "/path/to/trip_data",
+                "assets": {
+                    "yellow": {
+                        "class_name": "Asset",
+                        "module_name": "great_expectations.datasource.data_connector.asset",
+                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                        "group_names": ["year", "month"],
+                    }
+                },
+            }
+        },
+    )

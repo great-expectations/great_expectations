@@ -16,6 +16,7 @@ from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
+    GeCloudStoreBackend,
 )
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -366,6 +367,43 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
         with open(config_filepath, "w") as outfile:
             self.config.to_yaml(outfile)
+
+    def _init_datasource_store(self) -> None:
+        """
+
+        Returns:
+
+        """
+        if self.ge_cloud_mode:
+            from great_expectations.data_context.store.datasource_store import (
+                DatasourceStore,
+            )
+
+            raise NotImplementedError
+            # TODO: AJB 20220719 make this instantiate a cloud backed data context when necessary & coordinate between CloudDataContext and BaseDataContext
+            # self.ge_cloud_config
+
+            store_name: str = (
+                "datasource_store"  # Never explicitly referenced but adheres
+            )
+            # to the convention set by other internal Stores
+            store_backend: dict = {"class_name": "GeCloudStoreBackend"}
+            runtime_environment: dict = {
+                "root_directory": self.root_directory,
+                "data_context": self,
+                # By passing this value in our runtime_environment,
+                # we ensure that the same exact context (memory address and all) is supplied to the Store backend
+            }
+
+            datasource_store: DatasourceStore = DatasourceStore(
+                store_name=store_name,
+                store_backend=store_backend,
+                runtime_environment=runtime_environment,
+            )
+            self._datasource_store = datasource_store
+
+        else:
+            super()._init_datasource_store()
 
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -1277,9 +1315,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._datasource_store.update_by_name(
                 datasource_name=datasource_name, datasource_config=datasource_config
             )
-        else:
-            self.config.datasources[datasource_name] = datasource_config
-            self._cached_datasources[datasource_name] = datasource_config
+        self.config.datasources[datasource_name] = datasource_config
+        self._cached_datasources[datasource_name] = datasource_config
 
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
@@ -2788,3 +2825,69 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ]
 
         return instantiated_class, usage_stats_event_payload
+
+    def _instantiate_datasource_from_config_and_update_project_config(
+        self,
+        name: str,
+        config: dict,
+        initialize: bool = True,
+        save_changes: bool = False,
+    ) -> Optional[Datasource]:
+        """
+
+        Args:
+            name:
+            config:
+            initialize:
+            save_changes:
+
+        Returns:
+
+        """
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+            CommentedMap(**config)
+        )
+
+        if save_changes:
+            #
+            #
+            #
+            # TODO: AJB 20220719 Here is where we return the GeCloudResourceRef and pull out the ID to stick into the datasource config
+            #  Pull out id if exists then do update else post
+            #  How to handle case of saving with name - duplicates? Check in cache?
+            #  Desired behavior?
+
+            if isinstance(self._datasource_store.store_backend, GeCloudStoreBackend):
+                # if self.ge_cloud_mode: # TODO: is using ge_cloud_mode better than inferring by backend type?
+                # TODO: AJB 20220719 where does the name fit into the config? Can it be an optional part of config?
+                datasource_config["name"] = name
+                self._datasource_store.create(datasource_config)
+            else:
+                self._datasource_store.set_by_name(
+                    datasource_name=name, datasource_config=datasource_config
+                )
+        self.config.datasources[name] = datasource_config
+
+        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
+        substitutions: dict = self._determine_substitutions()
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        substituted_config: dict = substitute_all_config_variables(
+            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        )
+
+        datasource: Optional[Datasource] = None
+        if initialize:
+            try:
+                datasource: Datasource = self._instantiate_datasource_from_config(
+                    name=name, config=substituted_config
+                )
+                self._cached_datasources[name] = datasource
+            except ge_exceptions.DatasourceInitializationError as e:
+                # Do not keep configuration that could not be instantiated.
+                if save_changes:
+                    self._datasource_store.delete_by_name(datasource_name=name)
+                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
+                self.config.datasources.pop(name, None)
+                raise e
+
+        return datasource
