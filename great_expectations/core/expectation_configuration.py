@@ -1403,7 +1403,7 @@ class ExpectationConfiguration(SerializableDictDot):
             execution_engine=execution_engine,
         )
 
-    def get_domain_type(self) -> Optional[MetricDomainTypes]:
+    def get_domain_type(self) -> MetricDomainTypes:
         """Return "domain_type" of this expectation."""
         if self.expectation_type.startswith("expect_table_"):
             return MetricDomainTypes.TABLE
@@ -1417,7 +1417,9 @@ class ExpectationConfiguration(SerializableDictDot):
         if "column_list" in self.kwargs:
             return MetricDomainTypes.MULTICOLUMN
 
-        return None
+        raise ValueError(
+            'Unable to determine "domain_type" of this "ExpectationConfiguration" object from "kwargs" and heuristics.'
+        )
 
 
 class ExpectationConfigurationSchema(Schema):
