@@ -125,7 +125,6 @@ class GEDependencies:
         # requirements-dev-lite.txt:
         "flask",
         "freezegun",
-        "ipywidgets",
         "mistune",
         "mock-alchemy",
         "moto",
