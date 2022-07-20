@@ -12,6 +12,7 @@ from great_expectations.core.evaluation_parameters import (
     build_evaluation_parameters,
     find_evaluation_parameter_dependencies,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -1401,6 +1402,22 @@ class ExpectationConfiguration(SerializableDictDot):
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
         )
+
+    def get_domain_type(self) -> Optional[MetricDomainTypes]:
+        """Return "domain_type" of this expectation."""
+        if self.expectation_type.startswith("expect_table_"):
+            return MetricDomainTypes.TABLE
+
+        if "column" in self.kwargs:
+            return MetricDomainTypes.COLUMN
+
+        if "column_A" in self.kwargs and "column_B" in self.kwargs:
+            return MetricDomainTypes.COLUMN_PAIR
+
+        if "column_list" in self.kwargs:
+            return MetricDomainTypes.MULTICOLUMN
+
+        return None
 
 
 class ExpectationConfigurationSchema(Schema):
