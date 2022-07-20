@@ -66,7 +66,7 @@ class CloudDataContext(AbstractDataContext):
         store_backend: dict = {"class_name": "GeCloudStoreBackend"}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.ge_cloud_config,
+            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),
             "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
         }
 
