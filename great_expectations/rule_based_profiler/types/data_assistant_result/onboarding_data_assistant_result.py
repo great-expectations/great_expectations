@@ -15,6 +15,7 @@ class OnboardingDataAssistantResult(DataAssistantResult):
         "column.mean": "expect_column_mean_to_be_between",
         "column.median": "expect_column_median_to_be_between",
         "column.standard_deviation": "expect_column_stdev_to_be_between",
+        ("column.min", "column.max"): "expect_column_values_to_be_between",
     }
 
     # A mapping is defined for the Altair data type associated with each metric

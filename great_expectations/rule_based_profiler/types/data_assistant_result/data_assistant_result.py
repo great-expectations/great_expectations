@@ -12,6 +12,7 @@ import pandas as pd
 from IPython.display import HTML, display
 
 from great_expectations import __version__ as ge_version
+from great_expectations import exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -107,6 +108,7 @@ class DataAssistantResult(SerializableDictDot):
         "column.mean": "expect_column_mean_to_be_between",
         "column.median": "expect_column_median_to_be_between",
         "column.standard_deviation": "expect_column_stdev_to_be_between",
+        ("column.min", "column.max"): "expect_column_values_to_be_between",
     }
 
     # A mapping is defined for the Altair data type associated with each metric
@@ -2828,11 +2830,20 @@ class DataAssistantResult(SerializableDictDot):
         sequential: bool,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
         metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
-        column_based_metrics: List[str] = [
-            metric
-            for metric in metric_expectation_map.keys()
-            if metric.startswith("column")
-        ]
+
+        column_based_metrics: List[str] = []
+        for metrics in metric_expectation_map.keys():
+            if isinstance(metrics, str):
+                if metrics.startswith("column"):
+                    column_based_metrics.append(metrics)
+            elif isinstance(metrics, tuple):
+                for metric in metrics:
+                    if isinstance(metric, str) and metric.startswith("column"):
+                        column_based_metrics.append(metric)
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"METRIC_EXPECTATION_MAP keys must be of type str or tuple, but type {type(metrics)} was found."
+                )
 
         column_based_expectation_configurations_by_type: Dict[
             str, List[ExpectationConfiguration]
