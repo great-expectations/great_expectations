@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 
 from great_expectations.execution_engine.execution_engine import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
@@ -109,7 +108,13 @@ class SqlAlchemyBatchData(BatchData):
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
             )
 
-        dialect: GESqlDialect = GESqlDialect(engine.dialect.name.lower())
+        dialect_name: str = engine.dialect.name.lower()
+
+        try:
+            dialect: GESqlDialect = GESqlDialect(dialect_name)
+        except ValueError:
+            dialect: GESqlDialect = GESqlDialect.UNSUPPORTED
+
         if table_name:
             # Suggestion: pull this block out as its own _function
             if use_quoted_name:
@@ -201,9 +206,9 @@ class SqlAlchemyBatchData(BatchData):
         dialect_name: str = self.sql_engine_dialect.name.lower()
 
         try:
-            dialect: Union[GESqlDialect, str] = GESqlDialect(dialect_name)
+            dialect: GESqlDialect = GESqlDialect(dialect_name)
         except ValueError:
-            dialect: Union[GESqlDialect, str] = dialect_name
+            dialect: GESqlDialect = GESqlDialect.UNSUPPORTED
 
         if dialect == GESqlDialect.BIGQUERY:
             # BigQuery Table is created using with an expiration of 24 hours using Google's Data Definition Language
