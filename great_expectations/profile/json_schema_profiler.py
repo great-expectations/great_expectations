@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import jsonschema
 
@@ -218,7 +218,7 @@ class JsonSchemaProfiler(Profiler):
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/numeric.html#range"""
         object_types = self._get_object_types(details=details)
-        object_types = filter(
+        object_types = filter(  # type: ignore
             lambda object_type: object_type != JsonSchemaTypes.NULL.value, object_types
         )
         range_types = [JsonSchemaTypes.INTEGER.value, JsonSchemaTypes.NUMBER.value]
@@ -340,7 +340,7 @@ class JsonSchemaProfiler(Profiler):
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/null.html"""
-        object_types = self._get_object_types(details=details)
+        object_types: Union[list, set] = self._get_object_types(details=details)
         enum_list = self._get_enum_list(details=details)
         kwargs = {"column": key}
 

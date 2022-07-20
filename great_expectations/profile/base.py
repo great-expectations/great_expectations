@@ -147,8 +147,9 @@ class Profiler(metaclass=abc.ABCMeta):
     def __init__(self, configuration: Optional[dict] = None) -> None:
         self.configuration = configuration
 
-    def validate(self, item_to_validate: Any) -> None:
-        pass
+    def validate(self, item_to_validate: Any) -> bool:
+        # TODO: Re-evaluate on this behavior
+        return False
 
     def profile(
         self, item_to_profile: Any, suite_name: Optional[str] = None
