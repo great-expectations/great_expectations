@@ -2428,7 +2428,7 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        bobby_volume_data_assistant_result.batch_id_to_batch_identifier_display_name_map[
+        bobby_volume_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
             batch_id
         ]
         is not None
