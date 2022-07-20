@@ -1347,6 +1347,7 @@ class AbstractDataContext(ABC):
                     "manually_initialize_store_backend_id": self.variables.anonymous_usage_statistics.data_context_id
                 }
             )
+
         # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
         if (
             store_name not in [store["name"] for store in self.list_active_stores()]
