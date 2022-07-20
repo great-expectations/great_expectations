@@ -1473,7 +1473,14 @@ class AbstractDataContext(ABC):
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
-        for datasource_name in self._datasource_store.list_keys():
+        datasource_keys: List[
+            Union[str, Tuple[str, str]]
+        ] = self._datasource_store.list_keys()
+
+        if datasource_keys and isinstance(datasource_keys[0], tuple):
+            datasource_keys = [key[1] for key in datasource_keys]
+
+        for datasource_name in datasource_keys:
             try:
                 datasource: Optional[
                     Union[LegacyDatasource, BaseDatasource]

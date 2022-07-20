@@ -3,6 +3,7 @@ from typing import Any, Dict, Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -45,6 +46,12 @@ class EphemeralDataContext(AbstractDataContext):
         self._variables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 
+    def _init_variables(self) -> EphemeralDataContextVariables:
+        variables: EphemeralDataContextVariables = EphemeralDataContextVariables(
+            config=self._project_config,
+        )
+        return variables
+
     def _init_datasource_store(self) -> None:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
@@ -60,11 +67,10 @@ class EphemeralDataContext(AbstractDataContext):
         )
         self._datasource_store = datasource_store
 
-    def _init_variables(self) -> EphemeralDataContextVariables:
-        variables: EphemeralDataContextVariables = EphemeralDataContextVariables(
-            config=self._project_config,
-        )
-        return variables
+        for datasource_name, datasource_config in self.config.datasources.items():
+            self._datasource_store.set_by_name(
+                datasource_name=datasource_name, datasource_config=datasource_config
+            )
 
     def _save_project_config(self) -> None:
         """Since EphemeralDataContext does not have config as a file, display logging message instead"""
