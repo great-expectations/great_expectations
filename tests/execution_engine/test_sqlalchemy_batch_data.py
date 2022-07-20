@@ -137,6 +137,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     assert len(res) == 2
 
 
+@pytest.mark.unit
 def test_instantiation_with_unknown_dialect(sqlite_view_engine):
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
