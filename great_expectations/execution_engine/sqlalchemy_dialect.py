@@ -5,6 +5,10 @@ from typing import Any, List
 
 
 class GESqlDialect(enum.Enum):
+    """Contains sql dialects that have some level of support in Great Expectations.
+    Also contains an unsupported attribute if the dialect is not in the list.
+    """
+
     AWSATHENA = "awsathena"
     BIGQUERY = "bigquery"
     DREMIO = "dremio"
@@ -18,6 +22,7 @@ class GESqlDialect(enum.Enum):
     SQLITE = "sqlite"
     TERADATASQL = "teradatasql"
     TRINO = "trino"
+    UNSUPPORTED = "unsupported"
 
     @classmethod
     def _missing_(cls, value: Any) -> None:
@@ -30,9 +35,13 @@ class GESqlDialect(enum.Enum):
     @classmethod
     def get_all_dialect_names(cls) -> List[str]:
         """Get dialect names for all SQL dialects."""
-        return [dialect_name.value for dialect_name in cls]
+        return [
+            dialect_name.value
+            for dialect_name in cls
+            if dialect_name != GESqlDialect.UNSUPPORTED
+        ]
 
     @classmethod
     def get_all_dialects(cls) -> List[GESqlDialect]:
         """Get all dialects."""
-        return [dialect for dialect in cls]
+        return [dialect for dialect in cls if dialect != GESqlDialect.UNSUPPORTED]
