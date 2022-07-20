@@ -8,7 +8,6 @@ from urllib.parse import urljoin
 import requests
 
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.data_context.types.base import GeCloudConfig
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
