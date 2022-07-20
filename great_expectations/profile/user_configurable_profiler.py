@@ -107,7 +107,7 @@ class UserConfigurableProfiler:
                         one of "one", "two", "very_few" or "few". The default value is "many". For the purposes of
                         comparing whether two tables are identical, it might make the most sense to set this to "unique"
         """
-        self.column_info = {}
+        self.column_info: Dict = {}
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
 
@@ -647,8 +647,8 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 num_unique, pct_unique
             )
         )
-
-        return cardinality.name
+        # Return type mypy issue can be fixed by adding a str mixin to `OrderedProfilerCardinality`
+        return cardinality.name  # type: ignore
 
     def _add_semantic_types_by_column_from_config_to_column_info(self, column_name):
         """
@@ -1195,7 +1195,7 @@ nan: {pct_unique}
                 )
 
         if "expect_column_values_to_be_in_type_list" not in self.excluded_expectations:
-            col_type = self.column_info.get(column).get("type")
+            col_type = self.column_info.get(column, {}).get("type")
             if col_type != "UNKNOWN":
                 type_list = profiler_data_types_with_mapping.get(col_type)
                 profile_dataset.expect_column_values_to_be_in_type_list(
