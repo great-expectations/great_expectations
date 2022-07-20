@@ -1477,6 +1477,7 @@ class AbstractDataContext(ABC):
             Union[str, Tuple[str, str]]
         ] = self._datasource_store.list_keys()
 
+        # In the case that our Store/StoreBackend generates tuple keys, we want to extract the datasource name
         if datasource_keys and isinstance(datasource_keys[0], tuple):
             datasource_keys = [key[1] for key in datasource_keys]
 
