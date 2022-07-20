@@ -177,7 +177,7 @@ class VolumeDataAssistant(DataAssistant):
                 include_semantic_types=None,
                 exclude_semantic_types=None,
                 allowed_semantic_types_passthrough=None,
-                cardinality_limit_mode=CardinalityLimitMode.REL_100,
+                cardinality_limit_mode=CardinalityLimitMode.FEW,
                 max_unique_values=None,
                 max_proportion_unique=None,
                 data_context=None,
