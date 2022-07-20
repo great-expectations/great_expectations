@@ -109,7 +109,13 @@ class SqlAlchemyBatchData(BatchData):
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
             )
 
-        dialect: GESqlDialect = GESqlDialect(engine.dialect.name.lower())
+        try:
+            dialect: Union[GESqlDialect, str] = GESqlDialect(
+                engine.dialect.name.lower()
+            )
+        except ValueError:
+            dialect: Union[GESqlDialect, str] = engine.dialect.name.lower()
+
         if table_name:
             # Suggestion: pull this block out as its own _function
             if use_quoted_name:
