@@ -19,9 +19,7 @@ RUN git clone --depth 1 --branch ${BRANCH} https://github.com/great-expectations
 WORKDIR /great_expectations
 
 FROM build_${SOURCE} AS dev
-RUN pip install --requirement requirements.txt --requirement requirements-dev.txt \
-    --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt \
-    --constraint constraints-dev.txt
+RUN pip install --requirement requirements.txt --requirement requirements-dev.txt --constraint constraints-dev.txt
 RUN pip install .
 CMD [ "python", "--version"]
 
