@@ -125,9 +125,9 @@ def file_data_context(
 
 
 @pytest.fixture
-def make_cloud_context(
+def cloud_data_context(
     tmp_path: pathlib.Path, data_context_config: DataContextConfig
-) -> Callable:
+) -> CloudDataContext:
     ge_cloud_config = GeCloudConfig(
         base_url="https://api.dev.greatexpectations.io",
         organization_id="0ccac18e-7631-4bdd-8a42-3c35cce574c6",
@@ -138,15 +138,12 @@ def make_cloud_context(
     project_path = str(project_path)
     context_root_dir = os.path.join(project_path, "great_expectations")
 
-    def _make_cloud_context() -> CloudDataContext:
-        cloud_data_context = CloudDataContext(
-            project_config=data_context_config,
-            ge_cloud_config=ge_cloud_config,
-            context_root_dir=context_root_dir,
-        )
-        return cloud_data_context
-
-    return _make_cloud_context
+    cloud_data_context = CloudDataContext(
+        project_config=data_context_config,
+        ge_cloud_config=ge_cloud_config,
+        context_root_dir=context_root_dir,
+    )
+    return cloud_data_context
 
 
 def stores() -> dict:
@@ -451,7 +448,7 @@ def test_data_context_variables_save_config(
 
         assert mock_put.call_count == 1
         mock_put.assert_called_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables/",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
             json={
                 "data": {
                     "type": "data_context_variables",
@@ -515,37 +512,11 @@ def test_file_data_context_variables_e2e(
 
 
 @pytest.mark.integration
-def test_cloud_data_context_variables_e2e(
-    monkeypatch,
-    make_cloud_context: Callable,
-    progress_bars: ProgressBarsConfig,
-    data_context_config,
+def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
+    cloud_data_context: CloudDataContext,
+    data_context_config: DataContextConfig,
 ) -> None:
-
-    cloud_data_context: CloudDataContext = make_cloud_context()
-
-    # Prepare updated progress bars to set and send over the wire
-    updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
-    updated_progress_bars.globally = False
-    updated_progress_bars.profilers = True
-
-    # # Prepare updated plugins directory to set and send over the wire (ensuring we hide the true value behind $VARS syntax)
-    # env_var_name: str = "MY_PLUGINS_DIRECTORY"
-    # value_associated_with_env_var: str = "foo/bar/baz"
-    # monkeypatch.setenv(env_var_name, value_associated_with_env_var)
-
-    # # Set attributes defined above
-    # cloud_data_context.variables.progress_bars = updated_progress_bars
-    # cloud_data_context.variables.plugins_directory = f"${env_var_name}"
-
-    breakpoint()
     cloud_data_context.variables.config = data_context_config
-    cloud_data_context.variables.save_config()
+    success = cloud_data_context.variables.save_config()
 
-    # Reinstantiate a CloudDataContext
-    cloud_data_context: CloudDataContext = make_cloud_context()
-
-    assert cloud_data_context.variables.progress_bars == updated_progress_bars
-    assert (
-        cloud_data_context.variables.plugins_directory == value_associated_with_env_var
-    )
+    assert success is True

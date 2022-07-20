@@ -100,12 +100,12 @@ class DataContextVariables(ABC):
         substituted_val: Any = substitute_all_config_variables(val, self.substitutions)
         return substituted_val
 
-    def save_config(self) -> None:
+    def save_config(self) -> Any:
         """
         Persist any changes made to variables utilizing the configured Store.
         """
         key: ConfigurationIdentifier = self.get_key()
-        self.store.set(key=key, value=self.config)
+        return self.store.set(key=key, value=self.config)
 
     @property
     def config_version(self) -> Optional[float]:
