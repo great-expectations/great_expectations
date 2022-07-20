@@ -117,18 +117,18 @@ def type_check(ctx, packages, install_types=False):
         # "checkpoint",  # 78
         # "cli",  # 237
         # "core",  # 237
-        "data_asset",  # 1
+        "data_asset",  # 0
         # "data_context",  # 228
         # "datasource",  # 98
-        "exceptions",  # 2
+        "exceptions",  # 0
         # "execution_engine",  # 111
         # "expectations",  # 453
-        "jupyter_ux",  # 4
+        "jupyter_ux",  # 1
         # "marshmallow__shade",  # 19
-        "profile",  # 9
+        "profile",  # 6
         # "render",  # 87
         # "rule_based_profiler",  # 469
-        "self_check",  # 10
+        "self_check",  # 0
         "types",  # 3
         # "validation_operators", # 47
         # "validator",  # 46
