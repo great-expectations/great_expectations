@@ -97,7 +97,7 @@ class DataAssistantResult(SerializableDictDot):
     DataAssistantResult is a "dataclass" object, designed to hold results of executing "DataAssistant.run()" method.
     Available properties are: "metrics_by_domain", "expectation_configurations", and configuration object
     ("RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
-    Use "batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
+    Use "_batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
     """
 
     # A mapping is defined for which metrics to plot and their associated expectations
@@ -130,7 +130,7 @@ class DataAssistantResult(SerializableDictDot):
     }
 
     ALLOWED_KEYS = {
-        "batch_id_to_batch_identifier_display_name_map",
+        "_batch_id_to_batch_identifier_display_name_map",
         "profiler_config",
         "profiler_execution_time",
         "rule_execution_time",
@@ -145,9 +145,9 @@ class DataAssistantResult(SerializableDictDot):
         "execution_time",
     }
 
-    batch_id_to_batch_identifier_display_name_map: Optional[
+    _batch_id_to_batch_identifier_display_name_map: Optional[
         Dict[str, Set[Tuple[str, Any]]]
-    ] = None
+    ] = field(default=None)
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
     profiler_execution_time: Optional[
         float
@@ -171,8 +171,8 @@ class DataAssistantResult(SerializableDictDot):
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         expectation_configuration: ExpectationConfiguration
         return {
-            "batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
-                data=self.batch_id_to_batch_identifier_display_name_map
+            "_batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
+                data=self._batch_id_to_batch_identifier_display_name_map
             ),
             "profiler_config": self.profiler_config.to_json_dict(),
             "profiler_execution_time": convert_to_json_serializable(
@@ -3335,7 +3335,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         batch_identifier_list: List[Set[Tuple[str, str]]] = [
-            self.batch_id_to_batch_identifier_display_name_map[batch_id]
+            self._batch_id_to_batch_identifier_display_name_map[batch_id]
             for batch_id in batch_ids
         ]
 
