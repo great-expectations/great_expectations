@@ -23,6 +23,7 @@ from great_expectations.data_context.templates import (
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
+    AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     GeCloudConfig,
     dataContextConfigSchema,
@@ -363,13 +364,45 @@ class DataContext(BaseDataContext):
             ge_cloud_config=ge_cloud_config,
         )
 
-        # save project config if data_context_id auto-generated or global config values applied
-        project_config_dict = dataContextConfigSchema.dump(project_config)
-        if (
-            project_config.anonymous_usage_statistics.explicit_id is False
-            or project_config_dict != dataContextConfigSchema.dump(self.config)
-        ):
+        # Save project config if data_context_id auto-generated
+        if self._check_for_usage_stats_sync(project_config):
             self._save_project_config()
+
+    def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
+        if project_config.anonymous_usage_statistics.explicit_id is False:
+            return True
+
+        project_config_usage_stats: Optional[
+            AnonymizedUsageStatisticsConfig
+        ] = project_config.anonymous_usage_statistics
+        context_config_usage_stats: Optional[
+            AnonymizedUsageStatisticsConfig
+        ] = self.config.anonymous_usage_statistics
+
+        if project_config_usage_stats == context_config_usage_stats:
+            return False
+
+        if project_config_usage_stats is None or context_config_usage_stats is None:
+            return True
+
+        global_data_context_id: Optional[str] = self._get_data_context_id_override()
+        if (
+            project_config_usage_stats.data_context_id
+            != context_config_usage_stats.data_context_id
+            and context_config_usage_stats.data_context_id != global_data_context_id
+        ):
+            return True
+
+        global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
+        if (
+            project_config_usage_stats.usage_statistics_url
+            != context_config_usage_stats.usage_statistics_url
+            and context_config_usage_stats.usage_statistics_url
+            != global_usage_stats_url
+        ):
+            return True
+
+        return False
 
     def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
         """
