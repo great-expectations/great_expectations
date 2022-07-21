@@ -26,7 +26,6 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     GeCloudConfig,
-    dataContextConfigSchema,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
