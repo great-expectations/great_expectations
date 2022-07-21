@@ -2334,12 +2334,7 @@ checkpoint_store_name: default_checkpoint_store
 
 
 @pytest.fixture
-@mock.patch(
-    "great_expectations.data_context.store.DatasourceStore.list_keys",
-    return_value=[],
-)
 def empty_cloud_data_context(
-    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GeCloudConfig,
