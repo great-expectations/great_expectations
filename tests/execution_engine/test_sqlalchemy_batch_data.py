@@ -2,6 +2,7 @@ import pytest
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -134,3 +135,17 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     )
     res = execution_engine.get_batch_data_and_markers(batch_spec=my_batch_spec)
     assert len(res) == 2
+
+
+@pytest.mark.unit
+def test_instantiation_with_unknown_dialect(sqlite_view_engine):
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
+    execution_engine.engine.dialect.name = "not_a_supported_dialect"
+    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+        execution_engine=execution_engine,
+        table_name="test_table",
+    )
+
+    assert batch_data.dialect == GESqlDialect.OTHER
