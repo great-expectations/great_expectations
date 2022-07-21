@@ -291,7 +291,7 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        bobby_onboarding_data_assistant_result.batch_id_to_batch_identifier_display_name_map[
+        bobby_onboarding_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
             batch_id
         ]
         is not None

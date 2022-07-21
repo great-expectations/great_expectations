@@ -2086,7 +2086,11 @@ class ColumnMapExpectation(TableExpectation, ABC):
             success = True
         elif nonnull_count > 0:
             success = _mostly_success(
-                nonnull_count, unexpected_count, self.get_success_kwargs().get("mostly")
+                nonnull_count,
+                unexpected_count,
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
             )
 
         return _format_map_output(
@@ -2277,7 +2281,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get("mostly"),
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
             )
 
         return _format_map_output(
@@ -2465,7 +2471,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get("mostly"),
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
             )
 
         return _format_map_output(

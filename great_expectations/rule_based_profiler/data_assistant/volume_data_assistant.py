@@ -70,7 +70,7 @@ class VolumeDataAssistant(DataAssistant):
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
         return VolumeDataAssistantResult(
-            batch_id_to_batch_identifier_display_name_map=data_assistant_result.batch_id_to_batch_identifier_display_name_map,
+            _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
@@ -177,7 +177,7 @@ class VolumeDataAssistant(DataAssistant):
                 include_semantic_types=None,
                 exclude_semantic_types=None,
                 allowed_semantic_types_passthrough=None,
-                cardinality_limit_mode=CardinalityLimitMode.REL_100,
+                cardinality_limit_mode=CardinalityLimitMode.FEW,
                 max_unique_values=None,
                 max_proportion_unique=None,
                 data_context=None,

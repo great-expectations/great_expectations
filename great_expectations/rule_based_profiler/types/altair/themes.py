@@ -33,6 +33,8 @@ axis_title_font_size: int = 14
 axis_title_padding: int = 10
 axis_label_color: str = Colors.BLUE_1.value
 axis_label_font_size: int = 12
+axis_label_flush: bool = True
+axis_label_overlap_reduction: bool = True
 
 # X-Axis Only
 x_axis_title_y: int = 25
@@ -46,6 +48,10 @@ y_axis_title_x: int = -55
 # Legend
 legend_title_color: str = Colors.PURPLE.value
 legend_title_font_size: int = 12
+
+# Scale
+scale_continuous_padding: int = 33
+scale_band_padding_outer: float = 1.0
 
 #
 # Color Palettes
@@ -108,6 +114,8 @@ class AltairThemes(Enum):
             "titlePadding": axis_title_padding,
             "labelFontSize": axis_label_font_size,
             "labelColor": axis_label_color,
+            "labelFlush": axis_label_flush,
+            "labelOverlap": axis_label_overlap_reduction,
         },
         "axisY": {
             "titleX": y_axis_title_x,
@@ -127,6 +135,10 @@ class AltairThemes(Enum):
             "diverging": diverging_color_scheme,
             "heatmap": heatmap_color_scheme,
             "ordinal": ordinal_color_scheme,
+        },
+        "scale": {
+            "continuousPadding": scale_continuous_padding,
+            "bandPaddingOuter": scale_band_padding_outer,
         },
         "area": {
             "color": fill_color,
