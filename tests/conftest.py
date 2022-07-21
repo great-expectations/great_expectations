@@ -2335,7 +2335,7 @@ checkpoint_store_name: default_checkpoint_store
 
 @pytest.fixture
 @mock.patch(
-    "great_expectations.data_context.CloudDataContext._init_datasources",
+    "great_expectations.data_context.store.DatasourceStore.list_keys",
     return_value=[],
 )
 def empty_cloud_data_context(
