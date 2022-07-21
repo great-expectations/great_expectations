@@ -1478,10 +1478,11 @@ def import_make_url():
         from sqlalchemy.engine.url import make_url
     else:
         from sqlalchemy.engine import make_url
+
     return make_url
 
 
-def get_pyathena_potential_type(type_module, type_):
+def get_pyathena_potential_type(type_module, type_) -> str:
     if version.parse(type_module.pyathena.__version__) >= version.parse("2.5.0"):
         # introduction of new column type mapping in 2.5
         potential_type = type_module.AthenaDialect()._get_column_type(type_)
