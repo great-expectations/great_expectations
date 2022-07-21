@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import shutil
@@ -25,6 +26,7 @@ from great_expectations.data_context import (
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
+    DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
 )
@@ -2941,3 +2943,40 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
     assert context.plugins_directory and context.plugins_directory.endswith(
         config_var_value
     )
+
+
+@pytest.mark.integration
+def test_check_for_usage_stats_sync_finds_diff(
+    empty_data_context_stats_enabled: DataContext,
+    data_context_config_with_datasources: DataContextConfig,
+) -> None:
+    """
+    What does this test do and why?
+
+    During DataContext instantiation, if the project config used to create the object
+    and the actual config assigned to self.config differ in terms of their usage statistics
+    values, we want to be able to identify that and persist values accordingly.
+    """
+    context = empty_data_context_stats_enabled
+    project_config = data_context_config_with_datasources
+
+    res = context._check_for_usage_stats_sync(project_config=project_config)
+    assert res is True
+
+
+@pytest.mark.integration
+def test_check_for_usage_stats_sync_does_not_find_diff(
+    empty_data_context_stats_enabled: DataContext,
+) -> None:
+    """
+    What does this test do and why?
+
+    During DataContext instantiation, if the project config used to create the object
+    and the actual config assigned to self.config differ in terms of their usage statistics
+    values, we want to be able to identify that and persist values accordingly.
+    """
+    context = empty_data_context_stats_enabled
+    project_config = copy.deepcopy(context.config)  # Using same exact config
+
+    res = context._check_for_usage_stats_sync(project_config=project_config)
+    assert res is False

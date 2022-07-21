@@ -47,6 +47,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
@@ -55,7 +56,6 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
 )
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
@@ -2086,7 +2086,11 @@ class ColumnMapExpectation(TableExpectation, ABC):
             success = True
         elif nonnull_count > 0:
             success = _mostly_success(
-                nonnull_count, unexpected_count, self.get_success_kwargs().get("mostly")
+                nonnull_count,
+                unexpected_count,
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
             )
 
         return _format_map_output(
@@ -2277,7 +2281,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get("mostly"),
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
             )
 
         return _format_map_output(
@@ -2465,7 +2471,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get("mostly"),
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
             )
 
         return _format_map_output(

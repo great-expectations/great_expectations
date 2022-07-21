@@ -10,8 +10,8 @@ from freezegun import freeze_time
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     Domain,
@@ -291,7 +291,7 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        bobby_onboarding_data_assistant_result.batch_id_to_batch_identifier_display_name_map[
+        bobby_onboarding_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
             batch_id
         ]
         is not None

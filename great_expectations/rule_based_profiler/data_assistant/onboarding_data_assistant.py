@@ -146,7 +146,7 @@ class OnboardingDataAssistant(DataAssistant):
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
         return OnboardingDataAssistantResult(
-            batch_id_to_batch_identifier_display_name_map=data_assistant_result.batch_id_to_batch_identifier_display_name_map,
+            _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
@@ -540,7 +540,7 @@ class OnboardingDataAssistant(DataAssistant):
                 0.5,
                 0.75,
             ],
-            "allow_relative_error": "linear",
+            "allow_relative_error": False,
             "false_positive_rate": 0.05,
             "quantile_statistic_interpolation_method": "auto",
             "estimator": "bootstrap",
@@ -727,7 +727,7 @@ class OnboardingDataAssistant(DataAssistant):
             "mostly": 1.0,
             "strict_min": False,
             "strict_max": False,
-            "allow_relative_error": "linear",
+            "allow_relative_error": False,
             "false_positive_rate": 0.05,
             "quantile_statistic_interpolation_method": "auto",
             "estimator": "bootstrap",
@@ -1057,7 +1057,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "lower_bound": 0.0,
                 "upper_bound": None,
             },
-            "round_decimals": 4,
+            "round_decimals": 12,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,
