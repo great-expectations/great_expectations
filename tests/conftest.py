@@ -2,10 +2,12 @@ import datetime
 import locale
 import logging
 import os
+import pathlib
 import random
 import shutil
 import warnings
 from typing import Dict, List, Optional
+from unittest import mock
 
 import numpy as np
 import pandas as pd
@@ -2331,9 +2333,16 @@ checkpoint_store_name: default_checkpoint_store
     return DataContextConfig(**data_context_config_dict)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
+@mock.patch(
+    "great_expectations.data_context.CloudDataContext._init_datasources",
+    return_value=[],
+)
 def empty_cloud_data_context(
-    tmp_path, empty_ge_cloud_data_context_config, ge_cloud_config
+    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    tmp_path: pathlib.Path,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_config: GeCloudConfig,
 ) -> DataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
