@@ -262,6 +262,14 @@ class DataAssistantResult(SerializableDictDot):
         json_dict.update(auxiliary_profiler_execution_details)
         return json.dumps(json_dict, indent=2)
 
+    def _get_metric_expectation_map(self) -> Dict[Tuple[str], str]:
+        return {
+            (
+                (metric_names,) if isinstance(metric_names, str) else metric_names
+            ): expectation_name
+            for metric_names, expectation_name in self.METRIC_EXPECTATION_MAP
+        }
+
     def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:
         auxiliary_info: dict = {
             "num_profiler_rules": len(self.profiler_config.rules),
@@ -2752,7 +2760,9 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Union[alt.Chart, alt.LayerChart]]:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
+        metric_expectation_map: Dict[
+            Tuple[str], str
+        ] = self._get_metric_expectation_map()
 
         table_based_expectations: List[str] = [
             expectation
@@ -2766,27 +2776,41 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        attributed_metrics_by_domain: Dict[
+        attributed_metrics_by_table_domain: Dict[
             Domain, Dict[str, ParameterNode]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.TABLE)
+
         table_domain: Domain = Domain(
             domain_type=MetricDomainTypes.TABLE, rule_name="table_rule"
         )
-        attributed_metrics_by_table_domain: Dict[
+        attributed_metrics: Dict[
             str, ParameterNode
-        ] = attributed_metrics_by_domain[table_domain]
+        ] = attributed_metrics_by_table_domain[table_domain]
+
+        table_based_metric_names: Set[Union[Tuple[str], str]] = set()
+        for metrics in metric_expectation_map.keys():
+            if isinstance(metrics, str):
+                if metrics.startswith("table"):
+                    table_based_metric_names.add((metrics,))
+            elif isinstance(metrics, tuple):
+                if all([metric.startswith("table") for metric in metrics]):
+                    table_based_metric_names.add(metrics)
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"METRIC_EXPECTATION_MAP keys must be of type str or tuple, but type {type(metrics)} was found."
+                )
 
         charts: List[alt.Chart] = []
-
-        metric_name: str
-        attributed_values: ParameterNode
+        metric_names: Union[Tuple[str], str]
+        attributed_values: Set[ParameterNode]
         expectation_type: str
         expectation_configuration: ExpectationConfiguration
-        for (
-            metric_name,
-            attributed_values,
-        ) in attributed_metrics_by_table_domain.items():
-            expectation_type = metric_expectation_map[metric_name]
+        for metric_names in table_based_metric_names:
+            expectation_type = metric_expectation_map[metric_names]
+
+            attributed_values = {
+                attributed_metrics[metric_name] for metric_name in metric_names
+            }
 
             if plot_mode == PlotMode.PRESCRIPTIVE:
                 for expectation_configuration in table_based_expectation_configurations:
@@ -2795,7 +2819,7 @@ class DataAssistantResult(SerializableDictDot):
                             self._create_chart_for_table_domain_expectation(
                                 expectation_type=expectation_type,
                                 expectation_configuration=expectation_configuration,
-                                metric_name=metric_name,
+                                metric_names=metric_names,
                                 attributed_values=attributed_values,
                                 include_column_names=include_column_names,
                                 exclude_column_names=exclude_column_names,
@@ -2809,7 +2833,7 @@ class DataAssistantResult(SerializableDictDot):
                     self._create_chart_for_table_domain_expectation(
                         expectation_type=expectation_type,
                         expectation_configuration=None,
-                        metric_name=metric_name,
+                        metric_names=metric_names,
                         attributed_values=attributed_values,
                         include_column_names=include_column_names,
                         exclude_column_names=exclude_column_names,
@@ -2829,21 +2853,9 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
-
-        column_based_metrics: List[str] = []
-        for metrics in metric_expectation_map.keys():
-            if isinstance(metrics, str):
-                if metrics.startswith("column"):
-                    column_based_metrics.append(metrics)
-            elif isinstance(metrics, tuple):
-                for metric in metrics:
-                    if isinstance(metric, str) and metric.startswith("column"):
-                        column_based_metrics.append(metric)
-            else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
-                    f"METRIC_EXPECTATION_MAP keys must be of type str or tuple, but type {type(metrics)} was found."
-                )
+        metric_expectation_map: Dict[
+            Tuple[str], str
+        ] = self._get_metric_expectation_map()
 
         column_based_expectation_configurations_by_type: Dict[
             str, List[ExpectationConfiguration]
@@ -2851,56 +2863,70 @@ class DataAssistantResult(SerializableDictDot):
             expectation_configurations, include_column_names, exclude_column_names
         )
 
-        attributed_metrics_by_column_domain: Dict[
+        attributed_metrics_by_domain: Dict[
             Domain, Dict[str, ParameterNode]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
 
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]]
-        attributed_metrics_by_domain = self._filter_attributed_metrics_by_column_names(
-            attributed_metrics_by_column_domain,
+        attributed_metrics_by_column_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = self._filter_attributed_metrics_by_column_names(
+            attributed_metrics_by_domain,
             include_column_names,
             exclude_column_names,
         )
 
+        column_based_metric_names: Set[Union[Tuple[str], str]] = set()
+        for metrics in metric_expectation_map.keys():
+            if isinstance(metrics, str):
+                if metrics.startswith("column"):
+                    column_based_metric_names.add((metrics,))
+            elif isinstance(metrics, tuple):
+                if all([metric.startswith("column") for metric in metrics]):
+                    column_based_metric_names.add(metrics)
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"METRIC_EXPECTATION_MAP keys must be of type str or tuple, but type {type(metrics)} was found."
+                )
+
+        filtered_attributed_metrics_by_column_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ]
         column_based_expectation_configurations: List[ExpectationConfiguration]
         metric_display_charts: List[alt.VConcatChart]
         display_charts: List[alt.VConcatChart] = []
         metric_return_charts: List[alt.Chart]
         return_charts: List[Optional[alt.Chart]] = []
         expectation_type: str
-        for metric_name in column_based_metrics:
-            expectation_type = metric_expectation_map[metric_name]
+        for metric_names in column_based_metric_names:
+            expectation_type = metric_expectation_map[metric_names]
             column_based_expectation_configurations = (
                 column_based_expectation_configurations_by_type[expectation_type]
             )
-            filtered_attributed_metrics_by_domain = (
-                self._filter_attributed_metrics_by_metric_name(
-                    attributed_metrics_by_domain,
-                    metric_name,
+
+            filtered_attributed_metrics_by_column_domain = (
+                self._filter_attributed_metrics_by_metric_names(
+                    attributed_metrics_by_column_domain,
+                    metric_names,
                 )
             )
 
-            metric_display_charts = (
-                self._create_display_chart_for_column_domain_expectation(
-                    expectation_type=expectation_type,
-                    expectation_configurations=column_based_expectation_configurations,
-                    metric_name=metric_name,
-                    attributed_metrics_by_domain=filtered_attributed_metrics_by_domain,
-                    plot_mode=plot_mode,
-                    sequential=sequential,
-                )
+            metric_display_charts = self._create_display_chart_for_column_domain_expectation(
+                expectation_type=expectation_type,
+                expectation_configurations=column_based_expectation_configurations,
+                metric_names=metric_names,
+                attributed_metrics_by_domain=filtered_attributed_metrics_by_column_domain,
+                plot_mode=plot_mode,
+                sequential=sequential,
             )
             display_charts.extend(metric_display_charts)
 
-            metric_return_charts = (
-                self._create_return_charts_for_column_domain_expectation(
-                    expectation_type=expectation_type,
-                    expectation_configurations=column_based_expectation_configurations,
-                    metric_name=metric_name,
-                    attributed_metrics_by_domain=filtered_attributed_metrics_by_domain,
-                    plot_mode=plot_mode,
-                    sequential=sequential,
-                )
+            metric_return_charts = self._create_return_charts_for_column_domain_expectation(
+                expectation_type=expectation_type,
+                expectation_configurations=column_based_expectation_configurations,
+                metric_names=metric_names,
+                attributed_metrics_by_domain=filtered_attributed_metrics_by_column_domain,
+                plot_mode=plot_mode,
+                sequential=sequential,
             )
             return_charts.extend(metric_return_charts)
 
@@ -2915,7 +2941,9 @@ class DataAssistantResult(SerializableDictDot):
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
     ) -> Dict[str, List[ExpectationConfiguration]]:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
+        metric_expectation_map: Dict[
+            Tuple[str], str
+        ] = self._get_metric_expectation_map()
 
         column_based_expectations: Set[str] = {
             expectation
@@ -2982,17 +3010,19 @@ class DataAssistantResult(SerializableDictDot):
         return filtered_attributed_metrics
 
     @staticmethod
-    def _filter_attributed_metrics_by_metric_name(
+    def _filter_attributed_metrics_by_metric_names(
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
-        metric_name: str,
+        metric_names: str,
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
         domain: Domain
         filtered_attributed_metrics: Dict[Domain, Dict[str, ParameterNode]] = {}
         for domain, attributed_metric_values in attributed_metrics.items():
-            if metric_name in attributed_metric_values.keys():
-                filtered_attributed_metrics[domain] = {
-                    metric_name: attributed_metric_values[metric_name]
-                }
+            filtered_attributed_metrics[domain] = {}
+            for metric_name in metric_names:
+                if metric_name in attributed_metric_values.keys():
+                    filtered_attributed_metrics[domain][
+                        metric_name
+                    ] = attributed_metric_values[metric_name]
 
         return filtered_attributed_metrics
 
@@ -3081,13 +3111,13 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
-        metric_name: str,
+        metric_names: Union[Tuple[str], str],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
         column_dfs: List[ColumnDataFrame] = self._create_column_dfs_for_charting(
-            metric_name=metric_name,
+            metric_names=metric_names,
             attributed_metrics_by_domain=attributed_metrics_by_domain,
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
@@ -3096,7 +3126,7 @@ class DataAssistantResult(SerializableDictDot):
         return self._chart_column_values(
             expectation_type=expectation_type,
             column_dfs=column_dfs,
-            metric_name=metric_name,
+            metric_names=metric_names,
             plot_mode=plot_mode,
             sequential=sequential,
         )
@@ -3105,53 +3135,56 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
-        metric_name: str,
+        metric_names: Union[Tuple[str], str],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[alt.Chart]:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
+        metric_expectation_map: Dict[
+            Tuple[str], str
+        ] = self._get_metric_expectation_map()
 
         expectation_configuration: ExpectationConfiguration
         attributed_metrics: Dict[str, ParameterNode]
         attributed_values: ParameterNode
         return_charts: List[alt.Chart] = []
-        for domain, attributed_metrics in attributed_metrics_by_domain.items():
-            if (
-                metric_name in attributed_metrics.keys()
-                and metric_expectation_map[metric_name] == expectation_type
-            ):
-                attributed_values = attributed_metrics[metric_name]
+        for metric_name in metric_names:
+            for domain, attributed_metrics in attributed_metrics_by_domain.items():
+                if (
+                    metric_name in attributed_metrics.keys()
+                    and metric_expectation_map[metric_names] == expectation_type
+                ):
+                    attributed_values = attributed_metrics[metric_name]
 
-                for expectation_configuration in expectation_configurations:
-                    if (
-                        expectation_configuration.kwargs["column"]
-                        == domain.domain_kwargs.column
-                    ):
-                        df: pd.DataFrame = self._create_df_for_charting(
-                            metric_name=metric_name,
-                            attributed_values=attributed_values,
-                            expectation_configuration=expectation_configuration,
-                            plot_mode=plot_mode,
-                        )
+                    for expectation_configuration in expectation_configurations:
+                        if (
+                            expectation_configuration.kwargs["column"]
+                            == domain.domain_kwargs.column
+                        ):
+                            df: pd.DataFrame = self._create_df_for_charting(
+                                metric_names=metric_names,
+                                attributed_values=attributed_values,
+                                expectation_configuration=expectation_configuration,
+                                plot_mode=plot_mode,
+                            )
 
-                        sanitized_metric_name: str = sanitize_parameter_name(
-                            name=metric_name
-                        )
+                            sanitized_metric_name: str = sanitize_parameter_name(
+                                name=metric_name
+                            )
 
-                        column_name: str = domain.domain_kwargs.column
-                        subtitle = f"Column: {column_name}"
+                            column_name: str = domain.domain_kwargs.column
+                            subtitle = f"Column: {column_name}"
 
-                        return_chart = self._chart_domain_values(
-                            expectation_type=expectation_type,
-                            df=df,
-                            metric_name=sanitized_metric_name,
-                            plot_mode=plot_mode,
-                            sequential=sequential,
-                            subtitle=subtitle,
-                        )
+                            return_chart = self._chart_domain_values(
+                                expectation_type=expectation_type,
+                                df=df,
+                                metric_name=sanitized_metric_name,
+                                plot_mode=plot_mode,
+                                sequential=sequential,
+                                subtitle=subtitle,
+                            )
 
-                        return_charts.append(return_chart)
+                            return_charts.append(return_chart)
 
         return return_charts
 
@@ -3310,12 +3343,14 @@ class DataAssistantResult(SerializableDictDot):
 
     def _create_column_dfs_for_charting(
         self,
-        metric_name: str,
+        metric_names: Union[Tuple[str], str],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> List[ColumnDataFrame]:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
+        metric_expectation_map: Dict[
+            Tuple[str], str
+        ] = self._get_metric_expectation_map()
 
         metric_domains: Set[Domain] = set(attributed_metrics_by_domain.keys())
 
@@ -3324,6 +3359,8 @@ class DataAssistantResult(SerializableDictDot):
         domain_kwargs: dict
         column_name: str
         column_domain: Domain
+        metric_df: pd.DataFrame
+        df: pd.DataFrame = pd.DataFrame()
         column_dfs: List[ColumnDataFrame] = []
         for expectation_configuration in expectation_configurations:
             profiler_details = expectation_configuration.meta["profiler_details"]
@@ -3340,19 +3377,21 @@ class DataAssistantResult(SerializableDictDot):
             ] = attributed_metrics_by_domain[column_domain]
 
             if (
-                metric_expectation_map.get(metric_name)
+                metric_expectation_map.get(metric_names)
                 == expectation_configuration.expectation_type
             ):
-                attributed_values: ParameterNode = attributed_values_by_metric_name[
-                    metric_name
-                ]
+                attributed_values: Set[ParameterNode] = set()
+                for metric_name in metric_names:
+                    attributed_values.add(attributed_values_by_metric_name[metric_name])
 
-                df: pd.DataFrame = self._create_df_for_charting(
-                    metric_name=metric_name,
-                    attributed_values=attributed_values,
-                    expectation_configuration=expectation_configuration,
-                    plot_mode=plot_mode,
-                )
+                    metric_df = self._create_df_for_charting(
+                        metric_name=metric_name,
+                        attributed_values=attributed_values,
+                        expectation_configuration=expectation_configuration,
+                        plot_mode=plot_mode,
+                    )
+
+                    df = df.merge(metric_df)
 
                 column_name: str = expectation_configuration.kwargs["column"]
                 column_df: ColumnDataFrame = ColumnDataFrame(column_name, df)
@@ -3364,8 +3403,8 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         expectation_configuration: Optional[ExpectationConfiguration],
-        metric_name: str,
-        attributed_values: ParameterNode,
+        metric_names: Union[Tuple[str], str],
+        attributed_values: Set[ParameterNode],
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
         plot_mode: PlotMode,
@@ -3373,13 +3412,13 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.Chart:
 
         df: pd.DataFrame = self._create_df_for_charting(
-            metric_name=metric_name,
+            metric_names=metric_names,
             attributed_values=attributed_values,
             expectation_configuration=expectation_configuration,
             plot_mode=plot_mode,
         )
 
-        metric_name: str = sanitize_parameter_name(metric_name)
+        metric_name: str = sanitize_parameter_name(metric_names)
 
         # If columns are included/excluded we need to filter them out for table level metrics here
         table_column_metrics: List[str] = ["table_columns"]
