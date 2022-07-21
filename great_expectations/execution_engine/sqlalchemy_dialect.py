@@ -22,7 +22,7 @@ class GESqlDialect(enum.Enum):
     SQLITE = "sqlite"
     TERADATASQL = "teradatasql"
     TRINO = "trino"
-    UNSUPPORTED = "unsupported"
+    OTHER = "other"
 
     @classmethod
     def _missing_(cls, value: Any) -> None:
@@ -38,10 +38,10 @@ class GESqlDialect(enum.Enum):
         return [
             dialect_name.value
             for dialect_name in cls
-            if dialect_name != GESqlDialect.UNSUPPORTED
+            if dialect_name != GESqlDialect.OTHER
         ]
 
     @classmethod
     def get_all_dialects(cls) -> List[GESqlDialect]:
         """Get all dialects."""
-        return [dialect for dialect in cls if dialect != GESqlDialect.UNSUPPORTED]
+        return [dialect for dialect in cls if dialect != GESqlDialect.OTHER]
