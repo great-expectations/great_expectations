@@ -1410,11 +1410,17 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
 
 
 @pytest.fixture(scope="module")
-def titanic_spark_db(spark_warehouse_session):
+def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
     titanic_database_name: str = "db_test"
     titanic_table_name: str = "tb_titanic"
-    titanic_csv_path = file_relative_path(__file__, "./test_sets/titanic.csv")
-    titanic_df = spark_warehouse_session.read.csv(titanic_csv_path, header=True)
+
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    project_path = str(tmp_path_factory.mktemp("data"))
+    project_dataset_path = str(os.path.join(project_path, "Titanic.csv"))
+
+    shutil.copy(titanic_csv_path, project_dataset_path)
+
+    titanic_df = spark_warehouse_session.read.csv(project_dataset_path, header=True)
 
     spark_warehouse_session.sql(
         f"CREATE DATABASE IF NOT EXISTS {titanic_database_name}"
