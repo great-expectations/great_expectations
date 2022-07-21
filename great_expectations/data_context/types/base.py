@@ -61,9 +61,13 @@ def object_to_yaml_str(obj):
 class AbstractConfig(ABC, SerializableDictDot):
     """Base class for Config objects. Sets the fields that must be included on a Config."""
 
-    def __init__(self, id_, name):
-        self._id = id_
-        self._name = name
+    def __init__(self, id_=None, name=None):
+        # Note: name and id are optional currently to avoid updating all documentation within
+        # the scope of this work.
+        if id_ is not None:
+            self.id = id_
+        if name is not None:
+            self.name = name
         super().__init__()
 
 
@@ -837,7 +841,8 @@ configuration to continue.
 class DatasourceConfig(AbstractConfig):
     def __init__(
         self,
-        name=None,  # Note: name is optional currently to avoid updating all documentation with the scope of this work but it should be changed to required.
+        name=None,  # Note: name is optional currently to avoid updating all documentation within
+        # the scope of this work.
         id_=None,
         class_name=None,
         module_name: str = "great_expectations.datasource",
@@ -939,7 +944,8 @@ class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    # Note: name is optional currently to avoid updating all documentation with the scope of this work but it should be changed to required.
+    # Note: name is optional currently to avoid updating all documentation within
+    # the scope of this work.
     name = fields.String(
         required=False,
         allow_none=True,
@@ -947,6 +953,7 @@ class DatasourceConfigSchema(Schema):
     id = fields.String(
         required=False,
         allow_none=True,
+        data_key="id",
     )
 
     class_name = fields.String(
