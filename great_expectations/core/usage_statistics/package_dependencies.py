@@ -38,6 +38,7 @@ class GEDependencies:
             "cryptography",
             "importlib-metadata",
             "Ipython",
+            "ipywidgets",
             "jinja2",
             "jsonpatch",
             "jsonschema",
@@ -77,7 +78,6 @@ class GEDependencies:
             "gcsfs",
             "google-cloud-secret-manager",
             "google-cloud-storage",
-            "ipywidgets",
             "invoke",
             "isort",
             "mistune",
@@ -125,7 +125,6 @@ class GEDependencies:
         # requirements-dev-lite.txt:
         "flask",
         "freezegun",
-        "ipywidgets",
         "mistune",
         "mock-alchemy",
         "moto",
