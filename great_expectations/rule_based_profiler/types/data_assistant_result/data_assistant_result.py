@@ -5,7 +5,18 @@ import os
 import warnings
 from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass, field
-from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    KeysView,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import altair as alt
 import ipywidgets as widgets
@@ -265,11 +276,19 @@ class DataAssistantResult(SerializableDictDot):
         return json.dumps(json_dict, indent=2)
 
     def _get_metric_expectation_map(self) -> Dict[Tuple[str], str]:
+        if not all(
+            [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
+            for metric_names in self.METRIC_EXPECTATION_MAP.keys()
+        ):
+            raise ge_exceptions.DataAssistantResultExecutionError(
+                f"All METRIC_EXPECTATION_MAP keys must be of type str or tuple."
+            )
+
         return {
             (
                 (metric_names,) if isinstance(metric_names, str) else metric_names
             ): expectation_name
-            for metric_names, expectation_name in self.METRIC_EXPECTATION_MAP
+            for metric_names, expectation_name in self.METRIC_EXPECTATION_MAP.items()
         }
 
     def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:
@@ -688,22 +707,26 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _transform_table_column_list_to_rows(
-        df: pd.DataFrame, metric_name: str
+        df: pd.DataFrame, sanitized_metric_name: str
     ) -> pd.DataFrame:
         # explode list of column names into separate rows for each name in list
         # flatten columns of lists
-        col_flat: List[str] = [item for sublist in df[metric_name] for item in sublist]
+        col_flat: List[str] = [
+            item for sublist in df[sanitized_metric_name] for item in sublist
+        ]
         # row numbers to repeat
         ilocations: np.ndarray = np.repeat(
-            range(df.shape[0]), df[metric_name].apply(len)
+            range(df.shape[0]), df[sanitized_metric_name].apply(len)
         )
         # replicate rows and add flattened column of lists
-        cols: List[int] = [i for i, c in enumerate(df.columns) if c != metric_name]
+        cols: List[int] = [
+            i for i, c in enumerate(df.columns) if c != sanitized_metric_name
+        ]
         df = df.iloc[ilocations, cols]
-        df[metric_name] = col_flat
+        df[sanitized_metric_name] = col_flat
 
         # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
-        df["column_number"] = pd.factorize(df[metric_name])[0] + 1
+        df["column_number"] = pd.factorize(df[sanitized_metric_name])[0] + 1
 
         # rename table_columns to table_column
         df_columns = [
@@ -734,9 +757,9 @@ class DataAssistantResult(SerializableDictDot):
         return text, dy
 
     @staticmethod
-    def _get_nominal_metric_chart(
+    def _get_nominal_metrics_chart(
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str] = None,
     ) -> alt.Chart:
@@ -752,7 +775,9 @@ class DataAssistantResult(SerializableDictDot):
         """
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
-            column for column in df.columns if column not in [metric_name, batch_name]
+            column
+            for column in df.columns
+            if column not in [santizied_metric_name, batch_name]
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -839,7 +864,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_expect_domain_values_to_match_set_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str] = None,
     ) -> alt.Chart:
@@ -847,7 +872,7 @@ class DataAssistantResult(SerializableDictDot):
         Args:
             expectation_type: The name of the expectation
             df: A pandas dataframe containing the data to be plotted
-            metric_name: The name of the metric as it exists in the pandas dataframe
+            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
             sequential: Whether batches are sequential in nature
             subtitle: The subtitle, if applicable
 
@@ -856,7 +881,9 @@ class DataAssistantResult(SerializableDictDot):
         """
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
-            column for column in df.columns if column not in [metric_name, batch_name]
+            column
+            for column in df.columns
+            if column not in [sanitized_metric_names, batch_name]
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -874,25 +901,29 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
         metric_plot_component: MetricPlotComponent
-        if metric_name == "table_columns":
-            table_column: str = "table_column"
-            unique_column_sets: np.ndarray = np.unique(df[metric_name])
-            if len(unique_column_sets) == 1:
-                column_set = df[metric_name].iloc[0]
+        metric_plot_components: Set[MetricPlotComponent] = set()
+        for sanitized_metric_name in sanitized_metric_names:
+            if sanitized_metric_name == "table_columns":
+                table_column: str = "table_column"
+                unique_column_sets: np.ndarray = np.unique(df[sanitized_metric_name])
+                if len(unique_column_sets) == 1:
+                    column_set = df[sanitized_metric_name].iloc[0]
 
-            df = DataAssistantResult._transform_table_column_list_to_rows(
-                df=df, metric_name=metric_name
-            )
+                df = DataAssistantResult._transform_table_column_list_to_rows(
+                    df=df, metric_name=sanitized_metric_name
+                )
 
-            metric_plot_component = MetricPlotComponent(
-                name=table_column,
-                alt_type=metric_type,
-            )
-        else:
-            metric_plot_component = MetricPlotComponent(
-                name=metric_name,
-                alt_type=metric_type,
-            )
+                metric_plot_component = MetricPlotComponent(
+                    name=table_column,
+                    alt_type=metric_type,
+                )
+            else:
+                metric_plot_component = MetricPlotComponent(
+                    name=sanitized_metric_name,
+                    alt_type=metric_type,
+                )
+
+            metric_plot_components.add(metric_plot_component)
 
         # we need at least one record to plot the column_set as text
         if column_set is not None:
@@ -913,7 +944,7 @@ class DataAssistantResult(SerializableDictDot):
             return DataAssistantResult._get_sequential_expect_domain_values_to_match_set_isotype_chart(
                 expectation_type=expectation_type,
                 df=df,
-                metric_plot_component=metric_plot_component,
+                metric_plot_components=metric_plot_components,
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
                 column_number_plot_component=column_number_plot_component,
@@ -923,7 +954,7 @@ class DataAssistantResult(SerializableDictDot):
             return DataAssistantResult._get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
                 expectation_type=expectation_type,
                 df=df,
-                metric_plot_component=metric_plot_component,
+                metric_plot_components=metric_plot_components,
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
                 column_number_plot_component=column_number_plot_component,
@@ -933,20 +964,21 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_sequential_isotype_chart(
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: Set[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
         tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
-            metric_plot_component.generate_tooltip(),
+            metric_plot_component.generate_tooltip()
+            for metric_plot_component in metric_plot_components
         ]
 
         chart: Union[alt.Chart, alt.LayerChart]
@@ -1003,20 +1035,21 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_nonsequential_isotype_chart(
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: Set[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
         tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
-            metric_plot_component.generate_tooltip(),
+            metric_plot_component.generate_tooltip()
+            for metric_plot_component in metric_plot_components
         ]
 
         chart: alt.Chart
@@ -1074,7 +1107,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_sequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: Set[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
@@ -1082,14 +1115,14 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
         chart: alt.Chart = DataAssistantResult._get_sequential_isotype_chart(
             df=df,
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
             column_number_plot_component=column_number_plot_component,
@@ -1102,7 +1135,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: Set[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
@@ -1110,14 +1143,14 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
         chart: alt.Chart = DataAssistantResult._get_nonsequential_isotype_chart(
             df=df,
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
             column_number_plot_component=column_number_plot_component,
@@ -1129,7 +1162,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_quantitative_metric_chart(
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str] = None,
     ) -> alt.Chart:
@@ -1188,7 +1221,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_expect_domain_values_to_be_between_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
@@ -1196,7 +1229,7 @@ class DataAssistantResult(SerializableDictDot):
         Args:
             expectation_type: The name of the expectation
             df: A pandas dataframe containing the data to be plotted
-            metric_name: The name of the metric as it exists in the pandas dataframe
+            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
             sequential: Whether batches are sequential in nature
             subtitle: The subtitle, if applicable
 
@@ -1220,7 +1253,7 @@ class DataAssistantResult(SerializableDictDot):
             for column in df.columns
             if column
             not in {
-                metric_name,
+                sanitized_metric_names,
                 batch_name,
                 column_name,
                 max_value,
@@ -1240,9 +1273,12 @@ class DataAssistantResult(SerializableDictDot):
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
-        metric_plot_component: MetricPlotComponent = MetricPlotComponent(
-            name=metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
-        )
+        metric_plot_components: Set[MetricPlotComponent]
+        for sanitized_metric_name in sanitized_metric_names:
+            metric_plot_component: MetricPlotComponent = MetricPlotComponent(
+                name=sanitized_metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
+            )
+            metric_plot_components.add(metric_plot_component)
         min_value_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=min_value,
@@ -1288,7 +1324,10 @@ class DataAssistantResult(SerializableDictDot):
                     max_value_plot_component.generate_tooltip(format=","),
                     strict_min_plot_component.generate_tooltip(),
                     strict_max_plot_component.generate_tooltip(),
-                    metric_plot_component.generate_tooltip(format=","),
+                ]
+                + [
+                    metric_plot_component.generate_tooltip(format=",")
+                    for metric_plot_component in metric_plot_components
                 ]
             )
         else:
@@ -1297,18 +1336,24 @@ class DataAssistantResult(SerializableDictDot):
                 alt_type=None,
                 subtitle=subtitle,
             )
-            tooltip = batch_plot_component.generate_tooltip() + [
-                min_value_plot_component.generate_tooltip(format=","),
-                max_value_plot_component.generate_tooltip(format=","),
-                metric_plot_component.generate_tooltip(format=","),
-            ]
+            tooltip = (
+                batch_plot_component.generate_tooltip()
+                + [
+                    min_value_plot_component.generate_tooltip(format=","),
+                    max_value_plot_component.generate_tooltip(format=","),
+                ]
+                + [
+                    metric_plot_component.generate_tooltip(format=",")
+                    for metric_plot_component in metric_plot_components
+                ]
+            )
 
         if sequential:
             return (
                 DataAssistantResult._get_expect_domain_values_to_be_between_line_chart(
                     expectation_type=expectation_type,
                     df=df,
-                    metric_plot_component=metric_plot_component,
+                    metric_plot_components=metric_plot_components,
                     batch_plot_component=batch_plot_component,
                     domain_plot_component=domain_plot_component,
                     min_value_plot_component=min_value_plot_component,
@@ -1321,7 +1366,7 @@ class DataAssistantResult(SerializableDictDot):
                 DataAssistantResult._get_expect_domain_values_to_be_between_bar_chart(
                     expectation_type=expectation_type,
                     df=df,
-                    metric_plot_component=metric_plot_component,
+                    metric_plot_components=metric_plot_components,
                     batch_plot_component=batch_plot_component,
                     domain_plot_component=domain_plot_component,
                     min_value_plot_component=min_value_plot_component,
@@ -1333,7 +1378,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_interactive_metric_chart(
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> Union[alt.Chart, alt.LayerChart]:
         """
@@ -1396,7 +1441,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_interactive_detail_multi_chart(
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> Union[alt.Chart, alt.VConcatChart]:
         """
@@ -1460,14 +1505,14 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_to_be_between_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
         """
         Args:
             expectation_type: The name of the expectation
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
+            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
             sequential: Whether batches are sequential in nature
 
         Returns:
@@ -1627,14 +1672,14 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_detail_expect_column_values_to_be_between_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
         """
         Args:
             expectation_type: The name of the expectation
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
+            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
             sequential: Whether batches are sequential in nature
 
         Returns:
@@ -2877,28 +2922,20 @@ class DataAssistantResult(SerializableDictDot):
 
         table_based_metric_names: Set[Union[Tuple[str], str]] = set()
         for metrics in metric_expectation_map.keys():
-            if isinstance(metrics, str):
-                if metrics.startswith("table"):
-                    table_based_metric_names.add((metrics,))
-            elif isinstance(metrics, tuple):
-                if all([metric.startswith("table") for metric in metrics]):
-                    table_based_metric_names.add(metrics)
-            else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
-                    f"METRIC_EXPECTATION_MAP keys must be of type str or tuple, but type {type(metrics)} was found."
-                )
+            if all([metric.startswith("table") for metric in metrics]):
+                table_based_metric_names.add(metrics)
 
         charts: List[alt.Chart] = []
-        metric_names: Union[Tuple[str], str]
-        attributed_values: Set[ParameterNode]
+        metric_names: Tuple[str]
+        attributed_values: List[ParameterNode]
         expectation_type: str
         expectation_configuration: ExpectationConfiguration
         for metric_names in table_based_metric_names:
             expectation_type = metric_expectation_map[metric_names]
 
-            attributed_values = {
+            attributed_values = [
                 attributed_metrics[metric_name] for metric_name in metric_names
-            }
+            ]
 
             if plot_mode == PlotMode.PRESCRIPTIVE:
                 for expectation_configuration in table_based_expectation_configurations:
@@ -3100,7 +3137,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _filter_attributed_metrics_by_metric_names(
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
-        metric_names: str,
+        metric_names: Tuple[str],
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
         domain: Domain
         filtered_attributed_metrics: Dict[Domain, Dict[str, ParameterNode]] = {}
@@ -3118,21 +3155,29 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         df: pd.DataFrame,
-        metric_name: str,
+        metric_names: Tuple[str],
         plot_mode: PlotMode,
         sequential: bool,
         subtitle: Optional[str],
     ) -> Optional[alt.Chart]:
-        nominal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        sanitized_metric_names: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_metric_names(
+            metric_names=metric_names
+        )
+
+        nominal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.NOMINAL
         )
-        ordinal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        ordinal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
-        quantitative_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        quantitative_metrics: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.QUANTITATIVE
         )
-        temporal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        temporal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
 
@@ -3150,19 +3195,27 @@ class DataAssistantResult(SerializableDictDot):
                 ]
             ] = None
 
-            if metric_name in nominal_metrics:
+            if DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=nominal_metrics
+            ):
                 plot_impl = self._get_expect_domain_values_to_match_set_chart
-            elif metric_name in ordinal_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=ordinal_metrics
+            ):
                 plot_impl = self._get_expect_domain_values_ordinal_chart
-            elif metric_name in quantitative_metrics:
-                plot_impl = self._get_expect_domain_values_to_be_between_chart
-            elif metric_name in temporal_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=quantitative_metrics
+            ):
                 plot_impl = self._get_expect_domain_values_temporal_chart
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=temporal_metrics
+            ):
+                plot_impl = self._get_interactive_expect_column_values_temporal_chart
 
             return plot_impl(
                 expectation_type=expectation_type,
                 df=df,
-                metric_name=metric_name,
+                sanitized_metric_names=sanitized_metric_names,
                 sequential=sequential,
                 subtitle=subtitle,
             )
@@ -3179,18 +3232,26 @@ class DataAssistantResult(SerializableDictDot):
                 ]
             ] = None
 
-            if metric_name in nominal_metrics:
+            if DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=nominal_metrics
+            ):
                 plot_impl = self._get_nominal_metric_chart
-            elif metric_name in ordinal_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=ordinal_metrics
+            ):
                 plot_impl = self._get_ordinal_metric_chart
-            elif metric_name in quantitative_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=quantitative_metrics
+            ):
                 plot_impl = self._get_quantitative_metric_chart
-            elif metric_name in temporal_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=temporal_metrics
+            ):
                 plot_impl = self._get_temporal_metric_chart
 
             return plot_impl(
                 df=df,
-                metric_name=metric_name,
+                sanitized_metric_names=sanitized_metric_names,
                 sequential=sequential,
                 subtitle=subtitle,
             )
@@ -3199,7 +3260,7 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
-        metric_names: Union[Tuple[str], str],
+        metric_names: Tuple[str],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
         sequential: bool,
@@ -3223,7 +3284,7 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
-        metric_names: Union[Tuple[str], str],
+        metric_names: Tuple[str],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
         plot_mode: PlotMode,
         sequential: bool,
@@ -3250,7 +3311,7 @@ class DataAssistantResult(SerializableDictDot):
                             == domain.domain_kwargs.column
                         ):
                             df: pd.DataFrame = self._create_df_for_charting(
-                                metric_names=metric_names,
+                                sanitized_metric_names=sanitized_metric_names,
                                 attributed_values=attributed_values,
                                 expectation_configuration=expectation_configuration,
                                 plot_mode=plot_mode,
@@ -3266,7 +3327,7 @@ class DataAssistantResult(SerializableDictDot):
                             return_chart = self._chart_domain_values(
                                 expectation_type=expectation_type,
                                 df=df,
-                                metric_name=sanitized_metric_name,
+                                sanitized_metric_names=sanitized_metric_names,
                                 plot_mode=plot_mode,
                                 sequential=sequential,
                                 subtitle=subtitle,
@@ -3280,22 +3341,28 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        metric_names: Tuple[str],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
-        metric_name = sanitize_parameter_name(metric_name)
+        sanitized_metric_names: Set[
+            str
+        ] = DataAssistantResult._get_sanitized_metric_names_from_metric_names(
+            metric_names=metric_names
+        )
 
-        nominal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        nominal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.NOMINAL
         )
-        ordinal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        ordinal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
-        quantitative_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        quantitative_metrics: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.QUANTITATIVE
         )
-        temporal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        temporal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
 
@@ -3312,22 +3379,30 @@ class DataAssistantResult(SerializableDictDot):
                 ]
             ] = None
 
-            if metric_name in nominal_metrics:
+            if DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=nominal_metrics
+            ):
                 plot_impl = self._get_interactive_expect_column_values_nominal_chart
-            elif metric_name in ordinal_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=ordinal_metrics
+            ):
                 plot_impl = self._get_interactive_expect_column_values_ordinal_chart
-            elif metric_name in quantitative_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=quantitative_metrics
+            ):
                 plot_impl = (
                     self._get_interactive_expect_column_values_to_be_between_chart
                 )
-            elif metric_name in temporal_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=temporal_metrics
+            ):
                 plot_impl = self._get_interactive_expect_column_values_temporal_chart
 
             return [
                 plot_impl(
                     expectation_type=expectation_type,
                     column_dfs=column_dfs,
-                    metric_name=metric_name,
+                    sanitized_metric_names=sanitized_metric_names,
                     sequential=sequential,
                 )
             ]
@@ -3343,26 +3418,34 @@ class DataAssistantResult(SerializableDictDot):
                 ]
             ] = None
 
-            if metric_name in nominal_metrics:
+            if DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=nominal_metrics
+            ):
                 plot_impl = self._get_interactive_nominal_metric_chart
-            elif metric_name in ordinal_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=ordinal_metrics
+            ):
                 plot_impl = self._get_interactive_ordinal_metric_chart
-            elif metric_name in quantitative_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=quantitative_metrics
+            ):
                 plot_impl = self._get_interactive_metric_chart
-            elif metric_name in temporal_metrics:
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=temporal_metrics
+            ):
                 plot_impl = self._get_interactive_temporal_metric_chart
 
             return [
                 plot_impl(
                     column_dfs=column_dfs,
-                    metric_name=metric_name,
+                    sanitized_metric_names=sanitized_metric_names,
                     sequential=sequential,
                 )
             ]
 
     def _create_df_for_charting(
         self,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         attributed_values: ParameterNode,
         expectation_configuration: ExpectationConfiguration,
         plot_mode: PlotMode,
@@ -3431,7 +3514,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _create_column_dfs_for_charting(
         self,
-        metric_names: Union[Tuple[str], str],
+        metric_names: Tuple[str],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
@@ -3468,17 +3551,13 @@ class DataAssistantResult(SerializableDictDot):
                 metric_expectation_map.get(metric_names)
                 == expectation_configuration.expectation_type
             ):
-                attributed_values: Set[ParameterNode] = set()
                 for metric_name in metric_names:
-                    attributed_values.add(attributed_values_by_metric_name[metric_name])
-
                     metric_df = self._create_df_for_charting(
-                        metric_name=metric_name,
-                        attributed_values=attributed_values,
+                        sanitized_metric_names=sanitized_metric_names,
+                        attributed_values=attributed_values_by_metric_name[metric_name],
                         expectation_configuration=expectation_configuration,
                         plot_mode=plot_mode,
                     )
-
                     df = df.merge(metric_df)
 
                 column_name: str = expectation_configuration.kwargs["column"]
@@ -3491,20 +3570,24 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         expectation_configuration: Optional[ExpectationConfiguration],
-        metric_names: Union[Tuple[str], str],
-        attributed_values: Set[ParameterNode],
+        metric_names: Tuple[str],
+        attributed_values: List[ParameterNode],
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
 
-        df: pd.DataFrame = self._create_df_for_charting(
-            metric_names=metric_names,
-            attributed_values=attributed_values,
-            expectation_configuration=expectation_configuration,
-            plot_mode=plot_mode,
-        )
+        metric_df: pd.DataFrame
+        df: pd.DataFrame = pd.DataFrame()
+        for metric_name in metric_names:
+            metric_df = self._create_df_for_charting(
+                sanitized_metric_names=sanitized_metric_names,
+                attributed_values=attributed_values,
+                expectation_configuration=expectation_configuration,
+                plot_mode=plot_mode,
+            )
+            df = df.merge(metric_df)
 
         metric_name: str = sanitize_parameter_name(metric_names)
 
@@ -3532,7 +3615,7 @@ class DataAssistantResult(SerializableDictDot):
         return self._chart_domain_values(
             expectation_type=expectation_type,
             df=df,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             plot_mode=plot_mode,
             sequential=sequential,
             subtitle=None,
@@ -3572,7 +3655,7 @@ class DataAssistantResult(SerializableDictDot):
         )
         return attributed_metrics_by_domain
 
-    def _get_metric_types_from_altair_type(
+    def _get_sanitized_metric_names_from_altair_type(
         self, altair_type: AltairDataTypes
     ) -> Set[str]:
         metric_types: Dict[str, AltairDataTypes] = self.METRIC_TYPES
@@ -3583,17 +3666,31 @@ class DataAssistantResult(SerializableDictDot):
         }
 
     @staticmethod
+    def _get_sanitized_metric_names_from_metric_names(
+        metric_names: Tuple[str],
+    ) -> Set[str]:
+        return {
+            sanitize_parameter_name(name=metric_name) for metric_name in metric_names
+        }
+
+    @staticmethod
+    def _all_metric_names_in_iterable(
+        metric_names: Tuple[str], iterable: Iterable[str]
+    ) -> bool:
+        return all([metric_name in iterable for metric_name in metric_names])
+
+    @staticmethod
     def _get_expect_domain_values_ordinal_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
         return DataAssistantResult._get_expect_domain_values_to_be_between_chart(
             expectation_type=expectation_type,
             df=df,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
             subtitle=subtitle,
         )
@@ -3602,14 +3699,14 @@ class DataAssistantResult(SerializableDictDot):
     def _get_expect_domain_values_temporal_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
         return DataAssistantResult._get_expect_domain_values_to_be_between_chart(
             expectation_type=expectation_type,
             df=df,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
             subtitle=subtitle,
         )
@@ -3617,13 +3714,13 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_ordinal_metric_chart(
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
         return DataAssistantResult._get_quantitative_metric_chart(
             df=df,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
             subtitle=subtitle,
         )
@@ -3631,13 +3728,13 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_temporal_metric_chart(
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
         return DataAssistantResult._get_quantitative_metric_chart(
             df=df,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
             subtitle=subtitle,
         )
@@ -3646,7 +3743,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_nominal_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
         raise NotImplementedError(
@@ -3657,13 +3754,13 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_ordinal_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
         return DataAssistantResult._get_interactive_expect_column_values_to_be_between_chart(
             expectation_type=expectation_type,
             column_dfs=column_dfs,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
         )
 
@@ -3671,20 +3768,20 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_temporal_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
         return DataAssistantResult._get_interactive_expect_column_values_to_be_between_chart(
             expectation_type=expectation_type,
             column_dfs=column_dfs,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
         )
 
     @staticmethod
     def _get_interactive_nominal_metric_chart(
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
         raise NotImplementedError(
@@ -3694,23 +3791,23 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_interactive_ordinal_metric_chart(
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.LayerChart:
         return DataAssistantResult._get_interactive_metric_chart(
             column_dfs=column_dfs,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
         )
 
     @staticmethod
     def _get_interactive_temporal_metric_chart(
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.LayerChart:
         return DataAssistantResult._get_interactive_metric_chart(
             column_dfs=column_dfs,
-            metric_name=metric_name,
+            santizied_metric_name=metric_names,
             sequential=sequential,
         )
