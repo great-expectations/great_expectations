@@ -49,7 +49,7 @@ class JsonSchemaProfiler(Profiler):
     def __init__(self, configuration: Optional[dict] = None) -> None:
         super().__init__(configuration)
 
-    def validate(self, schema: dict) -> bool:
+    def validate(self, schema: dict) -> bool:  # type: ignore
         if not isinstance(schema, dict):
             raise TypeError(
                 f"This profiler requires a schema of type dict and was passed a {type(schema)}"
