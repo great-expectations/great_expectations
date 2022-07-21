@@ -1473,9 +1473,14 @@ class AbstractDataContext(ABC):
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
-        datasource_name: str
-        datasource_config: DatasourceConfig
-        for datasource_name, datasource_config in self.config.datasources.items():
+        config: DataContextConfig = self.get_config_with_variables_substituted(
+            self.config
+        )
+        datasources: Dict[str, DatasourceConfig] = cast(
+            Dict[str, DatasourceConfig], config.datasources
+        )
+
+        for datasource_name, datasource_config in datasources.items():
             try:
                 config = copy.deepcopy(datasource_config)
                 config_dict = dict(datasourceConfigSchema.dump(config))
