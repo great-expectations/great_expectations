@@ -5,6 +5,7 @@ import itertools
 import json
 import logging
 import uuid
+from abc import ABC
 from typing import Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
@@ -55,6 +56,15 @@ def object_to_yaml_str(obj):
         yaml.dump(obj, string_stream)
         output_str = string_stream.getvalue()
     return output_str
+
+
+class AbstractConfig(ABC, SerializableDictDot):
+    """Base class for Config objects. Sets the fields that must be included on a Config."""
+
+    def __init__(self, id_, name):
+        self._id = id_
+        self._name = name
+        super().__init__()
 
 
 class BaseYamlConfig(SerializableDictDot):
@@ -824,9 +834,11 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(SerializableDictDot):
+class DatasourceConfig(AbstractConfig):
     def __init__(
         self,
+        name=None,  # Note: name is optional currently to avoid updating all documentation with the scope of this work but it should be changed to required.
+        id_=None,
         class_name=None,
         module_name: str = "great_expectations.datasource",
         execution_engine=None,
@@ -846,6 +858,8 @@ class DatasourceConfig(SerializableDictDot):
         limit=None,
         **kwargs,
     ) -> None:
+
+        super().__init__(id_=id_, name=name)
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
@@ -924,6 +938,16 @@ class DatasourceConfig(SerializableDictDot):
 class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
+
+    # Note: name is optional currently to avoid updating all documentation with the scope of this work but it should be changed to required.
+    name = fields.String(
+        required=False,
+        allow_none=True,
+    )
+    id = fields.String(
+        required=False,
+        allow_none=True,
+    )
 
     class_name = fields.String(
         required=False,
