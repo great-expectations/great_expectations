@@ -369,6 +369,22 @@ class DataContext(BaseDataContext):
             self._save_project_config()
 
     def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
+        """If there are differences between the DataContextConfig used to instantiate
+        the DataContext and the DataContextConfig assigned to `self.config`, we want
+        to save those changes to disk so that subsequent instantiations will utilize
+        the same values.
+
+        A small caveat is that if that difference stems from a global override (env var
+        or conf file), we don't want to write to disk. This is due to the fact that
+        those mechanisms allow for dynamic values and saving them will make them static.
+
+        Args:
+            project_config: The DataContextConfig used to instantiate the DataContext.
+
+        Returns:
+            A boolean signifying whether or not the current DataContext's config needs
+            to be persisted in order to recognize changes made to usage statistics.
+        """
         if project_config.anonymous_usage_statistics.explicit_id is False:
             return True
 
@@ -385,6 +401,7 @@ class DataContext(BaseDataContext):
         if project_config_usage_stats is None or context_config_usage_stats is None:
             return True
 
+        # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.
         global_data_context_id: Optional[str] = self._get_data_context_id_override()
         if (
             project_config_usage_stats.data_context_id
@@ -393,6 +410,7 @@ class DataContext(BaseDataContext):
         ):
             return True
 
+        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.
         global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
         if (
             project_config_usage_stats.usage_statistics_url
