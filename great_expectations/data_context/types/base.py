@@ -61,7 +61,7 @@ def object_to_yaml_str(obj):
 class AbstractConfig(ABC, SerializableDictDot):
     """Base class for Config objects. Sets the fields that must be included on a Config."""
 
-    def __init__(self, id_=None, name=None) -> None:
+    def __init__(self, id_: str = None, name: str = None) -> None:
         # Note: name and id are optional currently to avoid updating all documentation within
         # the scope of this work.
         if id_ is not None:
