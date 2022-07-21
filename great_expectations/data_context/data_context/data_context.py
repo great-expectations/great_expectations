@@ -23,9 +23,9 @@ from great_expectations.data_context.templates import (
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
+    AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     GeCloudConfig,
-    dataContextConfigSchema,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
@@ -363,13 +363,63 @@ class DataContext(BaseDataContext):
             ge_cloud_config=ge_cloud_config,
         )
 
-        # save project config if data_context_id auto-generated or global config values applied
-        project_config_dict = dataContextConfigSchema.dump(project_config)
-        if (
-            project_config.anonymous_usage_statistics.explicit_id is False
-            or project_config_dict != dataContextConfigSchema.dump(self.config)
-        ):
+        # Save project config if data_context_id auto-generated
+        if self._check_for_usage_stats_sync(project_config):
             self._save_project_config()
+
+    def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
+        """If there are differences between the DataContextConfig used to instantiate
+        the DataContext and the DataContextConfig assigned to `self.config`, we want
+        to save those changes to disk so that subsequent instantiations will utilize
+        the same values.
+
+        A small caveat is that if that difference stems from a global override (env var
+        or conf file), we don't want to write to disk. This is due to the fact that
+        those mechanisms allow for dynamic values and saving them will make them static.
+
+        Args:
+            project_config: The DataContextConfig used to instantiate the DataContext.
+
+        Returns:
+            A boolean signifying whether or not the current DataContext's config needs
+            to be persisted in order to recognize changes made to usage statistics.
+        """
+        if project_config.anonymous_usage_statistics.explicit_id is False:
+            return True
+
+        project_config_usage_stats: Optional[
+            AnonymizedUsageStatisticsConfig
+        ] = project_config.anonymous_usage_statistics
+        context_config_usage_stats: Optional[
+            AnonymizedUsageStatisticsConfig
+        ] = self.config.anonymous_usage_statistics
+
+        if project_config_usage_stats == context_config_usage_stats:
+            return False
+
+        if project_config_usage_stats is None or context_config_usage_stats is None:
+            return True
+
+        # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.
+        global_data_context_id: Optional[str] = self._get_data_context_id_override()
+        if (
+            project_config_usage_stats.data_context_id
+            != context_config_usage_stats.data_context_id
+            and context_config_usage_stats.data_context_id != global_data_context_id
+        ):
+            return True
+
+        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.
+        global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
+        if (
+            project_config_usage_stats.usage_statistics_url
+            != context_config_usage_stats.usage_statistics_url
+            and context_config_usage_stats.usage_statistics_url
+            != global_usage_stats_url
+        ):
+            return True
+
+        return False
 
     def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
         """
