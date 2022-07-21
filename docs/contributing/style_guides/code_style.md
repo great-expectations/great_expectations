@@ -65,6 +65,24 @@ flake8 <PATH/TO/YOUR/CHANGES>
 pyupgrade <PATH/TO/YOUR/CHANGES> --py3-plus
 ```
 
+### Type Checking
+
+Our CI system will perform static type-checking using [mypy](https://mypy.readthedocs.io/en/stable/index.html#) on select modules & packages.
+
+Type-checked modules.
+
+```
+data_asset
+exceptions
+jupyter_ux
+profile
+self_check
+types
+```
+
+To verify your code will pass the CI type-checker, run `invoke type-check --install-types`.
+Or [run `mypy`](https://mypy.readthedocs.io/en/stable/running_mypy.html) directly against the packages listed above.
+
 ### Expectations
 
 * **Use unambiguous Expectation names**, even if they’re a bit longer, e.g. `expect_columns_to_match_ordered_list` instead of `expect_columns_to_be`.

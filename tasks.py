@@ -144,6 +144,8 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
 def type_check(ctx, packages, install_types=False, show_default_packages=False):
     """Run mypy static type-checking on select packages."""
     if show_default_packages:
+        # Use this to keep the Type-checking section of the docs up to date.
+        # https://docs.greatexpectations.io/docs/contributing/style_guides/code_style#type-checking
         print("\n".join(DEFAULT_PACKAGES_TO_TYPE_CHECK))
         raise invoke.Exit(code=0)
 
