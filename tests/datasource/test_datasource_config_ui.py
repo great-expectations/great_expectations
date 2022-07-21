@@ -53,8 +53,6 @@ def test_PandasDatasource_config(default_pandas_datasource_config):
 def test_SqlAlchemyDatasource_config(default_sql_alchemy_datasource_config):
 
     datasource_config = DatasourceConfig(
-        name="custom_datasource_name",
-        id_="some_id",
         class_name="SqlAlchemyDatasource",
         credentials={
             "drivername": "custom_drivername",
@@ -70,7 +68,6 @@ def test_SqlAlchemyDatasource_config(default_sql_alchemy_datasource_config):
 
     datasource_config_schema = DatasourceConfigSchema()
     assert datasource_config_schema.dump(datasource_config) == desired_config
-    print(datasource_config_schema.dump(datasource_config))
 
 
 def test_SparkDatasource_config(default_spark_datasource_config):
