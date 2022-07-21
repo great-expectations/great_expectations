@@ -1160,7 +1160,7 @@ class DataAssistantResult(SerializableDictDot):
         return chart
 
     @staticmethod
-    def _get_quantitative_metric_chart(
+    def _get_quantitative_metrics_chart(
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
         sequential: bool,
@@ -1376,7 +1376,7 @@ class DataAssistantResult(SerializableDictDot):
             )
 
     @staticmethod
-    def _get_interactive_metric_chart(
+    def _get_interactive_metrics_chart(
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
@@ -3235,19 +3235,19 @@ class DataAssistantResult(SerializableDictDot):
             if DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=nominal_metrics
             ):
-                plot_impl = self._get_nominal_metric_chart
+                plot_impl = self._get_nominal_metrics_chart
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=ordinal_metrics
             ):
-                plot_impl = self._get_ordinal_metric_chart
+                plot_impl = self._get_ordinal_metrics_chart
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=quantitative_metrics
             ):
-                plot_impl = self._get_quantitative_metric_chart
+                plot_impl = self._get_quantitative_metrics_chart
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=temporal_metrics
             ):
-                plot_impl = self._get_temporal_metric_chart
+                plot_impl = self._get_temporal_metrics_chart
 
             return plot_impl(
                 df=df,
@@ -3421,19 +3421,19 @@ class DataAssistantResult(SerializableDictDot):
             if DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=nominal_metrics
             ):
-                plot_impl = self._get_interactive_nominal_metric_chart
+                plot_impl = self._get_interactive_nominal_metrics_chart
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=ordinal_metrics
             ):
-                plot_impl = self._get_interactive_ordinal_metric_chart
+                plot_impl = self._get_interactive_ordinal_metrics_chart
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=quantitative_metrics
             ):
-                plot_impl = self._get_interactive_metric_chart
+                plot_impl = self._get_interactive_metrics_chart
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=temporal_metrics
             ):
-                plot_impl = self._get_interactive_temporal_metric_chart
+                plot_impl = self._get_interactive_temporal_metrics_chart
 
             return [
                 plot_impl(
@@ -3712,13 +3712,13 @@ class DataAssistantResult(SerializableDictDot):
         )
 
     @staticmethod
-    def _get_ordinal_metric_chart(
+    def _get_ordinal_metrics_chart(
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
-        return DataAssistantResult._get_quantitative_metric_chart(
+        return DataAssistantResult._get_quantitative_metrics_chart(
             df=df,
             sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
@@ -3726,13 +3726,13 @@ class DataAssistantResult(SerializableDictDot):
         )
 
     @staticmethod
-    def _get_temporal_metric_chart(
+    def _get_temporal_metrics_chart(
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
-        return DataAssistantResult._get_quantitative_metric_chart(
+        return DataAssistantResult._get_quantitative_metrics_chart(
             df=df,
             sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
@@ -3779,7 +3779,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
     @staticmethod
-    def _get_interactive_nominal_metric_chart(
+    def _get_interactive_nominal_metrics_chart(
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
@@ -3789,25 +3789,25 @@ class DataAssistantResult(SerializableDictDot):
         )
 
     @staticmethod
-    def _get_interactive_ordinal_metric_chart(
+    def _get_interactive_ordinal_metrics_chart(
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.LayerChart:
-        return DataAssistantResult._get_interactive_metric_chart(
+        return DataAssistantResult._get_interactive_s(
             column_dfs=column_dfs,
             sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
         )
 
     @staticmethod
-    def _get_interactive_temporal_metric_chart(
+    def _get_interactive_temporal_metrics_chart(
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.LayerChart:
-        return DataAssistantResult._get_interactive_metric_chart(
+        return DataAssistantResult._get_interactive_metrics_chart(
             column_dfs=column_dfs,
-            santizied_metric_name=metric_names,
+            santizied_metric_name=sanitized_metric_names,
             sequential=sequential,
         )
