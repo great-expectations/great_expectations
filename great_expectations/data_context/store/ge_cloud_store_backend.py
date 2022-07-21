@@ -88,7 +88,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         assert ge_cloud_resource_type or ge_cloud_resource_name, (
             "Must provide either ge_cloud_resource_type or " "ge_cloud_resource_name"
         )
+
         self._ge_cloud_base_url = ge_cloud_base_url
+
         self._ge_cloud_resource_name = (
             ge_cloud_resource_name
             or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_type]
@@ -278,7 +280,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def ge_cloud_credentials(self) -> dict:
         return self._ge_cloud_credentials
 
-    def list_keys(self) -> List[Tuple[str, Any]]:
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[str, Any]]:
         url = urljoin(
             self.ge_cloud_base_url,
             f"organizations/"
