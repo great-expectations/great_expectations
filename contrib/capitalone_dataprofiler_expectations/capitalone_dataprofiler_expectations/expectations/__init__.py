@@ -33,3 +33,6 @@ from .expect_profile_numeric_columns_diff_less_than_or_equal_to_threshold import
 from .expect_profile_numeric_columns_diff_less_than_threshold import (
     ExpectProfileNumericColumnsDiffLessThanThreshold,
 )
+from .expect_profile_numeric_columns_percent_diff_between_exclusive_threshold_range import (
+    ExpectProfileNumericColumnsPercentDiffBetweenExclusiveThresholdRange,
+)
