@@ -1044,7 +1044,7 @@ class OnboardingDataAssistant(DataAssistant):
         # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
         variables: dict = {
-            "cardinality_limit_mode": CardinalityLimitMode.FEW.value,
+            "cardinality_limit_mode": CardinalityLimitMode.FEW.name,
             "mostly": 1.0,
             "strict_min": False,
             "strict_max": False,
