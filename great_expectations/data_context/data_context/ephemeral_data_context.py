@@ -66,12 +66,6 @@ class EphemeralDataContext(AbstractDataContext):
         )
         self._datasource_store = datasource_store
 
-        # Required to populate the store with values to be used downstream
-        for datasource_name, datasource_config in self.config.datasources.items():
-            self._datasource_store.set_by_name(
-                datasource_name=datasource_name, datasource_config=datasource_config
-            )
-
     def _save_project_config(self) -> None:
         """Since EphemeralDataContext does not have config as a file, display logging message instead"""
         logger.debug(
