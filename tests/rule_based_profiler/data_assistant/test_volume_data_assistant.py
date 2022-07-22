@@ -1029,6 +1029,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                 },
                 "categorical_columns_rule": {
                     "variables": {
+                        "cardinality_limit_mode": "FEW",
                         "mostly": 1.0,
                         "strict_min": False,
                         "strict_max": False,
@@ -1040,16 +1041,12 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "truncate_values": {
                             "lower_bound": 0.0,
                         },
-                        "round_decimals": 1,
+                        "round_decimals": 12,
                     },
                     "domain_builder": {
                         "allowed_semantic_types_passthrough": ["logic"],
                         "class_name": "CategoricalColumnDomainBuilder",
-                        "cardinality_limit_mode": {
-                            "name": "FEW",
-                            "max_unique_values": 100,
-                            "metric_name_defining_limit": "column.distinct_values.count",
-                        },
+                        "cardinality_limit_mode": "$variables.cardinality_limit_mode",
                         "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
                         "exclude_column_names": sorted(
                             [
@@ -1858,7 +1855,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
         # include_semantic_types=include_semantic_types,
         # exclude_semantic_types=exclude_semantic_types,
         # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        cardinality_limit_mode=CardinalityLimitMode.FEW,
+        # cardinality_limit_mode=CardinalityLimitMode.FEW,
         # max_unique_values=max_unique_values,
         # max_proportion_unique=max_proportion_unique,
         # column_value_uniqueness_rule={
