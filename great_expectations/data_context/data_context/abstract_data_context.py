@@ -1473,19 +1473,20 @@ class AbstractDataContext(ABC):
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
-        datasource_keys: List[
-            Union[str, Tuple[str, str]]
-        ] = self._datasource_store.list_keys()
+        config: DataContextConfig = self.get_config_with_variables_substituted(
+            self.config
+        )
+        datasources: Dict[str, DatasourceConfig] = cast(
+            Dict[str, DatasourceConfig], config.datasources
+        )
 
-        # In the case that our Store/StoreBackend generates tuple keys, we want to extract the datasource name
-        if datasource_keys and isinstance(datasource_keys[0], tuple):
-            datasource_keys = [key[1] for key in datasource_keys]
-
-        for datasource_name in datasource_keys:
+        for datasource_name, datasource_config in datasources.items():
             try:
-                datasource: Optional[
-                    Union[LegacyDatasource, BaseDatasource]
-                ] = self.get_datasource(datasource_name=datasource_name)
+                config = copy.deepcopy(datasource_config)
+                config_dict = dict(datasourceConfigSchema.dump(config))
+                datasource = self._instantiate_datasource_from_config(
+                    name=datasource_name, config=config_dict
+                )
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
