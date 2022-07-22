@@ -603,11 +603,10 @@ class AbstractDataContext(ABC):
         """
         datasources: List[dict] = []
         substitutions: dict = self._determine_substitutions()
+
         datasource_name: str
-        for datasource_name in self._datasource_store.list_keys():
-            datasource_config: DatasourceConfig = (
-                self._datasource_store.retrieve_by_name(datasource_name)
-            )
+        datasource_config: DatasourceConfig
+        for datasource_name, datasource_config in self.config.datasources.items():
             datasource_dict: dict = datasource_config.to_json_dict()
             datasource_dict["name"] = datasource_name
             substituted_config: dict = cast(
