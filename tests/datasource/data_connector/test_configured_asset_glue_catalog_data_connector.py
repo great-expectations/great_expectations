@@ -258,7 +258,9 @@ def test_instantiation_with_batch_spec_passthrough(
     batch = Batch(data=batch_data)
 
     validator = Validator(execution_engine, batches=[batch])
-    assert len(validator.head(fetch_all=True)) == 664
+    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a
+    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get as much as 60% of the rows.
+    assert len(validator.head(fetch_all=True)) < 788
 
 
 @mock_glue
@@ -522,7 +524,9 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_asset_confi
     batch = Batch(data=batch_data)
 
     validator = Validator(execution_engine, batches=[batch])
-    assert len(validator.head(fetch_all=True)) == 664
+    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a
+    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get as much as 60% of the rows.
+    assert len(validator.head(fetch_all=True)) < 788
 
 
 @mock_glue
@@ -560,7 +564,9 @@ def test_get_batch_data_and_metadata_with_sampling_method__random_in_batch_spec_
     batch = Batch(data=batch_data)
 
     validator = Validator(execution_engine, batches=[batch])
-    assert len(validator.head(fetch_all=True)) == 664
+    # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a
+    # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get as much as 60% of the rows.
+    assert len(validator.head(fetch_all=True)) < 788
 
 
 @mock_glue
