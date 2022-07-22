@@ -130,7 +130,6 @@ class DataAssistantResult(SerializableDictDot):
     }
 
     ALLOWED_KEYS = {
-        "_batch_id_to_batch_identifier_display_name_map",
         "profiler_config",
         "profiler_execution_time",
         "rule_execution_time",
@@ -138,7 +137,6 @@ class DataAssistantResult(SerializableDictDot):
         "expectation_configurations",
         "citation",
         "execution_time",
-        "_usage_statistics_handler",
     }
 
     IN_JUPYTER_NOTEBOOK_KEYS = {
@@ -198,7 +196,6 @@ class DataAssistantResult(SerializableDictDot):
             ],
             "citation": convert_to_json_serializable(data=self.citation),
             "execution_time": convert_to_json_serializable(data=self.execution_time),
-            "_usage_statistics_handler": self._usage_statistics_handler.__class__.__name__,
         }
 
     def to_json_dict(self) -> dict:
