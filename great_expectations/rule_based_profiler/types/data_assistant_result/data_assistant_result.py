@@ -1195,7 +1195,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column
             for column in df.columns
-            if column not in {sanitized_metric_names, batch_name}
+            if column not in list(sanitized_metric_names) + [batch_name]
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1910,7 +1910,7 @@ class DataAssistantResult(SerializableDictDot):
 
             line_and_points_list.append(line + points)
 
-        return alt.layer(line_and_points_list)
+        return alt.layer(*line_and_points_list)
 
     @staticmethod
     def _get_bar_chart(
@@ -1950,7 +1950,7 @@ class DataAssistantResult(SerializableDictDot):
 
             bars_list.append(bars)
 
-        return alt.layer(bars_list)
+        return alt.layer(*bars_list)
 
     @staticmethod
     def _get_expect_domain_values_to_be_between_line_chart(
@@ -2406,7 +2406,7 @@ class DataAssistantResult(SerializableDictDot):
                 .add_selection(selection)
             )
 
-        return alt.layer(lines_and_points_list)
+        return alt.layer(*lines_and_points_list)
 
     @staticmethod
     def _get_interactive_line_chart(
@@ -2478,7 +2478,7 @@ class DataAssistantResult(SerializableDictDot):
                 .transform_filter(selection)
             )
 
-        return alt.layer(line_and_points_list)
+        return alt.layer(*line_and_points_list)
 
     @staticmethod
     def _get_interactive_bar_chart(
@@ -2543,7 +2543,7 @@ class DataAssistantResult(SerializableDictDot):
 
             bars_list.append(bars)
 
-        return alt.layer(bars_list)
+        return alt.layer(*bars_list)
 
     @staticmethod
     def _get_interactive_detail_expect_column_values_to_be_between_line_chart(
@@ -3676,20 +3676,23 @@ class DataAssistantResult(SerializableDictDot):
             for sanitized_metric_name in sanitized_metric_names
         ):
             if (include_column_names is not None) or (exclude_column_names is not None):
-                all_columns = df[metric_names].apply(pd.Series).values.tolist()
-                for record in all_columns:
-                    new_column_list = []
-                    for column in record:
-                        if (
-                            include_column_names is not None
-                            and column in include_column_names
-                        ) or (
-                            exclude_column_names is not None
-                            and column not in exclude_column_names
-                        ):
-                            new_column_list.append(column)
-                    new_record_list.append(new_column_list)
-                df[sanitized_metric_names] = new_record_list
+                for sanitized_metric_name in sanitized_metric_names:
+                    all_columns = (
+                        df[sanitized_metric_names].apply(pd.Series).values.tolist()
+                    )
+                    for record in all_columns:
+                        new_column_list = []
+                        for column in record:
+                            if (
+                                include_column_names is not None
+                                and column in include_column_names
+                            ) or (
+                                exclude_column_names is not None
+                                and column not in exclude_column_names
+                            ):
+                                new_column_list.append(column)
+                        new_record_list.append(new_column_list)
+                    df[sanitized_metric_name] = new_record_list
 
         return self._chart_domain_values(
             expectation_type=expectation_type,
