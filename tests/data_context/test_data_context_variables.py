@@ -1,5 +1,4 @@
 import copy
-import os
 import pathlib
 import random
 import string
@@ -134,13 +133,12 @@ def cloud_data_context(
 ) -> CloudDataContext:
     project_path = tmp_path / "cloud_data_context"
     project_path.mkdir()
-    project_path = str(project_path)
-    context_root_dir = os.path.join(project_path, "great_expectations")
+    context_root_dir = project_path / "great_expectations"
 
     cloud_data_context = CloudDataContext(
         project_config=data_context_config,
         ge_cloud_config=ge_cloud_config_e2e,
-        context_root_dir=context_root_dir,
+        context_root_dir=str(context_root_dir),
     )
     return cloud_data_context
 
