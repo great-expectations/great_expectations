@@ -953,7 +953,6 @@ class DatasourceConfigSchema(Schema):
     id = fields.String(
         required=False,
         allow_none=True,
-        data_key="id",
     )
 
     class_name = fields.String(
