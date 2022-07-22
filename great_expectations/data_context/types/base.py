@@ -15,6 +15,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -56,19 +57,6 @@ def object_to_yaml_str(obj):
         yaml.dump(obj, string_stream)
         output_str = string_stream.getvalue()
     return output_str
-
-
-class AbstractConfig(ABC, SerializableDictDot):
-    """Base class for Config objects. Sets the fields that must be included on a Config."""
-
-    def __init__(self, id_: str = None, name: str = None) -> None:
-        # Note: name and id are optional currently to avoid updating all documentation within
-        # the scope of this work.
-        if id_ is not None:
-            self.id = id_
-        if name is not None:
-            self.name = name
-        super().__init__()
 
 
 class BaseYamlConfig(SerializableDictDot):
