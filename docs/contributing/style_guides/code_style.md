@@ -72,12 +72,7 @@ Our CI system will perform static type-checking using [mypy](https://mypy.readth
 Type-checked modules.
 
 ```
-data_asset
-exceptions
-jupyter_ux
 profile
-self_check
-types
 ```
 
 To verify your code will pass the CI type-checker, run `invoke type-check --install-types`.
