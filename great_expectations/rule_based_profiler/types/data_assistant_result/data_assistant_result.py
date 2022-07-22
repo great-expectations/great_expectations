@@ -138,7 +138,7 @@ class DataAssistantResult(SerializableDictDot):
         "expectation_configurations",
         "citation",
         "execution_time",
-        "usage_statistics_handler",
+        "_usage_statistics_handler",
     }
 
     IN_JUPYTER_NOTEBOOK_KEYS = {
@@ -161,7 +161,8 @@ class DataAssistantResult(SerializableDictDot):
     execution_time: Optional[
         float
     ] = None  # Overall DataAssistant execution time (in seconds).
-    usage_statistics_handler: Optional[UsageStatisticsHandler] = None
+    # Reference to "UsageStatisticsHandler" object for this "DataAssistantResult" object (if configured).
+    _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     def to_dict(self) -> dict:
         """
@@ -197,7 +198,7 @@ class DataAssistantResult(SerializableDictDot):
             ],
             "citation": convert_to_json_serializable(data=self.citation),
             "execution_time": convert_to_json_serializable(data=self.execution_time),
-            "usage_statistics_handler": self.usage_statistics_handler.__class__.__name__,
+            "_usage_statistics_handler": self._usage_statistics_handler.__class__.__name__,
         }
 
     def to_json_dict(self) -> dict:
@@ -339,13 +340,6 @@ class DataAssistantResult(SerializableDictDot):
                 )
 
         return auxiliary_info
-
-    @property
-    def _usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
-        """
-        Returns: "UsageStatisticsHandler" object for this DataAssistantResult object (if configured).
-        """
-        return self.usage_statistics_handler
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value,
