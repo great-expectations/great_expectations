@@ -795,7 +795,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: Set[MetricPlotComponent] = set()
+        metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             if sanitized_metric_name == "table_columns":
                 table_column: str = "table_column"
@@ -834,7 +834,7 @@ class DataAssistantResult(SerializableDictDot):
                     alt_type=metric_type,
                 )
 
-            metric_plot_components.add(metric_plot_component)
+            metric_plot_components.append(metric_plot_component)
 
         column_number_plot_component: PlotComponent = PlotComponent(
             name=column_number,
@@ -907,7 +907,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: Set[MetricPlotComponent] = set()
+        metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             if sanitized_metric_name == "table_columns":
                 table_column: str = "table_column"
@@ -929,7 +929,7 @@ class DataAssistantResult(SerializableDictDot):
                     alt_type=metric_type,
                 )
 
-            metric_plot_components.add(metric_plot_component)
+            metric_plot_components.append(metric_plot_component)
 
         # we need at least one record to plot the column_set as text
         if column_set is not None:
@@ -970,7 +970,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_sequential_isotype_chart(
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
@@ -1041,7 +1041,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_nonsequential_isotype_chart(
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
@@ -1113,7 +1113,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_sequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
@@ -1141,7 +1141,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
@@ -1184,16 +1184,18 @@ class DataAssistantResult(SerializableDictDot):
         """
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: Set[MetricPlotComponent] = set()
+        metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component: MetricPlotComponent = MetricPlotComponent(
                 name=sanitized_metric_name, alt_type=metric_type
             )
-            metric_plot_components.add(metric_plot_component)
+            metric_plot_components.append(metric_plot_component)
 
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
-            column for column in df.columns if column not in {metric_name, batch_name}
+            column
+            for column in df.columns
+            if column not in {sanitized_metric_names, batch_name}
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1284,12 +1286,12 @@ class DataAssistantResult(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: Set[MetricPlotComponent] = set()
+        metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component = MetricPlotComponent(
                 name=sanitized_metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
             )
-            metric_plot_components.add(metric_plot_component)
+            metric_plot_components.append(metric_plot_component)
         min_value_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=min_value,
@@ -1418,12 +1420,12 @@ class DataAssistantResult(SerializableDictDot):
         )
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: Set[MetricPlotComponent] = set()
+        metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component = MetricPlotComponent(
                 name=sanitized_metric_name, alt_type=metric_type
             )
-            metric_plot_components.add(metric_plot_component)
+            metric_plot_components.append(metric_plot_component)
 
         domain_name: str = "column"
         domain_plot_component: DomainPlotComponent = DomainPlotComponent(
@@ -1488,12 +1490,12 @@ class DataAssistantResult(SerializableDictDot):
         )
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: Set[MetricPlotComponent] = set()
+        metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component: MetricPlotComponent = MetricPlotComponent(
                 name=sanitized_metric_name, alt_type=metric_type
             )
-            metric_plot_components.add(metric_plot_component)
+            metric_plot_components.append(metric_plot_component)
 
         domain_name: str = "column"
         domain_plot_component: DomainPlotComponent = DomainPlotComponent(
@@ -1574,7 +1576,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: Set[MetricPlotComponent] = set()
+        metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component: MetricPlotComponent = MetricPlotComponent(
                 name=sanitized_metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
@@ -1745,12 +1747,12 @@ class DataAssistantResult(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
         metric_plot_component: MetricPlotComponent
-        metric_plot_components: Set[MetricPlotComponent] = set()
+        metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component: MetricPlotComponent = MetricPlotComponent(
                 name=sanitized_metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
             )
-            metric_plot_components.add(metric_plot_component)
+            metric_plot_components.append(metric_plot_component)
 
         domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name="column",
@@ -1869,7 +1871,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_line_chart(
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
     ) -> alt.LayerChart:
@@ -1913,7 +1915,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_bar_chart(
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
     ) -> alt.LayerChart:
@@ -1953,7 +1955,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_expect_domain_values_to_be_between_line_chart(
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         min_value_plot_component: PlotComponent,
@@ -2040,7 +2042,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_expect_domain_values_to_be_between_bar_chart(
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         min_value_plot_component: ExpectationKwargPlotComponent,
@@ -2136,7 +2138,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_interactive_detail_multi_line_chart(
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         expectation_type: Optional[str] = None,
@@ -2409,7 +2411,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_interactive_line_chart(
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         expectation_type: Optional[str] = None,
@@ -2481,7 +2483,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_interactive_bar_chart(
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         expectation_type: Optional[str] = None,
@@ -2547,7 +2549,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_detail_expect_column_values_to_be_between_line_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         min_value_plot_component: PlotComponent,
@@ -2670,7 +2672,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_to_be_between_line_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         min_value_plot_component: PlotComponent,
@@ -2812,7 +2814,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_to_be_between_bar_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_components: Set[MetricPlotComponent],
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         min_value_plot_component: PlotComponent,
@@ -3255,7 +3257,7 @@ class DataAssistantResult(SerializableDictDot):
                     [
                         str,
                         pd.DataFrame,
-                        Set[str],
+                        List[str],
                         bool,
                         Optional[str],
                     ],
@@ -3292,7 +3294,7 @@ class DataAssistantResult(SerializableDictDot):
                 Callable[
                     [
                         pd.DataFrame,
-                        Set[str],
+                        List[str],
                         bool,
                         Optional[str],
                     ],
@@ -3385,7 +3387,7 @@ class DataAssistantResult(SerializableDictDot):
                             == domain.domain_kwargs.column
                         ):
                             df: pd.DataFrame = self._create_df_for_charting(
-                                sanitized_metric_names=sanitized_metric_names,
+                                metric_names=metric_name,
                                 attributed_values=attributed_values,
                                 expectation_configuration=expectation_configuration,
                                 plot_mode=plot_mode,
@@ -3442,7 +3444,7 @@ class DataAssistantResult(SerializableDictDot):
                     [
                         str,
                         List[ColumnDataFrame],
-                        Set[str],
+                        List[str],
                         bool,
                     ],
                     alt.VConcatChart,
@@ -3481,7 +3483,7 @@ class DataAssistantResult(SerializableDictDot):
                 Callable[
                     [
                         List[ColumnDataFrame],
-                        Set[str],
+                        List[str],
                         bool,
                     ],
                     alt.Chart,
@@ -3628,7 +3630,7 @@ class DataAssistantResult(SerializableDictDot):
                         expectation_configuration=expectation_configuration,
                         plot_mode=plot_mode,
                     )
-                    df = df.merge(metric_df)
+                    df = df.merge(metric_df, left_index=True, right_index=True)
 
                 column_name: str = expectation_configuration.kwargs["column"]
                 column_df: ColumnDataFrame = ColumnDataFrame(column_name, df)
@@ -3657,15 +3659,24 @@ class DataAssistantResult(SerializableDictDot):
                 expectation_configuration=expectation_configuration,
                 plot_mode=plot_mode,
             )
-            df = df.merge(metric_df)
+            df = df.merge(metric_df, left_index=True, right_index=True)
+
+        sanitized_metric_names: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_metric_names(
+            metric_names=metric_names
+        )
 
         # If columns are included/excluded we need to filter them out for table level metrics here
         table_column_metrics: List[str] = ["table_columns"]
         new_column_list: List[str]
         new_record_list: List[List[str]] = []
-        if metric_name in table_column_metrics:
+        if all(
+            sanitized_metric_name in table_column_metrics
+            for sanitized_metric_name in sanitized_metric_names
+        ):
             if (include_column_names is not None) or (exclude_column_names is not None):
-                all_columns = df[metric_name].apply(pd.Series).values.tolist()
+                all_columns = df[metric_names].apply(pd.Series).values.tolist()
                 for record in all_columns:
                     new_column_list = []
                     for column in record:
@@ -3678,7 +3689,7 @@ class DataAssistantResult(SerializableDictDot):
                         ):
                             new_column_list.append(column)
                     new_record_list.append(new_column_list)
-                df[metric_name] = new_record_list
+                df[sanitized_metric_names] = new_record_list
 
         return self._chart_domain_values(
             expectation_type=expectation_type,
@@ -3862,7 +3873,7 @@ class DataAssistantResult(SerializableDictDot):
         sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.LayerChart:
-        return DataAssistantResult._get_interactive_s(
+        return DataAssistantResult._get_interactive_metrics_chart(
             column_dfs=column_dfs,
             sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
@@ -3876,6 +3887,6 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.LayerChart:
         return DataAssistantResult._get_interactive_metrics_chart(
             column_dfs=column_dfs,
-            santizied_metric_name=sanitized_metric_names,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
         )

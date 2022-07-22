@@ -163,7 +163,7 @@ class ExpectationKwargPlotComponent(PlotComponent):
 
 
 def determine_plot_title(
-    metric_plot_components: Set[MetricPlotComponent],
+    metric_plot_components: List[MetricPlotComponent],
     batch_plot_component: BatchPlotComponent,
     domain_plot_component: DomainPlotComponent,
     expectation_type: Optional[str] = None,
@@ -173,7 +173,7 @@ def determine_plot_title(
     Conditionally renders a subtitle if relevant (specifically with column domain)
 
     Args:
-        metric_plot_components: A set of plot utilities corresponding to each metric.
+        metric_plot_components: A list of plot utilities corresponding to each metric.
         batch_plot_component: Plot utility corresponding to a given batch.
         domain_plot_component: Plot utility corresponding to a given domain.
         expectation_type: The name of the expectation.
