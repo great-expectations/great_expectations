@@ -77,7 +77,7 @@ stages:
               EXIT_STATUS=0
               invoke fmt --check --exclude docs/ || EXIT_STATUS=$?
               invoke lint || EXIT_STATUS=$?
-              invoke upgrade || EXIT_STATUS=$?
+              pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
   - stage: custom_checks
