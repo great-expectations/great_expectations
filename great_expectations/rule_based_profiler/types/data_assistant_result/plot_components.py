@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Optional, Set, Union
 
 import altair as alt
 
@@ -149,7 +149,7 @@ class BatchPlotComponent(PlotComponent):
 
 @dataclass(frozen=True)
 class ExpectationKwargPlotComponent(PlotComponent):
-    metric_plot_component: Optional[MetricPlotComponent] = None
+    title: Optional[str] = None
 
     def plot_on_axis(self) -> alt.Y:
         """
@@ -158,12 +158,12 @@ class ExpectationKwargPlotComponent(PlotComponent):
         return alt.Y(
             self.name,
             type=self.alt_type,
-            title=self.metric_plot_component.title,
+            title=self.title,
         )
 
 
 def determine_plot_title(
-    metric_plot_component: MetricPlotComponent,
+    metric_plot_components: Set[MetricPlotComponent],
     batch_plot_component: BatchPlotComponent,
     domain_plot_component: DomainPlotComponent,
     expectation_type: Optional[str] = None,
@@ -173,9 +173,10 @@ def determine_plot_title(
     Conditionally renders a subtitle if relevant (specifically with column domain)
 
     Args:
-        metric_plot_component: Plot utility corresponding to a given metric.
+        metric_plot_components: A set of plot utilities corresponding to each metric.
         batch_plot_component: Plot utility corresponding to a given batch.
         domain_plot_component: Plot utility corresponding to a given domain.
+        expectation_type: The name of the expectation.
 
     Returns:
         An Altair TitleParam object
@@ -186,7 +187,7 @@ def determine_plot_title(
         contents = expectation_type
     else:
         contents: str = (
-            f"{metric_plot_component.title} per {batch_plot_component.title}"
+            f"{metric_plot_components[0].title} per {batch_plot_component.title}"
         )
     subtitle: Optional[str] = domain_plot_component.subtitle
     domain_selector: Optional[str] = domain_plot_component.name
