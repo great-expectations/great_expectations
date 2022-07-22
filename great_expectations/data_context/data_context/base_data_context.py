@@ -364,8 +364,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         logger.debug("Starting DataContext._save_project_config")
 
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                self.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
 
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.

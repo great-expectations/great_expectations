@@ -70,7 +70,7 @@ class VolumeDataAssistant(DataAssistant):
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
         return VolumeDataAssistantResult(
-            batch_id_to_batch_identifier_display_name_map=data_assistant_result.batch_id_to_batch_identifier_display_name_map,
+            _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
@@ -177,7 +177,7 @@ class VolumeDataAssistant(DataAssistant):
                 include_semantic_types=None,
                 exclude_semantic_types=None,
                 allowed_semantic_types_passthrough=None,
-                cardinality_limit_mode=CardinalityLimitMode.REL_100,
+                cardinality_limit_mode=f"{VARIABLES_KEY}cardinality_limit_mode",
                 max_unique_values=None,
                 max_proportion_unique=None,
                 data_context=None,
@@ -226,6 +226,7 @@ class VolumeDataAssistant(DataAssistant):
         # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
         variables: dict = {
+            "cardinality_limit_mode": CardinalityLimitMode.FEW.name,
             "mostly": 1.0,
             "strict_min": False,
             "strict_max": False,
@@ -239,7 +240,7 @@ class VolumeDataAssistant(DataAssistant):
                 "lower_bound": 0.0,
                 "upper_bound": None,
             },
-            "round_decimals": 1,
+            "round_decimals": 12,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,

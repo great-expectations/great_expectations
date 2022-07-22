@@ -461,7 +461,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             batches = {}
 
         data_assistant_result: DataAssistantResult = DataAssistantResult(
-            batch_id_to_batch_identifier_display_name_map=self.batch_id_to_batch_identifier_display_name_map(),
+            _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
             usage_statistics_handler=usage_statistics_handler,
         )
@@ -589,7 +589,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         return parameter_values_for_fully_qualified_parameter_names_by_domain
 
-    def batch_id_to_batch_identifier_display_name_map(
+    def _batch_id_to_batch_identifier_display_name_map(
         self,
     ) -> Dict[str, Set[Tuple[str, Any]]]:
         """

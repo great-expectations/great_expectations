@@ -65,6 +65,12 @@ stores:
 If the container is called ``$web`` (for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
 :::
 
+:::note
+Various authentication and configuration options are available as documented in [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
+:::
+
+
+
 ### 4. Copy existing Validation Results JSON files to the Azure blob (This step is optional)
 
 One way to copy Validation Results into Azure Blob Storage is by using the ``az storage blob upload`` command, which is part of the Azure SDK. The following example will copy one Validation Result from a local folder to the Azure blob.   Information on other ways to copy Validation Result JSON files, like the Azure Storage browser in the Azure Portal, can be found in the [Documentation for Azure](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal).

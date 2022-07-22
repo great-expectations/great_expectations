@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import Dict, List, Optional
 
 TYPE_HINT_ERROR_THRESHOLD: int = (
-    2485  # This number is to be reduced as we annotate more functions!
+    2472  # This number is to be reduced as we annotate more functions!
 )
 
 logger = logging.getLogger(__name__)
@@ -126,7 +126,11 @@ def _build_deviations_dict(mypy_results: List[str]) -> Dict[str, List[str]]:
     return deviations_dict
 
 
-if __name__ == "__main__":
+def main():
     changed_files: List[str] = get_changed_files("origin/develop")
     untyped_def_deviations: List[str] = run_mypy("great_expectations")
     render_deviations(changed_files, untyped_def_deviations)
+
+
+if __name__ == "__main__":
+    main()
