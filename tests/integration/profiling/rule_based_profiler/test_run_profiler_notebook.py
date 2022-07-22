@@ -1,10 +1,11 @@
 import logging
 import os
 import shutil
-from typing import List, Optional
+from typing import List
 
 import nbformat
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
+from nbformat import NotebookNode
 
 from great_expectations.data_context.util import file_relative_path
 
@@ -51,14 +52,14 @@ def test_run_rbp_notebook(tmp_path):
     )
 
     with open(notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
+        nb: NotebookNode = nbformat.read(f, as_version=4)
 
-    ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=60, kernel_name="python3")
 
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
-        msg = f'Error executing the notebook "{notebook_path}".\n\n'
+        msg: str = f'Error executing the notebook "{notebook_path}".\n\n'
         msg += f'See notebook "{output_notebook_path}" for the traceback.'
         print(msg)
         raise
@@ -96,12 +97,12 @@ def test_run_data_assistants_notebook(tmp_path):
     with open(notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
 
-    ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=60, kernel_name="python3")
 
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
-        msg = f'Error executing the notebook "{notebook_path}".\n\n'
+        msg: str = f'Error executing the notebook "{notebook_path}".\n\n'
         msg += f'See notebook "{output_notebook_path}" for the traceback.'
         print(msg)
         raise
@@ -134,7 +135,7 @@ def test_run_self_initializing_expectations_notebook(tmp_path):
     )
 
     with open(notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
+        nb: NotebookNode = nbformat.read(f, as_version=4)
 
     ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
 
@@ -176,14 +177,14 @@ def test_run_multibatch_inferred_asset_example(tmp_path):
     )
 
     with open(notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
+        nb: NotebookNode = nbformat.read(f, as_version=4)
 
-    ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=60, kernel_name="python3")
 
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
-        msg = f'Error executing the notebook "{notebook_path}".\n\n'
+        msg: str = f'Error executing the notebook "{notebook_path}".\n\n'
         msg += f'See notebook "{output_notebook_path}" for the traceback.'
         print(msg)
         raise
@@ -221,14 +222,14 @@ def test_run_multibatch_configured_asset_example(tmp_path):
     )
 
     with open(notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
+        nb: NotebookNode = nbformat.read(f, as_version=4)
 
-    ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=60, kernel_name="python3")
 
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
-        msg = f'Error executing the notebook "{notebook_path}".\n\n'
+        msg: str = f'Error executing the notebook "{notebook_path}".\n\n'
         msg += f'See notebook "{output_notebook_path}" for the traceback.'
         print(msg)
         raise
