@@ -1856,11 +1856,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
         # include_semantic_types=include_semantic_types,
         # exclude_semantic_types=exclude_semantic_types,
         # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-<<<<<<< HEAD
         # cardinality_limit_mode=CardinalityLimitMode.FEW,
-=======
-        cardinality_limit_mode=CardinalityLimitMode.FEW,
->>>>>>> 7b57b4f87 (update VolumeDataAssistant tests (#5551))
         # max_unique_values=max_unique_values,
         # max_proportion_unique=max_proportion_unique,
         # column_value_uniqueness_rule={
