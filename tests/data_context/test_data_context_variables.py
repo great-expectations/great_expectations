@@ -439,6 +439,29 @@ def test_data_context_variables_save_config(
         )
 
 
+@pytest.mark.unit
+def test_data_context_variables_repr_and_str_only_reveal_config(
+    data_context_config: DataContextConfig,
+) -> None:
+    config = data_context_config
+
+    substitutions_key = "my_sensitive_information"
+    substitutions = {substitutions_key: "*****"}
+    variables = EphemeralDataContextVariables(
+        config=data_context_config, substitutions=substitutions
+    )
+
+    variables_str = str(variables)
+    variables_repr = repr(variables)
+
+    assert variables_str == str(config)
+    assert variables_repr == repr(config)
+    assert (
+        substitutions_key not in variables_str
+        and substitutions_key not in variables_repr
+    )
+
+
 def test_file_data_context_variables_e2e(
     monkeypatch, file_data_context: FileDataContext, progress_bars: ProgressBarsConfig
 ) -> None:
