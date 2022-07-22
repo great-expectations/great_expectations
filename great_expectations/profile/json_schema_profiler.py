@@ -49,7 +49,7 @@ class JsonSchemaProfiler(Profiler):
     def __init__(self, configuration: Optional[dict] = None) -> None:
         super().__init__(configuration)
 
-    def validate(self, schema: dict) -> bool:  # type: ignore
+    def validate(self, schema: dict) -> bool:  # type: ignore[override]
         if not isinstance(schema, dict):
             raise TypeError(
                 f"This profiler requires a schema of type dict and was passed a {type(schema)}"
@@ -218,7 +218,7 @@ class JsonSchemaProfiler(Profiler):
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/numeric.html#range"""
         object_types = self._get_object_types(details=details)
-        object_types = filter(  # type: ignore
+        object_types = filter(  # type: ignore[assignment]
             lambda object_type: object_type != JsonSchemaTypes.NULL.value, object_types
         )
         range_types = [JsonSchemaTypes.INTEGER.value, JsonSchemaTypes.NUMBER.value]

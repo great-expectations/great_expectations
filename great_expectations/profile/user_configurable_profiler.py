@@ -220,15 +220,13 @@ class UserConfigurableProfiler:
 
         """
         expectation_suite: ExpectationSuite
-        if (
-            len(self.profile_dataset.get_expectation_suite().expectations) > 0  # type: ignore
-        ):
+        if len(self.profile_dataset.get_expectation_suite().expectations) > 0:  # type: ignore[union-attr]
             # Only `Validator`` has `get_expectation_suite()`
             # noinspection PyProtectedMember
             suite_name: str = (
-                self.profile_dataset._expectation_suite.expectation_suite_name  # type: ignore
+                self.profile_dataset._expectation_suite.expectation_suite_name  # type: ignore[union-attr]
             )
-            self.profile_dataset._expectation_suite = ExpectationSuite(  # type: ignore
+            self.profile_dataset._expectation_suite = ExpectationSuite(  # type: ignore[union-attr]
                 expectation_suite_name=suite_name, data_context=None
             )
 
@@ -648,7 +646,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             )
         )
         # Return type mypy issue can be fixed by adding a str mixin to `OrderedProfilerCardinality`
-        return cardinality.name  # type: ignore
+        return cardinality.name  # type: ignore[return-value]
 
     def _add_semantic_types_by_column_from_config_to_column_info(self, column_name):
         """
