@@ -134,6 +134,7 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
 
 
 @invoke.task(
+    aliases=["types"],
     iterable=["packages"],
     help={
         "packages": f"One or more packages to type-check with mypy. (Default: {DEFAULT_PACKAGES_TO_TYPE_CHECK})",
