@@ -71,6 +71,9 @@ class DataContextVariables(ABC):
         if self.substitutions is None:
             self.substitutions = {}
 
+    def __str__(self) -> str:
+        return str(self.config)
+
     def __repr__(self) -> str:
         return repr(self.config)
 
