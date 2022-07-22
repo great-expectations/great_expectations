@@ -3,8 +3,8 @@ const removeMd = require('remove-markdown');
 const packageS3URL = "https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/package_manifests.json";
 const algoliasearch = require("algoliasearch");
 const client = algoliasearch(process.env.ALGOLIA_ACCOUNT, process.env.ALGOLIA_WRITE_KEY);
-const packageAlgoliaIndex = process.env.PACKAGE_INDEX;
-const packageExpecAlgoliaIndex = process.env.PACKAGE_EXPEC_INDEX;
+const packageAlgoliaIndex = process.env.ALGOLIA_PACKAGE_INDEX;
+const packageExpecAlgoliaIndex = process.env.ALGOLIA_PACKAGE_EXPEC_INDEX;
 const packageIndex = client.initIndex(packageAlgoliaIndex);
 const packageExpecIndex = client.initIndex(packageExpecAlgoliaIndex);
 

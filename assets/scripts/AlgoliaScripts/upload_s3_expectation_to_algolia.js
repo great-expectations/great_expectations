@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 const expecS3URL = "https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2.json";
 const algoliasearch = require("algoliasearch");
 const client = algoliasearch(process.env.ALGOLIA_ACCOUNT, process.env.ALGOLIA_WRITE_KEY);
-const expecAlgoliaIndex = process.env.EXPECTATION_INDEX;
+const expecAlgoliaIndex = process.env.ALGOLIA_EXPECTATION_INDEX;
 const index = client.initIndex(expecAlgoliaIndex);
 
 loadFromS3(expecS3URL).then(response => {
