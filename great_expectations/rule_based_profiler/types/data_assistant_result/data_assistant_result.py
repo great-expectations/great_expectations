@@ -130,6 +130,7 @@ class DataAssistantResult(SerializableDictDot):
     }
 
     ALLOWED_KEYS = {
+        "_batch_id_to_batch_identifier_display_name_map",
         "profiler_config",
         "profiler_execution_time",
         "rule_execution_time",
