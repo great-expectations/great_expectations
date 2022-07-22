@@ -12,9 +12,6 @@ jobs:
 
   stale:
     runs-on: ubuntu-latest
-    env:
-      ACTIONS_STEP_DEBUG: true  # DEBUG: toggle to false
-
     steps:
     - uses: actions/stale@v5
       with:
