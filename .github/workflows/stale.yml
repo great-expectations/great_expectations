@@ -19,7 +19,7 @@ jobs:
     - uses: actions/stale@v5
       with:
         # Debug
-        debug-only: true  # DEBUG: Toggle to false
+        debug-only: false  # DEBUG: Toggle to false
         start-date: '2022-01-01T00:00:00Z'  # ISO 8601 or RFC 2822
 
         # General
