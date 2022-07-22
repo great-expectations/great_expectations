@@ -178,7 +178,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         if ge_cloud_id:
             data["data"]["id"] = ge_cloud_id
-            url = urljoin(url, ge_cloud_id)
+            url = urljoin(f"{url}/", ge_cloud_id)
 
         try:
             response = requests.put(url, json=data, headers=self.auth_headers)

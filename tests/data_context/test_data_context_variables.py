@@ -1,7 +1,9 @@
 import copy
 import os
 import pathlib
-from typing import Any, Callable
+import random
+import string
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -126,7 +128,8 @@ def file_data_context(
 
 @pytest.fixture
 def cloud_data_context(
-    tmp_path: pathlib.Path, data_context_config: DataContextConfig
+    tmp_path: pathlib.Path,
+    data_context_config: DataContextConfig,
 ) -> CloudDataContext:
     ge_cloud_config = GeCloudConfig(
         base_url="https://api.dev.greatexpectations.io",
@@ -520,3 +523,37 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     success = cloud_data_context.variables.save_config()
 
     assert success is True
+
+
+@pytest.mark.integration
+def test_cloud_enabled_data_context_variables_e2e(monkeypatch):
+    randomized_plugins_directory_name = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+
+    monkeypatch.setenv("GE_CLOUD_BASE_URL", "")
+    monkeypatch.setenv("GE_CLOUD_ACCESS_TOKEN", "")
+    monkeypatch.setenv("GE_CLOUD_ORGANIZATION_ID", "")
+
+    breakpoint()
+    context = DataContext(
+        ge_cloud_mode=True,
+        ge_cloud_access_token="6284c351faa74ee6bcfcc6cfede25aac",
+        ge_cloud_organization_id="0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+        ge_cloud_base_url="https://api.dev.greatexpectations.io",
+    )
+
+    # assert context.variables.plugins_directory != randomized_plugins_directory_name
+
+    # context.variables.plugins_directory = randomized_plugins_directory_name
+
+    # assert context.variables.plugins_directory == randomized_plugins_directory_name
+
+    # context.variables.save_config()
+
+    # context = DataContext(
+    #     ge_cloud_mode=True,
+    #     ge_cloud_access_token="6284c351faa74ee6bcfcc6cfede25aac",
+    #     ge_cloud_organization_id="0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+    #     ge_cloud_base_url="https://api.dev.greatexpectations.io",
+    # )
+
+    # assert context.variables.plugins_directory == randomized_plugins_directory_name
