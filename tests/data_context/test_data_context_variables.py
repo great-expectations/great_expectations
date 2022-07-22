@@ -130,12 +130,8 @@ def file_data_context(
 def cloud_data_context(
     tmp_path: pathlib.Path,
     data_context_config: DataContextConfig,
+    ge_cloud_config_e2e: GeCloudConfig,
 ) -> CloudDataContext:
-    ge_cloud_config = GeCloudConfig(
-        base_url="https://api.dev.greatexpectations.io",
-        organization_id="0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-        access_token="6284c351faa74ee6bcfcc6cfede25aac",
-    )
     project_path = tmp_path / "cloud_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -143,7 +139,7 @@ def cloud_data_context(
 
     cloud_data_context = CloudDataContext(
         project_config=data_context_config,
-        ge_cloud_config=ge_cloud_config,
+        ge_cloud_config=ge_cloud_config_e2e,
         context_root_dir=context_root_dir,
     )
     return cloud_data_context
@@ -538,10 +534,17 @@ def test_file_data_context_variables_e2e(
 
 
 @pytest.mark.integration
+@pytest.mark.cloud
 def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     cloud_data_context: CloudDataContext,
     data_context_config: DataContextConfig,
 ) -> None:
+    """
+    What does this test do and why?
+
+    Ensures that the endpoint responsible for the DataContextVariables resource is accessible
+    through the Variables API.
+    """
     cloud_data_context.variables.config = data_context_config
     success = cloud_data_context.variables.save_config()
 
@@ -549,36 +552,48 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 
 
 @pytest.mark.integration
+@pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_cloud_enabled_data_context_variables_e2e(
-    mock_save_project_config: mock.MagicMock, monkeypatch
-):
-    randomized_plugins_directory_name = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    mock_save_project_config: mock.MagicMock, data_docs_sites: dict, monkeypatch
+) -> None:
+    """
+    What does this test do and why?
 
-    monkeypatch.setenv("GE_CLOUD_BASE_URL", "")
-    monkeypatch.setenv("GE_CLOUD_ACCESS_TOKEN", "")
-    monkeypatch.setenv("GE_CLOUD_ORGANIZATION_ID", "")
+    Tests the E2E workflow with a Cloud-enabled DataContext; as the CloudDataContext does not yet have 1-to-1
+    feature parity with the DataContext (as v0.15.15), this is the primary mechanism by which Great
+    Expectations Cloud interacts with variables.
+      1. User updates certain values and sets them as attributes.
+      2. User persists changes utilizing the save_config call defined by the Variables API.
+      3. Upon reading the result config from a GET request, we can confirm that changes were appropriately persisted.
 
-    context = DataContext(
-        ge_cloud_mode=True,
-        ge_cloud_access_token="6284c351faa74ee6bcfcc6cfede25aac",
-        ge_cloud_organization_id="0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-        ge_cloud_base_url="https://api.dev.greatexpectations.io",
-    )
+    It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
+    value in order to preserve sensitive information.
+    """
+    # Prepare updated plugins directory to set and save to the Cloud backend (ensuring we hide the true value behind $VARS syntax)
+    # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results
+    env_var_name = "MY_PLUGINS_DIRECTORY"
+    updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    monkeypatch.setenv(env_var_name, updated_plugins_dir)
 
-    assert context.variables.plugins_directory != randomized_plugins_directory_name
+    updated_data_docs_sites = data_docs_sites
+    new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    updated_data_docs_sites[new_site_name] = {}
 
-    context.variables.plugins_directory = randomized_plugins_directory_name
+    context = DataContext(ge_cloud_mode=True)
 
-    assert context.variables.plugins_directory == randomized_plugins_directory_name
+    assert context.variables.plugins_directory != f"${env_var_name}"
+    assert context.variables.data_docs_sites != updated_data_docs_sites
+
+    context.variables.plugins_directory = f"${env_var_name}"
+    context.variables.data_docs_sites = updated_data_docs_sites
+
+    assert context.variables.plugins_directory == updated_plugins_dir
+    assert context.variables.data_docs_sites == updated_data_docs_sites
 
     context.variables.save_config()
 
-    context = DataContext(
-        ge_cloud_mode=True,
-        ge_cloud_access_token="6284c351faa74ee6bcfcc6cfede25aac",
-        ge_cloud_organization_id="0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-        ge_cloud_base_url="https://api.dev.greatexpectations.io",
-    )
+    context = DataContext(ge_cloud_mode=True)
 
-    assert context.variables.plugins_directory == randomized_plugins_directory_name
+    assert context.variables.plugins_directory == updated_plugins_dir
+    assert context.variables.data_docs_sites == updated_data_docs_sites

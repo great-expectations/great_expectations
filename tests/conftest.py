@@ -2334,6 +2334,19 @@ checkpoint_store_name: default_checkpoint_store
 
 
 @pytest.fixture
+def ge_cloud_config_e2e() -> GeCloudConfig:
+    base_url = os.environ["GE_CLOUD_BASE_URL"]
+    organization_id = os.environ["GE_CLOUD_ORGANIZATION_ID"]
+    access_token = os.environ["GE_CLOUD_ACCESS_TOKEN"]
+    ge_cloud_config = GeCloudConfig(
+        base_url=base_url,
+        organization_id=organization_id,
+        access_token=access_token,
+    )
+    return ge_cloud_config
+
+
+@pytest.fixture
 @mock.patch(
     "great_expectations.data_context.store.DatasourceStore.list_keys",
     return_value=[],
