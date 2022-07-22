@@ -16,11 +16,7 @@ from great_expectations.data_context.types.base import DataContextConfig, GeClou
 
 
 @pytest.mark.integration
-@mock.patch(
-    "great_expectations.data_context.store.DatasourceStore.list_keys", return_value=[]
-)
 def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
-    mock_list_keys: mock.MagicMock,
     tmp_path: pathlib,
     data_context_config_with_datasources: DataContextConfig,
     ge_cloud_config: GeCloudConfig,
@@ -39,11 +35,7 @@ def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
 
 
 @pytest.mark.integration
-@mock.patch(
-    "great_expectations.data_context.store.DatasourceStore.list_keys", return_value=[]
-)
 def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
-    mock_list_keys: mock.MagicMock,
     tmp_path: pathlib,
     data_context_config_with_datasources: DataContextConfig,
 ) -> None:

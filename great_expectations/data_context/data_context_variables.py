@@ -71,6 +71,12 @@ class DataContextVariables(ABC):
         if self.substitutions is None:
             self.substitutions = {}
 
+    def __str__(self) -> str:
+        return str(self.config)
+
+    def __repr__(self) -> str:
+        return repr(self.config)
+
     @property
     def store(self) -> "DataContextStore":  # noqa: F821
         if self._store is None:
@@ -262,7 +268,7 @@ class DataContextVariables(ABC):
         )
 
 
-@dataclass
+@dataclass(repr=False)
 class EphemeralDataContextVariables(DataContextVariables):
     def _init_store(self) -> "DataContextStore":  # noqa: F821
         from great_expectations.data_context.store.data_context_store import (
@@ -277,7 +283,7 @@ class EphemeralDataContextVariables(DataContextVariables):
         return store
 
 
-@dataclass
+@dataclass(repr=False)
 class FileDataContextVariables(DataContextVariables):
     data_context: Optional["DataContext"] = None  # noqa: F821
 
@@ -311,7 +317,7 @@ class FileDataContextVariables(DataContextVariables):
         return store
 
 
-@dataclass
+@dataclass(repr=False)
 class CloudDataContextVariables(DataContextVariables):
     ge_cloud_base_url: Optional[str] = None
     ge_cloud_organization_id: Optional[str] = None
