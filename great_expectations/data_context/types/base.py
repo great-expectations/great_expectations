@@ -828,10 +828,12 @@ configuration to continue.
 class DatasourceConfig(AbstractConfig):
     def __init__(
         self,
-        name: str = None,  # Note: name is optional currently to avoid updating all documentation within
+        name: Optional[
+            str
+        ] = None,  # Note: name is optional currently to avoid updating all documentation within
         # the scope of this work.
-        id_: str = None,
-        class_name: str = None,
+        id_: Optional[str] = None,
+        class_name: Optional[str] = None,
         module_name: str = "great_expectations.datasource",
         execution_engine=None,
         data_connectors=None,
