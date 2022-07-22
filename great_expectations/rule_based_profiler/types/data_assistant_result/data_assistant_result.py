@@ -777,7 +777,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column
             for column in df.columns
-            if column not in [sanitized_metric_names, batch_name]
+            if column not in list(sanitized_metric_names) + [batch_name]
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -889,7 +889,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column
             for column in df.columns
-            if column not in [sanitized_metric_names, batch_name]
+            if column not in list(sanitized_metric_names) + [batch_name]
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1264,15 +1264,15 @@ class DataAssistantResult(SerializableDictDot):
             column
             for column in df.columns
             if column
-            not in {
-                sanitized_metric_names,
+            not in list(sanitized_metric_names)
+            + [
                 batch_name,
                 column_name,
                 max_value,
                 min_value,
                 strict_min,
                 strict_max,
-            }
+            ]
         ]
 
         batch_type: alt.StandardType
@@ -1406,7 +1406,9 @@ class DataAssistantResult(SerializableDictDot):
         batch_name: str = "batch"
         all_columns: List[str] = list(column_dfs[0].df.columns)
         batch_identifiers: List[str] = [
-            column for column in all_columns if column not in {metric_name, batch_name}
+            column
+            for column in all_columns
+            if column not in list(sanitized_metric_names) + [batch_name]
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1434,7 +1436,8 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         df: pd.DataFrame = pd.DataFrame(
-            columns=[batch_name, domain_name, sanitized_metric_names]
+            columns=[batch_name, domain_name]
+            + list(sanitized_metric_names)
             + batch_identifiers
         )
         for column_df in column_dfs:
@@ -1476,7 +1479,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column
             for column in all_columns
-            if column not in {sanitized_metric_names, batch_name}
+            if column not in list(sanitized_metric_names) + [batch_name]
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1555,15 +1558,15 @@ class DataAssistantResult(SerializableDictDot):
             column
             for column in all_columns
             if column
-            not in {
-                sanitized_metric_names,
+            not in list(sanitized_metric_names)
+            + [
                 batch_name,
                 column_name,
                 min_value,
                 max_value,
                 strict_min,
                 strict_max,
-            }
+            ]
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1726,15 +1729,15 @@ class DataAssistantResult(SerializableDictDot):
             column
             for column in all_columns
             if column
-            not in {
-                sanitized_metric_names,
+            not in list(sanitized_metric_names)
+            + [
                 batch_name,
                 column_name,
                 min_value,
                 max_value,
                 strict_min,
                 strict_max,
-            }
+            ]
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -3072,16 +3075,8 @@ class DataAssistantResult(SerializableDictDot):
 
         column_based_metric_names: Set[Union[Tuple[str], str]] = set()
         for metrics in metric_expectation_map.keys():
-            if isinstance(metrics, str):
-                if metrics.startswith("column"):
-                    column_based_metric_names.add((metrics,))
-            elif isinstance(metrics, tuple):
-                if all([metric.startswith("column") for metric in metrics]):
-                    column_based_metric_names.add(metrics)
-            else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
-                    f"METRIC_EXPECTATION_MAP keys must be of type str or tuple, but type {type(metrics)} was found."
-                )
+            if all([metric.startswith("column") for metric in metrics]):
+                column_based_metric_names.add(metrics)
 
         filtered_attributed_metrics_by_column_domain: Dict[
             Domain, Dict[str, ParameterNode]
@@ -3218,6 +3213,8 @@ class DataAssistantResult(SerializableDictDot):
                     filtered_attributed_metrics[domain][
                         metric_name
                     ] = attributed_metric_values[metric_name]
+            if filtered_attributed_metrics[domain] == {}:
+                filtered_attributed_metrics.pop(domain)
 
         return filtered_attributed_metrics
 
@@ -3387,7 +3384,7 @@ class DataAssistantResult(SerializableDictDot):
                             == domain.domain_kwargs.column
                         ):
                             df: pd.DataFrame = self._create_df_for_charting(
-                                metric_names=metric_name,
+                                metric_name=metric_name,
                                 attributed_values=attributed_values,
                                 expectation_configuration=expectation_configuration,
                                 plot_mode=plot_mode,
@@ -3597,19 +3594,13 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_domains: Set[Domain] = set(attributed_metrics_by_domain.keys())
 
-        profiler_details: dict
-        metric_configuration: dict
-        domain_kwargs: dict
         column_name: str
         column_domain: Domain
         metric_df: pd.DataFrame
         df: pd.DataFrame = pd.DataFrame()
         column_dfs: List[ColumnDataFrame] = []
         for expectation_configuration in expectation_configurations:
-            profiler_details = expectation_configuration.meta["profiler_details"]
-            metric_configuration = profiler_details["metric_configuration"]
-            domain_kwargs = metric_configuration["domain_kwargs"]
-            column_name = domain_kwargs["column"]
+            column_name = expectation_configuration.kwargs["column"]
 
             column_domain = [
                 d for d in metric_domains if d.domain_kwargs.column == column_name
@@ -3630,9 +3621,11 @@ class DataAssistantResult(SerializableDictDot):
                         expectation_configuration=expectation_configuration,
                         plot_mode=plot_mode,
                     )
-                    df = df.merge(metric_df, left_index=True, right_index=True)
+                    if len(df.index) == 0:
+                        df = metric_df.copy()
+                    else:
+                        df = df.merge(metric_df, left_index=True, right_index=True)
 
-                column_name: str = expectation_configuration.kwargs["column"]
                 column_df: ColumnDataFrame = ColumnDataFrame(column_name, df)
                 column_dfs.append(column_df)
 
@@ -3659,7 +3652,10 @@ class DataAssistantResult(SerializableDictDot):
                 expectation_configuration=expectation_configuration,
                 plot_mode=plot_mode,
             )
-            df = df.merge(metric_df, left_index=True, right_index=True)
+            if len(df.index) == 0:
+                df = metric_df.copy()
+            else:
+                df = df.merge(metric_df, left_index=True, right_index=True)
 
         sanitized_metric_names: Set[
             str
