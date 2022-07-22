@@ -71,7 +71,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
             ],
             "citation": self.citation,
             "execution_time": self.execution_time,
-            "_usage_statistics_handler": self._usage_statistics_handler.__class__.__name__,
         }
 
     def to_json_dict(self) -> dict:

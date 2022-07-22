@@ -113,9 +113,16 @@ stages:
     - job: type_hint_checker
       steps:
       - script: |
-          pip install mypy # Prereq for type hint script
-          python scripts/check_type_hint_coverage.py
+          pip install mypy invoke # Prereq for type hint script
+          invoke type-coverage
         name: TypeHintChecker
+
+    - job: static_type_check
+      steps:
+      - script: |
+          pip install mypy invoke
+          invoke type-check --install-types
+        name: StaticTypeCheck
 
     - job: docstring_checker
       steps:
