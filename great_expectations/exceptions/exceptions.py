@@ -304,7 +304,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
 
 class ClassInstantiationError(GreatExpectationsError):
     def __init__(self, module_name, package_name, class_name) -> None:
-        module_spec = importlib.util.find_spec(module_name, package=package_name)
+        module_spec = importlib.util.find_spec(module_name, package=package_name)  # type: ignore[attr-defined]
         if not module_spec:
             if not package_name:
                 package_name = ""
