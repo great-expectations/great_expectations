@@ -114,7 +114,9 @@ def ge_cloud_data_context_config(
 
 
 @pytest.mark.cloud
+@mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error(
+    mock_save_project_config,
     ge_cloud_data_context_config,
     data_context_with_incomplete_global_config_in_dot_dir_only,
 ):
