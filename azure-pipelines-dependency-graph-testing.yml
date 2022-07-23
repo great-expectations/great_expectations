@@ -362,6 +362,10 @@ stages:
               # In order to ensure coverage, we run them during each CI/CD cycle.
               pytest -m cloud
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest-cloud-overrides'
 
           - task: PublishTestResults@2
