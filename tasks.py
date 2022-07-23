@@ -114,19 +114,19 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
     # "checkpoint",  # 78
     # "cli",  # 237
     # "core",  # 242
-    # "data_asset",  # 1
+    "data_asset",  # 0
     # "data_context",  # 272
     # "datasource",  # 98
-    # "exceptions",  # 2
+    "exceptions",  # 0
     # "execution_engine",  # 109
     # "expectations",  # 462
-    # "jupyter_ux",  # 4
+    "jupyter_ux",  # 0
     # "marshmallow__shade",  # 14
     "profile",  # 0
     # "render",  # 87
     # "rule_based_profiler",  # 469
-    # "self_check",  # 10
-    # "types",  # 3
+    "self_check",  # 0
+    "types",  # 0
     # "validation_operators", # 47
     # "validator",  # 46
     # util.py # 28
