@@ -114,14 +114,11 @@ def ge_cloud_data_context_config(
 
 
 @pytest.mark.cloud
-def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error(
-    ge_cloud_data_context_config,
-    data_context_with_incomplete_global_config_in_dot_dir_only,
-):
+def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error():
     # Don't want to make a real request in a unit test so we simply patch the config fixture
     with mock.patch(
-        "great_expectations.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
-        return_value=ge_cloud_data_context_config,
+        "great_expectations.data_context.DataContext._get_ge_cloud_config_dict",
+        return_value={"base_url": None, "organization_id": None, "access_token": None},
     ):
         with pytest.raises(DataContextError):
             DataContext(context_root_dir="/my/context/root/dir", ge_cloud_mode=True)
