@@ -149,7 +149,12 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
     test_dir = full_test_dir.parts[-1]
     project_path = str(full_test_dir)
 
-    assert gen_directory_tree_str(project_path) == f"{test_dir}/"
+    assert (
+        gen_directory_tree_str(project_path)
+        == f"""\
+{test_dir}/
+"""
+    )
 
     # Check two stores with the same config
     persistent_expectations_store = ExpectationsStore(
@@ -159,13 +164,15 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
         }
     )
     # Check successful initialization with a store_backend_id
-    initialized_directory_tree_with_store_backend_id = (
-        f"{test_dir}/.ge_store_backend_id"
-    )
+    initialized_directory_tree_with_store_backend_id = f"""\
+{test_dir}/
+    .ge_store_backend_id
+"""
     assert (
         gen_directory_tree_str(project_path)
         == initialized_directory_tree_with_store_backend_id
     )
+
     assert persistent_expectations_store.store_backend_id is not None
 
     # Check that a duplicate store reports the same store_backend_id

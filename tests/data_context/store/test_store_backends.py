@@ -254,7 +254,11 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
         base_directory=os.path.join(project_path, path),
     )
     # Check that store_backend_id is created on instantiation, before being accessed
-    desired_directory_tree_str = f"{test_dir}/dummy_str/.ge_store_backend_id"
+    desired_directory_tree_str = f"""\
+{test_dir}/
+    dummy_str/
+        .ge_store_backend_id
+"""
     assert gen_directory_tree_str(project_path) == desired_directory_tree_str
     check_store_backend_store_backend_id_functionality(
         store_backend=tuple_filesystem_store_backend
@@ -262,9 +266,12 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
     assert gen_directory_tree_str(project_path) == desired_directory_tree_str
 
     # Repeat the above with a filepath template
-    project_path_with_filepath_template = str(
-        tmp_path_factory.mktemp("test_StoreBackend_id_initialization__dir")
+    full_test_dir_with_file_template = tmp_path_factory.mktemp(
+        "test_StoreBackend_id_initialization__dir"
     )
+    test_dir_with_file_template = full_test_dir_with_file_template.parts[-1]
+    project_path_with_filepath_template = str(full_test_dir_with_file_template)
+
     tuple_filesystem_store_backend_with_filepath_template = TupleFilesystemStoreBackend(
         root_directory=os.path.join(project_path, path),
         base_directory=project_path_with_filepath_template,
@@ -273,13 +280,13 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
     check_store_backend_store_backend_id_functionality(
         store_backend=tuple_filesystem_store_backend_with_filepath_template
     )
-    directory_tree_str = gen_directory_tree_str(project_path_with_filepath_template)
-    directory_tree_str_parts = directory_tree_str.split("/")
-    assert len(directory_tree_str_parts) == 2
-    assert directory_tree_str_parts[0].startswith(
-        "test_StoreBackend_id_initialization__dir"
+    assert (
+        gen_directory_tree_str(project_path_with_filepath_template)
+        == f"""\
+{test_dir_with_file_template}/
+    .ge_store_backend_id
+"""
     )
-    assert directory_tree_str_parts[1] == ".ge_store_backend_id "
 
     # Create a new store with the same config and make sure it reports the same store_backend_id
     tuple_filesystem_store_backend_duplicate = TupleFilesystemStoreBackend(
@@ -461,7 +468,7 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
 def test_TupleFilesystemStoreBackend(tmp_path_factory):
     path = "dummy_str"
     full_test_dir = tmp_path_factory.mktemp("test_TupleFilesystemStoreBackend__dir")
-    test_dir = full_test_dir.part[-1]
+    test_dir = full_test_dir.parts[-1]
     project_path = str(full_test_dir)
     base_public_path = "http://www.test.com/"
 

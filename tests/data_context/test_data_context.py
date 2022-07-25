@@ -822,23 +822,21 @@ def test_ConfigOnlyDataContext__initialization(
 def test__normalize_absolute_or_relative_path(
     tmp_path_factory, basic_data_context_config
 ):
-    config_path = str(
-        tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
+    full_test_dir = tmp_path_factory.mktemp(
+        "test__normalize_absolute_or_relative_path__dir"
     )
+    test_dir = full_test_dir.parts[-1]
+    config_path = str(full_test_dir)
     context = BaseDataContext(
         basic_data_context_config,
         config_path,
     )
 
-    assert context.root_directory.startswith(
-        "test__normalize_absolute_or_relative_path__dir"
+    assert context._normalize_absolute_or_relative_path("yikes").endswith(
+        os.path.join(test_dir, "yikes")
     )
-    assert "yikes" in os.listdir(context.root_directory)
 
-    assert (
-        "test__normalize_absolute_or_relative_path__dir"
-        not in context._normalize_absolute_or_relative_path("/yikes")
-    )
+    assert test_dir not in context._normalize_absolute_or_relative_path("/yikes")
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
