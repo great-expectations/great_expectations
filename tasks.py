@@ -8,12 +8,11 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
-import json
-
 import invoke
 
 from scripts import check_type_hint_coverage
 from tests.integration.usage_statistics import usage_stats_utils
+import json
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
