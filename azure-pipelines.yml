@@ -93,6 +93,14 @@ stages:
           invoke type-coverage
         name: TypeHintChecker
 
+    - job: static_type_check
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+      - script: |
+          pip install mypy invoke
+          invoke type-check --install-types
+        name: StaticTypeCheck
+
     - job: docstring_checker
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
@@ -219,6 +227,10 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -285,6 +297,10 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -379,6 +395,10 @@ stages:
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
       - job: mssql
@@ -412,6 +432,10 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
       - job: trino
@@ -451,6 +475,10 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
   - stage: cli_integration

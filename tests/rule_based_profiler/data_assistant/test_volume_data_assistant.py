@@ -1647,6 +1647,7 @@ def test_volume_data_assistant_result_serialization(
         bobby_volume_data_assistant_result.to_json_dict()
         == volume_data_assistant_result_as_dict
     )
+    assert len(bobby_volume_data_assistant_result.profiler_config.rules) == 2
 
 
 @mock.patch(
