@@ -94,8 +94,8 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             }
         except ValidationError as err:
             raise GreatExpectationsError(
-                "Unable to load asset configuration in TableBatchKwargsGenerator '%s': "
-                "validation error: %s." % (name, str(err))
+                f"Unable to load asset configuration in TableBatchKwargsGenerator '{name}': "
+                "validation error: {str(err)}."
             )
 
         if datasource is not None:
@@ -105,8 +105,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
 
             except sqlalchemy.exc.OperationalError:
                 logger.warning(
-                    "Unable to create inspector from engine in batch kwargs generator '%s'"
-                    % name
+                    f"Unable to create inspector from engine in batch kwargs generator '{name}'"
                 )
                 self.inspector = None
 

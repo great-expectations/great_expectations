@@ -8,7 +8,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
-    parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 from great_expectations.rule_based_profiler.config import (
@@ -205,8 +204,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             [
                 "min_value",
                 "max_value",
-                "row_condition",
-                "condition_parser",
                 "strict_min",
                 "strict_max",
             ],
@@ -220,10 +217,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "max_value": {
                 "schema": {"type": "number"},
                 "value": params.get("max_value"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
             },
             "strict_min": {
                 "schema": {"type": "boolean"},
@@ -246,21 +239,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
 
@@ -286,8 +264,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             [
                 "min_value",
                 "max_value",
-                "row_condition",
-                "condition_parser",
                 "strict_min",
                 "strict_max",
             ],
@@ -304,19 +280,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(

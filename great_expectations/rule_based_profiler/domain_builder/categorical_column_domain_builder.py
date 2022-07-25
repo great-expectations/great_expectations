@@ -1,6 +1,6 @@
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     AbsoluteCardinalityLimit,

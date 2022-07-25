@@ -3,7 +3,13 @@ from copy import deepcopy
 from string import Template as pTemplate
 from typing import List, Optional
 
-from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
+from great_expectations.marshmallow__shade import (
+    INCLUDE,
+    Schema,
+    fields,
+    post_dump,
+    post_load,
+)
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
@@ -293,6 +299,9 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         )
         return string
 
+    def __eq__(self, other):
+        return str(self) == str(other)
+
 
 class RenderedBulletListContent(RenderedComponentContent):
     def __init__(
@@ -489,7 +498,7 @@ class RenderedSectionContent(RenderedContent):
         self.content_blocks = content_blocks
         self.section_name = section_name
 
-    def to_json_dict(self):
+    def to_json_dict(self) -> dict:
         d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
@@ -501,48 +510,116 @@ class RenderedSectionContent(RenderedContent):
 class RenderedAtomicValue(DictDot):
     def __init__(
         self,
-        template: Optional[str] = None,
-        params: Optional[dict] = None,
         schema: Optional[dict] = None,
         header: Optional["RenderedAtomicValue"] = None,
+        template: Optional[str] = None,
+        params: Optional[dict] = None,
         header_row: Optional[List["RenderedAtomicValue"]] = None,
         table: Optional[List[List["RenderedAtomicValue"]]] = None,
         graph: Optional[dict] = None,
+        kwargs: Optional[dict] = None,
     ) -> None:
+        self.schema: Optional[dict] = schema
+        self.header: Optional[RenderedAtomicValue] = header
+
         # StringValueType
         self.template: Optional[str] = template
         self.params: Optional[dict] = params
-        self.schema: Optional[dict] = schema
 
         # TableType
-        self.header: Optional[RenderedAtomicValue] = header
         self.header_row: Optional[List[RenderedAtomicValue]] = header_row
         self.table: Optional[List[List[RenderedAtomicValue]]] = table
 
         # GraphType
-        self.graph: Optional[RenderedAtomicValue] = graph
+        self.graph: Optional[RenderedAtomicValueGraph] = RenderedAtomicValueGraph(
+            graph=graph
+        )
+
+        # UnknownType
+        self.kwargs: Optional[dict] = kwargs
+
+    def __repr__(self) -> str:
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def __str__(self) -> str:
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def to_json_dict(self) -> dict:
+        """Returns RenderedAtomicValue as a json dictionary."""
+        d = renderedAtomicValueSchema.dump(self)
+        json_dict: dict = {}
+        for key in d:
+            if key == "graph":
+                json_dict[key] = getattr(self, key).to_json_dict()
+            else:
+                json_dict[key] = getattr(self, key)
+        return json_dict
+
+
+class RenderedAtomicValueGraph(DictDot):
+    def __init__(
+        self,
+        graph: Optional[dict] = None,
+    ):
+        self.graph = graph
+
+    def __repr__(self) -> str:
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def __str__(self) -> str:
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def to_json_dict(self) -> dict:
+        """Returns RenderedAtomicValueGraph as a json dictionary."""
+        return self.graph
 
 
 class RenderedAtomicValueSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    # for StringType
+    schema = fields.Dict(required=False, allow_none=True)
+    header = fields.Dict(required=False, allow_none=True)
+
+    # for StringValueType
     template = fields.String(required=False, allow_none=True)
     params = fields.Dict(required=False, allow_none=True)
-    schema = fields.Dict(required=False, allow_none=True)
 
     # for TableType
-    header = fields.Dict(required=False, allow_none=True)
     header_row = fields.List(fields.Dict, required=False, allow_none=True)
     table = fields.List(fields.List(fields.Dict, required=False, allow_none=True))
 
     # for GraphType
-    graph = fields.String(required=False, allow_none=True)
+    graph = fields.Dict(required=False, allow_none=True)
+
+    # for UnknownType
+    kwargs = fields.Dict(required=False, allow_none=True)
 
     @post_load
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
+
+    REMOVE_KEYS_IF_NONE = [
+        "template",
+        "table",
+        "params",
+        "header_row",
+        "table",
+        "graph",
+        "kwargs",
+    ]
+
+    @post_dump
+    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
+        """Removes the attributes in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE during serialization if
+        their values are None."""
+        data = deepcopy(data)
+        for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
+            if key == "graph" and key in data and data[key].graph is None:
+                data.pop(key)
+            elif key in data and data[key] is None:
+                data.pop(key)
+        return data
 
 
 class RenderedAtomicContent(RenderedContent):
@@ -556,10 +633,17 @@ class RenderedAtomicContent(RenderedContent):
         self.value = value
         self.value_type = value_type
 
-    def to_json_dict(self):
+    def __repr__(self) -> str:
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def __str__(self) -> str:
+        return json.dumps(self.to_json_dict(), indent=2)
+
+    def to_json_dict(self) -> dict:
+        """Returns RenderedAtomicContent as a json dictionary."""
         d = super().to_json_dict()
         d["name"] = self.name
-        d["value"] = self.value.__dict__
+        d["value"] = self.value.to_json_dict()
         d["value_type"] = self.value_type
         return d
 

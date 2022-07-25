@@ -18,9 +18,9 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.datasource import DataConnector, Datasource
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config.base import (
@@ -62,6 +62,7 @@ def alice_validator(alice_columnar_table_single_batch_context) -> Validator:
 
     validator: Validator = get_validator_with_expectation_suite(
         data_context=context,
+        batch_list=None,
         batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
@@ -87,6 +88,7 @@ def bobby_validator(
 
     validator: Validator = get_validator_with_expectation_suite(
         data_context=context,
+        batch_list=None,
         batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
@@ -117,6 +119,7 @@ def bobster_validator(
 
     validator: Validator = get_validator_with_expectation_suite(
         data_context=context,
+        batch_list=None,
         batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
@@ -144,6 +147,7 @@ def quentin_validator(
 
     validator: Validator = get_validator_with_expectation_suite(
         data_context=context,
+        batch_list=None,
         batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
@@ -1114,6 +1118,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 
     validator: Validator = get_validator_with_expectation_suite(
         data_context=context,
+        batch_list=None,
         batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,
@@ -1360,6 +1365,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 
     validator: Validator = get_validator_with_expectation_suite(
         data_context=context,
+        batch_list=None,
         batch_request=batch_request,
         expectation_suite_name=None,
         expectation_suite=None,

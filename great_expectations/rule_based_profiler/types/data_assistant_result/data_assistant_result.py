@@ -1,22 +1,34 @@
 import copy
+import datetime
+import json
+import os
+import warnings
 from collections import defaultdict, namedtuple
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
 
 import altair as alt
+import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 from IPython.display import HTML, display
 
+from great_expectations import __version__ as ge_version
+from great_expectations import exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     get_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import convert_to_json_serializable, nested_update
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    in_jupyter_notebook,
+    nested_update,
+)
+from great_expectations.rule_based_profiler.config import RuleConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
     sanitize_parameter_name,
@@ -50,12 +62,42 @@ ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
 
 
 @dataclass
+class RuleStats(SerializableDictDot):
+    """
+    This class encapsulates basic "Rule" execution statistics.
+    """
+
+    num_domains: int = 0
+    domains_count_by_domain_type: Dict[MetricDomainTypes, int] = field(
+        default_factory=dict
+    )
+    domains_by_domain_type: Dict[MetricDomainTypes, List[dict]] = field(
+        default_factory=dict
+    )
+    num_parameter_builders: int = 0
+    num_expectation_configuration_builders: int = 0
+    execution_time: Optional[float] = None
+
+    def to_dict(self) -> dict:
+        """
+        Returns dictionary equivalent of this object.
+        """
+        return asdict(self)
+
+    def to_json_dict(self) -> dict:
+        """
+        Returns JSON dictionary equivalent of this object.
+        """
+        return convert_to_json_serializable(data=self.to_dict())
+
+
+@dataclass
 class DataAssistantResult(SerializableDictDot):
     """
     DataAssistantResult is a "dataclass" object, designed to hold results of executing "DataAssistant.run()" method.
     Available properties are: "metrics_by_domain", "expectation_configurations", and configuration object
     ("RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
-    Use "batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
+    Use "_batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
     """
 
     # A mapping is defined for which metrics to plot and their associated expectations
@@ -88,23 +130,38 @@ class DataAssistantResult(SerializableDictDot):
     }
 
     ALLOWED_KEYS = {
-        "batch_id_to_batch_identifier_display_name_map",
+        "_batch_id_to_batch_identifier_display_name_map",
         "profiler_config",
+        "profiler_execution_time",
+        "rule_execution_time",
         "metrics_by_domain",
         "expectation_configurations",
+        "citation",
         "execution_time",
-        "usage_statistics_handler",
     }
 
-    batch_id_to_batch_identifier_display_name_map: Optional[
+    IN_JUPYTER_NOTEBOOK_KEYS = {
+        "execution_time",
+    }
+
+    _batch_id_to_batch_identifier_display_name_map: Optional[
         Dict[str, Set[Tuple[str, Any]]]
-    ] = None
+    ] = field(default=None)
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
+    profiler_execution_time: Optional[
+        float
+    ] = None  # Effective Rule-Based Profiler total execution time (in seconds).
+    rule_execution_time: Optional[
+        Dict[str, float]
+    ] = None  # Effective Rule-Based Profiler per-Rule execution time (in seconds).
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
-    execution_time: Optional[float] = None  # Execution time (in seconds).
-    usage_statistics_handler: Optional[UsageStatisticsHandler] = None
+    execution_time: Optional[
+        float
+    ] = None  # Overall DataAssistant execution time (in seconds).
+    # Reference to "UsageStatisticsHandler" object for this "DataAssistantResult" object (if configured).
+    _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     def to_dict(self) -> dict:
         """
@@ -114,10 +171,16 @@ class DataAssistantResult(SerializableDictDot):
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         expectation_configuration: ExpectationConfiguration
         return {
-            "batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
-                data=self.batch_id_to_batch_identifier_display_name_map
+            "_batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
+                data=self._batch_id_to_batch_identifier_display_name_map
             ),
             "profiler_config": self.profiler_config.to_json_dict(),
+            "profiler_execution_time": convert_to_json_serializable(
+                data=self.profiler_execution_time
+            ),
+            "rule_execution_time": convert_to_json_serializable(
+                data=self.rule_execution_time
+            ),
             "metrics_by_domain": [
                 {
                     "domain_id": domain.id,
@@ -132,8 +195,8 @@ class DataAssistantResult(SerializableDictDot):
                 expectation_configuration.to_json_dict()
                 for expectation_configuration in self.expectation_configurations
             ],
+            "citation": convert_to_json_serializable(data=self.citation),
             "execution_time": convert_to_json_serializable(data=self.execution_time),
-            "usage_statistics_handler": self.usage_statistics_handler.__class__.__name__,
         }
 
     def to_json_dict(self) -> dict:
@@ -142,18 +205,149 @@ class DataAssistantResult(SerializableDictDot):
         """
         return self.to_dict()
 
-    @property
-    def _usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
+    def __dir__(self) -> List[str]:
         """
-        Returns: "UsageStatisticsHandler" object for this DataAssistantResult object (if configured).
+        This custom magic method is used to enable tab completion on "DataAssistantResult" objects.
         """
-        return self.usage_statistics_handler
+        return list(
+            DataAssistantResult.ALLOWED_KEYS
+            | {
+                "get_expectation_suite",
+                "plot_metrics",
+                "plot_expectations_and_metrics",
+            }
+        )
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>6/23/2022</Alex>
+        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
+        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
+        """
+        json_dict: dict = self.to_json_dict()
+        if in_jupyter_notebook():
+            key: str
+            value: Any
+            json_dict = {
+                key: value
+                for key, value in json_dict.items()
+                if key in DataAssistantResult.IN_JUPYTER_NOTEBOOK_KEYS
+            }
+
+            verbose: Union[bool, str] = str(
+                os.getenv("GE_TROUBLESHOOTING", False)
+            ).lower()
+            if verbose != "true":
+                verbose = "false"
+
+            verbose = json.loads(verbose)
+
+            auxiliary_profiler_execution_details: dict = (
+                self._get_auxiliary_profiler_execution_details(verbose=verbose)
+            )
+            json_dict.update(auxiliary_profiler_execution_details)
+
+        return json.dumps(json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>6/23/2022</Alex>
+        This implementation is non-ideal (it was agreed to employ it for development expediency).  A better approach
+        would consist of "__str__()" calling "__repr__()", while all output options are handled through state variables.
+        """
+        json_dict: dict = self.to_json_dict()
+        auxiliary_profiler_execution_details: dict = (
+            self._get_auxiliary_profiler_execution_details(verbose=True)
+        )
+        json_dict.update(auxiliary_profiler_execution_details)
+        return json.dumps(json_dict, indent=2)
+
+    def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:
+        auxiliary_info: dict = {
+            "num_profiler_rules": len(self.profiler_config.rules),
+            "num_expectation_configurations": len(self.expectation_configurations),
+            "auto_generated_at": datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            ),
+            "great_expectations_version": ge_version,
+        }
+
+        if verbose:
+            rule_name_to_rule_stats_map: Dict[str, RuleStats] = {}
+
+            rule_domains: List[Domain] = list(self.metrics_by_domain.keys())
+
+            rule_stats: RuleStats
+            domains: List[Domain]
+            domain: Domain
+            domain_as_json_dict: dict
+            num_domains: int
+
+            rule_name: str
+            rule_config: RuleConfig
+            for rule_name, rule_config in self.profiler_config.rules.items():
+                domains = list(
+                    filter(
+                        lambda element: element.rule_name == rule_name,
+                        rule_domains,
+                    )
+                )
+                num_domains = len(domains)
+
+                rule_stats = rule_name_to_rule_stats_map.get(rule_name)
+                if rule_stats is None:
+                    rule_stats = RuleStats(
+                        num_domains=num_domains,
+                        num_parameter_builders=len(rule_config["parameter_builders"]),
+                        num_expectation_configuration_builders=len(
+                            rule_config["expectation_configuration_builders"]
+                        ),
+                    )
+                    rule_name_to_rule_stats_map[rule_name] = rule_stats
+                    rule_stats.execution_time = self.rule_execution_time[rule_name]
+
+                if num_domains > 0:
+                    for domain in domains:
+                        if (
+                            rule_stats.domains_count_by_domain_type.get(
+                                domain.domain_type
+                            )
+                            is None
+                        ):
+                            rule_stats.domains_count_by_domain_type[
+                                domain.domain_type
+                            ] = 0
+
+                        if (
+                            rule_stats.domains_by_domain_type.get(domain.domain_type)
+                            is None
+                        ):
+                            rule_stats.domains_by_domain_type[domain.domain_type] = []
+
+                        rule_stats.domains_count_by_domain_type[domain.domain_type] += 1
+
+                        domain_as_json_dict = domain.to_json_dict()
+                        domain_as_json_dict.pop("domain_type")
+                        domain_as_json_dict.pop("rule_name")
+                        rule_stats.domains_by_domain_type[domain.domain_type].append(
+                            domain_as_json_dict
+                        )
+
+                auxiliary_info.update(
+                    convert_to_json_serializable(data=rule_name_to_rule_stats_map)
+                )
+
+        return auxiliary_info
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value,
         args_payload_fn=get_expectation_suite_usage_statistics,
     )
-    def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
+    def get_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        include_profiler_config: bool = False,
+    ) -> ExpectationSuite:
         """
         Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
         """
@@ -170,9 +364,21 @@ class DataAssistantResult(SerializableDictDot):
             match_type="domain",
             overwrite_existing=True,
         )
-        expectation_suite.add_citation(
-            **self.citation,
-        )
+
+        citation: Dict[str, Any]
+        if include_profiler_config:
+            citation = self.citation
+        else:
+            key: str
+            value: Any
+            citation = {
+                key: value
+                for key, value in self.citation.items()
+                if key != "profiler_config"
+            }
+
+        expectation_suite.add_citation(**citation)
+
         return expectation_suite
 
     def plot_metrics(
@@ -330,31 +536,117 @@ class DataAssistantResult(SerializableDictDot):
             charts=charts, theme=altair_theme
         )
 
-        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+        chart_titles: List[str] = DataAssistantResult._get_chart_titles(
+            charts=themed_charts
+        )
+
+        display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {" ": None}
+        for idx in range(len(chart_titles)):
+            display_chart_dict[chart_titles[idx]] = themed_charts[idx]
+
         dropdown_title_color: str = altair_theme["legend"]["titleColor"]
-        dropdown_title_font: str = altair_theme["font"]
-        dropdown_css: str = f"""
+        dropdown_font: str = altair_theme["font"]
+        dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
+        dropdown_text_color: str = altair_theme["axis"]["labelColor"]
+
+        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+        altair_dropdown_css: str = f"""
             <style>
             span.vega-bind-name {{
                 color: {dropdown_title_color};
-                font-family: "{dropdown_title_font}";
+                font-family: {dropdown_font};
+                font-size: {dropdown_font_size}px;
                 font-weight: bold;
             }}
             form.vega-bindings {{
-              position: absolute;
-              left: 75px;
-              top: 30px;
+                color: {dropdown_text_color};
+                font-family: {dropdown_font};
+                font-size: {dropdown_font_size}px;
+                position: absolute;
+                left: 75px;
+                top: 28px;
             }}
             </style>
         """
-        display(HTML(dropdown_css))
+        display(HTML(altair_dropdown_css))
 
         # max rows for Altair charts is set to 5,000 without this
         alt.data_transformers.disable_max_rows()
 
-        chart: alt.Chart
-        for chart in themed_charts:
-            chart.display()
+        ipywidgets_dropdown_css: str = f"""
+            <style>
+            .widget-inline-hbox .widget-label {{
+                color: {dropdown_title_color};
+                font-family: {dropdown_font};
+                font-size: {dropdown_font_size}px;
+                font-weight: bold;
+            }}
+            .widget-dropdown > select {{
+                padding-right: 21px;
+                padding-left: 3px;
+                color: {dropdown_text_color};
+                font-family: {dropdown_font};
+                font-size: {dropdown_font_size}px;
+                height: 20px;
+                line-height: {dropdown_font_size}px;
+                background-size: 20px;
+                border-radius: 2px;
+            }}
+            </style>
+        """
+        display(HTML(ipywidgets_dropdown_css))
+
+        dropdown_selection: widgets.Dropdown = widgets.Dropdown(
+            options=chart_titles,
+            description="Select Plot: ",
+            style={"description_width": "initial"},
+            layout={"width": "max-content", "margin": "0px"},
+        )
+
+        # As of 19 July, 2022 there is a Deprecation Warning due to the latest ipywidgets' interaction with
+        # ipykernel (Kernel._parent_header deprecated in v6.0.0). Rather than add a version constraint to ipykernel,
+        # we suppress Deprecation Warnings produced by module ipywidgets.widgets.widget_output.
+        warnings.filterwarnings(
+            action="ignore",
+            module="ipywidgets.widgets.widget_output",
+        )
+        widgets.interact(
+            DataAssistantResult._display_chart_from_dict,
+            display_chart_dict=widgets.fixed(display_chart_dict),
+            chart_title=dropdown_selection,
+        )
+
+    @staticmethod
+    def _display_chart_from_dict(
+        display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]],
+        chart_title: str,
+    ) -> None:
+        display_chart_dict[chart_title].display()
+
+    @staticmethod
+    def _get_chart_titles(charts: List[alt.Chart]) -> List[str]:
+        chart_titles: List[str] = []
+        chart_title: Optional[str]
+        for chart in charts:
+            chart_title = None
+            try:
+                chart_title = chart.title.text
+            except AttributeError:
+                for layer in chart.layer:
+                    try:
+                        chart_title = layer.title.text
+                        break
+                    except AttributeError:
+                        continue
+
+            if chart_title is None:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    "All DataAssistantResult charts must have a title."
+                )
+
+            chart_titles.append(chart_title)
+
+        return chart_titles
 
     @staticmethod
     def _apply_theme(
@@ -450,7 +742,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_component: BatchPlotComponent = BatchPlotComponent(
+        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
@@ -460,7 +752,7 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
-        metric_component: MetricPlotComponent
+        metric_plot_component: MetricPlotComponent
         if metric_name == "table_columns":
             table_column: str = "table_column"
             unique_column_sets: np.ndarray = np.unique(df[metric_name])
@@ -476,6 +768,7 @@ class DataAssistantResult(SerializableDictDot):
                 df = df[df[metric_name].apply(set) != unique_columns]
                 # record containing all columns to be compared against
                 empty_columns: List[None] = [None] * (len(batch_identifiers) + 1)
+                # noinspection PyTypeChecker
                 all_columns_record: pd.DataFrame = pd.DataFrame(
                     data=[[unique_columns] + empty_columns], columns=df.columns
                 )
@@ -485,22 +778,22 @@ class DataAssistantResult(SerializableDictDot):
                     df=df, metric_name=metric_name
                 )
 
-            metric_component = MetricPlotComponent(
+            metric_plot_component = MetricPlotComponent(
                 name=table_column,
                 alt_type=metric_type,
             )
         else:
-            metric_component = MetricPlotComponent(
+            metric_plot_component = MetricPlotComponent(
                 name=metric_name,
                 alt_type=metric_type,
             )
 
-        column_number_component: PlotComponent = PlotComponent(
+        column_number_plot_component: PlotComponent = PlotComponent(
             name=column_number,
             alt_type=AltairDataTypes.ORDINAL.value,
         )
 
-        domain_component: DomainPlotComponent = DomainPlotComponent(
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name=None,
             alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
@@ -509,19 +802,19 @@ class DataAssistantResult(SerializableDictDot):
         if sequential:
             return DataAssistantResult._get_sequential_isotype_chart(
                 df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-                column_number_component=column_number_component,
+                metric_plot_component=metric_plot_component,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+                column_number_plot_component=column_number_plot_component,
                 column_set=column_set,
             )
         else:
             return DataAssistantResult._get_nonsequential_isotype_chart(
                 df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-                column_number_component=column_number_component,
+                metric_plot_component=metric_plot_component,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+                column_number_plot_component=column_number_plot_component,
                 column_set=column_set,
             )
 
@@ -553,7 +846,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_component: BatchPlotComponent = BatchPlotComponent(
+        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
@@ -563,7 +856,7 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
-        metric_component: MetricPlotComponent
+        metric_plot_component: MetricPlotComponent
         if metric_name == "table_columns":
             table_column: str = "table_column"
             unique_column_sets: np.ndarray = np.unique(df[metric_name])
@@ -574,12 +867,12 @@ class DataAssistantResult(SerializableDictDot):
                 df=df, metric_name=metric_name
             )
 
-            metric_component = MetricPlotComponent(
+            metric_plot_component = MetricPlotComponent(
                 name=table_column,
                 alt_type=metric_type,
             )
         else:
-            metric_component = MetricPlotComponent(
+            metric_plot_component = MetricPlotComponent(
                 name=metric_name,
                 alt_type=metric_type,
             )
@@ -588,12 +881,12 @@ class DataAssistantResult(SerializableDictDot):
         if column_set is not None:
             df = df.iloc[:1]
 
-        column_number_component: PlotComponent = PlotComponent(
+        column_number_plot_component: PlotComponent = PlotComponent(
             name=column_number,
             alt_type=AltairDataTypes.ORDINAL.value,
         )
 
-        domain_component: DomainPlotComponent = DomainPlotComponent(
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name=None,
             alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
@@ -603,40 +896,40 @@ class DataAssistantResult(SerializableDictDot):
             return DataAssistantResult._get_sequential_expect_domain_values_to_match_set_isotype_chart(
                 expectation_type=expectation_type,
                 df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-                column_number_component=column_number_component,
+                metric_plot_component=metric_plot_component,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+                column_number_plot_component=column_number_plot_component,
                 column_set=column_set,
             )
         else:
             return DataAssistantResult._get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
                 expectation_type=expectation_type,
                 df=df,
-                metric_component=metric_component,
-                batch_component=batch_component,
-                domain_component=domain_component,
-                column_number_component=column_number_component,
+                metric_plot_component=metric_plot_component,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+                column_number_plot_component=column_number_plot_component,
                 column_set=column_set,
             )
 
     @staticmethod
     def _get_sequential_isotype_chart(
         df: pd.DataFrame,
-        metric_component: MetricPlotComponent,
-        batch_component: BatchPlotComponent,
-        domain_component: DomainPlotComponent,
-        column_number_component: PlotComponent,
+        metric_plot_component: MetricPlotComponent,
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_component,
-            batch_plot_component=batch_component,
-            domain_plot_component=domain_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            metric_component.generate_tooltip(),
+        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+            metric_plot_component.generate_tooltip(),
         ]
 
         chart: Union[alt.Chart, alt.LayerChart]
@@ -646,15 +939,15 @@ class DataAssistantResult(SerializableDictDot):
                 .mark_point(color=Colors.PURPLE.value)
                 .encode(
                     x=alt.X(
-                        batch_component.name,
-                        type=batch_component.alt_type,
-                        title=batch_component.title,
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
                         axis=alt.Axis(grid=False),
                     ),
                     y=alt.Y(
-                        column_number_component.name,
-                        type=column_number_component.alt_type,
-                        title=column_number_component.title,
+                        column_number_plot_component.name,
+                        type=column_number_plot_component.alt_type,
+                        title=column_number_plot_component.title,
                         axis=alt.Axis(grid=True),
                     ),
                     tooltip=tooltip,
@@ -669,14 +962,14 @@ class DataAssistantResult(SerializableDictDot):
                 .mark_point(opacity=0.0)
                 .encode(
                     x=alt.X(
-                        batch_component.name,
-                        type=batch_component.alt_type,
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
                         title=None,
                         axis=alt.Axis(labels=False, ticks=False, grid=False),
                     ),
                     y=alt.Y(
-                        column_number_component.name,
-                        type=column_number_component.alt_type,
+                        column_number_plot_component.name,
+                        type=column_number_plot_component.alt_type,
                         title=" ",
                         axis=alt.Axis(labels=False, ticks=False),
                     ),
@@ -693,20 +986,20 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_nonsequential_isotype_chart(
         df: pd.DataFrame,
-        metric_component: MetricPlotComponent,
-        batch_component: BatchPlotComponent,
-        domain_component: DomainPlotComponent,
-        column_number_component: PlotComponent,
+        metric_plot_component: MetricPlotComponent,
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_component,
-            batch_plot_component=batch_component,
-            domain_plot_component=domain_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
-        tooltip: List[alt.Tooltip] = batch_component.generate_tooltip() + [
-            metric_component.generate_tooltip(),
+        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+            metric_plot_component.generate_tooltip(),
         ]
 
         chart: alt.Chart
@@ -716,15 +1009,15 @@ class DataAssistantResult(SerializableDictDot):
                 .mark_point(color=Colors.PURPLE.value)
                 .encode(
                     x=alt.X(
-                        batch_component.name,
-                        type=batch_component.alt_type,
-                        title=batch_component.title,
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
                         axis=alt.Axis(labels=False, grid=False),
                     ),
                     y=alt.Y(
-                        column_number_component.name,
-                        type=column_number_component.alt_type,
-                        title=column_number_component.title,
+                        column_number_plot_component.name,
+                        type=column_number_plot_component.alt_type,
+                        title=column_number_plot_component.title,
                         axis=alt.Axis(grid=True),
                     ),
                     tooltip=tooltip,
@@ -739,14 +1032,14 @@ class DataAssistantResult(SerializableDictDot):
                 .mark_point(opacity=0.0)
                 .encode(
                     x=alt.X(
-                        batch_component.name,
-                        type=batch_component.alt_type,
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
                         title=None,
                         axis=alt.Axis(labels=False, ticks=False, grid=False),
                     ),
                     y=alt.Y(
-                        column_number_component.name,
-                        type=column_number_component.alt_type,
+                        column_number_plot_component.name,
+                        type=column_number_plot_component.alt_type,
                         title=" ",
                         axis=alt.Axis(labels=False, ticks=False),
                     ),
@@ -764,25 +1057,25 @@ class DataAssistantResult(SerializableDictDot):
     def _get_sequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_component: MetricPlotComponent,
-        batch_component: BatchPlotComponent,
-        domain_component: DomainPlotComponent,
-        column_number_component: PlotComponent,
+        metric_plot_component: MetricPlotComponent,
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
-            metric_plot_component=metric_component,
-            batch_plot_component=batch_component,
-            domain_plot_component=domain_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
         chart: alt.Chart = DataAssistantResult._get_sequential_isotype_chart(
             df=df,
-            metric_component=metric_component,
-            batch_component=batch_component,
-            domain_component=domain_component,
-            column_number_component=column_number_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+            column_number_plot_component=column_number_plot_component,
             column_set=column_set,
         ).properties(title=title)
 
@@ -792,25 +1085,25 @@ class DataAssistantResult(SerializableDictDot):
     def _get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_component: MetricPlotComponent,
-        batch_component: BatchPlotComponent,
-        domain_component: DomainPlotComponent,
-        column_number_component: PlotComponent,
+        metric_plot_component: MetricPlotComponent,
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
-            metric_plot_component=metric_component,
-            batch_plot_component=batch_component,
-            domain_plot_component=domain_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
         chart: alt.Chart = DataAssistantResult._get_nonsequential_isotype_chart(
             df=df,
-            metric_component=metric_component,
-            batch_component=batch_component,
-            domain_component=domain_component,
-            column_number_component=column_number_component,
+            metric_plot_component=metric_plot_component,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+            column_number_plot_component=column_number_plot_component,
             column_set=column_set,
         ).properties(title=title)
 
@@ -2705,11 +2998,14 @@ class DataAssistantResult(SerializableDictDot):
         ) -> bool:
             if e.expectation_type not in column_based_expectations:
                 return False
+
             column_name: str = e.kwargs["column"]
             if exclude_column_names and column_name in exclude_column_names:
                 return False
+
             if include_column_names and column_name not in include_column_names:
                 return False
+
             return True
 
         column_based_expectation_configurations: List[ExpectationConfiguration] = list(
@@ -2730,29 +3026,33 @@ class DataAssistantResult(SerializableDictDot):
 
         return column_based_expectation_configurations_by_type
 
+    @staticmethod
     def _filter_attributed_metrics_by_column_names(
-        self,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        def _filter(m: Dict[Domain, Dict[str, ParameterNode]]) -> bool:
-            column_name: str = m.domain_kwargs.column
+        def _filter(domain: Domain) -> bool:
+            column_name: str = domain.domain_kwargs.column
             if exclude_column_names and column_name in exclude_column_names:
                 return False
+
             if include_column_names and column_name not in include_column_names:
                 return False
+
             return True
 
-        domains: Set[Domain] = set(filter(lambda m: _filter(m), attributed_metrics))
+        domains: Set[Domain] = set(
+            filter(lambda m: _filter(m), list(attributed_metrics.keys()))
+        )
         filtered_attributed_metrics: Dict[Domain, Dict[str, ParameterNode]] = {
             domain: attributed_metrics[domain] for domain in domains
         }
 
         return filtered_attributed_metrics
 
+    @staticmethod
     def _filter_attributed_metrics_by_metric_name(
-        self,
         attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
         metric_name: str,
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
@@ -3027,7 +3327,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         batch_identifier_list: List[Set[Tuple[str, str]]] = [
-            self.batch_id_to_batch_identifier_display_name_map[batch_id]
+            self._batch_id_to_batch_identifier_display_name_map[batch_id]
             for batch_id in batch_ids
         ]
 

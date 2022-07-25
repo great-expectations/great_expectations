@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import shutil
@@ -25,6 +26,7 @@ from great_expectations.data_context import (
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
+    DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
 )
@@ -439,6 +441,20 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
                 },
             },
         ]
+
+
+@mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
+def test_update_datasource_persists_changes_with_store(
+    mock_update_by_name: mock.MagicMock,
+    data_context_parameterized_expectation_suite: DataContext,
+) -> None:
+    context: DataContext = data_context_parameterized_expectation_suite
+
+    datasource_to_update: Datasource = tuple(context.datasources.values())[0]
+
+    context.update_datasource(datasource=datasource_to_update)
+
+    assert mock_update_by_name.call_count == 1
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -1306,7 +1322,7 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
 
 
-def test_load_config_variables_file(
+def test_load_config_variables_property(
     basic_data_context_config, tmp_path_factory, monkeypatch
 ):
     # Setup:
@@ -1328,11 +1344,11 @@ def test_load_config_variables_file(
         # We should be able to load different files based on an environment variable
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
-        config_vars = context._load_config_variables_file()
+        config_vars = context.config_variables
         assert config_vars["env"] == "dev"
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
-        config_vars = context._load_config_variables_file()
+        config_vars = context.config_variables
         assert config_vars["env"] == "prod"
     except Exception:
         raise
@@ -1431,7 +1447,7 @@ def test_list_checkpoints_on_context_with_checkpoint(empty_context_with_checkpoi
     assert context.list_checkpoints() == ["my_checkpoint"]
 
 
-def test_list_checkpoints_on_context_with_twwo_checkpoints(
+def test_list_checkpoints_on_context_with_two_checkpoints(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
@@ -2879,3 +2895,88 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     )
     checkpoint_result = checkpoint.run()
     assert checkpoint_result.get("success") is True
+
+
+def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
+    empty_data_context: DataContext, monkeypatch
+) -> None:
+    """
+    What does this test do and why?
+
+    Great Expectations recognizes changes made to environment variables within a program execution
+    and ensures that these changes are recognized in subsequent calls within the same process.
+
+    This is particularly relevant when performing substitutions within a user's project config.
+    """
+    context: DataContext = empty_data_context
+    env_var_name: str = "MY_PLUGINS_DIRECTORY"
+    env_var_value: str = "my_patched_value"
+
+    context.variables.config.plugins_directory = f"${env_var_name}"
+    monkeypatch.setenv(env_var_name, env_var_value)
+
+    assert context.plugins_directory and context.plugins_directory.endswith(
+        env_var_value
+    )
+
+
+def test_modifications_to_config_vars_is_recognized_within_same_program_execution(
+    empty_data_context: DataContext,
+) -> None:
+    """
+    What does this test do and why?
+
+    Great Expectations recognizes changes made to config variables within a program execution
+    and ensures that these changes are recognized in subsequent calls within the same process.
+
+    This is particularly relevant when performing substitutions within a user's project config.
+    """
+    context: DataContext = empty_data_context
+    config_var_name: str = "my_plugins_dir"
+    config_var_value: str = "my_patched_value"
+
+    context.variables.config.plugins_directory = f"${config_var_name}"
+    context.save_config_variable(
+        config_variable_name=config_var_name, value=config_var_value
+    )
+
+    assert context.plugins_directory and context.plugins_directory.endswith(
+        config_var_value
+    )
+
+
+@pytest.mark.integration
+def test_check_for_usage_stats_sync_finds_diff(
+    empty_data_context_stats_enabled: DataContext,
+    data_context_config_with_datasources: DataContextConfig,
+) -> None:
+    """
+    What does this test do and why?
+
+    During DataContext instantiation, if the project config used to create the object
+    and the actual config assigned to self.config differ in terms of their usage statistics
+    values, we want to be able to identify that and persist values accordingly.
+    """
+    context = empty_data_context_stats_enabled
+    project_config = data_context_config_with_datasources
+
+    res = context._check_for_usage_stats_sync(project_config=project_config)
+    assert res is True
+
+
+@pytest.mark.integration
+def test_check_for_usage_stats_sync_does_not_find_diff(
+    empty_data_context_stats_enabled: DataContext,
+) -> None:
+    """
+    What does this test do and why?
+
+    During DataContext instantiation, if the project config used to create the object
+    and the actual config assigned to self.config differ in terms of their usage statistics
+    values, we want to be able to identify that and persist values accordingly.
+    """
+    context = empty_data_context_stats_enabled
+    project_config = copy.deepcopy(context.config)  # Using same exact config
+
+    res = context._check_for_usage_stats_sync(project_config=project_config)
+    assert res is False

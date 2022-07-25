@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
@@ -31,7 +31,10 @@ class RuleBasedProfilerResult(SerializableDictDot):
     ]
     expectation_configurations: List[ExpectationConfiguration]
     citation: dict
-    usage_statistics_handler: Optional[UsageStatisticsHandler] = None
+    execution_time: float
+    rule_execution_time: Dict[str, float]
+    # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
+    _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     def to_dict(self) -> dict:
         """
@@ -50,7 +53,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
                         data=fully_qualified_parameter_names
                     ),
                 }
-                for domain, fully_qualified_parameter_names in self.json_serialized_fully_qualified_parameter_name.items()
+                for domain, fully_qualified_parameter_names in self.fully_qualified_parameter_names_by_domain.items()
             ],
             "parameter_values_for_fully_qualified_parameter_names_by_domain": [
                 {
@@ -67,6 +70,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
                 for expectation_configuration in self.expectation_configurations
             ],
             "citation": self.citation,
+            "execution_time": self.execution_time,
         }
 
     def to_json_dict(self) -> dict:
@@ -74,13 +78,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
         Returns: This RuleBasedProfilerResult as JSON-serializable dictionary.
         """
         return self.to_dict()
-
-    @property
-    def _usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
-        """
-        Returns: "UsageStatisticsHandler" object for this RuleBasedProfilerResult object (if configured).
-        """
-        return self.usage_statistics_handler
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE.value,

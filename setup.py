@@ -27,7 +27,7 @@ def get_extras_require():
         "teradata",
         "trino",
     )
-    ignore_keys = ("contrib", "sqlalchemy", "test")
+    ignore_keys = ("sqlalchemy", "test")
     rx_fname_part = re.compile(r"requirements-dev-(.*).txt")
     for fname in sorted(glob("requirements-dev-*.txt")):
         key = rx_fname_part.match(fname).group(1)
@@ -38,8 +38,10 @@ def get_extras_require():
             results[key] = parsed
 
     lite = results.pop("lite")
+    contrib = results.pop("contrib")
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
+    results["test"] = lite + contrib
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]

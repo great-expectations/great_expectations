@@ -14,7 +14,7 @@ class RuleState:
 
     def __init__(
         self,
-        rule: "Rule",  # noqa: F821
+        rule: Optional["Rule"] = None,  # noqa: F821
         variables: Optional[ParameterContainer] = None,
         domains: Optional[List[Domain]] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -40,13 +40,23 @@ class RuleState:
 
         self._parameters = parameters
 
+        self._execution_time = 0.0
+
     @property
     def rule(self) -> "Rule":  # noqa: F821:
         return self._rule
 
+    @rule.setter
+    def rule(self, value: "Rule") -> None:  # noqa: F821:
+        self._rule = value
+
     @property
     def variables(self) -> Optional[ParameterContainer]:
         return self._variables
+
+    @variables.setter
+    def variables(self, value: Optional[ParameterContainer]) -> None:
+        self._variables = value
 
     @property
     def domains(self) -> List[Domain]:
@@ -63,6 +73,14 @@ class RuleState:
     @parameters.setter
     def parameters(self, value: Optional[Dict[str, ParameterContainer]]) -> None:
         self._parameters = value
+
+    @property
+    def execution_time(self) -> float:
+        return self._execution_time
+
+    @execution_time.setter
+    def execution_time(self, value: float) -> None:
+        self._execution_time = value
 
     def reset(self) -> None:
         self.reset_domains()

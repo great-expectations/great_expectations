@@ -945,6 +945,9 @@ def test_run_profiler_without_dynamic_args(
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
+        variables_directives_list=None,
+        domain_type_directives_list=None,
+        comment=None,
     )
 
 
@@ -984,6 +987,9 @@ def test_run_profiler_with_dynamic_args(
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
+        variables_directives_list=None,
+        domain_type_directives_list=None,
+        comment=None,
     )
 
 
@@ -1128,7 +1134,7 @@ def test_add_profiler(
     profiler_key: ConfigurationIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    mock_data_context.ge_cloud_mode.return_value = False
+    mock_data_context.ge_cloud_mode = False
     profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
         profiler_config_with_placeholder_args,
         data_context=mock_data_context,

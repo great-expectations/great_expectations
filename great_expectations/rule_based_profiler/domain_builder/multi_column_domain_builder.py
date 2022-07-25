@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.types import (
     INFERRED_SEMANTIC_TYPE_KEY,

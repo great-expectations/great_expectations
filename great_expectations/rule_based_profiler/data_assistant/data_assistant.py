@@ -3,6 +3,9 @@ from inspect import isabstract
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+)
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain_builder import (
@@ -76,7 +79,7 @@ class MetaDataAssistant(ABCMeta):
             )
 
             # noinspection PyTypeChecker
-            DataAssistantDispatcher.register_data_assistant(data_assistant=newclass)
+            DataAssistantDispatcher._register_data_assistant(data_assistant=newclass)
 
         return newclass
 
@@ -378,7 +381,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     def __init__(
         self,
         name: str,
-        validator: Validator,
+        validator: Optional[Validator],
     ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
@@ -395,9 +398,12 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._validator = validator
 
-        self._batches = self._validator.batches
-
-        self._data_context = self._validator.data_context
+        if validator is None:
+            self._data_context = None
+            self._batches = None
+        else:
+            self._data_context = self._validator.data_context
+            self._batches = self._validator.batches
 
         variables: Optional[Dict[str, Any]] = self.get_variables() or {}
         self._profiler = RuleBasedProfiler(
@@ -444,10 +450,20 @@ class DataAssistant(metaclass=MetaDataAssistant):
         Returns:
             DataAssistantResult: The result object for the DataAssistant
         """
+        usage_statistics_handler: Optional[UsageStatisticsHandler]
+        if self._data_context is None:
+            usage_statistics_handler = None
+        else:
+            usage_statistics_handler = self._data_context._usage_statistics_handler
+
+        batches: Dict[str, Batch] = self._batches
+        if batches is None:
+            batches = {}
+
         data_assistant_result: DataAssistantResult = DataAssistantResult(
-            batch_id_to_batch_identifier_display_name_map=self.batch_id_to_batch_identifier_display_name_map(),
+            _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
-            usage_statistics_handler=self._data_context._usage_statistics_handler,
+            _usage_statistics_handler=usage_statistics_handler,
         )
         run_profiler_on_data(
             data_assistant=self,
@@ -455,7 +471,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             profiler=self.profiler,
             variables=variables,
             rules=rules,
-            batch_list=list(self._batches.values()),
+            batch_list=list(batches.values()),
             batch_request=None,
             variables_directives_list=variables_directives_list,
             domain_type_directives_list=domain_type_directives_list,
@@ -481,16 +497,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
             Boolean value (True if all interface methods are implemented; otherwise, False)
         """
         return isabstract(cls)
-
-    @property
-    def metrics_parameter_builders_by_domain(
-        self,
-    ) -> Dict[Domain, List[ParameterBuilder]]:
-        """
-        Returns:
-            Dictionary of "ParameterBuilder" objects, keyed by ("domain_type", "rule_name")-specified "Domain" object.
-        """
-        return self._metrics_parameter_builders_by_domain
 
     @abstractmethod
     def get_variables(self) -> Optional[Dict[str, Any]]:
@@ -528,9 +534,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
     def get_metrics_by_domain(self) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
         Obtain subset of all parameter values for fully-qualified parameter names by domain, available from entire
-        "RuleBasedProfiler" state, where "Domain" objects are among keys included in provisions as proscribed by return
-        value of "DataAssistant.metrics_parameter_builders_by_domain" interface property and fully-qualified parameter
-        names match interface properties of "ParameterBuilder" objects, corresponding to these partial "Domain" objects.
+        "RuleBasedProfiler" state, where "Domain" objects are among keys included in provisions as proscribed by value
+        of "DataAssistant._metrics_parameter_builders_by_domain" private attribute and fully-qualified parameter names
+        match interface properties of "ParameterBuilder" objects, corresponding to these partial "Domain" objects.
 
         Returns:
             Dictionaries of values for fully-qualified parameter names by Domain for metrics, from "RuleBasedpRofiler"
@@ -545,7 +551,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 lambda element: any(
                     element[0].is_superset(other=domain_key)
                     for domain_key in list(
-                        self.metrics_parameter_builders_by_domain.keys()
+                        self._metrics_parameter_builders_by_domain.keys()
                     )
                 ),
                 self.profiler.get_parameter_values_for_fully_qualified_parameter_names_by_domain().items(),
@@ -561,7 +567,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 parameter_builder.json_serialized_fully_qualified_parameter_name
                 for parameter_builder in parameter_builders
             ]
-            for domain, parameter_builders in self.metrics_parameter_builders_by_domain.items()
+            for domain, parameter_builders in self._metrics_parameter_builders_by_domain.items()
         }
 
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
@@ -583,17 +589,21 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         return parameter_values_for_fully_qualified_parameter_names_by_domain
 
-    def batch_id_to_batch_identifier_display_name_map(
+    def _batch_id_to_batch_identifier_display_name_map(
         self,
     ) -> Dict[str, Set[Tuple[str, Any]]]:
         """
         This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
         """
+        batches: Dict[str, Batch] = self._batches
+        if batches is None:
+            batches = {}
+
         batch_id: str
         batch: Batch
         return {
             batch_id: set(batch.batch_definition.batch_identifiers.items())
-            for batch_id, batch in self._batches.items()
+            for batch_id, batch in batches.items()
         }
 
 
@@ -638,6 +648,9 @@ def run_profiler_on_data(
     rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
         rule.name: rule.to_json_dict() for rule in rules
     }
+    comment: str = f"""Created by effective Rule-Based Profiler of {data_assistant.__class__.__name__} with the \
+configuration included.
+"""
     rule_based_profiler_result: RuleBasedProfilerResult = profiler.run(
         variables=variables,
         rules=rules_configs,
@@ -647,9 +660,12 @@ def run_profiler_on_data(
         reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         variables_directives_list=variables_directives_list,
         domain_type_directives_list=domain_type_directives_list,
+        comment=comment,
     )
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
+    result.profiler_execution_time = rule_based_profiler_result.execution_time
+    result.rule_execution_time = rule_based_profiler_result.rule_execution_time
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
     result.expectation_configurations = (
         rule_based_profiler_result.expectation_configurations

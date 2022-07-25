@@ -33,6 +33,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import (
@@ -306,6 +309,9 @@ class BaseCheckpoint(ConfigPeer):
             expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
                 "expectation_suite_ge_cloud_id"
             )
+            include_rendered_content: bool = substituted_validation_dict.get(
+                "include_rendered_content", False
+            )
 
             validator: Validator = self.data_context.get_validator(
                 batch_request=batch_request,
@@ -319,6 +325,7 @@ class BaseCheckpoint(ConfigPeer):
                     if self.data_context.ge_cloud_mode
                     else None
                 ),
+                include_rendered_content=include_rendered_content,
             )
 
             action_list: list = substituted_validation_dict.get("action_list")
@@ -347,7 +354,8 @@ class BaseCheckpoint(ConfigPeer):
             checkpoint_identifier = None
             if self.data_context.ge_cloud_mode:
                 checkpoint_identifier = GeCloudIdentifier(
-                    resource_type="contract", ge_cloud_id=str(self.ge_cloud_id)
+                    resource_type=GeCloudRESTResource.CONTRACT,
+                    ge_cloud_id=str(self.ge_cloud_id),
                 )
 
             operator_run_kwargs = {}
@@ -365,6 +373,7 @@ class BaseCheckpoint(ConfigPeer):
                     ),
                     result_format=result_format,
                     checkpoint_identifier=checkpoint_identifier,
+                    checkpoint_name=self.name,
                     **operator_run_kwargs,
                 )
             )

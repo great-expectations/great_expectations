@@ -1,5 +1,6 @@
 import copy
 import cProfile
+import datetime
 import importlib
 import io
 import json
@@ -10,7 +11,6 @@ import re
 import time
 import uuid
 from collections import OrderedDict
-from datetime import datetime
 from functools import wraps
 from gc import get_referrers
 from inspect import (
@@ -24,9 +24,10 @@ from inspect import (
     getmodule,
     signature,
 )
+from numbers import Number
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -34,12 +35,7 @@ from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
 
-from great_expectations.core.expectation_suite import (
-    ExpectationSuite,
-    expectationSuiteSchema,
-)
 from great_expectations.exceptions import (
-    GreatExpectationsError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -73,62 +69,33 @@ except ImportError:
     Table = None
     Select = None
 
-SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
-    "batch": "batches",
-    "checkpoint": "checkpoints",
-    "data_asset": "data_assets",
-    "datasource": "datasources",
-    "expectation": "expectations",
-    "expectation_suite": "expectation_suites",
-    "suite_validation_result": "suite_validation_results",
-    "expectation_validation_result": "expectation_validation_results",
-    "contract": "contracts",
-    "rendered_data_doc": "rendered_data_docs",
-    "data_context_variable": "data_context_variables",
-}
-
-PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
-    "batches": "batch",
-    "checkpoints": "checkpoint",
-    "data_assets": "data_asset",
-    "datasources": "datasource",
-    "expectations": "expectation",
-    "expectation_suites": "expectation_suite",
-    "suite_validation_results": "suite_validation_result",
-    "expectation_validation_results": "expectation_validation_result",
-    "contracts": "contract",
-    "rendered_data_docs": "rendered_data_doc",
-    "data_context_variables": "data_context_variable",
-}
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
-def pluralize(singular_ge_noun: str) -> str:
+class bidict(dict):
     """
-    Pluralizes a Great Expectations singular noun
+    Bi-directional hashmap: https://stackoverflow.com/a/21894086
     """
-    try:
-        return SINGULAR_TO_PLURAL_LOOKUP_DICT[singular_ge_noun.lower()]
-    except KeyError:
-        raise GreatExpectationsError(
-            f"Unable to pluralize '{singular_ge_noun}'. Please update "
-            f"great_expectations.util.SINGULAR_TO_PLURAL_LOOKUP_DICT"
-        )
 
+    def __init__(self, *args: List[Any], **kwargs: Dict[str, Any]) -> None:
+        super().__init__(*args, **kwargs)
+        self.inverse = {}
+        for key, value in self.items():
+            self.inverse.setdefault(value, []).append(key)
 
-def singularize(plural_ge_noun: str) -> str:
-    """
-    Singularizes a Great Expectations plural noun
-    """
-    try:
-        return PLURAL_TO_SINGULAR_LOOKUP_DICT[plural_ge_noun.lower()]
-    except KeyError:
-        raise GreatExpectationsError(
-            f"Unable to singularize '{plural_ge_noun}'. Please update "
-            f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
-        )
+    def __setitem__(self, key: str, value: Any) -> None:
+        if key in self:
+            self.inverse[self[key]].remove(key)
+        super().__setitem__(key, value)
+        self.inverse.setdefault(value, []).append(key)
+
+    def __delitem__(self, key: str):
+        self.inverse.setdefault(self[key], []).remove(key)
+        if self[key] in self.inverse and not self.inverse[self[key]]:
+            del self.inverse[self[key]]
+        super().__delitem__(key)
 
 
 def camel_to_snake(name: str) -> str:
@@ -911,10 +878,16 @@ def validate(
             from great_expectations.data_context import DataContext
 
             data_context = DataContext(data_context)
+
         expectation_suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
         )
     else:
+        from great_expectations.core.expectation_suite import (
+            ExpectationSuite,
+            expectationSuiteSchema,
+        )
+
         if isinstance(expectation_suite, dict):
             expectation_suite_dict: dict = expectationSuiteSchema.load(
                 expectation_suite
@@ -922,17 +895,19 @@ def validate(
             expectation_suite: ExpectationSuite = ExpectationSuite(
                 **expectation_suite_dict, data_context=data_context
             )
+
         if data_asset_name is not None:
             raise ValueError(
                 "When providing an expectation suite, data_asset_name cannot also be provided."
             )
+
         if expectation_suite_name is not None:
             raise ValueError(
                 "When providing an expectation suite, expectation_suite_name cannot also be provided."
             )
+
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s"
-            % (data_asset_name, expectation_suite.expectation_suite_name)
+            f"Validating data_asset_name {data_asset_name} with expectation_suite_name {expectation_suite.expectation_suite_name}"
         )
 
     # If the object is already a DataAsset type, then this is purely a convenience method
@@ -981,6 +956,7 @@ def validate(
     data_asset_ = _convert_to_dataset_class(
         data_asset, dataset_class=data_asset_class, expectation_suite=expectation_suite
     )
+
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 
@@ -1096,7 +1072,7 @@ def filter_properties_dict(
         delete_fields: list of keys that must be deleted, with the understanding that all other entries will be retained
         clean_nulls: If True, then in addition to other filtering directives, delete entries, whose values are None
         clean_falsy: If True, then in addition to other filtering directives, delete entries, whose values are Falsy
-        (If the "clean_falsy" argument is specified at "True", then "clean_nulls" is assumed to be "True" as well.)
+        (If the "clean_falsy" argument is specified as "True", then "clean_nulls" is assumed to be "True" as well.)
         inplace: If True, then modify the source properties dictionary; otherwise, make a copy for filtering purposes
         keep_falsy_numerics: If True, then in addition to other filtering directives, do not delete zero-valued numerics
 
@@ -1341,6 +1317,49 @@ def is_nan(value: Any) -> bool:
         return True
 
 
+def isclose(
+    operand_a: Union[datetime.datetime, Number],
+    operand_b: Union[datetime.datetime, Number],
+    rtol=1.0e-5,  # controls relative weight of "operand_b" (when its magnitude is large)
+    atol=1.0e-8,  # controls absolute accuracy (based on floating point machine precision)
+    equal_nan=False,
+) -> bool:
+    """
+    Checks whether or not two numbers (or timestamps) are approximately close to one another.
+
+    According to "https://numpy.org/doc/stable/reference/generated/numpy.isclose.html",
+        For finite values, isclose uses the following equation to test whether two floating point values are equivalent:
+        "absolute(a - b) <= (atol + rtol * absolute(b))".
+
+    This translates to:
+        "absolute(operand_a - operand_b) <= (atol + rtol * absolute(operand_b))", where "operand_a" is "target" quantity
+    under evaluation for being close to a "control" value, and "operand_b" serves as the "control" ("reference") value.
+
+    The values of the absolute tolerance ("atol") parameter is chosen as a sufficiently small constant for most floating
+    point machine representations (e.g., 1.0e-8), so that even if the "control" value is small in magnitude and "target"
+    and "control" are close in absolute value, then the accuracy of the assessment can still be high up to the precision
+    of the "atol" value (here, 8 digits as the default).  However, when the "control" value is large in magnitude, the
+    relative tolerance ("rtol") parameter carries a greater weight in the comparison assessment, because the acceptable
+    deviation between the two quantities can be relatively larger for them to be deemed as "close enough" in this case.
+    """
+    operand_a_as_number: np.float64
+    operand_b_as_number: np.float64
+    if isinstance(operand_a, datetime.datetime):
+        operand_a_as_number = np.float64(int(operand_a.strftime("%Y%m%d%H%M%S")))
+        operand_b_as_number = np.float64(int(operand_b.strftime("%Y%m%d%H%M%S")))
+    else:
+        operand_a_as_number = np.float64(operand_a)
+        operand_b_as_number = np.float64(operand_b)
+
+    return np.isclose(
+        a=operand_a_as_number,
+        b=operand_b_as_number,
+        rtol=rtol,
+        atol=atol,
+        equal_nan=equal_nan,
+    )
+
+
 def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
     """
     This method checks whether or not candidate object is subset of target object.
@@ -1371,7 +1390,7 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
         # noinspection PyUnusedLocal
-        parsed_date: datetime = parse(value, fuzzy=fuzzy)
+        parsed_date: datetime.datetime = parse(value, fuzzy=fuzzy)
     except (TypeError, ValueError):
         return False
     return True
@@ -1474,10 +1493,11 @@ def import_make_url():
         from sqlalchemy.engine.url import make_url
     else:
         from sqlalchemy.engine import make_url
+
     return make_url
 
 
-def get_pyathena_potential_type(type_module, type_):
+def get_pyathena_potential_type(type_module, type_) -> str:
     if version.parse(type_module.pyathena.__version__) >= version.parse("2.5.0"):
         # introduction of new column type mapping in 2.5
         potential_type = type_module.AthenaDialect()._get_column_type(type_)
@@ -1494,6 +1514,7 @@ def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
     """
     Leverage on Trino Package to return sqlalchemy sql type
     """
+    # noinspection PyUnresolvedReferences
     potential_type = type_module.parse_sqltype(type_)
     return potential_type
 

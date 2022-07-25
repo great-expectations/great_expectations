@@ -7,6 +7,9 @@ from moto import mock_sns
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
@@ -114,7 +117,8 @@ def validation_result_suite():
 @pytest.fixture(scope="module")
 def validation_result_suite_ge_cloud_identifier(validation_result_suite_ge_cloud_id):
     return GeCloudIdentifier(
-        resource_type="contract", ge_cloud_id=validation_result_suite_ge_cloud_id
+        resource_type=GeCloudRESTResource.CONTRACT,
+        ge_cloud_id=validation_result_suite_ge_cloud_id,
     )
 
 

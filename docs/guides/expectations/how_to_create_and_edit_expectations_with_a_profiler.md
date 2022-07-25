@@ -132,7 +132,7 @@ checkpoint_config = {
     ],
 }
 checkpoint = SimpleCheckpoint(
-    f"_tmp_checkpoint_{expectation_suite_name}", context, **checkpoint_config
+    f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}", context, **checkpoint_config
 )
 checkpoint_result = checkpoint.run()
 

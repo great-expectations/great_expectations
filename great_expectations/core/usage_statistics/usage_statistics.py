@@ -126,13 +126,18 @@ class UsageStatisticsHandler:
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
 
+        # <WILL> 20220701 - ValidationOperators have been deprecated, so some init_payloads will not have them included
+        validation_operators = None
+        if hasattr(self._data_context, "validation_operators"):
+            validation_operators = self._data_context.validation_operators
+
         init_payload = {
             "platform.system": platform.system(),
             "platform.release": platform.release(),
             "version_info": str(sys.version_info),
             "datasources": self._data_context.project_config_with_variables_substituted.datasources,
             "stores": self._data_context.stores,
-            "validation_operators": self._data_context.validation_operators,
+            "validation_operators": validation_operators,
             "data_docs_sites": self._data_context.project_config_with_variables_substituted.data_docs_sites,
             "expectation_suites": expectation_suites,
             "dependencies": self._get_serialized_dependencies(),

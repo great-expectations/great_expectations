@@ -107,7 +107,7 @@ class UserConfigurableProfiler:
                         one of "one", "two", "very_few" or "few". The default value is "many". For the purposes of
                         comparing whether two tables are identical, it might make the most sense to set this to "unique"
         """
-        self.column_info = {}
+        self.column_info: Dict = {}
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
 
@@ -220,12 +220,13 @@ class UserConfigurableProfiler:
 
         """
         expectation_suite: ExpectationSuite
-        if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
+        if len(self.profile_dataset.get_expectation_suite().expectations) > 0:  # type: ignore[union-attr]
+            # Only `Validator`` has `get_expectation_suite()`
             # noinspection PyProtectedMember
             suite_name: str = (
-                self.profile_dataset._expectation_suite.expectation_suite_name
+                self.profile_dataset._expectation_suite.expectation_suite_name  # type: ignore[union-attr]
             )
-            self.profile_dataset._expectation_suite = ExpectationSuite(
+            self.profile_dataset._expectation_suite = ExpectationSuite(  # type: ignore[union-attr]
                 expectation_suite_name=suite_name, data_context=None
             )
 
@@ -644,8 +645,8 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 num_unique, pct_unique
             )
         )
-
-        return cardinality.name
+        # Return type mypy issue can be fixed by adding a str mixin to `OrderedProfilerCardinality`
+        return cardinality.name  # type: ignore[return-value]
 
     def _add_semantic_types_by_column_from_config_to_column_info(self, column_name):
         """
@@ -673,6 +674,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             for semantic_type, column_list in self.semantic_types_dict.items():
                 if column_name in column_list:
                     semantic_types.append(semantic_type.upper())
+
             column_info_entry["semantic_types"] = semantic_types
             if all(
                 i in column_info_entry.get("semantic_types")
@@ -1191,7 +1193,7 @@ nan: {pct_unique}
                 )
 
         if "expect_column_values_to_be_in_type_list" not in self.excluded_expectations:
-            col_type = self.column_info.get(column).get("type")
+            col_type = self.column_info.get(column, {}).get("type")
             if col_type != "UNKNOWN":
                 type_list = profiler_data_types_with_mapping.get(col_type)
                 profile_dataset.expect_column_values_to_be_in_type_list(
