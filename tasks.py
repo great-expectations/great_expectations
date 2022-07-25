@@ -97,7 +97,7 @@ def hooks(ctx, all_files=False, diff=False, sync=False):
         ctx.run(" ".join(["pre-commit", "install"]), echo=True)
 
 
-@invoke.task
+@invoke.task(aliases=["type-cov"])  # type: ignore
 def type_coverage(ctx):
     """
     Check total type-hint coverage compared to `develop`.
@@ -106,3 +106,59 @@ def type_coverage(ctx):
         check_type_hint_coverage.main()
     except AssertionError as err:
         raise invoke.Exit(message=str(err), code=1)
+
+
+# numbers next to each package represent the last known number of typing errors.
+# when errors reach 0 please uncomment the module so it becomes type-checked by default.
+DEFAULT_PACKAGES_TO_TYPE_CHECK = [
+    # "checkpoint",  # 78
+    # "cli",  # 237
+    # "core",  # 242
+    # "data_asset",  # 1
+    # "data_context",  # 272
+    # "datasource",  # 98
+    # "exceptions",  # 2
+    # "execution_engine",  # 109
+    # "expectations",  # 462
+    # "jupyter_ux",  # 4
+    # "marshmallow__shade",  # 14
+    "profile",  # 0
+    # "render",  # 87
+    # "rule_based_profiler",  # 469
+    # "self_check",  # 10
+    # "types",  # 3
+    # "validation_operators", # 47
+    # "validator",  # 46
+    # util.py # 28
+]
+
+
+@invoke.task(
+    aliases=["types"],
+    iterable=["packages"],
+    help={
+        "packages": f"One or more packages to type-check with mypy. (Default: {DEFAULT_PACKAGES_TO_TYPE_CHECK})",
+        "show-default-packages": "Print the default packages to type-check and then exit.",
+        "install-types": "Automatically install any needed types from `typeshed`.",
+    },
+)
+def type_check(ctx, packages, install_types=False, show_default_packages=False):
+    """Run mypy static type-checking on select packages."""
+    if show_default_packages:
+        # Use this to keep the Type-checking section of the docs up to date.
+        # https://docs.greatexpectations.io/docs/contributing/style_guides/code_style#type-checking
+        print("\n".join(DEFAULT_PACKAGES_TO_TYPE_CHECK))
+        raise invoke.Exit(code=0)
+
+    packages = packages or DEFAULT_PACKAGES_TO_TYPE_CHECK
+    # once we have sunsetted `type-coverage` and our typing has matured we should define
+    # our packages to exclude (if any) in the mypy config file.
+    # https://mypy.readthedocs.io/en/stable/config_file.html#confval-exclude
+    ge_pkgs = [f"great_expectations/{p}" for p in packages]
+    cmds = [
+        "mypy",
+        *ge_pkgs,
+    ]
+    if install_types:
+        cmds.extend(["--install-types", "--non-interactive"])
+    ctx.run(" ".join(cmds), echo=True)

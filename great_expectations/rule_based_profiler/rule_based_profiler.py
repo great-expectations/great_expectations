@@ -340,7 +340,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 rule_state.rule.name: rule_state.execution_time
                 for rule_state in self.rule_states
             },
-            usage_statistics_handler=self._usage_statistics_handler,
+            _usage_statistics_handler=self._usage_statistics_handler,
         )
 
     def get_expectation_configurations(self) -> List[ExpectationConfiguration]:

@@ -1,5 +1,6 @@
 import copy
 import cProfile
+import datetime
 import importlib
 import io
 import json
@@ -10,7 +11,6 @@ import re
 import time
 import uuid
 from collections import OrderedDict
-from datetime import datetime
 from functools import wraps
 from gc import get_referrers
 from inspect import (
@@ -24,6 +24,7 @@ from inspect import (
     getmodule,
     signature,
 )
+from numbers import Number
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
@@ -1316,6 +1317,49 @@ def is_nan(value: Any) -> bool:
         return True
 
 
+def isclose(
+    operand_a: Union[datetime.datetime, Number],
+    operand_b: Union[datetime.datetime, Number],
+    rtol=1.0e-5,  # controls relative weight of "operand_b" (when its magnitude is large)
+    atol=1.0e-8,  # controls absolute accuracy (based on floating point machine precision)
+    equal_nan=False,
+) -> bool:
+    """
+    Checks whether or not two numbers (or timestamps) are approximately close to one another.
+
+    According to "https://numpy.org/doc/stable/reference/generated/numpy.isclose.html",
+        For finite values, isclose uses the following equation to test whether two floating point values are equivalent:
+        "absolute(a - b) <= (atol + rtol * absolute(b))".
+
+    This translates to:
+        "absolute(operand_a - operand_b) <= (atol + rtol * absolute(operand_b))", where "operand_a" is "target" quantity
+    under evaluation for being close to a "control" value, and "operand_b" serves as the "control" ("reference") value.
+
+    The values of the absolute tolerance ("atol") parameter is chosen as a sufficiently small constant for most floating
+    point machine representations (e.g., 1.0e-8), so that even if the "control" value is small in magnitude and "target"
+    and "control" are close in absolute value, then the accuracy of the assessment can still be high up to the precision
+    of the "atol" value (here, 8 digits as the default).  However, when the "control" value is large in magnitude, the
+    relative tolerance ("rtol") parameter carries a greater weight in the comparison assessment, because the acceptable
+    deviation between the two quantities can be relatively larger for them to be deemed as "close enough" in this case.
+    """
+    operand_a_as_number: np.float64
+    operand_b_as_number: np.float64
+    if isinstance(operand_a, datetime.datetime):
+        operand_a_as_number = np.float64(int(operand_a.strftime("%Y%m%d%H%M%S")))
+        operand_b_as_number = np.float64(int(operand_b.strftime("%Y%m%d%H%M%S")))
+    else:
+        operand_a_as_number = np.float64(operand_a)
+        operand_b_as_number = np.float64(operand_b)
+
+    return np.isclose(
+        a=operand_a_as_number,
+        b=operand_b_as_number,
+        rtol=rtol,
+        atol=atol,
+        equal_nan=equal_nan,
+    )
+
+
 def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
     """
     This method checks whether or not candidate object is subset of target object.
@@ -1346,7 +1390,7 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
         # noinspection PyUnusedLocal
-        parsed_date: datetime = parse(value, fuzzy=fuzzy)
+        parsed_date: datetime.datetime = parse(value, fuzzy=fuzzy)
     except (TypeError, ValueError):
         return False
     return True
@@ -1449,10 +1493,11 @@ def import_make_url():
         from sqlalchemy.engine.url import make_url
     else:
         from sqlalchemy.engine import make_url
+
     return make_url
 
 
-def get_pyathena_potential_type(type_module, type_):
+def get_pyathena_potential_type(type_module, type_) -> str:
     if version.parse(type_module.pyathena.__version__) >= version.parse("2.5.0"):
         # introduction of new column type mapping in 2.5
         potential_type = type_module.AthenaDialect()._get_column_type(type_)
@@ -1469,6 +1514,7 @@ def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
     """
     Leverage on Trino Package to return sqlalchemy sql type
     """
+    # noinspection PyUnresolvedReferences
     potential_type = type_module.parse_sqltype(type_)
     return potential_type
 

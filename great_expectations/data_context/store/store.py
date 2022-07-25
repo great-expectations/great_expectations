@@ -85,7 +85,7 @@ class Store:
         return isinstance(self._store_backend, GeCloudStoreBackend)
 
     @property
-    def store_backend(self) -> dict:
+    def store_backend(self) -> StoreBackend:
         return self._store_backend
 
     @property
