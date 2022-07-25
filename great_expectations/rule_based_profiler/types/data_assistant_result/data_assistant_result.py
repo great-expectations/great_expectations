@@ -1294,23 +1294,34 @@ class DataAssistantResult(SerializableDictDot):
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
+
+        y_axis_title: str
+        if len(sanitized_metric_names) > 1:
+            y_axis_title = "Column Values"
+        else:
+            y_axis_title = None
+
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component = MetricPlotComponent(
-                name=sanitized_metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
+                name=sanitized_metric_name,
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
             )
             metric_plot_components.append(metric_plot_component)
         min_value_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=min_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
             )
         )
         max_value_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=max_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
             )
         )
 
@@ -1326,12 +1337,14 @@ class DataAssistantResult(SerializableDictDot):
                 ExpectationKwargPlotComponent(
                     name=strict_min,
                     alt_type=AltairDataTypes.NOMINAL.value,
+                    axis_title=y_axis_title,
                 )
             )
             strict_max_plot_component: ExpectationKwargPlotComponent = (
                 ExpectationKwargPlotComponent(
                     name=strict_max,
                     alt_type=AltairDataTypes.NOMINAL.value,
+                    axis_title=y_axis_title,
                 )
             )
             tooltip = (
@@ -1583,11 +1596,20 @@ class DataAssistantResult(SerializableDictDot):
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
+
+        y_axis_title: str
+        if len(sanitized_metric_names) > 1:
+            y_axis_title = "Column Values"
+        else:
+            y_axis_title = None
+
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component: MetricPlotComponent = MetricPlotComponent(
-                name=sanitized_metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
+                name=sanitized_metric_name,
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
             )
             metric_plot_components.append(metric_plot_component)
 
@@ -1600,24 +1622,28 @@ class DataAssistantResult(SerializableDictDot):
             ExpectationKwargPlotComponent(
                 name=min_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
             )
         )
         max_value_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=max_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
             )
         )
         strict_min_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=strict_min,
                 alt_type=AltairDataTypes.NOMINAL.value,
+                axis_title=y_axis_title,
             )
         )
         strict_max_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=strict_max,
                 alt_type=AltairDataTypes.NOMINAL.value,
+                axis_title=y_axis_title,
             )
         )
 
@@ -1750,11 +1776,20 @@ class DataAssistantResult(SerializableDictDot):
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
+
+        y_axis_title: str
+        if len(sanitized_metric_names) > 1:
+            y_axis_title = "Column Values"
+        else:
+            y_axis_title = None
+
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
             metric_plot_component: MetricPlotComponent = MetricPlotComponent(
-                name=sanitized_metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
+                name=sanitized_metric_name,
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
             )
             metric_plot_components.append(metric_plot_component)
 
@@ -1767,28 +1802,28 @@ class DataAssistantResult(SerializableDictDot):
             ExpectationKwargPlotComponent(
                 name=min_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
-                title=sanitized_metric_names[0],
+                axis_title=y_axis_title,
             )
         )
         max_value_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=max_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
-                title=sanitized_metric_names[0],
+                axis_title=y_axis_title,
             )
         )
         strict_min_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=strict_min,
                 alt_type=AltairDataTypes.NOMINAL.value,
-                title=sanitized_metric_names[0],
+                axis_title=y_axis_title,
             )
         )
         strict_max_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=strict_max,
                 alt_type=AltairDataTypes.NOMINAL.value,
-                title=sanitized_metric_names[0],
+                axis_title=y_axis_title,
             )
         )
 
@@ -3691,7 +3726,7 @@ class DataAssistantResult(SerializableDictDot):
             if (include_column_names is not None) or (exclude_column_names is not None):
                 for sanitized_metric_name in sanitized_metric_names:
                     all_columns = (
-                        df[sanitized_metric_names].apply(pd.Series).values.tolist()
+                        df[sanitized_metric_name].apply(pd.Series).values.tolist()
                     )
                     for record in all_columns:
                         new_column_list = []

@@ -8,10 +8,13 @@ import altair as alt
 class PlotComponent:
     name: Optional[str] = None
     alt_type: Optional[alt.StandardType] = None
+    axis_title: Optional[str] = None
 
     @property
     def title(self) -> Optional[str]:
-        if self.name is not None:
+        if self.axis_title is not None:
+            return self.axis_title
+        elif self.name is not None:
             return self.name.replace("_", " ").title()
         else:
             return None
@@ -84,13 +87,6 @@ class MetricPlotComponent(PlotComponent):
 @dataclass(frozen=True)
 class DomainPlotComponent(PlotComponent):
     subtitle: Optional[str] = None
-
-    @property
-    def title(self) -> Optional[str]:
-        if self.name is not None:
-            return self.name.title()
-        else:
-            return None
 
     def plot_on_axis(self) -> alt.X:
         """
@@ -182,13 +178,20 @@ def determine_plot_title(
         An Altair TitleParam object
 
     """
+    metric_plot_component_titles: Set[str] = set()
+    for metric_plot_component in metric_plot_components:
+        metric_plot_component_titles.add(metric_plot_component.title)
+
     contents: str
     if expectation_type:
         contents = expectation_type
-    else:
+    elif len(metric_plot_component_titles) == 1:
         contents: str = (
-            f"{metric_plot_components[0].title} per {batch_plot_component.title}"
+            f"{list(metric_plot_component_titles)[0]} per {batch_plot_component.title}"
         )
+    else:
+        contents: str = f"Column Values per {batch_plot_component.title}"
+
     subtitle: Optional[str] = domain_plot_component.subtitle
     domain_selector: Optional[str] = domain_plot_component.name
 
