@@ -462,6 +462,7 @@ class DataContext(BaseDataContext):
         """
         if self.ge_cloud_mode:
             config = self._retrieve_data_context_config_from_ge_cloud()
+            self._set_ge_cloud_env_vars()
             return config
 
         path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
@@ -489,6 +490,19 @@ class DataContext(BaseDataContext):
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
+
+    def _set_ge_cloud_env_vars(self) -> None:
+        assert self.ge_cloud_config is not None
+        env_vars = (
+            ("GE_CLOUD_BASE_URL", self.ge_cloud_config.base_url),
+            ("GE_CLOUD_ACCOUNT_ID", self.ge_cloud_config.account_id),
+            ("GE_CLOUD_ACCESS_TOKEN", self.ge_cloud_config.access_token),
+            ("GE_CLOUD_ORGANIZATION_ID", self.ge_cloud_config.organization_id),
+        )
+        for env_var_name, env_var_value in env_vars:
+            if env_var_value is not None and env_var_name not in os.environ:
+                os.environ[env_var_name] = env_var_value
+                logger.info(f"Setting {env_var_name} as environment variable.")
 
     def add_store(self, store_name, store_config):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")
