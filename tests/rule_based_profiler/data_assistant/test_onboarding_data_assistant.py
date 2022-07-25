@@ -582,7 +582,7 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_include_column_
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 13
+    assert len(column_domain_charts) == 15
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
