@@ -794,6 +794,7 @@ def test_ExplorerDataContext(titanic_data_context):
 
 
 # noinspection PyPep8Naming
+@pytest.mark.unit
 def test_ConfigOnlyDataContext__initialization(
     tmp_path_factory, basic_data_context_config
 ):
@@ -805,36 +806,37 @@ def test_ConfigOnlyDataContext__initialization(
         config_path,
     )
 
-    assert (
-        context.root_directory.split("/")[-1]
-        == "test_ConfigOnlyDataContext__initialization__dir0"
+    assert context.root_directory.split("/")[-1].startswith(
+        "test_ConfigOnlyDataContext__initialization__dir"
     )
-    assert context.plugins_directory.split("/")[-3:] == [
-        "test_ConfigOnlyDataContext__initialization__dir0",
-        "plugins",
-        "",
-    ]
+
+    plugins_dir_parts = context.plugins_directory.split("/")[-3:]
+    assert len(plugins_dir_parts) == 3
+    assert plugins_dir_parts[0].startswith(
+        "test_ConfigOnlyDataContext__initialization__dir"
+    )
+    assert plugins_dir_parts[1:] == ["plugins", ""]
 
 
+@pytest.mark.unit
 def test__normalize_absolute_or_relative_path(
     tmp_path_factory, basic_data_context_config
 ):
-    config_path = str(
-        tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
+    full_test_dir = tmp_path_factory.mktemp(
+        "test__normalize_absolute_or_relative_path__dir"
     )
+    test_dir = full_test_dir.parts[-1]
+    config_path = str(full_test_dir)
     context = BaseDataContext(
         basic_data_context_config,
         config_path,
     )
 
-    assert str(
-        os.path.join("test__normalize_absolute_or_relative_path__dir0", "yikes")
-    ) in context._normalize_absolute_or_relative_path("yikes")
-
-    assert (
-        "test__normalize_absolute_or_relative_path__dir"
-        not in context._normalize_absolute_or_relative_path("/yikes")
+    assert context._normalize_absolute_or_relative_path("yikes").endswith(
+        os.path.join(test_dir, "yikes")
     )
+
+    assert test_dir not in context._normalize_absolute_or_relative_path("/yikes")
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
@@ -1626,7 +1628,7 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         context.get_checkpoint("foo")
 
 
-# TODO: add more test cases
+@pytest.mark.integration
 def test_run_checkpoint_new_style(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1678,8 +1680,6 @@ def test_run_checkpoint_new_style(
         context.run_checkpoint(checkpoint_name=checkpoint_config.name)
 
     assert len(context.validations_store.list_keys()) == 0
-
-    # print(context.list_datasources())
 
     context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
 
