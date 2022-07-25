@@ -660,21 +660,27 @@ class DataAssistantResult(SerializableDictDot):
         display_chart_dict[chart_title].display()
 
     @staticmethod
+    def _get_chart_layer_title(layer: alt.Chart) -> Optional[str]:
+        """Recursively searches through the chart layers for a title and returns one if it exists."""
+        chart_title: Optional[str]
+        try:
+            chart_title = layer.title.text
+        except AttributeError:
+            for chart_layer in layer.layer:
+                chart_title = DataAssistantResult._get_chart_layer_title(
+                    layer=chart_layer
+                )
+                if chart_title is not None:
+                    break
+        return chart_title
+
+    @staticmethod
     def _get_chart_titles(charts: List[alt.Chart]) -> List[str]:
+        """Recursively searches through each chart layer for a title and returns a list of titles."""
         chart_titles: List[str] = []
         chart_title: Optional[str]
         for chart in charts:
-            chart_title = None
-            try:
-                chart_title = chart.title.text
-            except AttributeError:
-                for layer in chart.layer:
-                    try:
-                        chart_title = layer.title.text
-                        break
-                    except AttributeError:
-                        continue
-
+            chart_title = DataAssistantResult._get_chart_layer_title(layer=chart)
             if chart_title is None:
                 raise ge_exceptions.DataAssistantResultExecutionError(
                     "All DataAssistantResult charts must have a title."
@@ -3592,12 +3598,20 @@ class DataAssistantResult(SerializableDictDot):
             Tuple[str], str
         ] = self._get_metric_expectation_map()
 
+        sanitized_metric_names: List[
+            str
+        ] = self._get_sanitized_metric_names_from_metric_names(
+            metric_names=metric_names
+        )
+
         metric_domains: Set[Domain] = set(attributed_metrics_by_domain.keys())
 
         column_name: str
         column_domain: Domain
         metric_df: pd.DataFrame
+        join_keys: List[str]
         df: pd.DataFrame = pd.DataFrame()
+        column_df: ColumnDataFrame
         column_dfs: List[ColumnDataFrame] = []
         for expectation_configuration in expectation_configurations:
             column_name = expectation_configuration.kwargs["column"]
@@ -3624,9 +3638,14 @@ class DataAssistantResult(SerializableDictDot):
                     if len(df.index) == 0:
                         df = metric_df.copy()
                     else:
-                        df = df.merge(metric_df, left_index=True, right_index=True)
+                        join_keys = [
+                            column
+                            for column in metric_df.columns
+                            if column not in sanitized_metric_names
+                        ]
+                        df = df.merge(metric_df, on=join_keys)
 
-                column_df: ColumnDataFrame = ColumnDataFrame(column_name, df)
+                column_df = ColumnDataFrame(column_name, df)
                 column_dfs.append(column_df)
 
         return column_dfs
