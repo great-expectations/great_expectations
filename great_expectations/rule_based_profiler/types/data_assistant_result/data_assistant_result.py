@@ -666,12 +666,15 @@ class DataAssistantResult(SerializableDictDot):
         try:
             chart_title = layer.title.text
         except AttributeError:
-            for chart_layer in layer.layer:
-                chart_title = DataAssistantResult._get_chart_layer_title(
-                    layer=chart_layer
-                )
-                if chart_title is not None:
-                    break
+            try:
+                for chart_layer in layer.layer:
+                    chart_title = DataAssistantResult._get_chart_layer_title(
+                        layer=chart_layer
+                    )
+                    if chart_title is not None:
+                        return chart_title
+            except AttributeError:
+                return None
         return chart_title
 
     @staticmethod
@@ -1302,14 +1305,12 @@ class DataAssistantResult(SerializableDictDot):
             ExpectationKwargPlotComponent(
                 name=min_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
-                title=sanitized_metric_names[0],
             )
         )
         max_value_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=max_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
-                title=sanitized_metric_names[0],
             )
         )
 
@@ -1325,14 +1326,12 @@ class DataAssistantResult(SerializableDictDot):
                 ExpectationKwargPlotComponent(
                     name=strict_min,
                     alt_type=AltairDataTypes.NOMINAL.value,
-                    title=sanitized_metric_names[0],
                 )
             )
             strict_max_plot_component: ExpectationKwargPlotComponent = (
                 ExpectationKwargPlotComponent(
                     name=strict_max,
                     alt_type=AltairDataTypes.NOMINAL.value,
-                    title=sanitized_metric_names[0],
                 )
             )
             tooltip = (
@@ -1590,7 +1589,7 @@ class DataAssistantResult(SerializableDictDot):
             metric_plot_component: MetricPlotComponent = MetricPlotComponent(
                 name=sanitized_metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
             )
-            metric_plot_components.add(metric_plot_component)
+            metric_plot_components.append(metric_plot_component)
 
         domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name="column",
@@ -1601,28 +1600,24 @@ class DataAssistantResult(SerializableDictDot):
             ExpectationKwargPlotComponent(
                 name=min_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
-                title=sanitized_metric_names[0],
             )
         )
         max_value_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=max_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
-                title=sanitized_metric_names[0],
             )
         )
         strict_min_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=strict_min,
                 alt_type=AltairDataTypes.NOMINAL.value,
-                title=sanitized_metric_names[0],
             )
         )
         strict_max_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=strict_max,
                 alt_type=AltairDataTypes.NOMINAL.value,
-                title=sanitized_metric_names[0],
             )
         )
 
@@ -1631,8 +1626,8 @@ class DataAssistantResult(SerializableDictDot):
                 batch_name,
             ]
             + batch_identifiers
+            + list(sanitized_metric_names)
             + [
-                sanitized_metric_names,
                 column_name,
                 min_value,
                 max_value,
@@ -1657,7 +1652,7 @@ class DataAssistantResult(SerializableDictDot):
         elif strict_min:
             predicate = (
                 (alt.datum.min_value > alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
+                & (alt.datum.max_value >= alt.datum[metric_plot_components[0].name])
             ) | (
                 (alt.datum.min_value < alt.datum[metric_plot_components[0].name])
                 & (alt.datum.max_value <= alt.datum[metric_plot_components[0].name])
@@ -2038,12 +2033,16 @@ class DataAssistantResult(SerializableDictDot):
             if_true=alt.value(Colors.PINK.value),
         )
 
-        anomaly_coded_points = line.layer[1].encode(
-            color=point_color_condition,
-            tooltip=tooltip,
+        anomaly_coded_points = (
+            line.layer[0]
+            .layer[1]
+            .encode(
+                color=point_color_condition,
+                tooltip=tooltip,
+            )
         )
         anomaly_coded_line = alt.layer(
-            line.layer[0].encode(tooltip=tooltip), anomaly_coded_points
+            line.layer[0].layer[0].encode(tooltip=tooltip), anomaly_coded_points
         )
 
         return band + lower_limit + upper_limit + anomaly_coded_line
@@ -2717,8 +2716,8 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        line: alt.Chart = line_and_points.layer[0]
-        points: alt.Chart = line_and_points.layer[1]
+        line: alt.Chart = line_and_points.layer[0].layer[0]
+        points: alt.Chart = line_and_points.layer[0].layer[1]
 
         line_and_points.transform = alt.Undefined
         line.selection = alt.Undefined
