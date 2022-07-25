@@ -8,9 +8,12 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+import json
+
 import invoke
 
 from scripts import check_type_hint_coverage
+from tests.integration.usage_statistics import usage_stats_utils
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
@@ -162,3 +165,31 @@ def type_check(ctx, packages, install_types=False, show_default_packages=False):
     if install_types:
         cmds.extend(["--install-types", "--non-interactive"])
     ctx.run(" ".join(cmds), echo=True)
+
+
+@invoke.task(aliases=["get-stats"])
+def get_usage_stats_json(ctx):
+    """
+    Dump usage stats event examples to json file
+    """
+    events = usage_stats_utils.get_usage_stats_example_events()
+    version = usage_stats_utils.get_gx_version()
+
+    outfile = f"v{version}_example_events.json"
+    with open(outfile, "w") as f:
+        json.dump(events, f)
+
+    print(f"File written to '{outfile}'.")
+
+
+@invoke.task(get_usage_stats_json, aliases=["move-stats"])
+def mv_usage_stats_json(ctx):
+    """
+    Use databricks-cli lib to move usage stats event examples to dbfs:/
+    """
+    version = usage_stats_utils.get_gx_version()
+    outfile = f"v{version}_example_events.json"
+    cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
+    cmd = cmd.format(outfile)
+    ctx.run(cmd)
+    print(f"'{outfile}' copied to dbfs.")
