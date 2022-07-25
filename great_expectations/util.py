@@ -27,7 +27,21 @@ from inspect import (
 from numbers import Number
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Set,
+    Sized,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import numpy as np
 import pandas as pd
@@ -1529,7 +1543,7 @@ def pandas_series_between_inclusive(
     if version.parse(pd.__version__) >= version.parse("1.3.0"):
         metric_series = series.between(min_value, max_value, inclusive="both")
     else:
-        metric_series = series.between(min_value, max_value, inclusive=True)
+        metric_series = series.between(min_value, max_value)
 
     return metric_series
 
@@ -1556,4 +1570,5 @@ def numpy_quantile(
             axis=axis,
             interpolation=method,
         )
+
     return quantile
