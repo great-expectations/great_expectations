@@ -8,6 +8,7 @@ from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 from nbformat import NotebookNode
 
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.exceptions.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
 
@@ -54,15 +55,14 @@ def test_run_rbp_notebook(tmp_path):
     with open(notebook_path) as f:
         nb: NotebookNode = nbformat.read(f, as_version=4)
 
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=30, kernel_name="python3")
 
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
         msg: str = f'Error executing the notebook "{notebook_path}".\n\n'
         msg += f'See notebook "{output_notebook_path}" for the traceback.'
-        print(msg)
-        raise
+        raise GreatExpectationsError(msg)
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
@@ -97,15 +97,14 @@ def test_run_data_assistants_notebook(tmp_path):
     with open(notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
 
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=30, kernel_name="python3")
 
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
         msg: str = f'Error executing the notebook "{notebook_path}".\n\n'
         msg += f'See notebook "{output_notebook_path}" for the traceback.'
-        print(msg)
-        raise
+        raise GreatExpectationsError(msg)
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
@@ -137,15 +136,14 @@ def test_run_self_initializing_expectations_notebook(tmp_path):
     with open(notebook_path) as f:
         nb: NotebookNode = nbformat.read(f, as_version=4)
 
-    ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep = ExecutePreprocessor(timeout=30, kernel_name="python3")
 
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
         msg = f'Error executing the notebook "{notebook_path}".\n\n'
         msg += f'See notebook "{output_notebook_path}" for the traceback.'
-        print(msg)
-        raise
+        raise GreatExpectationsError(msg)
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
@@ -186,8 +184,7 @@ def test_run_multibatch_inferred_asset_example(tmp_path):
     except CellExecutionError:
         msg: str = f'Error executing the notebook "{notebook_path}".\n\n'
         msg += f'See notebook "{output_notebook_path}" for the traceback.'
-        print(msg)
-        raise
+        raise GreatExpectationsError(msg)
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
@@ -224,15 +221,14 @@ def test_run_multibatch_configured_asset_example(tmp_path):
     with open(notebook_path) as f:
         nb: NotebookNode = nbformat.read(f, as_version=4)
 
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=30, kernel_name="python3")
 
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
         msg: str = f'Error executing the notebook "{notebook_path}".\n\n'
         msg += f'See notebook "{output_notebook_path}" for the traceback.'
-        print(msg)
-        raise
+        raise GreatExpectationsError(msg)
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
@@ -266,15 +262,14 @@ def test_run_multibatch_sql_asset_example(tmp_path):
     with open(notebook_path) as f:
         nb: NotebookNode = nbformat.read(f, as_version=4)
 
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=30, kernel_name="python3")
 
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
     except CellExecutionError:
         msg: str = f'Error executing the notebook "{notebook_path}".\n\n'
         msg += f'See notebook "{output_notebook_path}" for the traceback.'
-        print(msg)
-        raise
+        raise GreatExpectationsError(msg)
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
