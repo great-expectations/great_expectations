@@ -496,8 +496,6 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         self.module_name = "great_expectations.rule_based_profiler"
         self.class_name = "RuleBasedProfiler"
 
-        self.name = name
-
         self.config_version = config_version
 
         self.variables = variables
@@ -677,6 +675,7 @@ class RuleBasedProfilerConfigSchema(Schema):
         unknown = INCLUDE
         fields = (
             "name",
+            "id",
             "config_version",
             "module_name",
             "class_name",
