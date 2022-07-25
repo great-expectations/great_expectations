@@ -3082,7 +3082,11 @@ class DataAssistantResult(SerializableDictDot):
         column_based_metric_names: Set[Union[Tuple[str], str]] = set()
         for metrics in metric_expectation_map.keys():
             if all([metric.startswith("column") for metric in metrics]):
-                column_based_metric_names.add(metrics)
+                if plot_mode == PlotMode.DIAGNOSTIC:
+                    column_based_metric_names.add(metrics)
+                if plot_mode == PlotMode.DESCRIPTIVE:
+                    for metric in metrics:
+                        column_based_metric_names.add((metric,))
 
         filtered_attributed_metrics_by_column_domain: Dict[
             Domain, Dict[str, ParameterNode]
@@ -3366,12 +3370,6 @@ class DataAssistantResult(SerializableDictDot):
             Tuple[str], str
         ] = self._get_metric_expectation_map()
 
-        sanitized_metric_names: Set[
-            str
-        ] = self._get_sanitized_metric_names_from_metric_names(
-            metric_names=metric_names
-        )
-
         expectation_configuration: ExpectationConfiguration
         attributed_metrics: Dict[str, ParameterNode]
         attributed_values: ParameterNode
@@ -3610,7 +3608,7 @@ class DataAssistantResult(SerializableDictDot):
         column_domain: Domain
         metric_df: pd.DataFrame
         join_keys: List[str]
-        df: pd.DataFrame = pd.DataFrame()
+        df: pd.DataFrame
         column_df: ColumnDataFrame
         column_dfs: List[ColumnDataFrame] = []
         for expectation_configuration in expectation_configurations:
@@ -3628,6 +3626,7 @@ class DataAssistantResult(SerializableDictDot):
                 metric_expectation_map.get(metric_names)
                 == expectation_configuration.expectation_type
             ):
+                df = pd.DataFrame()
                 for metric_name in metric_names:
                     metric_df = self._create_df_for_charting(
                         metric_name=metric_name,
