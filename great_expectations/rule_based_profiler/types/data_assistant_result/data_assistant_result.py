@@ -470,7 +470,7 @@ class DataAssistantResult(SerializableDictDot):
             PlotResult wrapper object around Altair charts.
         """
         return self._plot(
-            plot_mode=PlotMode.PRESCRIPTIVE,
+            plot_mode=PlotMode.DIAGNOSTIC,
             sequential=sequential,
             theme=theme,
             include_column_names=include_column_names,
@@ -494,7 +494,7 @@ class DataAssistantResult(SerializableDictDot):
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            plot_mode: Type of plot to generate, prescriptive or descriptive
+            plot_mode: Type of plot to generate, diagnostic or descriptive
             sequential: Whether batches are sequential in nature
             theme: Altair top-level chart configuration dictionary
             include_column_names: A list of columns to chart
@@ -3016,7 +3016,7 @@ class DataAssistantResult(SerializableDictDot):
                 attributed_metrics[metric_name] for metric_name in metric_names
             ]
 
-            if plot_mode == PlotMode.PRESCRIPTIVE:
+            if plot_mode == PlotMode.DIAGNOSTIC:
                 for expectation_configuration in table_based_expectation_configurations:
                     if expectation_configuration.expectation_type == expectation_type:
                         table_domain_chart: alt.Chart = (
@@ -3088,9 +3088,7 @@ class DataAssistantResult(SerializableDictDot):
             Domain, Dict[str, ParameterNode]
         ]
         column_based_expectation_configurations: List[ExpectationConfiguration]
-        metric_display_charts: List[alt.VConcatChart]
         display_charts: List[alt.VConcatChart] = []
-        metric_return_charts: List[alt.Chart]
         return_charts: List[Optional[alt.Chart]] = []
         expectation_type: str
         for metric_names in column_based_metric_names:
@@ -3106,25 +3104,27 @@ class DataAssistantResult(SerializableDictDot):
                 )
             )
 
-            metric_display_charts = self._create_display_chart_for_column_domain_expectation(
-                expectation_type=expectation_type,
-                expectation_configurations=column_based_expectation_configurations,
-                metric_names=metric_names,
-                attributed_metrics_by_domain=filtered_attributed_metrics_by_column_domain,
-                plot_mode=plot_mode,
-                sequential=sequential,
+            display_charts.extend(
+                self._create_display_chart_for_column_domain_expectation(
+                    expectation_type=expectation_type,
+                    expectation_configurations=column_based_expectation_configurations,
+                    metric_names=metric_names,
+                    attributed_metrics_by_domain=filtered_attributed_metrics_by_column_domain,
+                    plot_mode=plot_mode,
+                    sequential=sequential,
+                )
             )
-            display_charts.extend(metric_display_charts)
 
-            metric_return_charts = self._create_return_charts_for_column_domain_expectation(
-                expectation_type=expectation_type,
-                expectation_configurations=column_based_expectation_configurations,
-                metric_names=metric_names,
-                attributed_metrics_by_domain=filtered_attributed_metrics_by_column_domain,
-                plot_mode=plot_mode,
-                sequential=sequential,
+            return_charts.extend(
+                self._create_return_charts_for_column_domain_expectation(
+                    expectation_type=expectation_type,
+                    expectation_configurations=column_based_expectation_configurations,
+                    metric_names=metric_names,
+                    attributed_metrics_by_domain=filtered_attributed_metrics_by_column_domain,
+                    plot_mode=plot_mode,
+                    sequential=sequential,
+                )
             )
-            return_charts.extend(metric_return_charts)
 
         display_charts = list(filter(None, display_charts))
         return_charts = list(filter(None, return_charts))
@@ -3254,7 +3254,7 @@ class DataAssistantResult(SerializableDictDot):
             altair_type=AltairDataTypes.ORDINAL
         )
 
-        if plot_mode is PlotMode.PRESCRIPTIVE:
+        if plot_mode is PlotMode.DIAGNOSTIC:
             plot_impl: Optional[
                 Callable[
                     [
@@ -3441,7 +3441,7 @@ class DataAssistantResult(SerializableDictDot):
             altair_type=AltairDataTypes.ORDINAL
         )
 
-        if plot_mode is PlotMode.PRESCRIPTIVE:
+        if plot_mode is PlotMode.DIAGNOSTIC:
             plot_impl: Optional[
                 Callable[
                     [
@@ -3576,7 +3576,7 @@ class DataAssistantResult(SerializableDictDot):
 
         df = pd.concat([df, batch_identifiers], axis=1)
 
-        if plot_mode is PlotMode.PRESCRIPTIVE:
+        if plot_mode is PlotMode.DIAGNOSTIC:
             for kwarg_name in expectation_configuration.kwargs:
                 if isinstance(expectation_configuration.kwargs[kwarg_name], list):
                     df[kwarg_name] = [
