@@ -1,5 +1,4 @@
 import pathlib
-from unittest import mock
 
 import pytest
 
@@ -24,6 +23,9 @@ def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
     project_path = tmp_path / "my_data_context"
     project_path.mkdir()
 
+    # Clear datasources to improve test performance in DataContext._init_datasources
+    data_context_config_with_datasources.datasources = {}
+
     context = BaseDataContext(
         project_config=data_context_config_with_datasources,
         context_root_dir=str(project_path),
@@ -41,6 +43,9 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
 ) -> None:
     project_path = tmp_path / "my_data_context"
     project_path.mkdir()
+
+    # Clear datasources to improve test performance in DataContext._init_datasources
+    data_context_config_with_datasources.datasources = {}
 
     context = BaseDataContext(
         project_config=data_context_config_with_datasources,
