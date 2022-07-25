@@ -463,7 +463,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         data_assistant_result: DataAssistantResult = DataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
-            usage_statistics_handler=usage_statistics_handler,
+            _usage_statistics_handler=usage_statistics_handler,
         )
         run_profiler_on_data(
             data_assistant=self,

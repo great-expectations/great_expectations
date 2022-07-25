@@ -603,11 +603,10 @@ class AbstractDataContext(ABC):
         """
         datasources: List[dict] = []
         substitutions: dict = self._determine_substitutions()
+
         datasource_name: str
-        for datasource_name in self._datasource_store.list_keys():
-            datasource_config: DatasourceConfig = (
-                self._datasource_store.retrieve_by_name(datasource_name)
-            )
+        datasource_config: DatasourceConfig
+        for datasource_name, datasource_config in self.config.datasources.items():
             datasource_dict: dict = datasource_config.to_json_dict()
             datasource_dict["name"] = datasource_name
             substituted_config: dict = cast(
@@ -1419,32 +1418,14 @@ class AbstractDataContext(ABC):
         # As such, it must be instantiated separately.
         self._init_datasource_store()
 
+    @abstractmethod
     def _init_datasource_store(self) -> None:
         """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
 
         Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default
         implementation is provided based on the user's environment but is not customizable.
         """
-        from great_expectations.data_context.store.datasource_store import (
-            DatasourceStore,
-        )
-
-        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
-        # to the convention set by other internal Stores
-        store_backend: dict = {"class_name": "InlineStoreBackend"}
-        runtime_environment: dict = {
-            "root_directory": self.root_directory,
-            "data_context": self,
-            # By passing this value in our runtime_environment,
-            # we ensure that the same exact context (memory address and all) is supplied to the Store backend
-        }
-
-        datasource_store: DatasourceStore = DatasourceStore(
-            store_name=store_name,
-            store_backend=store_backend,
-            runtime_environment=runtime_environment,
-        )
-        self._datasource_store = datasource_store
+        raise NotImplementedError
 
     def _update_config_variables(self) -> None:
         """Updates config_variables cache by re-calling _load_config_variables().
@@ -1491,11 +1472,20 @@ class AbstractDataContext(ABC):
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
-        for datasource_name in self._datasource_store.list_keys():
+        config: DataContextConfig = self.get_config_with_variables_substituted(
+            self.config
+        )
+        datasources: Dict[str, DatasourceConfig] = cast(
+            Dict[str, DatasourceConfig], config.datasources
+        )
+
+        for datasource_name, datasource_config in datasources.items():
             try:
-                datasource: Optional[
-                    Union[LegacyDatasource, BaseDatasource]
-                ] = self.get_datasource(datasource_name=datasource_name)
+                config = copy.deepcopy(datasource_config)
+                config_dict = dict(datasourceConfigSchema.dump(config))
+                datasource = self._instantiate_datasource_from_config(
+                    name=datasource_name, config=config_dict
+                )
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")

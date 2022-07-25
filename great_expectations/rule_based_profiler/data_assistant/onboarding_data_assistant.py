@@ -154,7 +154,7 @@ class OnboardingDataAssistant(DataAssistant):
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
             execution_time=data_assistant_result.execution_time,
-            usage_statistics_handler=data_assistant_result.usage_statistics_handler,
+            _usage_statistics_handler=data_assistant_result._usage_statistics_handler,
         )
 
     @staticmethod
@@ -927,7 +927,7 @@ class OnboardingDataAssistant(DataAssistant):
                 include_semantic_types=None,
                 exclude_semantic_types=None,
                 allowed_semantic_types_passthrough=None,
-                cardinality_limit_mode=CardinalityLimitMode.FEW,
+                cardinality_limit_mode=f"{VARIABLES_KEY}cardinality_limit_mode",
                 max_unique_values=None,
                 max_proportion_unique=None,
                 data_context=None,
@@ -1044,6 +1044,7 @@ class OnboardingDataAssistant(DataAssistant):
         # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
         variables: dict = {
+            "cardinality_limit_mode": CardinalityLimitMode.FEW.name,
             "mostly": 1.0,
             "strict_min": False,
             "strict_max": False,

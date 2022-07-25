@@ -51,6 +51,21 @@ class EphemeralDataContext(AbstractDataContext):
         )
         return variables
 
+    def _init_datasource_store(self) -> None:
+        from great_expectations.data_context.store.datasource_store import (
+            DatasourceStore,
+        )
+
+        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
+        # to the convention set by other internal Stores
+        store_backend: dict = {"class_name": "InMemoryStoreBackend"}
+
+        datasource_store: DatasourceStore = DatasourceStore(
+            store_name=store_name,
+            store_backend=store_backend,
+        )
+        self._datasource_store = datasource_store
+
     def _save_project_config(self) -> None:
         """Since EphemeralDataContext does not have config as a file, display logging message instead"""
         logger.debug(

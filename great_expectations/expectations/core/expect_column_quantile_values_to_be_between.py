@@ -30,6 +30,7 @@ from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
     VARIABLES_KEY,
 )
+from great_expectations.util import isclose
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
@@ -741,7 +742,17 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             for (lower_bound, upper_bound) in quantile_value_ranges
         ]
         success_details = [
-            range_[0] <= quantile_vals[idx] <= range_[1]
+            isclose(
+                operand_a=quantile_vals[idx],
+                operand_b=range_[0],
+                rtol=1.0e-4,
+            )
+            or isclose(
+                operand_a=quantile_vals[idx],
+                operand_b=range_[1],
+                rtol=1.0e-4,
+            )
+            or range_[0] <= quantile_vals[idx] <= range_[1]
             for idx, range_ in enumerate(comparison_quantile_ranges)
         ]
 
