@@ -652,7 +652,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        super().delete_datasource(datasource_name)
+        super().delete_datasource(datasource_name, save_changes=save_changes)
         self._synchronize_self_with_underlying_data_context()
 
     def get_available_data_asset_names(
@@ -1281,9 +1281,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._datasource_store.update_by_name(
                 datasource_name=datasource_name, datasource_config=datasource_config
             )
-        else:
-            self.config.datasources[datasource_name] = datasource_config
-            self._cached_datasources[datasource_name] = datasource_config
+        self.config.datasources[datasource_name] = datasource_config
+        self._cached_datasources[datasource_name] = datasource_config
 
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs

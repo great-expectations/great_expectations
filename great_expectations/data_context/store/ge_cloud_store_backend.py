@@ -69,10 +69,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
+    DEFAULT_BASE_URL: str = "https://app.greatexpectations.io/"
+
     def __init__(
         self,
         ge_cloud_credentials: Dict,
-        ge_cloud_base_url: str = "https://app.greatexpectations.io/",
+        ge_cloud_base_url: str = DEFAULT_BASE_URL,
         ge_cloud_resource_type: Optional[Union[str, GeCloudRESTResource]] = None,
         ge_cloud_resource_name: Optional[str] = None,
         suppress_store_backend_id: bool = True,
