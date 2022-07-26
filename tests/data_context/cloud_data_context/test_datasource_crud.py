@@ -55,7 +55,7 @@ def test_cloud_mode_base_data_context_add_datasource_save_changes_true(
     ge_cloud_organization_id: str,
     request_headers: dict,
 ):
-    """A BaseDataContext in cloud mode should save to the Datasource store when calling add_datasource
+    """A BaseDataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource
     with save_changes=True."""
     assert empty_cloud_data_context.ge_cloud_mode
     assert isinstance(
@@ -97,15 +97,10 @@ def test_cloud_mode_base_data_context_add_datasource_save_changes_true(
             stored_datasource.config_with_name
         )
 
-        # TODO: AJB 20220725 REMOVE THIS HACK
-        ge_cloud_base_url = (
-            empty_cloud_data_context._datasource_store._store_backend.ge_cloud_base_url
-        )
-
         # This post should be called without the id (which is retrieved from the response).
         # It should be called with the datasource name in the config.
         mock_post.assert_called_with(
-            f"{ge_cloud_base_url}organizations/{ge_cloud_organization_id}/datasources",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {
                     "type": "datasource",
