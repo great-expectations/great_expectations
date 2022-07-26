@@ -36,7 +36,7 @@ from great_expectations.rule_based_profiler.config.base import (
             {
                 "class_name": "RuleBasedProfiler",
                 "config_version": 1.0,
-                "id": "dd223ad9-as12-d823-239a-382sadaf8112",
+                "id_": "dd223ad9-as12-d823-239a-382sadaf8112",
                 "module_name": "great_expectations.rule_based_profiler",
                 "name": "my_rbp",
                 "rules": {},
