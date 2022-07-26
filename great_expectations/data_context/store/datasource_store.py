@@ -175,7 +175,7 @@ class DatasourceStore(Store):
         """
         key: Union[
             GeCloudIdentifier, DataContextVariableKey
-        ] = self.store_backend.build_key(name=datasource_config.name)
+        ] = self._build_key_from_config(datasource_config)
         return self.set(key, datasource_config)
 
     def update_by_name(
