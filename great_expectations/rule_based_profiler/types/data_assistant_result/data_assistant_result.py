@@ -2046,24 +2046,24 @@ class DataAssistantResult(SerializableDictDot):
             .properties(title=title)
         )
 
-        # encode point color based on anomalies
-        metric_name: str = metric_plot_components[0].name
-        predicate: Union[bool, int] = (
-            (alt.datum.min_value > alt.datum[metric_name])
-            & (alt.datum.max_value > alt.datum[metric_name])
-        ) | (
-            (alt.datum.min_value < alt.datum[metric_name])
-            & (alt.datum.max_value < alt.datum[metric_name])
-        )
-        point_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
-        )
-
         anomaly_coded_line: alt.Chart
         anomaly_coded_lines: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
+            # encode point color based on anomalies
+            metric_name: str = metric_plot_component.name
+            predicate: Union[bool, int] = (
+                (alt.datum.min_value > alt.datum[metric_name])
+                & (alt.datum.max_value > alt.datum[metric_name])
+            ) | (
+                (alt.datum.min_value < alt.datum[metric_name])
+                & (alt.datum.max_value < alt.datum[metric_name])
+            )
+            point_color_condition: alt.condition = alt.condition(
+                predicate=predicate,
+                if_false=alt.value(Colors.GREEN.value),
+                if_true=alt.value(Colors.PINK.value),
+            )
+
             anomaly_coded_base = alt.Chart(data=df, title=title)
 
             anomaly_coded_line = anomaly_coded_base.mark_line().encode(
@@ -2080,9 +2080,7 @@ class DataAssistantResult(SerializableDictDot):
             )
             anomaly_coded_lines.append(anomaly_coded_line + anomaly_coded_points)
 
-        test = alt.layer(band, lower_limit, upper_limit, *anomaly_coded_lines)
-
-        return test
+        return alt.layer(band, lower_limit, upper_limit, *anomaly_coded_lines)
 
     @staticmethod
     def _get_expect_domain_values_to_be_between_bar_chart(
