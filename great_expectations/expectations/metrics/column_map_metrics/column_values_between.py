@@ -7,7 +7,8 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.expectation import ATOL, RTOL
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -112,8 +113,8 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                             isclose(
                                 operand_a=val,
                                 operand_b=max_value,
-                                rtol=1.0e-5,
-                                atol=1.0e-8,
+                                rtol=RTOL,
+                                atol=ATOL,
                             )
                             or (val <= max_value)
                         )
@@ -124,8 +125,8 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                             isclose(
                                 operand_a=val,
                                 operand_b=min_value,
-                                rtol=1.0e-5,
-                                atol=1.0e-8,
+                                rtol=RTOL,
+                                atol=ATOL,
                             )
                             or (min_value <= val)
                         ) and (val < max_value)
@@ -136,16 +137,16 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                             isclose(
                                 operand_a=val,
                                 operand_b=min_value,
-                                rtol=1.0e-5,
-                                atol=1.0e-8,
+                                rtol=RTOL,
+                                atol=ATOL,
                             )
                             or (min_value <= val)
                         ) and (
                             isclose(
                                 operand_a=val,
                                 operand_b=max_value,
-                                rtol=1.0e-5,
-                                atol=1.0e-8,
+                                rtol=RTOL,
+                                atol=ATOL,
                             )
                             or (val <= max_value)
                         )
@@ -173,8 +174,8 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                         return isclose(
                             operand_a=val,
                             operand_b=max_value,
-                            rtol=1.0e-5,
-                            atol=1.0e-8,
+                            rtol=RTOL,
+                            atol=ATOL,
                         ) or (val <= max_value)
 
             elif min_value is not None and max_value is None:
@@ -201,8 +202,8 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                         return isclose(
                             operand_a=val,
                             operand_b=min_value,
-                            rtol=1.0e-5,
-                            atol=1.0e-8,
+                            rtol=RTOL,
+                            atol=ATOL,
                         ) or (min_value <= val)
 
             else:
@@ -252,24 +253,55 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if min_value is None:
             if strict_max:
                 return column < max_value
-            else:
-                return column <= max_value
+
+            return sa.or_(
+                sa.func.abs(column - max_value) <= ATOL + RTOL * abs(max_value),
+                column <= max_value,
+            )
 
         elif max_value is None:
             if strict_min:
                 return min_value < column
-            else:
-                return min_value <= column
+
+            return sa.or_(
+                sa.func.abs(min_value - column) <= ATOL + RTOL * sa.func.abs(column),
+                column >= min_value,
+            )
 
         else:
             if strict_min and strict_max:
                 return sa.and_(min_value < column, column < max_value)
-            elif strict_min:
-                return sa.and_(min_value < column, column <= max_value)
-            elif strict_max:
-                return sa.and_(min_value <= column, column < max_value)
-            else:
-                return sa.and_(min_value <= column, column <= max_value)
+
+            if strict_min:
+                return sa.and_(
+                    sa.or_(
+                        sa.func.abs(column - max_value) <= ATOL + RTOL * abs(max_value),
+                        column <= max_value,
+                    ),
+                    min_value < column,
+                )
+
+            if strict_max:
+                return sa.and_(
+                    sa.or_(
+                        sa.func.abs(min_value - column)
+                        <= ATOL + RTOL * sa.func.abs(column),
+                        column >= min_value,
+                    ),
+                    column < max_value,
+                )
+
+            return sa.and_(
+                sa.or_(
+                    sa.func.abs(min_value - column)
+                    <= ATOL + RTOL * sa.func.abs(column),
+                    column >= min_value,
+                ),
+                sa.or_(
+                    sa.func.abs(column - max_value) <= ATOL + RTOL * abs(max_value),
+                    column <= max_value,
+                ),
+            )
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(
@@ -314,20 +346,36 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 return column < max_value
             else:
-                return column <= max_value
+                return F.abs(column - max_value) <= ATOL + RTOL * abs(max_value) | (
+                    column <= F.lit(max_value)
+                )
 
         elif max_value is None:
             if strict_min:
                 return min_value < column
             else:
-                return min_value <= column
+                return F.abs(min_value - column) <= ATOL + RTOL * F.abs(column) | (
+                    F.lit(min_value) <= column
+                )
 
         else:
             if strict_min and strict_max:
                 return (min_value < column) & (column < max_value)
             elif strict_min:
-                return (min_value < column) & (column <= max_value)
+                return (min_value < column) & (
+                    F.abs(column - max_value)
+                    <= ATOL + RTOL * abs(max_value) | (column <= F.lit(max_value))
+                )
             elif strict_max:
-                return (min_value <= column) & (column < max_value)
+                return (
+                    F.abs(min_value - column)
+                    <= ATOL + RTOL * F.abs(column) | (F.lit(min_value) <= column)
+                ) & (column < max_value)
             else:
-                return (min_value <= column) & (column <= max_value)
+                return (
+                    F.abs(min_value - column)
+                    <= ATOL + RTOL * F.abs(column) | (F.lit(min_value) <= column)
+                ) & (
+                    F.abs(column - max_value)
+                    <= ATOL + RTOL * abs(max_value) | (column <= F.lit(max_value))
+                )
