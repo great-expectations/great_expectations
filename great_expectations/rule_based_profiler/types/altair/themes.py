@@ -76,7 +76,7 @@ line_stroke_width: float = 2.5
 line_opacity: float = 0.9
 
 # Point
-point_size: int = 70
+point_size: int = 50
 point_color: str = Colors.GREEN.value
 point_filled: bool = True
 point_opacity: float = 1.0
