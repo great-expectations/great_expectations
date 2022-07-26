@@ -67,9 +67,18 @@ def test_datasource_store_get_by_id(
         resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
     )
 
-    with patch("requests.get", autospec=True) as mock_get:
-        # type(mock_get.return_value).status_code = PropertyMock(return_value=200)
-        # type(mock_get.return_value).json = PropertyMock(return_value={})
+    def mocked_response(*args, **kwargs):
+        class MockResponse:
+            def __init__(self, json_data: dict, status_code: int) -> None:
+                self._json_data = json_data
+                self._status_code = status_code
+
+            def json(self):
+                return self._json_data
+
+        return MockResponse({"data": {"id": id_}}, 201)
+
+    with patch("requests.get", autospec=True, side_effect=mocked_response) as mock_get:
 
         datasource_store_ge_cloud_backend.get(key=key)
 
