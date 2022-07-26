@@ -45,7 +45,7 @@ def test_cloud_mode_data_context_add_datasource_save_changes_false():
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "config_includes_name",
+    "config_includes_name_setting",
     [
         pytest.param("name_supplied_separately", id="name supplied separately"),
         pytest.param("config_includes_name", id="config includes name"),
@@ -57,7 +57,7 @@ def test_cloud_mode_data_context_add_datasource_save_changes_false():
     ],
 )
 def test_cloud_mode_base_data_context_add_datasource_save_changes_true(
-    config_includes_name: str,
+    config_includes_name_setting: str,
     empty_cloud_data_context: BaseDataContext,
     datasource_config: DatasourceConfig,
     datasource_name: str,
@@ -98,15 +98,18 @@ def test_cloud_mode_base_data_context_add_datasource_save_changes_true(
     ) as mock_post:
 
         # Call add_datasource with and without the name field included in the datasource config
-        if config_includes_name == "name_supplied_separately":
+        if config_includes_name_setting == "name_supplied_separately":
             stored_datasource: BaseDatasource = empty_cloud_data_context.add_datasource(
                 name=datasource_name, **datasource_config.to_dict(), save_changes=True
             )
-        elif config_includes_name == "config_includes_name":
+        elif config_includes_name_setting == "config_includes_name":
             stored_datasource: BaseDatasource = empty_cloud_data_context.add_datasource(
                 **datasource_config_with_name.to_dict(), save_changes=True
             )
-        elif config_includes_name == "name_supplied_separately_and_included_in_config":
+        elif (
+            config_includes_name_setting
+            == "name_supplied_separately_and_included_in_config"
+        ):
             stored_datasource: BaseDatasource = empty_cloud_data_context.add_datasource(
                 name=datasource_name,
                 **datasource_config_with_name.to_dict(),
