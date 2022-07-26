@@ -375,43 +375,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
 
-    # def _init_datasource_store(self) -> None:
-    #     """
-    #
-    #     Returns:
-    #
-    #     """
-    #     if self.ge_cloud_mode:
-    #         from great_expectations.data_context.store.datasource_store import (
-    #             DatasourceStore,
-    #         )
-    #
-    #         raise NotImplementedError
-    #         # TODO: AJB 20220719 make this instantiate a cloud backed data context when necessary & coordinate between CloudDataContext and BaseDataContext
-    #         # self.ge_cloud_config
-    #
-    #         store_name: str = (
-    #             "datasource_store"  # Never explicitly referenced but adheres
-    #         )
-    #         # to the convention set by other internal Stores
-    #         store_backend: dict = {"class_name": "GeCloudStoreBackend"}
-    #         runtime_environment: dict = {
-    #             "root_directory": self.root_directory,
-    #             "data_context": self,
-    #             # By passing this value in our runtime_environment,
-    #             # we ensure that the same exact context (memory address and all) is supplied to the Store backend
-    #         }
-    #
-    #         datasource_store: DatasourceStore = DatasourceStore(
-    #             store_name=store_name,
-    #             store_backend=store_backend,
-    #             runtime_environment=runtime_environment,
-    #         )
-    #         self._datasource_store = datasource_store
-    #
-    #     else:
-    #         super()._init_datasource_store()
-
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
