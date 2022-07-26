@@ -42,3 +42,19 @@ Here we initialize a Spark and Glue, and read great_expectations.yaml
 
 ### 6. Congratulations!
 Your data docs built on S3 and you can see index.html at the bucket
+
+
+<details>
+  <summary>This documentation has been contributed by Bogdan Volodarskiy from Provectus</summary>
+  <div>
+    <p>
+      Our links:
+    </p>
+    <ul>
+      <li> <a href="https://www.linkedin.com/in/bogdan-volodarskiy-652498108/">Author's Linkedin</a> </li>
+      <li> <a href="https://medium.com/@bvolodarskiy">Author's Blog</a> </li>
+      <li> <a href="https://provectus.com/">About Provectus</a> </li>
+      <li> <a href="https://provectus.com/data-quality-assurance/">About Provectus Data QA</a> </li>
+</ul>
+  </div>
+</details>
