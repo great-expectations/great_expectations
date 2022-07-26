@@ -33,7 +33,7 @@ class BaseDatasource:
         execution_engine=None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
-        id_: Optional[UUID] = None,
+        id_: Optional[str] = None,
     ) -> None:
         """
         Build a new Datasource.
@@ -43,9 +43,10 @@ class BaseDatasource:
             execution_engine (ClassConfig): the type of compute engine to produce
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
-            id_: Identifier specific to this datasource. Serialized as id.
+            id_: Identifier specific to this datasource.
         """
         self._name = name
+        self._id_ = id_
 
         self._data_context_root_directory = data_context_root_directory
         if execution_engine is None:
@@ -61,7 +62,7 @@ class BaseDatasource:
             )
             self._datasource_config = {
                 "execution_engine": execution_engine,
-                "id": id_,
+                "id_": id_,
             }
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
@@ -381,6 +382,13 @@ class BaseDatasource:
         return self._name
 
     @property
+    def id_(self) -> str:
+        """
+        Property for datasource id_
+        """
+        return self._id_
+
+    @property
     def execution_engine(self) -> ExecutionEngine:
         return self._execution_engine
 
@@ -393,11 +401,10 @@ class BaseDatasource:
         return copy.deepcopy(self._datasource_config)
 
     @property
-    def id(self) -> Optional[UUID]:
-        try:
-            return self.config.id
-        except AttributeError:
-            return None
+    def config_with_name(self) -> dict:
+        config_copy: dict = copy.deepcopy(self._datasource_config)
+        config_copy["name"] = self.name
+        return config_copy
 
 
 class Datasource(BaseDatasource):
@@ -425,7 +432,7 @@ class Datasource(BaseDatasource):
             data_connectors: DataConnectors to add to the datasource
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
-            id_: Identifier specific to this datasource. Serialized as id.
+            id_: Identifier specific to this datasource.
         """
         self._name = name
 

@@ -1547,6 +1547,49 @@ class AbstractDataContext(ABC):
             )
         return datasource
 
+    # TODO: AJB 20220725 move to DatasourceStore?
+    def _store_datasource_config(self, config: DatasourceConfig) -> None:
+        """Store a datasource config in the Datasource Store
+
+        Args:
+            config: Datasource config (must contain `name` field).
+
+        Returns:
+
+        """
+        if self._data_context.ge_cloud_mode:
+            return self._datasource_store.create(datasource_config=config)
+        else:
+            return self._datasource_store.set_by_name(
+                datasource_name=config.name, datasource_config=config
+            )
+
+    # TODO: AJB 20220725 move to DatasourceStore?
+    def _merge_datasource_name_into_config(
+        self, name: str, config: DatasourceConfig
+    ) -> DatasourceConfig:
+        """Merge the name provided with a name that is in config
+
+        Args:
+            name:
+            config:
+
+        Returns:
+
+        Raises:
+            InvalidConfigError if name exists on config and is not equal to the name passed into this method.
+
+        """
+        if hasattr(config, "name"):
+            if name != config.name:
+                raise ge_exceptions.InvalidConfigError(
+                    f"Datasource name {name} does not match name from config: {config.name}"
+                )
+        else:
+            config.name = name
+
+        return config
+
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
         name: str,
@@ -1558,8 +1601,14 @@ class AbstractDataContext(ABC):
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
+        datasource_config = self._merge_datasource_name_into_config(
+            name, datasource_config
+        )
 
         if save_changes:
+            something = self._store_datasource_config(config)
+            print(something)
+
             #
             #
             #
@@ -1568,9 +1617,9 @@ class AbstractDataContext(ABC):
             #  How to handle case of saving with name - duplicates? Check in cache?
             #  Desired behavior?
 
-            self._datasource_store.set_by_name(
-                datasource_name=name, datasource_config=datasource_config
-            )
+            # self._datasource_store.set_by_name(
+            #     datasource_name=name, datasource_config=datasource_config
+            # )
         self.config.datasources[name] = datasource_config
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
