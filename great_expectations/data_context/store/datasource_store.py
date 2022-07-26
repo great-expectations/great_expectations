@@ -1,13 +1,9 @@
 import copy
-import uuid
 from typing import List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
-)
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
@@ -94,14 +90,6 @@ class DatasourceStore(Store):
         else:
             return self._schema.loads(value)
 
-    def get_datasource(
-        self, name: Optional[str], ge_cloud_id: Optional[str]
-    ) -> DatasourceConfig:
-        """Retrieve a DatasourceConfig based on either name or ge_cloud_id"""
-        # TODO: AJB 20220718 is this necessary or helpful?
-        #  Should this logic live in the Cloud store backend instead of here?
-        pass
-
     def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig:
         """Retrieves a DatasourceConfig persisted in the store by it's given name.
 
@@ -125,20 +113,6 @@ class DatasourceStore(Store):
 
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))
         return datasource_config
-
-    def _get_by_id(self, datasource_id: uuid.UUID) -> DatasourceConfig:
-        """Retrieves a DatasourceConfig persisted in Ge Cloud Store backend by ID.
-
-        Args:
-            datasource_id: UUID of the datasource to retrieve.
-
-        Returns:
-            The DatasourceConfig persisted in the store that is associated with the given
-            input ID.
-
-        Raises:
-            ValueError if a DatasourceConfig is not found.
-        """
 
     def delete_by_name(self, datasource_name: str) -> None:
         """Deletes a DatasourceConfig persisted in the store by it's given name.
@@ -165,41 +139,22 @@ class DatasourceStore(Store):
         )
         self.set(datasource_key, datasource_config)
 
-    def create(self, datasource_config: DatasourceConfig) -> GeCloudResourceRef:
-        """
+    def create(
+        self, datasource_config: DatasourceConfig
+    ) -> Optional[GeCloudResourceRef]:
+        """Create a datasource config in the store using a store_backend-specific key.
 
         Args:
-            datasource_config:
+            datasource_config: Config containing the datasource name.
 
         Returns:
-
+            None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
+            which was used to create the config in the backend.
         """
-        key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=None
-        )
-
-        # TODO: AJB 20220719 track down return types and update
+        key: Union[
+            GeCloudIdentifier, DataContextVariableKey
+        ] = self.store_backend.get_key(name=datasource_config.name)
         return self.set(key, datasource_config)
-
-    def update_by_id(
-        self,
-        datasource_id: str,
-        datasource_config: DatasourceConfig,
-    ) -> None:
-        """
-
-        Args:
-            datasource_id:
-            datasource_config:
-
-        Returns:
-
-        """
-        key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=datasource_id
-        )
-
-        self.set(key, datasource_config)
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
@@ -226,9 +181,6 @@ class DatasourceStore(Store):
         )
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
-        # TODO: if in cloud mode, key class GeCloudIdentifier(resource_type, ge_cloud_id)
-        #  or handle cloud in all separate methods
-
         datasource_key: DataContextVariableKey = DataContextVariableKey(
             resource_type=DataContextVariableSchema.DATASOURCES,
             resource_name=datasource_name,
