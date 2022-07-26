@@ -1,1 +1,1 @@
-trino>=0.310.0
+trino>=0.310.0,!=0.315.0 # Released 2022-07-26 and causes connection failures; omitting version until resolved.
