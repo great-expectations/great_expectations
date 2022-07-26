@@ -99,10 +99,11 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
         false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
         estimator=f"{VARIABLES_KEY}estimator",
         n_resamples=f"{VARIABLES_KEY}n_resamples",
         random_seed=f"{VARIABLES_KEY}random_seed",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
         include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
@@ -119,10 +120,11 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "default_expect_table_row_count_to_be_between_rule": {
                 "variables": {
                     "false_positive_rate": 0.05,
-                    "quantile_statistic_interpolation_method": "auto",
                     "estimator": "bootstrap",
                     "n_resamples": 9999,
                     "random_seed": None,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_std_error_ratio_threshold": 0.25,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": 0,
