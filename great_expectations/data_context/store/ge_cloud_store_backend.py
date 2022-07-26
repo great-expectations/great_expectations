@@ -73,7 +73,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self,
         ge_cloud_credentials: Dict,
         ge_cloud_base_url: str = "https://app.greatexpectations.io/",
-        ge_cloud_resource_type: Optional[GeCloudRESTResource] = None,
+        ge_cloud_resource_type: Optional[Union[str, GeCloudRESTResource]] = None,
         ge_cloud_resource_name: Optional[str] = None,
         suppress_store_backend_id: bool = True,
         manually_initialize_store_backend_id: str = "",
@@ -85,9 +85,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
-        assert ge_cloud_resource_type or ge_cloud_resource_name, (
-            "Must provide either ge_cloud_resource_type or " "ge_cloud_resource_name"
-        )
+        assert (
+            ge_cloud_resource_type or ge_cloud_resource_name
+        ), "Must provide either ge_cloud_resource_type or ge_cloud_resource_name"
 
         self._ge_cloud_base_url = ge_cloud_base_url
 
@@ -95,6 +95,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ge_cloud_resource_name
             or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_type]
         )
+
+        # While resource_types should be coming in as enums, configs represent the arg
+        # as strings and require manual casting.
+        if ge_cloud_resource_type and isinstance(ge_cloud_resource_type, str):
+            ge_cloud_resource_type = ge_cloud_resource_type.upper()
+            ge_cloud_resource_type = GeCloudRESTResource[ge_cloud_resource_type]
+
         self._ge_cloud_resource_type = (
             ge_cloud_resource_type
             or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_name]

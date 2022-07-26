@@ -1565,6 +1565,24 @@ def test_GeCloudStoreBackend():
         )
 
 
+@pytest.mark.unit
+def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() -> None:
+    ge_cloud_base_url = "https://app.greatexpectations.io/"
+    ge_cloud_credentials = {
+        "access_token": "1234",
+        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+    }
+    ge_cloud_resource_type = "contract"  # Instead of using enum
+
+    my_store_backend = GeCloudStoreBackend(
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_credentials=ge_cloud_credentials,
+        ge_cloud_resource_type=ge_cloud_resource_type,
+    )
+
+    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CONTRACT
+
+
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
