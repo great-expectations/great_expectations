@@ -11,9 +11,6 @@ import pytest
 # Test delete_datasource
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store import GeCloudStoreBackend
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
@@ -47,7 +44,20 @@ def test_cloud_mode_data_context_add_datasource_save_changes_false():
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "config_includes_name",
+    [
+        pytest.param("name_supplied_separately", id="name supplied separately"),
+        pytest.param("config_includes_name", id="config includes name"),
+        pytest.param(
+            "name_supplied_separately_and_included_in_config",
+            id="name supplied separately and config includes name",
+            marks=pytest.mark.xfail(strict=True, raises=TypeError),
+        ),
+    ],
+)
 def test_cloud_mode_base_data_context_add_datasource_save_changes_true(
+    config_includes_name: str,
     empty_cloud_data_context: BaseDataContext,
     datasource_config: DatasourceConfig,
     datasource_name: str,
@@ -57,12 +67,17 @@ def test_cloud_mode_base_data_context_add_datasource_save_changes_true(
 ):
     """A BaseDataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource
     with save_changes=True."""
+
+    # Make sure we are using the right fixtures
     assert empty_cloud_data_context.ge_cloud_mode
+    assert isinstance(empty_cloud_data_context, BaseDataContext)
     assert isinstance(
         empty_cloud_data_context._data_context._datasource_store._store_backend,
         GeCloudStoreBackend,
     )
+    assert len(empty_cloud_data_context.list_datasources()) == 0
 
+    # Setup
     datasource_id: str = "some_uuid"
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
@@ -81,24 +96,32 @@ def test_cloud_mode_base_data_context_add_datasource_save_changes_true(
     with patch(
         "requests.post", autospec=True, side_effect=mocked_post_response
     ) as mock_post:
-        datasource: BaseDatasource = empty_cloud_data_context.add_datasource(
-            name=datasource_name, **datasource_config.to_dict(), save_changes=True
-        )
-        assert len(empty_cloud_data_context.list_datasources()) == 1
-        # TODO: AJB 20220719 get this working and test elsewhere
-        # assert empty_cloud_data_context.get_datasource(datasource_name).config == datasource_config.to_dict()
 
-        stored_datasource: BaseDatasource = empty_cloud_data_context.get_datasource(
+        # Call add_datasource with and without the name field included in the datasource config
+        if config_includes_name == "name_supplied_separately":
+            stored_datasource: BaseDatasource = empty_cloud_data_context.add_datasource(
+                name=datasource_name, **datasource_config.to_dict(), save_changes=True
+            )
+        elif config_includes_name == "config_includes_name":
+            stored_datasource: BaseDatasource = empty_cloud_data_context.add_datasource(
+                **datasource_config_with_name.to_dict(), save_changes=True
+            )
+        elif config_includes_name == "name_supplied_separately_and_included_in_config":
+            stored_datasource: BaseDatasource = empty_cloud_data_context.add_datasource(
+                name=datasource_name,
+                **datasource_config_with_name.to_dict(),
+                save_changes=True,
+            )
+
+        # Make sure we have stored our datasource in the context
+        assert len(empty_cloud_data_context.list_datasources()) == 1
+
+        retrieved_datasource: BaseDatasource = empty_cloud_data_context.get_datasource(
             datasource_name
         )
-        # stored_datasource_config: DatasourceConfig = datasourceConfigSchema.load(**empty_cloud_data_context.list_datasources()[0])
-        # TODO: AJB 20220725 - do we need config_with_name?
-        stored_datasource_config: DatasourceConfig = datasourceConfigSchema.load(
-            stored_datasource.config_with_name
-        )
 
-        # This post should be called without the id (which is retrieved from the response).
-        # It should be called with the datasource name in the config.
+        # This post should have been called without the id (which is retrieved from the response).
+        # It should have been called with the datasource name in the config.
         mock_post.assert_called_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
@@ -113,12 +136,14 @@ def test_cloud_mode_base_data_context_add_datasource_save_changes_true(
             headers=request_headers,
         )
 
-        # type(mock_post.return_value).status_code = PropertyMock(return_value=200)
-        #
-        # datasource_store_ge_cloud_backend.set(key=key, value=datasource_config)
-        #
+        # Make sure the id was populated correctly into the created datasource object and config
+        assert stored_datasource.id_ == datasource_id
+        assert retrieved_datasource.id_ == datasource_id
+        assert retrieved_datasource.config["id_"] == datasource_id
 
-        assert datasource.id_ == datasource_id
+        # Make sure the name is populated correctly into the created datasource
+        assert retrieved_datasource.name == datasource_name
+        assert retrieved_datasource.config["name"] == datasource_name
 
 
 @pytest.mark.integration

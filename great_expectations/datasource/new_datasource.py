@@ -63,6 +63,7 @@ class BaseDatasource:
             self._datasource_config = {
                 "execution_engine": execution_engine,
                 "id_": id_,
+                "name": name,
             }
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
@@ -399,12 +400,6 @@ class BaseDatasource:
     @property
     def config(self) -> dict:
         return copy.deepcopy(self._datasource_config)
-
-    @property
-    def config_with_name(self) -> dict:
-        config_copy: dict = copy.deepcopy(self._datasource_config)
-        config_copy["name"] = self.name
-        return config_copy
 
 
 class Datasource(BaseDatasource):
