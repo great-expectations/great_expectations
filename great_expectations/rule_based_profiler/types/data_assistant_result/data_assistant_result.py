@@ -1478,76 +1478,6 @@ class DataAssistantResult(SerializableDictDot):
             )
 
     @staticmethod
-    def _get_interactive_detail_multi_chart(
-        column_dfs: List[ColumnDataFrame],
-        sanitized_metric_names: Set[str],
-        sequential: bool,
-    ) -> Union[alt.LayerChart, alt.VConcatChart]:
-        """
-        Args:
-            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
-            sequential: Whether batches are sequential in nature
-
-        Returns:
-            A interactive detail altair multi-chart
-        """
-        batch_name: str = "batch"
-        all_columns: List[str] = list(column_dfs[0].df.columns)
-        batch_identifiers: List[str] = [
-            column
-            for column in all_columns
-            if column not in list(sanitized_metric_names) + [batch_name]
-        ]
-        batch_type: alt.StandardType
-        if sequential:
-            batch_type = AltairDataTypes.ORDINAL.value
-        else:
-            batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
-            name=batch_name,
-            alt_type=batch_type,
-            batch_identifiers=batch_identifiers,
-        )
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        metric_plot_component: MetricPlotComponent
-        metric_plot_components: List[MetricPlotComponent] = []
-        for sanitized_metric_name in sanitized_metric_names:
-            metric_plot_component: MetricPlotComponent = MetricPlotComponent(
-                name=sanitized_metric_name, alt_type=metric_type
-            )
-            metric_plot_components.append(metric_plot_component)
-
-        domain_name: str = "column"
-        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
-            name=domain_name,
-            alt_type=AltairDataTypes.NOMINAL.value,
-        )
-
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[batch_name, domain_name, sanitized_metric_names]
-            + batch_identifiers
-        )
-        for column_df in column_dfs:
-            column_df.df[domain_name] = column_df.column
-            df = pd.concat([df, column_df.df], axis=0)
-
-        if sequential:
-            return DataAssistantResult._get_interactive_detail_multi_line_chart(
-                df=df,
-                metric_plot_components=metric_plot_components,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
-        else:
-            return DataAssistantResult._get_interactive_bar_chart(
-                df=df,
-                metric_plot_components=metric_plot_components,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
-
-    @staticmethod
     def _get_interactive_expect_column_values_to_be_between_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
@@ -1666,39 +1596,52 @@ class DataAssistantResult(SerializableDictDot):
             df = pd.concat([df, column_df], axis=0)
 
         # encode point color based on anomalies
-        predicate: Union[bool, int]
-        if strict_min and strict_max:
-            predicate = (
-                (alt.datum.min_value > alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value > alt.datum[metric_plot_components[0].name])
-            ) | (
-                (alt.datum.min_value < alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value < alt.datum[metric_plot_components[0].name])
-            )
-        elif strict_min:
-            predicate = (
-                (alt.datum.min_value > alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value >= alt.datum[metric_plot_components[0].name])
-            ) | (
-                (alt.datum.min_value < alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value <= alt.datum[metric_plot_components[0].name])
-            )
-        elif strict_max:
-            predicate = (
-                (alt.datum.min_value >= alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value > alt.datum[metric_plot_components[0].name])
-            ) | (
-                (alt.datum.min_value <= alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value < alt.datum[metric_plot_components[0].name])
-            )
-        else:
-            predicate = (
-                (alt.datum.min_value >= alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value >= alt.datum[metric_plot_components[0].name])
-            ) | (
-                (alt.datum.min_value <= alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value <= alt.datum[metric_plot_components[0].name])
-            )
+        predicates: List[Union[bool, int]] = []
+        for metric_plot_component in metric_plot_components:
+            if strict_min and strict_max:
+                predicates.append(
+                    (
+                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value > alt.datum[metric_plot_component.name])
+                    )
+                    | (
+                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value < alt.datum[metric_plot_component.name])
+                    )
+                )
+            elif strict_min:
+                predicates.append(
+                    (
+                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
+                    )
+                    | (
+                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
+                    )
+                )
+            elif strict_max:
+                predicates.append(
+                    (
+                        (alt.datum.min_value >= alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value > alt.datum[metric_plot_component.name])
+                    )
+                    | (
+                        (alt.datum.min_value <= alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value < alt.datum[metric_plot_component.name])
+                    )
+                )
+            else:
+                predicates.append(
+                    (
+                        (alt.datum.min_value >= alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
+                    )
+                    | (
+                        (alt.datum.min_value <= alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
+                    )
+                )
 
         if sequential:
             return DataAssistantResult._get_interactive_expect_column_values_to_be_between_line_chart(
@@ -1711,7 +1654,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component=max_value_plot_component,
                 strict_min_plot_component=strict_min_plot_component,
                 strict_max_plot_component=strict_max_plot_component,
-                predicate=predicate,
+                predicates=predicates,
             )
         else:
             return DataAssistantResult._get_interactive_expect_column_values_to_be_between_bar_chart(
@@ -1724,187 +1667,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component=max_value_plot_component,
                 strict_min_plot_component=strict_min_plot_component,
                 strict_max_plot_component=strict_max_plot_component,
-                predicate=predicate,
-            )
-
-    @staticmethod
-    def _get_interactive_detail_expect_column_values_to_be_between_chart(
-        expectation_type: str,
-        column_dfs: List[ColumnDataFrame],
-        sanitized_metric_names: Set[str],
-        sequential: bool,
-    ) -> Union[alt.LayerChart, alt.VConcatChart]:
-        """
-        Args:
-            expectation_type: The name of the expectation
-            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
-            sequential: Whether batches are sequential in nature
-
-        Returns:
-            An interactive detail multi line expect_column_values_to_be_between chart
-        """
-        column_name: str = "column"
-        min_value: str = "min_value"
-        max_value: str = "max_value"
-        strict_min: str = "strict_min"
-        strict_max: str = "strict_max"
-
-        batch_name: str = "batch"
-        all_columns: List[str] = list(column_dfs[0].df.columns)
-        batch_identifiers: List[str] = [
-            column
-            for column in all_columns
-            if column
-            not in list(sanitized_metric_names)
-            + [
-                batch_name,
-                column_name,
-                min_value,
-                max_value,
-                strict_min,
-                strict_max,
-            ]
-        ]
-        batch_type: alt.StandardType
-        if sequential:
-            batch_type = AltairDataTypes.ORDINAL.value
-        else:
-            batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
-            name=batch_name,
-            alt_type=batch_type,
-            batch_identifiers=batch_identifiers,
-        )
-
-        y_axis_title: Optional[str]
-        if len(sanitized_metric_names) > 1:
-            y_axis_title = "Column Values"
-        else:
-            y_axis_title = None
-
-        metric_plot_component: MetricPlotComponent
-        metric_plot_components: List[MetricPlotComponent] = []
-        for sanitized_metric_name in sanitized_metric_names:
-            metric_plot_component: MetricPlotComponent = MetricPlotComponent(
-                name=sanitized_metric_name,
-                alt_type=AltairDataTypes.QUANTITATIVE.value,
-                axis_title=y_axis_title,
-            )
-            metric_plot_components.append(metric_plot_component)
-
-        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
-            name="column",
-            alt_type=AltairDataTypes.NOMINAL.value,
-        )
-
-        min_value_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=min_value,
-                alt_type=AltairDataTypes.QUANTITATIVE.value,
-                axis_title=y_axis_title,
-            )
-        )
-        max_value_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=max_value,
-                alt_type=AltairDataTypes.QUANTITATIVE.value,
-                axis_title=y_axis_title,
-            )
-        )
-        strict_min_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=strict_min,
-                alt_type=AltairDataTypes.NOMINAL.value,
-                axis_title=y_axis_title,
-            )
-        )
-        strict_max_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=strict_max,
-                alt_type=AltairDataTypes.NOMINAL.value,
-                axis_title=y_axis_title,
-            )
-        )
-
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[
-                batch_name,
-            ]
-            + batch_identifiers
-            + [
-                sanitized_metric_names,
-                column_name,
-                min_value,
-                max_value,
-                strict_min,
-                strict_max,
-            ]
-        )
-
-        for _, column_df in column_dfs:
-            df = pd.concat([df, column_df], axis=0)
-
-        # encode point color based on anomalies
-        predicate: Union[bool, int]
-        if strict_min and strict_max:
-            predicate = (
-                (alt.datum.min_value > alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value > alt.datum[metric_plot_components[0].name])
-            ) | (
-                (alt.datum.min_value < alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value < alt.datum[metric_plot_components[0].name])
-            )
-        elif strict_min:
-            predicate = (
-                (alt.datum.min_value > alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value >= alt.datum[metric_plot_components[0].name])
-            ) | (
-                (alt.datum.min_value < alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value <= alt.datum[metric_plot_components[0].name])
-            )
-        elif strict_max:
-            predicate = (
-                (alt.datum.min_value >= alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value > alt.datum[metric_plot_components[0].name])
-            ) | (
-                (alt.datum.min_value <= alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value < alt.datum[metric_plot_components[0].name])
-            )
-        else:
-            predicate = (
-                (alt.datum.min_value >= alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value >= alt.datum[metric_plot_components[0].name])
-            ) | (
-                (alt.datum.min_value <= alt.datum[metric_plot_components[0].name])
-                & (alt.datum.max_value <= alt.datum[metric_plot_components[0].name])
-            )
-
-        if sequential:
-            return DataAssistantResult._get_interactive_detail_expect_column_values_to_be_between_line_chart(
-                expectation_type=expectation_type,
-                df=df,
-                metric_plot_components=metric_plot_components,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-                min_value_plot_component=min_value_plot_component,
-                max_value_plot_component=max_value_plot_component,
-                strict_min_plot_component=strict_min_plot_component,
-                strict_max_plot_component=strict_max_plot_component,
-                predicate=predicate,
-            )
-        else:
-            return DataAssistantResult._get_interactive_expect_column_values_to_be_between_bar_chart(
-                expectation_type=expectation_type,
-                df=df,
-                metric_plot_components=metric_plot_components,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-                min_value_plot_component=min_value_plot_component,
-                max_value_plot_component=max_value_plot_component,
-                strict_min_plot_component=strict_min_plot_component,
-                strict_max_plot_component=strict_max_plot_component,
-                predicate=predicate,
+                predicates=predicates,
             )
 
     @staticmethod
@@ -2046,12 +1809,14 @@ class DataAssistantResult(SerializableDictDot):
             .properties(title=title)
         )
 
+        metric_name: str
+        predicate: Union[bool, int]
         anomaly_coded_line: alt.Chart
         anomaly_coded_lines: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             # encode point color based on anomalies
-            metric_name: str = metric_plot_component.name
-            predicate: Union[bool, int] = (
+            metric_name = metric_plot_component.name
+            predicate = (
                 (alt.datum.min_value > alt.datum[metric_name])
                 & (alt.datum.max_value > alt.datum[metric_name])
             ) | (
@@ -2152,304 +1917,37 @@ class DataAssistantResult(SerializableDictDot):
             .properties(title=title)
         )
 
-        bars: alt.LayerChart = DataAssistantResult._get_bar_chart(
-            df=df,
-            metric_plot_components=metric_plot_components,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
-        )
-
-        # encode point color based on anomalies
-        metric_name: str = metric_plot_components[0].name
-        predicate: Union[bool, int] = (
-            (alt.datum.min_value > alt.datum[metric_name])
-            & (alt.datum.max_value > alt.datum[metric_name])
-        ) | (
-            (alt.datum.min_value < alt.datum[metric_name])
-            & (alt.datum.max_value < alt.datum[metric_name])
-        )
-        bar_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
-        )
-
-        anomaly_coded_bars = bars.encode(color=bar_color_condition, tooltip=tooltip)
-
-        return band + lower_limit + upper_limit + anomaly_coded_bars
-
-    @staticmethod
-    def _get_interactive_detail_multi_line_chart(
-        df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
-        batch_plot_component: BatchPlotComponent,
-        domain_plot_component: DomainPlotComponent,
-        expectation_type: Optional[str] = None,
-    ) -> alt.LayerChart:
-        detail_title_font_size: int = 14
-        detail_title_font_weight: str = "bold"
-
-        line_chart_height: int = 150
-        detail_line_chart_height: int = 75
-
-        point_size: int = 50
-
-        unselected_color: alt.value = alt.value("lightgray")
-
-        selected_opacity: float = 1.0
-        unselected_opacity: float = 0.4
-
-        title: alt.TitleParams = determine_plot_title(
-            expectation_type=expectation_type,
-            metric_plot_components=metric_plot_components,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
-        )
-
-        tooltip: List[alt.Tooltip] = (
-            [domain_plot_component.generate_tooltip()]
-            + batch_plot_component.generate_tooltip()
-            + [
-                metric_plot_component.generate_tooltip(format=",")
-                for metric_plot_component in metric_plot_components
-            ]
-        )
-
-        columns: List[str] = [" "] + pd.unique(df[domain_plot_component.name]).tolist()
-        input_dropdown: alt.binding_select = alt.binding_select(
-            options=columns, name="Select Column: "
-        )
-        selection: alt.selection_single = alt.selection_single(
-            empty="none",
-            bind=input_dropdown,
-            fields=[domain_plot_component.name],
-        )
-
-        detail_title_column_names: pd.DataFrame = pd.DataFrame(
-            {domain_plot_component.name: pd.unique(df[domain_plot_component.name])}
-        )
-        detail_title_column_titles: str = "column_title"
-        detail_title_column_names[
-            detail_title_column_titles
-        ] = detail_title_column_names[domain_plot_component.name].apply(
-            lambda x: f"Column ({x}) Selection Detail"
-        )
-        detail_title_text: alt.condition = alt.condition(
-            selection, detail_title_column_titles, alt.value("")
-        )
-
-        detail_title = (
-            alt.Chart(detail_title_column_names)
-            .mark_text(
-                color=Colors.PURPLE.value,
-                fontSize=detail_title_font_size,
-                fontWeight=detail_title_font_weight,
-            )
-            .encode(text=detail_title_text)
-            .transform_filter(selection)
-            .properties(height=35)
-        )
-
-        lines_and_points_list: List[alt.Chart] = []
+        metric_name: str
+        predicate: Union[bool, int]
+        anomaly_coded_bar: alt.Chart
+        anomaly_coded_bars: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
-            line: alt.Chart = (
-                alt.Chart(df)
-                .mark_line()
-                .encode(
-                    x=alt.X(
-                        batch_plot_component.name,
-                        type=batch_plot_component.alt_type,
-                        axis=alt.Axis(ticks=False, title=None, labels=False),
-                        scale=alt.Scale(align=0.05),
-                    ),
-                    y=alt.Y(
-                        metric_plot_component.name,
-                        type=metric_plot_component.alt_type,
-                        title=None,
-                    ),
-                    color=alt.condition(
-                        selection,
-                        alt.Color(
-                            domain_plot_component.name,
-                            type=domain_plot_component.alt_type,
-                            scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                            legend=None,
-                        ),
-                        unselected_color,
-                    ),
-                    opacity=alt.condition(
-                        selection,
-                        alt.value(selected_opacity),
-                        alt.value(unselected_opacity),
-                    ),
-                    tooltip=tooltip,
-                )
-                .properties(height=line_chart_height, title=title)
+            # encode bar color based on anomalies
+            metric_name = metric_plot_component.name
+            predicate = (
+                (alt.datum.min_value > alt.datum[metric_name])
+                & (alt.datum.max_value > alt.datum[metric_name])
+            ) | (
+                (alt.datum.min_value < alt.datum[metric_name])
+                & (alt.datum.max_value < alt.datum[metric_name])
+            )
+            bar_color_condition: alt.condition = alt.condition(
+                predicate=predicate,
+                if_false=alt.value(Colors.GREEN.value),
+                if_true=alt.value(Colors.PINK.value),
             )
 
-            points: alt.Chart = (
-                alt.Chart(df)
-                .mark_point(size=point_size)
-                .encode(
-                    x=alt.X(
-                        batch_plot_component.name,
-                        type=batch_plot_component.alt_type,
-                        axis=alt.Axis(ticks=False, title=None, labels=False),
-                        scale=alt.Scale(align=0.05),
-                    ),
-                    y=alt.Y(
-                        metric_plot_component.name,
-                        type=metric_plot_component.alt_type,
-                        title=None,
-                    ),
-                    color=alt.condition(
-                        selection,
-                        alt.value(Colors.GREEN.value),
-                        unselected_color,
-                    ),
-                    opacity=alt.condition(
-                        selection,
-                        alt.value(selected_opacity),
-                        alt.value(unselected_opacity),
-                    ),
-                    tooltip=tooltip,
-                )
-                .properties(height=line_chart_height, title=title)
-            )
+            anomaly_coded_base = alt.Chart(data=df, title=title)
 
-            highlight_line: alt.Chart = (
-                alt.Chart(df)
-                .mark_line(strokeWidth=2.5)
-                .encode(
-                    x=alt.X(
-                        batch_plot_component.name,
-                        type=batch_plot_component.alt_type,
-                        axis=alt.Axis(ticks=False, title=None, labels=False),
-                        scale=alt.Scale(align=0.05),
-                    ),
-                    y=alt.Y(
-                        metric_plot_component.name,
-                        type=metric_plot_component.alt_type,
-                        title=None,
-                    ),
-                    color=alt.condition(
-                        selection,
-                        alt.Color(
-                            domain_plot_component.name,
-                            type=domain_plot_component.alt_type,
-                            scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                            legend=None,
-                        ),
-                        unselected_color,
-                    ),
-                    opacity=alt.condition(
-                        selection,
-                        alt.value(selected_opacity),
-                        alt.value(unselected_opacity),
-                    ),
-                    tooltip=tooltip,
-                )
-                .properties(height=line_chart_height, title=title)
-                .transform_filter(selection)
+            anomaly_coded_bar = anomaly_coded_base.mark_bar().encode(
+                x=batch_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(),
+                tooltip=tooltip,
+                color=bar_color_condition,
             )
+            anomaly_coded_bars.append(anomaly_coded_bar)
 
-            highlight_points: alt.Chart = (
-                alt.Chart(df)
-                .mark_point(size=40)
-                .encode(
-                    x=alt.X(
-                        batch_plot_component.name,
-                        type=batch_plot_component.alt_type,
-                        axis=alt.Axis(ticks=False, title=None, labels=False),
-                    ),
-                    y=alt.Y(
-                        metric_plot_component.name,
-                        type=metric_plot_component.alt_type,
-                        title=None,
-                    ),
-                    color=alt.condition(
-                        selection,
-                        alt.value(Colors.GREEN.value),
-                        unselected_color,
-                    ),
-                    opacity=alt.condition(
-                        selection,
-                        alt.value(selected_opacity),
-                        alt.value(unselected_opacity),
-                    ),
-                    tooltip=tooltip,
-                )
-                .properties(height=line_chart_height, title=title)
-                .transform_filter(selection)
-            )
-
-            detail_line: alt.Chart = (
-                alt.Chart(
-                    df,
-                )
-                .mark_line(opacity=selected_opacity)
-                .encode(
-                    x=batch_plot_component.plot_on_axis(),
-                    y=alt.Y(
-                        metric_plot_component.name,
-                        type=metric_plot_component.alt_type,
-                        title=None,
-                    ),
-                    color=alt.Color(
-                        domain_plot_component.name,
-                        type=domain_plot_component.alt_type,
-                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                    ),
-                    tooltip=tooltip,
-                )
-                .properties(height=detail_line_chart_height)
-                .transform_filter(selection)
-            )
-
-            detail_points: alt.Chart = (
-                alt.Chart(
-                    df,
-                )
-                .mark_point(
-                    size=point_size, color=Colors.GREEN.value, opacity=selected_opacity
-                )
-                .encode(
-                    x=batch_plot_component.plot_on_axis(),
-                    y=alt.Y(
-                        metric_plot_component.name,
-                        type=metric_plot_component.alt_type,
-                        title=None,
-                    ),
-                    tooltip=tooltip,
-                )
-                .properties(height=detail_line_chart_height)
-                .transform_filter(selection)
-            )
-
-            # special title for combined y-axis across two charts
-            y_axis_title = alt.TitleParams(
-                metric_plot_components[0].title,
-                color=Colors.PURPLE.value,
-                orient="left",
-                angle=270,
-                fontSize=14,
-                dx=70,
-                dy=-5,
-            )
-
-            lines_and_points_list.append(
-                alt.VConcatChart(
-                    vconcat=[
-                        line + points + highlight_line + highlight_points,
-                        detail_title,
-                        detail_line + detail_points,
-                    ],
-                )
-                .properties(title=y_axis_title)
-                .add_selection(selection)
-            )
-
-        return alt.layer(*lines_and_points_list)
+        return alt.layer(band, lower_limit, upper_limit, *anomaly_coded_bars)
 
     @staticmethod
     def _get_interactive_line_chart(
@@ -2589,129 +2087,6 @@ class DataAssistantResult(SerializableDictDot):
         return alt.layer(*bars_list)
 
     @staticmethod
-    def _get_interactive_detail_expect_column_values_to_be_between_line_chart(
-        expectation_type: str,
-        df: pd.DataFrame,
-        metric_plot_components: List[MetricPlotComponent],
-        batch_plot_component: BatchPlotComponent,
-        domain_plot_component: DomainPlotComponent,
-        min_value_plot_component: PlotComponent,
-        max_value_plot_component: PlotComponent,
-        strict_min_plot_component: PlotComponent,
-        strict_max_plot_component: PlotComponent,
-        predicate: Union[bool, int],
-    ) -> alt.LayerChart:
-        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
-
-        tooltip: List[alt.Tooltip] = (
-            [domain_plot_component.generate_tooltip()]
-            + batch_plot_component.generate_tooltip()
-            + [
-                min_value_plot_component.generate_tooltip(format=","),
-                max_value_plot_component.generate_tooltip(format=","),
-                strict_min_plot_component.generate_tooltip(),
-                strict_max_plot_component.generate_tooltip(),
-            ]
-            + [
-                metric_plot_component.generate_tooltip(format=",")
-                for metric_plot_component in metric_plot_components
-            ]
-        )
-        detail_line_chart_height: int = 75
-
-        interactive_detail_multi_line_chart: alt.LayerChart = (
-            DataAssistantResult._get_interactive_detail_multi_line_chart(
-                expectation_type=expectation_type,
-                df=df,
-                metric_plot_components=metric_plot_components,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
-        )
-
-        # use existing selection
-        selection_name: str = list(
-            interactive_detail_multi_line_chart.vconcat[2].layer[0].selection.keys()
-        )[0]
-        selection_def: alt.SelectionDef = (
-            interactive_detail_multi_line_chart.vconcat[2]
-            .layer[0]
-            .selection[selection_name]
-        )
-        selection: alt.selection = alt.selection(
-            name=selection_name, **selection_def.to_dict()
-        )
-
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(color=line_color)
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=min_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(height=detail_line_chart_height)
-            .transform_filter(selection)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(color=line_color)
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=max_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(height=detail_line_chart_height)
-            .transform_filter(selection)
-        )
-
-        band: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_area()
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=min_value_plot_component.plot_on_axis(),
-                y2=alt.Y2(
-                    max_value_plot_component.name, title=max_value_plot_component.title
-                ),
-            )
-            .properties(height=detail_line_chart_height)
-            .transform_filter(selection)
-        )
-
-        point_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
-        )
-
-        interactive_detail_multi_line_chart.vconcat[0].layer[3] = (
-            interactive_detail_multi_line_chart.vconcat[0]
-            .layer[3]
-            .encode(color=point_color_condition, tooltip=tooltip)
-        )
-
-        interactive_detail_multi_line_chart.vconcat[2].layer[1] = (
-            interactive_detail_multi_line_chart.vconcat[2]
-            .layer[1]
-            .encode(color=point_color_condition, tooltip=tooltip)
-        )
-
-        # add expectation kwargs
-        detail_chart: alt.LayerChart = interactive_detail_multi_line_chart.vconcat[2]
-        detail_chart_layers: list[alt.Chart] = [
-            band,
-            lower_limit,
-            upper_limit,
-            detail_chart.layer[0].encode(tooltip=tooltip),
-            detail_chart.layer[1].encode(tooltip=tooltip),
-        ]
-        interactive_detail_multi_line_chart.vconcat[2].layer = detail_chart_layers
-
-        return interactive_detail_multi_line_chart
-
-    @staticmethod
     def _get_interactive_expect_column_values_to_be_between_line_chart(
         expectation_type: str,
         df: pd.DataFrame,
@@ -2722,7 +2097,7 @@ class DataAssistantResult(SerializableDictDot):
         max_value_plot_component: PlotComponent,
         strict_min_plot_component: PlotComponent,
         strict_max_plot_component: PlotComponent,
-        predicate: Union[bool, int],
+        predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
@@ -2740,23 +2115,6 @@ class DataAssistantResult(SerializableDictDot):
                 for metric_plot_component in metric_plot_components
             ]
         )
-
-        line_and_points: alt.LayerChart = (
-            DataAssistantResult._get_interactive_line_chart(
-                expectation_type=expectation_type,
-                df=df,
-                metric_plot_components=metric_plot_components,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
-        )
-
-        line: alt.Chart = line_and_points.layer[0].layer[0]
-        points: alt.Chart = line_and_points.layer[0].layer[1]
-
-        line_and_points.transform = alt.Undefined
-        line.selection = alt.Undefined
-        points.selection = alt.Undefined
 
         input_dropdown_initial_state: pd.DataFrame = (
             df.groupby([batch_plot_component.name]).max().reset_index()
@@ -2837,21 +2195,48 @@ class DataAssistantResult(SerializableDictDot):
             .transform_filter(selection)
         )
 
-        point_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
+        lines_and_points: alt.LayerChart = (
+            DataAssistantResult._get_interactive_line_chart(
+                expectation_type=expectation_type,
+                df=df,
+                metric_plot_components=metric_plot_components,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+            )
         )
 
-        anomaly_coded_points: alt.Chart = (
-            points.encode(color=point_color_condition, tooltip=tooltip)
-            .add_selection(selection)
-            .transform_filter(selection)
-        )
+        line: alt.Chart
+        points: alt.Chart
+        point_color_condition: alt.condition
+        anomaly_coded_points: alt.Chart
+        anomaly_coded_lines_and_points: List[alt.Chart] = []
+        for idx, line_layer in enumerate(lines_and_points.layer):
+            line = line_layer.layer[0]
+            points = line_layer.layer[1]
 
-        line = line.transform_filter(selection)
+            line_layer.transform = alt.Undefined
+            line.selection = alt.Undefined
+            points.selection = alt.Undefined
 
-        return band + lower_limit + upper_limit + line + anomaly_coded_points
+            point_color_condition: alt.condition = alt.condition(
+                predicate=predicates[idx],
+                if_false=alt.value(Colors.GREEN.value),
+                if_true=alt.value(Colors.PINK.value),
+            )
+
+            anomaly_coded_points = (
+                points.encode(color=point_color_condition, tooltip=tooltip)
+                .add_selection(selection)
+                .transform_filter(selection)
+            )
+
+            line = line.transform_filter(selection)
+
+            anomaly_coded_lines_and_points.append(alt.layer(line, anomaly_coded_points))
+
+        return alt.layer(
+            band, lower_limit, upper_limit, *anomaly_coded_lines_and_points
+        ).transform_filter(selection)
 
     @staticmethod
     def _get_interactive_expect_column_values_to_be_between_bar_chart(
@@ -2864,7 +2249,6 @@ class DataAssistantResult(SerializableDictDot):
         max_value_plot_component: PlotComponent,
         strict_min_plot_component: PlotComponent,
         strict_max_plot_component: PlotComponent,
-        predicate: Union[bool, int],
     ) -> alt.VConcatChart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
