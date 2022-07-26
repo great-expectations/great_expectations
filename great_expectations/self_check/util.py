@@ -2426,7 +2426,9 @@ def _create_trino_engine(
 
     with engine.begin() as conn:
         try:
-            res = conn.execute(text(f"create schema {schema_name}"))
+            schemas = conn.execute(text(f"show schemas from memory like {repr(schema_name)}")).fetchall()
+            if ('schema',) not in schemas:
+                res = conn.execute(text(f"create schema {schema_name}"))
         except TrinoUserError:
             pass
     return engine
