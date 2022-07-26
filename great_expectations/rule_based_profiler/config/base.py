@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from ruamel.yaml.comments import CommentedMap
 
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
@@ -482,26 +483,26 @@ class RuleConfigSchema(NotNullSchema):
     )
 
 
-class RuleBasedProfilerConfig(BaseYamlConfig):
+class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
     def __init__(
         self,
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
+        id_: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ) -> None:
         self.module_name = "great_expectations.rule_based_profiler"
         self.class_name = "RuleBasedProfiler"
 
-        self.name = name
-
         self.config_version = config_version
 
         self.variables = variables
         self.rules = rules
 
-        super().__init__(commented_map=commented_map)
+        AbstractConfig.__init__(self, id_=id_, name=name)
+        BaseYamlConfig.__init__(self, commented_map=commented_map)
 
     @classmethod
     def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
@@ -674,6 +675,7 @@ class RuleBasedProfilerConfigSchema(Schema):
         unknown = INCLUDE
         fields = (
             "name",
+            "id",
             "config_version",
             "module_name",
             "class_name",
@@ -684,6 +686,10 @@ class RuleBasedProfilerConfigSchema(Schema):
 
     name = fields.String(
         required=True,
+        allow_none=False,
+    )
+    id = fields.String(
+        required=False,
         allow_none=False,
     )
     config_version = fields.Float(
