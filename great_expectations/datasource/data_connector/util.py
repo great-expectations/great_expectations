@@ -80,6 +80,7 @@ def batch_definition_matches_batch_request(
         if batch_filter_parameters:
             if not isinstance(batch_filter_parameters, dict):
                 return False
+
             for key in batch_filter_parameters.keys():
                 if not (
                     key in batch_definition.batch_identifiers
@@ -91,6 +92,7 @@ def batch_definition_matches_batch_request(
     if batch_request.batch_identifiers:
         if not isinstance(batch_request.batch_identifiers, dict):
             return False
+
         for key in batch_request.batch_identifiers.keys():
             if not (
                 key in batch_definition.batch_identifiers

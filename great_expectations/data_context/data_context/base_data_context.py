@@ -693,7 +693,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        super().delete_datasource(datasource_name)
+        super().delete_datasource(datasource_name, save_changes=save_changes)
         self._synchronize_self_with_underlying_data_context()
 
     def get_available_data_asset_names(

@@ -620,7 +620,9 @@ class AbstractDataContext(ABC):
             datasources.append(masked_config)
         return datasources
 
-    def delete_datasource(self, datasource_name: str) -> None:
+    def delete_datasource(
+        self, datasource_name: Optional[str], save_changes: bool = False
+    ) -> None:
         """Delete a datasource
         Args:
             datasource_name: The name of the datasource to delete.
@@ -630,13 +632,15 @@ class AbstractDataContext(ABC):
         """
         if datasource_name is None:
             raise ValueError("Datasource names must be a datasource name")
-        else:
-            datasource = self.get_datasource(datasource_name=datasource_name)
-            if datasource:
-                self._datasource_store.delete_by_name(datasource_name)
-                del self._cached_datasources[datasource_name]
-            else:
-                raise ValueError(f"Datasource {datasource_name} not found")
+
+        datasource = self.get_datasource(datasource_name=datasource_name)
+
+        if datasource is None:
+            raise ValueError(f"Datasource {datasource_name} not found")
+
+        if save_changes:
+            self._datasource_store.delete_by_name(datasource_name)
+        self._cached_datasources.pop(datasource_name, None)
 
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None

@@ -68,6 +68,7 @@ class CloudDataContext(AbstractDataContext):
             "root_directory": self.root_directory,
             "ge_cloud_credentials": self.ge_cloud_config.to_dict(),
             "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
+            "ge_cloud_base_url": self.ge_cloud_config.base_url,
         }
 
         datasource_store: DatasourceStore = DatasourceStore(
