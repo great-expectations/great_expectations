@@ -7,7 +7,6 @@ from ruamel.yaml import YAML
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource import SimpleSqlalchemyDatasource
 from great_expectations.datasource.data_connector import DataConnector
 from tests.test_utils import create_files_in_directory
 

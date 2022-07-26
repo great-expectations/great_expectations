@@ -236,7 +236,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             batch_definition_list = batch_filter_obj.select_from_data_connector_query(
                 batch_definition_list=batch_definition_list
             )
-
+            # this will have to be sorted in some sort of way
+            # how do you sort?
         return batch_definition_list
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
