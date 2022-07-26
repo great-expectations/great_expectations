@@ -1,7 +1,6 @@
 import copy
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
-from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -60,7 +59,7 @@ class BaseDatasource:
                 runtime_environment={"concurrency": concurrency},
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
-            self._datasource_config = {
+            self._datasource_config: dict = {
                 "execution_engine": execution_engine,
                 "id_": id_,
                 "name": name,
@@ -68,7 +67,7 @@ class BaseDatasource:
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
 
-        self._data_connectors = {}
+        self._data_connectors: dict = {}
 
     def get_batch_from_batch_definition(
         self,
@@ -416,7 +415,7 @@ class Datasource(BaseDatasource):
         data_connectors=None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
-        id_: Optional[UUID] = None,
+        id_: Optional[str] = None,
     ) -> None:
         """
         Build a new Datasource with data connectors.
