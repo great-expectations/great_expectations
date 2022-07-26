@@ -709,7 +709,7 @@ anonymized_checkpoint_run_schema = {
                 "anonymized_run_id": {"$ref": "#/definitions/anonymized_string"},
                 "anonymized_run_name": {"$ref": "#/definitions/anonymized_run_name"},
                 "anonymized_run_time": {"$ref": "#/definitions/anonymized_run_time"},
-                "anonymized_expectation_suite_ge_cloud_id": {
+                "anonymized_expectation_suite_id_": {
                     "$ref": "#/definitions/anonymized_string"
                 },
                 "checkpoint_optional_top_level_keys": {

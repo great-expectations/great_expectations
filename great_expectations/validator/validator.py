@@ -1375,7 +1375,7 @@ aborting graph resolution.
         self,
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None,
+        id_: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         # deprecated-v0.13.0
@@ -1387,7 +1387,7 @@ aborting graph resolution.
         return self._expectation_suite.find_expectations(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
-            ge_cloud_id=ge_cloud_id,
+            id_=id_,
         )
 
     def remove_expectation(
@@ -1395,14 +1395,14 @@ aborting graph resolution.
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
         remove_multiple_matches: bool = False,
-        ge_cloud_id: Optional[str] = None,
+        id_: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
 
         return self._expectation_suite.remove_expectation(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
             remove_multiple_matches=remove_multiple_matches,
-            ge_cloud_id=ge_cloud_id,
+            id_=id_,
         )
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
@@ -1725,7 +1725,7 @@ set as active.
             self._data_context.save_expectation_suite(expectation_suite)
             if self.ge_cloud_mode:
                 updated_suite = self._data_context.get_expectation_suite(
-                    ge_cloud_id=str(expectation_suite.ge_cloud_id)
+                    id_=str(expectation_suite.id_)
                 )
                 self._initialize_expectations(expectation_suite=updated_suite)
         elif filepath is not None:

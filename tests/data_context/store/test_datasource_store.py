@@ -127,7 +127,7 @@ def test_datasource_store_retrieval_cloud_mode(
     )
 
     key: GeCloudIdentifier = GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id="foobarbaz"
+        resource_type=GeCloudRESTResource.DATASOURCE, id_="foobarbaz"
     )
 
     with patch("requests.put", autospec=True) as mock_put:

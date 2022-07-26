@@ -217,7 +217,7 @@ class AbstractDataContext(ABC):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        ge_cloud_id: Optional[str] = None,
+        id_: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> None:
         """
@@ -702,7 +702,7 @@ class AbstractDataContext(ABC):
         query: Optional[str] = None,
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_id_: Optional[str] = None,
         batch_spec_passthrough: Optional[dict] = None,
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -721,19 +721,17 @@ class AbstractDataContext(ABC):
                     expectation_suite is not None,
                     expectation_suite_name is not None,
                     create_expectation_suite_with_name is not None,
-                    expectation_suite_ge_cloud_id is not None,
+                    expectation_suite_id_ is not None,
                 ]
             )
             > 1
         ):
             raise ValueError(
-                f"No more than one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name can be specified"
+                f"No more than one of expectation_suite_name,{'expectation_suite_id_,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
-        if expectation_suite_ge_cloud_id is not None:
-            expectation_suite = self.get_expectation_suite(
-                ge_cloud_id=expectation_suite_ge_cloud_id
-            )
+        if expectation_suite_id_ is not None:
+            expectation_suite = self.get_expectation_suite(id_=expectation_suite_id_)
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
         if create_expectation_suite_with_name is not None:
@@ -943,7 +941,7 @@ class AbstractDataContext(ABC):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
+        id_: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
@@ -1001,12 +999,12 @@ class AbstractDataContext(ABC):
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id_: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GE Cloud ID
         Args:
             expectation_suite_name (str): the name for the Expectation Suite
-            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
+            id_ (str): the GE Cloud ID for the Expectation Suite
 
         Returns:
             expectation_suite

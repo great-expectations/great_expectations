@@ -813,26 +813,24 @@ class StoreValidationResultAction(ValidationAction):
                 )
             )
 
-        contract_ge_cloud_id = None
+        contract_id_ = None
         if self.data_context.ge_cloud_mode and checkpoint_identifier:
-            contract_ge_cloud_id = checkpoint_identifier.ge_cloud_id
+            contract_id_ = checkpoint_identifier.id_
 
-        expectation_suite_ge_cloud_id = None
+        expectation_suite_id_ = None
         if self.data_context.ge_cloud_mode and expectation_suite_identifier:
-            expectation_suite_ge_cloud_id = str(
-                expectation_suite_identifier.ge_cloud_id
-            )
+            expectation_suite_id_ = str(expectation_suite_identifier.id_)
 
         return_val = self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
-            contract_id=contract_ge_cloud_id,
-            expectation_suite_id=expectation_suite_ge_cloud_id,
+            contract_id=contract_id_,
+            expectation_suite_id=expectation_suite_id_,
         )
         if self.data_context.ge_cloud_mode:
             return_val: GeCloudResourceRef
-            new_ge_cloud_id = return_val.ge_cloud_id
-            validation_result_suite_identifier.ge_cloud_id = new_ge_cloud_id
+            new_id_ = return_val.id_
+            validation_result_suite_identifier.id_ = new_id_
 
 
 class StoreEvaluationParametersAction(ValidationAction):
@@ -1097,10 +1095,10 @@ class CloudNotificationAction(ValidationAction):
     def __init__(
         self,
         data_context: "DataContext",
-        checkpoint_ge_cloud_id: str,
+        checkpoint_id_: str,
     ) -> None:
         super().__init__(data_context)
-        self.checkpoint_ge_cloud_id = checkpoint_ge_cloud_id
+        self.checkpoint_id_ = checkpoint_id_
 
     def _run(
         self,
@@ -1132,7 +1130,7 @@ class CloudNotificationAction(ValidationAction):
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
             f"/organizations/{self.data_context.ge_cloud_config.organization_id}/contracts/"
-            f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
+            f"{self.checkpoint_id_}/suite-validation-results/{validation_result_suite_identifier.id_}/notification-actions",
         )
         auth_headers = {
             "Content-Type": "application/vnd.api+json",

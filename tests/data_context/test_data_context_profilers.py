@@ -134,7 +134,7 @@ def test_save_profiler(
             profiler=profiler_config_with_placeholder_args,
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id_=None,
         )
 
     with mock.patch(
@@ -145,6 +145,6 @@ def test_save_profiler(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id_=None,
         )
     assert isinstance(profiler, RuleBasedProfiler)

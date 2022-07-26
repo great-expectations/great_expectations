@@ -40,7 +40,7 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_config_dict = response_json["data"]["attributes"][
             "checkpoint_config"
         ]
-        checkpoint_config_dict["ge_cloud_id"] = ge_cloud_checkpoint_id
+        checkpoint_config_dict["id_"] = ge_cloud_checkpoint_id
 
         return checkpoint_config_dict
 
@@ -54,7 +54,7 @@ class CheckpointStore(ConfigurationStore):
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
                 resource_type=GeCloudRESTResource.CONTRACT,
-                ge_cloud_id=str(uuid.uuid4()),
+                id_=str(uuid.uuid4()),
             )
         else:
             test_key: ConfigurationIdentifier = self.key_class(
@@ -106,10 +106,10 @@ class CheckpointStore(ConfigurationStore):
     def delete_checkpoint(
         self,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id_: Optional[str] = None,
     ) -> None:
         key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=ge_cloud_id
+            name=name, id_=id_
         )
         try:
             self.remove_key(key=key)
@@ -119,10 +119,10 @@ class CheckpointStore(ConfigurationStore):
             )
 
     def get_checkpoint(
-        self, name: Optional[str], ge_cloud_id: Optional[str]
+        self, name: Optional[str], id_: Optional[str]
     ) -> CheckpointConfig:
         key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=ge_cloud_id
+            name=name, id_=id_
         )
         try:
             checkpoint_config: CheckpointConfig = self.get(key=key)
@@ -158,13 +158,13 @@ class CheckpointStore(ConfigurationStore):
         return checkpoint_config
 
     def add_checkpoint(
-        self, checkpoint: "Checkpoint", name: Optional[str], ge_cloud_id: Optional[str]
+        self, checkpoint: "Checkpoint", name: Optional[str], id_: Optional[str]
     ) -> None:
         key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=ge_cloud_id
+            name=name, id_=id_
         )
         checkpoint_config: CheckpointConfig = checkpoint.get_config()
         checkpoint_ref = self.set(key=key, value=checkpoint_config)
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
-            ge_cloud_id = checkpoint_ref.ge_cloud_id
-            checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)
+            id_ = checkpoint_ref.id_
+            checkpoint.id_ = uuid.UUID(id_)

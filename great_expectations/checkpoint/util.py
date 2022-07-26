@@ -188,10 +188,8 @@ def get_substituted_validation_dict(
         ),
         "expectation_suite_name": validation_dict.get("expectation_suite_name")
         or substituted_runtime_config.get("expectation_suite_name"),
-        "expectation_suite_ge_cloud_id": validation_dict.get(
-            "expectation_suite_ge_cloud_id"
-        )
-        or substituted_runtime_config.get("expectation_suite_ge_cloud_id"),
+        "expectation_suite_id_": validation_dict.get("expectation_suite_id_")
+        or substituted_runtime_config.get("expectation_suite_id_"),
         "action_list": get_updated_action_list(
             base_action_list=substituted_runtime_config.get("action_list"),
             other_action_list=validation_dict.get("action_list", {}),
@@ -270,10 +268,8 @@ def substitute_template_config(source_config: dict, template_config: dict) -> di
         dest_config["run_name_template"] = source_config["run_name_template"]
     if source_config.get("expectation_suite_name") is not None:
         dest_config["expectation_suite_name"] = source_config["expectation_suite_name"]
-    if source_config.get("expectation_suite_ge_cloud_id") is not None:
-        dest_config["expectation_suite_ge_cloud_id"] = source_config[
-            "expectation_suite_ge_cloud_id"
-        ]
+    if source_config.get("expectation_suite_id_") is not None:
+        dest_config["expectation_suite_id_"] = source_config["expectation_suite_id_"]
 
     # update
     if source_config.get("batch_request") is not None:
@@ -339,10 +335,8 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
         dest_config["run_name_template"] = runtime_kwargs["run_name_template"]
     if runtime_kwargs.get("expectation_suite_name") is not None:
         dest_config["expectation_suite_name"] = runtime_kwargs["expectation_suite_name"]
-    if runtime_kwargs.get("expectation_suite_ge_cloud_id") is not None:
-        dest_config["expectation_suite_ge_cloud_id"] = runtime_kwargs[
-            "expectation_suite_ge_cloud_id"
-        ]
+    if runtime_kwargs.get("expectation_suite_id_") is not None:
+        dest_config["expectation_suite_id_"] = runtime_kwargs["expectation_suite_id_"]
     # update
     if runtime_kwargs.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}

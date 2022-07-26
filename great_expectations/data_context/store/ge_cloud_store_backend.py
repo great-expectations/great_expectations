@@ -163,7 +163,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self) -> None:
         pass
 
-    def _update(self, ge_cloud_id: str, value: Any, **kwargs: dict) -> bool:
+    def _update(self, id_: str, value: Any, **kwargs: dict) -> bool:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -185,9 +185,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
 
-        if ge_cloud_id:
-            data["data"]["id"] = ge_cloud_id
-            url = urljoin(f"{url}/", ge_cloud_id)
+        if id_:
+            data["data"]["id"] = id_
+            url = urljoin(f"{url}/", id_)
 
         try:
             response = requests.put(url, json=data, headers=self.auth_headers)
@@ -223,16 +223,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     ) -> Union[bool, GeCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
         ge_cloud_resource: GeCloudRESTResource = key[0]
-        ge_cloud_id: str = key[1]
+        id_: str = key[1]
 
-        # if key has ge_cloud_id, perform _update instead
+        # if key has id_, perform _update instead
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
-        if (
-            ge_cloud_id
-            or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES
-        ):
-            return self._update(ge_cloud_id=ge_cloud_id, value=value, **kwargs)
+        if id_ or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES:
+            return self._update(id_=id_, value=value, **kwargs)
 
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
@@ -263,7 +260,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
             return GeCloudResourceRef(
                 resource_type=resource_type,
-                ge_cloud_id=object_id,
+                id_=object_id,
                 url=object_url,
             )
         # TODO Show more detailed error messages
@@ -316,10 +313,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def get_url_for_key(
         self, key: Tuple[str, ...], protocol: Optional[Any] = None
     ) -> str:
-        ge_cloud_id = key[1]
+        id_ = key[1]
         url = urljoin(
             self.ge_cloud_base_url,
-            f"organizations/{self.ge_cloud_credentials['organization_id']}/{hyphen(self.ge_cloud_resource_name)}/{ge_cloud_id}",
+            f"organizations/{self.ge_cloud_credentials['organization_id']}/{hyphen(self.ge_cloud_resource_name)}/{id_}",
         )
         return url
 
@@ -327,12 +324,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
-        ge_cloud_id = key[1]
+        id_ = key[1]
 
         data = {
             "data": {
                 "type": self.ge_cloud_resource_type,
-                "id": ge_cloud_id,
+                "id": id_,
                 "attributes": {
                     "deleted": True,
                 },
@@ -344,7 +341,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"organizations/"
             f"{self.ge_cloud_credentials['organization_id']}/"
             f"{hyphen(self.ge_cloud_resource_name)}/"
-            f"{ge_cloud_id}",
+            f"{id_}",
         )
         try:
             response = requests.delete(url, json=data, headers=self.auth_headers)

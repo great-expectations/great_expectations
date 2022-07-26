@@ -2252,8 +2252,8 @@ class CheckpointConfigSchema(Schema):
             "slack_webhook",
             "notify_on",
             "notify_with",
-            "ge_cloud_id",
-            "expectation_suite_ge_cloud_id",
+            "id_",
+            "expectation_suite_id_",
         )
         ordered = True
 
@@ -2267,7 +2267,7 @@ class CheckpointConfigSchema(Schema):
         "batches",
     ]
 
-    ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    id_ = fields.UUID(required=False, allow_none=True)
     name = fields.String(required=False, allow_none=True)
     config_version = fields.Number(
         validate=lambda x: (0 < x < 100) or x is None,
@@ -2287,7 +2287,7 @@ class CheckpointConfigSchema(Schema):
     )
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
-    expectation_suite_ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    expectation_suite_id_ = fields.UUID(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
     action_list = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
@@ -2381,13 +2381,13 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
-        ge_cloud_id: Optional[Union[UUID, str]] = None,
+        id_: Optional[Union[UUID, str]] = None,
         # the following four args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[Union[UUID, str]] = None,
+        expectation_suite_id_: Optional[Union[UUID, str]] = None,
     ) -> None:
         self._name = name
         self._config_version = config_version
@@ -2401,14 +2401,14 @@ class CheckpointConfig(BaseYamlConfig):
             self._template_name = template_name
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
-            self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
+            self._expectation_suite_id_ = expectation_suite_id_
             self._batch_request = batch_request or {}
             self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
             self._profilers = profilers or []
-            self._ge_cloud_id = ge_cloud_id
+            self._id_ = id_
             # the following attributes are used by SimpleCheckpoint
             self._site_names = site_names
             self._slack_webhook = slack_webhook
@@ -2446,20 +2446,20 @@ class CheckpointConfig(BaseYamlConfig):
         self._batches = value
 
     @property
-    def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
-        return self._ge_cloud_id
+    def id_(self) -> Optional[Union[UUID, str]]:
+        return self._id_
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value: Union[UUID, str]) -> None:
-        self._ge_cloud_id = value
+    @id_.setter
+    def id_(self, value: Union[UUID, str]) -> None:
+        self._id_ = value
 
     @property
-    def expectation_suite_ge_cloud_id(self) -> Optional[Union[UUID, str]]:
-        return self._expectation_suite_ge_cloud_id
+    def expectation_suite_id_(self) -> Optional[Union[UUID, str]]:
+        return self._expectation_suite_id_
 
-    @expectation_suite_ge_cloud_id.setter
-    def expectation_suite_ge_cloud_id(self, value: Union[UUID, str]) -> None:
-        self._expectation_suite_ge_cloud_id = value
+    @expectation_suite_id_.setter
+    def expectation_suite_id_(self, value: Union[UUID, str]) -> None:
+        self._expectation_suite_id_ = value
 
     @property
     def name(self) -> str:
@@ -2674,7 +2674,7 @@ class CheckpointConfig(BaseYamlConfig):
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_id_: Optional[str] = None,
     ) -> dict:
         """
         This method reconciles the Checkpoint configuration (e.g., obtained from the Checkpoint store) with dynamically
@@ -2713,7 +2713,7 @@ class CheckpointConfig(BaseYamlConfig):
             "runtime_configuration": runtime_configuration,
             "validations": validations,
             "profilers": profilers,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+            "expectation_suite_id_": expectation_suite_id_,
         }
         substituted_runtime_config: dict = checkpoint.get_substituted_config(
             runtime_kwargs=runtime_kwargs
@@ -2750,12 +2750,10 @@ class CheckpointConfig(BaseYamlConfig):
             validation_dict[
                 "expectation_suite_name"
             ] = validation_expectation_suite_name
-            validation_expectation_suite_ge_cloud_id: str = (
-                substituted_validation_dict.get("expectation_suite_ge_cloud_id")
+            validation_expectation_suite_id_: str = substituted_validation_dict.get(
+                "expectation_suite_id_"
             )
-            validation_dict[
-                "expectation_suite_ge_cloud_id"
-            ] = validation_expectation_suite_ge_cloud_id
+            validation_dict["expectation_suite_id_"] = validation_expectation_suite_id_
             validation_action_list: list = substituted_validation_dict.get(
                 "action_list"
             )

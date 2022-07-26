@@ -215,15 +215,13 @@ class CheckpointAnonymizer(BaseAnonymizer):
         else:
             anonymized_run_time = self._anonymize_string(str(run_time))
 
-        expectation_suite_ge_cloud_id: Optional[str] = kwargs.get(
-            "expectation_suite_ge_cloud_id"
-        )
-        anonymized_expectation_suite_ge_cloud_id: Optional[str]
-        if expectation_suite_ge_cloud_id is None:
-            anonymized_expectation_suite_ge_cloud_id = None
+        expectation_suite_id_: Optional[str] = kwargs.get("expectation_suite_id_")
+        anonymized_expectation_suite_id_: Optional[str]
+        if expectation_suite_id_ is None:
+            anonymized_expectation_suite_id_ = None
         else:
-            anonymized_expectation_suite_ge_cloud_id = self._anonymize_string(
-                str(expectation_suite_ge_cloud_id)
+            anonymized_expectation_suite_id_ = self._anonymize_string(
+                str(expectation_suite_id_)
             )
 
         for attribute_name in sorted(CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS):
@@ -243,7 +241,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
             "anonymized_run_id": anonymized_run_id,
             "anonymized_run_name": anonymized_run_name,
             "anonymized_run_time": anonymized_run_time,
-            "anonymized_expectation_suite_ge_cloud_id": anonymized_expectation_suite_ge_cloud_id,
+            "anonymized_expectation_suite_id_": anonymized_expectation_suite_id_,
             "checkpoint_optional_top_level_keys": checkpoint_optional_top_level_keys,
         }
 

@@ -470,7 +470,7 @@ class DefaultSiteSectionBuilder:
                         ),
                         rendered_content,
                         source_type=resource_key.resource_type,
-                        source_id=resource_key.ge_cloud_id,
+                        source_id=resource_key.id_,
                     )
                 else:
                     viewable_content = self.view_class.render(

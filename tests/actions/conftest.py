@@ -86,12 +86,12 @@ def basic_in_memory_data_context_for_validation_operator(
 
 
 @pytest.fixture(scope="module")
-def checkpoint_ge_cloud_id():
+def checkpoint_id_():
     return "bfe7dc64-5320-49b0-91c1-2e8029e06c4d"
 
 
 @pytest.fixture(scope="module")
-def validation_result_suite_ge_cloud_id():
+def validation_result_suite_id_():
     return "bfe7dc64-5320-49b0-91c1-2e8029e06c4d"
 
 
@@ -115,15 +115,15 @@ def validation_result_suite():
 
 
 @pytest.fixture(scope="module")
-def validation_result_suite_ge_cloud_identifier(validation_result_suite_ge_cloud_id):
+def validation_result_suite_id_entifier(validation_result_suite_id_):
     return GeCloudIdentifier(
         resource_type=GeCloudRESTResource.CONTRACT,
-        ge_cloud_id=validation_result_suite_ge_cloud_id,
+        id_=validation_result_suite_id_,
     )
 
 
 @pytest.fixture(scope="module")
-def validation_result_suite_with_ge_cloud_id(validation_result_suite_ge_cloud_id):
+def validation_result_suite_with_id_(validation_result_suite_id_):
     return ExpectationSuiteValidationResult(
         results=[],
         success=True,
@@ -138,7 +138,7 @@ def validation_result_suite_with_ge_cloud_id(validation_result_suite_ge_cloud_id
             "expectation_suite_name": "asset.default",
             "run_id": "test_100",
         },
-        ge_cloud_id=UUID(validation_result_suite_ge_cloud_id),
+        id_=UUID(validation_result_suite_id_),
     )
 
 

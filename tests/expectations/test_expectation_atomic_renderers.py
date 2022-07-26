@@ -14,7 +14,7 @@ from great_expectations.render.types import RenderedAtomicContent
 def expectation_configuration_kwargs():
     # These below fields are defaults; specific tests will overwrite as deemed necessary
     return {
-        "ge_cloud_id": "abcdefgh-ijkl-mnop-qrst-uvwxyz123456",
+        "id_": "abcdefgh-ijkl-mnop-qrst-uvwxyz123456",
         "expectation_type": "",
         "kwargs": {},
         "meta": {},
@@ -204,7 +204,7 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
             "threshold": 0.1,
         },
         "meta": {},
-        "ge_cloud_id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
+        "id_": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
     }
     update_dict = {
         "expectation_config": ExpectationConfiguration(**expectation_config),
@@ -445,7 +445,7 @@ def test_atomic_prescriptive_summary_expect_column_quantile_values_to_be_between
             "allow_relative_error": False,
         },
         "meta": {},
-        "ge_cloud_id": "cd6b4f19-8167-4984-b495-54bffcb070da",
+        "id_": "cd6b4f19-8167-4984-b495-54bffcb070da",
     }
     rendered_content = get_prescriptive_rendered_content(update_dict)
 
@@ -476,7 +476,7 @@ def test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_be
             "allow_relative_error": False,
         },
         "meta": {},
-        "ge_cloud_id": "cd6b4f19-8167-4984-b495-54bffcb070da",
+        "id_": "cd6b4f19-8167-4984-b495-54bffcb070da",
     }
     update_dict = {
         "expectation_config": ExpectationConfiguration(**expectation_config),

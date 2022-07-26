@@ -56,7 +56,7 @@ class JsonSiteStore(Store):
         """
         ge_cloud_json_site_id = response_json["data"]["id"]
         json_site_dict = response_json["data"]["attributes"]["rendered_data_doc"]
-        json_site_dict["ge_cloud_id"] = ge_cloud_json_site_id
+        json_site_dict["id_"] = ge_cloud_json_site_id
 
         return json_site_dict
 

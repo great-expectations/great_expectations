@@ -622,19 +622,19 @@ def test_EmailAction(
 def test_cloud_notification_action(
     mock_post_method,
     cloud_data_context_with_datasource_pandas_engine,
-    validation_result_suite_with_ge_cloud_id,
-    validation_result_suite_ge_cloud_identifier,
-    checkpoint_ge_cloud_id,
+    validation_result_suite_with_id_,
+    validation_result_suite_id_entifier,
+    checkpoint_id_,
     ge_cloud_access_token,
 ):
     cloud_action: CloudNotificationAction = CloudNotificationAction(
         data_context=cloud_data_context_with_datasource_pandas_engine,
-        checkpoint_ge_cloud_id=checkpoint_ge_cloud_id,
+        checkpoint_id_=checkpoint_id_,
     )
     expected_ge_cloud_url = urljoin(
         cloud_action.data_context.ge_cloud_config.base_url,
         f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
-        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
+        f"{cloud_action.checkpoint_id_}/suite-validation-results/{validation_result_suite_id_entifier.id_}/notification-actions",
     )
     expected_headers = {
         "Content-Type": "application/vnd.api+json",
@@ -642,8 +642,8 @@ def test_cloud_notification_action(
     }
 
     assert cloud_action.run(
-        validation_result_suite=validation_result_suite_with_ge_cloud_id,
-        validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
+        validation_result_suite=validation_result_suite_with_id_,
+        validation_result_suite_identifier=validation_result_suite_id_entifier,
         data_asset=None,
     ) == {"cloud_notification_result": "Cloud notification succeeded."}
     mock_post_method.assert_called_with(
@@ -656,19 +656,19 @@ def test_cloud_notification_action(
 def test_cloud_notification_action_bad_response(
     mock_post_method,
     cloud_data_context_with_datasource_pandas_engine,
-    validation_result_suite_with_ge_cloud_id,
-    validation_result_suite_ge_cloud_identifier,
-    checkpoint_ge_cloud_id,
+    validation_result_suite_with_id_,
+    validation_result_suite_id_entifier,
+    checkpoint_id_,
     ge_cloud_access_token,
 ):
     cloud_action: CloudNotificationAction = CloudNotificationAction(
         data_context=cloud_data_context_with_datasource_pandas_engine,
-        checkpoint_ge_cloud_id=checkpoint_ge_cloud_id,
+        checkpoint_id_=checkpoint_id_,
     )
     expected_ge_cloud_url = urljoin(
         cloud_action.data_context.ge_cloud_config.base_url,
         f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
-        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
+        f"{cloud_action.checkpoint_id_}/suite-validation-results/{validation_result_suite_id_entifier.id_}/notification-actions",
     )
     expected_headers = {
         "Content-Type": "application/vnd.api+json",
@@ -680,8 +680,8 @@ def test_cloud_notification_action_bad_response(
 
     assert (
         cloud_action.run(
-            validation_result_suite=validation_result_suite_with_ge_cloud_id,
-            validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
+            validation_result_suite=validation_result_suite_with_id_,
+            validation_result_suite_identifier=validation_result_suite_id_entifier,
             data_asset=None,
         )
         == expected_result

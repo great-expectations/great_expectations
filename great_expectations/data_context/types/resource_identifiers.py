@@ -202,12 +202,12 @@ class ValidationResultIdentifier(DataContextKey):
 
 class GeCloudIdentifier(DataContextKey):
     def __init__(
-        self, resource_type: "GeCloudRESTResource", ge_cloud_id: Optional[str] = None
+        self, resource_type: "GeCloudRESTResource", id_: Optional[str] = None
     ) -> None:
         super().__init__()
 
         self._resource_type = resource_type
-        self._ge_cloud_id = ge_cloud_id if ge_cloud_id is not None else ""
+        self._id_ = id_ if id_ is not None else ""
 
     @property
     def resource_type(self):
@@ -218,29 +218,29 @@ class GeCloudIdentifier(DataContextKey):
         self._resource_type = value
 
     @property
-    def ge_cloud_id(self):
-        return self._ge_cloud_id
+    def id_(self):
+        return self._id_
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value) -> None:
-        self._ge_cloud_id = value
+    @id_.setter
+    def id_(self, value) -> None:
+        self._id_ = value
 
     def to_tuple(self):
-        return (self.resource_type, self.ge_cloud_id)
+        return (self.resource_type, self.id_)
 
     def to_fixed_length_tuple(self):
         return self.to_tuple()
 
     @classmethod
     def from_tuple(cls, tuple_):
-        return cls(resource_type=tuple_[0], ge_cloud_id=tuple_[1])
+        return cls(resource_type=tuple_[0], id_=tuple_[1])
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
         return cls.from_tuple(tuple_)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        return f"{self.__class__.__name__}::{self.resource_type}::{self.id_}"
 
 
 class ValidationResultIdentifierSchema(Schema):

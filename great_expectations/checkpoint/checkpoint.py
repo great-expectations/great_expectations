@@ -99,7 +99,7 @@ class BaseCheckpoint(ConfigPeer):
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_id_: Optional[str] = None,
     ) -> CheckpointResult:
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -124,7 +124,7 @@ class BaseCheckpoint(ConfigPeer):
             "runtime_configuration": runtime_configuration or {},
             "validations": validations or [],
             "profilers": profilers or [],
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+            "expectation_suite_id_": expectation_suite_id_,
         }
 
         substituted_runtime_config: dict = self.get_substituted_config(
@@ -306,8 +306,8 @@ class BaseCheckpoint(ConfigPeer):
             expectation_suite_name: str = substituted_validation_dict.get(
                 "expectation_suite_name"
             )
-            expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
-                "expectation_suite_ge_cloud_id"
+            expectation_suite_id_: str = substituted_validation_dict.get(
+                "expectation_suite_id_"
             )
             include_rendered_content: bool = substituted_validation_dict.get(
                 "include_rendered_content", False
@@ -320,10 +320,8 @@ class BaseCheckpoint(ConfigPeer):
                     if not self.data_context.ge_cloud_mode
                     else None
                 ),
-                expectation_suite_ge_cloud_id=(
-                    expectation_suite_ge_cloud_id
-                    if self.data_context.ge_cloud_mode
-                    else None
+                expectation_suite_id_=(
+                    expectation_suite_id_ if self.data_context.ge_cloud_mode else None
                 ),
                 include_rendered_content=include_rendered_content,
             )
@@ -355,7 +353,7 @@ class BaseCheckpoint(ConfigPeer):
             if self.data_context.ge_cloud_mode:
                 checkpoint_identifier = GeCloudIdentifier(
                     resource_type=GeCloudRESTResource.CONTRACT,
-                    ge_cloud_id=str(self.ge_cloud_id),
+                    id_=str(self.id_),
                 )
 
             operator_run_kwargs = {}
@@ -467,9 +465,9 @@ is run), with each validation having its own defined "action_list" attribute.
             return []
 
     @property
-    def ge_cloud_id(self) -> Optional[UUID]:
+    def id_(self) -> Optional[UUID]:
         try:
-            return self.config.ge_cloud_id
+            return self.config.id_
         except AttributeError:
             return None
 
@@ -518,8 +516,8 @@ class Checkpoint(BaseCheckpoint):
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[UUID] = None,
-        expectation_suite_ge_cloud_id: Optional[UUID] = None,
+        id_: Optional[UUID] = None,
+        expectation_suite_id_: Optional[UUID] = None,
     ) -> None:
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
         if batch_request_contains_batch_data(batch_request=batch_request):
@@ -550,8 +548,8 @@ constructor arguments.
             profilers=profilers,
             validation_operator_name=validation_operator_name,
             batches=batches,
-            ge_cloud_id=ge_cloud_id,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            id_=id_,
+            expectation_suite_id_=expectation_suite_id_,
         )
         super().__init__(
             checkpoint_config=checkpoint_config,
@@ -573,7 +571,7 @@ constructor arguments.
         run_name: Optional[str] = None,
         run_time: Optional[datetime.datetime] = None,
         result_format: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_id_: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
         checkpoint_config_from_store: CheckpointConfig = cast(
@@ -614,7 +612,7 @@ constructor arguments.
             "run_name": run_name,
             "run_time": run_time,
             "result_format": result_format,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+            "expectation_suite_id_": expectation_suite_id_,
         }
 
         checkpoint_config: dict = {
@@ -658,8 +656,8 @@ constructor arguments.
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        id_: Optional[str] = None,
+        expectation_suite_id_: Optional[str] = None,
     ) -> "Checkpoint":
         checkpoint_config: Union[CheckpointConfig, dict]
 
@@ -702,8 +700,8 @@ constructor arguments.
             "slack_webhook": slack_webhook,
             "notify_on": notify_on,
             "notify_with": notify_with,
-            "ge_cloud_id": ge_cloud_id,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+            "id_": id_,
+            "expectation_suite_id_": expectation_suite_id_,
         }
 
         checkpoint_config = deep_filter_properties_iterable(
@@ -1042,13 +1040,13 @@ class SimpleCheckpoint(Checkpoint):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[UUID] = None,
+        id_: Optional[UUID] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
         site_names: Union[str, List[str]] = "all",
         slack_webhook: Optional[str] = None,
         notify_on: str = "all",
         notify_with: Union[str, List[str]] = "all",
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_id_: Optional[str] = None,
         **kwargs,
     ) -> None:
         checkpoint_config: CheckpointConfig = self._configurator_class(
@@ -1068,8 +1066,8 @@ class SimpleCheckpoint(Checkpoint):
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=ge_cloud_id,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            id_=id_,
+            expectation_suite_id_=expectation_suite_id_,
         ).build()
 
         super().__init__(
@@ -1085,8 +1083,8 @@ class SimpleCheckpoint(Checkpoint):
             runtime_configuration=checkpoint_config.runtime_configuration,
             validations=validations,
             profilers=checkpoint_config.profilers,
-            ge_cloud_id=checkpoint_config.ge_cloud_id,
-            expectation_suite_ge_cloud_id=checkpoint_config.expectation_suite_ge_cloud_id,
+            id_=checkpoint_config.id_,
+            expectation_suite_id_=checkpoint_config.expectation_suite_id_,
         )
 
     def run(
@@ -1109,7 +1107,7 @@ class SimpleCheckpoint(Checkpoint):
         slack_webhook: Optional[str] = None,
         notify_on: str = "all",
         notify_with: Union[str, List[str]] = "all",
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_id_: Optional[str] = None,
     ) -> CheckpointResult:
         new_baseline_config = None
 
@@ -1143,5 +1141,5 @@ class SimpleCheckpoint(Checkpoint):
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            expectation_suite_id_=expectation_suite_id_,
         )

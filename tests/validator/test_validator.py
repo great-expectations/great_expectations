@@ -738,7 +738,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
                     "result_format": "BASIC",
                 },
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
+                id_=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
             )
         ],
         data_context=context,
@@ -769,7 +769,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
+def test_ge_cloud_validator_updates_self_suite_with_id_s_on_save(
     mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
@@ -790,13 +790,13 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "passenger_count", "min_value": 0, "max_value": 99},
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
+                id_=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
             ),
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
                 kwargs={"column": "trip_distance", "min_value": 11, "max_value": 22},
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("3e8eee33-b425-4b36-a831-6e9dd31ad5af"),
+                id_=UUID("3e8eee33-b425-4b36-a831-6e9dd31ad5af"),
             ),
         ],
         data_context=context,
