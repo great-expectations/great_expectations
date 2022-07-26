@@ -1325,6 +1325,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         ge_cloud_id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> ExpectationSuite:
+        """
+
+        Args:
+            expectation_suite_name (str):
+             (Optional[dict]):
+            overwrite_existing (bool):
+            ge_cloud_id (Optional[str]):
+
+        Returns:
+
+        """
         return self._data_context.create_expectation_suite(
             expectation_suite_name,
             overwrite_existing=overwrite_existing,
@@ -1337,6 +1348,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
+        """
+
+        Args:
+            expectation_suite_name (Optional[str]):
+            ge_cloud_id (Optional[str]):
+
+        Returns:
+
+        """
         return self._data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
         )
@@ -1344,6 +1364,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def delete_expectation_suite(
         self, expectation_suite_name: Optional[str] = None
     ) -> bool:
+        """
+
+        Args:
+            expectation_suite_name (Optional[str]):
+
+        Returns:
+
+        """
         return self._data_context.delete_expectation_suite(
             expectation_suite_name=expectation_suite_name
         )
