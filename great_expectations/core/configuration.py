@@ -12,7 +12,7 @@ class AbstractConfig(ABC, SerializableDictDot):
         # Note: name and id are optional currently to avoid updating all documentation within
         # the scope of this work.
         if id_ is not None:
-            self.id = id_
+            self.id_ = id_
         if name is not None:
             self.name = name
         super().__init__()
