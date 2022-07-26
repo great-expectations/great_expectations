@@ -54,7 +54,7 @@ Your data docs built on S3 and you can see index.html at the bucket
       <li> <a href="https://www.linkedin.com/in/bogdan-volodarskiy-652498108/">Author's Linkedin</a> </li>
       <li> <a href="https://medium.com/@bvolodarskiy">Author's Blog</a> </li>
       <li> <a href="https://provectus.com/">About Provectus</a> </li>
-      <li> <a href="https://provectus.com/data-quality-assurance/">About Provectus Data QA</a> </li>
+      <li> <a href="https://provectus.com/data-quality-assurance/">About Provectus Data QA Expertise</a> </li>
 </ul>
   </div>
 </details>
