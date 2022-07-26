@@ -3,6 +3,7 @@ import logging
 from decimal import Decimal
 
 import pandas as pd
+import pytest
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
@@ -11,7 +12,12 @@ from great_expectations.core.util import (
     convert_to_json_serializable,
     requires_lossy_conversion,
 )
-from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    CheckpointValidationConfig,
+    CheckpointValidationConfigSchema,
+    checkpointConfigSchema,
+)
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
@@ -466,3 +472,83 @@ def test_checkpoint_config_print(
         properties=expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict(),
         clean_falsy=True,
     )
+
+
+@pytest.mark.parametrize(
+    "checkpoint_validation_config,expected_serialized_checkpoint_validation_config",
+    [
+        pytest.param(
+            CheckpointValidationConfig(
+                batch_request={
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_data_connector",
+                    "data_asset_name": "users",
+                    "data_connector_query": {"partition_index": -1},
+                },
+                name="my_first_validation",
+            ),
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_data_connector",
+                    "data_asset_name": "users",
+                    "data_connector_query": {"partition_index": -1},
+                },
+                "name": "my_first_validation",
+            },
+            id="minimal",
+        ),
+    ],
+)
+def test_checkpoint_validation_config_is_serialized(
+    checkpoint_validation_config: CheckpointValidationConfig,
+    expected_serialized_checkpoint_validation_config: dict,
+) -> None:
+    """CheckpointValidationConfig should be serialized appropriately with/without optional params."""
+    observed = CheckpointValidationConfigSchema().dump(checkpoint_validation_config)
+
+    assert observed == expected_serialized_checkpoint_validation_config
+
+
+@pytest.mark.parametrize(
+    "checkpoint_config,expected_serialized_checkpoint_config",
+    [
+        pytest.param(
+            CheckpointConfig(
+                name="my_nested_checkpoint",
+                config_version=1,
+                template_name="my_nested_checkpoint_template_2",
+                expectation_suite_name="users.delivery",
+                validations=[
+                    CheckpointValidationConfig(
+                        batch_request={
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_data_connector",
+                            "data_asset_name": "users",
+                            "data_connector_query": {"partition_index": -1},
+                        },
+                        name="my_first_validation",
+                    ),
+                    CheckpointValidationConfig(
+                        batch_request={
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_data_connector",
+                            "data_asset_name": "users",
+                            "data_connector_query": {"partition_index": -2},
+                        },
+                        name="my_second_validation",
+                    ),
+                ],
+            ),
+            {},
+            id="minimal",
+        )
+    ],
+)
+def test_checkpoint_validation_config_within_checkpoint_config_is_serialized(
+    checkpoint_config: CheckpointConfig, expected_serialized_checkpoint_config: dict
+) -> None:
+    """CheckpointValidationConfig within CheckpointConfig should be serialized appropriately with/without optional params."""
+    observed = checkpointConfigSchema.dump(checkpoint_config)
+
+    assert observed == expected_serialized_checkpoint_config
