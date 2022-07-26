@@ -132,9 +132,9 @@ class DatasourceStore(Store):
             datasource_config: The config of the Datasource to delete.
         """
 
-        self.remove_key(self._get_key_from_config(datasource_config))
+        self.remove_key(self._build_key_from_config(datasource_config))
 
-    def _get_key_from_config(
+    def _build_key_from_config(
         self, datasource_config: DatasourceConfig
     ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
         if hasattr(datasource_config, "id_"):
@@ -145,7 +145,7 @@ class DatasourceStore(Store):
             name = datasource_config.name
         else:
             name = None
-        return self.store_backend.get_key(name=name, id_=id_)
+        return self.store_backend.build_key(name=name, id_=id_)
 
     def set_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
@@ -175,7 +175,7 @@ class DatasourceStore(Store):
         """
         key: Union[
             GeCloudIdentifier, DataContextVariableKey
-        ] = self.store_backend.get_key(name=datasource_config.name)
+        ] = self.store_backend.build_key(name=datasource_config.name)
         return self.set(key, datasource_config)
 
     def update_by_name(

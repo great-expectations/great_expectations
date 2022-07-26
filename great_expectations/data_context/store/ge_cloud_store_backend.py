@@ -361,7 +361,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def config(self) -> dict:
         return self._config
 
-    def get_key(self, id_: Optional[str] = None, **kwargs) -> GeCloudIdentifier:
+    def build_key(self, id_: Optional[str] = None, **kwargs) -> GeCloudIdentifier:
         """Get the store backend specific implementation of the key, ignore irrelevant kwargs."""
         return GeCloudIdentifier(
             resource_type=self.ge_cloud_resource_type, ge_cloud_id=id_

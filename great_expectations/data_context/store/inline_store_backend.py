@@ -210,7 +210,7 @@ class InlineStoreBackend(StoreBackend):
 
         return resource_type, resource_name
 
-    def get_key(self, name: str, **kwargs) -> DataContextVariableKey:
+    def build_key(self, name: str, **kwargs) -> DataContextVariableKey:
         """Get the store backend specific implementation of the key, ignore irrelevant kwargs."""
         return DataContextVariableKey(
             resource_type=DataContextVariableSchema.DATASOURCES,
