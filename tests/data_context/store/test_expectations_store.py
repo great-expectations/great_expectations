@@ -135,6 +135,7 @@ def test_expectations_store_report_store_backend_id_in_memory_store_backend():
     assert test_utils.validate_uuid4(in_memory_expectations_store.store_backend_id)
 
 
+@pytest.mark.integration
 def test_expectations_store_report_same_id_with_same_configuration_TupleFilesystemStoreBackend(
     tmp_path_factory,
 ):
@@ -142,17 +143,16 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
     What does this test and why?
     A store with the same config (must be persistent store) should report the same store_backend_id
     """
-    path = "dummy_str"
-    project_path = str(
-        tmp_path_factory.mktemp(
-            "test_expectations_store_report_same_id_with_same_configuration__dir"
-        )
+    full_test_dir = tmp_path_factory.mktemp(
+        "test_expectations_store_report_same_id_with_same_configuration__dir"
     )
+    test_dir = full_test_dir.parts[-1]
+    project_path = str(full_test_dir)
 
     assert (
         gen_directory_tree_str(project_path)
-        == """\
-test_expectations_store_report_same_id_with_same_configuration__dir0/
+        == f"""\
+{test_dir}/
 """
     )
 
@@ -164,14 +164,15 @@ test_expectations_store_report_same_id_with_same_configuration__dir0/
         }
     )
     # Check successful initialization with a store_backend_id
-    initialized_directory_tree_with_store_backend_id = """\
-test_expectations_store_report_same_id_with_same_configuration__dir0/
+    initialized_directory_tree_with_store_backend_id = f"""\
+{test_dir}/
     .ge_store_backend_id
 """
     assert (
         gen_directory_tree_str(project_path)
         == initialized_directory_tree_with_store_backend_id
     )
+
     assert persistent_expectations_store.store_backend_id is not None
 
     # Check that a duplicate store reports the same store_backend_id

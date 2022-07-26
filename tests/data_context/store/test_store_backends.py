@@ -212,6 +212,7 @@ def check_store_backend_store_backend_id_functionality(
     assert test_utils.validate_uuid4(parsed_store_backend_id[1])
 
 
+@pytest.mark.integration
 @mock_s3
 def test_StoreBackend_id_initialization(tmp_path_factory):
     """
@@ -244,17 +245,17 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
     # TupleFilesystemStoreBackend
     # Initialize without store_backend_id and check that it is generated correctly
     path = "dummy_str"
-    project_path = str(
-        tmp_path_factory.mktemp("test_StoreBackend_id_initialization__dir")
-    )
+    full_test_dir = tmp_path_factory.mktemp("test_StoreBackend_id_initialization__dir")
+    test_dir = full_test_dir.parts[-1]
+    project_path = str(full_test_dir)
 
     tuple_filesystem_store_backend = TupleFilesystemStoreBackend(
         root_directory=project_path,
         base_directory=os.path.join(project_path, path),
     )
     # Check that store_backend_id is created on instantiation, before being accessed
-    desired_directory_tree_str = """\
-test_StoreBackend_id_initialization__dir0/
+    desired_directory_tree_str = f"""\
+{test_dir}/
     dummy_str/
         .ge_store_backend_id
 """
@@ -265,9 +266,12 @@ test_StoreBackend_id_initialization__dir0/
     assert gen_directory_tree_str(project_path) == desired_directory_tree_str
 
     # Repeat the above with a filepath template
-    project_path_with_filepath_template = str(
-        tmp_path_factory.mktemp("test_StoreBackend_id_initialization__dir")
+    full_test_dir_with_file_template = tmp_path_factory.mktemp(
+        "test_StoreBackend_id_initialization__dir"
     )
+    test_dir_with_file_template = full_test_dir_with_file_template.parts[-1]
+    project_path_with_filepath_template = str(full_test_dir_with_file_template)
+
     tuple_filesystem_store_backend_with_filepath_template = TupleFilesystemStoreBackend(
         root_directory=os.path.join(project_path, path),
         base_directory=project_path_with_filepath_template,
@@ -278,8 +282,8 @@ test_StoreBackend_id_initialization__dir0/
     )
     assert (
         gen_directory_tree_str(project_path_with_filepath_template)
-        == """\
-test_StoreBackend_id_initialization__dir1/
+        == f"""\
+{test_dir_with_file_template}/
     .ge_store_backend_id
 """
     )
@@ -460,9 +464,12 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
         converted_string = my_store._convert_key_to_filepath(tuple_)
 
 
+@pytest.mark.unit
 def test_TupleFilesystemStoreBackend(tmp_path_factory):
     path = "dummy_str"
-    project_path = str(tmp_path_factory.mktemp("test_TupleFilesystemStoreBackend__dir"))
+    full_test_dir = tmp_path_factory.mktemp("test_TupleFilesystemStoreBackend__dir")
+    test_dir = full_test_dir.parts[-1]
+    project_path = str(full_test_dir)
     base_public_path = "http://www.test.com/"
 
     my_store = TupleFilesystemStoreBackend(
@@ -483,8 +490,8 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     assert set(my_store.list_keys()) == {(".ge_store_backend_id",), ("AAA",), ("BBB",)}
     assert (
         gen_directory_tree_str(project_path)
-        == """\
-test_TupleFilesystemStoreBackend__dir0/
+        == f"""\
+{test_dir}/
     dummy_str/
         .ge_store_backend_id
         my_file_AAA
@@ -506,10 +513,13 @@ test_TupleFilesystemStoreBackend__dir0/
     assert url == "http://www.test.com/my_file_CCC"
 
 
+@pytest.mark.unit
 def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
     tmp_path_factory,
 ):
-    project_path = str(tmp_path_factory.mktemp("things"))
+    full_test_dir = tmp_path_factory.mktemp("things")
+    test_dir = full_test_dir.parts[-1]
+    project_path = str(full_test_dir)
 
     checkpoint_dir = os.path.join(project_path, ".ipynb_checkpoints")
     os.mkdir(checkpoint_dir)
@@ -529,8 +539,8 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
 
     assert (
         gen_directory_tree_str(project_path)
-        == """\
-things0/
+        == f"""\
+{test_dir}/
     .ge_store_backend_id
     AAA
     .ipynb_checkpoints/
@@ -1563,6 +1573,24 @@ def test_GeCloudStoreBackend():
                 "Authorization": "Bearer 1234",
             },
         )
+
+
+@pytest.mark.unit
+def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() -> None:
+    ge_cloud_base_url = "https://app.greatexpectations.io/"
+    ge_cloud_credentials = {
+        "access_token": "1234",
+        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+    }
+    ge_cloud_resource_type = "contract"  # Instead of using enum
+
+    my_store_backend = GeCloudStoreBackend(
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_credentials=ge_cloud_credentials,
+        ge_cloud_resource_type=ge_cloud_resource_type,
+    )
+
+    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CONTRACT
 
 
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
