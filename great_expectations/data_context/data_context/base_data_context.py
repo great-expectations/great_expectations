@@ -2799,16 +2799,16 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         initialize: bool = True,
         save_changes: bool = False,
     ) -> Optional[Datasource]:
-        """
+        """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
 
         Args:
-            name:
-            config:
-            initialize:
-            save_changes:
+            name: Desired name for the datasource.
+            config: Config for the datasource.
+            initialize: Whether to initialize the datasource or return None.
+            save_changes: Whether to save the datasource config to the configured Datasource store.
 
         Returns:
-
+            If initialize=True return an instantiated Datasource object, else None.
         """
 
         datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(
