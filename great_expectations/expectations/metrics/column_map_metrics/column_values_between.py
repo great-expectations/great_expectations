@@ -12,6 +12,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+from great_expectations.util import isclose
 
 
 class ColumnValuesBetween(ColumnMapMetricProvider):
@@ -106,11 +107,48 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                     if strict_min and strict_max:
                         return (min_value < val) and (val < max_value)
                     elif strict_min:
-                        return (min_value < val) and (val <= max_value)
+                        # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
+                        return (min_value < val) and (
+                            isclose(
+                                operand_a=val,
+                                operand_b=max_value,
+                                rtol=1.0e-5,
+                                atol=1.0e-8,
+                            )
+                            or (val <= max_value)
+                        )
                     elif strict_max:
-                        return (min_value <= val) and (val < max_value)
+                        # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
+                        # noinspection PyTypeChecker
+                        return (
+                            isclose(
+                                operand_a=val,
+                                operand_b=min_value,
+                                rtol=1.0e-5,
+                                atol=1.0e-8,
+                            )
+                            or (min_value <= val)
+                        ) and (val < max_value)
                     else:
-                        return (min_value <= val) and (val <= max_value)
+                        # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
+                        # noinspection PyTypeChecker
+                        return (
+                            isclose(
+                                operand_a=val,
+                                operand_b=min_value,
+                                rtol=1.0e-5,
+                                atol=1.0e-8,
+                            )
+                            or (min_value <= val)
+                        ) and (
+                            isclose(
+                                operand_a=val,
+                                operand_b=max_value,
+                                rtol=1.0e-5,
+                                atol=1.0e-8,
+                            )
+                            or (val <= max_value)
+                        )
 
             elif min_value is None and max_value is not None:
                 if allow_cross_type_comparisons:
@@ -131,7 +169,13 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                     if strict_max:
                         return val < max_value
                     else:
-                        return val <= max_value
+                        # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
+                        return isclose(
+                            operand_a=val,
+                            operand_b=max_value,
+                            rtol=1.0e-5,
+                            atol=1.0e-8,
+                        ) or (val <= max_value)
 
             elif min_value is not None and max_value is None:
                 if allow_cross_type_comparisons:
@@ -152,7 +196,14 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                     if strict_min:
                         return min_value < val
                     else:
-                        return min_value <= val
+                        # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
+                        # noinspection PyTypeChecker
+                        return isclose(
+                            operand_a=val,
+                            operand_b=min_value,
+                            rtol=1.0e-5,
+                            atol=1.0e-8,
+                        ) or (min_value <= val)
 
             else:
                 return False

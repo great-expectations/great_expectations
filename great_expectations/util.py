@@ -1320,9 +1320,9 @@ def is_nan(value: Any) -> bool:
 def isclose(
     operand_a: Union[datetime.datetime, Number],
     operand_b: Union[datetime.datetime, Number],
-    rtol=1.0e-5,  # controls relative weight of "operand_b" (when its magnitude is large)
-    atol=1.0e-8,  # controls absolute accuracy (based on floating point machine precision)
-    equal_nan=False,
+    rtol: float = 1.0e-5,  # controls relative weight of "operand_b" (when its magnitude is large)
+    atol: float = 1.0e-8,  # controls absolute accuracy (based on floating point machine precision)
+    equal_nan: bool = False,
 ) -> bool:
     """
     Checks whether or not two numbers (or timestamps) are approximately close to one another.
