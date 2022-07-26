@@ -125,6 +125,28 @@ class DatasourceStore(Store):
         )
         self.remove_key(datasource_key)
 
+    def delete(self, datasource_config: DatasourceConfig) -> None:
+        """Deletes a DatasourceConfig persisted in the store using its config.
+
+        Args:
+            datasource_config: The config of the Datasource to delete.
+        """
+
+        self.remove_key(self._get_key_from_config(datasource_config))
+
+    def _get_key_from_config(
+        self, datasource_config: DatasourceConfig
+    ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
+        if hasattr(datasource_config, "id_"):
+            id_ = datasource_config.id_
+        else:
+            id_ = None
+        if hasattr(datasource_config, "name"):
+            name = datasource_config.name
+        else:
+            name = None
+        return self.store_backend.get_key(name=name, id_=id_)
+
     def set_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
     ) -> None:

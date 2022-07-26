@@ -11,15 +11,20 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
+    GeCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     DataContextConfig,
     DataContextConfigDefaults,
+    DatasourceConfig,
     GeCloudConfig,
+    datasourceConfigSchema,
 )
+from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
+from great_expectations.datasource import Datasource
 
 logger = logging.getLogger(__name__)
 
@@ -294,13 +299,57 @@ class CloudDataContext(AbstractDataContext):
         """
         return self._context_root_directory
 
-    # def add_datasource(
-    #     self,
-    #     name: str,
-    #     initialize: bool = True,
-    #     save_changes: bool = False,
-    #     **kwargs: Optional[dict],
-    # ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-    #     """Add a datasource and if save_changes is set to True, write the config to the configured datasource store backend"""
-    #     raise NotImplementedError
-    # # #     # TODO: AJB 20220718 Does this need to be different here to default to using the ID?
+    def _instantiate_datasource_from_config_and_update_project_config(
+        self,
+        name: str,
+        config: dict,
+        initialize: bool = True,
+        save_changes: bool = False,
+    ) -> Optional[Datasource]:
+        """
+
+        Args:
+            name:
+            config:
+            initialize:
+            save_changes:
+
+        Returns:
+
+        """
+
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(config)
+
+        if save_changes:
+
+            datasource_config["name"] = name
+            resource_ref: GeCloudResourceRef = self._datasource_store.create(
+                datasource_config
+            )
+            datasource_config.id_ = resource_ref.ge_cloud_id
+
+        self.config.datasources[name] = datasource_config
+
+        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
+        substitutions: dict = self._determine_substitutions()
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        substituted_config: dict = substitute_all_config_variables(
+            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        )
+
+        datasource: Optional[Datasource] = None
+        if initialize:
+            try:
+                datasource: Datasource = self._instantiate_datasource_from_config(
+                    name=name, config=substituted_config
+                )
+                self._cached_datasources[name] = datasource
+            except ge_exceptions.DatasourceInitializationError as e:
+                # Do not keep configuration that could not be instantiated.
+                if save_changes:
+                    self._datasource_store.delete(datasource_config)
+                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
+                self.config.datasources.pop(name, None)
+                raise e
+
+        return datasource

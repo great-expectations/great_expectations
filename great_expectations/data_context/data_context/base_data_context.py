@@ -2851,55 +2851,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
 
         """
-        datasource_config: DatasourceConfig = datasourceConfigSchema.load(
-            CommentedMap(**config)
+
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(
+            name=name,
+            config=config,
+            initialize=initialize,
+            save_changes=save_changes,
         )
-
-        if save_changes:
-            #
-            #
-            #
-            # TODO: AJB 20220719 Here is where we return the GeCloudResourceRef and pull out the ID to stick into the datasource config
-            #  Pull out id if exists then do update else post
-            #  How to handle case of saving with name - duplicates? Check in cache?
-            #  Desired behavior?
-
-            if isinstance(self._datasource_store.store_backend, GeCloudStoreBackend):
-                # if self.ge_cloud_mode: # TODO: is using ge_cloud_mode better than inferring by backend type?
-                # TODO: AJB 20220719 where does the name fit into the config? Can it be an optional part of config?
-                datasource_config["name"] = name
-                resource_ref: GeCloudResourceRef = self._datasource_store.create(
-                    datasource_config
-                )
-                # datasource_config.id = resource_ref.ge_cloud_id
-                datasource_config.id_ = resource_ref.ge_cloud_id
-
-            else:
-                self._datasource_store.set_by_name(
-                    datasource_name=name, datasource_config=datasource_config
-                )
-        self.config.datasources[name] = datasource_config
-
-        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
-        substitutions: dict = self._determine_substitutions()
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
-        substituted_config: dict = substitute_all_config_variables(
-            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
-
-        datasource: Optional[Datasource] = None
-        if initialize:
-            try:
-                datasource: Datasource = self._instantiate_datasource_from_config(
-                    name=name, config=substituted_config
-                )
-                self._cached_datasources[name] = datasource
-            except ge_exceptions.DatasourceInitializationError as e:
-                # Do not keep configuration that could not be instantiated.
-                if save_changes:
-                    self._datasource_store.delete_by_name(datasource_name=name)
-                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(name, None)
-                raise e
-
+        self._synchronize_self_with_underlying_data_context()
         return datasource
