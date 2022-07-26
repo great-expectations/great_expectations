@@ -12,6 +12,13 @@ from great_expectations.datasource import BaseDatasource
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
+    "data_context_type",
+    [
+        pytest.param(data_context_type, id=data_context_type)
+        for data_context_type in ("BaseDataContext", "DataContext", "CloudDataContext")
+    ],
+)
+@pytest.mark.parametrize(
     "save_changes",
     [
         pytest.param(True, id="save_changes=True"),
@@ -30,7 +37,8 @@ from great_expectations.datasource import BaseDatasource
         ),
     ],
 )
-def test_cloud_mode_base_data_context_add_datasource(
+def test_cloud_mode_add_datasource(
+    data_context_type: str,
     save_changes: bool,
     config_includes_name_setting: str,
     empty_cloud_data_context: BaseDataContext,
@@ -40,18 +48,27 @@ def test_cloud_mode_base_data_context_add_datasource(
     ge_cloud_organization_id: str,
     request_headers: dict,
 ):
-    """A BaseDataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource
+    """A Data Context in cloud mode should save to the cloud backed Datasource store when calling add_datasource
     with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response
     to create the datasource."""
 
-    # Make sure we are using the right fixtures
-    assert empty_cloud_data_context.ge_cloud_mode
-    assert isinstance(empty_cloud_data_context, BaseDataContext)
-    assert isinstance(
-        empty_cloud_data_context._data_context._datasource_store._store_backend,
-        GeCloudStoreBackend,
-    )
-    assert len(empty_cloud_data_context.list_datasources()) == 0
+    # Set the appropriate fixture
+    context: BaseDataContext
+    if data_context_type == "BaseDataContext":
+        context = empty_cloud_data_context
+        # Make sure we are using the right fixture
+        assert isinstance(empty_cloud_data_context, BaseDataContext)
+        assert isinstance(
+            context._datasource_store._store_backend,
+            GeCloudStoreBackend,
+        )
+        assert context.ge_cloud_mode
+    else:
+        # TODO: AJB 20220726 make this work for other DataContext types
+        context = empty_cloud_data_context
+
+    # Make sure we are using the right fixture
+    assert len(context.list_datasources()) == 0
 
     # Setup
     datasource_id: str = "some_uuid"
@@ -74,32 +91,31 @@ def test_cloud_mode_base_data_context_add_datasource(
     ) as mock_post:
 
         # Call add_datasource with and without the name field included in the datasource config
+        stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
-            stored_datasource: BaseDatasource = empty_cloud_data_context.add_datasource(
+            stored_datasource = context.add_datasource(
                 name=datasource_name,
                 **datasource_config.to_dict(),
                 save_changes=save_changes,
             )
         elif config_includes_name_setting == "config_includes_name":
-            stored_datasource: BaseDatasource = empty_cloud_data_context.add_datasource(
+            stored_datasource = context.add_datasource(
                 **datasource_config_with_name.to_dict(), save_changes=save_changes
             )
         elif (
             config_includes_name_setting
             == "name_supplied_separately_and_included_in_config"
         ):
-            stored_datasource: BaseDatasource = empty_cloud_data_context.add_datasource(
+            stored_datasource = context.add_datasource(
                 name=datasource_name,
                 **datasource_config_with_name.to_dict(),
                 save_changes=save_changes,
             )
 
         # Make sure we have stored our datasource in the context
-        assert len(empty_cloud_data_context.list_datasources()) == 1
+        assert len(context.list_datasources()) == 1
 
-        retrieved_datasource: BaseDatasource = empty_cloud_data_context.get_datasource(
-            datasource_name
-        )
+        retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
 
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
