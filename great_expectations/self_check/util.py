@@ -1736,7 +1736,17 @@ def build_test_backends_list(
             else:
                 test_backends += ["trino"]
         if include_azure:
-            # TODO: make sure that the correct creds are being added
+            azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
+            azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
+            if not azure_access_key and not azure_credential:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "Azure tests are requested, but credentials were not set up"
+                    )
+                else:
+                    logger.warning(
+                        "Azure tests are requested, but credentials were not set up"
+                    )
             test_backends += ["azure"]
 
     return test_backends
