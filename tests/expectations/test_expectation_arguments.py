@@ -875,7 +875,6 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
-    breakpoint()
     suite.add_expectation(expectation_configuration=expectation_configuration)
 
     # emit 1 from add_expectation
