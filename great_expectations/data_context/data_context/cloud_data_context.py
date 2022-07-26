@@ -11,7 +11,6 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
-    GeCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
