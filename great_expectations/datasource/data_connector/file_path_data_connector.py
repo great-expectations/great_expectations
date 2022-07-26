@@ -172,7 +172,6 @@ class FilePathDataConnector(DataConnector):
             )
 
         if batch_request.data_connector_query is not None:
-
             data_connector_query_dict = batch_request.data_connector_query.copy()
             if (
                 batch_request.limit is not None
