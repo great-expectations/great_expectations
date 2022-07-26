@@ -3187,10 +3187,8 @@ class DataAssistantResult(SerializableDictDot):
             if expectation.startswith("expect_column_")
         }
 
-        def _filter(
-            e: ExpectationConfiguration, column_based_expectations: Set[str]
-        ) -> bool:
-            if e.expectation_type not in column_based_expectations:
+        def _filter(e: ExpectationConfiguration, expectations: Set[str]) -> bool:
+            if e.expectation_type not in expectations:
                 return False
 
             column_name: str = e.kwargs["column"]
@@ -3604,7 +3602,6 @@ class DataAssistantResult(SerializableDictDot):
         # e.g. prevent batch 1 from having keys "month", "year" and batch 2 from having keys "year", "month"
         batch_identifier_set: Set
         batch_identifier_list_sorted: List
-        batch_identifier_tuple: Tuple
         batch_identifier_key: str
         batch_identifier_value: str
         batch_identifier_keys: Set[str] = set()
