@@ -10,6 +10,7 @@ from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
+@pytest.mark.cloud
 @pytest.mark.unit
 def test_datasource_store_create(
     ge_cloud_base_url: str,
@@ -48,6 +49,7 @@ def test_datasource_store_create(
         )
 
 
+@pytest.mark.cloud
 @pytest.mark.unit
 def test_datasource_store_get_by_id(
     ge_cloud_base_url: str,
@@ -88,6 +90,7 @@ def test_datasource_store_get_by_id(
         )
 
 
+@pytest.mark.cloud
 @pytest.mark.unit
 def test_datasource_store_delete_by_id(
     ge_cloud_base_url: str,
