@@ -493,8 +493,8 @@ def compute_quantiles(
 def compute_kde_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-    quantile_statistic_interpolation_method: str,
     n_resamples: int,
+    quantile_statistic_interpolation_method: str,
     bw_method: Union[str, float, Callable],
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
@@ -512,10 +512,10 @@ def compute_kde_quantiles_point_estimate(
     Args:
         false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
             identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
-        quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
-            statistic, used for confidence intervals.
         n_resamples: A positive integer indicating the sample size resulting from the sampling with replacement
             procedure.
+        quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
+            statistic, used for confidence intervals.
         bw_method: The estimator bandwidth as described in:
             https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
         random_seed: An optional random_seed to pass to "np.random.Generator(np.random.PCG64(random_seed))"
@@ -563,8 +563,9 @@ def compute_kde_quantiles_point_estimate(
 def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-    quantile_statistic_interpolation_method: str,
     n_resamples: int,
+    quantile_statistic_interpolation_method: str,
+    quantile_bias_std_error_ratio_threshold: float,
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
     """
@@ -652,6 +653,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=lower_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_lower_quantile,
     )
 
@@ -659,6 +661,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_upper_quantile,
     )
 
@@ -677,6 +680,7 @@ def _determine_quantile_bias_corrected_point_estimate(
     bootstraps: np.ndarray,
     quantile_pct: float,
     quantile_statistic_interpolation_method: str,
+    quantile_bias_std_error_ratio_threshold: float,
     sample_quantile: np.ndarray,
 ) -> Number:
     bootstrap_quantiles: Union[np.ndarray, Number] = numpy_quantile(
@@ -696,14 +700,16 @@ def _determine_quantile_bias_corrected_point_estimate(
     quantile_bias_corrected_point_estimate: Number
 
     if (
-        bootstrap_quantile_standard_error > 0
-        and bootstrap_quantile_bias / bootstrap_quantile_standard_error <= 0.25
+        bootstrap_quantile_standard_error > 0.0
+        and bootstrap_quantile_bias / bootstrap_quantile_standard_error
+        <= quantile_bias_std_error_ratio_threshold
     ):
         quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate
     else:
         quantile_bias_corrected_point_estimate = (
             bootstrap_quantile_point_estimate - bootstrap_quantile_bias
         )
+
     return quantile_bias_corrected_point_estimate
 
 
