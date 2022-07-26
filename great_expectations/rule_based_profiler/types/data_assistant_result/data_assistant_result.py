@@ -1860,7 +1860,7 @@ class DataAssistantResult(SerializableDictDot):
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
             ColorPalettes.HEATMAP_6.value[4]
         )
-        expectation_kwarg_line_stroke_width: int = 5
+        expectation_kwarg_line_stroke_width: int = 6
 
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
@@ -1956,7 +1956,7 @@ class DataAssistantResult(SerializableDictDot):
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
             ColorPalettes.HEATMAP_6.value[4]
         )
-        expectation_kwarg_line_stroke_width: int = 5
+        expectation_kwarg_line_stroke_width: int = 6
 
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
@@ -2456,7 +2456,7 @@ class DataAssistantResult(SerializableDictDot):
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
             ColorPalettes.HEATMAP_6.value[4]
         )
-        expectation_kwarg_line_stroke_width: int = 5
+        expectation_kwarg_line_stroke_width: int = 6
 
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
@@ -2585,7 +2585,7 @@ class DataAssistantResult(SerializableDictDot):
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
             ColorPalettes.HEATMAP_6.value[4]
         )
-        expectation_kwarg_line_stroke_width: int = 5
+        expectation_kwarg_line_stroke_width: int = 6
 
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
@@ -2733,7 +2733,7 @@ class DataAssistantResult(SerializableDictDot):
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
             ColorPalettes.HEATMAP_6.value[4]
         )
-        expectation_kwarg_line_stroke_width: int = 5
+        expectation_kwarg_line_stroke_width: int = 6
 
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
