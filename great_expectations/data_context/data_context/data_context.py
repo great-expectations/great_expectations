@@ -526,7 +526,7 @@ class DataContext(BaseDataContext):
 
     def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
-        super().delete_datasource(datasource_name=name)
+        super().delete_datasource(datasource_name=name, save_changes=True)
         self._save_project_config()
 
     def add_profiler(
