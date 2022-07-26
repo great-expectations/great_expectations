@@ -2019,7 +2019,11 @@ class DataAssistantResult(SerializableDictDot):
                 .transform_filter(selection)
             )
 
-        return alt.layer(*line_and_points_list)
+        return (
+            alt.layer(*line_and_points_list)
+            .add_selection(selection)
+            .transform_filter(selection)
+        )
 
     @staticmethod
     def _get_interactive_bar_chart(
@@ -2209,14 +2213,16 @@ class DataAssistantResult(SerializableDictDot):
         points: alt.Chart
         point_color_condition: alt.condition
         anomaly_coded_points: alt.Chart
-        anomaly_coded_lines_and_points: List[alt.Chart] = []
         for idx, line_layer in enumerate(lines_and_points.layer):
             line = line_layer.layer[0]
             points = line_layer.layer[1]
 
+            line_layer.selection = alt.Undefined
             line_layer.transform = alt.Undefined
             line.selection = alt.Undefined
+            line.transform = alt.Undefined
             points.selection = alt.Undefined
+            points.transform = alt.Undefined
 
             point_color_condition: alt.condition = alt.condition(
                 predicate=predicates[idx],
@@ -2224,19 +2230,24 @@ class DataAssistantResult(SerializableDictDot):
                 if_true=alt.value(Colors.PINK.value),
             )
 
-            anomaly_coded_points = (
-                points.encode(color=point_color_condition, tooltip=tooltip)
-                .add_selection(selection)
-                .transform_filter(selection)
-            )
+            anomaly_coded_points = points.encode(
+                color=point_color_condition, tooltip=tooltip
+            ).add_selection(selection)
 
-            line = line.transform_filter(selection)
+            line = line.add_selection(selection)
 
-            anomaly_coded_lines_and_points.append(alt.layer(line, anomaly_coded_points))
+            line_layer.layer[0] = line
+            line_layer.layer[1] = anomaly_coded_points
 
-        return alt.layer(
-            band, lower_limit, upper_limit, *anomaly_coded_lines_and_points
-        ).transform_filter(selection)
+        lines_and_points.selection = alt.Undefined
+        lines_and_points.transform = alt.Undefined
+        lines_and_points = lines_and_points.add_selection(selection)
+
+        return (
+            alt.layer(band, lower_limit, upper_limit, lines_and_points)
+            .add_selection(selection)
+            .transform_filter(selection)
+        )
 
     @staticmethod
     def _get_interactive_expect_column_values_to_be_between_bar_chart(
