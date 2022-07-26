@@ -756,11 +756,6 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
     assert len(validator.head(fetch_all=True)) == 120
 
 
-# this is one place this ic ould be
-def test_data_connector_query():
-    pass
-
-
 def test_default_behavior_with_no_splitter(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
