@@ -2791,3 +2791,31 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ]
 
         return instantiated_class, usage_stats_event_payload
+
+    def _instantiate_datasource_from_config_and_update_project_config(
+        self,
+        name: str,
+        config: dict,
+        initialize: bool = True,
+        save_changes: bool = False,
+    ) -> Optional[Datasource]:
+        """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
+
+        Args:
+            name: Desired name for the datasource.
+            config: Config for the datasource.
+            initialize: Whether to initialize the datasource or return None.
+            save_changes: Whether to save the datasource config to the configured Datasource store.
+
+        Returns:
+            If initialize=True return an instantiated Datasource object, else None.
+        """
+
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(
+            name=name,
+            config=config,
+            initialize=initialize,
+            save_changes=save_changes,
+        )
+        self._synchronize_self_with_underlying_data_context()
+        return datasource
