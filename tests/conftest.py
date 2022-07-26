@@ -2339,9 +2339,15 @@ def ge_cloud_config_e2e() -> GeCloudConfig:
     """
     Uses live credentials stored in the Great Expectations Cloud backend.
     """
-    base_url = os.environ["GE_CLOUD_BASE_URL"]
-    organization_id = os.environ["GE_CLOUD_ORGANIZATION_ID"]
-    access_token = os.environ["GE_CLOUD_ACCESS_TOKEN"]
+    base_url = os.getenv("GE_CLOUD_BASE_URL")
+    organization_id = os.getenv("GE_CLOUD_ORGANIZATION_ID")
+    access_token = os.getenv("GE_CLOUD_ACCESS_TOKEN")
+
+    if any(env_var is None for env_var in (base_url, organization_id, access_token)):
+        pytest.skip(
+            "Missing GE_CLOUD environment variables; skipping Cloud-specific tests"
+        )
+
     ge_cloud_config = GeCloudConfig(
         base_url=base_url,
         organization_id=organization_id,

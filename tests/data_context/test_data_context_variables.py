@@ -1,4 +1,5 @@
 import copy
+import os
 import pathlib
 import random
 import string
@@ -553,7 +554,10 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_cloud_enabled_data_context_variables_e2e(
-    mock_save_project_config: mock.MagicMock, data_docs_sites: dict, monkeypatch
+    mock_save_project_config: mock.MagicMock,
+    data_docs_sites: dict,
+    ge_cloud_config_e2e: GeCloudConfig,
+    monkeypatch,
 ) -> None:
     """
     What does this test do and why?
@@ -578,7 +582,13 @@ def test_cloud_enabled_data_context_variables_e2e(
     new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
     updated_data_docs_sites[new_site_name] = {}
 
-    context = DataContext(ge_cloud_mode=True)
+    # Call with explicit args the first time
+    context = DataContext(
+        ge_cloud_mode=True,
+        ge_cloud_base_url=ge_cloud_config_e2e.base_url,
+        ge_cloud_organization_id=ge_cloud_config_e2e.organization_id,
+        ge_cloud_access_token=ge_cloud_config_e2e.access_token,
+    )
 
     assert context.variables.plugins_directory != f"${env_var_name}"
     assert context.variables.data_docs_sites != updated_data_docs_sites
@@ -591,6 +601,7 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     context.variables.save_config()
 
+    # Leverage environment variables the second time
     context = DataContext(ge_cloud_mode=True)
 
     assert context.variables.plugins_directory == updated_plugins_dir
