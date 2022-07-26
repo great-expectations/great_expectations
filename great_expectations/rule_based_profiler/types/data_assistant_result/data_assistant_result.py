@@ -662,7 +662,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_chart_layer_title(layer: alt.Chart) -> Optional[str]:
         """Recursively searches through the chart layers for a title and returns one if it exists."""
-        chart_title: Optional[str]
+        chart_title: Optional[str] = None
         try:
             chart_title = layer.title.text
         except AttributeError:
@@ -1180,7 +1180,7 @@ class DataAssistantResult(SerializableDictDot):
         sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str] = None,
-    ) -> alt.Chart:
+    ) -> alt.LayerChart:
         """
         Args:
             df: A pandas dataframe containing the data to be plotted
@@ -1245,7 +1245,7 @@ class DataAssistantResult(SerializableDictDot):
         sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
-    ) -> alt.Chart:
+    ) -> Union[alt.Chart, alt.LayerChart]:
         """
         Args:
             expectation_type: The name of the expectation
@@ -1482,7 +1482,7 @@ class DataAssistantResult(SerializableDictDot):
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
-    ) -> Union[alt.Chart, alt.VConcatChart]:
+    ) -> Union[alt.LayerChart, alt.VConcatChart]:
         """
         Args:
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
@@ -1553,7 +1553,7 @@ class DataAssistantResult(SerializableDictDot):
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
-    ) -> alt.VConcatChart:
+    ) -> Union[alt.LayerChart, alt.VConcatChart]:
         """
         Args:
             expectation_type: The name of the expectation
@@ -1597,7 +1597,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
 
-        y_axis_title: str
+        y_axis_title: Optional[str]
         if len(sanitized_metric_names) > 1:
             y_axis_title = "Column Values"
         else:
@@ -1733,7 +1733,7 @@ class DataAssistantResult(SerializableDictDot):
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
         sequential: bool,
-    ) -> alt.VConcatChart:
+    ) -> Union[alt.LayerChart, alt.VConcatChart]:
         """
         Args:
             expectation_type: The name of the expectation
@@ -1777,7 +1777,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
 
-        y_axis_title: str
+        y_axis_title: Optional[str]
         if len(sanitized_metric_names) > 1:
             y_axis_title = "Column Values"
         else:
@@ -1913,7 +1913,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-    ) -> Union[alt.LayerChart, List[alt.LayerChart]]:
+    ) -> alt.LayerChart:
         title: alt.TitleParams = determine_plot_title(
             metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
@@ -3295,37 +3295,41 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         if plot_mode is PlotMode.DIAGNOSTIC:
-            plot_impl: Optional[
+            expectation_plot_impl: Optional[
                 Callable[
                     [
                         str,
                         pd.DataFrame,
-                        List[str],
+                        Set[str],
                         bool,
                         Optional[str],
                     ],
-                    alt.Chart,
+                    Union[alt.Chart, alt.LayerChart],
                 ]
             ] = None
 
             if DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=nominal_metrics
             ):
-                plot_impl = self._get_expect_domain_values_to_match_set_chart
+                expectation_plot_impl = (
+                    self._get_expect_domain_values_to_match_set_chart
+                )
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=ordinal_metrics
             ):
-                plot_impl = self._get_expect_domain_values_ordinal_chart
+                expectation_plot_impl = self._get_expect_domain_values_ordinal_chart
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=quantitative_metrics
             ):
-                plot_impl = self._get_expect_domain_values_to_be_between_chart
+                expectation_plot_impl = (
+                    self._get_expect_domain_values_to_be_between_chart
+                )
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=temporal_metrics
             ):
-                plot_impl = self._get_interactive_expect_column_values_temporal_chart
+                expectation_plot_impl = self._get_expect_domain_values_temporal_chart
 
-            return plot_impl(
+            return expectation_plot_impl(
                 expectation_type=expectation_type,
                 df=df,
                 sanitized_metric_names=sanitized_metric_names,
@@ -3333,36 +3337,36 @@ class DataAssistantResult(SerializableDictDot):
                 subtitle=subtitle,
             )
         else:
-            plot_impl: Optional[
+            metric_plot_impl: Optional[
                 Callable[
                     [
                         pd.DataFrame,
-                        List[str],
+                        Set[str],
                         bool,
                         Optional[str],
                     ],
-                    alt.Chart,
+                    Union[alt.Chart, alt.LayerChart],
                 ]
             ] = None
 
             if DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=nominal_metrics
             ):
-                plot_impl = self._get_nominal_metrics_chart
+                metric_plot_impl = self._get_nominal_metrics_chart
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=ordinal_metrics
             ):
-                plot_impl = self._get_ordinal_metrics_chart
+                metric_plot_impl = self._get_ordinal_metrics_chart
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=quantitative_metrics
             ):
-                plot_impl = self._get_quantitative_metrics_chart
+                metric_plot_impl = self._get_quantitative_metrics_chart
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=temporal_metrics
             ):
-                plot_impl = self._get_temporal_metrics_chart
+                metric_plot_impl = self._get_temporal_metrics_chart
 
-            return plot_impl(
+            return metric_plot_impl(
                 df=df,
                 sanitized_metric_names=sanitized_metric_names,
                 sequential=sequential,
@@ -3492,12 +3496,12 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         if plot_mode is PlotMode.DIAGNOSTIC:
-            plot_impl: Optional[
+            expectation_plot_impl: Optional[
                 Callable[
                     [
                         str,
                         List[ColumnDataFrame],
-                        List[str],
+                        Set[str],
                         bool,
                     ],
                     alt.VConcatChart,
@@ -3507,24 +3511,30 @@ class DataAssistantResult(SerializableDictDot):
             if DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=nominal_metrics
             ):
-                plot_impl = self._get_interactive_expect_column_values_nominal_chart
+                expectation_plot_impl = (
+                    self._get_interactive_expect_column_values_nominal_chart
+                )
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=ordinal_metrics
             ):
-                plot_impl = self._get_interactive_expect_column_values_ordinal_chart
+                expectation_plot_impl = (
+                    self._get_interactive_expect_column_values_ordinal_chart
+                )
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=quantitative_metrics
             ):
-                plot_impl = (
+                expectation_plot_impl = (
                     self._get_interactive_expect_column_values_to_be_between_chart
                 )
             elif DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=temporal_metrics
             ):
-                plot_impl = self._get_interactive_expect_column_values_temporal_chart
+                expectation_plot_impl = (
+                    self._get_interactive_expect_column_values_temporal_chart
+                )
 
             return [
-                plot_impl(
+                expectation_plot_impl(
                     expectation_type=expectation_type,
                     column_dfs=column_dfs,
                     sanitized_metric_names=sanitized_metric_names,
@@ -3536,10 +3546,10 @@ class DataAssistantResult(SerializableDictDot):
                 Callable[
                     [
                         List[ColumnDataFrame],
-                        List[str],
+                        Set[str],
                         bool,
                     ],
-                    alt.Chart,
+                    Union[alt.LayerChart, alt.VConcatChart],
                 ]
             ] = None
 
@@ -3865,7 +3875,7 @@ class DataAssistantResult(SerializableDictDot):
         sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
-    ) -> alt.Chart:
+    ) -> alt.LayerChart:
         return DataAssistantResult._get_quantitative_metrics_chart(
             df=df,
             sanitized_metric_names=sanitized_metric_names,
@@ -3879,7 +3889,7 @@ class DataAssistantResult(SerializableDictDot):
         sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
-    ) -> alt.Chart:
+    ) -> alt.LayerChart:
         return DataAssistantResult._get_quantitative_metrics_chart(
             df=df,
             sanitized_metric_names=sanitized_metric_names,
