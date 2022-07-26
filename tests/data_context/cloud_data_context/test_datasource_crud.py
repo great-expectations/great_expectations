@@ -10,6 +10,7 @@ from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.datasource import BaseDatasource
 
 
+@pytest.mark.cloud
 @pytest.mark.integration
 @pytest.mark.parametrize(
     "save_changes",
