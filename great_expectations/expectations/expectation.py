@@ -97,7 +97,7 @@ _TEST_DEFS_DIR = os.path.join(
 )
 
 
-RTOL: float = 1.0e-5
+RTOL: float = 1.0e-4
 ATOL: float = 1.0e-8
 
 
