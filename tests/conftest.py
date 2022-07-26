@@ -1,3 +1,4 @@
+import copy
 import datetime
 import locale
 import logging
@@ -2359,7 +2360,7 @@ def empty_cloud_data_context(
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GeCloudConfig,
-) -> DataContext:
+) -> BaseDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -2371,6 +2372,37 @@ def empty_cloud_data_context(
         ge_cloud_config=ge_cloud_config,
     )
     assert context.list_datasources() == []
+    return context
+
+
+@pytest.fixture
+@mock.patch(
+    "great_expectations.data_context.store.DatasourceStore.list_keys",
+    return_value=[],
+)
+def empty_cloud_data_context_custom_base_url(
+    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    tmp_path: pathlib.Path,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_config: GeCloudConfig,
+) -> BaseDataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+
+    custom_base_url: str = "https://some_url.org"
+    custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
+    custom_ge_cloud_config.base_url = custom_base_url
+
+    context = ge.data_context.BaseDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        ge_cloud_mode=True,
+        ge_cloud_config=custom_ge_cloud_config,
+    )
+    assert context.list_datasources() == []
+    assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
+    assert context.ge_cloud_config.base_url == custom_base_url
     return context
 
 
