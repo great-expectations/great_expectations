@@ -723,7 +723,7 @@ positive integer, or must be omitted (or set to None).
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=kwargs.get("quantile_bias_std_error_ratio_threshold"),
-            expected_return_type=float,
+            expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
