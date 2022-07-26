@@ -2659,6 +2659,8 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
                 "module_name": "great_expectations.datasource.data_connector",
             },
         },
+        "id_": None,
+        "name": "my_datasource",
     }
     assert datasource_from_yaml.config == {
         "execution_engine": {
@@ -2684,6 +2686,8 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
                 "module_name": "great_expectations.datasource.data_connector",
             },
         },
+        "id_": None,
+        "name": "my_datasource",
     }
 
     assert datasource_from_yaml.name == datasource_name
