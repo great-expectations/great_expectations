@@ -31,7 +31,7 @@ class PlotComponent:
         return alt.Tooltip(
             field=self.name,
             type=self.alt_type,
-            title=self.title,
+            title=self.name.replace("_", " ").title(),
             format=format,
         )
 
@@ -145,8 +145,6 @@ class BatchPlotComponent(PlotComponent):
 
 @dataclass(frozen=True)
 class ExpectationKwargPlotComponent(PlotComponent):
-    title: Optional[str] = None
-
     def plot_on_axis(self) -> alt.Y:
         """
         Plots metric on Y axis - see parent `PlotComponent` for more details.
