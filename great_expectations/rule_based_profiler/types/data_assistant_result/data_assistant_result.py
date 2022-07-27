@@ -2232,22 +2232,20 @@ class DataAssistantResult(SerializableDictDot):
 
             anomaly_coded_points = points.encode(
                 color=point_color_condition, tooltip=tooltip
-            ).add_selection(selection)
+            ).transform_filter(selection)
 
-            line = line.add_selection(selection)
+            line = line.transform_filter(selection)
 
             line_layer.layer[0] = line
             line_layer.layer[1] = anomaly_coded_points
 
         lines_and_points.selection = alt.Undefined
         lines_and_points.transform = alt.Undefined
-        lines_and_points = lines_and_points.add_selection(selection)
+        lines_and_points = lines_and_points.transform_filter(selection)
 
         return (
             alt.layer(band, lower_limit, upper_limit, lines_and_points)
-            .add_selection(selection)
-            .transform_filter(selection)
-        )
+        ).add_selection(selection)
 
     @staticmethod
     def _get_interactive_expect_column_values_to_be_between_bar_chart(
