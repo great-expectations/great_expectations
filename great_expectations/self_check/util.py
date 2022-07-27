@@ -325,6 +325,9 @@ SQL_DIALECT_NAMES = (
     "mssql",
     "bigquery",
     "trino",
+    "redshift",
+    "athena",
+    "snowflake",
 )
 
 
@@ -1565,6 +1568,9 @@ def build_test_backends_list(
     include_aws=False,
     include_trino=False,
     include_azure=False,
+    include_redshift=False,
+    include_athena=False,
+    include_snowflake=False,
     raise_exceptions_for_backends: bool = True,
 ) -> List[str]:
     """Attempts to identify supported backends by checking which imports are available."""
@@ -1696,6 +1702,9 @@ def build_test_backends_list(
             else:
                 test_backends += ["bigquery"]
 
+        if include_redshift or include_athena:
+            include_aws = True
+
         if include_aws:
             # TODO need to come up with a better way to do this check.
             # currently this checks the 3 default EVN variables that boto3 looks for
@@ -1735,6 +1744,7 @@ def build_test_backends_list(
                     )
             else:
                 test_backends += ["trino"]
+
         if include_azure:
             azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
             azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
@@ -1748,6 +1758,60 @@ def build_test_backends_list(
                         "Azure tests are requested, but credentials were not set up"
                     )
             test_backends += ["azure"]
+
+        if include_redshift:
+            # noinspection PyUnresolvedReferences
+            try:
+                engine = _create_redshift_engine(db_hostname)
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "redshift tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"redshift tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["redshift"]
+
+        if include_athena:
+            # noinspection PyUnresolvedReferences
+            try:
+                engine = _create_athena_engine(db_hostname)
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "athena tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"athena tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["athena"]
+
+        if include_snowflake:
+            # noinspection PyUnresolvedReferences
+            try:
+                engine = _create_snowflake_engine(db_hostname)
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "snowflake tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"snowflake tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["snowflake"]
 
     return test_backends
 
@@ -1796,7 +1860,6 @@ def generate_expectation_tests(
                 dialects_to_include = {
                     dialect: True
                     for dialect in SQL_DIALECT_NAMES
-                    if dialect != "bigquery"
                 }
 
         # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
@@ -1813,6 +1876,9 @@ def generate_expectation_tests(
             include_mssql=dialects_to_include.get("mssql", False),
             include_bigquery=dialects_to_include.get("bigquery", False),
             include_trino=dialects_to_include.get("trino", False),
+            include_redshift=dialects_to_include.get("redshift", False),
+            include_athena=dialects_to_include.get("athena", False),
+            include_snowflake=dialects_to_include.get("snowflake", False),
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
@@ -2475,6 +2541,82 @@ def _create_trino_engine(
     # return create_engine(
     #     f"trino://{trino_user}:{trino_password}@{trino_account}-{trino_cluster}.trino.galaxy.starburst.io:443/test_suite/test_ci"
     # )
+
+
+def _create_redshift_engine() -> Engine:
+    """
+    Copied get_redshift_connection_url func from tests/test_utils.py
+    """
+    host = os.environ.get("REDSHIFT_HOST")
+    port = os.environ.get("REDSHIFT_PORT")
+    user = os.environ.get("REDSHIFT_USERNAME")
+    pswd = os.environ.get("REDSHIFT_PASSWORD")
+    db = os.environ.get("REDSHIFT_DATABASE")
+    ssl = os.environ.get("REDSHIFT_SSLMODE")
+
+    if not host:
+        raise ValueError(
+            "Environment Variable REDSHIFT_HOST is required to run integration tests against Redshift"
+        )
+    if not port:
+        raise ValueError(
+            "Environment Variable REDSHIFT_PORT is required to run integration tests against Redshift"
+        )
+    if not user:
+        raise ValueError(
+            "Environment Variable REDSHIFT_USERNAME is required to run integration tests against Redshift"
+        )
+    if not pswd:
+        raise ValueError(
+            "Environment Variable REDSHIFT_PASSWORD is required to run integration tests against Redshift"
+        )
+    if not db:
+        raise ValueError(
+            "Environment Variable REDSHIFT_DATABASE is required to run integration tests against Redshift"
+        )
+    if not ssl:
+        raise ValueError(
+            "Environment Variable REDSHIFT_SSLMODE is required to run integration tests against Redshift"
+        )
+
+    url = f"redshift+psycopg2://{user}:{pswd}@{host}:{port}/{db}?sslmode={ssl}"
+    return create_engine(url)
+
+
+def _create_athena_engine(db_name_env_var: str = "ATHENA_DB_NAME") -> Engine:
+    """
+    Copied get_awsathena_connection_url and get_awsathena_db_name funcs from
+    tests/test_utils.py
+    """
+    ATHENA_DB_NAME: str = os.getenv(db_name_env_var)
+    ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
+    if not ATHENA_DB_NAME:
+        raise ValueError(
+            f"Environment Variable {db_name_env_var} is required to run integration tests against AWS Athena"
+        )
+    if not ATHENA_STAGING_S3:
+        raise ValueError(
+            "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
+        )
+
+    url = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
+    return create_engine(url)
+
+
+def _create_snowflake_engine() -> Engine:
+    """
+    Copied get_snowflake_connection_url func from tests/test_utils.py
+    """
+    sfUser = os.environ.get("SNOWFLAKE_USER")
+    sfPswd = os.environ.get("SNOWFLAKE_PW")
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
+    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
+    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"
+
+    url = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
+    return create_engine(url)
 
 
 def generate_sqlite_db_path():

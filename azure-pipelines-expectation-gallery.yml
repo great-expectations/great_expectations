@@ -143,11 +143,35 @@ stages:
           - bash: python ./build_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
-#           env:
-#             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-#             GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
-#             GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
-#             GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
+            env:
+              # snowflake credentials
+              SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
+              SNOWFLAKE_USER: $(SNOWFLAKE_USER)
+              SNOWFLAKE_PW: $(SNOWFLAKE_PW)
+              SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
+              SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
+              SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
+              SNOWFLAKE_ROLE: $(SNOWFLAKE_ROLE)
+              # redshift credentials
+              REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
+              REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
+              REDSHIFT_HOST: $(REDSHIFT_HOST)
+              REDSHIFT_PORT: $(REDSHIFT_PORT)
+              REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
+              REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
+              # AWS credentials
+              AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
+              ATHENA_DB_NAME: $(ATHENA_DB_NAME)
+              ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
+              ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
+              ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
+              # GCP credentials
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+              # Azure credentials
+              AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
+              AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
           - bash: python ./build_package_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
