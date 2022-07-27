@@ -675,7 +675,7 @@ class RuleBasedProfilerConfigSchema(Schema):
         unknown = INCLUDE
         fields = (
             "name",
-            "id",
+            "id_",
             "config_version",
             "module_name",
             "class_name",
@@ -688,7 +688,7 @@ class RuleBasedProfilerConfigSchema(Schema):
         required=True,
         allow_none=False,
     )
-    id = fields.String(
+    id_ = fields.String(
         required=False,
         allow_none=False,
     )
