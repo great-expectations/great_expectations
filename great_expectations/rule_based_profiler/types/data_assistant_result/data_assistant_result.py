@@ -2487,7 +2487,7 @@ class DataAssistantResult(SerializableDictDot):
         first_chart_idx: int = 0
         for idx, chart_title in enumerate(chart_titles):
             if (
-                chart_title == "Table Row Count"
+                chart_title == "Table Row Count per Batch"
                 or chart_title == "expect_table_row_count_to_be_between"
             ):
                 first_chart_idx = idx
