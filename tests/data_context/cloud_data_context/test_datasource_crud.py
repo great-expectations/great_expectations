@@ -4,9 +4,15 @@ from unittest.mock import patch
 
 import pytest
 
+from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store import GeCloudStoreBackend
-from great_expectations.data_context.types.base import DatasourceConfig
+from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
+    DataContextConfig,
+    DatasourceConfig,
+    GeCloudConfig,
+)
 from great_expectations.datasource import BaseDatasource
 
 
@@ -150,3 +156,96 @@ def test_cloud_mode_add_datasource(
         # Make sure the name is populated correctly into the created datasource
         assert retrieved_datasource.name == datasource_name
         assert retrieved_datasource.config["name"] == datasource_name
+
+
+#
+# @pytest.fixture
+# def cloud_data_context(
+#     tmp_path: pathlib.Path,
+#     data_context_config: DataContextConfig,
+#     ge_cloud_config_e2e: GeCloudConfig,
+# ) -> CloudDataContext:
+#     project_path = tmp_path / "cloud_data_context"
+#     project_path.mkdir()
+#     context_root_dir = project_path / "great_expectations"
+#
+#     cloud_data_context = CloudDataContext(
+#         project_config=data_context_config,
+#         ge_cloud_config=ge_cloud_config_e2e,
+#         context_root_dir=str(context_root_dir),
+#     )
+#     return cloud_data_context
+
+
+@pytest.fixture
+def data_context_config_dict() -> dict:
+    config: dict = {
+        "config_version": 3.0,
+        "plugins_directory": "plugins/",
+        "evaluation_parameter_store_name": "evaluation_parameter_store",
+        "validations_store_name": "validations_store",
+        "expectations_store_name": "expectations_store",
+        "checkpoint_store_name": "checkpoint_store",
+        "profiler_store_name": "profiler_store",
+        "config_variables_file_path": "uncommitted/config_variables.yml",
+        "stores": {
+            "expectations_store": {
+                "class_name": "ExpectationsStore",
+                "store_backend": {
+                    "class_name": "TupleFilesystemStoreBackend",
+                    "base_directory": "expectations/",
+                },
+            },
+            "evaluation_parameter_store": {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "EvaluationParameterStore",
+            },
+        },
+        "data_docs_sites": {},
+        "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
+            enabled=True,
+            data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
+            usage_statistics_url="https://app.greatexpectations.io/",
+        ),
+        "notebooks": None,
+        "concurrency": None,
+        "progress_bars": None,
+    }
+    return config
+
+
+@pytest.fixture
+def data_context_config(data_context_config_dict: dict) -> DataContextConfig:
+    config: DataContextConfig = DataContextConfig(**data_context_config_dict)
+    return config
+
+
+@pytest.fixture
+def data_context_in_cloud_mode_mocked(
+    ge_cloud_config: GeCloudConfig,
+    data_context_config: DataContextConfig,
+):
+    def mocked_config():
+        return data_context_config
+
+    def mocked_cloud_config():
+        return ge_cloud_config
+
+    print(mocked_config())
+
+    # with patch(
+    #     "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+    #     autospec=True, side_effect=mocked_config
+    # ):
+    #     with patch(
+    #         "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
+    #         autospec=True, side_effect=mocked_cloud_config
+    #     ):
+    #         context: DataContext = DataContext(ge_cloud_mode=True)
+    #         print(context.config)
+    #         return context
+
+
+def test_sandbox(data_context_in_cloud_mode_mocked):
+    # print(data_context_in_cloud_mode_mocked.config)
+    pass
