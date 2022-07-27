@@ -1536,7 +1536,7 @@ def pandas_series_between_inclusive(
 
 def numpy_quantile(
     a: np.ndarray, q: float, method: str, axis: Optional[int] = None
-) -> np.ndarray:
+) -> Union[np.float64, np.ndarray]:
     """
     As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
