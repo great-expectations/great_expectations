@@ -1564,6 +1564,7 @@ def build_test_backends_list(
     include_bigquery=False,
     include_aws=False,
     include_trino=False,
+    include_azure=False,
     raise_exceptions_for_backends: bool = True,
 ) -> List[str]:
     """Attempts to identify supported backends by checking which imports are available."""
@@ -1734,6 +1735,19 @@ def build_test_backends_list(
                     )
             else:
                 test_backends += ["trino"]
+        if include_azure:
+            azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
+            azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
+            if not azure_access_key and not azure_credential:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "Azure tests are requested, but credentials were not set up"
+                    )
+                else:
+                    logger.warning(
+                        "Azure tests are requested, but credentials were not set up"
+                    )
+            test_backends += ["azure"]
 
     return test_backends
 
