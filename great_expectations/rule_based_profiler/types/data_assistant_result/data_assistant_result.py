@@ -1267,15 +1267,17 @@ class DataAssistantResult(SerializableDictDot):
             column
             for column in df.columns
             if column
-            not in list(sanitized_metric_names)
-            + [
-                batch_name,
-                column_name,
-                max_value,
-                min_value,
-                strict_min,
-                strict_max,
-            ]
+            not in (
+                sanitized_metric_names
+                | {
+                    batch_name,
+                    column_name,
+                    max_value,
+                    min_value,
+                    strict_min,
+                    strict_max,
+                }
+            )
         ]
 
         batch_type: alt.StandardType
@@ -1500,15 +1502,17 @@ class DataAssistantResult(SerializableDictDot):
             column
             for column in all_columns
             if column
-            not in list(sanitized_metric_names)
-            + [
-                batch_name,
-                column_name,
-                min_value,
-                max_value,
-                strict_min,
-                strict_max,
-            ]
+            not in (
+                sanitized_metric_names
+                | {
+                    batch_name,
+                    column_name,
+                    min_value,
+                    max_value,
+                    strict_min,
+                    strict_max,
+                }
+            )
         ]
         batch_type: alt.StandardType
         if sequential:
