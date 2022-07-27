@@ -222,11 +222,21 @@ def test_delete_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
 
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
-def test_get_validator_with_cloud_enabled_context_passes_cloud_context_to_return_obj(
+def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
     mock_save_project_config: mock.MagicMock,
 ) -> None:
+    """
+    What does this test do and why?
+
+    Ensures that the Validator that is created through DataContext.get_validator() is
+    Cloud-enabled if the DataContext used to instantiate the object is Cloud-enabled.
+
+    Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
+    backend.
+    """
     context = DataContext(ge_cloud_mode=True)
 
+    # Create a suite to be used in Validator instantiation
     suites = context.list_expectation_suites()
     expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
 
@@ -236,6 +246,7 @@ def test_get_validator_with_cloud_enabled_context_passes_cloud_context_to_return
         overwrite_existing=True,
     )
 
+    # Grab the first datasource/data connector/data asset bundle we can to use in Validation instantiation
     datasource = tuple(context.datasources.values())[0]
     datasource_name = datasource.name
 
@@ -250,11 +261,14 @@ def test_get_validator_with_cloud_enabled_context_passes_cloud_context_to_return
         data_asset_name=data_asset_name,
     )
 
+    # Create Validator and ensure that persistence is Cloud-backed
     validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
     )
 
-    validator.save_expectation_suite()
+    with mock.patch("requests.put", autospec=True) as mock_put:
+        type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
+        validator.save_expectation_suite()
 
-    assert isinstance(validator.data_context, CloudDataContext)
+    assert mock_put.call_count == 1
