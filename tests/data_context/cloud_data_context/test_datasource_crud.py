@@ -233,17 +233,19 @@ def data_context_in_cloud_mode_mocked(
 
     print(mocked_config())
 
-    # with patch(
-    #     "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
-    #     autospec=True, side_effect=mocked_config
-    # ):
-    #     with patch(
-    #         "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
-    #         autospec=True, side_effect=mocked_cloud_config
-    #     ):
-    #         context: DataContext = DataContext(ge_cloud_mode=True)
-    #         print(context.config)
-    #         return context
+    with patch(
+        "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+        autospec=True,
+        side_effect=mocked_config,
+    ):
+        with patch(
+            "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
+            autospec=True,
+            side_effect=mocked_cloud_config,
+        ):
+            context: DataContext = DataContext(ge_cloud_mode=True)
+            print(context.config)
+            return context
 
 
 def test_sandbox(data_context_in_cloud_mode_mocked):
