@@ -2482,7 +2482,23 @@ class DataAssistantResult(SerializableDictDot):
                 )
                 charts.append(table_domain_chart)
 
-        return [chart for chart in charts if chart is not None]
+        # we want the table row count chart to be displayed first if it exists
+        chart_titles: List[str] = self._get_chart_titles(charts=charts)
+        first_chart_idx: int = 0
+        for idx, chart_title in enumerate(chart_titles):
+            if (
+                chart_title == "Table Row Count"
+                or chart_title == "expect_table_row_count_to_be_between"
+            ):
+                first_chart_idx = idx
+
+        sorted_charts: List[alt.Charts] = [charts[first_chart_idx]] + [
+            chart
+            for idx, chart in enumerate(charts)
+            if chart is not None and idx != first_chart_idx
+        ]
+
+        return sorted_charts
 
     def _plot_column_domain_charts(
         self,
