@@ -1973,9 +1973,9 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = (
-            df.groupby([batch_plot_component.name]).max().reset_index()
-        )
+        input_dropdown_initial_state: pd.DataFrame = df.groupby(
+            [batch_plot_component.name], as_index=False
+        )[batch_plot_component.name].max()
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers + [domain_plot_component.name]
         ] = " "
@@ -2049,9 +2049,9 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = (
-            df.groupby([batch_plot_component.name]).max().reset_index()
-        )
+        input_dropdown_initial_state: pd.DataFrame = df.groupby(
+            [batch_plot_component.name], as_index=False
+        )[batch_plot_component.name].max()
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers + [domain_plot_component.name]
         ] = " "
@@ -2120,9 +2120,9 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = (
-            df.groupby([batch_plot_component.name]).max().reset_index()
-        )
+        input_dropdown_initial_state: pd.DataFrame = df.groupby(
+            [batch_plot_component.name], as_index=False
+        )[batch_plot_component.name].max()
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers
             + [
@@ -2277,9 +2277,9 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = (
-            df.groupby([batch_plot_component.name]).max().reset_index()
-        )
+        input_dropdown_initial_state: pd.DataFrame = df.groupby(
+            [batch_plot_component.name], as_index=False
+        )[batch_plot_component.name].max()
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers
             + [
