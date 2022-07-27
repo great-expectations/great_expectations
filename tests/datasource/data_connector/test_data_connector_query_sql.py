@@ -1,22 +1,33 @@
 import datetime
+import os
 from typing import List
 
 import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
-from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.data_context.util import (
+    file_relative_path,
+    instantiate_class_from_config,
+)
 from great_expectations.datasource import SimpleSqlalchemyDatasource
 
 
 @pytest.fixture()
 def create_db_and_instantiate_simple_sql_datasource():
-    data_path: str = (
-        "../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata_2020.db"
+    data_path: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "sqlite",
+            "yellow_tripdata_2020.db",
+        ),
     )
-
     datasource_config: dict = {
-        "name": "taxi_mult_batch_sql_datasource",
+        "name": "taxi_multi_batch_sql_datasource",
         "module_name": "great_expectations.datasource",
         "class_name": "SimpleSqlalchemyDatasource",
         "connection_string": "sqlite:///" + data_path,
@@ -270,7 +281,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
 
     returned_batch_definition_list: List[
         BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_fro_batch_request(
+    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
         batch_request=BatchRequest(
             datasource_name="taxi_multi_batch_sql_datasource",
             data_connector_name="by_pickup_date_time",
