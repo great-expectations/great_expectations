@@ -145,6 +145,12 @@ class DataAssistantExecutionError(DataAssistantError):
     pass
 
 
+class DataAssistantResultExecutionError(DataAssistantError):
+    """A runtime error for a "DataAssistantResult" class."""
+
+    pass
+
+
 class InvalidConfigError(DataContextError):
     def __init__(self, message) -> None:
         self.message = message
