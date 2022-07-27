@@ -1762,7 +1762,7 @@ def build_test_backends_list(
         if include_redshift:
             # noinspection PyUnresolvedReferences
             try:
-                engine = _create_redshift_engine(db_hostname)
+                engine = _create_redshift_engine()
                 conn = engine.connect()
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
@@ -1780,7 +1780,7 @@ def build_test_backends_list(
         if include_athena:
             # noinspection PyUnresolvedReferences
             try:
-                engine = _create_athena_engine(db_hostname)
+                engine = _create_athena_engine()
                 conn = engine.connect()
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
@@ -1798,7 +1798,7 @@ def build_test_backends_list(
         if include_snowflake:
             # noinspection PyUnresolvedReferences
             try:
-                engine = _create_snowflake_engine(db_hostname)
+                engine = _create_snowflake_engine()
                 conn = engine.connect()
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
