@@ -457,7 +457,7 @@ def main(**kwargs):
         print(checklists)
         with open("./checklists.txt", "w") as outfile:
             outfile.write(checklists)
-    with open("./expectation_library_v2.json", "w") as outfile:
+    with open("./expectation_library_v3.json", "w") as outfile:
         json.dump(gallery_info, outfile, indent=4)
 
 
