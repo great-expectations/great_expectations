@@ -780,7 +780,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column
             for column in df.columns
-            if column not in list(sanitized_metric_names) + [batch_name]
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -892,7 +892,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column
             for column in df.columns
-            if column not in list(sanitized_metric_names) + [batch_name]
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1198,7 +1198,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column
             for column in df.columns
-            if column not in list(sanitized_metric_names) + [batch_name]
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1420,7 +1420,7 @@ class DataAssistantResult(SerializableDictDot):
         batch_identifiers: List[str] = [
             column
             for column in all_columns
-            if column not in list(sanitized_metric_names) + [batch_name]
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -3164,6 +3164,11 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
+        sanitized_metric_names: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_metric_names(
+            metric_names=metric_names
+        )
 
         metric_df: pd.DataFrame
         df: pd.DataFrame = pd.DataFrame()
@@ -3177,13 +3182,12 @@ class DataAssistantResult(SerializableDictDot):
             if len(df.index) == 0:
                 df = metric_df.copy()
             else:
-                df = df.merge(metric_df, left_index=True, right_index=True)
-
-        sanitized_metric_names: Set[
-            str
-        ] = self._get_sanitized_metric_names_from_metric_names(
-            metric_names=metric_names
-        )
+                join_keys = [
+                    column
+                    for column in metric_df.columns
+                    if column not in sanitized_metric_names
+                ]
+                df = df.merge(metric_df, on=join_keys)
 
         # If columns are included/excluded we need to filter them out for table level metrics here
         table_column_metrics: List[str] = ["table_columns"]
