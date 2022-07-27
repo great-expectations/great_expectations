@@ -1,5 +1,5 @@
 import copy
-from typing import Any, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.data_context_variables import (
@@ -10,6 +10,8 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
 )
+from great_expectations.data_context.types.refs import GeCloudResourceRef
+from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.util import filter_properties_dict
 
 
@@ -61,32 +63,25 @@ class DatasourceStore(Store):
         ]
         return [key for key in keys_without_store_backend_id]
 
-    def remove_key(self, key: DataContextVariableKey) -> None:
+    def remove_key(self, key: Union[DataContextVariableKey, GeCloudIdentifier]) -> None:
         """
         See parent `Store.remove_key()` for more information
         """
         return self._store_backend.remove_key(key.to_tuple())
 
-    def serialize(
-        self, key: Optional[Any], value: DatasourceConfig
-    ) -> Union[str, DatasourceConfig]:
+    def serialize(self, value: DatasourceConfig) -> Union[str, DatasourceConfig]:
         """
         See parent 'Store.serialize()' for more information
         """
-        del key  # Unused arg but necessary as part of signature
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._schema.dump(value)
         return value
 
-    def deserialize(
-        self, key: Optional[Any], value: Union[dict, DatasourceConfig]
-    ) -> DatasourceConfig:
+    def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
         """
         See parent 'Store.deserialize()' for more information
         """
-        del key  # Unused arg but necessary as part of signature
-
         # When using the InlineStoreBackend, objects are already converted to their respective config types.
         if isinstance(value, DatasourceConfig):
             return value
@@ -130,6 +125,28 @@ class DatasourceStore(Store):
         )
         self.remove_key(datasource_key)
 
+    def delete(self, datasource_config: DatasourceConfig) -> None:
+        """Deletes a DatasourceConfig persisted in the store using its config.
+
+        Args:
+            datasource_config: The config of the Datasource to delete.
+        """
+
+        self.remove_key(self._build_key_from_config(datasource_config))
+
+    def _build_key_from_config(
+        self, datasource_config: DatasourceConfig
+    ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
+        if hasattr(datasource_config, "id_"):
+            id_ = datasource_config.id_
+        else:
+            id_ = None
+        if hasattr(datasource_config, "name"):
+            name = datasource_config.name
+        else:
+            name = None
+        return self.store_backend.build_key(name=name, id_=id_)
+
     def set_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
     ) -> None:
@@ -143,6 +160,23 @@ class DatasourceStore(Store):
             datasource_name=datasource_name
         )
         self.set(datasource_key, datasource_config)
+
+    def create(
+        self, datasource_config: DatasourceConfig
+    ) -> Optional[GeCloudResourceRef]:
+        """Create a datasource config in the store using a store_backend-specific key.
+
+        Args:
+            datasource_config: Config containing the datasource name.
+
+        Returns:
+            None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
+            which was used to create the config in the backend.
+        """
+        key: Union[
+            GeCloudIdentifier, DataContextVariableKey
+        ] = self._build_key_from_config(datasource_config)
+        return self.set(key, datasource_config)
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig

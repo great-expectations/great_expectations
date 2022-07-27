@@ -3,8 +3,8 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union, cast
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
