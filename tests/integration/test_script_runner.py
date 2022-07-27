@@ -20,6 +20,7 @@ logger.setLevel(logging.DEBUG)
 
 class BackendDependencies(enum.Enum):
     AWS = "AWS"
+    AZURE = "AZURE"
     BIGQUERY = "BIGQUERY"
     GCS = "GCS"
     MYSQL = "MYSQL"
@@ -1297,46 +1298,54 @@ cloud_bigquery_tests = [
 ]
 
 cloud_azure_tests = [
-    # IntegrationTestFixture(
-    #     name="azure_pandas_configured_yaml",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    # ),
-    # IntegrationTestFixture(
-    #     name="azure_pandas_configured_python",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    # ),
-    # IntegrationTestFixture(
-    #     name="azure_pandas_inferred_and_runtime_yaml",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    # ),
-    # IntegrationTestFixture(
-    #     name="azure_pandas_inferred_and_runtime_python",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    # ),
+    IntegrationTestFixture(
+        name="azure_pandas_configured_yaml",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.AZURE,
+    ),
+    IntegrationTestFixture(
+        name="azure_pandas_configured_python",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.AZURE,
+    ),
+    IntegrationTestFixture(
+        name="azure_pandas_inferred_and_runtime_yaml",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.AZURE,
+    ),
+    IntegrationTestFixture(
+        name="azure_pandas_inferred_and_runtime_python",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.AZURE,
+    ),
     # TODO: <Alex>ALEX -- uncomment next four (4) tests once Spark in Azure Pipelines is enabled.</Alex>
     # IntegrationTestFixture(
     #     name = "azure_spark_configured_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
+    #     extra_backend_dependencies = BackendDependencies.AZURE
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_configured_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
+    #     extra_backend_dependencies = BackendDependencies.AZURE
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_inferred_and_runtime_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
+    #     extra_backend_dependencies = BackendDependencies.AZURE
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_inferred_and_runtime_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
+    #     extra_backend_dependencies = BackendDependencies.AZURE
     # ),
 ]
 
@@ -1883,3 +1892,5 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
         pytest.skip("Skipping spark tests")
     elif dependencies == BackendDependencies.SNOWFLAKE and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping snowflake tests")
+    elif dependencies == BackendDependencies.AZURE and not pytest_args.azure:
+        pytest.skip("Skipping Azure tests")
