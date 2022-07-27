@@ -121,6 +121,7 @@ class DataAssistantResult(SerializableDictDot):
         "column.mean": "expect_column_mean_to_be_between",
         "column.median": "expect_column_median_to_be_between",
         "column.standard_deviation": "expect_column_stdev_to_be_between",
+        "column.quantile_values": "expect_column_quantile_values_to_be_between",
         ("column.min", "column.max"): "expect_column_values_to_be_between",
     }
 
@@ -139,6 +140,7 @@ class DataAssistantResult(SerializableDictDot):
         "column.mean": AltairDataTypes.QUANTITATIVE,
         "column.median": AltairDataTypes.QUANTITATIVE,
         "column.standard_deviation": AltairDataTypes.QUANTITATIVE,
+        "column.quantile_values": AltairDataTypes.QUANTITATIVE,
     }
 
     ALLOWED_KEYS = {
@@ -2492,7 +2494,7 @@ class DataAssistantResult(SerializableDictDot):
             ):
                 first_chart_idx = idx
 
-        sorted_charts: List[alt.Charts] = [charts[first_chart_idx]] + [
+        sorted_charts: List[alt.Chart] = [charts[first_chart_idx]] + [
             chart
             for idx, chart in enumerate(charts)
             if chart is not None and idx != first_chart_idx
