@@ -807,11 +807,12 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     multi_batch_taxi_validator_ge_cloud_mode.expect_column_values_to_be_between(
         column="trip_distance", min_value=11, max_value=22
     )
+
     multi_batch_taxi_validator_ge_cloud_mode.save_expectation_suite()
-    assert (
-        multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite().to_json_dict()
-        == mock_suite.to_json_dict()
-    )
+
+    actual_suite = multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite()
+
+    assert actual_suite.to_json_dict() == mock_suite.to_json_dict()
 
     # add_expectation() will not send usage_statistics event when called from a Validator
     assert mock_emit.call_count == 0

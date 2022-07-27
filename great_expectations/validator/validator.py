@@ -1528,7 +1528,7 @@ set as active.
         """
         Wrapper around ge_cloud_mode property of associated Data Context
         """
-        if self._data_context:
+        if self._data_context and hasattr(self._data_context, "ge_cloud_mode"):
             return self._data_context.ge_cloud_mode
         return False
 
