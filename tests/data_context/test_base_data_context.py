@@ -246,7 +246,7 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
         overwrite_existing=True,
     )
 
-    # Grab the first datasource/data connector/data asset bundle we can to use in Validation instantiation
+    # Grab the first datasource/data connector/data asset bundle we can to use in Validator instantiation
     datasource = tuple(context.datasources.values())[0]
     datasource_name = datasource.name
 
