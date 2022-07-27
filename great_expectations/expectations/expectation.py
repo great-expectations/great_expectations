@@ -97,10 +97,6 @@ _TEST_DEFS_DIR = os.path.join(
 )
 
 
-RTOL: float = 1.0e-4
-ATOL: float = 1.0e-8
-
-
 # noinspection PyMethodParameters
 class MetaExpectation(ABCMeta):
     """MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.
@@ -1748,16 +1744,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_min:
                 above_min = metric_value > min_value
             else:
-                # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
-                above_min = (
-                    isclose(
-                        operand_a=metric_value,
-                        operand_b=min_value,
-                        rtol=RTOL,
-                        atol=ATOL,
-                    )
-                    or metric_value >= min_value
-                )
+                above_min = metric_value >= min_value
         else:
             above_min = True
 
@@ -1765,16 +1752,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 below_max = metric_value < max_value
             else:
-                # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
-                below_max = (
-                    isclose(
-                        operand_a=metric_value,
-                        operand_b=min_value,
-                        rtol=RTOL,
-                        atol=ATOL,
-                    )
-                    or metric_value <= max_value
-                )
+                below_max = metric_value <= max_value
         else:
             below_max = True
 
