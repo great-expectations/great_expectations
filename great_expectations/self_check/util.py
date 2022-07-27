@@ -1857,7 +1857,11 @@ def generate_expectation_tests(
                 engines_to_include.get("sqlalchemy") is True
                 and raise_exceptions_for_backends is False
             ):
-                dialects_to_include = {dialect: True for dialect in SQL_DIALECT_NAMES}
+                dialects_to_include = {
+                    dialect: True
+                    for dialect in SQL_DIALECT_NAMES
+                    if dialect != "bigquery"
+                }
 
         # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
         if engines_to_include.get("sqlalchemy") is True and not dialects_to_include:
