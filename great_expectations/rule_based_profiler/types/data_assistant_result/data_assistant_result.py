@@ -2258,6 +2258,7 @@ class DataAssistantResult(SerializableDictDot):
         max_value_plot_component: PlotComponent,
         strict_min_plot_component: PlotComponent,
         strict_max_plot_component: PlotComponent,
+        predicates: List[Union[bool, int]],
     ) -> alt.VConcatChart:
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
@@ -2275,17 +2276,6 @@ class DataAssistantResult(SerializableDictDot):
                 for metric_plot_component in metric_plot_components
             ]
         )
-
-        bars: alt.LayerChart = DataAssistantResult._get_interactive_bar_chart(
-            expectation_type=expectation_type,
-            df=df,
-            metric_plot_components=metric_plot_components,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
-        )
-
-        bars.selection = alt.Undefined
-        bars.transform = alt.Undefined
 
         input_dropdown_initial_state: pd.DataFrame = (
             df.groupby([batch_plot_component.name]).max().reset_index()
@@ -2369,19 +2359,37 @@ class DataAssistantResult(SerializableDictDot):
             .transform_filter(selection)
         )
 
-        bar_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
+        bars: alt.LayerChart = DataAssistantResult._get_interactive_bar_chart(
+            expectation_type=expectation_type,
+            df=df,
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
-        anomaly_coded_bars = (
-            bars.encode(color=bar_color_condition, tooltip=tooltip)
-            .add_selection(selection)
-            .transform_filter(selection)
-        )
+        bar: alt.Chart
+        bar_color_condition: alt.condition
+        for idx, bar_layer in enumerate(bars.layer):
+            bar_layer.selection = alt.Undefined
+            bar_layer.transform = alt.Undefined
 
-        return band + lower_limit + upper_limit + anomaly_coded_bars
+            bar_color_condition: alt.condition = alt.condition(
+                predicate=predicates[idx],
+                if_false=alt.value(Colors.GREEN.value),
+                if_true=alt.value(Colors.PINK.value),
+            )
+
+            bars.layer[idx] = bar_layer.encode(
+                color=bar_color_condition, tooltip=tooltip
+            ).transform_filter(selection)
+
+        bars.selection = alt.Undefined
+        bars.transform = alt.Undefined
+        bars = bars.transform_filter(selection)
+
+        return (alt.layer(band, lower_limit, upper_limit, bars)).add_selection(
+            selection
+        )
 
     @staticmethod
     def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
