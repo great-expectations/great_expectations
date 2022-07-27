@@ -10,10 +10,8 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from numbers import Number
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
@@ -84,7 +82,7 @@ from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
-from great_expectations.util import camel_to_snake, is_parseable_date
+from great_expectations.util import camel_to_snake, is_parseable_date, isclose
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -97,6 +95,10 @@ _TEST_DEFS_DIR = os.path.join(
     "tests",
     "test_definitions",
 )
+
+
+RTOL: float = 1.0e-4
+ATOL: float = 1.0e-8
 
 
 # noinspection PyMethodParameters
@@ -1746,8 +1748,14 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_min:
                 above_min = metric_value > min_value
             else:
+                # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
                 above_min = (
-                    self._isclose(operand_a=metric_value, operand_b=min_value)
+                    isclose(
+                        operand_a=metric_value,
+                        operand_b=min_value,
+                        rtol=RTOL,
+                        atol=ATOL,
+                    )
                     or metric_value >= min_value
                 )
         else:
@@ -1757,8 +1765,14 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 below_max = metric_value < max_value
             else:
+                # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
                 below_max = (
-                    self._isclose(operand_a=metric_value, operand_b=min_value)
+                    isclose(
+                        operand_a=metric_value,
+                        operand_b=min_value,
+                        rtol=RTOL,
+                        atol=ATOL,
+                    )
                     or metric_value <= max_value
                 )
         else:
@@ -1767,25 +1781,6 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         success = above_min and below_max
 
         return {"success": success, "result": {"observed_value": metric_value}}
-
-    @staticmethod
-    def _isclose(
-        operand_a: Union[datetime.datetime, Number],
-        operand_b: Union[datetime.datetime, Number],
-    ) -> bool:
-        """
-        Checks whether or not two numbers (or timestamps) are approximately close to one another.
-        """
-        operand_a_as_number: np.float64
-        operand_b_as_number: np.float64
-        if isinstance(operand_a, datetime.datetime):
-            operand_a_as_number = np.float64(int(operand_a.strftime("%Y%m%d%H%M%S")))
-            operand_b_as_number = np.float64(int(operand_b.strftime("%Y%m%d%H%M%S")))
-        else:
-            operand_a_as_number = np.float64(operand_a)
-            operand_b_as_number = np.float64(operand_b)
-
-        return np.isclose(operand_a_as_number, operand_b_as_number)
 
 
 class QueryExpectation(TableExpectation, ABC):
@@ -2639,6 +2634,11 @@ def _validate_mostly_config(configuration: Optional[ExpectationConfiguration]) -
 
 
 def _mostly_success(
-    rows_considered_cnt: int, unexpected_cnt: int, mostly: float
+    rows_considered_cnt: int,
+    unexpected_cnt: int,
+    mostly: float,
 ) -> bool:
-    return float((rows_considered_cnt - unexpected_cnt) / rows_considered_cnt) >= mostly
+    success_ratio: float = (
+        float(rows_considered_cnt - unexpected_cnt) / rows_considered_cnt
+    )
+    return success_ratio >= mostly

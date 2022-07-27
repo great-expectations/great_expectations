@@ -956,6 +956,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     "variables": {
                         "false_positive_rate": 0.05,
                         "quantile_statistic_interpolation_method": "auto",
+                        "quantile_bias_std_error_ratio_threshold": 0.25,
                         "estimator": "bootstrap",
                         "n_resamples": 9999,
                         "include_estimator_samples_histogram_in_details": False,
@@ -998,6 +999,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "metric_domain_kwargs": "$domain.domain_kwargs",
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                                    "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
                                     "random_seed": "$variables.random_seed",
                                     "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
                                     "round_decimals": "$variables.round_decimals",
@@ -1029,27 +1031,25 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                 },
                 "categorical_columns_rule": {
                     "variables": {
+                        "cardinality_limit_mode": "FEW",
                         "mostly": 1.0,
                         "strict_min": False,
                         "strict_max": False,
                         "false_positive_rate": 0.05,
                         "quantile_statistic_interpolation_method": "auto",
+                        "quantile_bias_std_error_ratio_threshold": 0.25,
                         "estimator": "bootstrap",
                         "n_resamples": 9999,
                         "include_estimator_samples_histogram_in_details": False,
                         "truncate_values": {
                             "lower_bound": 0.0,
                         },
-                        "round_decimals": 1,
+                        "round_decimals": 12,
                     },
                     "domain_builder": {
                         "allowed_semantic_types_passthrough": ["logic"],
                         "class_name": "CategoricalColumnDomainBuilder",
-                        "cardinality_limit_mode": {
-                            "name": "FEW",
-                            "max_unique_values": 100,
-                            "metric_name_defining_limit": "column.distinct_values.count",
-                        },
+                        "cardinality_limit_mode": "$variables.cardinality_limit_mode",
                         "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
                         "exclude_column_names": sorted(
                             [
@@ -1098,6 +1098,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "metric_name": "column.distinct_values.count",
                                     "enforce_numeric_metric": True,
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                                    "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
                                     "replace_nan_with_zero": True,
                                     "n_resamples": "$variables.n_resamples",
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
@@ -1650,6 +1651,7 @@ def test_volume_data_assistant_result_serialization(
         bobby_volume_data_assistant_result.to_json_dict()
         == volume_data_assistant_result_as_dict
     )
+    assert len(bobby_volume_data_assistant_result.profiler_config.rules) == 2
 
 
 @mock.patch(
@@ -1858,7 +1860,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
         # include_semantic_types=include_semantic_types,
         # exclude_semantic_types=exclude_semantic_types,
         # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        cardinality_limit_mode=CardinalityLimitMode.FEW,
+        # cardinality_limit_mode=CardinalityLimitMode.FEW,
         # max_unique_values=max_unique_values,
         # max_proportion_unique=max_proportion_unique,
         # column_value_uniqueness_rule={

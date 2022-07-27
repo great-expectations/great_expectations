@@ -1,6 +1,7 @@
 import logging
 from typing import Any, List, Optional, Tuple
 
+from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
@@ -208,3 +209,10 @@ class InlineStoreBackend(StoreBackend):
             resource_name = key[1]
 
         return resource_type, resource_name
+
+    def build_key(self, name: str, **kwargs) -> DataContextVariableKey:
+        """Get the store backend specific implementation of the key, ignore irrelevant kwargs."""
+        return DataContextVariableKey(
+            resource_type=DataContextVariableSchema.DATASOURCES,
+            resource_name=name,
+        )
