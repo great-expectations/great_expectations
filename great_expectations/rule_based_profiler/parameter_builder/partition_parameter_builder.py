@@ -24,7 +24,7 @@ from great_expectations.types.attributes import Attributes
 
 class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
     """
-    Compute histogram/partition using specified metric (depending on bucketizaiton directive) for one Batch od data.
+    Compute histogram/partition using specified metric (depending on bucketizaiton directive) for one Batch of data.
     """
 
     exclude_field_names: Set[
