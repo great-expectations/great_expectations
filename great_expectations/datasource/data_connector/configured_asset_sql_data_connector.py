@@ -196,6 +196,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = []
+        sub_cache: Optional[List[str]] = None
         try:
             sub_cache = self._get_data_reference_list_from_cache_by_data_asset_name(
                 data_asset_name=batch_request.data_asset_name
