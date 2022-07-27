@@ -1857,7 +1857,10 @@ class DataAssistantResult(SerializableDictDot):
         tooltip: List[alt.Tooltip],
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
-        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
+        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
+            ColorPalettes.HEATMAP_6.value[4]
+        )
+        expectation_kwarg_line_stroke_width: int = 5
 
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
@@ -1868,7 +1871,10 @@ class DataAssistantResult(SerializableDictDot):
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
             .encode(
                 x=batch_plot_component.plot_on_axis(),
                 y=min_value_plot_component.plot_on_axis(),
@@ -1879,7 +1885,10 @@ class DataAssistantResult(SerializableDictDot):
 
         upper_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
             .encode(
                 x=batch_plot_component.plot_on_axis(),
                 y=max_value_plot_component.plot_on_axis(),
@@ -1944,7 +1953,10 @@ class DataAssistantResult(SerializableDictDot):
         tooltip: List[alt.Tooltip],
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
-        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
+        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
+            ColorPalettes.HEATMAP_6.value[4]
+        )
+        expectation_kwarg_line_stroke_width: int = 5
 
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
@@ -1955,7 +1967,10 @@ class DataAssistantResult(SerializableDictDot):
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
             .encode(
                 x=alt.X(
                     batch_plot_component.name,
@@ -1971,7 +1986,10 @@ class DataAssistantResult(SerializableDictDot):
 
         upper_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
             .encode(
                 x=alt.X(
                     batch_plot_component.name,
@@ -2435,7 +2453,10 @@ class DataAssistantResult(SerializableDictDot):
         strict_max_plot_component: PlotComponent,
         predicate: Union[bool, int],
     ) -> alt.VConcatChart:
-        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
+        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
+            ColorPalettes.HEATMAP_6.value[4]
+        )
+        expectation_kwarg_line_stroke_width: int = 5
 
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
@@ -2475,7 +2496,10 @@ class DataAssistantResult(SerializableDictDot):
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
             .encode(
                 x=batch_plot_component.plot_on_axis(),
                 y=min_value_plot_component.plot_on_axis(),
@@ -2487,7 +2511,10 @@ class DataAssistantResult(SerializableDictDot):
 
         upper_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
             .encode(
                 x=batch_plot_component.plot_on_axis(),
                 y=max_value_plot_component.plot_on_axis(),
@@ -2555,7 +2582,10 @@ class DataAssistantResult(SerializableDictDot):
         strict_max_plot_component: PlotComponent,
         predicate: Union[bool, int],
     ) -> alt.VConcatChart:
-        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
+        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
+            ColorPalettes.HEATMAP_6.value[4]
+        )
+        expectation_kwarg_line_stroke_width: int = 5
 
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
@@ -2613,7 +2643,10 @@ class DataAssistantResult(SerializableDictDot):
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
             .encode(
                 x=alt.X(
                     batch_plot_component.name,
@@ -2631,7 +2664,10 @@ class DataAssistantResult(SerializableDictDot):
 
         upper_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
             .encode(
                 x=alt.X(
                     batch_plot_component.name,
@@ -2694,7 +2730,10 @@ class DataAssistantResult(SerializableDictDot):
         strict_max_plot_component: PlotComponent,
         predicate: Union[bool, int],
     ) -> alt.VConcatChart:
-        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
+        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
+            ColorPalettes.HEATMAP_6.value[4]
+        )
+        expectation_kwarg_line_stroke_width: int = 5
 
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
@@ -2746,7 +2785,10 @@ class DataAssistantResult(SerializableDictDot):
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
             .encode(
                 x=alt.X(
                     batch_plot_component.name,
@@ -2765,7 +2807,10 @@ class DataAssistantResult(SerializableDictDot):
 
         upper_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
             .encode(
                 x=alt.X(
                     batch_plot_component.name,
