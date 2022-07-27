@@ -5,9 +5,9 @@ from ruamel import yaml
 
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,

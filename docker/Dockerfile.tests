@@ -1,0 +1,27 @@
+# PYTHON_VERSION in ["3.7", "3.8", "3.9"]
+ARG PYTHON_VERSION=3.8
+# SOURCE in ["local", "github"]
+ARG SOURCE=local
+
+# Our base image is the official python image. If needed we can look into slimming this down.
+FROM python:${PYTHON_VERSION} AS base
+RUN apt update && apt install default-jre unixodbc unixodbc-dev locales locales-all -y && apt clean
+RUN python -m pip install --upgrade pip
+
+FROM base as build_local
+WORKDIR /great_expectations
+COPY . .
+
+FROM base AS build_github
+# BRANCH is the branch name you want to build
+ARG BRANCH=develop
+RUN git clone --depth 1 --branch ${BRANCH} https://github.com/great-expectations/great_expectations.git
+WORKDIR /great_expectations
+
+FROM build_${SOURCE} AS dev
+RUN pip install --requirement requirements.txt --requirement requirements-dev.txt --constraint constraints-dev.txt
+RUN pip install .
+CMD [ "python", "--version"]
+
+FROM dev as test
+RUN pip install --requirement requirements-dev-test.txt --constraint constraints-dev.txt

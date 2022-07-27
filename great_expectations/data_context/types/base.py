@@ -14,6 +14,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -824,10 +825,15 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(SerializableDictDot):
+class DatasourceConfig(AbstractConfig):
     def __init__(
         self,
-        class_name=None,
+        name: Optional[
+            str
+        ] = None,  # Note: name is optional currently to avoid updating all documentation within
+        # the scope of this work.
+        id_: Optional[str] = None,
+        class_name: Optional[str] = None,
         module_name: str = "great_expectations.datasource",
         execution_engine=None,
         data_connectors=None,
@@ -846,6 +852,8 @@ class DatasourceConfig(SerializableDictDot):
         limit=None,
         **kwargs,
     ) -> None:
+
+        super().__init__(id_=id_, name=name)
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
@@ -924,6 +932,17 @@ class DatasourceConfig(SerializableDictDot):
 class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
+
+    # Note: name is optional currently to avoid updating all documentation within
+    # the scope of this work.
+    name = fields.String(
+        required=False,
+        allow_none=True,
+    )
+    id_ = fields.String(
+        required=False,
+        allow_none=True,
+    )
 
     class_name = fields.String(
         required=False,

@@ -2,12 +2,12 @@ from typing import Any, Dict
 
 import pandas as pd
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (

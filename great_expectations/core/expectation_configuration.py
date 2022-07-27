@@ -12,6 +12,7 @@ from great_expectations.core.evaluation_parameters import (
     build_evaluation_parameters,
     find_evaluation_parameter_dependencies,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -1138,6 +1139,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 "default_kwarg_values", {}
             )
             domain_keys = expectation_kwargs_dict["domain_kwargs"]
+
         domain_kwargs = {
             key: self.kwargs.get(key, default_kwarg_values.get(key))
             for key in domain_keys
@@ -1147,6 +1149,7 @@ class ExpectationConfiguration(SerializableDictDot):
             raise InvalidExpectationKwargsError(
                 f"Missing domain kwargs: {list(missing_kwargs)}"
             )
+
         return domain_kwargs
 
     def get_success_kwargs(self) -> dict:
@@ -1169,12 +1172,14 @@ class ExpectationConfiguration(SerializableDictDot):
                 "default_kwarg_values", {}
             )
             success_keys = expectation_kwargs_dict["success_kwargs"]
+
         domain_kwargs = self.get_domain_kwargs()
         success_kwargs = {
             key: self.kwargs.get(key, default_kwarg_values.get(key))
             for key in success_keys
         }
         success_kwargs.update(domain_kwargs)
+
         return success_kwargs
 
     def get_runtime_kwargs(self, runtime_configuration: Optional[dict] = None) -> dict:
@@ -1202,6 +1207,7 @@ class ExpectationConfiguration(SerializableDictDot):
         lookup_kwargs = deepcopy(self.kwargs)
         if runtime_configuration:
             lookup_kwargs.update(runtime_configuration)
+
         runtime_kwargs = {
             key: lookup_kwargs.get(key, default_kwarg_values.get(key))
             for key in runtime_keys
@@ -1210,10 +1216,11 @@ class ExpectationConfiguration(SerializableDictDot):
             runtime_kwargs["result_format"]
         )
         runtime_kwargs.update(success_kwargs)
+
         return runtime_kwargs
 
     def applies_to_same_domain(
-        self, other_expectation_configuration: "ExpectationConfiguration"
+        self, other_expectation_configuration: "ExpectationConfiguration"  # noqa: F821
     ) -> bool:
         if (
             not self.expectation_type
@@ -1225,15 +1232,17 @@ class ExpectationConfiguration(SerializableDictDot):
             == other_expectation_configuration.get_domain_kwargs()
         )
 
+    # noinspection PyPep8Naming
     def isEquivalentTo(
         self,
-        other: Union[dict, "ExpectationConfiguration"],
+        other: Union[dict, "ExpectationConfiguration"],  # noqa: F821
         match_type: str = "success",
     ) -> bool:
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
+                    # noinspection PyNoneFunctionAssignment
                     other = expectationConfigurationSchema.load(other)
                 except ValidationError:
                     logger.debug(
@@ -1244,6 +1253,7 @@ class ExpectationConfiguration(SerializableDictDot):
             else:
                 # Delegate comparison to the other instance
                 return NotImplemented
+
         if match_type == "domain":
             return all(
                 (
@@ -1252,7 +1262,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 )
             )
 
-        elif match_type == "success":
+        if match_type == "success":
             return all(
                 (
                     self.expectation_type == other.expectation_type,
@@ -1260,13 +1270,14 @@ class ExpectationConfiguration(SerializableDictDot):
                 )
             )
 
-        elif match_type == "runtime":
+        if match_type == "runtime":
             return all(
                 (
                     self.expectation_type == other.expectation_type,
                     self.kwargs == other.kwargs,
                 )
             )
+
         return False
 
     def __eq__(self, other):
@@ -1328,9 +1339,7 @@ class ExpectationConfiguration(SerializableDictDot):
             try:
                 urn = ge_urn.parseString(string_urn)
             except ParserError:
-                logger.warning(
-                    f"Unable to parse great_expectations urn {value['$PARAMETER']}"
-                )
+                logger.warning("Unable to parse great_expectations urn['$PARAMETER']")
                 continue
 
             # Query stores do not have "expectation_suite_name"
@@ -1340,6 +1349,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 self._update_dependencies_with_expectation_suite_urn(dependencies, urn)
 
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
+
         return dependencies
 
     @staticmethod
@@ -1373,7 +1383,7 @@ class ExpectationConfiguration(SerializableDictDot):
         validator: Any,  # Can't type as Validator due to import cycle
         runtime_configuration=None,
     ):
-        expectation_impl = self._get_expectation_impl()
+        expectation_impl: "Expectation" = self._get_expectation_impl()  # noqa: F821
         return expectation_impl(self).validate(
             validator=validator,
             runtime_configuration=runtime_configuration,
@@ -1391,6 +1401,24 @@ class ExpectationConfiguration(SerializableDictDot):
             metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
+        )
+
+    def get_domain_type(self) -> MetricDomainTypes:
+        """Return "domain_type" of this expectation."""
+        if self.expectation_type.startswith("expect_table_"):
+            return MetricDomainTypes.TABLE
+
+        if "column" in self.kwargs:
+            return MetricDomainTypes.COLUMN
+
+        if "column_A" in self.kwargs and "column_B" in self.kwargs:
+            return MetricDomainTypes.COLUMN_PAIR
+
+        if "column_list" in self.kwargs:
+            return MetricDomainTypes.MULTICOLUMN
+
+        raise ValueError(
+            'Unable to determine "domain_type" of this "ExpectationConfiguration" object from "kwargs" and heuristics.'
         )
 
 

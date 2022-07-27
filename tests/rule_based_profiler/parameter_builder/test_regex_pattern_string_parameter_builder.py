@@ -12,9 +12,9 @@ from great_expectations.core.batch import (
     BatchRequest,
 )
 from great_expectations.core.id_dict import BatchSpec, IDDict
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )

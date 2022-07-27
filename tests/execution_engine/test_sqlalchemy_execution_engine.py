@@ -9,8 +9,9 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -23,6 +24,7 @@ from great_expectations.expectations.row_conditions import (
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import get_sqlalchemy_domain_data
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
 
@@ -67,6 +69,42 @@ def test_instantiation_via_url(sa):
             sampling_kwargs={"n": 5},
         )
     )
+
+
+@pytest.mark.integration
+def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
+    """Ensure that we can still retrieve data when the dialect is not recognized."""
+
+    # 1. Create engine with sqlite db
+    db_file = file_relative_path(
+        __file__,
+        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+    my_execution_engine = SqlAlchemyExecutionEngine(url="sqlite:///" + db_file)
+    assert my_execution_engine.connection_string is None
+    assert my_execution_engine.credentials is None
+    assert my_execution_engine.url[-36:] == "test_cases_for_sql_data_connector.db"
+
+    # 2. Change dialect to one not listed in GESqlDialect
+    my_execution_engine.engine.dialect.name = "other_dialect"
+
+    # 3. Get data
+    num_rows_in_sample: int = 10
+    batch_data, _ = my_execution_engine.get_batch_data_and_markers(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
+            table_name="table_partitioned_by_date_column__A",
+            sampling_method="_sample_using_limit",
+            sampling_kwargs={"n": num_rows_in_sample},
+        )
+    )
+
+    # 4. Assert dialect and data are as expected
+
+    assert batch_data.dialect == GESqlDialect.OTHER
+
+    my_execution_engine.load_batch_data("__", batch_data)
+    validator = Validator(my_execution_engine)
+    assert len(validator.head(fetch_all=True)) == num_rows_in_sample
 
 
 def test_instantiation_via_credentials(sa, test_backends, test_df):

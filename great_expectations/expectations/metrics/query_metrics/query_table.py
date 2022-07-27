@@ -1,10 +1,10 @@
 from typing import Any, Dict, List, Optional, Union
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.import_manager import (
     pyspark_sql_DataFrame,
     pyspark_sql_Row,

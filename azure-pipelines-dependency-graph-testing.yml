@@ -49,6 +49,7 @@ resources:
 variables:
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
+
 stages:
   - stage: scope_check
     pool:
@@ -113,9 +114,16 @@ stages:
     - job: type_hint_checker
       steps:
       - script: |
-          pip install mypy # Prereq for type hint script
-          python scripts/check_type_hint_coverage.py
+          pip install mypy invoke # Prereq for type hint script
+          invoke type-coverage
         name: TypeHintChecker
+
+    - job: static_type_check
+      steps:
+      - script: |
+          pip install mypy invoke
+          invoke type-check --install-types
+        name: StaticTypeCheck
 
     - job: docstring_checker
       steps:
@@ -246,6 +254,10 @@ stages:
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
           - task: PublishTestResults@2
@@ -320,6 +332,10 @@ stages:
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
           - script: |
@@ -346,6 +362,10 @@ stages:
               # In order to ensure coverage, we run them during each CI/CD cycle.
               pytest -m cloud
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest-cloud-overrides'
 
           - task: PublishTestResults@2
@@ -449,6 +469,10 @@ stages:
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
       - job: mssql
@@ -489,6 +513,10 @@ stages:
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
       - job: trino
@@ -536,6 +564,10 @@ stages:
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
   - stage: cli_integration
