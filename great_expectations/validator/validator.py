@@ -259,6 +259,10 @@ class Validator:
     def data_context(self) -> Optional["DataContext"]:  # noqa: F821
         return self._data_context
 
+    @data_context.setter
+    def data_context(self, data_context: "DataContext") -> "DataContext":  # noqa: F821
+        self._data_context = data_context
+
     @property
     def expose_dataframe_methods(self) -> bool:
         return self._expose_dataframe_methods

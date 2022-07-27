@@ -4,8 +4,13 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
+from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import DataContextConfig
 
 from great_expectations.data_context.store import (  # isort:skip
@@ -213,3 +218,17 @@ def test_delete_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
 
     context.delete_expectation_suite("my_expectation_suite")
     assert mock_cloud_delete_expectation_suite.call_count == 1
+
+
+@pytest.mark.cloud
+def test_get_validator_with_cloud_enabled_context_passes_cloud_context_to_return_obj() -> None:
+    context = DataContext(ge_cloud_mode=True)
+
+    # expectation_suite_ge_cloud_id = "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+    # context.create_expectation_suite("my_test_suite")
+
+    # validator = context.get_validator(
+    #     expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+    # )
+
+    # assert isinstance(validator.data_context, CloudDataContext)

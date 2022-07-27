@@ -29,3 +29,7 @@ class GeCloudResourceRef(GeCloudIdAwareRef):
     @property
     def url(self):
         return self._url
+
+    @property
+    def ge_cloud_id(self):
+        return self._ge_cloud_id
