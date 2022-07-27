@@ -1124,6 +1124,12 @@ def build_sa_validator_with_data(
         engine = _create_bigquery_engine()
     elif sa_engine_name == "trino":
         engine = _create_trino_engine(db_hostname)
+    elif sa_engine_name == "redshift":
+        engine = _create_redshift_engine()
+    elif sa_engine_name == "athena":
+        engine = _create_athena_engine()
+    elif sa_engine_name == "snowflake":
+        engine = _create_snowflake_engine()
     else:
         engine = None
 
