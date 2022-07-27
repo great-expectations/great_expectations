@@ -133,12 +133,19 @@ stages:
 #             done;
             displayName: 'Wait for Trino database to initialise'
 
-#         - task: DownloadSecureFile@1
-#           name: gcp_authkey
-#           displayName: 'Download Google Service Account'
-#           inputs:
-#             secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
-#             retryCount: '2'
+          - task: DownloadSecureFile@1
+            name: gcp_authkey
+            displayName: 'Download Google Service Account'
+            inputs:
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+              retryCount: '2'
+
+          - task: DownloadSecureFile@1
+            name: aws_authkey
+            displayName: 'Download AWS Credentials'
+            inputs:
+              secureFile: 'aws_config_sandbox'
+              retryCount: '2'
 
           - bash: python ./build_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
