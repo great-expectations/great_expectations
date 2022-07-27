@@ -110,11 +110,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
             data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
         """
         name: str = profiler_config.name
+        id_: Optional[str] = None
+        if hasattr(profiler_config, "id_"):
+            id_ = profiler_config.id_
         config_version: float = profiler_config.config_version
         variables: Optional[Dict[str, Any]] = profiler_config.variables
         rules: Optional[Dict[str, Dict[str, Any]]] = profiler_config.rules
 
         self._name = name
+        self._id = id_
         self._config_version = config_version
 
         self._profiler_config = profiler_config
@@ -1410,6 +1414,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        id_: Optional[str] = None,
     ) -> None:
         """
         Create a new Profiler using configured rules.
@@ -1427,6 +1432,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
             name=name,
+            id_=id_,
             config_version=config_version,
             variables=variables,
             rules=rules,
