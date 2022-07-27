@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -221,14 +221,40 @@ def test_delete_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
 
 
 @pytest.mark.cloud
-def test_get_validator_with_cloud_enabled_context_passes_cloud_context_to_return_obj() -> None:
+@mock.patch("great_expectations.data_context.DataContext._save_project_config")
+def test_get_validator_with_cloud_enabled_context_passes_cloud_context_to_return_obj(
+    mock_save_project_config: mock.MagicMock,
+) -> None:
     context = DataContext(ge_cloud_mode=True)
 
-    # expectation_suite_ge_cloud_id = "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
-    # context.create_expectation_suite("my_test_suite")
+    suites = context.list_expectation_suites()
+    expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
 
-    # validator = context.get_validator(
-    #     expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-    # )
+    context.create_expectation_suite(
+        "my_test_suite",
+        ge_cloud_id=expectation_suite_ge_cloud_id,
+        overwrite_existing=True,
+    )
 
-    # assert isinstance(validator.data_context, CloudDataContext)
+    datasource = tuple(context.datasources.values())[0]
+    datasource_name = datasource.name
+
+    data_connector = tuple(datasource.data_connectors.values())[0]
+    data_connector_name = data_connector.name
+
+    data_asset_name = tuple(data_connector.assets.keys())[0]
+
+    batch_request = BatchRequest(
+        datasource_name=datasource_name,
+        data_connector_name=data_connector_name,
+        data_asset_name=data_asset_name,
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+    )
+
+    validator.save_expectation_suite()
+
+    assert isinstance(validator.data_context, CloudDataContext)
