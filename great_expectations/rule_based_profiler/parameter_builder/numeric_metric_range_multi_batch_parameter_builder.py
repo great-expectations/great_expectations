@@ -550,7 +550,7 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                 numeric_range_estimation_result = NumericRangeEstimationResult(
                     estimation_histogram=np.histogram(
                         a=metric_value_vector, bins=NUM_HISTOGRAM_BINS
-                    ),
+                    )[0],
                     value_range=np.asarray(
                         [metric_value_vector[0], metric_value_vector[0]]
                     ),
