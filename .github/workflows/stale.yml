@@ -28,7 +28,7 @@ jobs:
         # Scope
         only-pr-labels: community
         only-issue-labels: community
-        exempt-issue-labels: core-team 
+        exempt-issue-labels: core-team, "help wanted"
 
         # Issue messages
         stale-issue-message: >
