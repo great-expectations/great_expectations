@@ -2360,7 +2360,7 @@ def ge_cloud_config_e2e() -> GeCloudConfig:
     "great_expectations.data_context.store.DatasourceStore.list_keys",
     return_value=[],
 )
-def empty_cloud_data_context(
+def empty_base_data_context_in_cloud_mode(
     mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
@@ -2447,8 +2447,10 @@ def empty_cloud_data_context_custom_base_url(
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
-    context = empty_cloud_data_context
+def cloud_data_context_with_datasource_pandas_engine(
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
+):
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
     config = yaml.load(
         """
     class_name: Datasource
@@ -2470,9 +2472,9 @@ def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
 
 @pytest.fixture
 def cloud_data_context_with_datasource_sqlalchemy_engine(
-    empty_cloud_data_context, db_file
+    empty_base_data_context_in_cloud_mode: BaseDataContext, db_file
 ):
-    context = empty_cloud_data_context
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
     config = yaml.load(
         f"""
     class_name: Datasource

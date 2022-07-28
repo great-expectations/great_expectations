@@ -165,7 +165,7 @@ def test_get_config_with_variables_substituted(
 @mock.patch("great_expectations.data_context.CloudDataContext.create_expectation_suite")
 def test_create_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
     mock_cloud_create_expectation_suite: mock.MagicMock,
-    empty_cloud_data_context: BaseDataContext,
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
 ) -> None:
     """
     What does this test do and why?
@@ -173,7 +173,7 @@ def test_create_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
     Ensures that when a BaseDataContext is instantiated with cloud_mode=True, the call to
     ExpectationSuite CRUD leverages the implementation defined and managed by CloudDataContext.
     """
-    context = empty_cloud_data_context
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
 
     context.create_expectation_suite("my_expectation_suite")
     assert mock_cloud_create_expectation_suite.call_count == 1
@@ -183,7 +183,7 @@ def test_create_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
 @mock.patch("great_expectations.data_context.CloudDataContext.get_expectation_suite")
 def test_get_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
     mock_cloud_get_expectation_suite: mock.MagicMock,
-    empty_cloud_data_context: BaseDataContext,
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
 ) -> None:
     """
     What does this test do and why?
@@ -191,7 +191,7 @@ def test_get_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
     Ensures that when a BaseDataContext is instantiated with cloud_mode=True, the call to
     ExpectationSuite CRUD leverages the implementation defined and managed by CloudDataContext.
     """
-    context = empty_cloud_data_context
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
 
     context.get_expectation_suite("my_expectation_suite")
     assert mock_cloud_get_expectation_suite.call_count == 1
@@ -201,7 +201,7 @@ def test_get_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
 @mock.patch("great_expectations.data_context.CloudDataContext.delete_expectation_suite")
 def test_delete_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
     mock_cloud_delete_expectation_suite: mock.MagicMock,
-    empty_cloud_data_context: BaseDataContext,
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
 ) -> None:
     """
     What does this test do and why?
@@ -209,7 +209,7 @@ def test_delete_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
     Ensures that when a BaseDataContext is instantiated with cloud_mode=True, the call to
     ExpectationSuite CRUD leverages the implementation defined and managed by CloudDataContext.
     """
-    context = empty_cloud_data_context
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
 
     context.delete_expectation_suite("my_expectation_suite")
     assert mock_cloud_delete_expectation_suite.call_count == 1

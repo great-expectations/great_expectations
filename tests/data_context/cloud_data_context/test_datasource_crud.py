@@ -35,7 +35,7 @@ from great_expectations.datasource import BaseDatasource
 def test_base_data_context_in_cloud_mode_add_datasource(
     save_changes: bool,
     config_includes_name_setting: str,
-    empty_cloud_data_context: BaseDataContext,
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
     datasource_config: DatasourceConfig,
     datasource_name: str,
     ge_cloud_base_url: str,
@@ -46,7 +46,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response
     to create the datasource."""
 
-    context: BaseDataContext = empty_cloud_data_context
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
     # Make sure we are using the right fixture
     assert isinstance(context, BaseDataContext)
     assert isinstance(
