@@ -240,10 +240,17 @@ except (ImportError, KeyError):
     MYSQL_TYPES = {}
 
 try:
+    # SQLAlchemy does not export the "INT" type for the MS SQL Server dialect; however "INT" is supported by the engine.
+    # Since SQLAlchemy exports the "INTEGER" type for the MS SQL Server dialect, alias "INT" to the "INTEGER" type.
     import sqlalchemy.dialects.mssql as mssqltypes
 
     # noinspection PyPep8Naming
     from sqlalchemy.dialects.mssql import dialect as mssqlDialect
+
+    try:
+        getattr(mssqltypes, "INT")
+    except AttributeError:
+        mssqltypes.INT = mssqltypes.INTEGER
 
     MSSQL_TYPES = {
         "BIGINT": mssqltypes.BIGINT,
@@ -257,6 +264,7 @@ try:
         "DECIMAL": mssqltypes.DECIMAL,
         "FLOAT": mssqltypes.FLOAT,
         "IMAGE": mssqltypes.IMAGE,
+        "INT": mssqltypes.INT,
         "INTEGER": mssqltypes.INTEGER,
         "MONEY": mssqltypes.MONEY,
         "NCHAR": mssqltypes.NCHAR,
@@ -309,6 +317,124 @@ except (ImportError, KeyError):
     trinotypes = None
     trinoDialect = None
     TRINO_TYPES = {}
+
+try:
+    import sqlalchemy_redshift.dialect as redshifttypes
+    import sqlalchemy_redshift.dialect as redshiftDialect
+
+    REDSHIFT_TYPES = {
+        "BIGINT": redshifttypes.BIGINT,
+        "BOOLEAN": redshifttypes.BOOLEAN,
+        "CHAR": redshifttypes.CHAR,
+        "DATE": redshifttypes.DATE,
+        "DECIMAL": redshifttypes.DECIMAL,
+        "DOUBLE_PRECISION": redshifttypes.DOUBLE_PRECISION,
+        "FOREIGN_KEY_RE": redshifttypes.FOREIGN_KEY_RE,
+        "GEOMETRY": redshifttypes.GEOMETRY,
+        "INTEGER": redshifttypes.INTEGER,
+        "PRIMARY_KEY_RE": redshifttypes.PRIMARY_KEY_RE,
+        "REAL": redshifttypes.REAL,
+        "SMALLINT": redshifttypes.SMALLINT,
+        "TIMESTAMP": redshifttypes.TIMESTAMP,
+        "TIMESTAMPTZ": redshifttypes.TIMESTAMPTZ,
+        "TIMETZ": redshifttypes.TIMETZ,
+        "VARCHAR": redshifttypes.VARCHAR,
+    }
+except (ImportError, KeyError):
+    redshifttypes = None
+    redshiftDialect = None
+    REDSHIFT_TYPES = {}
+
+try:
+    import snowflake.sqlalchemy.custom_types as snowflaketypes
+    import snowflake.sqlalchemy.snowdialect
+    import snowflake.sqlalchemy.snowdialect as snowflakeDialect
+
+    # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
+    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+    sqlalchemy.dialects.registry.register(
+        "snowflake", "snowflake.sqlalchemy", "dialect"
+    )
+
+    SNOWFLAKE_TYPES = {
+        "ARRAY": snowflaketypes.ARRAY,
+        "BYTEINT": snowflaketypes.BYTEINT,
+        "CHARACTER": snowflaketypes.CHARACTER,
+        "DEC": snowflaketypes.DEC,
+        "DOUBLE": snowflaketypes.DOUBLE,
+        "FIXED": snowflaketypes.FIXED,
+        "NUMBER": snowflaketypes.NUMBER,
+        "OBJECT": snowflaketypes.OBJECT,
+        "STRING": snowflaketypes.STRING,
+        "TEXT": snowflaketypes.TEXT,
+        "TIMESTAMP_LTZ": snowflaketypes.TIMESTAMP_LTZ,
+        "TIMESTAMP_NTZ": snowflaketypes.TIMESTAMP_NTZ,
+        "TIMESTAMP_TZ": snowflaketypes.TIMESTAMP_TZ,
+        "TINYINT": snowflaketypes.TINYINT,
+        "VARBINARY": snowflaketypes.VARBINARY,
+        "VARIANT": snowflaketypes.VARIANT,
+    }
+except (ImportError, KeyError, AttributeError):
+    snowflake = None
+    snowflaketypes = None
+    snowflakeDialect = None
+    SNOWFLAKE_TYPES = {}
+
+try:
+    import pyathena.sqlalchemy_athena
+    from pyathena.sqlalchemy_athena import AthenaDialect as athenaDialect
+    from pyathena.sqlalchemy_athena import types as athenatypes
+
+    # athenatypes is just `from sqlalchemy import types`
+    # https://github.com/laughingman7743/PyAthena/blob/master/pyathena/sqlalchemy_athena.py#L692
+    #   - the _get_column_type method of AthenaDialect does some mapping via conditional statements
+    # https://github.com/laughingman7743/PyAthena/blob/master/pyathena/sqlalchemy_athena.py#L105
+    #   - The AthenaTypeCompiler has some methods named `visit_<TYPE>`
+    ATHENA_TYPES = {
+        "BOOLEAN": athenatypes.BOOLEAN,
+        "FLOAT": athenatypes.FLOAT,
+        "DOUBLE": athenatypes.FLOAT,
+        "REAL": athenatypes.FLOAT,
+        "TINYINT": athenatypes.INTEGER,
+        "SMALLINT": athenatypes.INTEGER,
+        "INTEGER": athenatypes.INTEGER,
+        "INT": athenatypes.INTEGER,
+        "BIGINT": athenatypes.BIGINT,
+        "DECIMAL": athenatypes.DECIMAL,
+        "CHAR": athenatypes.CHAR,
+        "VARCHAR": athenatypes.VARCHAR,
+        "STRING": athenatypes.String,
+        "DATE": athenatypes.DATE,
+        "TIMESTAMP": athenatypes.TIMESTAMP,
+        "BINARY": athenatypes.BINARY,
+        "VARBINARY": athenatypes.BINARY,
+        "ARRAY": athenatypes.String,
+        "MAP": athenatypes.String,
+        "STRUCT": athenatypes.String,
+        "ROW": athenatypes.String,
+        "JSON": athenatypes.String,
+    }
+except ImportError:
+    pyathena = None
+    athenatypes = None
+    athenaDialect = None
+    ATHENA_TYPES = {}
+
+# Others from great_expectations/dataset/sqlalchemy_dataset.py
+try:
+    import sqlalchemy_dremio.pyodbc
+
+    sqlalchemy.dialects.registry.register(
+        "dremio", "sqlalchemy_dremio.pyodbc", "dialect"
+    )
+except ImportError:
+    sqlalchemy_dremio = None
+
+try:
+    import teradatasqlalchemy.dialect
+    import teradatasqlalchemy.types as teradatatypes
+except ImportError:
+    teradatasqlalchemy = None
 
 import tempfile
 
@@ -763,6 +889,182 @@ def get_dataset(
             table_name, engine=engine, profiler=profiler, caching=caching
         )
 
+    elif dataset_type == "snowflake":
+        if not create_engine or not SNOWFLAKE_TYPES:
+            return None
+
+        engine = _create_snowflake_engine()
+        sql_dtypes = {}
+        if (
+            schemas
+            and "snowflake" in schemas
+            and isinstance(engine.dialect, snowflakeDialect)
+        ):
+            schema = schemas["snowflake"]
+            sql_dtypes = {
+                col: SNOWFLAKE_TYPES[dtype] for (col, dtype) in schema.items()
+            }
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
+
+        if table_name is None:
+            table_name = generate_test_table_name().lower()
+
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=engine, profiler=profiler, caching=caching
+        )
+
+    elif dataset_type == "redshift":
+        if not create_engine or not REDSHIFT_TYPES:
+            return None
+
+        engine = _create_redshift_engine()
+        sql_dtypes = {}
+        if (
+            schemas
+            and "redshift" in schemas
+            and isinstance(engine.dialect, redshiftDialect)
+        ):
+            schema = schemas["redshift"]
+            sql_dtypes = {col: REDSHIFT_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
+
+        if table_name is None:
+            table_name = generate_test_table_name().lower()
+
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=engine, profiler=profiler, caching=caching
+        )
+
+    elif dataset_type == "athena":
+        if not create_engine or not ATHENA_TYPES:
+            return None
+
+        engine = _create_athena_engine()
+        sql_dtypes = {}
+        if (
+            schemas
+            and "athena" in schemas
+            and isinstance(engine.dialect, athenaDialect)
+        ):
+            schema = schemas["athena"]
+            sql_dtypes = {col: ATHENA_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
+
+        if table_name is None:
+            table_name = generate_test_table_name().lower()
+
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=engine, profiler=profiler, caching=caching
+        )
+
     elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
 
@@ -1102,6 +1404,21 @@ def build_sa_validator_with_data(
     try:
         dialect_classes["trino"] = trinoDialect
         dialect_types["trino"] = TRINO_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["snowflake"] = snowflakeDialect.dialect
+        dialect_types["snowflake"] = SNOWFLAKE_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["redshift"] = redshiftDialect.RedshiftDialect
+        dialect_types["redshift"] = REDSHIFT_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["athena"] = athenaDialect
+        dialect_types["athena"] = ATHENA_TYPES
     except AttributeError:
         pass
 
