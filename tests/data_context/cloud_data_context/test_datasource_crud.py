@@ -33,7 +33,6 @@ from great_expectations.datasource import BaseDatasource
     ],
 )
 def test_base_data_context_in_cloud_mode_add_datasource(
-    data_context_type: str,
     save_changes: bool,
     config_includes_name_setting: str,
     empty_cloud_data_context: BaseDataContext,
