@@ -61,7 +61,8 @@
           "success": true,
           "observed_value": 1.1547005383792515
         },
-        "suppress_test_for": ["spark", "pandas", "sqlite"]
+        "only_for": ["sqlalchemy"],
+        "suppress_test_for": ["sqlite"]
       },
       {
         "title": "basic_negative_test",
