@@ -12,6 +12,7 @@ title: Changelog
 * [BUGFIX] Temporarily disable Trino `0.315.0` from requirements (#5606)
 * [BUGFIX] Update _create_trino_engine to check for schema before creating it (#5607)
 * [BUGFIX] Support `ExpectationSuite` CRUD at `BaseDataContext` level (#5604)
+* [BUGFIX] Patch issue with `get_validator` on Cloud-backed `DataContext` (#5619)
 * [MAINTENANCE] Add name and id to DatasourceConfig (#5560)
 * [MAINTENANCE] Clear datasources in `test_data_context_datasources` to improve test performance and narrow test scope (#5588)
 * [MAINTENANCE] Fix tests that rely on guessing pytest generated random file paths. (#5589)
