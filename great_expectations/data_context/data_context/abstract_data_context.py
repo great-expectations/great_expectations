@@ -76,6 +76,7 @@ from great_expectations.validator.validator import Validator
 
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
     UsageStatisticsHandler,
+    send_usage_message,
 )
 
 logger = logging.getLogger(__name__)
@@ -587,6 +588,7 @@ class AbstractDataContext(ABC):
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
+        # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = self._instantiate_datasource_from_config(
@@ -1690,3 +1692,18 @@ class AbstractDataContext(ABC):
                             "metric {} was requested by another expectation suite but is not available in "
                             "this validation result.".format(metric_name)
                         )
+
+    def send_usage_message(
+        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
+    ) -> None:
+        """helper method to send a usage method using DataContext. Used when sending usage events from
+            classes like ExpectationSuite.
+            event
+        Args:
+            event (str): str representation of event
+            event_payload (dict): optional event payload
+            success (bool): optional success param
+        Returns:
+            None
+        """
+        send_usage_message(self, event, event_payload, success)

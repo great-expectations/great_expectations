@@ -2301,6 +2301,8 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
                 "base_directory": "../data",
             }
         },
+        "id_": None,
+        "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)
     assert datasource_from_yaml.__class__.__name__ == "Datasource"
@@ -2657,6 +2659,8 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
                 "module_name": "great_expectations.datasource.data_connector",
             },
         },
+        "id_": None,
+        "name": "my_datasource",
     }
     assert datasource_from_yaml.config == {
         "execution_engine": {
@@ -2682,6 +2686,8 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
                 "module_name": "great_expectations.datasource.data_connector",
             },
         },
+        "id_": None,
+        "name": "my_datasource",
     }
 
     assert datasource_from_yaml.name == datasource_name
@@ -2830,6 +2836,8 @@ def test_add_datasource_from_yaml_with_substitution_variables(
                 "base_directory": "../data",
             }
         },
+        "id_": None,
+        "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)
     assert datasource_from_yaml.__class__.__name__ == "Datasource"

@@ -1318,20 +1318,44 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             validation_operators.append(value)
         return validation_operators
 
-    def send_usage_message(
-        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
-    ) -> None:
-        """helper method to send a usage method using DataContext. Used when sending usage events from
-            classes like ExpectationSuite.
-            event
-        Args:
-            event (str): str representation of event
-            event_payload (dict): optional event payload
-            success (bool): optional success param
-        Returns:
-            None
+    def create_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        overwrite_existing: bool = False,
+        ge_cloud_id: Optional[str] = None,
+        **kwargs: Optional[dict],
+    ) -> ExpectationSuite:
         """
-        send_usage_message(self, event, event_payload, success)
+        See `AbstractDataContext.create_expectation_suite` for more information.
+        """
+        return self._data_context.create_expectation_suite(
+            expectation_suite_name,
+            overwrite_existing=overwrite_existing,
+            ge_cloud_id=ge_cloud_id,
+            **kwargs,
+        )
+
+    def get_expectation_suite(
+        self,
+        expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> ExpectationSuite:
+        """
+        See `AbstractDataContext.get_expectation_suite` for more information.
+        """
+        return self._data_context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
+        )
+
+    def delete_expectation_suite(
+        self, expectation_suite_name: Optional[str] = None
+    ) -> bool:
+        """
+        See `AbstractDataContext.delete_expectation_suite` for more information.
+        """
+        return self._data_context.delete_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
@@ -2791,3 +2815,31 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ]
 
         return instantiated_class, usage_stats_event_payload
+
+    def _instantiate_datasource_from_config_and_update_project_config(
+        self,
+        name: str,
+        config: dict,
+        initialize: bool = True,
+        save_changes: bool = False,
+    ) -> Optional[Datasource]:
+        """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
+
+        Args:
+            name: Desired name for the datasource.
+            config: Config for the datasource.
+            initialize: Whether to initialize the datasource or return None.
+            save_changes: Whether to save the datasource config to the configured Datasource store.
+
+        Returns:
+            If initialize=True return an instantiated Datasource object, else None.
+        """
+
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(
+            name=name,
+            config=config,
+            initialize=initialize,
+            save_changes=save_changes,
+        )
+        self._synchronize_self_with_underlying_data_context()
+        return datasource

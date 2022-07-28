@@ -939,7 +939,7 @@ class DatasourceConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
-    id = fields.String(
+    id_ = fields.String(
         required=False,
         allow_none=True,
     )

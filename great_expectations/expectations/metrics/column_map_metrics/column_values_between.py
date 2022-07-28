@@ -1,3 +1,4 @@
+import datetime
 import warnings
 
 from dateutil.parser import parse
@@ -7,7 +8,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -74,6 +75,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             raise ValueError("min_value cannot be greater than max_value")
 
         def is_between(val):
+            # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
             # print type(val), type(min_value), type(max_value), val, min_value, max_value
@@ -198,27 +200,80 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
+        # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
         if min_value is None:
             if strict_max:
-                return column < max_value
-            else:
-                return column <= max_value
+                return column < sa.literal(max_value)
+
+            if isinstance(max_value, (str, datetime.datetime)):
+                return column <= sa.literal(max_value)
+
+            return column <= sa.literal(max_value)
 
         elif max_value is None:
             if strict_min:
-                return min_value < column
-            else:
-                return min_value <= column
+                return sa.literal(min_value) < column
+
+            if isinstance(min_value, (str, datetime.datetime)):
+                return column >= sa.literal(min_value)
+
+            return column >= sa.literal(min_value)
 
         else:
             if strict_min and strict_max:
-                return sa.and_(min_value < column, column < max_value)
-            elif strict_min:
-                return sa.and_(min_value < column, column <= max_value)
-            elif strict_max:
-                return sa.and_(min_value <= column, column < max_value)
-            else:
-                return sa.and_(min_value <= column, column <= max_value)
+                return sa.and_(
+                    sa.literal(min_value) < column, column < sa.literal(max_value)
+                )
+
+            if strict_min:
+                if isinstance(max_value, (str, datetime.datetime)):
+                    return sa.and_(
+                        column <= sa.literal(max_value),
+                        sa.literal(min_value) < column,
+                    )
+
+                return sa.and_(
+                    sa.literal(min_value) < column,
+                    column <= sa.literal(max_value),
+                )
+
+            if strict_max:
+                if isinstance(min_value, (str, datetime.datetime)):
+                    return sa.and_(
+                        column >= sa.literal(min_value),
+                        column < sa.literal(max_value),
+                    )
+
+                return sa.and_(
+                    column < sa.literal(max_value),
+                    column >= sa.literal(min_value),
+                )
+
+            if (isinstance(max_value, str) and isinstance(min_value, str)) or (
+                isinstance(max_value, datetime.datetime)
+                and isinstance(min_value, datetime.datetime)
+            ):
+                return sa.and_(
+                    column >= sa.literal(min_value),
+                    column <= sa.literal(max_value),
+                )
+
+            if isinstance(max_value, (str, datetime.datetime)):
+                return sa.and_(
+                    column <= sa.literal(max_value),
+                    column >= sa.literal(min_value),
+                )
+
+            if isinstance(min_value, (str, datetime.datetime)):
+                return sa.and_(
+                    column >= sa.literal(min_value),
+                    column <= sa.literal(max_value),
+                )
+
+            return sa.and_(
+                column >= sa.literal(min_value),
+                column <= sa.literal(max_value),
+            )
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(
@@ -259,24 +314,51 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
+        # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
         if min_value is None:
             if strict_max:
-                return column < max_value
-            else:
-                return column <= max_value
+                return column < F.lit(max_value)
+
+            if isinstance(max_value, (str, datetime.datetime)):
+                return column <= F.lit(max_value)
+
+            return column <= F.lit(max_value)
 
         elif max_value is None:
             if strict_min:
-                return min_value < column
-            else:
-                return min_value <= column
+                return F.lit(min_value) < column
+
+            if isinstance(min_value, (str, datetime.datetime)):
+                return F.lit(min_value) <= column
+
+            return F.lit(min_value) <= column
 
         else:
             if strict_min and strict_max:
-                return (min_value < column) & (column < max_value)
-            elif strict_min:
-                return (min_value < column) & (column <= max_value)
-            elif strict_max:
-                return (min_value <= column) & (column < max_value)
-            else:
-                return (min_value <= column) & (column <= max_value)
+                return (F.lit(min_value) < column) & (column < F.lit(max_value))
+
+            if strict_min:
+                if isinstance(max_value, (str, datetime.datetime)):
+                    return (F.lit(min_value) < column) & (column <= F.lit(max_value))
+
+                return (F.lit(min_value) < column) & (column <= F.lit(max_value))
+
+            if strict_max:
+                if isinstance(min_value, (str, datetime.datetime)):
+                    return (F.lit(min_value) <= column) & (column < F.lit(max_value))
+
+                return (F.lit(min_value) <= column) & (column < F.lit(max_value))
+
+            if (isinstance(max_value, str) and isinstance(min_value, str)) or (
+                isinstance(max_value, datetime.datetime)
+                and isinstance(min_value, datetime.datetime)
+            ):
+                return (F.lit(min_value) <= column) & (column <= F.lit(max_value))
+
+            if isinstance(max_value, (str, datetime.datetime)):
+                return (F.lit(min_value) <= column) & (column <= F.lit(max_value))
+
+            if isinstance(min_value, (str, datetime.datetime)):
+                return (F.lit(min_value) <= column) & (column <= F.lit(max_value))
+
+            return (F.lit(min_value) <= column) & (column <= F.lit(max_value))
