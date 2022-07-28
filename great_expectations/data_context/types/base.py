@@ -2236,18 +2236,6 @@ class CheckpointValidationConfig(AbstractConfig):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-    def to_json_dict(self) -> dict:
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
-        dict_obj: dict = self.to_dict()
-        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
-        return serializeable_dict
-
 
 class CheckpointValidationConfigSchema(Schema):
     class Meta:
