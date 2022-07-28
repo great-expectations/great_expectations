@@ -47,10 +47,10 @@
         "success": true,
         "observed_value": 1.1547005383792517
       },
-      "suppress_test_for": ["spark", "postgresql", "mssql"]
+      "only_for": ["pandas", "sqlite"]
       },
             {
-      "title" : "positive_test__exact_min_and_max_postgres",
+      "title" : "positive_test__exact_min_and_max_sqlalchemy",
       "exact_match_out" : false,
       "in": {
         "column": "dist1",
@@ -61,7 +61,7 @@
         "success": true,
         "observed_value": 1.1547005383792515
       },
-      "only_for": ["postgresql", "mssql"]
+      "suppress_test_for": ["spark", "pandas", "sqlite"]
       },
       {
         "title": "basic_negative_test",
