@@ -167,6 +167,7 @@ def test_get_config_with_variables_substituted(
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
     mock_save_project_config: mock.MagicMock,
+    monkeypatch,
 ) -> None:
     """
     What does this test do and why?
@@ -175,6 +176,9 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
     backend.
     """
+    # Context is shared between other tests so we need to set a required env var
+    monkeypatch.setenv("MY_PLUGINS_DIRECTORY", "plugins/")
+
     context = DataContext(ge_cloud_mode=True)
 
     # Create a suite to be used in Validator instantiation
