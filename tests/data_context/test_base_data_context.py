@@ -1,4 +1,4 @@
-from typing import List
+from typing import Callable, List, Tuple
 from unittest import mock
 
 import pandas as pd
@@ -9,6 +9,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.validator.validator import Validator
 
 from great_expectations.data_context.store import (  # isort:skip
     ExpectationsStore,
@@ -163,10 +164,53 @@ def test_get_config_with_variables_substituted(
         del os.environ["replace_me"]
 
 
+@pytest.fixture
+def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator, str]]:
+    def _closure(context: DataContext) -> Tuple[Validator, str]:
+
+        # Create a suite to be used in Validator instantiation
+        suites = context.list_expectation_suites()
+        expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
+
+        context.create_expectation_suite(
+            "my_test_suite",
+            ge_cloud_id=expectation_suite_ge_cloud_id,
+            overwrite_existing=True,
+        )
+
+        # Grab the first datasource/data connector/data asset bundle we can to use in Validation instantiation
+        datasource_name = "Test Pandas Datasource"
+        datasource = context.datasources[datasource_name]
+
+        data_connector = tuple(datasource.data_connectors.values())[0]
+        data_connector_name = data_connector.name
+
+        data_asset_name = tuple(data_connector.assets.keys())[0]
+
+        batch_request = RuntimeBatchRequest(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            runtime_parameters={
+                "batch_data": pd.DataFrame({"x": range(10)}),
+            },
+            batch_identifiers={"col1": "123"},
+        )
+
+        # Create Validator and ensure that persistence is Cloud-backed
+        validator = context.get_validator(
+            batch_request=batch_request,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+        )
+
+        return validator, expectation_suite_ge_cloud_id
+
+    return _closure
+
+
 @pytest.mark.cloud
-@mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
-    mock_save_project_config: mock.MagicMock,
+    prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
     monkeypatch,
 ) -> None:
     """
@@ -178,43 +222,12 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     """
     # Context is shared between other tests so we need to set a required env var
     monkeypatch.setenv("MY_PLUGINS_DIRECTORY", "plugins/")
-
     context = DataContext(ge_cloud_mode=True)
 
-    # Create a suite to be used in Validator instantiation
-    suites = context.list_expectation_suites()
-    expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
-
-    context.create_expectation_suite(
-        "my_test_suite",
-        ge_cloud_id=expectation_suite_ge_cloud_id,
-        overwrite_existing=True,
-    )
-
-    # Grab the first datasource/data connector/data asset bundle we can to use in Validation instantiation
-    datasource_name = "Test Pandas Datasource"
-    datasource = context.datasources[datasource_name]
-
-    data_connector = tuple(datasource.data_connectors.values())[0]
-    data_connector_name = data_connector.name
-
-    data_asset_name = tuple(data_connector.assets.keys())[0]
-
-    batch_request = RuntimeBatchRequest(
-        datasource_name=datasource_name,
-        data_connector_name=data_connector_name,
-        data_asset_name=data_asset_name,
-        runtime_parameters={
-            "batch_data": pd.DataFrame()
-        },  # empty df just for valid batch request
-        batch_identifiers={"col1": "123"},
-    )
-
-    # Create Validator and ensure that persistence is Cloud-backed
-    validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-    )
+    (
+        validator,
+        _,
+    ) = prepare_validator_for_cloud_e2e(context)
 
     with mock.patch("requests.put", autospec=True) as mock_put:
         type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
@@ -226,9 +239,11 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
 @pytest.mark.cloud
 def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend_pt2(
     monkeypatch,
+    prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
 ) -> None:
     """
     What does this test do and why?
+
     Ensures that the Validator that is created through DataContext.get_validator() is
     Cloud-enabled if the DataContext used to instantiate the object is Cloud-enabled.
     Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
@@ -236,53 +251,31 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     """
     # Context is shared between other tests so we need to set a required env var
     monkeypatch.setenv("MY_PLUGINS_DIRECTORY", "plugins/")
-
     context = DataContext(ge_cloud_mode=True)
 
-    # Create a suite to be used in Validator instantiation
-    suites = context.list_expectation_suites()
-    expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
+    (
+        validator,
+        expectation_suite_ge_cloud_id,
+    ) = prepare_validator_for_cloud_e2e(context)
 
-    context.create_expectation_suite(
-        "my_test_suite",
-        ge_cloud_id=expectation_suite_ge_cloud_id,
-        overwrite_existing=True,
-    )
+    res = validator.expect_column_max_to_be_between("x", min_value=0, max_value=10)
+    assert res.success
 
-    # Grab the first datasource/data connector/data asset bundle we can to use in Validation instantiation
-    datasource_name = "Test Pandas Datasource"
-    datasource = context.datasources[datasource_name]
-
-    data_connector = tuple(datasource.data_connectors.values())[0]
-    data_connector_name = data_connector.name
-
-    data_asset_name = tuple(data_connector.assets.keys())[0]
-
-    batch_request = RuntimeBatchRequest(
-        datasource_name=datasource_name,
-        data_connector_name=data_connector_name,
-        data_asset_name=data_asset_name,
-        runtime_parameters={
-            "batch_data": pd.DataFrame({"x": range(10)}),
-        },  # empty df just for valid batch request
-        batch_identifiers={"col1": "123"},
-    )
-
-    # Create Validator and ensure that persistence is Cloud-backed
-    validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-    )
-
-    validator.expect_column_max_to_be_between("x", min_value=0, max_value=10)
+    expectations_on_validator_before = len(validator.expectation_suite)
 
     assert expectation_suite_ge_cloud_id in context.list_expectation_suite_names()
+    suite_on_context = context.get_expectation_suite(
+        ge_cloud_id=expectation_suite_ge_cloud_id
+    )
+    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
 
     validator.save_expectation_suite()
 
     assert expectation_suite_ge_cloud_id in context.list_expectation_suite_names()
-    assert str(validator.expectation_suite.ge_cloud_id) == str(
-        expectation_suite_ge_cloud_id
+    suite_on_context = context.get_expectation_suite(
+        ge_cloud_id=expectation_suite_ge_cloud_id
     )
+    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
 
-    assert len(validator.expectation_suite.expectations) > 0
+    expectations_on_validator_after = len(validator.expectation_suite)
+    assert expectations_on_validator_before == expectations_on_validator_after
