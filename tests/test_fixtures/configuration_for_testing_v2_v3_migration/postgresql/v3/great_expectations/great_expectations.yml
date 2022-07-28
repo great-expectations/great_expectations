@@ -25,8 +25,10 @@ datasources:
       default_runtime_data_connector_name:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        batch_identifiers:
-          - default_identifier_name
+        assets:
+          my_runtime_asset:
+            batch_identifiers:
+              - default_identifier_name
       default_inferred_data_connector_name:
         module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetSqlDataConnector

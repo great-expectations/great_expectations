@@ -309,7 +309,9 @@ def test_cli_datasource_new_connection_string(
             "class_name": "Datasource",
             "data_connectors": {
                 "default_runtime_data_connector_name": {
-                    "batch_identifiers": ["default_identifier_name"],
+                    "assets": {
+                        "batch_identifiers": ["default_identifier_name"],
+                    },
                     "class_name": "RuntimeDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
                 },

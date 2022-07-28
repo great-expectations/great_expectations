@@ -760,9 +760,11 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
             my_runtime_data_connector:
                 module_name: great_expectations.datasource.data_connector
                 class_name: RuntimeDataConnector
-                batch_identifiers:
-                    - pipeline_stage_name
-                    - airflow_run_id
+                assets:
+                    my_runtime_asset:
+                        batch_identifiers:
+                            - pipeline_stage_name
+                            - airflow_run_id
     """
 
     # noinspection PyUnusedLocal
@@ -854,8 +856,10 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
         data_connectors:
           default_runtime_data_connector_name:
             class_name: RuntimeDataConnector
-            batch_identifiers:
-              - default_identifier_name
+            assets:
+              my_runtime_asset:
+                batch_identifiers:
+                  - default_identifier_name
           default_inferred_data_connector_name:
             class_name: InferredAssetSqlDataConnector
             name: whole_table
@@ -2092,10 +2096,12 @@ data_connectors:
     test_runtime_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        batch_identifiers:
-            - pipeline_stage_name
-            - airflow_run_id
-            - custom_key_0
+        assets:
+          my_runtime_asset:
+            batch_identifiers:
+              - pipeline_stage_name
+              - airflow_run_id
+              - custom_key_0
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -2132,8 +2138,6 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
     data_connectors:
         default_runtime_data_connector_name:
             class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
             assets:
                 asset_a:
                     batch_identifiers:
@@ -2162,10 +2166,8 @@ def data_context_with_datasource_spark_engine(empty_data_context, spark_session)
     execution_engine:
         class_name: SparkDFExecutionEngine
     data_connectors:
-        default_runtime_data_connector_name:
+        my_runtime_data_connector_name:
             class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
             assets:
                 asset_a:
                     batch_identifiers:
@@ -2195,10 +2197,8 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
         class_name: SqlAlchemyExecutionEngine
         connection_string: sqlite:///{db_file}
     data_connectors:
-        default_runtime_data_connector_name:
+        my_runtime_data_connector_name:
             class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
             assets:
                 asset_a:
                     batch_identifiers:
@@ -2230,10 +2230,12 @@ def data_context_with_query_store(
         class_name: SqlAlchemyExecutionEngine
         connection_string: {titanic_sqlite_db_connection_string}
     data_connectors:
-        default_runtime_data_connector_name:
+        my_runtime_data_connector_name:
             class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
+            assets:
+              my_runtime_asset:
+                batch_identifiers:
+                  - default_identifier_name
     """
     )
     context.add_datasource(
@@ -2420,10 +2422,12 @@ def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
     execution_engine:
         class_name: PandasExecutionEngine
     data_connectors:
-        default_runtime_data_connector_name:
+        my_runtime_data_connector_name:
             class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
+            assets:
+              my_asset:
+                batch_identifiers:
+                  - default_identifier_name
         """,
     )
     context.add_datasource(
@@ -2447,9 +2451,11 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
     data_connectors:
         default_runtime_data_connector_name:
             class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
+            assets:
+              my_runtime_asset:
+                batch_identifiers:
+                  - default_identifier_name
+        """
     )
     context.add_datasource(
         "my_datasource",
@@ -6910,11 +6916,15 @@ def build_in_memory_runtime_context():
                 "data_connectors": {
                     "runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
+                        "assets": {
+                            "my_runtime_asset": {
+                                "batch_identifiers": [
+                                    "id_key_0",
+                                    "id_key_1",
+                                ]
+                            },
+                        },
+                    },
                 },
             },
             "spark_datasource": {
@@ -6927,11 +6937,15 @@ def build_in_memory_runtime_context():
                 "data_connectors": {
                     "runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
+                        "assets": {
+                            "my_runtime_asset": {
+                                "batch_identifiers": [
+                                    "id_key_0",
+                                    "id_key_1",
+                                ],
+                            },
+                        },
+                    },
                 },
             },
         },

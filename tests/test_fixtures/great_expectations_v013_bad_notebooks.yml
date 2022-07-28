@@ -51,9 +51,11 @@ datasources:
           my_runtime_data_connector:
             module_name: great_expectations.datasource.data_connector
             class_name: RuntimeDataConnector
-            runtime_keys:
-              - pipeline_stage_name
-              - airflow_run_id
+            assets:
+              my_runtime_asset:
+                runtime_keys:
+                  - pipeline_stage_name
+                  - airflow_run_id
 
 config_variables_file_path: uncommitted/config_variables.yml
 
