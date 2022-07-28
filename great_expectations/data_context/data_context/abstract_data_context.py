@@ -964,8 +964,8 @@ class AbstractDataContext(ABC):
         expectation_suite: ExpectationSuite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
-        key: ExpectationSuiteIdentifier = self._determine_expectatation_suite_key(
-            identifier=expectation_suite_name
+        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite_name
         )
         if self.expectations_store.has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
@@ -989,10 +989,9 @@ class AbstractDataContext(ABC):
         Returns:
             True for Success and False for Failure.
         """
-        key: ExpectationSuiteIdentifier = self._determine_expectatation_suite_key(
-            identifier=expectation_suite_name
+        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            expectation_suite_name
         )
-
         if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
@@ -1014,9 +1013,9 @@ class AbstractDataContext(ABC):
         Returns:
             expectation_suite
         """
-        key: Optional[
-            ExpectationSuiteIdentifier
-        ] = self._determine_expectatation_suite_key(identifier=expectation_suite_name)
+        key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite_name
+        )
 
         if self.expectations_store.has_key(key):
             expectations_schema_dict: dict = cast(
@@ -1029,15 +1028,6 @@ class AbstractDataContext(ABC):
             raise ge_exceptions.DataContextError(
                 f"expectation_suite {expectation_suite_name} not found"
             )
-
-    @staticmethod
-    def _determine_expectatation_suite_key(
-        identifier: str,
-    ) -> ExpectationSuiteIdentifier:
-        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-            expectation_suite_name=identifier,
-        )
-        return key
 
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
