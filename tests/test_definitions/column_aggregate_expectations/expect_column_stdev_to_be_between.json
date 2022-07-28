@@ -40,6 +40,20 @@
       "exact_match_out" : false,
       "in": {
         "column": "dist1",
+        "min_value": 1.1547005383792517,
+        "max_value": 1.1547005383792517
+      },
+      "out": {
+        "success": true,
+        "observed_value": 1.1547005383792517
+      },
+      "suppress_test_for": ["spark", "postgresql"]
+      },
+            {
+      "title" : "positive_test__exact_min_and_max_postgres",
+      "exact_match_out" : false,
+      "in": {
+        "column": "dist1",
         "min_value": 1.1547005383792515,
         "max_value": 1.1547005383792515
       },
@@ -47,8 +61,8 @@
         "success": true,
         "observed_value": 1.1547005383792515
       },
-      "suppress_test_for": ["spark"]
-    },
+      "only_for": ["postgresql"]
+      },
       {
         "title": "basic_negative_test",
         "include_in_gallery": true,
