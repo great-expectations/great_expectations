@@ -4,6 +4,34 @@
 Changelog
 #########
 
+0.15.16
+-----------------
+* [FEATURE] Multi-Batch Example Notebook - SqlDataConnector examples (#5575)
+* [FEATURE] Implement "is_close()" for making equality comparisons "reasonably close" for each ExecutionEngine subclass (#5597)
+* [FEATURE] expect_profile_numeric_columns_percent_diff_(inclusive bounds) (#5586) (thanks @stevensecreti)
+* [FEATURE] DataConnector Query enabled for `SimpleSqlDatasource` (#5610)
+* [FEATURE] Implement the exact metric range estimate for NumericMetricRangeMultiBatchParameterBuilder (#5620)
+* [BUGFIX] Pass cloud base url to datasource store (#5595)
+* [BUGFIX] Temporarily disable Trino `0.315.0` from requirements (#5606)
+* [BUGFIX] Update _create_trino_engine to check for schema before creating it (#5607)
+* [BUGFIX] Support `ExpectationSuite` CRUD at `BaseDataContext` level (#5604)
+* [MAINTENANCE] Add name and id to DatasourceConfig (#5560)
+* [MAINTENANCE] Clear datasources in `test_data_context_datasources` to improve test performance and narrow test scope (#5588)
+* [MAINTENANCE] Fix tests that rely on guessing pytest generated random file paths. (#5589)
+* [MAINTENANCE] Do not set google cloud credentials for lifetime of pytest process. (#5592)
+* [MAINTENANCE] Misc updates to `Datasource` CRUD on `DataContext` to ensure consistent behavior (#5584)
+* [MAINTENANCE] Add id to `RuleBasedProfiler` config (#5590)
+* [MAINTENANCE] refactor to enable customization of quantile bias correction threshold for bootstrap estimation method (#5587)
+* [MAINTENANCE] Ensure that `resource_type` used in `GeCloudStoreBackend` is converted to `GeCloudRESTResource` enum as needed (#5601)
+* [MAINTENANCE] Create datasource with id (#5591)
+* [MAINTENANCE] Enable Azure blob storage integration tests (#5594)
+* [MAINTENANCE] Increase expectation kwarg line stroke width (#5608)
+* [MAINTENANCE] Added Algolia Scripts (#5544) (thanks @devanshdixit)
+* [MAINTENANCE] Handle `numpy` deprecation warnings (#5615)
+* [MAINTENANCE] remove approximate comparisons -- they will be replaced by estimator alternatives (#5618)
+* [MAINTENANCE] Making the dependency on dev-lite clearer (#5514)
+* [MAINTENANCE] Fix tests in tests/integration/profiling/rule_based_profiler/ and tests/render/renderer/ (#5611)
+
 0.15.15
 -----------------
 * [FEATURE] Integrate `DataContextVariables` with `DataContext` (#5466)
