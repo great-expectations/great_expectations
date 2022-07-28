@@ -16,7 +16,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-
 class TableHead(TableMetricProvider):
     metric_name = "table.head"
     value_keys = ("n_rows", "fetch_all")
@@ -52,7 +51,7 @@ class TableHead(TableMetricProvider):
         )
         df = None
         table_name = getattr(selectable, "name", None)
-        if table_name is None:
+        if isinstance(table_name, sa.sql.elements._anonymous_label) or table_name is None:
             # if a custom query was passed
             try:
                 if metric_value_kwargs["fetch_all"]:
