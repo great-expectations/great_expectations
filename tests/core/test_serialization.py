@@ -521,56 +521,7 @@ def test_checkpoint_config_print(
                     },
                 ],
             },
-            id="config_with_no_name_or_id",
-        ),
-        pytest.param(
-            CheckpointConfig(
-                name="my_nested_checkpoint",
-                config_version=1,
-                template_name="my_nested_checkpoint_template",
-                expectation_suite_name="users.delivery",
-                validations=[
-                    CheckpointValidationConfig(
-                        batch_request={
-                            "datasource_name": "my_datasource",
-                            "data_connector_name": "my_data_connector",
-                            "data_asset_name": "users",
-                            "data_connector_query": {"partition_index": -1},
-                        },
-                        name="my_validation",
-                    ),
-                ],
-            ),
-            {
-                "action_list": [],
-                "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
-                "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
-                "expectation_suite_name": "users.delivery",
-                "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
-                "name": "my_nested_checkpoint",
-                "profilers": [],
-                "run_name_template": None,
-                "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
-                "validations": [
-                    {
-                        "batch_request": {
-                            "data_asset_name": "users",
-                            "data_connector_name": "my_data_connector",
-                            "data_connector_query": {
-                                "partition_index": -1,
-                            },
-                            "datasource_name": "my_datasource",
-                        },
-                        "name": "my_validation",
-                    },
-                ],
-            },
-            id="config_with_name",
+            id="config_without_id",
         ),
         pytest.param(
             CheckpointConfig(
@@ -620,57 +571,6 @@ def test_checkpoint_config_print(
                 ],
             },
             id="config_with_id",
-        ),
-        pytest.param(
-            CheckpointConfig(
-                name="my_nested_checkpoint",
-                config_version=1,
-                template_name="my_nested_checkpoint_template",
-                expectation_suite_name="users.delivery",
-                validations=[
-                    CheckpointValidationConfig(
-                        batch_request={
-                            "datasource_name": "my_datasource",
-                            "data_connector_name": "my_data_connector",
-                            "data_asset_name": "users",
-                            "data_connector_query": {"partition_index": -1},
-                        },
-                        name="my_validation",
-                        id_="5d342d5a-8007-405e-abfa-db2b06e63283",
-                    ),
-                ],
-            ),
-            {
-                "action_list": [],
-                "batch_request": {},
-                "class_name": "Checkpoint",
-                "config_version": 1.0,
-                "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
-                "expectation_suite_name": "users.delivery",
-                "ge_cloud_id": None,
-                "module_name": "great_expectations.checkpoint",
-                "name": "my_nested_checkpoint",
-                "profilers": [],
-                "run_name_template": None,
-                "runtime_configuration": {},
-                "template_name": "my_nested_checkpoint_template",
-                "validations": [
-                    {
-                        "batch_request": {
-                            "data_asset_name": "users",
-                            "data_connector_name": "my_data_connector",
-                            "data_connector_query": {
-                                "partition_index": -1,
-                            },
-                            "datasource_name": "my_datasource",
-                        },
-                        "id_": "5d342d5a-8007-405e-abfa-db2b06e63283",
-                        "name": "my_validation",
-                    },
-                ],
-            },
-            id="config_with_name_and_id",
         ),
     ],
 )

@@ -2228,10 +2228,8 @@ class DataContextConfig(BaseYamlConfig):
 
 
 class CheckpointValidationConfig(AbstractConfig):
-    def __init__(
-        self, name: Optional[str] = None, id_: Optional[str] = None, **kwargs: dict
-    ) -> None:
-        super().__init__(id_=id_, name=name)
+    def __init__(self, id_: Optional[str] = None, **kwargs: dict) -> None:
+        super().__init__(id_=id_)
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -2242,7 +2240,7 @@ class CheckpointValidationConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=False, allow_none=False)
-    id = fields.String(required=False, allow_none=False)
+    id_ = fields.String(required=False, allow_none=False)
 
 
 class CheckpointConfigSchema(Schema):
