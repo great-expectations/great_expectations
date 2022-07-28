@@ -123,9 +123,11 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
             my_runtime_data_connector:
                 module_name: great_expectations.datasource.data_connector
                 class_name: RuntimeDataConnector
-                batch_identifiers:
-                    - pipeline_stage_name
-                    - airflow_run_id
+                assets:
+                    Titanic_1911:
+                        batch_identifiers:
+                            - pipeline_stage_name
+                            - airflow_run_id
     """
 
     # noinspection PyUnusedLocal

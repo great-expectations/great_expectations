@@ -2139,6 +2139,14 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
         my_runtime_data_connector:
             class_name: RuntimeDataConnector
             assets:
+                Titanic_1911:
+                    batch_identifiers:
+                        - pipeline_stage_name
+                        - airflow_run_id
+                Titanic_19120414_1313:
+                    batch_identifiers:
+                        - pipeline_stage_name
+                        - airflow_run_id
                 asset_a:
                     batch_identifiers:
                         - day
@@ -2166,7 +2174,7 @@ def data_context_with_datasource_spark_engine(empty_data_context, spark_session)
     execution_engine:
         class_name: SparkDFExecutionEngine
     data_connectors:
-        my_runtime_data_connector_name:
+        my_runtime_data_connector:
             class_name: RuntimeDataConnector
             assets:
                 asset_a:
@@ -2197,7 +2205,7 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
         class_name: SqlAlchemyExecutionEngine
         connection_string: sqlite:///{db_file}
     data_connectors:
-        my_runtime_data_connector_name:
+        my_runtime_data_connector:
             class_name: RuntimeDataConnector
             assets:
                 asset_a:
