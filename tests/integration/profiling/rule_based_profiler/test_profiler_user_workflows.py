@@ -1220,244 +1220,252 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     default_profiler_config: Optional[
         RuleBasedProfilerConfig
     ] = expectation_impl.default_kwarg_values.get("profiler_config")
-    if default_profiler_config:
-        del expectation_impl.default_kwarg_values["profiler_config"]
 
-    assert "profiler_config" not in expectation_impl.default_kwarg_values
+    try:
+        if default_profiler_config:
+            del expectation_impl.default_kwarg_values["profiler_config"]
 
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
-    validator: Validator = bobby_validator
+        assert "profiler_config" not in expectation_impl.default_kwarg_values
 
-    batch_request: dict
-    result: ExpectationValidationResult
-    custom_profiler_config: RuleBasedProfilerConfig
+        context: DataContext = (
+            bobby_columnar_table_multi_batch_deterministic_data_context
+        )
+        validator: Validator = bobby_validator
 
-    custom_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={
-            "mostly": 1.0,
-            "strict_min": False,
-            "strict_max": False,
-        },
-        rules={
-            "custom_column_values_between_rule": {
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "parameter_builders": [
-                    {
-                        "name": "my_min_estimator",
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "column.min",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "enforce_numeric_metric": True,
-                        "replace_nan_with_zero": True,
+        batch_request: dict
+        result: ExpectationValidationResult
+        custom_profiler_config: RuleBasedProfilerConfig
+
+        custom_profiler_config = RuleBasedProfilerConfig(
+            name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+            config_version=1.0,
+            variables={
+                "mostly": 1.0,
+                "strict_min": False,
+                "strict_max": False,
+            },
+            rules={
+                "custom_column_values_between_rule": {
+                    "domain_builder": {
+                        "class_name": "ColumnDomainBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder",
                     },
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_values_to_be_between",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "column": "$domain.domain_kwargs.column",
-                        "min_value": "$parameter.my_min_estimator.value[0]",
-                        "mostly": "$variables.mostly",
-                        "strict_min": "$variables.strict_min",
-                        "meta": {
-                            "details": {
-                                "my_min_estimator": "$parameter.my_min_estimator.details",
+                    "parameter_builders": [
+                        {
+                            "name": "my_min_estimator",
+                            "class_name": "MetricMultiBatchParameterBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                            "metric_name": "column.min",
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "enforce_numeric_metric": True,
+                            "replace_nan_with_zero": True,
+                        },
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "expectation_type": "expect_column_values_to_be_between",
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                            "column": "$domain.domain_kwargs.column",
+                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "mostly": "$variables.mostly",
+                            "strict_min": "$variables.strict_min",
+                            "meta": {
+                                "details": {
+                                    "my_min_estimator": "$parameter.my_min_estimator.details",
+                                },
                             },
                         },
-                    },
-                ],
+                    ],
+                },
             },
-        },
-    )
+        )
 
-    column_name: str = "fare_amount"
+        column_name: str = "fare_amount"
 
-    result = validator.expect_column_values_to_be_between(
-        column=column_name,
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-        profiler_config=custom_profiler_config,
-    )
-    assert result.success
-    assert result.expectation_config["kwargs"] == {
-        "column": "fare_amount",
-        "min_value": -52.0,
-        "strict_min": False,
-        "mostly": 1.0,
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": True,
-        "profiler_config": custom_profiler_config.to_json_dict(),
-        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-    }
+        result = validator.expect_column_values_to_be_between(
+            column=column_name,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+            profiler_config=custom_profiler_config,
+        )
+        assert result.success
+        assert result.expectation_config["kwargs"] == {
+            "column": "fare_amount",
+            "min_value": -52.0,
+            "strict_min": False,
+            "mostly": 1.0,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "profiler_config": custom_profiler_config.to_json_dict(),
+            "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+        }
 
-    result = validator.expect_column_values_to_be_between(
-        column=column_name,
-        min_value=0.0,
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-        profiler_config=custom_profiler_config,
-    )
-    assert not result.success
-    assert result.expectation_config["kwargs"] == {
-        "column": "fare_amount",
-        "min_value": 0.0,
-        "strict_min": False,
-        "mostly": 1.0,
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": True,
-        "profiler_config": custom_profiler_config.to_json_dict(),
-        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-    }
+        result = validator.expect_column_values_to_be_between(
+            column=column_name,
+            min_value=0.0,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+            profiler_config=custom_profiler_config,
+        )
+        assert not result.success
+        assert result.expectation_config["kwargs"] == {
+            "column": "fare_amount",
+            "min_value": 0.0,
+            "strict_min": False,
+            "mostly": 1.0,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "profiler_config": custom_profiler_config.to_json_dict(),
+            "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+        }
 
-    result = validator.expect_column_values_to_be_between(
-        column=column_name,
-        min_value=0.0,
-        mostly=8.75e-1,
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-        profiler_config=custom_profiler_config,
-    )
-    assert result.success
-    assert result.expectation_config["kwargs"] == {
-        "column": "fare_amount",
-        "min_value": 0.0,
-        "strict_min": False,
-        "mostly": 8.75e-1,
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": True,
-        "profiler_config": custom_profiler_config.to_json_dict(),
-        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-    }
+        result = validator.expect_column_values_to_be_between(
+            column=column_name,
+            min_value=0.0,
+            mostly=8.75e-1,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+            profiler_config=custom_profiler_config,
+        )
+        assert result.success
+        assert result.expectation_config["kwargs"] == {
+            "column": "fare_amount",
+            "min_value": 0.0,
+            "strict_min": False,
+            "mostly": 8.75e-1,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "profiler_config": custom_profiler_config.to_json_dict(),
+            "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+        }
 
-    with pytest.raises(AssertionError) as e:
-        # noinspection PyUnusedLocal
+        with pytest.raises(AssertionError) as e:
+            # noinspection PyUnusedLocal
+            result = validator.expect_column_values_to_be_between(
+                column=column_name,
+                mostly=1.0,
+                result_format="SUMMARY",
+                include_config=True,
+                auto=False,
+                profiler_config=custom_profiler_config,
+            )
+        assert "min_value and max_value cannot both be None" in str(e.value)
+
+        batch_request = {
+            "datasource_name": "taxi_pandas",
+            "data_connector_name": "monthly",
+            "data_asset_name": "my_reports",
+            "data_connector_query": {
+                "index": 1,
+            },
+        }
+
+        validator: Validator = get_validator_with_expectation_suite(
+            data_context=context,
+            batch_list=None,
+            batch_request=batch_request,
+            expectation_suite_name=None,
+            expectation_suite=None,
+            component_name="profiler",
+            persist=False,
+        )
+        assert len(validator.batches) == 1
+
+        custom_profiler_config = RuleBasedProfilerConfig(
+            name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+            config_version=1.0,
+            variables={
+                "mostly": 1.0,
+                "strict_min": False,
+                "strict_max": False,
+            },
+            rules={
+                "custom_column_values_between_rule": {
+                    "domain_builder": {
+                        "class_name": "ColumnDomainBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                    },
+                    "parameter_builders": [
+                        {
+                            "name": "my_min_estimator",
+                            "class_name": "MetricMultiBatchParameterBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                            "metric_name": "column.min",
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "enforce_numeric_metric": True,
+                            "replace_nan_with_zero": True,
+                        },
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "expectation_type": "expect_column_values_to_be_between",
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                            "column": "$domain.domain_kwargs.column",
+                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "mostly": "$variables.mostly",
+                            "strict_min": "$variables.strict_min",
+                            "meta": {
+                                "details": {
+                                    "my_min_estimator": "$parameter.my_min_estimator.details",
+                                },
+                            },
+                        },
+                    ],
+                },
+            },
+        )
+
         result = validator.expect_column_values_to_be_between(
             column=column_name,
             mostly=1.0,
             result_format="SUMMARY",
             include_config=True,
-            auto=False,
+            auto=True,
             profiler_config=custom_profiler_config,
         )
-    assert "min_value and max_value cannot both be None" in str(e.value)
-
-    batch_request = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-        "data_connector_query": {
-            "index": 1,
-        },
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        data_context=context,
-        batch_list=None,
-        batch_request=batch_request,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="profiler",
-        persist=False,
-    )
-    assert len(validator.batches) == 1
-
-    custom_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={
-            "mostly": 1.0,
+        assert result.success
+        assert result.expectation_config["kwargs"] == {
+            "column": "fare_amount",
+            "min_value": -21.0,
             "strict_min": False,
-            "strict_max": False,
-        },
-        rules={
-            "custom_column_values_between_rule": {
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "parameter_builders": [
-                    {
-                        "name": "my_min_estimator",
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "column.min",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "enforce_numeric_metric": True,
-                        "replace_nan_with_zero": True,
-                    },
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_values_to_be_between",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "column": "$domain.domain_kwargs.column",
-                        "min_value": "$parameter.my_min_estimator.value[0]",
-                        "mostly": "$variables.mostly",
-                        "strict_min": "$variables.strict_min",
-                        "meta": {
-                            "details": {
-                                "my_min_estimator": "$parameter.my_min_estimator.details",
-                            },
-                        },
-                    },
-                ],
-            },
-        },
-    )
+            "mostly": 1.0,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "profiler_config": custom_profiler_config.to_json_dict(),
+            "batch_id": "0808e185a52825d22356de2fe00a8f5f",
+        }
 
-    result = validator.expect_column_values_to_be_between(
-        column=column_name,
-        mostly=1.0,
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-        profiler_config=custom_profiler_config,
-    )
-    assert result.success
-    assert result.expectation_config["kwargs"] == {
-        "column": "fare_amount",
-        "min_value": -21.0,
-        "strict_min": False,
-        "mostly": 1.0,
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": True,
-        "profiler_config": custom_profiler_config.to_json_dict(),
-        "batch_id": "0808e185a52825d22356de2fe00a8f5f",
-    }
-
-    result = validator.expect_column_values_to_be_between(
-        column=column_name,
-        min_value=-21.0,
-        mostly=1.0,
-        result_format="SUMMARY",
-        include_config=True,
-        auto=False,
-    )
-    assert result.success
-    assert result.expectation_config["kwargs"] == {
-        "column": "fare_amount",
-        "min_value": -21.0,
-        "mostly": 1.0,
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": False,
-        "batch_id": "0808e185a52825d22356de2fe00a8f5f",
-    }
+        result = validator.expect_column_values_to_be_between(
+            column=column_name,
+            min_value=-21.0,
+            mostly=1.0,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=False,
+        )
+        assert result.success
+        assert result.expectation_config["kwargs"] == {
+            "column": "fare_amount",
+            "min_value": -21.0,
+            "mostly": 1.0,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": False,
+            "batch_id": "0808e185a52825d22356de2fe00a8f5f",
+        }
+    finally:
+        expectation_impl.default_kwarg_values[
+            "profiler_config"
+        ] = default_profiler_config
 
 
 @pytest.mark.skipif(
