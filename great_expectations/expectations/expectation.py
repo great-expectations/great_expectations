@@ -880,6 +880,7 @@ class Expectation(metaclass=MetaExpectation):
         interactive_evaluation=True,
         data_context=None,
         runtime_configuration=None,
+        force_no_progress_bar: bool = False,
     ):
         include_rendered_content: bool = validator._include_rendered_content
 
@@ -892,6 +893,7 @@ class Expectation(metaclass=MetaExpectation):
         evr = validator.graph_validate(
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
+            force_no_progress_bar=force_no_progress_bar,
         )[0]
         if include_rendered_content:
             evr.render()
@@ -1268,6 +1270,7 @@ class Expectation(metaclass=MetaExpectation):
         test_data_cases: List[ExpectationTestDataCases],
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
         raise_exceptions_for_backends: bool = False,
+        force_no_progress_bar: bool = True,
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
         test_results = []
@@ -1285,6 +1288,7 @@ class Expectation(metaclass=MetaExpectation):
                 expectation_type=exp_test["expectation_type"],
                 test=exp_test["test"],
                 raise_exception=False,
+                force_no_progress_bar=force_no_progress_bar,
             )
             print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
             if error_message is None:
