@@ -1,5 +1,7 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
+from typing import Optional
+from unittest import mock
 from unittest.mock import patch
 
 import pytest
@@ -221,18 +223,19 @@ def data_context_config(data_context_config_dict: dict) -> DataContextConfig:
 
 
 @pytest.fixture
-def data_context_in_cloud_mode_mocked(
+@patch("great_expectations.data_context.DataContext._save_project_config")
+def mocked_data_context_in_cloud_mode(
+    mock_save_project_config: mock.MagicMock,
     ge_cloud_config: GeCloudConfig,
     data_context_config: DataContextConfig,
 ):
-    def mocked_config():
+    def mocked_config(*args, **kwargs) -> DataContextConfig:
         return data_context_config
 
-    def mocked_cloud_config():
+    def mocked_get_ge_cloud_config(*args, **kwargs) -> GeCloudConfig:
         return ge_cloud_config
 
-    print(mocked_config())
-
+    # TODO: tmp file path for context
     with patch(
         "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
         autospec=True,
@@ -241,13 +244,43 @@ def data_context_in_cloud_mode_mocked(
         with patch(
             "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
             autospec=True,
-            side_effect=mocked_cloud_config,
+            side_effect=mocked_get_ge_cloud_config,
         ):
             context: DataContext = DataContext(ge_cloud_mode=True)
             print(context.config)
             return context
 
 
-def test_sandbox(data_context_in_cloud_mode_mocked):
-    # print(data_context_in_cloud_mode_mocked.config)
+# @patch("great_expectations.data_context.DataContext._save_project_config")
+def test_sandbox(
+    # mock_save_project_config: mock.MagicMock,
+    mocked_data_context_in_cloud_mode: DataContext,
+    # ge_cloud_config: GeCloudConfig,
+    # data_context_config: DataContextConfig,
+):
+
+    # def mocked_config(*args, **kwargs) -> DataContextConfig:
+    #     return data_context_config
+    #
+    # def mocked_get_ge_cloud_config(*args, **kwargs) -> GeCloudConfig:
+    #     return ge_cloud_config
+    #
+    # with patch(
+    #     "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+    #     autospec=True,
+    #     side_effect=mocked_config,
+    # ):
+    #     with patch(
+    #         "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
+    #         autospec=True,
+    #         side_effect=mocked_get_ge_cloud_config,
+    #     ):
+    #         context: DataContext = DataContext(ge_cloud_mode=True)
+    #         print(context.config)
+    #         pass
+    #         # return context
+
+    print(mocked_data_context_in_cloud_mode.config)
+    # context = DataContext(ge_cloud_mode=True)
+    # print(context.config)
     pass
