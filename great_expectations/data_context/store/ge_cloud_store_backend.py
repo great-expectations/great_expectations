@@ -194,6 +194,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response = requests.put(url, json=data, headers=self.auth_headers)
             response_status_code = response.status_code
 
+            # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
+            # for the ExpectationSuite endpoint. As such, this is a temporary fork to
+            # ensure that legacy PATCH behavior is supported.
             if (
                 response_status_code == 405
                 and resource_type is GeCloudRESTResource.EXPECTATION_SUITE

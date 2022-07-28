@@ -1351,7 +1351,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         res = self._data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
         )
-        # self._synchronize_self_with_underlying_data_context()
         return res
 
     @usage_statistics_enabled_method(
