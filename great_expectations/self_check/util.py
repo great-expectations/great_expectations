@@ -2230,7 +2230,6 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                             result["success"] == value
                         ), f"{result['success']} != {value}"
                 else:
-                    print(result["success"])
                     assert result["success"] == value, f"{result['success']} != {value}"
 
             elif key == "observed_value":
