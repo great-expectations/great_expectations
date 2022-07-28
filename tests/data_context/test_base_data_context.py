@@ -320,3 +320,4 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
         ge_cloud_id=expectation_suite_ge_cloud_id
     )
     assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert len(suite_on_context.expectations) == 5

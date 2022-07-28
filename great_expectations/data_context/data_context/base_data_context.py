@@ -1353,6 +1353,19 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         return res
 
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: Optional[str] = None,
+    ) -> ExpectationSuite:
+        """
+        See `AbstractDataContext.delete_expectation_suite` for more information.
+        """
+        res = self._data_context.delete_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        self._synchronize_self_with_underlying_data_context()
+        return res
+
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
         args_payload_fn=save_expectation_suite_usage_statistics,
