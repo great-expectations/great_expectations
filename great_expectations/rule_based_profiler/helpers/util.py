@@ -462,7 +462,7 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
                 SemanticDomainTypes.LOGIC,
                 SemanticDomainTypes.IDENTIFIER,
             ]
-            for semantic_domain_type in (inferred_semantic_domain_type.values())
+            for semantic_domain_type in inferred_semantic_domain_type.values()
         ]
     )
 
@@ -527,7 +527,7 @@ def compute_kde_quantiles_point_estimate(
     metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
         metric_values, bw_method=bw_method
     )
-    metric_values_gaussian_sample: float
+    metric_values_gaussian_sample: np.ndarray
     if random_seed:
         metric_values_gaussian_sample = metric_values_density_estimate.resample(
             n_resamples,
@@ -538,15 +538,15 @@ def compute_kde_quantiles_point_estimate(
             n_resamples,
         )
 
-    lower_quantile_point_estimate: float = np.quantile(
+    lower_quantile_point_estimate: np.float64 = numpy_quantile(
         metric_values_gaussian_sample,
         q=lower_quantile_pct,
-        interpolation=quantile_statistic_interpolation_method,
+        method=quantile_statistic_interpolation_method,
     )
-    upper_quantile_point_estimate: float = np.quantile(
+    upper_quantile_point_estimate: np.float64 = numpy_quantile(
         metric_values_gaussian_sample,
         q=upper_quantile_pct,
-        interpolation=quantile_statistic_interpolation_method,
+        method=quantile_statistic_interpolation_method,
     )
 
     return NumericRangeEstimationResult(
@@ -649,7 +649,7 @@ def compute_bootstrap_quantiles_point_estimate(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
-    lower_quantile_bias_corrected_point_estimate: Number = _determine_quantile_bias_corrected_point_estimate(
+    lower_quantile_bias_corrected_point_estimate: np.float64 = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=lower_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
@@ -657,7 +657,7 @@ def compute_bootstrap_quantiles_point_estimate(
         sample_quantile=sample_lower_quantile,
     )
 
-    upper_quantile_bias_corrected_point_estimate: Number = _determine_quantile_bias_corrected_point_estimate(
+    upper_quantile_bias_corrected_point_estimate: np.float64 = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
@@ -682,8 +682,8 @@ def _determine_quantile_bias_corrected_point_estimate(
     quantile_statistic_interpolation_method: str,
     quantile_bias_std_error_ratio_threshold: float,
     sample_quantile: np.ndarray,
-) -> Number:
-    bootstrap_quantiles: Union[np.ndarray, Number] = numpy_quantile(
+) -> np.float64:
+    bootstrap_quantiles: Union[np.ndarray, np.float64] = numpy_quantile(
         bootstraps,
         q=quantile_pct,
         axis=1,
@@ -697,7 +697,7 @@ def _determine_quantile_bias_corrected_point_estimate(
     # See:
     # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
     #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
-    quantile_bias_corrected_point_estimate: Number
+    quantile_bias_corrected_point_estimate: np.float64
 
     if (
         bootstrap_quantile_standard_error > 0.0

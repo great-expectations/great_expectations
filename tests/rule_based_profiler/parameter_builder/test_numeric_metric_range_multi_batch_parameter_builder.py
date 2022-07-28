@@ -343,6 +343,126 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
+def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    data_context: DataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    metric_domain_kwargs: dict = {"column": "fare_amount"}
+
+    fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
+
+    numeric_metric_range_parameter_builder: ParameterBuilder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="column_min_range",
+            metric_name="column.min",
+            metric_multi_batch_parameter_builder_name=None,
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            estimator="exact",
+            include_estimator_samples_histogram_in_details=True,
+            false_positive_rate=None,
+            round_decimals=1,
+            evaluation_parameter_builder_configs=None,
+            data_context=data_context,
+        )
+    )
+
+    variables: Optional[ParameterContainer] = None
+
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
+    )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
+    assert parameter_container.parameter_nodes is None
+
+    numeric_metric_range_parameter_builder.build_parameters(
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
+        batch_request=batch_request,
+    )
+
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
+        parameter_container.parameter_nodes or {}
+    )
+    assert len(parameter_nodes) == 1
+
+    expected_value_dict: Dict[str, Optional[str]] = {
+        "value": None,
+        "details": {
+            "metric_configuration": {
+                "domain_kwargs": {"column": "fare_amount"},
+                "metric_name": "column.min",
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
+            },
+            "num_batches": 3,
+        },
+    }
+
+    parameter_node: ParameterNode = (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+            parameters=parameters,
+        )
+    )
+
+    actual_values_01: np.ndarray = parameter_node.pop("value")
+    parameter_node["value"] = None
+
+    actual_estimation_histogram: np.ndarray = parameter_node.details.pop(
+        "estimation_histogram"
+    )
+
+    assert parameter_node == expected_value_dict
+
+    actual_value_01_lower: float = actual_values_01[0]
+    actual_value_01_upper: float = actual_values_01[1]
+    expected_value_01_lower: float = -52.0
+    expected_value_01_upper: float = -21.0
+
+    assert actual_value_01_lower == expected_value_01_lower
+    assert actual_value_01_upper == expected_value_01_upper
+
+    expected_estimation_histogram: np.ndarray = np.array(
+        [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            2.0,
+        ]
+    )
+
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    ks_result: tuple = stats.ks_2samp(
+        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+    )
+    p_value: float = ks_result[1]
+    assert p_value > 9.5e-1
+
+
 def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):

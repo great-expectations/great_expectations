@@ -173,6 +173,9 @@ def pytest_addoption(parser):
         help="If set, run integration tests for docs",
     )
     parser.addoption(
+        "--azure", action="store_true", help="If set, execute tests again Azure"
+    )
+    parser.addoption(
         "--performance-tests",
         action="store_true",
         help="If set, run performance tests (which might also require additional arguments like --bigquery)",
@@ -217,6 +220,7 @@ def build_test_backends_list_cfe(metafunc):
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
     include_aws: bool = metafunc.config.getoption("--aws")
     include_trino: bool = metafunc.config.getoption("--trino")
+    include_azure: bool = metafunc.config.getoption("--azure")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -227,6 +231,7 @@ def build_test_backends_list_cfe(metafunc):
         include_bigquery=include_bigquery,
         include_aws=include_aws,
         include_trino=include_trino,
+        include_azure=include_azure,
     )
     return test_backend_names
 

@@ -54,9 +54,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     """
 
     RECOGNIZED_SAMPLING_METHOD_NAMES: set = {
-        "oneshot",
         "bootstrap",
+        "exact",
         "kde",
+        "oneshot",
     }
 
     RECOGNIZED_N_RESAMPLES_SAMPLING_METHOD_NAMES: set = {
@@ -92,7 +93,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         enforce_numeric_metric: Union[str, bool] = True,
         replace_nan_with_zero: Union[str, bool] = True,
         reduce_scalar_metric: Union[str, bool] = True,
-        false_positive_rate: Union[str, float] = 5.0e-2,
+        false_positive_rate: Optional[Union[str, float]] = None,
         estimator: str = "bootstrap",
         n_resamples: Optional[Union[str, int]] = None,
         random_seed: Optional[Union[str, int]] = None,
@@ -124,8 +125,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
                 identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
-            estimator: choice of the estimation algorithm: "oneshot" (one observation), "bootstrap" (default),
-                or "kde" (kernel density estimation).
+            estimator: choice of the estimation algorithm: "oneshot" (one observation), "bootstrap" (default), "exact"
+                (deterministic, incorporating entire observed value range), or "kde" (kernel density estimation).
             n_resamples: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 9999 is used (default in
                 "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
@@ -138,8 +139,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             bw_method: Applicable only for the "kde" sampling method -- if omitted (default), then "scott" is used.
                 Possible values for the estimator bandwidth method are described at:
                 https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
-            include_estimator_samples_histogram_in_details: Applicable only for the "bootstrap" sampling method -- if
-                True, then add 10-bin histogram of bootstraps to "details"; otherwise, omit this information (default).
+            include_estimator_samples_histogram_in_details: Applicable only for the "bootstrap" and "kde" sampling
+                methods -- if True, then add 10-bin histogram of metric samples to "details"; otherwise, omit (default).
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
                 (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
@@ -165,6 +166,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         self._metric_multi_batch_parameter_builder_name = (
             metric_multi_batch_parameter_builder_name
         )
+
+        if false_positive_rate is None:
+            false_positive_rate = 5.0e-2
 
         self._false_positive_rate = false_positive_rate
 
@@ -407,7 +411,10 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
 
         estimator_func: Callable
         estimator_kwargs: dict
-        if estimator == "bootstrap":
+        if estimator == "exact":
+            estimator_func = self._get_exact_estimate
+            estimator_kwargs = {}
+        elif estimator == "bootstrap":
             estimator_func = self._get_bootstrap_estimate
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
@@ -426,7 +433,8 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                 "bw_method": self.bw_method,
             }
         else:
-            estimator_func = self._get_deterministic_estimate
+            # Apply "oneshot" estimator (should be used for testing purposes only).
+            estimator_func = self._get_oneshot_estimate
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
                 "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
@@ -722,7 +730,7 @@ positive integer, or must be omitted (or set to None).
             float
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=kwargs.get("float"),
+            parameter_reference=kwargs.get("quantile_bias_std_error_ratio_threshold"),
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
@@ -805,7 +813,7 @@ positive integer, or must be omitted (or set to None).
         )
 
     @staticmethod
-    def _get_deterministic_estimate(
+    def _get_oneshot_estimate(
         metric_values: np.ndarray,
         **kwargs,
     ) -> NumericRangeEstimationResult:
@@ -818,4 +826,18 @@ positive integer, or must be omitted (or set to None).
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
             quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        )
+
+    @staticmethod
+    def _get_exact_estimate(
+        metric_values: np.ndarray,
+        **kwargs,
+    ) -> NumericRangeEstimationResult:
+        return NumericRangeEstimationResult(
+            estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[
+                0
+            ],
+            value_range=np.asarray(
+                [np.amin(a=metric_values), np.amax(a=metric_values)]
+            ),
         )
