@@ -261,7 +261,7 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     res = validator.expect_column_max_to_be_between("x", min_value=0, max_value=10)
     assert res.success
 
-    expectations_on_validator_before = len(validator.expectation_suite)
+    expectations_on_validator_before = validator.expectation_suite
 
     assert expectation_suite_ge_cloud_id in context.list_expectation_suite_names()
     suite_on_context = context.get_expectation_suite(
@@ -277,5 +277,5 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     )
     assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
 
-    expectations_on_validator_after = len(validator.expectation_suite)
+    expectations_on_validator_after = validator.expectation_suite
     assert expectations_on_validator_before == expectations_on_validator_after
