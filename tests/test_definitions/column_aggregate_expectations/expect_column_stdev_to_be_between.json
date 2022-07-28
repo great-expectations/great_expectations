@@ -36,32 +36,32 @@
         }
       },
       {
-      "title" : "positive_test__exact_min_and_max",
-      "exact_match_out" : false,
-      "in": {
-        "column": "dist1",
-        "min_value": 1.1547005383792517,
-        "max_value": 1.1547005383792517
+        "title" : "positive_test__exact_min_and_max",
+        "exact_match_out" : false,
+        "in": {
+          "column": "dist1",
+          "min_value": 1.1547005383792517,
+          "max_value": 1.1547005383792517
+        },
+        "out": {
+          "success": true,
+          "observed_value": 1.1547005383792517
+        },
+        "only_for": ["pandas", "sqlite"]
       },
-      "out": {
-        "success": true,
-        "observed_value": 1.1547005383792517
-      },
-      "only_for": ["pandas", "sqlite"]
-      },
-            {
-      "title" : "positive_test__exact_min_and_max_sqlalchemy",
-      "exact_match_out" : false,
-      "in": {
-        "column": "dist1",
-        "min_value": 1.1547005383792515,
-        "max_value": 1.1547005383792515
-      },
-      "out": {
-        "success": true,
-        "observed_value": 1.1547005383792515
-      },
-      "suppress_test_for": ["spark", "pandas", "sqlite"]
+      {
+        "title" : "positive_test__exact_min_and_max_sqlalchemy",
+        "exact_match_out" : false,
+        "in": {
+          "column": "dist1",
+          "min_value": 1.1547005383792515,
+          "max_value": 1.1547005383792515
+        },
+        "out": {
+          "success": true,
+          "observed_value": 1.1547005383792515
+        },
+        "suppress_test_for": ["spark", "pandas", "sqlite"]
       },
       {
         "title": "basic_negative_test",
