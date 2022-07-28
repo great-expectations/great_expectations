@@ -2136,7 +2136,7 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
     execution_engine:
         class_name: PandasExecutionEngine
     data_connectors:
-        my_runtime_data_connector_name:
+        my_runtime_data_connector:
             class_name: RuntimeDataConnector
             assets:
                 asset_a:

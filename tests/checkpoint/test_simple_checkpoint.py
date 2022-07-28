@@ -1019,14 +1019,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     # create expectation suite
     context.create_expectation_suite("my_expectation_suite")
 
-    print(f"here is the datacontext: {context.get_datasource()}")
+    # print(f"here is the datacontext: {context.get_datasource()}")
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"month": 1},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
