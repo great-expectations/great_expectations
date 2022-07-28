@@ -194,6 +194,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response = requests.put(url, json=data, headers=self.auth_headers)
             response_status_code = response.status_code
 
+            if (
+                response_status_code == 405
+                and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
+            ):
+                response = requests.patch(url, json=data, headers=self.auth_headers)
+                response_status_code = response.status_code
+
             if response_status_code < 300:
                 return True
             return False

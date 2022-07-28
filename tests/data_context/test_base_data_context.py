@@ -1,10 +1,12 @@
+import random
+import string
 from typing import Callable, List, Tuple
-from unittest import mock
 
 import pandas as pd
 import pytest
 
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.data_context.data_context import DataContext
@@ -172,11 +174,39 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
         suites = context.list_expectation_suites()
         expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
 
-        context.create_expectation_suite(
-            "my_test_suite",
+        suite_name = f"suite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+        suite = context.create_expectation_suite(
+            suite_name,
             ge_cloud_id=expectation_suite_ge_cloud_id,
             overwrite_existing=True,
         )
+
+        configs = [
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={"column": "infinities"},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_unique",
+                kwargs={"column": "naturals"},
+            ),
+        ]
+        for config in configs:
+            suite.add_expectation(expectation_configuration=config)
+
+        context.save_expectation_suite(
+            expectation_suite=suite,
+            ge_cloud_id=expectation_suite_ge_cloud_id,
+            overwrite_existing=True,
+        )
+
+        assert len(suite.expectations) == 4
 
         # Grab the first datasource/data connector/data asset bundle we can to use in Validation instantiation
         datasource_name = "Test Pandas Datasource"
@@ -203,37 +233,39 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
 
+        assert len(validator.expectation_suite.expectations) == 4
+
         return validator, expectation_suite_ge_cloud_id
 
     return _closure
 
 
-@pytest.mark.cloud
-def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
-    prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
-    monkeypatch,
-) -> None:
-    """
-    What does this test do and why?
-    Ensures that the Validator that is created through DataContext.get_validator() is
-    Cloud-enabled if the DataContext used to instantiate the object is Cloud-enabled.
-    Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
-    backend.
-    """
-    # Context is shared between other tests so we need to set a required env var
-    monkeypatch.setenv("MY_PLUGINS_DIRECTORY", "plugins/")
-    context = DataContext(ge_cloud_mode=True)
+# @pytest.mark.cloud
+# def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
+#     prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
+#     monkeypatch,
+# ) -> None:
+#     """
+#     What does this test do and why?
+#     Ensures that the Validator that is created through DataContext.get_validator() is
+#     Cloud-enabled if the DataContext used to instantiate the object is Cloud-enabled.
+#     Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
+#     backend.
+#     """
+#     # Context is shared between other tests so we need to set a required env var
+#     monkeypatch.setenv("MY_PLUGINS_DIRECTORY", "plugins/")
+#     context = DataContext(ge_cloud_mode=True)
 
-    (
-        validator,
-        _,
-    ) = prepare_validator_for_cloud_e2e(context)
+#     (
+#         validator,
+#         _,
+#     ) = prepare_validator_for_cloud_e2e(context)
 
-    with mock.patch("requests.put", autospec=True) as mock_put:
-        type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
-        validator.save_expectation_suite()
+#     with mock.patch("requests.put", autospec=True) as mock_put:
+#         type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
+#         validator.save_expectation_suite()
 
-    assert mock_put.call_count == 1
+#     assert mock_put.call_count == 1
 
 
 @pytest.mark.cloud
@@ -258,10 +290,12 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
         expectation_suite_ge_cloud_id,
     ) = prepare_validator_for_cloud_e2e(context)
 
+    assert len(validator.expectation_suite.expectations) == 4
+
     res = validator.expect_column_max_to_be_between("x", min_value=0, max_value=10)
     assert res.success
 
-    expectations_on_validator_before = validator.expectation_suite
+    assert len(validator.expectation_suite.expectations) == 5
 
     assert expectation_suite_ge_cloud_id in context.list_expectation_suite_names()
     suite_on_context = context.get_expectation_suite(
@@ -277,5 +311,4 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     )
     assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
 
-    expectations_on_validator_after = validator.expectation_suite
-    assert expectations_on_validator_before == expectations_on_validator_after
+    assert len(validator.expectation_suite.expectations) == 5
