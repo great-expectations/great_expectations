@@ -1,5 +1,6 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
+import pathlib
 from typing import Optional
 from unittest import mock
 from unittest.mock import patch
@@ -226,16 +227,20 @@ def data_context_config(data_context_config_dict: dict) -> DataContextConfig:
 @patch("great_expectations.data_context.DataContext._save_project_config")
 def mocked_data_context_in_cloud_mode(
     mock_save_project_config: mock.MagicMock,
+    tmp_path: pathlib.Path,
     ge_cloud_config: GeCloudConfig,
     data_context_config: DataContextConfig,
 ):
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_name: str = str(project_path)
+
     def mocked_config(*args, **kwargs) -> DataContextConfig:
         return data_context_config
 
     def mocked_get_ge_cloud_config(*args, **kwargs) -> GeCloudConfig:
         return ge_cloud_config
 
-    # TODO: tmp file path for context
     with patch(
         "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
         autospec=True,
@@ -246,7 +251,10 @@ def mocked_data_context_in_cloud_mode(
             autospec=True,
             side_effect=mocked_get_ge_cloud_config,
         ):
-            context: DataContext = DataContext(ge_cloud_mode=True)
+            context: DataContext = DataContext(
+                ge_cloud_mode=True,
+                context_root_dir=project_path_name,
+            )
             print(context.config)
             return context
 
