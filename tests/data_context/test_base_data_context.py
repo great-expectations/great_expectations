@@ -2,9 +2,10 @@ import os
 from typing import List
 from unittest import mock
 
+import pandas as pd
 import pytest
 
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.data_context.data_context import DataContext
@@ -192,7 +193,7 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     )
 
     # Grab the first datasource/data connector/data asset bundle we can to use in Validation instantiation
-    datasource_name = sorted(context.datasources.keys())[0]
+    datasource_name = "Test Pandas Datasource"
     datasource = context.datasources[datasource_name]
 
     data_connector = tuple(datasource.data_connectors.values())[0]
@@ -200,10 +201,14 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
 
     data_asset_name = tuple(data_connector.assets.keys())[0]
 
-    batch_request = BatchRequest(
+    batch_request = RuntimeBatchRequest(
         datasource_name=datasource_name,
         data_connector_name=data_connector_name,
         data_asset_name=data_asset_name,
+        runtime_parameters={
+            "batch_data": pd.DataFrame()
+        },  # empty df just for valid batch request
+        batch_identifiers={"col1": "123"},
     )
 
     # Create Validator and ensure that persistence is Cloud-backed
