@@ -2186,9 +2186,9 @@ def generate_expectation_tests(
                     # if dialect != "bigquery"
                 }
 
-        # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
-        if engines_to_include.get("sqlalchemy") is True and not dialects_to_include:
-            dialects_to_include["sqlite"] = True
+        # # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
+        # if engines_to_include.get("sqlalchemy") is True and not dialects_to_include:
+        #     dialects_to_include["sqlite"] = True
 
         backends = build_test_backends_list(
             include_pandas=engines_to_include.get("pandas", False),
