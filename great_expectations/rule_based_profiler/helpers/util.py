@@ -464,7 +464,7 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
                 SemanticDomainTypes.LOGIC,
                 SemanticDomainTypes.IDENTIFIER,
             ]
-            for semantic_domain_type in (inferred_semantic_domain_type.values())
+            for semantic_domain_type in inferred_semantic_domain_type.values()
         ]
     )
 
