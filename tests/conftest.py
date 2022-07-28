@@ -2420,7 +2420,7 @@ def empty_data_context_in_cloud_mode(
     "great_expectations.data_context.store.DatasourceStore.list_keys",
     return_value=[],
 )
-def empty_cloud_data_context_custom_base_url(
+def empty_base_data_context_in_cloud_mode_custom_base_url(
     mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
