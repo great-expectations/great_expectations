@@ -2381,9 +2381,7 @@ def empty_cloud_data_context(
 
 
 @pytest.fixture
-@mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def empty_data_context_in_cloud_mode(
-    mock_save_project_config: mock.MagicMock,
     tmp_path: pathlib.Path,
     ge_cloud_config: GeCloudConfig,
     empty_ge_cloud_data_context_config: DataContextConfig,
@@ -2400,6 +2398,8 @@ def empty_data_context_in_cloud_mode(
         return ge_cloud_config
 
     with mock.patch(
+        "great_expectations.data_context.DataContext._save_project_config"
+    ), mock.patch(
         "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
         autospec=True,
         side_effect=mocked_config,
