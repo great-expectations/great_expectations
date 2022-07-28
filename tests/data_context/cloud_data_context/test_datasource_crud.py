@@ -47,7 +47,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     to create the datasource."""
 
     context: BaseDataContext = empty_base_data_context_in_cloud_mode
-    # Make sure we are using the right fixture
+    # Make sure the fixture has the right configuration
     assert isinstance(context, BaseDataContext)
     assert isinstance(
         context._datasource_store._store_backend,
@@ -164,7 +164,7 @@ def test_data_context_in_cloud_mode_add_datasource(
     to create the datasource."""
 
     context: DataContext = empty_data_context_in_cloud_mode
-    # Make sure we are using the right fixture
+    # Make sure the fixture has the right configuration
     assert isinstance(context, DataContext)
     assert isinstance(
         context._datasource_store._store_backend,
@@ -271,7 +271,7 @@ def test_data_context_in_cloud_mode_add_datasource(
     to create the datasource."""
 
     context: CloudDataContext = empty_cloud_data_context
-    # Make sure we are using the right fixture
+    # Make sure the fixture has the right configuration
     assert isinstance(context, CloudDataContext)
     assert isinstance(
         context._datasource_store._store_backend,
