@@ -229,14 +229,14 @@ def mocked_data_context_in_cloud_mode(
     mock_save_project_config: mock.MagicMock,
     tmp_path: pathlib.Path,
     ge_cloud_config: GeCloudConfig,
-    data_context_config: DataContextConfig,
+    empty_ge_cloud_data_context_config: DataContextConfig,
 ):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path_name: str = str(project_path)
 
     def mocked_config(*args, **kwargs) -> DataContextConfig:
-        return data_context_config
+        return empty_ge_cloud_data_context_config
 
     def mocked_get_ge_cloud_config(*args, **kwargs) -> GeCloudConfig:
         return ge_cloud_config
@@ -245,50 +245,19 @@ def mocked_data_context_in_cloud_mode(
         "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
         autospec=True,
         side_effect=mocked_config,
+    ), patch(
+        "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
+        autospec=True,
+        side_effect=mocked_get_ge_cloud_config,
     ):
-        with patch(
-            "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
-            autospec=True,
-            side_effect=mocked_get_ge_cloud_config,
-        ):
-            context: DataContext = DataContext(
-                ge_cloud_mode=True,
-                context_root_dir=project_path_name,
-            )
-            print(context.config)
-            return context
+        context: DataContext = DataContext(
+            ge_cloud_mode=True,
+            context_root_dir=project_path_name,
+        )
+        return context
 
 
-# @patch("great_expectations.data_context.DataContext._save_project_config")
 def test_sandbox(
-    # mock_save_project_config: mock.MagicMock,
     mocked_data_context_in_cloud_mode: DataContext,
-    # ge_cloud_config: GeCloudConfig,
-    # data_context_config: DataContextConfig,
 ):
-
-    # def mocked_config(*args, **kwargs) -> DataContextConfig:
-    #     return data_context_config
-    #
-    # def mocked_get_ge_cloud_config(*args, **kwargs) -> GeCloudConfig:
-    #     return ge_cloud_config
-    #
-    # with patch(
-    #     "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
-    #     autospec=True,
-    #     side_effect=mocked_config,
-    # ):
-    #     with patch(
-    #         "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
-    #         autospec=True,
-    #         side_effect=mocked_get_ge_cloud_config,
-    #     ):
-    #         context: DataContext = DataContext(ge_cloud_mode=True)
-    #         print(context.config)
-    #         pass
-    #         # return context
-
     print(mocked_data_context_in_cloud_mode.config)
-    # context = DataContext(ge_cloud_mode=True)
-    # print(context.config)
-    pass
