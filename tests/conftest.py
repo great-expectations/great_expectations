@@ -2259,7 +2259,7 @@ def data_context_with_query_store(
 
 
 @pytest.fixture
-def id_():
+def ge_cloud_id():
     # Fake id but adheres to the format required of a UUID
     return "731ee1bd-604a-4851-9ee8-bca8ffb32bce"
 
@@ -2534,7 +2534,7 @@ def ge_cloud_profiler_id() -> str:
 @pytest.fixture
 def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
     return GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.PROFILER, id_=ge_cloud_profiler_id
+        resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_profiler_id
     )
 
 
