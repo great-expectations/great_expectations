@@ -2329,22 +2329,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ge_cloud_id=ge_cloud_id,
         )
 
-    def get_validator_using_batch_list(
-        self,
-        expectation_suite: ExpectationSuite,
-        batch_list: List[Batch],
-        include_rendered_content: bool = False,
-        **kwargs: Optional[dict],
-    ) -> Validator:
-        validator = super().get_validator_using_batch_list(
-            expectation_suite=expectation_suite,
-            batch_list=batch_list,
-            include_rendered_content=include_rendered_content,
-            kwargs=kwargs,
-        )
-        validator.data_context = self._data_context
-        return validator
-
     def test_yaml_config(
         self,
         yaml_config: str,
