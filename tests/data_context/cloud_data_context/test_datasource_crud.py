@@ -1,8 +1,5 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
-import pathlib
-from typing import Optional
-from unittest import mock
 from unittest.mock import patch
 
 import pytest
@@ -10,24 +7,12 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store import GeCloudStoreBackend
-from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
-    DataContextConfig,
-    DatasourceConfig,
-    GeCloudConfig,
-)
+from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.datasource import BaseDatasource
 
 
 @pytest.mark.cloud
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "data_context_type",
-    [
-        pytest.param(data_context_type, id=data_context_type)
-        for data_context_type in ("BaseDataContext", "DataContext", "CloudDataContext")
-    ],
-)
 @pytest.mark.parametrize(
     "save_changes",
     [
@@ -47,35 +32,24 @@ from great_expectations.datasource import BaseDatasource
         ),
     ],
 )
-def test_cloud_mode_add_datasource(
+def test_base_data_context_in_cloud_mode_add_datasource(
     data_context_type: str,
     save_changes: bool,
     config_includes_name_setting: str,
     empty_cloud_data_context: BaseDataContext,
-    # empty_data_context_in_cloud_mode: DataContext,
     datasource_config: DatasourceConfig,
     datasource_name: str,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     request_headers: dict,
 ):
-    """A Data Context in cloud mode should save to the cloud backed Datasource store when calling add_datasource
+    """A BaseDataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource
     with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response
     to create the datasource."""
 
-    # Set the appropriate fixture
-    context: BaseDataContext
-    if data_context_type == "BaseDataContext":
-        context = empty_cloud_data_context
-        # Make sure we are using the right fixture
-        assert isinstance(context, BaseDataContext)
-    #
-    # elif data_context_type == "DataContext":
-    #     context = empty_data_context_in_cloud_mode
-    else:
-        context = empty_cloud_data_context
-
+    context: BaseDataContext = empty_cloud_data_context
     # Make sure we are using the right fixture
+    assert isinstance(context, BaseDataContext)
     assert isinstance(
         context._datasource_store._store_backend,
         GeCloudStoreBackend,
@@ -187,8 +161,7 @@ def test_data_context_in_cloud_mode_add_datasource(
     ge_cloud_organization_id: str,
     request_headers: dict,
 ):
-    """A Data Context in cloud mode should save to the cloud backed Datasource store when calling add_datasource
-    with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response
+    """A DataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
     to create the datasource."""
 
     context: DataContext = empty_data_context_in_cloud_mode
