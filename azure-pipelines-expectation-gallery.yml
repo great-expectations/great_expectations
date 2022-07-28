@@ -148,7 +148,7 @@ stages:
               secureFile: 'aws_config_sandbox'
               retryCount: '2'
 
-          - bash: python ./build_gallery.py
+          - bash: python ./build_gallery.py --no-contrib
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
             env:
