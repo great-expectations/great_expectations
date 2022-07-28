@@ -4,8 +4,10 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import DataContextConfig
 
 from great_expectations.data_context.store import (  # isort:skip
@@ -162,54 +164,52 @@ def test_get_config_with_variables_substituted(
 
 
 @pytest.mark.cloud
-@mock.patch("great_expectations.data_context.CloudDataContext.create_expectation_suite")
-def test_create_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
-    mock_cloud_create_expectation_suite: mock.MagicMock,
-    empty_cloud_data_context: BaseDataContext,
+@mock.patch("great_expectations.data_context.DataContext._save_project_config")
+def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
+    mock_save_project_config: mock.MagicMock,
 ) -> None:
     """
     What does this test do and why?
-
-    Ensures that when a BaseDataContext is instantiated with cloud_mode=True, the call to
-    ExpectationSuite CRUD leverages the implementation defined and managed by CloudDataContext.
+    Ensures that the Validator that is created through DataContext.get_validator() is
+    Cloud-enabled if the DataContext used to instantiate the object is Cloud-enabled.
+    Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
+    backend.
     """
-    context = empty_cloud_data_context
+    context = DataContext(ge_cloud_mode=True)
 
-    context.create_expectation_suite("my_expectation_suite")
-    assert mock_cloud_create_expectation_suite.call_count == 1
+    # Create a suite to be used in Validator instantiation
+    suites = context.list_expectation_suites()
+    expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
 
+    context.create_expectation_suite(
+        "my_test_suite",
+        ge_cloud_id=expectation_suite_ge_cloud_id,
+        overwrite_existing=True,
+    )
 
-@pytest.mark.cloud
-@mock.patch("great_expectations.data_context.CloudDataContext.get_expectation_suite")
-def test_get_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
-    mock_cloud_get_expectation_suite: mock.MagicMock,
-    empty_cloud_data_context: BaseDataContext,
-) -> None:
-    """
-    What does this test do and why?
+    # Grab the first datasource/data connector/data asset bundle we can to use in Validation instantiation
+    datasource = tuple(context.datasources.values())[0]
+    datasource_name = datasource.name
 
-    Ensures that when a BaseDataContext is instantiated with cloud_mode=True, the call to
-    ExpectationSuite CRUD leverages the implementation defined and managed by CloudDataContext.
-    """
-    context = empty_cloud_data_context
+    data_connector = tuple(datasource.data_connectors.values())[0]
+    data_connector_name = data_connector.name
 
-    context.get_expectation_suite("my_expectation_suite")
-    assert mock_cloud_get_expectation_suite.call_count == 1
+    data_asset_name = tuple(data_connector.assets.keys())[0]
 
+    batch_request = BatchRequest(
+        datasource_name=datasource_name,
+        data_connector_name=data_connector_name,
+        data_asset_name=data_asset_name,
+    )
 
-@pytest.mark.cloud
-@mock.patch("great_expectations.data_context.CloudDataContext.delete_expectation_suite")
-def test_delete_expectation_suite_with_cloud_enabled_context_uses_cloud_impl(
-    mock_cloud_delete_expectation_suite: mock.MagicMock,
-    empty_cloud_data_context: BaseDataContext,
-) -> None:
-    """
-    What does this test do and why?
+    # Create Validator and ensure that persistence is Cloud-backed
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+    )
 
-    Ensures that when a BaseDataContext is instantiated with cloud_mode=True, the call to
-    ExpectationSuite CRUD leverages the implementation defined and managed by CloudDataContext.
-    """
-    context = empty_cloud_data_context
+    with mock.patch("requests.put", autospec=True) as mock_put:
+        type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
+        validator.save_expectation_suite()
 
-    context.delete_expectation_suite("my_expectation_suite")
-    assert mock_cloud_delete_expectation_suite.call_count == 1
+    assert mock_put.call_count == 1
