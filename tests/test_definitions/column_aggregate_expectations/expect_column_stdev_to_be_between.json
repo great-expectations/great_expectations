@@ -47,7 +47,7 @@
           "success": true,
           "observed_value": 1.1547005383792517
         },
-        "only_for": ["pandas", "sqlite"]
+        "only_for": ["pandas", "sqlite", "mysql"]
       },
       {
         "title" : "positive_test__exact_min_and_max_sqlalchemy",
@@ -62,7 +62,7 @@
           "observed_value": 1.1547005383792515
         },
         "only_for": ["sqlalchemy"],
-        "suppress_test_for": ["sqlite"]
+        "suppress_test_for": ["sqlite", "mysql"]
       },
       {
         "title": "basic_negative_test",
