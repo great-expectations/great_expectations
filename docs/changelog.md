@@ -8,10 +8,12 @@ title: Changelog
 * [FEATURE] expect_profile_numeric_columns_percent_diff_(inclusive bounds) (#5586) (thanks @stevensecreti)
 * [FEATURE] DataConnector Query enabled for `SimpleSqlDatasource` (#5610)
 * [FEATURE] Implement the exact metric range estimate for NumericMetricRangeMultiBatchParameterBuilder (#5620)
+* [FEATURE] Ensure that id propogates from RuleBasedProfilerConfig to RuleBasedProfiler (#5617)
 * [BUGFIX] Pass cloud base url to datasource store (#5595)
 * [BUGFIX] Temporarily disable Trino `0.315.0` from requirements (#5606)
 * [BUGFIX] Update _create_trino_engine to check for schema before creating it (#5607)
 * [BUGFIX] Support `ExpectationSuite` CRUD at `BaseDataContext` level (#5604)
+* [BUGFIX] Update test due to change in postgres stdev calculation method (#5624)
 * [BUGFIX] Patch issue with `get_validator` on Cloud-backed `DataContext` (#5619)
 * [MAINTENANCE] Add name and id to DatasourceConfig (#5560)
 * [MAINTENANCE] Clear datasources in `test_data_context_datasources` to improve test performance and narrow test scope (#5588)
@@ -29,6 +31,7 @@ title: Changelog
 * [MAINTENANCE] remove approximate comparisons -- they will be replaced by estimator alternatives (#5618)
 * [MAINTENANCE] Making the dependency on dev-lite clearer (#5514)
 * [MAINTENANCE] Fix tests in tests/integration/profiling/rule_based_profiler/ and tests/render/renderer/ (#5611)
+* [MAINTENANCE] DataContext in cloud mode test add_datasource (#5625)
 
 ### 0.15.15
 * [FEATURE] Integrate `DataContextVariables` with `DataContext` (#5466)
