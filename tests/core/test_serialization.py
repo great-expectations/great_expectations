@@ -15,7 +15,6 @@ from great_expectations.core.util import (
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
-    CheckpointValidationConfigSchema,
     checkpointConfigSchema,
 )
 from great_expectations.util import (
@@ -475,49 +474,13 @@ def test_checkpoint_config_print(
 
 
 @pytest.mark.parametrize(
-    "checkpoint_validation_config,expected_serialized_checkpoint_validation_config",
-    [
-        pytest.param(
-            CheckpointValidationConfig(
-                batch_request={
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -1},
-                },
-                name="my_first_validation",
-            ),
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -1},
-                },
-                "name": "my_first_validation",
-            },
-            id="minimal",
-        ),
-    ],
-)
-def test_checkpoint_validation_config_is_serialized(
-    checkpoint_validation_config: CheckpointValidationConfig,
-    expected_serialized_checkpoint_validation_config: dict,
-) -> None:
-    """CheckpointValidationConfig should be serialized appropriately with/without optional params."""
-    observed = CheckpointValidationConfigSchema().dump(checkpoint_validation_config)
-
-    assert observed == expected_serialized_checkpoint_validation_config
-
-
-@pytest.mark.parametrize(
     "checkpoint_config,expected_serialized_checkpoint_config",
     [
         pytest.param(
             CheckpointConfig(
                 name="my_nested_checkpoint",
                 config_version=1,
-                template_name="my_nested_checkpoint_template_2",
+                template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
                     CheckpointValidationConfig(
@@ -527,22 +490,188 @@ def test_checkpoint_validation_config_is_serialized(
                             "data_asset_name": "users",
                             "data_connector_query": {"partition_index": -1},
                         },
-                        name="my_first_validation",
                     ),
+                ],
+            ),
+            {
+                "action_list": [],
+                "batch_request": {},
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "evaluation_parameters": {},
+                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_name": "users.delivery",
+                "ge_cloud_id": None,
+                "module_name": "great_expectations.checkpoint",
+                "name": "my_nested_checkpoint",
+                "profilers": [],
+                "run_name_template": None,
+                "runtime_configuration": {},
+                "template_name": "my_nested_checkpoint_template",
+                "validations": [
+                    {
+                        "batch_request": {
+                            "data_asset_name": "users",
+                            "data_connector_name": "my_data_connector",
+                            "data_connector_query": {
+                                "partition_index": -1,
+                            },
+                            "datasource_name": "my_datasource",
+                        },
+                    },
+                ],
+            },
+            id="config_with_no_name_or_id",
+        ),
+        pytest.param(
+            CheckpointConfig(
+                name="my_nested_checkpoint",
+                config_version=1,
+                template_name="my_nested_checkpoint_template",
+                expectation_suite_name="users.delivery",
+                validations=[
                     CheckpointValidationConfig(
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_data_connector",
                             "data_asset_name": "users",
-                            "data_connector_query": {"partition_index": -2},
+                            "data_connector_query": {"partition_index": -1},
                         },
-                        name="my_second_validation",
+                        name="my_validation",
                     ),
                 ],
             ),
-            {},
-            id="minimal",
-        )
+            {
+                "action_list": [],
+                "batch_request": {},
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "evaluation_parameters": {},
+                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_name": "users.delivery",
+                "ge_cloud_id": None,
+                "module_name": "great_expectations.checkpoint",
+                "name": "my_nested_checkpoint",
+                "profilers": [],
+                "run_name_template": None,
+                "runtime_configuration": {},
+                "template_name": "my_nested_checkpoint_template",
+                "validations": [
+                    {
+                        "batch_request": {
+                            "data_asset_name": "users",
+                            "data_connector_name": "my_data_connector",
+                            "data_connector_query": {
+                                "partition_index": -1,
+                            },
+                            "datasource_name": "my_datasource",
+                        },
+                        "name": "my_validation",
+                    },
+                ],
+            },
+            id="config_with_name",
+        ),
+        pytest.param(
+            CheckpointConfig(
+                name="my_nested_checkpoint",
+                config_version=1,
+                template_name="my_nested_checkpoint_template",
+                expectation_suite_name="users.delivery",
+                validations=[
+                    CheckpointValidationConfig(
+                        batch_request={
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_data_connector",
+                            "data_asset_name": "users",
+                            "data_connector_query": {"partition_index": -1},
+                        },
+                        id_="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                    ),
+                ],
+            ),
+            {
+                "action_list": [],
+                "batch_request": {},
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "evaluation_parameters": {},
+                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_name": "users.delivery",
+                "ge_cloud_id": None,
+                "module_name": "great_expectations.checkpoint",
+                "name": "my_nested_checkpoint",
+                "profilers": [],
+                "run_name_template": None,
+                "runtime_configuration": {},
+                "template_name": "my_nested_checkpoint_template",
+                "validations": [
+                    {
+                        "batch_request": {
+                            "data_asset_name": "users",
+                            "data_connector_name": "my_data_connector",
+                            "data_connector_query": {
+                                "partition_index": -1,
+                            },
+                            "datasource_name": "my_datasource",
+                        },
+                        "id_": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                    },
+                ],
+            },
+            id="config_with_id",
+        ),
+        pytest.param(
+            CheckpointConfig(
+                name="my_nested_checkpoint",
+                config_version=1,
+                template_name="my_nested_checkpoint_template",
+                expectation_suite_name="users.delivery",
+                validations=[
+                    CheckpointValidationConfig(
+                        batch_request={
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_data_connector",
+                            "data_asset_name": "users",
+                            "data_connector_query": {"partition_index": -1},
+                        },
+                        name="my_validation",
+                        id_="5d342d5a-8007-405e-abfa-db2b06e63283",
+                    ),
+                ],
+            ),
+            {
+                "action_list": [],
+                "batch_request": {},
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "evaluation_parameters": {},
+                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_name": "users.delivery",
+                "ge_cloud_id": None,
+                "module_name": "great_expectations.checkpoint",
+                "name": "my_nested_checkpoint",
+                "profilers": [],
+                "run_name_template": None,
+                "runtime_configuration": {},
+                "template_name": "my_nested_checkpoint_template",
+                "validations": [
+                    {
+                        "batch_request": {
+                            "data_asset_name": "users",
+                            "data_connector_name": "my_data_connector",
+                            "data_connector_query": {
+                                "partition_index": -1,
+                            },
+                            "datasource_name": "my_datasource",
+                        },
+                        "id_": "5d342d5a-8007-405e-abfa-db2b06e63283",
+                        "name": "my_validation",
+                    },
+                ],
+            },
+            id="config_with_name_and_id",
+        ),
     ],
 )
 def test_checkpoint_validation_config_within_checkpoint_config_is_serialized(
