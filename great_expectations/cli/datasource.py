@@ -335,7 +335,7 @@ data_connectors:
       group_names:
         - data_asset_name
       pattern: (.*)
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
     assets:
       my_runtime_asset_name:
@@ -446,10 +446,12 @@ execution_engine:
 
         yaml_str += '''
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''

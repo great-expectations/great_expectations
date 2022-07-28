@@ -42,10 +42,12 @@ execution_engine:
     database: {database}
     schema_name: {schema_name}
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''
@@ -84,10 +86,12 @@ execution_engine:
     schema_name: {schema_name}
     drivername: stuff
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''
@@ -127,10 +131,12 @@ execution_engine:
     schema_name: {schema_name}
     drivername: mysql+pymysql
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''
@@ -186,10 +192,12 @@ execution_engine:
     schema_name: {schema_name}
     drivername: postgresql
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''
@@ -244,10 +252,12 @@ execution_engine:
       sslmode: prefer
     drivername: postgresql+psycopg2
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''
@@ -314,10 +324,12 @@ execution_engine:
     password: {password}
     drivername: snowflake
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''
@@ -369,10 +381,12 @@ execution_engine:
       authenticator: {authenticator_url}
     drivername: snowflake
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''
@@ -425,10 +439,12 @@ execution_engine:
     private_key_passphrase: {private_key_passphrase}
     drivername: snowflake
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''
@@ -478,10 +494,12 @@ execution_engine:
   class_name: SqlAlchemyExecutionEngine
   connection_string: {connection_string}
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''
@@ -527,10 +545,12 @@ execution_engine:
   class_name: SqlAlchemyExecutionEngine
   connection_string: {connection_string}
 data_connectors:
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset:
+        batch_identifiers:
+          - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True"""'''
@@ -598,7 +618,7 @@ data_connectors:
       group_names:
         - data_asset_name
       pattern: (.*)
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
     assets:
       my_runtime_asset_name:
@@ -651,7 +671,7 @@ data_connectors:
       group_names:
         - data_asset_name
       pattern: (.*)
-  default_runtime_data_connector_name:
+  my_runtime_data_connector_name:
     class_name: RuntimeDataConnector
     assets:
       my_runtime_asset_name:
