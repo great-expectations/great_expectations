@@ -246,10 +246,9 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
 
 @pytest.mark.cloud
 @pytest.mark.integration
-@pytest.mark.xfail(
-    strict=False, reason="Flaky GX Cloud test - to be resolved post 0.15.16 release"
-)
+@mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
+    mock_save_project_config: mock.MagicMock,
     prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
     monkeypatch,
 ) -> None:
@@ -279,12 +278,11 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
 
 @pytest.mark.cloud
 @pytest.mark.integration
-@pytest.mark.xfail(
-    strict=False, reason="Flaky GX Cloud test - to be resolved post 0.15.16 release"
-)
+@mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_validator_e2e_workflow_with_cloud_enabled_context(
-    monkeypatch,
+    mock_save_project_config: mock.MagicMock,
     prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
+    monkeypatch,
 ) -> None:
     """
     What does this test do and why?
