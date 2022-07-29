@@ -250,7 +250,6 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
 def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
     mock_save_project_config: mock.MagicMock,
     prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
-    monkeypatch,
 ) -> None:
     """
     What does this test do and why?
@@ -260,8 +259,6 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
     backend.
     """
-    # Context is shared between other tests so we need to set a required env var
-    monkeypatch.setenv("MY_PLUGINS_DIRECTORY", "plugins/")
     context = DataContext(ge_cloud_mode=True)
 
     (
@@ -282,7 +279,6 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
 def test_validator_e2e_workflow_with_cloud_enabled_context(
     mock_save_project_config: mock.MagicMock,
     prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
-    monkeypatch,
 ) -> None:
     """
     What does this test do and why?
@@ -292,8 +288,6 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
     backend.
     """
-    # Context is shared between other tests so we need to set a required env var
-    monkeypatch.setenv("MY_PLUGINS_DIRECTORY", "plugins/")
     context = DataContext(ge_cloud_mode=True)
 
     (
