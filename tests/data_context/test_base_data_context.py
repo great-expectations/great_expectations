@@ -175,8 +175,7 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
         suites = context.list_expectation_suites()
         expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
 
-        # Randomize name so subsequent tests use a clean slate
-        suite_name = f"suite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+        suite_name = "oss_e2e_test_suite"
         suite = context.create_expectation_suite(
             suite_name,
             ge_cloud_id=expectation_suite_ge_cloud_id,
