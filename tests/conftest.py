@@ -107,6 +107,10 @@ def pytest_configure(config):
         "markers",
         "aws_integration: runs aws integration test that may be very slow and requires credentials",
     )
+    config.addinivalue_line(
+        "markers",
+        "cloud: runs GX Cloud tests that may be slow and requires credentials",
+    )
 
 
 def pytest_addoption(parser):
@@ -174,6 +178,9 @@ def pytest_addoption(parser):
     )
     parser.addoption(
         "--azure", action="store_true", help="If set, execute tests again Azure"
+    )
+    parser.addoption(
+        "--cloud", action="store_true", help="If set, execute tests again GX Cloud"
     )
     parser.addoption(
         "--performance-tests",
@@ -251,15 +258,23 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--docs-tests"):
         # --docs-tests given in cli: do not skip documentation integration tests
         return
+    if config.getoption("--cloud"):
+        # --cloud given in cli: do not skip GX Cloud integration tests
+        return
+
     skip_aws_integration = pytest.mark.skip(
         reason="need --aws-integration option to run"
     )
     skip_docs_integration = pytest.mark.skip(reason="need --docs-tests option to run")
+    skip_cloud = pytest.mark.skip(reason="need --cloud option to run")
+
     for item in items:
         if "aws_integration" in item.keywords:
             item.add_marker(skip_aws_integration)
         if "docs" in item.keywords:
             item.add_marker(skip_docs_integration)
+        if "cloud" in item.keywords:
+            item.add_marker(skip_cloud)
 
 
 @pytest.fixture(autouse=True)

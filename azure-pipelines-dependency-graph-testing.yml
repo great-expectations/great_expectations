@@ -360,7 +360,7 @@ stages:
           - script: |
               # These are tests that are specific to Great Expectations Cloud.
               # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest -m cloud
+              pytest --cloud
 
             env:
               GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
