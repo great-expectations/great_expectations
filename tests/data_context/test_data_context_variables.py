@@ -533,9 +533,6 @@ def test_file_data_context_variables_e2e(
 
 @pytest.mark.integration
 @pytest.mark.cloud
-@pytest.mark.xfail(
-    strict=False, reason="Flaky GX Cloud test - to be resolved post 0.15.16 release"
-)
 def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     cloud_data_context: CloudDataContext,
     data_context_config: DataContextConfig,
@@ -555,9 +552,6 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 @pytest.mark.integration
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
-@pytest.mark.xfail(
-    strict=False, reason="Flaky GX Cloud test - to be resolved post 0.15.16 release"
-)
 def test_cloud_enabled_data_context_variables_e2e(
     mock_save_project_config: mock.MagicMock, data_docs_sites: dict, monkeypatch
 ) -> None:
@@ -574,11 +568,9 @@ def test_cloud_enabled_data_context_variables_e2e(
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
     """
-    # Prepare updated plugins directory to set and save to the Cloud backend (ensuring we hide the true value behind $VARS syntax)
+    # Prepare updated plugins directory to set and save to the Cloud backend.
     # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results
-    env_var_name = "MY_PLUGINS_DIRECTORY"
     updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
-    monkeypatch.setenv(env_var_name, updated_plugins_dir)
 
     updated_data_docs_sites = data_docs_sites
     new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
@@ -586,10 +578,10 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     context = DataContext(ge_cloud_mode=True)
 
-    assert context.variables.plugins_directory != f"${env_var_name}"
+    assert context.variables.plugins_directory != updated_plugins_dir
     assert context.variables.data_docs_sites != updated_data_docs_sites
 
-    context.variables.plugins_directory = f"${env_var_name}"
+    context.variables.plugins_directory = updated_plugins_dir
     context.variables.data_docs_sites = updated_data_docs_sites
 
     assert context.variables.plugins_directory == updated_plugins_dir
