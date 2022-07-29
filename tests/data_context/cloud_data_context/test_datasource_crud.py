@@ -49,10 +49,6 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     context: BaseDataContext = empty_base_data_context_in_cloud_mode
     # Make sure the fixture has the right configuration
     assert isinstance(context, BaseDataContext)
-    assert isinstance(
-        context._datasource_store._store_backend,
-        GeCloudStoreBackend,
-    )
     assert context.ge_cloud_mode
     assert len(context.list_datasources()) == 0
 
@@ -166,10 +162,6 @@ def test_data_context_in_cloud_mode_add_datasource(
     context: DataContext = empty_data_context_in_cloud_mode
     # Make sure the fixture has the right configuration
     assert isinstance(context, DataContext)
-    assert isinstance(
-        context._datasource_store._store_backend,
-        GeCloudStoreBackend,
-    )
     assert context.ge_cloud_mode
     assert len(context.list_datasources()) == 0
 
@@ -273,10 +265,6 @@ def test_data_context_in_cloud_mode_add_datasource(
     context: CloudDataContext = empty_cloud_data_context
     # Make sure the fixture has the right configuration
     assert isinstance(context, CloudDataContext)
-    assert isinstance(
-        context._datasource_store._store_backend,
-        GeCloudStoreBackend,
-    )
     assert context.ge_cloud_mode
     assert len(context.list_datasources()) == 0
 
