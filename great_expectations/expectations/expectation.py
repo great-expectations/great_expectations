@@ -82,7 +82,7 @@ from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
-from great_expectations.util import camel_to_snake, is_parseable_date, isclose
+from great_expectations.util import camel_to_snake, is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -1744,10 +1744,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_min:
                 above_min = metric_value > min_value
             else:
-                above_min = (
-                    isclose(operand_a=metric_value, operand_b=min_value)
-                    or metric_value >= min_value
-                )
+                above_min = metric_value >= min_value
         else:
             above_min = True
 
@@ -1755,10 +1752,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 below_max = metric_value < max_value
             else:
-                below_max = (
-                    isclose(operand_a=metric_value, operand_b=min_value)
-                    or metric_value <= max_value
-                )
+                below_max = metric_value <= max_value
         else:
             below_max = True
 

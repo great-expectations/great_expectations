@@ -4,6 +4,7 @@ from typing import List
 
 import boto3
 import botocore
+import pytest
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
@@ -19,6 +20,7 @@ from tests.test_utils import create_files_in_directory
 yaml = YAML()
 
 
+@pytest.mark.unit
 def test__get_full_file_path_for_asset_pandas(fs):
     """
     What does this test and why?

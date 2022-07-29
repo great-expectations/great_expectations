@@ -4,6 +4,7 @@ from typing import List
 
 import boto3
 import botocore
+import pytest
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec
@@ -13,6 +14,7 @@ from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
 
+@pytest.mark.unit
 def test__get_full_file_path_pandas(fs):
     """
     What does this test and why?
