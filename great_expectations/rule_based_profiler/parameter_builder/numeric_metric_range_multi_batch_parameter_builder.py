@@ -10,6 +10,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
+    build_numeric_range_estimation_result,
     compute_bootstrap_quantiles_point_estimate,
     compute_kde_quantiles_point_estimate,
     compute_quantiles,
@@ -551,24 +552,10 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             metric_value_vector = metric_values[metric_value_idx]
             if np.all(np.isclose(metric_value_vector, metric_value_vector[0])):
                 # Computation is unnecessary if distribution is degenerate.
-                histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
-                    a=metric_value_vector, bins=NUM_HISTOGRAM_BINS
-                )
-                numeric_range_estimation_result = NumericRangeEstimationResult(
-                    estimation_histogram=np.vstack(
-                        (
-                            np.pad(
-                                array=histogram[0],
-                                pad_width=(0, 1),
-                                mode="constant",
-                                constant_values=0,
-                            ),
-                            histogram[1],
-                        )
-                    ),
-                    value_range=np.asarray(
-                        [metric_value_vector[0], metric_value_vector[0]]
-                    ),
+                numeric_range_estimation_result = build_numeric_range_estimation_result(
+                    metric_values=metric_value_vector,
+                    min_value=metric_value_vector[0],
+                    max_value=metric_value_vector[0],
                 )
             else:
                 # Compute low and high estimates for vector of samples for given element of multi-dimensional metric.
@@ -853,22 +840,8 @@ positive integer, or must be omitted (or set to None).
         metric_values: np.ndarray,
         **kwargs,
     ) -> NumericRangeEstimationResult:
-        histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
-            a=metric_values, bins=NUM_HISTOGRAM_BINS
-        )
-        return NumericRangeEstimationResult(
-            estimation_histogram=np.vstack(
-                (
-                    np.pad(
-                        array=histogram[0],
-                        pad_width=(0, 1),
-                        mode="constant",
-                        constant_values=0,
-                    ),
-                    histogram[1],
-                )
-            ),
-            value_range=np.asarray(
-                [np.amin(a=metric_values), np.amax(a=metric_values)]
-            ),
+        return build_numeric_range_estimation_result(
+            metric_values=metric_values,
+            min_value=np.amin(a=metric_values),
+            max_value=np.amax(a=metric_values),
         )
