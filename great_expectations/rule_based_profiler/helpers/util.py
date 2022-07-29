@@ -484,8 +484,22 @@ def compute_quantiles(
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
+
+    histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
+        a=metric_values, bins=NUM_HISTOGRAM_BINS
+    )
     return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
+        estimation_histogram=np.vstack(
+            (
+                np.pad(
+                    array=histogram[0],
+                    pad_width=(0, 1),
+                    mode="constant",
+                    constant_values=0,
+                ),
+                histogram[1],
+            )
+        ),
         value_range=np.asarray([lower_quantile, upper_quantile]),
     )
 
@@ -549,10 +563,21 @@ def compute_kde_quantiles_point_estimate(
         method=quantile_statistic_interpolation_method,
     )
 
+    histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
+        a=metric_values, bins=NUM_HISTOGRAM_BINS
+    )
     return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(
-            a=metric_values_gaussian_sample, bins=NUM_HISTOGRAM_BINS
-        )[0],
+        estimation_histogram=np.vstack(
+            (
+                np.pad(
+                    array=histogram[0],
+                    pad_width=(0, 1),
+                    mode="constant",
+                    constant_values=0,
+                ),
+                histogram[1],
+            )
+        ),
         value_range=[
             lower_quantile_point_estimate,
             upper_quantile_point_estimate,
@@ -665,10 +690,21 @@ def compute_bootstrap_quantiles_point_estimate(
         sample_quantile=sample_upper_quantile,
     )
 
+    histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
+        a=metric_values, bins=NUM_HISTOGRAM_BINS
+    )
     return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(
-            a=bootstraps.flatten(), bins=NUM_HISTOGRAM_BINS
-        )[0],
+        estimation_histogram=np.vstack(
+            (
+                np.pad(
+                    array=histogram[0],
+                    pad_width=(0, 1),
+                    mode="constant",
+                    constant_values=0,
+                ),
+                histogram[1],
+            )
+        ),
         value_range=[
             lower_quantile_bias_corrected_point_estimate,
             upper_quantile_bias_corrected_point_estimate,

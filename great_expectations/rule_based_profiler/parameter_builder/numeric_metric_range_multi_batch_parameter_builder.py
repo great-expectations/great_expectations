@@ -2,7 +2,7 @@ import copy
 import itertools
 import warnings
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 
@@ -533,13 +533,17 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
         metric_value_range_shape: tuple = metric_value_shape + (2,)
         metric_value_range: np.ndarray = np.zeros(shape=metric_value_range_shape)
         # Initialize observed_values for multi-dimensional metric to all trivial values (to be updated in situ).
-        # Since "numpy.histogram()" uses 10 bins by default, histogram contains 10-element least-significant dimension.
-        estimation_histogram_shape: tuple = metric_value_shape + (10,)
-        estimation_histogram: np.ndarray = np.zeros(shape=estimation_histogram_shape)
+        # Return values of "numpy.histogram()", histogram and bin edges, are packaged in least-significant dimensions.
+        estimation_histogram_shape: tuple = metric_value_shape + (
+            2,
+            NUM_HISTOGRAM_BINS + 1,
+        )
+        estimation_histogram: np.ndarray = np.empty(shape=estimation_histogram_shape)
 
         metric_value_vector: np.ndarray
         metric_value_range_min_idx: tuple
         metric_value_range_max_idx: tuple
+        metric_value_estimation_histogram_idx: tuple
         numeric_range_estimation_result: NumericRangeEstimationResult
         # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         for metric_value_idx in metric_value_vector_indices:
@@ -547,10 +551,21 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             metric_value_vector = metric_values[metric_value_idx]
             if np.all(np.isclose(metric_value_vector, metric_value_vector[0])):
                 # Computation is unnecessary if distribution is degenerate.
+                histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
+                    a=metric_value_vector, bins=NUM_HISTOGRAM_BINS
+                )
                 numeric_range_estimation_result = NumericRangeEstimationResult(
-                    estimation_histogram=np.histogram(
-                        a=metric_value_vector, bins=NUM_HISTOGRAM_BINS
-                    )[0],
+                    estimation_histogram=np.vstack(
+                        (
+                            np.pad(
+                                array=histogram[0],
+                                pad_width=(0, 1),
+                                mode="constant",
+                                constant_values=0,
+                            ),
+                            histogram[1],
+                        )
+                    ),
                     value_range=np.asarray(
                         [metric_value_vector[0], metric_value_vector[0]]
                     ),
@@ -576,7 +591,7 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             # Obtain index of metric element (by discarding "N"-element samples dimension).
             metric_value_idx = metric_value_idx[1:]
 
-            # Compute indices for min and max value range estimates.
+            # Compute indices for metric value range min and max estimates.
             metric_value_range_min_idx = metric_value_idx + (
                 slice(0, 1, None),
             )  # appends "[0]" element
@@ -584,10 +599,9 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                 slice(1, 2, None),
             )  # appends "[1]" element
 
-            # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
-            estimation_histogram[
-                metric_value_idx
-            ] = numeric_range_estimation_result.estimation_histogram
+            # Compute index for metric value estimation histogram.
+            metric_value_estimation_histogram_idx = metric_value_idx
+
             # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
             metric_value_range[metric_value_range_min_idx] = round(
                 cast(float, min_value), round_decimals
@@ -596,10 +610,15 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                 cast(float, max_value), round_decimals
             )
 
+            # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
+            estimation_histogram[
+                metric_value_estimation_histogram_idx
+            ] = numeric_range_estimation_result.estimation_histogram
+
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
         if metric_value_range.shape[0] == 1:
-            estimation_histogram = estimation_histogram[0]
             metric_value_range = metric_value_range[0]
+            estimation_histogram = estimation_histogram[0]
 
         if round_decimals == 0:
             metric_value_range = metric_value_range.astype(np.int64)
@@ -828,15 +847,27 @@ positive integer, or must be omitted (or set to None).
             quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
         )
 
+    # noinspection PyUnusedLocal
     @staticmethod
     def _get_exact_estimate(
         metric_values: np.ndarray,
         **kwargs,
     ) -> NumericRangeEstimationResult:
+        histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
+            a=metric_values, bins=NUM_HISTOGRAM_BINS
+        )
         return NumericRangeEstimationResult(
-            estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[
-                0
-            ],
+            estimation_histogram=np.vstack(
+                (
+                    np.pad(
+                        array=histogram[0],
+                        pad_width=(0, 1),
+                        mode="constant",
+                        constant_values=0,
+                    ),
+                    histogram[1],
+                )
+            ),
             value_range=np.asarray(
                 [np.amin(a=metric_values), np.amax(a=metric_values)]
             ),
