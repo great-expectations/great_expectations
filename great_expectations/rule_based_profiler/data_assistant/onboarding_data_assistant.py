@@ -239,7 +239,7 @@ class OnboardingDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
+            "quantile_statistic_interpolation_method": "nearest",
             "quantile_bias_std_error_ratio_threshold": 0.25,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
@@ -546,7 +546,7 @@ class OnboardingDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
+            "quantile_statistic_interpolation_method": "nearest",
             "quantile_bias_std_error_ratio_threshold": 0.25,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
@@ -734,7 +734,7 @@ class OnboardingDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
+            "quantile_statistic_interpolation_method": "nearest",
             "quantile_bias_std_error_ratio_threshold": 0.25,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
@@ -1056,7 +1056,7 @@ class OnboardingDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
+            "quantile_statistic_interpolation_method": "nearest",
             "quantile_bias_std_error_ratio_threshold": 0.25,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
