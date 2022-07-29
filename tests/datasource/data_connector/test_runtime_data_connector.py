@@ -326,7 +326,7 @@ def test_asset_is_named_but_batch_identifier_in_other_asset(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(ge_exceptions.DataConnectorError) as error:
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_assets.name,
@@ -340,6 +340,7 @@ def test_asset_is_named_but_batch_identifier_in_other_asset(
                 runtime_parameters={"batch_data": test_df_pandas},
             )
         )
+        print(error.value.message)
 
 
 def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
