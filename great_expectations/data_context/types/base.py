@@ -2718,7 +2718,7 @@ class CheckpointConfig(BaseYamlConfig):
 
         if validations is None:
             validations = []
-        validations = [validation.to_dict() for validation in validations]
+
         validations = get_validations_with_batch_request_as_dict(
             validations=validations
         )
