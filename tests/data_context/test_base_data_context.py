@@ -174,8 +174,12 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
         # Create a suite to be used in Validator instantiation
         suites = context.list_expectation_suites()
         expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
-
         suite_name = "oss_e2e_test_suite"
+
+        # Start off each test run with a clean slate
+        if expectation_suite_ge_cloud_id in context.list_expectation_suite_names():
+            context.delete_expectation_suite(ge_cloud_id=expectation_suite_ge_cloud_id)
+
         suite = context.create_expectation_suite(
             suite_name,
             ge_cloud_id=expectation_suite_ge_cloud_id,

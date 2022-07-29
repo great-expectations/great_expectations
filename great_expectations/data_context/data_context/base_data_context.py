@@ -1356,12 +1356,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def delete_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
         """
         See `AbstractDataContext.delete_expectation_suite` for more information.
         """
         res = self._data_context.delete_expectation_suite(
-            expectation_suite_name=expectation_suite_name
+            expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
         )
         self._synchronize_self_with_underlying_data_context()
         return res
