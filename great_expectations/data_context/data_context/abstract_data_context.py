@@ -980,6 +980,7 @@ class AbstractDataContext(ABC):
     def delete_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
 

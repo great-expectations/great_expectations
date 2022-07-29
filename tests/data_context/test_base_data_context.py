@@ -174,9 +174,12 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
         # Create a suite to be used in Validator instantiation
         suites = context.list_expectation_suites()
         expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
+        suite_name = "oss_e2e_test_suite"
 
-        # Randomize name so subsequent tests use a clean slate
-        suite_name = f"suite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+        # Start off each test run with a clean slate
+        if expectation_suite_ge_cloud_id in context.list_expectation_suite_names():
+            context.delete_expectation_suite(ge_cloud_id=expectation_suite_ge_cloud_id)
+
         suite = context.create_expectation_suite(
             suite_name,
             ge_cloud_id=expectation_suite_ge_cloud_id,
@@ -246,12 +249,10 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
 
 @pytest.mark.cloud
 @pytest.mark.integration
-@pytest.mark.xfail(
-    strict=False, reason="Flaky GX Cloud test - to be resolved post 0.15.16 release"
-)
+@mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
+    mock_save_project_config: mock.MagicMock,
     prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
-    monkeypatch,
 ) -> None:
     """
     What does this test do and why?
@@ -261,8 +262,6 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
     backend.
     """
-    # Context is shared between other tests so we need to set a required env var
-    monkeypatch.setenv("MY_PLUGINS_DIRECTORY", "plugins/")
     context = DataContext(ge_cloud_mode=True)
 
     (
@@ -279,11 +278,9 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
 
 @pytest.mark.cloud
 @pytest.mark.integration
-@pytest.mark.xfail(
-    strict=False, reason="Flaky GX Cloud test - to be resolved post 0.15.16 release"
-)
+@mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_validator_e2e_workflow_with_cloud_enabled_context(
-    monkeypatch,
+    mock_save_project_config: mock.MagicMock,
     prepare_validator_for_cloud_e2e: Callable[[DataContext], Tuple[Validator, str]],
 ) -> None:
     """
@@ -294,8 +291,6 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     Saving of ExpectationSuites using such a Validator should send payloads to the Cloud
     backend.
     """
-    # Context is shared between other tests so we need to set a required env var
-    monkeypatch.setenv("MY_PLUGINS_DIRECTORY", "plugins/")
     context = DataContext(ge_cloud_mode=True)
 
     (

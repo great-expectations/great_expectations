@@ -185,7 +185,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
 def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     mock_request,
     ge_cloud_base_url,
-    empty_cloud_data_context_custom_base_url,
+    empty_base_data_context_in_cloud_mode_custom_base_url: BaseDataContext,
     ge_cloud_runtime_organization_id,
     ge_cloud_runtime_access_token,
 ):
@@ -194,7 +194,7 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     # Ensure that the request goes through
     mock_request.return_value.status_code = 200
 
-    context = empty_cloud_data_context_custom_base_url
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode_custom_base_url
 
     # Assertions that the context fixture is set up properly
     assert not context.ge_cloud_config.base_url == GeCloudStoreBackend.DEFAULT_BASE_URL
