@@ -28,7 +28,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
@@ -2360,7 +2360,7 @@ def ge_cloud_config_e2e() -> GeCloudConfig:
     "great_expectations.data_context.store.DatasourceStore.list_keys",
     return_value=[],
 )
-def empty_cloud_data_context(
+def empty_base_data_context_in_cloud_mode(
     mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
@@ -2381,11 +2381,64 @@ def empty_cloud_data_context(
 
 
 @pytest.fixture
+def empty_data_context_in_cloud_mode(
+    tmp_path: pathlib.Path,
+    ge_cloud_config: GeCloudConfig,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+):
+    """This fixture is a DataContext in cloud mode that mocks calls to the cloud backend during setup so that it can be instantiated in tests."""
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_name: str = str(project_path)
+
+    def mocked_config(*args, **kwargs) -> DataContextConfig:
+        return empty_ge_cloud_data_context_config
+
+    def mocked_get_ge_cloud_config(*args, **kwargs) -> GeCloudConfig:
+        return ge_cloud_config
+
+    with mock.patch(
+        "great_expectations.data_context.DataContext._save_project_config"
+    ), mock.patch(
+        "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+        autospec=True,
+        side_effect=mocked_config,
+    ), mock.patch(
+        "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
+        autospec=True,
+        side_effect=mocked_get_ge_cloud_config,
+    ):
+        context: DataContext = DataContext(
+            ge_cloud_mode=True,
+            context_root_dir=project_path_name,
+        )
+        return context
+
+
+@pytest.fixture
+def empty_cloud_data_context(
+    tmp_path: pathlib.Path,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_config: GeCloudConfig,
+) -> CloudDataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_name: str = str(project_path)
+
+    cloud_data_context: CloudDataContext = CloudDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path_name,
+        ge_cloud_config=ge_cloud_config,
+    )
+    return cloud_data_context
+
+
+@pytest.fixture
 @mock.patch(
     "great_expectations.data_context.store.DatasourceStore.list_keys",
     return_value=[],
 )
-def empty_cloud_data_context_custom_base_url(
+def empty_base_data_context_in_cloud_mode_custom_base_url(
     mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
@@ -2412,8 +2465,10 @@ def empty_cloud_data_context_custom_base_url(
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
-    context = empty_cloud_data_context
+def cloud_data_context_with_datasource_pandas_engine(
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
+):
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
     config = yaml.load(
         """
     class_name: Datasource
@@ -2435,9 +2490,9 @@ def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
 
 @pytest.fixture
 def cloud_data_context_with_datasource_sqlalchemy_engine(
-    empty_cloud_data_context, db_file
+    empty_base_data_context_in_cloud_mode: BaseDataContext, db_file
 ):
-    context = empty_cloud_data_context
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
     config = yaml.load(
         f"""
     class_name: Datasource
