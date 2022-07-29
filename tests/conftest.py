@@ -2391,6 +2391,41 @@ def empty_cloud_data_context(
 
 
 @pytest.fixture
+def empty_data_context_in_cloud_mode(
+    tmp_path: pathlib.Path,
+    ge_cloud_config: GeCloudConfig,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+):
+    """This fixture is a DataContext in cloud mode that mocks calls to the cloud backend during setup so that it can be instantiated in tests."""
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_name: str = str(project_path)
+
+    def mocked_config(*args, **kwargs) -> DataContextConfig:
+        return empty_ge_cloud_data_context_config
+
+    def mocked_get_ge_cloud_config(*args, **kwargs) -> GeCloudConfig:
+        return ge_cloud_config
+
+    with mock.patch(
+        "great_expectations.data_context.DataContext._save_project_config"
+    ), mock.patch(
+        "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+        autospec=True,
+        side_effect=mocked_config,
+    ), mock.patch(
+        "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
+        autospec=True,
+        side_effect=mocked_get_ge_cloud_config,
+    ):
+        context: DataContext = DataContext(
+            ge_cloud_mode=True,
+            context_root_dir=project_path_name,
+        )
+        return context
+
+
+@pytest.fixture
 @mock.patch(
     "great_expectations.data_context.store.DatasourceStore.list_keys",
     return_value=[],
