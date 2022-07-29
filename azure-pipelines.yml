@@ -13,7 +13,7 @@ schedules:
   branches:
     include:
     - develop
-  always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
+  always: false # Will only trigger if the state of the codebase has changed since the last scheduled run
 
 trigger:
   tags:
@@ -115,6 +115,70 @@ stages:
           # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
+
+  - stage: docker_tests
+    dependsOn: []
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+      - job: build_push_test_
+        strategy:
+          matrix:
+            Python37:
+              minor_version: '7'
+            Python38:
+              minor_version: '8'
+            Python39:
+              minor_version: '9'
+        services:
+          postgres: postgres
+        variables:
+          DOCKER_TAG: none
+        steps:
+          - bash: |
+              # login to docker first so we die fast if this fails
+              docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
+
+              EPOCH=`date +%s`
+              TAG="3.$(minor_version)_develop_${EPOCH}_${RANDOM}"
+              # We repull the develop branch. We could build the local branch that is already present but we should
+              # prune it's depth since we don't need the git history.
+              # CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${TAG} --target azure --build-arg PYTHON_VERSION=3.$(minor_version) --build-arg SOURCE=github --build-arg BRANCH=develop ."
+              # Temporarily use local copy of repo
+              CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${TAG} --target azure --build-arg PYTHON_VERSION=3.$(minor_version) ."
+              echo ${CMD}
+              eval ${CMD}
+              PUSH="docker push greatexpectations/test:${TAG}"
+              echo ${PUSH}
+              eval ${PUSH}
+              echo "Docker image can be found at https://hub.docker.com/r/greatexpectations/test/tags"
+              echo "Pull it locally using: docker pull greatexpectations/test:${TAG}"
+
+              # Set this variable so other steps can read it.
+              echo "##vso[task.setvariable variable=DOCKER_TAG]${TAG}"
+
+            displayName: 'Build and push 3.$(minor_version)'
+            env:
+              DOCKER_USER: $(DOCKER_USER)
+              DOCKER_TOKEN: $(DOCKER_TOKEN)
+
+          - bash: |
+              PULL="docker pull docker pull greatexpectations/test:$(DOCKER_TAG)"
+              echo ${PULL}
+              eval ${PULL}
+              # PYTEST="docker run --network=host greatexpectations/test:$(DOCKER_TAG) pytest -v --spark --postgresql --ignore=tests/cli --ignore=tests/integration/usage_statistics"
+              PYTEST="docker run --network=host -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) -e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) "
+              PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) greatexpectations/test:$(DOCKER_TAG) pytest --postgresql "
+              PYTEST+="--spark --cloud --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html "
+              PYTEST+="--ignore=tests/cli --ignore=tests/integration/usage_statistics"
+              echo ${PYTEST}
+              eval ${PYTEST}
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
+            displayName: 'pytest 3.$(minor_version)'
+
 
   - stage: import_ge
     dependsOn: [lint]

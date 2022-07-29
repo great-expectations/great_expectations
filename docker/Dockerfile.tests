@@ -19,9 +19,12 @@ RUN git clone --depth 1 --branch ${BRANCH} https://github.com/great-expectations
 WORKDIR /great_expectations
 
 FROM build_${SOURCE} AS dev
-RUN pip install --requirement requirements.txt --requirement requirements-dev.txt --constraint constraints-dev.txt
+RUN pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
 RUN pip install .
 CMD [ "python", "--version"]
 
 FROM dev as test
 RUN pip install --requirement requirements-dev-test.txt --constraint constraints-dev.txt
+
+FROM test as azure
+RUN pip install --requirement requirements-dev-test-pipeline.txt --constraint constraints-dev.txt
