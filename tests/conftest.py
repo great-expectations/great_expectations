@@ -28,7 +28,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
@@ -107,6 +107,10 @@ def pytest_configure(config):
         "markers",
         "aws_integration: runs aws integration test that may be very slow and requires credentials",
     )
+    config.addinivalue_line(
+        "markers",
+        "cloud: runs GX Cloud tests that may be slow and requires credentials",
+    )
 
 
 def pytest_addoption(parser):
@@ -174,6 +178,9 @@ def pytest_addoption(parser):
     )
     parser.addoption(
         "--azure", action="store_true", help="If set, execute tests again Azure"
+    )
+    parser.addoption(
+        "--cloud", action="store_true", help="If set, execute tests again GX Cloud"
     )
     parser.addoption(
         "--performance-tests",
@@ -251,15 +258,23 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--docs-tests"):
         # --docs-tests given in cli: do not skip documentation integration tests
         return
+    if config.getoption("--cloud"):
+        # --cloud given in cli: do not skip GX Cloud integration tests
+        return
+
     skip_aws_integration = pytest.mark.skip(
         reason="need --aws-integration option to run"
     )
     skip_docs_integration = pytest.mark.skip(reason="need --docs-tests option to run")
+    skip_cloud = pytest.mark.skip(reason="need --cloud option to run")
+
     for item in items:
         if "aws_integration" in item.keywords:
             item.add_marker(skip_aws_integration)
         if "docs" in item.keywords:
             item.add_marker(skip_docs_integration)
+        if "cloud" in item.keywords:
+            item.add_marker(skip_cloud)
 
 
 @pytest.fixture(autouse=True)
@@ -2360,7 +2375,7 @@ def ge_cloud_config_e2e() -> GeCloudConfig:
     "great_expectations.data_context.store.DatasourceStore.list_keys",
     return_value=[],
 )
-def empty_cloud_data_context(
+def empty_base_data_context_in_cloud_mode(
     mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
@@ -2416,11 +2431,29 @@ def empty_data_context_in_cloud_mode(
 
 
 @pytest.fixture
+def empty_cloud_data_context(
+    tmp_path: pathlib.Path,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_config: GeCloudConfig,
+) -> CloudDataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_name: str = str(project_path)
+
+    cloud_data_context: CloudDataContext = CloudDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path_name,
+        ge_cloud_config=ge_cloud_config,
+    )
+    return cloud_data_context
+
+
+@pytest.fixture
 @mock.patch(
     "great_expectations.data_context.store.DatasourceStore.list_keys",
     return_value=[],
 )
-def empty_cloud_data_context_custom_base_url(
+def empty_base_data_context_in_cloud_mode_custom_base_url(
     mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
@@ -2447,8 +2480,10 @@ def empty_cloud_data_context_custom_base_url(
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
-    context = empty_cloud_data_context
+def cloud_data_context_with_datasource_pandas_engine(
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
+):
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
     config = yaml.load(
         """
     class_name: Datasource
@@ -2470,9 +2505,9 @@ def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
 
 @pytest.fixture
 def cloud_data_context_with_datasource_sqlalchemy_engine(
-    empty_cloud_data_context, db_file
+    empty_base_data_context_in_cloud_mode: BaseDataContext, db_file
 ):
-    context = empty_cloud_data_context
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
     config = yaml.load(
         f"""
     class_name: Datasource
