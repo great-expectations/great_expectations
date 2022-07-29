@@ -2256,9 +2256,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3063,8 +3063,11 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "asset_a",
-            "batch_identifiers": {"month": 11, "day": 11},
+            "data_asset_name": "Titanic_1911",
+            "batch_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3167,8 +3170,11 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "asset_a",
-            "batch_identifiers": {"month": 11, "day": 11},
+            "data_asset_name": "Titanic_1911",
+            "batch_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3256,8 +3262,11 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "asset_a",
-            "batch_identifiers": {"month": 11, "day": 11},
+            "data_asset_name": "Titanic_1911",
+            "batch_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
             "runtime_parameters": {"batch_data": test_df},
         }
     )

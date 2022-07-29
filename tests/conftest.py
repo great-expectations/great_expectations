@@ -761,6 +761,18 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                 module_name: great_expectations.datasource.data_connector
                 class_name: RuntimeDataConnector
                 assets:
+                    test_df:
+                        batch_identifiers:
+                            - pipeline_stage_name
+                            - airflow_run_id
+                    Titanic_1911:
+                        batch_identifiers:
+                            - pipeline_stage_name
+                            - airflow_run_id
+                    Titanic_19120414_1313.csv:
+                        batch_identifiers:
+                            - pipeline_stage_name
+                            - airflow_run_id
                     my_runtime_asset:
                         batch_identifiers:
                             - pipeline_stage_name
@@ -2208,6 +2220,10 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
         my_runtime_data_connector:
             class_name: RuntimeDataConnector
             assets:
+                test_df:
+                    batch_identifiers:
+                        - pipeline_stage_name
+                        - airflow_run_id
                 asset_a:
                     batch_identifiers:
                         - day

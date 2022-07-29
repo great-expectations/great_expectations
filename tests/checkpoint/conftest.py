@@ -121,10 +121,9 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
                     users: {{}}
 
             my_runtime_data_connector:
-                module_name: great_expectations.datasource.data_connector
                 class_name: RuntimeDataConnector
                 assets:
-                    Titanic_1911:
+                    Titanic_19120414_1313.csv:
                         batch_identifiers:
                             - pipeline_stage_name
                             - airflow_run_id

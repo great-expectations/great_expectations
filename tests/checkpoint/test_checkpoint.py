@@ -702,7 +702,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     - batch_request:
         datasource_name: my_datasource
         data_connector_name: my_runtime_data_connector
-        data_asset_name: IN_MEMORY_DATA_ASSET
+        data_asset_name: test_df
     expectation_suite_name: users.delivery
     action_list:
         - name: store_validation_result
@@ -726,7 +726,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
                 "batch_request": {
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_runtime_data_connector",
-                    "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                    "data_asset_name": "test_df",
                 }
             }
         ],
@@ -778,6 +778,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
                 "batch_data": test_df,
             },
             "batch_identifiers": {
+                "pipeline_stage_name": "setup",
                 "airflow_run_id": 1234567890,
             },
         },
@@ -803,7 +804,6 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         ),
         mock.call(
             {
-                "event": "data_context.get_batch_list",
                 "event_payload": {
                     "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
@@ -816,6 +816,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
                     ],
                     "runtime_parameters_keys": ["batch_data"],
                 },
+                "event": "data_context.get_batch_list",
                 "success": True,
             },
         ),
@@ -832,14 +833,13 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         ),
         mock.call(
             {
-                "event": "data_context.build_data_docs",
                 "event_payload": {},
+                "event": "data_context.build_data_docs",
                 "success": True,
             }
         ),
         mock.call(
             {
-                "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "f563d9aa1604e16099bb7dff7b203319",
                     "config_version": 1.0,
@@ -890,13 +890,14 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
                         },
                     ],
                 },
+                "event": "checkpoint.run",
                 "success": True,
             },
         ),
         mock.call(
             {
-                "event": "data_context.run_checkpoint",
                 "event_payload": {},
+                "event": "data_context.run_checkpoint",
                 "success": True,
             }
         ),
@@ -1499,9 +1500,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector_name",
-            "data_asset_name": "test_df",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -1557,9 +1558,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector_name",
-            "data_asset_name": "test_df",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -2036,11 +2037,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request_1: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector_name",
+            "data_connector_name": "my_runtime_data_connector",
             # TO ASK : what about situations where we are passing in a DataAsset that is not defined already in teh configuraiton?
             # that's even worse?
-            "data_asset_name": "test_df_1",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df_1},
         }
     )
@@ -2049,9 +2050,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request_2: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "test_df_2",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_b",
+            "batch_identifiers": {"day": 12, "month": 12, "year": 2022},
             "runtime_parameters": {"batch_data": test_df_2},
         }
     )
@@ -2121,9 +2122,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {
                 "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
             },
@@ -2178,9 +2179,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     batch_request_1 = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {
                 "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
             },
@@ -2191,9 +2192,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     batch_request_2 = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_b",
+            "batch_identifiers": {"day": 12, "month": 12, "year": 2022},
             "runtime_parameters": {
                 "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
             },
@@ -2295,9 +2296,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {
                 "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
             },
@@ -2353,9 +2354,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -2410,9 +2411,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3167,9 +3168,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {
                 "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
             },
@@ -3224,9 +3225,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3280,9 +3281,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3334,9 +3335,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {
                 "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
             },
@@ -3391,9 +3392,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3447,9 +3448,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3755,9 +3756,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {
                 "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
             },
@@ -3816,9 +3817,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3876,9 +3877,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3934,9 +3935,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {
                 "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
             },
@@ -3996,9 +3997,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -4057,9 +4058,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -4389,9 +4390,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "asset_a",
+            "batch_identifiers": {"day": 11, "month": 11},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
