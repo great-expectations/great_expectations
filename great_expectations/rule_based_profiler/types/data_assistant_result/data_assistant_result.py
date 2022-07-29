@@ -709,8 +709,10 @@ class DataAssistantResult(SerializableDictDot):
         return [chart.configure(**theme) for chart in charts]
 
     @staticmethod
-    def _transform_table_column_list_to_rows(
-        df: pd.DataFrame, sanitized_metric_name: str
+    def _transform_column_list_to_rows(
+        df: pd.DataFrame,
+        sanitized_metric_name: str,
+        batch_identifiers: List[str],
     ) -> pd.DataFrame:
         # explode list of column names into separate rows for each name in list
         # flatten columns of lists
@@ -727,16 +729,14 @@ class DataAssistantResult(SerializableDictDot):
         ]
         df = df.iloc[ilocations, cols]
         df[sanitized_metric_name] = col_flat
-
-        # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
-        df["column_number"] = pd.factorize(df[sanitized_metric_name])[0] + 1
-
-        # rename table_columns to table_column
-        df_columns = [
-            "table_column" if column == "table_columns" else column
-            for column in list(df.columns)
+        groupby_columns: List[str] = [
+            column for column in df.columns if column != sanitized_metric_name
         ]
-        df.columns = df_columns
+        df["metric_list_position"] = df.groupby(by=groupby_columns).cumcount()
+
+        if sanitized_metric_name == "table_columns":
+            # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
+            df["column_number"] = pd.factorize(df[sanitized_metric_name])[0] + 1
         return df
 
     @staticmethod
@@ -793,51 +793,19 @@ class DataAssistantResult(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
 
-        column_number: str = "column_number"
-
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
-            if sanitized_metric_name == "table_columns":
-                table_column: str = "table_column"
-                unique_column_sets: np.ndarray = np.unique(df[sanitized_metric_name])
-                if len(unique_column_sets) == 1:
-                    column_set = df[sanitized_metric_name].iloc[0]
-                    # we need at least one record to plot the column_set as text
-                    df = df.iloc[:1]
-                else:
-                    # filter only on batches that do not contain every possible column
-                    unique_columns: Set[str] = {
-                        column
-                        for column_list in df[sanitized_metric_name]
-                        for column in column_list
-                    }
-                    df = df[df[sanitized_metric_name].apply(set) != unique_columns]
-                    # record containing all columns to be compared against
-                    empty_columns: List[None] = [None] * (len(batch_identifiers) + 1)
-                    # noinspection PyTypeChecker
-                    all_columns_record: pd.DataFrame = pd.DataFrame(
-                        data=[[unique_columns] + empty_columns], columns=df.columns
-                    )
-                    df = pd.concat([all_columns_record, df], axis=0)
-                    df[batch_name] = df[batch_name].fillna(value="All Columns")
-                    df = DataAssistantResult._transform_table_column_list_to_rows(
-                        df=df, sanitized_metric_name=sanitized_metric_name
-                    )
-
-                metric_plot_component = MetricPlotComponent(
-                    name=table_column,
-                    alt_type=metric_type,
-                )
-            else:
-                metric_plot_component = MetricPlotComponent(
-                    name=sanitized_metric_name,
-                    alt_type=metric_type,
-                )
+            metric_plot_component = MetricPlotComponent(
+                name=sanitized_metric_name,
+                alt_type=metric_type,
+            )
 
             metric_plot_components.append(metric_plot_component)
+
+        column_number: str = "column_number"
 
         column_number_plot_component: PlotComponent = PlotComponent(
             name=column_number,
@@ -905,38 +873,23 @@ class DataAssistantResult(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
 
-        column_number: str = "column_number"
-
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
-            if sanitized_metric_name == "table_columns":
-                table_column: str = "table_column"
-                unique_column_sets: np.ndarray = np.unique(df[sanitized_metric_name])
-                if len(unique_column_sets) == 1:
-                    column_set = df[sanitized_metric_name].iloc[0]
-
-                df = DataAssistantResult._transform_table_column_list_to_rows(
-                    df=df, sanitized_metric_name=sanitized_metric_name
-                )
-
-                metric_plot_component = MetricPlotComponent(
-                    name=table_column,
-                    alt_type=metric_type,
-                )
-            else:
-                metric_plot_component = MetricPlotComponent(
-                    name=sanitized_metric_name,
-                    alt_type=metric_type,
-                )
+            metric_plot_component = MetricPlotComponent(
+                name=sanitized_metric_name,
+                alt_type=metric_type,
+            )
 
             metric_plot_components.append(metric_plot_component)
 
         # we need at least one record to plot the column_set as text
         if column_set is not None:
             df = df.iloc[:1]
+
+        column_number: str = "column_number"
 
         column_number_plot_component: PlotComponent = PlotComponent(
             name=column_number,
@@ -1688,15 +1641,32 @@ class DataAssistantResult(SerializableDictDot):
 
         lines_and_points_list: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
-            line: alt.Chart = (
-                alt.Chart(data=df, title=title)
-                .mark_line()
-                .encode(
-                    x=batch_plot_component.plot_on_axis(),
-                    y=metric_plot_component.plot_on_axis(),
-                    tooltip=tooltip,
+            metric_list_position: str = "metric_list_position"
+            if metric_list_position in df.columns:
+                line: alt.Chart = (
+                    alt.Chart(data=df, title=title)
+                    .mark_line()
+                    .encode(
+                        x=batch_plot_component.plot_on_axis(),
+                        y=metric_plot_component.plot_on_axis(),
+                        tooltip=tooltip,
+                        color=alt.Y(
+                            metric_list_position,
+                            type=AltairDataTypes.ORDINAL.value,
+                            legend=None,
+                        ),
+                    )
                 )
-            )
+            else:
+                line: alt.Chart = (
+                    alt.Chart(data=df, title=title)
+                    .mark_line()
+                    .encode(
+                        x=batch_plot_component.plot_on_axis(),
+                        y=metric_plot_component.plot_on_axis(),
+                        tooltip=tooltip,
+                    )
+                )
 
             points: alt.Chart = (
                 alt.Chart(data=df, title=title)
@@ -2009,15 +1979,32 @@ class DataAssistantResult(SerializableDictDot):
 
         line_and_points_list: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
-            line: alt.Chart = (
-                alt.Chart(data=df, title=title)
-                .mark_line()
-                .encode(
-                    x=batch_plot_component.plot_on_axis(),
-                    y=metric_plot_component.plot_on_axis(),
-                    tooltip=tooltip,
+            metric_list_position: str = "metric_list_position"
+            if metric_list_position in df.columns:
+                line: alt.Chart = (
+                    alt.Chart(data=df, title=title)
+                    .mark_line()
+                    .encode(
+                        x=batch_plot_component.plot_on_axis(),
+                        y=metric_plot_component.plot_on_axis(),
+                        tooltip=tooltip,
+                        color=alt.Y(
+                            metric_list_position,
+                            type=AltairDataTypes.ORDINAL.value,
+                            legend=None,
+                        ),
+                    )
                 )
-            )
+            else:
+                line: alt.Chart = (
+                    alt.Chart(data=df, title=title)
+                    .mark_line()
+                    .encode(
+                        x=batch_plot_component.plot_on_axis(),
+                        y=metric_plot_component.plot_on_axis(),
+                        tooltip=tooltip,
+                    )
+                )
 
             points: alt.Chart = (
                 alt.Chart(data=df, title=title)
@@ -3038,9 +3025,9 @@ class DataAssistantResult(SerializableDictDot):
             for value in attributed_values.values()
         ]
 
-        df: pd.DataFrame = pd.DataFrame(
-            {sanitize_parameter_name(name=metric_name): metric_values}
-        )
+        sanitized_metric_name: str = sanitize_parameter_name(name=metric_name)
+
+        df: pd.DataFrame = pd.DataFrame({sanitized_metric_name: metric_values})
 
         batch_identifier_list: List[Set[Tuple[str, str]]] = [
             self._batch_id_to_batch_identifier_display_name_map[batch_id]
@@ -3072,15 +3059,22 @@ class DataAssistantResult(SerializableDictDot):
             batch_identifier_records.append(batch_identifier_record)
 
         batch_identifier_keys_sorted: List[str] = sorted(batch_identifier_keys)
-        batch_identifiers: pd.DataFrame = pd.DataFrame(
+        batch_identifier_df: pd.DataFrame = pd.DataFrame(
             batch_identifier_records, columns=batch_identifier_keys_sorted
         )
 
         idx: int
-        batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_identifiers))]
+        batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_identifier_df))]
         df["batch"] = batch_numbers
 
-        df = pd.concat([df, batch_identifiers], axis=1)
+        df = pd.concat([df, batch_identifier_df], axis=1)
+
+        if isinstance(metric_values[0], list):
+            df = DataAssistantResult._transform_column_list_to_rows(
+                df=df,
+                sanitized_metric_name=sanitized_metric_name,
+                batch_identifiers=batch_identifier_keys_sorted,
+            )
 
         if plot_mode is PlotMode.DIAGNOSTIC:
             for kwarg_name in expectation_configuration.kwargs:
