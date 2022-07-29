@@ -1318,22 +1318,27 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             validation_operators.append(value)
         return validation_operators
 
+    def list_expectation_suite_names(self) -> List[str]:
+        return self._data_context.list_expectation_suite_names()
+
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
         ge_cloud_id: Optional[str] = None,
-        **kwargs: Optional[dict],
+        **kwargs,
     ) -> ExpectationSuite:
         """
         See `AbstractDataContext.create_expectation_suite` for more information.
         """
-        return self._data_context.create_expectation_suite(
+        res = self._data_context.create_expectation_suite(
             expectation_suite_name,
             overwrite_existing=overwrite_existing,
             ge_cloud_id=ge_cloud_id,
             **kwargs,
         )
+        self._synchronize_self_with_underlying_data_context()
+        return res
 
     def get_expectation_suite(
         self,
@@ -1343,19 +1348,23 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         See `AbstractDataContext.get_expectation_suite` for more information.
         """
-        return self._data_context.get_expectation_suite(
+        res = self._data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
         )
+        return res
 
     def delete_expectation_suite(
-        self, expectation_suite_name: Optional[str] = None
-    ) -> bool:
+        self,
+        expectation_suite_name: Optional[str] = None,
+    ) -> ExpectationSuite:
         """
         See `AbstractDataContext.delete_expectation_suite` for more information.
         """
-        return self._data_context.delete_expectation_suite(
+        res = self._data_context.delete_expectation_suite(
             expectation_suite_name=expectation_suite_name
         )
+        self._synchronize_self_with_underlying_data_context()
+        return res
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
@@ -1380,7 +1389,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             None
         """
         if ge_cloud_id:
-            super().save_expectation_suite(
+            self._data_context.save_expectation_suite(
                 expectation_suite,
                 expectation_suite_name,
                 overwrite_existing,
@@ -1388,7 +1397,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 **kwargs,
             )
         else:
-            super().save_expectation_suite(
+            self._data_context.save_expectation_suite(
                 expectation_suite,
                 expectation_suite_name,
                 overwrite_existing,
