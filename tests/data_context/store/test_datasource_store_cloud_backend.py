@@ -85,7 +85,7 @@ def test_datasource_store_get_by_id(
                     "attributes": {"datasource_config": datasource_config},
                 }
             },
-            201,
+            200,
         )
 
     with patch("requests.get", autospec=True, side_effect=mocked_response) as mock_get:
@@ -131,7 +131,7 @@ def test_datasource_store_get_by_name(
                     "attributes": {"datasource_config": datasource_config},
                 }
             },
-            201,
+            200,
         )
 
     with patch(
