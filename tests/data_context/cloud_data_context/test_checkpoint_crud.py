@@ -1,9 +1,12 @@
 import copy
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Type
 from unittest import mock
 
 import pytest
 
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -104,97 +107,38 @@ def mocked_get_response(
     return _mocked_get_response
 
 
+@pytest.mark.cloud
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "data_context_fixture_name,data_context_type",
+    [
+        # In order to leverage existing fixtures in parametrization, we provide
+        # their string names and dynamically retrieve them using pytest's built-in
+        # `request` fixture.
+        # Source: https://stackoverflow.com/a/64348247
+        pytest.param("empty_base_data_context_in_cloud_mode", BaseDataContext),
+        pytest.param("empty_data_context_in_cloud_mode", DataContext),
+        pytest.param("empty_cloud_data_context", CloudDataContext),
+    ],
+)
 def test_base_data_context_in_cloud_mode_add_checkpoint(
-    empty_base_data_context_in_cloud_mode: BaseDataContext,
+    data_context_fixture_name: str,
+    data_context_type: Type[AbstractDataContext],
     checkpoint_id: str,
     validation_ids: Tuple[str, str],
     checkpoint_config: dict,
     mocked_post_response: Callable[[], MockResponse],
     mocked_get_response: Callable[[], MockResponse],
+    request,
 ) -> None:
     """
-    A BaseDataContext in cloud mode should save to the Cloud backed CheckpointStore when calling `add_checkpoint`.
+    All Cloud-backed contexts (DataContext, BaseDataContext, and CloudDataContext) should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
     When saving, it should use the id from the response to create the checkpoint.
     """
-    context: BaseDataContext = empty_base_data_context_in_cloud_mode
+    context = request.getfixturevalue(data_context_fixture_name)
 
     # Make sure the fixture has the right configuration
-    assert isinstance(context, BaseDataContext)
-    assert context.ge_cloud_mode
-
-    validation_id_1, validation_id_2 = validation_ids
-
-    with mock.patch(
-        "requests.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post, mock.patch(
-        "requests.get", autospec=True, side_effect=mocked_get_response
-    ) as mock_get:
-
-        checkpoint = context.add_checkpoint(**checkpoint_config)
-
-        assert mock_post.call_count == 1
-        assert mock_get.call_count == 1
-
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
-
-    assert checkpoint.config.validations[0]["id"] == validation_id_1
-    assert checkpoint.validations[0]["id"] == validation_id_1
-
-    assert checkpoint.config.validations[1]["id"] == validation_id_2
-    assert checkpoint.validations[1]["id"] == validation_id_2
-
-
-def test_data_context_in_cloud_mode_add_checkpoint(
-    empty_data_context_in_cloud_mode: DataContext,
-    checkpoint_id: str,
-    validation_ids: Tuple[str, str],
-    checkpoint_config: dict,
-    mocked_post_response: Callable[[], MockResponse],
-    mocked_get_response: Callable[[], MockResponse],
-) -> None:
-    """ """
-    context: DataContext = empty_data_context_in_cloud_mode
-
-    # Make sure the fixture has the right configuration
-    assert isinstance(context, DataContext)
-    assert context.ge_cloud_mode
-
-    validation_id_1, validation_id_2 = validation_ids
-
-    with mock.patch(
-        "requests.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post, mock.patch(
-        "requests.get", autospec=True, side_effect=mocked_get_response
-    ) as mock_get:
-
-        checkpoint = context.add_checkpoint(**checkpoint_config)
-
-        assert mock_post.call_count == 1
-        assert mock_get.call_count == 1
-
-    assert checkpoint.ge_cloud_id == checkpoint_id
-    assert checkpoint.config.ge_cloud_id == checkpoint_id
-
-    assert checkpoint.config.validations[0]["id"] == validation_id_1
-    assert checkpoint.validations[0]["id"] == validation_id_1
-
-    assert checkpoint.config.validations[1]["id"] == validation_id_2
-    assert checkpoint.validations[1]["id"] == validation_id_2
-
-
-def test_cloud_data_context(
-    empty_cloud_data_context: CloudDataContext,
-    checkpoint_id: str,
-    validation_ids: Tuple[str, str],
-    checkpoint_config: dict,
-    mocked_post_response: Callable[[], MockResponse],
-    mocked_get_response: Callable[[], MockResponse],
-) -> None:
-    context: CloudDataContext = empty_cloud_data_context
-
-    # Make sure the fixture has the right configuration
-    assert isinstance(context, CloudDataContext)
+    assert isinstance(context, data_context_type)
     assert context.ge_cloud_mode
 
     validation_id_1, validation_id_2 = validation_ids
