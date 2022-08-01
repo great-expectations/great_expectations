@@ -67,7 +67,10 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import (
+    GeCloudIdAwareRef,
+    GeCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -2087,9 +2090,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
 
-        checkpoint_config: CheckpointConfig = self.checkpoint_store.add_checkpoint(
-            checkpoint, name, ge_cloud_id
+        checkpoint_config = self.checkpoint_store.create(
+            checkpoint_config=checkpoint.config
         )
+
         checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
             checkpoint_config=checkpoint_config, data_context=self
         )
