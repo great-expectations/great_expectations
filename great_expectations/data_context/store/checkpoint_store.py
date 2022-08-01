@@ -15,10 +15,7 @@ from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfigDefaults,
 )
-from great_expectations.data_context.types.refs import (
-    GeCloudIdAwareRef,
-    GeCloudResourceRef,
-)
+from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
