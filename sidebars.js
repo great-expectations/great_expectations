@@ -195,7 +195,7 @@ module.exports = {
           items: [
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler'
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler',
           ]
         },
         {
@@ -310,7 +310,7 @@ module.exports = {
             { type: 'doc', id: 'contributing/contributing_github' },
             { type: 'doc', id: 'contributing/contributing_test' },
             { type: 'doc', id: 'contributing/contributing_maturity' },
-            { type: 'doc', id: 'contributing/contributing_misc' }
+            { type: 'doc', id: 'contributing/contributing_misc' },
           ]
         },
         {
