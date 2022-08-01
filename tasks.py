@@ -140,6 +140,9 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
         "packages": f"One or more packages to type-check with mypy. (Default: {DEFAULT_PACKAGES_TO_TYPE_CHECK})",
         "show-default-packages": "Print the default packages to type-check and then exit.",
         "install-types": "Automatically install any needed types from `typeshed`.",
+        "daemon": "Run mypy in daemon mode with faster analysis."
+        " The daemon will be started and re-used for subsequent calls."
+        " For detailed usage see `dmypy --help`.",
     },
 )
 def type_check(
