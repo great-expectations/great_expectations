@@ -143,10 +143,16 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
         "daemon": "Run mypy in daemon mode with faster analysis."
         " The daemon will be started and re-used for subsequent calls."
         " For detailed usage see `dmypy --help`.",
+        "clear-cache": "Clear the local mypy cache directory.",
     },
 )
 def type_check(
-    ctx, packages, install_types=False, show_default_packages=False, daemon=False
+    ctx,
+    packages,
+    install_types=False,
+    show_default_packages=False,
+    daemon=False,
+    clear_cache=False,
 ):
     """Run mypy static type-checking on select packages."""
     if show_default_packages:
@@ -154,6 +160,11 @@ def type_check(
         # https://docs.greatexpectations.io/docs/contributing/style_guides/code_style#type-checking
         print("\n".join(DEFAULT_PACKAGES_TO_TYPE_CHECK))
         raise invoke.Exit(code=0)
+
+    if clear_cache:
+        print("  Clearing the mypy cache ... ", end="")
+        ctx.run(" ".join(["rm", "-rf", ".mypy_cache"]))
+        print("✅"),
 
     if daemon:
         bin = "dmypy run --"
