@@ -379,6 +379,10 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> "Checkpoint":  # noqa: F821
+        """
+        See `BaseDataContext.add_checkpoint` for more information.
+        """
+        # Chetan - 20220801 - Update docstring to point to AbstractDataContext once Checkpoint CRUD has been ported over
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
 

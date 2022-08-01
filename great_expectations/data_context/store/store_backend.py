@@ -5,6 +5,7 @@ from typing import Optional
 
 import pyparsing as pp
 
+from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import filter_properties_dict
 
@@ -263,7 +264,20 @@ class InMemoryStoreBackend(StoreBackend):
     def remove_key(self, key) -> None:
         del self._store[key]
 
-    def build_key(self, name: Optional[str], id_: Optional[str]) -> None:
+    def build_key(self, name: Optional[str], id_: Optional[str]) -> DataContextKey:
+        """
+        Utility to build a conditionally build specific key types based on input arguments.
+
+        Args:
+            name: The name of the object to be stored
+            id_: The id of the object to be stored
+
+        Returns:
+            key: The key generated as a result of the input name and id_
+
+        Raises:
+            NotImplementedError if not defined by child classes in the StoreBackend hierarchy
+        """
         raise NotImplementedError
 
     @property
