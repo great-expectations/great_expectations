@@ -116,9 +116,15 @@ def mocked_get_response(
         # their string names and dynamically retrieve them using pytest's built-in
         # `request` fixture.
         # Source: https://stackoverflow.com/a/64348247
-        pytest.param("empty_base_data_context_in_cloud_mode", BaseDataContext),
-        pytest.param("empty_data_context_in_cloud_mode", DataContext),
-        pytest.param("empty_cloud_data_context", CloudDataContext),
+        pytest.param(
+            "empty_base_data_context_in_cloud_mode",
+            BaseDataContext,
+            id="BaseDataContext",
+        ),
+        pytest.param("empty_data_context_in_cloud_mode", DataContext, id="DataContext"),
+        pytest.param(
+            "empty_cloud_data_context", CloudDataContext, id="CloudDataContext"
+        ),
     ],
 )
 def test_base_data_context_in_cloud_mode_add_checkpoint(
@@ -148,7 +154,6 @@ def test_base_data_context_in_cloud_mode_add_checkpoint(
     ) as mock_post, mock.patch(
         "requests.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
-
         checkpoint = context.add_checkpoint(**checkpoint_config)
 
         assert mock_post.call_count == 1
