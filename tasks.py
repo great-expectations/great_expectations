@@ -171,4 +171,5 @@ def type_check(
     ]
     if install_types:
         cmds.extend(["--install-types", "--non-interactive"])
-    ctx.run(" ".join(cmds), echo=True)
+    # use pseudo-terminal for colorized output
+    ctx.run(" ".join(cmds), echo=True, pty=True)
