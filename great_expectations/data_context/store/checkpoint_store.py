@@ -46,6 +46,7 @@ class CheckpointStore(ConfigurationStore):
         ]
         checkpoint_config_dict["ge_cloud_id"] = ge_cloud_checkpoint_id
 
+        # Checkpoints accept a `ge_cloud_id` but not an `id`
         checkpoint_config_dict.pop("id")
 
         return checkpoint_config_dict
@@ -175,10 +176,6 @@ class CheckpointStore(ConfigurationStore):
             ge_cloud_id = checkpoint_ref.ge_cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)
 
-        # Recognize any changes that may have occurred as part of `set`
-        # (i.e. the introduction of object ids) and return them to caller.
-        return self.get(key=key)
-
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
         """Create a checkpoint config in the store using a store_backend-specific key.
 
@@ -190,13 +187,10 @@ class CheckpointStore(ConfigurationStore):
             which was used to create the config in the backend.
         """
         key: DataContextKey = self._build_key_from_config(checkpoint_config)
-        ref: Optional[Union[GeCloudResourceRef, bool]] = self.set(
-            key, checkpoint_config
-        )
 
+        # Make two separate requests to set and get in order to obtain any additional
+        # values that may have been added to the config by the StoreBackend (i.e. object ids)
+        self.set(key, checkpoint_config)
         config = self.get(key=key)
-
-        if ref and isinstance(ref, GeCloudResourceRef):
-            config.id_ = ref.ge_cloud_id
 
         return config
