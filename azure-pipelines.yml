@@ -122,6 +122,7 @@ stages:
       vmImage: 'ubuntu-latest'
     jobs:
       - job: build_push_test_
+        timeoutInMinutes: 120
         strategy:
           matrix:
             Python37:
