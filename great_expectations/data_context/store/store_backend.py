@@ -1,7 +1,7 @@
 import logging
 import uuid
 from abc import ABCMeta, abstractmethod
-from typing import Optional
+from typing import Any, Optional
 
 import pyparsing as pp
 
@@ -202,6 +202,9 @@ class StoreBackend(metaclass=ABCMeta):
 
     @property
     def config(self) -> dict:
+        raise NotImplementedError
+
+    def build_key(self, **kwargs) -> Any:
         raise NotImplementedError
 
 

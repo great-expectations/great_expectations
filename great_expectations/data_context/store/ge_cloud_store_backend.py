@@ -7,6 +7,10 @@ from urllib.parse import urljoin
 
 import requests
 
+from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -149,7 +153,16 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _get(self, key: Tuple[str, ...]) -> dict:
         ge_cloud_url = self.get_url_for_key(key=key)
         try:
-            response = requests.get(ge_cloud_url, headers=self.auth_headers)
+            params: dict
+            # if name is included in the key, add as a param
+            if len(key) > 2 and key[2]:
+                params = {"name": key[2]}
+                ge_cloud_url = ge_cloud_url.rstrip("/")
+                response = requests.get(
+                    ge_cloud_url, headers=self.auth_headers, params=params
+                )
+            else:
+                response = requests.get(ge_cloud_url, headers=self.auth_headers)
             return response.json()
         except JSONDecodeError as jsonError:
             logger.debug(
@@ -343,7 +356,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         data = {
             "data": {
                 "type": self.ge_cloud_resource_type,
-                "id": ge_cloud_id,
+                "id_": ge_cloud_id,
                 "attributes": {
                     "deleted": True,
                 },
@@ -380,6 +393,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def build_key(self, id_: Optional[str] = None, **kwargs) -> GeCloudIdentifier:
         """Get the store backend specific implementation of the key, ignore irrelevant kwargs."""
+        if "name" in kwargs:
+            return GeCloudIdentifier(
+                resource_type=self.ge_cloud_resource_type,
+                ge_cloud_id=id_,
+                resource_name=kwargs["name"],
+            )
         return GeCloudIdentifier(
             resource_type=self.ge_cloud_resource_type, ge_cloud_id=id_
         )
