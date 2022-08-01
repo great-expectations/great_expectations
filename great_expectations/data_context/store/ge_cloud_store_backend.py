@@ -272,8 +272,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             object_id = response_json["data"]["id"]
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
-
-            # Return the one ref and use a subsequent request to get the updated config
             return GeCloudResourceRef(
                 resource_type=resource_type,
                 ge_cloud_id=object_id,
