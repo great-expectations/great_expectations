@@ -118,6 +118,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+.dmypy.json
 
 # vim backup files
 *~
