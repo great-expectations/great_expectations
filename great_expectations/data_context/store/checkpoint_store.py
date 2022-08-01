@@ -168,3 +168,7 @@ class CheckpointStore(ConfigurationStore):
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
             ge_cloud_id = checkpoint_ref.ge_cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)
+
+        # Recognize any changes that may have occurred as part of `set`
+        # (i.e. the introduction of object ids) and return them to caller.
+        return self.get(key=key)

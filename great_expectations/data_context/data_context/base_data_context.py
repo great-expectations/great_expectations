@@ -2087,7 +2087,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
 
-        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
+        checkpoint_config: CheckpointConfig = self.checkpoint_store.add_checkpoint(
+            checkpoint, name, ge_cloud_id
+        )
+        checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
+            checkpoint_config=checkpoint_config, data_context=self
+        )
         return checkpoint
 
     def get_checkpoint(
