@@ -142,7 +142,9 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
         "install-types": "Automatically install any needed types from `typeshed`.",
     },
 )
-def type_check(ctx, packages, install_types=False, show_default_packages=False):
+def type_check(
+    ctx, packages, install_types=False, show_default_packages=False, daemon=False
+):
     """Run mypy static type-checking on select packages."""
     if show_default_packages:
         # Use this to keep the Type-checking section of the docs up to date.
@@ -150,13 +152,18 @@ def type_check(ctx, packages, install_types=False, show_default_packages=False):
         print("\n".join(DEFAULT_PACKAGES_TO_TYPE_CHECK))
         raise invoke.Exit(code=0)
 
+    if daemon:
+        bin = "dmypy run --"
+    else:
+        bin = "mypy"
+
     packages = packages or DEFAULT_PACKAGES_TO_TYPE_CHECK
     # once we have sunsetted `type-coverage` and our typing has matured we should define
     # our packages to exclude (if any) in the mypy config file.
     # https://mypy.readthedocs.io/en/stable/config_file.html#confval-exclude
     ge_pkgs = [f"great_expectations/{p}" for p in packages]
     cmds = [
-        "mypy",
+        bin,
         *ge_pkgs,
     ]
     if install_types:
