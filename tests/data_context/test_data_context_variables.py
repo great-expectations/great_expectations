@@ -1,12 +1,16 @@
 import copy
-import os
 import pathlib
+import random
+import string
 from typing import Any
 from unittest import mock
 
 import pytest
 
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -22,6 +26,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     ConcurrencyConfig,
     DataContextConfig,
+    GeCloudConfig,
     NotebookConfig,
     NotebookTemplateConfig,
     ProgressBarsConfig,
@@ -118,6 +123,24 @@ def file_data_context(
         project_config=data_context_config, context_root_dir=str(context_root_dir)
     )
     return context
+
+
+@pytest.fixture
+def cloud_data_context(
+    tmp_path: pathlib.Path,
+    data_context_config: DataContextConfig,
+    ge_cloud_config_e2e: GeCloudConfig,
+) -> CloudDataContext:
+    project_path = tmp_path / "cloud_data_context"
+    project_path.mkdir()
+    context_root_dir = project_path / "great_expectations"
+
+    cloud_data_context = CloudDataContext(
+        project_config=data_context_config,
+        ge_cloud_config=ge_cloud_config_e2e,
+        context_root_dir=str(context_root_dir),
+    )
+    return cloud_data_context
 
 
 def stores() -> dict:
@@ -422,7 +445,7 @@ def test_data_context_variables_save_config(
 
         assert mock_put.call_count == 1
         mock_put.assert_called_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables/",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
             json={
                 "data": {
                     "type": "data_context_variables",
@@ -462,6 +485,7 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
     )
 
 
+@pytest.mark.integration
 def test_file_data_context_variables_e2e(
     monkeypatch, file_data_context: FileDataContext, progress_bars: ProgressBarsConfig
 ) -> None:
@@ -505,3 +529,67 @@ def test_file_data_context_variables_e2e(
         file_data_context.variables.plugins_directory == value_associated_with_env_var
     )
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
+
+
+@pytest.mark.integration
+@pytest.mark.cloud
+def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
+    cloud_data_context: CloudDataContext,
+    data_context_config: DataContextConfig,
+) -> None:
+    """
+    What does this test do and why?
+
+    Ensures that the endpoint responsible for the DataContextVariables resource is accessible
+    through the Variables API.
+    """
+    cloud_data_context.variables.config = data_context_config
+    success = cloud_data_context.variables.save_config()
+
+    assert success is True
+
+
+@pytest.mark.integration
+@pytest.mark.cloud
+@mock.patch("great_expectations.data_context.DataContext._save_project_config")
+def test_cloud_enabled_data_context_variables_e2e(
+    mock_save_project_config: mock.MagicMock, data_docs_sites: dict, monkeypatch
+) -> None:
+    """
+    What does this test do and why?
+
+    Tests the E2E workflow with a Cloud-enabled DataContext; as the CloudDataContext does not yet have 1-to-1
+    feature parity with the DataContext (as v0.15.15), this is the primary mechanism by which Great
+    Expectations Cloud interacts with variables.
+      1. User updates certain values and sets them as attributes.
+      2. User persists changes utilizing the save_config call defined by the Variables API.
+      3. Upon reading the result config from a GET request, we can confirm that changes were appropriately persisted.
+
+    It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
+    value in order to preserve sensitive information.
+    """
+    # Prepare updated plugins directory to set and save to the Cloud backend.
+    # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results
+    updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+
+    updated_data_docs_sites = data_docs_sites
+    new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    updated_data_docs_sites[new_site_name] = {}
+
+    context = DataContext(ge_cloud_mode=True)
+
+    assert context.variables.plugins_directory != updated_plugins_dir
+    assert context.variables.data_docs_sites != updated_data_docs_sites
+
+    context.variables.plugins_directory = updated_plugins_dir
+    context.variables.data_docs_sites = updated_data_docs_sites
+
+    assert context.variables.plugins_directory == updated_plugins_dir
+    assert context.variables.data_docs_sites == updated_data_docs_sites
+
+    context.variables.save_config()
+
+    context = DataContext(ge_cloud_mode=True)
+
+    assert context.variables.plugins_directory == updated_plugins_dir
+    assert context.variables.data_docs_sites == updated_data_docs_sites

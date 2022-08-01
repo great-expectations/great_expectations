@@ -9,6 +9,7 @@ import requests
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
+from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
@@ -69,11 +70,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
+    DEFAULT_BASE_URL: str = "https://app.greatexpectations.io/"
+
     def __init__(
         self,
         ge_cloud_credentials: Dict,
-        ge_cloud_base_url: str = "https://app.greatexpectations.io/",
-        ge_cloud_resource_type: Optional[GeCloudRESTResource] = None,
+        ge_cloud_base_url: str = DEFAULT_BASE_URL,
+        ge_cloud_resource_type: Optional[Union[str, GeCloudRESTResource]] = None,
         ge_cloud_resource_name: Optional[str] = None,
         suppress_store_backend_id: bool = True,
         manually_initialize_store_backend_id: str = "",
@@ -85,9 +88,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
-        assert ge_cloud_resource_type or ge_cloud_resource_name, (
-            "Must provide either ge_cloud_resource_type or " "ge_cloud_resource_name"
-        )
+        assert (
+            ge_cloud_resource_type or ge_cloud_resource_name
+        ), "Must provide either ge_cloud_resource_type or ge_cloud_resource_name"
 
         self._ge_cloud_base_url = ge_cloud_base_url
 
@@ -95,6 +98,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ge_cloud_resource_name
             or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_type]
         )
+
+        # While resource_types should be coming in as enums, configs represent the arg
+        # as strings and require manual casting.
+        if ge_cloud_resource_type and isinstance(ge_cloud_resource_type, str):
+            ge_cloud_resource_type = ge_cloud_resource_type.upper()
+            ge_cloud_resource_type = GeCloudRESTResource[ge_cloud_resource_type]
+
         self._ge_cloud_resource_type = (
             ge_cloud_resource_type
             or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_name]
@@ -169,19 +179,30 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             }
         }
 
-        if ge_cloud_id:
-            data["data"]["id"] = ge_cloud_id
-
         url = urljoin(
             self.ge_cloud_base_url,
             f"organizations/"
             f"{organization_id}/"
-            f"{hyphen(self.ge_cloud_resource_name)}/"
-            f"{ge_cloud_id}",
+            f"{hyphen(self.ge_cloud_resource_name)}",
         )
+
+        if ge_cloud_id:
+            data["data"]["id"] = ge_cloud_id
+            url = urljoin(f"{url}/", ge_cloud_id)
+
         try:
             response = requests.put(url, json=data, headers=self.auth_headers)
             response_status_code = response.status_code
+
+            # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
+            # for the ExpectationSuite endpoint. As such, this is a temporary fork to
+            # ensure that legacy PATCH behavior is supported.
+            if (
+                response_status_code == 405
+                and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
+            ):
+                response = requests.patch(url, json=data, headers=self.auth_headers)
+                response_status_code = response.status_code
 
             if response_status_code < 300:
                 return True
@@ -356,3 +377,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     @property
     def config(self) -> dict:
         return self._config
+
+    def build_key(self, id_: Optional[str] = None, **kwargs) -> GeCloudIdentifier:
+        """Get the store backend specific implementation of the key, ignore irrelevant kwargs."""
+        return GeCloudIdentifier(
+            resource_type=self.ge_cloud_resource_type, ge_cloud_id=id_
+        )
