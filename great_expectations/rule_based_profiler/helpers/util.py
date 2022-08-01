@@ -462,7 +462,7 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
                 SemanticDomainTypes.LOGIC,
                 SemanticDomainTypes.IDENTIFIER,
             ]
-            for semantic_domain_type in (inferred_semantic_domain_type.values())
+            for semantic_domain_type in inferred_semantic_domain_type.values()
         ]
     )
 
@@ -484,9 +484,11 @@ def compute_quantiles(
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
-    return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
-        value_range=np.asarray([lower_quantile, upper_quantile]),
+
+    return build_numeric_range_estimation_result(
+        metric_values=metric_values,
+        min_value=lower_quantile,
+        max_value=upper_quantile,
     )
 
 
@@ -510,6 +512,7 @@ def compute_kde_quantiles_point_estimate(
     Bandwidth Method: https://stats.stackexchange.com/questions/90656/kernel-bandwidth-scotts-vs-silvermans-rules
 
     Args:
+        metric_values: "numpy.ndarray" of "dtype.float" values with elements corresponding to "Batch" data samples.
         false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
             identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
         n_resamples: A positive integer indicating the sample size resulting from the sampling with replacement
@@ -549,14 +552,10 @@ def compute_kde_quantiles_point_estimate(
         method=quantile_statistic_interpolation_method,
     )
 
-    return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(
-            a=metric_values_gaussian_sample, bins=NUM_HISTOGRAM_BINS
-        )[0],
-        value_range=[
-            lower_quantile_point_estimate,
-            upper_quantile_point_estimate,
-        ],
+    return build_numeric_range_estimation_result(
+        metric_values=metric_values,
+        min_value=lower_quantile_point_estimate,
+        max_value=upper_quantile_point_estimate,
     )
 
 
@@ -665,14 +664,10 @@ def compute_bootstrap_quantiles_point_estimate(
         sample_quantile=sample_upper_quantile,
     )
 
-    return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(
-            a=bootstraps.flatten(), bins=NUM_HISTOGRAM_BINS
-        )[0],
-        value_range=[
-            lower_quantile_bias_corrected_point_estimate,
-            upper_quantile_bias_corrected_point_estimate,
-        ],
+    return build_numeric_range_estimation_result(
+        metric_values=metric_values,
+        min_value=lower_quantile_bias_corrected_point_estimate,
+        max_value=upper_quantile_bias_corrected_point_estimate,
     )
 
 
@@ -711,6 +706,41 @@ def _determine_quantile_bias_corrected_point_estimate(
         )
 
     return quantile_bias_corrected_point_estimate
+
+
+def build_numeric_range_estimation_result(
+    metric_values: np.ndarray,
+    min_value: Number,
+    max_value: Number,
+) -> NumericRangeEstimationResult:
+    """
+    Computes histogram of 1-dimensional set of data points and packages it together with value range as returned output.
+
+    Args:
+        metric_values: "numpy.ndarray" of "dtype.float" values with elements corresponding to "Batch" data samples.
+        min_value: pre-computed supremum of "metric_values" (properly conditioned for output).
+        max_value: pre-computed infimum of "metric_values" (properly conditioned for output).
+
+    Returns:
+        Structured "NumericRangeEstimationResult" object, containing histogram and value_range attributes.
+    """
+    histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
+        a=metric_values, bins=NUM_HISTOGRAM_BINS
+    )
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.vstack(
+            (
+                np.pad(
+                    array=histogram[0],
+                    pad_width=(0, 1),
+                    mode="constant",
+                    constant_values=0,
+                ),
+                histogram[1],
+            )
+        ),
+        value_range=np.asarray([min_value, max_value]),
+    )
 
 
 def get_validator_with_expectation_suite(

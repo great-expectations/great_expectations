@@ -568,11 +568,9 @@ def test_cloud_enabled_data_context_variables_e2e(
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
     """
-    # Prepare updated plugins directory to set and save to the Cloud backend (ensuring we hide the true value behind $VARS syntax)
+    # Prepare updated plugins directory to set and save to the Cloud backend.
     # As values are persisted in the Cloud DB, we want to randomize our values each time for consistent test results
-    env_var_name = "MY_PLUGINS_DIRECTORY"
     updated_plugins_dir = f"plugins_dir_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
-    monkeypatch.setenv(env_var_name, updated_plugins_dir)
 
     updated_data_docs_sites = data_docs_sites
     new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
@@ -580,10 +578,10 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     context = DataContext(ge_cloud_mode=True)
 
-    assert context.variables.plugins_directory != f"${env_var_name}"
+    assert context.variables.plugins_directory != updated_plugins_dir
     assert context.variables.data_docs_sites != updated_data_docs_sites
 
-    context.variables.plugins_directory = f"${env_var_name}"
+    context.variables.plugins_directory = updated_plugins_dir
     context.variables.data_docs_sites = updated_data_docs_sites
 
     assert context.variables.plugins_directory == updated_plugins_dir
