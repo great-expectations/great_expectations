@@ -263,6 +263,9 @@ class InMemoryStoreBackend(StoreBackend):
     def remove_key(self, key) -> None:
         del self._store[key]
 
+    def build_key(self, name: Optional[str], id_: Optional[str]) -> None:
+        raise NotImplementedError
+
     @property
     def config(self) -> dict:
         return self._config
