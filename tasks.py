@@ -31,7 +31,7 @@ def sort(ctx, path=".", check=False, exclude=None):
         cmds.append("--check-only")
     if exclude:
         cmds.extend(["--skip", exclude])
-    ctx.run(" ".join(cmds))
+    ctx.run(" ".join(cmds), echo=True)
 
 
 @invoke.task(
@@ -54,7 +54,7 @@ def fmt(ctx, path=".", sort_=True, check=False, exclude=None):
         cmds.append("--check")
     if exclude:
         cmds.extend(["--exclude", exclude])
-    ctx.run(" ".join(cmds))
+    ctx.run(" ".join(cmds), echo=True)
 
 
 @invoke.task
