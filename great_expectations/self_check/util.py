@@ -202,7 +202,7 @@ except ImportError:
         sqla_bigquery = None
         bigquery_types_tuple = None  # type: ignore[assignment]
         BigQueryDialect = None
-        pybigquery = None
+        pybigquery = None  # type: ignore[var-annotated]
         BIGQUERY_TYPES = {}
 
 
