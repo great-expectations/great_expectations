@@ -171,5 +171,8 @@ def type_check(
     ]
     if install_types:
         cmds.extend(["--install-types", "--non-interactive"])
+    if daemon:
+        # see related issue https://github.com/python/mypy/issues/9475
+        cmds.extend(["--follow-imports=normal"])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
