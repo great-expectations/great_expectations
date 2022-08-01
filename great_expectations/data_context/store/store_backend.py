@@ -205,6 +205,7 @@ class StoreBackend(metaclass=ABCMeta):
         raise NotImplementedError
 
     def build_key(self, **kwargs) -> Any:
+        """Build a key specific to the store backend implementation."""
         raise NotImplementedError
 
 
