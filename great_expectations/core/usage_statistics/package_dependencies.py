@@ -142,6 +142,10 @@ class GEDependencies:
         "PyHive",
         "thrift",
         "thrift-sasl",
+        # requirements-dev-test-pipeline.txt:
+        "pytest-azurepipelines",
+        "pytest-cov",
+        "pytest-random-order",
     ]
 
     GE_DEV_DEPENDENCIES: List[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(

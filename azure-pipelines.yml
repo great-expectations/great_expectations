@@ -163,10 +163,9 @@ stages:
               DOCKER_TOKEN: $(DOCKER_TOKEN)
 
           - bash: |
-              PULL="docker pull docker pull greatexpectations/test:$(DOCKER_TAG)"
+              PULL="docker pull greatexpectations/test:$(DOCKER_TAG)"
               echo ${PULL}
               eval ${PULL}
-              # PYTEST="docker run --network=host greatexpectations/test:$(DOCKER_TAG) pytest -v --spark --postgresql --ignore=tests/cli --ignore=tests/integration/usage_statistics"
               PYTEST="docker run --network=host -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) -e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) "
               PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) greatexpectations/test:$(DOCKER_TAG) pytest --postgresql "
               PYTEST+="--spark --cloud --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html "
