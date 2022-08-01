@@ -24,7 +24,7 @@ This integration test tests the following:
 
 1. get_validator() will create a temp_table with the expected expiration
 2. passing in `bigquery_temp_table` as part of `batch_spec_passthrough` will raise a DeprecationWarning.
-3. the validator.head method (and corresponding metric) will work on bigquery datasources even when temp table creation 
+3. the validator.head method (and corresponding metric) will work on bigquery datasources even when temp table creation
     is turned off
 """
 
@@ -128,8 +128,7 @@ batch_request_without_temp_table: RuntimeBatchRequest = RuntimeBatchRequest(
     },  # this is the name of the table you would like to use a 'temp_table'
 )
 validator_without_temp_table = context.get_validator(
-    batch_request=batch_request_without_temp_table,
-    expectation_suite_name="test_suit_2"
+    batch_request=batch_request_without_temp_table, expectation_suite_name="test_suit_2"
 )
 
 assert validator.head(n_rows=5, fetch_all=False)
