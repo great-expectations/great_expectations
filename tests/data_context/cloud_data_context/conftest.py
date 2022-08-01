@@ -14,7 +14,7 @@ class MockResponse:
 
 @pytest.fixture
 def mock_response_factory() -> Callable[[dict, int], MockResponse]:
-    def _closure(json_data: dict, status_code: int) -> MockResponse:
+    def _make_mock_response(json_data: dict, status_code: int) -> MockResponse:
         return MockResponse(json_data=json_data, status_code=status_code)
 
-    return _closure
+    return _make_mock_response
