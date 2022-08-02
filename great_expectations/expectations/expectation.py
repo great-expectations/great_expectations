@@ -4,10 +4,11 @@ import json
 import logging
 import os
 import re
+import time
 import traceback
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
-from collections import Counter
+from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
@@ -949,6 +950,7 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
+        debug_logger: Optional[logging.Logger] = None,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -970,6 +972,10 @@ class Expectation(metaclass=MetaExpectation):
         incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
         that do not exist). These errors are added under "errors" key in the report.
         """
+
+        _debug = lambda x: x
+        if debug_logger:
+            _debug = lambda x: debug_logger.debug(f"(run_diagnostics) {x}")
 
         errors: List[ExpectationErrorDiagnostics] = []
 
@@ -1009,11 +1015,13 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
 
+        _debug("Getting test results")
         test_results: List[ExpectationTestDiagnostics] = self._get_test_results(
             expectation_type=description_diagnostics.snake_name,
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
+            debug_logger=debug_logger,
         )
 
         backend_test_result_counts: List[
@@ -1271,8 +1279,15 @@ class Expectation(metaclass=MetaExpectation):
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
         raise_exceptions_for_backends: bool = False,
         force_no_progress_bar: bool = True,
+        debug_logger: Optional[logging.Logger] = None,
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
+
+        _debug = lambda x: x
+        if debug_logger:
+            _debug = lambda x: debug_logger.debug(f"(_get_test_results) {x}")
+        _debug("Starting")
+
         test_results = []
 
         exp_tests = generate_expectation_tests(
@@ -1280,9 +1295,13 @@ class Expectation(metaclass=MetaExpectation):
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
+            debug_logger=debug_logger,
         )
 
+        backend_test_times = defaultdict(list)
         for exp_test in exp_tests:
+            print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
+            _start = time.time()
             validation_result, error_message, stack_trace = evaluate_json_test_cfe(
                 validator=exp_test["validator_with_data"],
                 expectation_type=exp_test["expectation_type"],
@@ -1290,7 +1309,10 @@ class Expectation(metaclass=MetaExpectation):
                 raise_exception=False,
                 force_no_progress_bar=force_no_progress_bar,
             )
-            print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
+            _end = time.time()
+            _duration = _end - _start
+            backend_test_times[exp_test["backend"]].append(_duration)
+            print(f"  Ran in {_duration} seconds")
             if error_message is None:
                 print(f"  PASSED")
                 test_passed = True
@@ -1323,6 +1345,14 @@ class Expectation(metaclass=MetaExpectation):
                     error_diagnostics=error_diagnostics,
                 )
             )
+
+        backend_durations_string = [
+            f"{backend_name} took {sum(test_times)} seconds"
+            for backend_name, test_times in sorted(
+                backend_test_times.items(), key=lambda x: x[1]
+            )
+        ]
+        _debug(", ".join(backend_durations_string))
 
         return test_results
 

@@ -7,6 +7,7 @@ import random
 import re
 import string
 import threading
+import time
 import traceback
 import warnings
 from functools import wraps
@@ -1181,8 +1182,10 @@ def get_test_validator_with_data(
     caching=True,
     table_name=None,
     sqlite_db_path=None,
+    debug_logger: Optional[logging.Logger] = None,
 ):
     """Utility to create datasets for json-formatted tests."""
+
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
@@ -1233,6 +1236,7 @@ def get_test_validator_with_data(
             caching=caching,
             table_name=table_name,
             sqlite_db_path=sqlite_db_path,
+            debug_logger=debug_logger,
         )
         return result
 
@@ -1373,7 +1377,12 @@ def build_sa_validator_with_data(
     table_name=None,
     sqlite_db_path=None,
     batch_definition: Optional[BatchDefinition] = None,
+    debug_logger: Optional[logging.Logger] = None,
 ):
+    _debug = lambda x: x
+    if debug_logger:
+        _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")
+
     dialect_classes = {}
     dialect_types = {}
     try:
@@ -1465,6 +1474,7 @@ def build_sa_validator_with_data(
         and sa_engine_name in schemas
         and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
     ):
+        _debug(f"{sa_engine_name} is in schemas")
         schema = schemas[sa_engine_name]
 
         sql_dtypes = {
@@ -1499,6 +1509,7 @@ def build_sa_validator_with_data(
                 df[col] = pd.to_datetime(df[col])
             elif type_ in ["VARCHAR", "STRING"]:
                 df[col] = df[col].apply(str)
+        _debug(f"Finished conversions in the dataframe")
 
     if table_name is None:
         table_name = generate_test_table_name()
@@ -1511,6 +1522,8 @@ def build_sa_validator_with_data(
     else:
         sql_insert_method = None
 
+    _debug("Calling df.to_sql")
+    _start = time.time()
     df.to_sql(
         name=table_name,
         con=engine,
@@ -1519,6 +1532,8 @@ def build_sa_validator_with_data(
         if_exists="replace",
         method=sql_insert_method,
     )
+    _end = time.time()
+    _debug(f"df.to_sql for {sa_engine_name} took {_end - _start} seconds")
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     batch = Batch(data=batch_data, batch_definition=batch_definition)
@@ -2144,6 +2159,7 @@ def generate_expectation_tests(
     test_data_cases: List[ExpectationTestDataCases],
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     raise_exceptions_for_backends: bool = False,
+    debug_logger: Optional[logging.Logger] = None,
 ):
     """Determine tests to run
 
@@ -2152,9 +2168,15 @@ def generate_expectation_tests(
     :param execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics object specifying the engines the expectation is implemented for
     :return: list of parametrized tests with loaded validators and accessible backends
     """
+    _debug = lambda x: x
+    if debug_logger:
+        _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")
+
     parametrized_tests = []
 
-    for d in test_data_cases:
+    num_test_data_cases = len(test_data_cases)
+    for i, d in enumerate(test_data_cases, 1):
+        _debug(f"test_data_case {i}/{num_test_data_cases}")
         d = copy.deepcopy(d)
         dialects_to_include = {}
         engines_to_include = {}
@@ -2208,6 +2230,7 @@ def generate_expectation_tests(
 
         for c in backends:
 
+            _debug(f"Getting validators with data: {c}")
             datasets = []
 
             try:
@@ -2221,12 +2244,13 @@ def generate_expectation_tests(
                                 dataset.get("schemas"),
                                 table_name=dataset.get("dataset_name"),
                                 sqlite_db_path=sqlite_db_path,
+                                debug_logger=debug_logger,
                             )
                         )
                     validator_with_data = datasets[0]
                 else:
                     validator_with_data = get_test_validator_with_data(
-                        c, d["data"], d["schemas"]
+                        c, d["data"], d["schemas"], debug_logger=debug_logger
                     )
             except Exception as e:
                 # Adding these print statements for build_gallery.py's console output
@@ -2252,12 +2276,16 @@ def generate_expectation_tests(
                                         dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
+                                        debug_logger=debug_logger,
                                     )
                                 )
                             validator_with_data = datasets[0]
                         else:
                             validator_with_data = get_test_validator_with_data(
-                                c, d["data_alt"], d["schemas"]
+                                c,
+                                d["data_alt"],
+                                d["schemas"],
+                                debug_logger=debug_logger,
                             )
                     except Exception as e2:
                         print(

@@ -235,7 +235,7 @@ def build_gallery(
             expectation
         )
         try:
-            diagnostics = impl().run_diagnostics()
+            diagnostics = impl().run_diagnostics(debug_logger=logger)
             checklist_string = diagnostics.generate_checklist()
             expectation_checklists.write(
                 f"\n\n----------------\n{expectation} ({group})\n"
