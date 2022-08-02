@@ -1346,13 +1346,8 @@ class Expectation(metaclass=MetaExpectation):
                 )
             )
 
-        backend_durations_string = [
-            f"{backend_name} took {sum(test_times)} seconds"
-            for backend_name, test_times in sorted(
-                backend_test_times.items(), key=lambda x: x[1]
-            )
-        ]
-        _debug(", ".join(backend_durations_string))
+        for backend_name, test_times in sorted(backend_test_times.items()):
+            _debug(f"{backend_name} took {sum(test_times)} seconds")
 
         return test_results
 
