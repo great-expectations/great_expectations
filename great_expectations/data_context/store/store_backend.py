@@ -204,7 +204,7 @@ class StoreBackend(metaclass=ABCMeta):
     def config(self) -> dict:
         raise NotImplementedError
 
-    def build_key(self, **kwargs) -> Any:
+    def build_key(self, id_: Optional[str] = None, name: Optional[str] = None) -> Any:
         """Build a key specific to the store backend implementation."""
         raise NotImplementedError
 
