@@ -323,7 +323,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install git+https://github.com/superconductive/dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
@@ -459,7 +459,7 @@ stages:
           - script: |
               # Install dependencies
               pip install --requirement requirements.txt
-              pip install git+https://github.com/superconductive/dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
@@ -502,7 +502,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install git+https://github.com/superconductive/dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
@@ -552,7 +552,7 @@ stages:
           - script: |
               # Install dependencies
               pip install --requirement requirements.txt
-              pip install git+https://github.com/superconductive/dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
@@ -597,7 +597,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install git+https://github.com/superconductive/dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
 
               # Run dgtest
               dgtest run great_expectations --filter 'tests/cli' --aws-integration -v
