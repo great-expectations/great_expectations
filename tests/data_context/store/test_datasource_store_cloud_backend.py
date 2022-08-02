@@ -189,3 +189,41 @@ def test_datasource_store_delete_by_id(
             },
             headers=request_headers,
         )
+
+
+@pytest.mark.cloud
+@pytest.mark.unit
+def test_datasource_store_update(
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+    request_headers: dict,
+    datasource_config: DatasourceConfig,
+    datasource_store_ge_cloud_backend: DatasourceStore,
+) -> None:
+    """What does this test and why?
+
+    The datasource store when used with a cloud backend should emit the correct request when creating a new datasource.
+    """
+
+    with patch("requests.post", autospec=True) as mock_post, patch(
+        "great_expectations.data_context.store.DatasourceStore.has_key", autospec=True
+    ) as mock_has_key:
+        # Mocking has_key so that we don't try to connect to the cloud backend to verify key existence.
+        mock_has_key.return_value = True
+        type(mock_post.return_value).status_code = PropertyMock(return_value=200)
+
+        datasource_store_ge_cloud_backend.update(datasource_config)
+
+        mock_post.assert_called_once_with(
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
+            json={
+                "data": {
+                    "type": "datasource",
+                    "attributes": {
+                        "datasource_config": datasource_config.to_dict(),
+                        "organization_id": ge_cloud_organization_id,
+                    },
+                }
+            },
+            headers=request_headers,
+        )

@@ -631,4 +631,5 @@ def datasource_config() -> DatasourceConfig:
                 },
             }
         },
+        name="test_datasource_name",
     )
