@@ -34,7 +34,7 @@ def test_datasource_store_create(
 
         datasource_store_ge_cloud_backend.set(key=key, value=datasource_config)
 
-        mock_post.assert_called_with(
+        mock_post.assert_called_once_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {
@@ -92,7 +92,7 @@ def test_datasource_store_get_by_id(
 
         datasource_store_ge_cloud_backend.get(key=key)
 
-        mock_get.assert_called_with(
+        mock_get.assert_called_once_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id_}",
             headers=request_headers,
             params=None,
@@ -147,7 +147,7 @@ def test_datasource_store_get_by_name(
             datasource_name=datasource_name
         )
 
-        mock_get.assert_called_with(
+        mock_get.assert_called_once_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             headers=request_headers,
             params={"name": datasource_name},
@@ -178,7 +178,7 @@ def test_datasource_store_delete_by_id(
 
         datasource_store_ge_cloud_backend.remove_key(key=key)
 
-        mock_delete.assert_called_with(
+        mock_delete.assert_called_once_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id_}",
             json={
                 "data": {
