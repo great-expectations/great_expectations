@@ -443,7 +443,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
         ]
 
 
-@mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
+@mock.patch("great_expectations.data_context.store.DatasourceStore.update")
 def test_update_datasource_persists_changes_with_store(
     mock_update_by_name: mock.MagicMock,
     data_context_parameterized_expectation_suite: DataContext,
