@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import Dict
 from unittest.mock import PropertyMock, patch
 
 import pytest
@@ -601,7 +602,7 @@ def datasource_store_name() -> str:
 
 
 @pytest.fixture
-def request_headers(ge_cloud_access_token) -> dict:
+def request_headers(ge_cloud_access_token) -> Dict[str, str]:
     return {
         "Content-Type": "application/vnd.api+json",
         "Authorization": f"Bearer {ge_cloud_access_token}",
