@@ -1584,7 +1584,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 6,
+                "variable_count": 7,
             },
             "event": "profiler.run",
             "success": True,
@@ -1810,7 +1810,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 8,
+                "variable_count": 9,
             },
             "event": "profiler.run",
             "success": True,
@@ -1842,8 +1842,9 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             "n_resamples": 9139,
             "random_seed": 43792,
             "false_positive_rate": 5.0e-2,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_std_error_ratio_threshold": 0.25,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
         },
         rules={
             "column_quantiles_rule": {
@@ -1866,6 +1867,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "random_seed": "$variables.random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                        "quantile_bias_correction": "$variables.quantile_bias_correction",
                         "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
                         "round_decimals": 2,
                     }
@@ -1943,8 +1945,9 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             "n_resamples": 9139,
             "random_seed": 43792,
             "false_positive_rate": 5.0e-2,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_std_error_ratio_threshold": 0.25,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
         },
         rules={
             "column_quantiles_rule": {
@@ -1967,6 +1970,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "random_seed": "$variables.random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                        "quantile_bias_correction": "$variables.quantile_bias_correction",
                         "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
                         "round_decimals": "$variables.round_decimals",
                     }
