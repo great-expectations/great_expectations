@@ -565,6 +565,7 @@ def compute_bootstrap_quantiles_point_estimate(
     false_positive_rate: np.float64,
     n_resamples: int,
     quantile_statistic_interpolation_method: str,
+    quantile_bias_correction: bool,
     quantile_bias_std_error_ratio_threshold: float,
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
@@ -653,6 +654,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=lower_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_correction=quantile_bias_correction,
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_lower_quantile,
     )
@@ -661,6 +663,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_correction=quantile_bias_correction,
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_upper_quantile,
     )
@@ -680,6 +683,7 @@ def _determine_quantile_bias_corrected_point_estimate(
     bootstraps: np.ndarray,
     quantile_pct: float,
     quantile_statistic_interpolation_method: str,
+    quantile_bias_correction: bool,
     quantile_bias_std_error_ratio_threshold: float,
     sample_quantile: np.ndarray,
 ) -> np.float64:
@@ -697,20 +701,21 @@ def _determine_quantile_bias_corrected_point_estimate(
     # See:
     # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
     #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
-    # quantile_bias_corrected_point_estimate: np.float64
-    #
-    # if (
-    #     bootstrap_quantile_standard_error > 0.0
-    #     and bootstrap_quantile_bias / bootstrap_quantile_standard_error
-    #     <= quantile_bias_std_error_ratio_threshold
-    # ):
-    #     quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate
-    # else:
-    #     quantile_bias_corrected_point_estimate = (
-    #         bootstrap_quantile_point_estimate - bootstrap_quantile_bias
-    #     )
+    quantile_bias_corrected_point_estimate: np.float64
 
-    return bootstrap_quantile_point_estimate
+    if (
+        not quantile_bias_correction
+        and bootstrap_quantile_standard_error > 0.0
+        and bootstrap_quantile_bias / bootstrap_quantile_standard_error
+        <= quantile_bias_std_error_ratio_threshold
+    ):
+        quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate
+    else:
+        quantile_bias_corrected_point_estimate = (
+            bootstrap_quantile_point_estimate - bootstrap_quantile_bias
+        )
+
+    return quantile_bias_corrected_point_estimate
 
 
 def get_validator_with_expectation_suite(
