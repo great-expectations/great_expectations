@@ -2058,6 +2058,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Checkpoint:
+        """
+        See parent 'AbstractDataContext.add_checkpoint()' for more information
+        """
         checkpoint = self._data_context.add_checkpoint(
             name=name,
             config_version=config_version,
