@@ -171,12 +171,14 @@ stages:
               PYTEST="docker run --network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
               PYTEST+="-e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) -e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) "
               PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) greatexpectations/test:$(DOCKER_TAG) "
-              PYTEST+="pytest --postgresql --spark --cloud --napoleon-docstrings --no-docker-discovery "
-              PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml:/coverage/coverage.xml "
+              PYTEST+="/bin/bash -c \"pytest --postgresql --spark --cloud --napoleon-docstrings --no-docker-discovery "
+              # We should be able to specify --cov-report=xml:path but this doesn't seemt to work so we do a mv at the end
+              PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml "
               PYTEST+="--cov-report=html:/coverage/htmlcov --ignore=tests/cli --ignore=tests/integration/usage_statistics"
-              PYTEST+=" tests/expectations/test_expectation.py"
+              PYTEST+=" tests/expectations/test_expectation.py && mv coverage.xml /coverage/coverage.xml\""
               echo ${PYTEST}
               eval ${PYTEST}
+              ls coverage
             env:
               GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
               GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
