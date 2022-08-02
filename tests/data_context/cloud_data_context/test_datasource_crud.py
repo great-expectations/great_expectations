@@ -250,7 +250,7 @@ def test_data_context_in_cloud_mode_add_datasource(
         ),
     ],
 )
-def test_data_context_in_cloud_mode_add_datasource(
+def test_cloud_data_context_add_datasource(
     config_includes_name_setting: str,
     empty_cloud_data_context: CloudDataContext,
     datasource_config: DatasourceConfig,
