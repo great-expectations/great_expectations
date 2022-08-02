@@ -98,7 +98,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         estimator: str = "bootstrap",
         n_resamples: Optional[Union[str, int]] = None,
         random_seed: Optional[Union[str, int]] = None,
-        quantile_statistic_interpolation_method: str = "nearest",
+        quantile_statistic_interpolation_method: str = "auto",
         quantile_bias_correction: bool = False,
         quantile_bias_std_error_ratio_threshold: Optional[Union[str, float]] = None,
         bw_method: Optional[Union[str, float, Callable]] = None,
@@ -134,8 +134,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             random_seed: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 uses "np.random.choice"; otherwise, utilizes "np.random.Generator(np.random.PCG64(random_seed))".
-            quantile_statistic_interpolation_method: Applicable only for the "bootstrap" sampling method --
-                supplies value of (interpolation) "method" to "np.quantile()" statistic, used for confidence intervals.
+            quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
+                statistic, used for confidence intervals.
             quantile_bias_correction: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
                 False is used (bias correction is disabled) and quantile_bias_std_error_ratio_threshold will have no
                 effect.
